@@ -326,11 +326,16 @@ const Play = () => {
             {/* Mode select */}
             <div className="flex gap-2">
               <Button variant={mode === "ai" ? "default" : "outline"} className="flex-1" onClick={() => resetGame("ai")}>
-                <Bot className="mr-2 h-4 w-4" /> vs Computer
+                <Bot className="mr-2 h-4 w-4" /> vs AI
               </Button>
               <Button variant={mode === "local" ? "default" : "outline"} className="flex-1" onClick={() => resetGame("local")}>
-                <Users className="mr-2 h-4 w-4" /> 2 Players
+                <Users className="mr-2 h-4 w-4" /> Local
               </Button>
+              <Link to="/play/online" className="flex-1">
+                <Button variant="outline" className="w-full border-primary/30 text-primary hover:bg-primary/10">
+                  <Wifi className="mr-2 h-4 w-4" /> Online
+                </Button>
+              </Link>
             </div>
 
             {/* AI Difficulty — 5 levels */}
