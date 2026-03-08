@@ -74,7 +74,7 @@ const PersonalizedPuzzles = () => {
         if (move && `${move.from}${move.to}` === expectedMove) {
           setGame(g);
           const nextIdx = moveIndex + 1;
-          if (nextIdx >= puzzle.solution.length) {
+          if (nextIdx >= puzzle.moves.length) {
             setStatus("correct");
             setSolved((s) => s + 1);
           } else {
