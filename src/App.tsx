@@ -22,7 +22,7 @@ import PremiumChat from "./pages/PremiumChat";
 import VideoLessons from "./pages/VideoLessons";
 import PersonalizedPuzzles from "./pages/PersonalizedPuzzles";
 import Achievements from "./pages/Achievements";
-import Analyse from "./pages/Analyse";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,7 +49,7 @@ const App = () => (
             <Route path="/premium/lessons" element={<VideoLessons />} />
             <Route path="/premium/puzzles" element={<PersonalizedPuzzles />} />
             <Route path="/achievements" element={<Achievements />} />
-            <Route path="/analyse" element={<Analyse />} />
+            
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
