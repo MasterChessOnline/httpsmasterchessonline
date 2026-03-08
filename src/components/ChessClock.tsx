@@ -4,14 +4,17 @@ import { Clock } from "lucide-react";
 export interface TimeControl {
   label: string;
   seconds: number; // per player
+  increment: number; // seconds added per move
 }
 
 export const TIME_CONTROLS: TimeControl[] = [
-  { label: "1 min", seconds: 60 },
-  { label: "3 min", seconds: 180 },
-  { label: "5 min", seconds: 300 },
-  { label: "10 min", seconds: 600 },
-  { label: "∞", seconds: 0 }, // unlimited
+  { label: "1+0", seconds: 60, increment: 0 },
+  { label: "1+1", seconds: 60, increment: 1 },
+  { label: "3+0", seconds: 180, increment: 0 },
+  { label: "3+2", seconds: 180, increment: 2 },
+  { label: "5+3", seconds: 300, increment: 3 },
+  { label: "10+5", seconds: 600, increment: 5 },
+  { label: "∞", seconds: 0, increment: 0 }, // unlimited
 ];
 
 interface ChessClockProps {
