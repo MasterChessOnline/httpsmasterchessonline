@@ -25,6 +25,31 @@ const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
   bp: { symbol: "♟", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
 };
 
+const CAPTURED_SYMBOLS: Record<string, string> = {
+  wq: "♛", wr: "♜", wb: "♝", wn: "♞", wp: "♟",
+  bq: "♛", br: "♜", bb: "♝", bn: "♞", bp: "♟",
+};
+
+function CapturedRow({ pieces, advantage }: { pieces: string[]; advantage: number }) {
+  if (pieces.length === 0 && advantage === 0) return <div className="h-6" />;
+  return (
+    <div className="flex items-center gap-0.5 h-6 px-1">
+      {pieces.map((key, i) => (
+        <span
+          key={`${key}-${i}`}
+          className={`text-base leading-none ${key.startsWith("w") ? "text-foreground/70" : "text-muted-foreground"}`}
+          style={{ marginLeft: i > 0 ? "-2px" : 0 }}
+        >
+          {CAPTURED_SYMBOLS[key]}
+        </span>
+      ))}
+      {advantage > 0 && (
+        <span className="text-xs font-semibold text-muted-foreground ml-1">+{advantage}</span>
+      )}
+    </div>
+  );
+}
+
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
 
