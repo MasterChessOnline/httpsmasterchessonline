@@ -185,6 +185,32 @@ const Play = () => {
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
 
+  // Calculate captured pieces from move history
+  const capturedPieces = useMemo(() => {
+    const initial: Record<string, number> = { wp: 8, wn: 2, wb: 2, wr: 2, wq: 1, wk: 1, bp: 8, bn: 2, bb: 2, br: 2, bq: 1, bk: 1 };
+    const current: Record<string, number> = { wp: 0, wn: 0, wb: 0, wr: 0, wq: 0, wk: 0, bp: 0, bn: 0, bb: 0, br: 0, bq: 0, bk: 0 };
+    const b = game.board();
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const p = b[r][c];
+        if (p) current[`${p.color}${p.type}`]++;
+      }
+    }
+    const white: string[] = []; // pieces white captured (black pieces missing)
+    const black: string[] = []; // pieces black captured (white pieces missing)
+    const order = ["q", "r", "b", "n", "p"];
+    for (const t of order) {
+      const missingBlack = initial[`b${t}`] - current[`b${t}`];
+      for (let i = 0; i < missingBlack; i++) white.push(`b${t}`);
+      const missingWhite = initial[`w${t}`] - current[`w${t}`];
+      for (let i = 0; i < missingWhite; i++) black.push(`w${t}`);
+    }
+    // Material advantage
+    const VALS: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9 };
+    const whiteAdv = white.reduce((s, k) => s + (VALS[k[1]] || 0), 0) - black.reduce((s, k) => s + (VALS[k[1]] || 0), 0);
+    return { white, black, whiteAdv };
+  }, [fen]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
