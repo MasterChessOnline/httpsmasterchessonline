@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Play from "./pages/Play";
+import PlayOnline from "./pages/PlayOnline";
 import Puzzles from "./pages/Puzzles";
 import Learn from "./pages/Learn";
 import Tournaments from "./pages/Tournaments";
@@ -13,6 +14,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Leaderboard from "./pages/Leaderboard";
+import Profile from "./pages/Profile";
+import Friends from "./pages/Friends";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,9 +31,13 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/play" element={<Play />} />
+            <Route path="/play/online" element={<PlayOnline />} />
             <Route path="/puzzles" element={<Puzzles />} />
             <Route path="/learn" element={<Learn />} />
             <Route path="/tournaments" element={<Tournaments />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/profile/:userId" element={<Profile />} />
+            <Route path="/friends" element={<Friends />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

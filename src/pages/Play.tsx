@@ -3,9 +3,10 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Bot, Users, Crown, Timer } from "lucide-react";
+import { RotateCcw, Bot, Users, Crown, Timer, Wifi } from "lucide-react";
 import { getAIMove, Difficulty, AI_LEVELS } from "@/lib/chess-ai";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
+import { Link } from "react-router-dom";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -325,11 +326,16 @@ const Play = () => {
             {/* Mode select */}
             <div className="flex gap-2">
               <Button variant={mode === "ai" ? "default" : "outline"} className="flex-1" onClick={() => resetGame("ai")}>
-                <Bot className="mr-2 h-4 w-4" /> vs Computer
+                <Bot className="mr-2 h-4 w-4" /> vs AI
               </Button>
               <Button variant={mode === "local" ? "default" : "outline"} className="flex-1" onClick={() => resetGame("local")}>
-                <Users className="mr-2 h-4 w-4" /> 2 Players
+                <Users className="mr-2 h-4 w-4" /> Local
               </Button>
+              <Link to="/play/online" className="flex-1">
+                <Button variant="outline" className="w-full border-primary/30 text-primary hover:bg-primary/10">
+                  <Wifi className="mr-2 h-4 w-4" /> Online
+                </Button>
+              </Link>
             </div>
 
             {/* AI Difficulty — 5 levels */}
