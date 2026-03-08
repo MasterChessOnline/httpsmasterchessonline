@@ -1,16 +1,34 @@
 import { MoveStep } from "@/components/learn/InteractiveBoard";
 
 /**
- * Maps lesson IDs to interactive move sequences.
- * Each entry has an optional startFen (defaults to standard starting position)
- * and an array of moves with explanations.
+ * A single named variation with its own board and moves.
  */
-export interface LessonMoveData {
+export interface LessonVariation {
+  name: string;
   startFen?: string;
   moves: MoveStep[];
 }
 
+/**
+ * Maps lesson IDs to interactive move sequences.
+ * Each entry can have:
+ * - A single set of moves (backward compat)
+ * - Multiple named variations, each with its own board
+ */
+export interface LessonMoveData {
+  startFen?: string;
+  moves: MoveStep[];
+  variations?: LessonVariation[];
+}
+
 const M = (san: string, explanation: string): MoveStep => ({ san, explanation });
+
+/** Helper to create a named variation */
+const V = (name: string, moves: MoveStep[], startFen?: string): LessonVariation => ({
+  name,
+  startFen,
+  moves,
+});
 
 export const LESSON_MOVES: Record<string, LessonMoveData> = {
   // ===== OPENING FUNDAMENTALS =====
