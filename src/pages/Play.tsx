@@ -139,11 +139,10 @@ const Play = () => {
     if (selectedSquare && legalMoves.includes(square)) {
       const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
       if (move) {
-        const movedColor = move.color; // color that just moved
+        const movedColor = move.color;
         setMoveHistory((prev) => [...prev, move.san]);
         setLastMove({ from: move.from, to: move.to });
         setGameStarted(true);
-        // Add increment for player's move
         if (!unlimited && timeControl.increment > 0) {
           if (movedColor === "w") {
             setWhiteTime((prev: number) => prev + timeControl.increment);
@@ -152,6 +151,16 @@ const Play = () => {
           }
         }
         updateState();
+        // Sound effects
+        if (game.isCheckmate() || game.isDraw() || game.isStalemate()) {
+          playChessSound("gameOver");
+        } else if (game.isCheck()) {
+          playChessSound("check");
+        } else if (move.captured) {
+          playChessSound("capture");
+        } else {
+          playChessSound("move");
+        }
       }
       setSelectedSquare(null);
       setLegalMoves([]);
