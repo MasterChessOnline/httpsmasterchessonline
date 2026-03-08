@@ -106,7 +106,6 @@ const Play = () => {
           setMoveHistory((prev) => [...prev, move.san]);
           setLastMove({ from: move.from, to: move.to });
           setGameStarted(true);
-          // Add increment for AI's move
           if (!unlimited && timeControl.increment > 0) {
             if (aiColor === "w") {
               setWhiteTime((prev: number) => prev + timeControl.increment);
@@ -115,6 +114,16 @@ const Play = () => {
             }
           }
           updateState();
+          // Sound effects
+          if (game.isCheckmate() || game.isDraw() || game.isStalemate()) {
+            playChessSound("gameOver");
+          } else if (game.isCheck()) {
+            playChessSound("check");
+          } else if (move.captured) {
+            playChessSound("capture");
+          } else {
+            playChessSound("move");
+          }
         }
       }
       setAiThinking(false);
