@@ -9,6 +9,8 @@ import { BookOpen, Target, Crown, Layout, Crosshair, Brain, ArrowLeft, ChevronRi
 import { COURSES, Course, Lesson } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasAccess } from "@/lib/premium-tiers";
+import InteractiveBoard from "@/components/learn/InteractiveBoard";
+import { LESSON_MOVES } from "@/lib/lesson-moves";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   BookOpen, Target, Crown, Layout, Crosshair, Brain,
