@@ -79,7 +79,7 @@ const Play = () => {
 
   const handleSquareClick = (square: Square) => {
     if (game.isGameOver()) return;
-    if (mode === "ai" && game.turn() === "b") return;
+    if (mode === "ai" && game.turn() === aiColor) return;
 
     if (selectedSquare && legalMoves.includes(square)) {
       const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
