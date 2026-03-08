@@ -6,19 +6,26 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Crown, Send, Lock, MessageCircle } from "lucide-react";
+import { Crown, Send, Lock, MessageCircle, Star, Gem, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { hasAccess, TIERS, type TierKey } from "@/lib/premium-tiers";
+
+const TIER_BADGE: Record<TierKey, { icon: typeof Crown; class: string }> = {
+  premium: { icon: Crown, class: "text-primary" },
+  pro: { icon: Star, class: "text-blue-400" },
+  elite: { icon: Gem, class: "text-purple-400" },
+  grandmaster: { icon: Shield, class: "text-amber-400" },
+};
 
 interface ChatMessage {
   id: string;
   user_id: string;
   message: string;
   created_at: string;
-  profiles?: { display_name: string | null; avatar_url: string | null; rating: number } | null;
 }
 
 const PremiumChat = () => {
-  const { user, isPremium, loading } = useAuth();
+  const { user, isPremium, subscriptionTier, loading } = useAuth();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -30,7 +37,6 @@ const PremiumChat = () => {
     if (!loading && !user) navigate("/login");
   }, [loading, user]);
 
-  // Fetch messages
   useEffect(() => {
     if (!isPremium) return;
 
@@ -42,7 +48,6 @@ const PremiumChat = () => {
         .limit(200);
       if (data) {
         setMessages(data);
-        // Fetch profiles for unique user_ids
         const userIds = [...new Set(data.map((m) => m.user_id))];
         if (userIds.length > 0) {
           const { data: profiles } = await supabase
@@ -59,13 +64,11 @@ const PremiumChat = () => {
     };
     fetchMessages();
 
-    // Realtime subscription
     const channel = supabase
       .channel("premium-chat")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "premium_chat_messages" }, async (payload) => {
         const msg = payload.new as ChatMessage;
         setMessages((prev) => [...prev, msg]);
-        // Fetch profile if unknown
         if (!profilesMap[msg.user_id]) {
           const { data } = await supabase.from("profiles").select("user_id, display_name, rating").eq("user_id", msg.user_id).single();
           if (data) setProfilesMap((prev) => ({ ...prev, [data.user_id]: data }));
@@ -99,11 +102,14 @@ const PremiumChat = () => {
           <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
             Premium Strategy Lounge
           </h1>
-          <p className="text-muted-foreground mb-8">
-            This exclusive chat room is available to Premium members. Discuss strategies, share analysis, and connect with top players.
+          <p className="text-muted-foreground mb-4">
+            This exclusive chat room is available to all Premium members and above.
+          </p>
+          <p className="text-sm text-muted-foreground mb-8">
+            Required tier: <span className="text-primary font-semibold">Premium ($4.99/mo)</span> or higher
           </p>
           <Button onClick={() => navigate("/premium")} className="bg-primary text-primary-foreground">
-            <Crown className="w-4 h-4 mr-2" /> Upgrade to Premium
+            <Crown className="w-4 h-4 mr-2" /> View Plans
           </Button>
         </main>
         <Footer />
@@ -116,9 +122,14 @@ const PremiumChat = () => {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 pt-24 pb-4 max-w-3xl flex flex-col">
         <div className="flex items-center gap-2 mb-4">
-          <Badge className="bg-primary/20 text-primary border-primary/30">
-            <Crown className="w-3 h-3 mr-1" /> Premium
-          </Badge>
+          {subscriptionTier && TIER_BADGE[subscriptionTier] && (() => {
+            const TierIcon = TIER_BADGE[subscriptionTier].icon;
+            return (
+              <Badge className="bg-primary/20 text-primary border-primary/30">
+                <TierIcon className="w-3 h-3 mr-1" /> {subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1)}
+              </Badge>
+            );
+          })()}
           <h1 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
             Strategy Lounge
           </h1>

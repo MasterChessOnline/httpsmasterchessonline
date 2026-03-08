@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Chess, Square } from "chess.js";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -6,8 +6,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Lock, Brain, CheckCircle2, XCircle, Eye, SkipForward, Target } from "lucide-react";
+import { Crown, Lock, CheckCircle2, XCircle, Eye, SkipForward, Target, Star } from "lucide-react";
 import { PUZZLES } from "@/lib/puzzles-data";
+import { hasAccess } from "@/lib/premium-tiers";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -28,23 +29,28 @@ const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
 };
 
 const PersonalizedPuzzles = () => {
-  const { user, profile, isPremium, loading } = useAuth();
+  const { user, profile, isPremium, subscriptionTier, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Filter puzzles by difficulty based on rating
+  // Pro+ gets advanced puzzles sorted by rating, Premium gets basic set
   const personalizedPuzzles = useMemo(() => {
     if (!profile) return PUZZLES;
     const rating = profile.rating;
-    // Sort by difficulty matching player level
+    const isProPlus = hasAccess(subscriptionTier, "pro");
+
     return [...PUZZLES].sort((a, b) => {
       const diffA = a.moves.length;
       const diffB = b.moves.length;
-      // Lower rated players get easier puzzles first
+      if (isProPlus) {
+        // Pro+ gets harder puzzles prioritized based on rating
+        if (rating >= 1600) return diffB - diffA;
+        return diffA - diffB;
+      }
+      // Basic premium gets easier puzzles
       if (rating < 1300) return diffA - diffB;
-      if (rating < 1600) return 0; // Mixed
-      return diffB - diffA; // Higher rated get harder first
+      return 0;
     });
-  }, [profile]);
+  }, [profile, subscriptionTier]);
 
   const [puzzleIdx, setPuzzleIdx] = useState(0);
   const puzzle = personalizedPuzzles[puzzleIdx];
@@ -78,7 +84,6 @@ const PersonalizedPuzzles = () => {
             setStatus("correct");
             setSolved((s) => s + 1);
           } else {
-            // Auto-reply opponent move
             const opponentSan = puzzle.moves[nextIdx];
             setTimeout(() => {
               const g2 = new Chess(g.fen());
@@ -115,11 +120,17 @@ const PersonalizedPuzzles = () => {
           <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: "var(--font-display)" }}>
             Personalized Puzzle Training
           </h1>
-          <p className="text-muted-foreground mb-8">
-            Get puzzles tailored to your skill level. Premium members receive custom puzzle sets matched to their rating and weaknesses.
+          <p className="text-muted-foreground mb-4">
+            Get puzzles tailored to your skill level. Premium members receive custom puzzle sets matched to their rating.
+          </p>
+          <p className="text-sm text-muted-foreground mb-8">
+            Required tier: <span className="text-primary font-semibold">Premium ($4.99/mo)</span> or higher.
+            <br />
+            <Star className="w-3 h-3 inline mr-1 text-blue-400" />
+            <span className="text-blue-400 font-semibold">Pro</span> members get advanced difficulty puzzles.
           </p>
           <Button onClick={() => navigate("/premium")} className="bg-primary text-primary-foreground">
-            <Crown className="w-4 h-4 mr-2" /> Upgrade to Premium
+            <Crown className="w-4 h-4 mr-2" /> View Plans
           </Button>
         </main>
         <Footer />
@@ -128,6 +139,7 @@ const PersonalizedPuzzles = () => {
   }
 
   const board = game.board();
+  const isProPlus = hasAccess(subscriptionTier, "pro");
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -137,6 +149,11 @@ const PersonalizedPuzzles = () => {
           <Badge className="bg-primary/20 text-primary border-primary/30 mb-2">
             <Target className="w-3 h-3 mr-1" /> Skill Level: {profile?.rating || 1200}
           </Badge>
+          {isProPlus && (
+            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 mb-2 ml-2">
+              <Star className="w-3 h-3 mr-1" /> Advanced Mode
+            </Badge>
+          )}
           <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
             Personalized <span className="text-gradient-gold">Puzzles</span>
           </h1>
