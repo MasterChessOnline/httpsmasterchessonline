@@ -207,9 +207,12 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev }: {
       </div>
       <div className="mb-6">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">
-          {lesson.fen ? "Position Example" : "Starting Position"}
+          Interactive Board
         </p>
-        <MiniBoard fen={lesson.fen || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"} />
+        <InteractiveBoard
+          startFen={LESSON_MOVES[lesson.id]?.startFen || lesson.fen}
+          moves={LESSON_MOVES[lesson.id]?.moves || []}
+        />
       </div>
       {lesson.keyPoints.length > 0 && (
         <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
