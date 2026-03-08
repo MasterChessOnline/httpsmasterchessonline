@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Check, Loader2, MessageCircle, Play, Target, Award, ArrowRight, Star, Gem, Shield } from "lucide-react";
+import { Crown, Check, Loader2, MessageCircle, Play, Target, Award, ArrowRight, Star, Gem, Shield, X, Brain, Trophy, Swords, TrendingUp, Users } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { TIERS, getTierLevel, type TierKey } from "@/lib/premium-tiers";
 
@@ -39,6 +39,31 @@ const tierBadgeColors: Record<TierKey, string> = {
   grandmaster: "bg-amber-500/20 text-amber-400",
 };
 
+// Feature comparison table
+const FEATURE_ROWS = [
+  { label: "Daily Puzzles", free: "3/day", premium: "Unlimited", pro: "Unlimited", elite: "Unlimited", gm: "Unlimited" },
+  { label: "Puzzle Difficulties", free: "Easy & Medium", premium: "All", pro: "All + Personalized", elite: "All + Personalized", gm: "All + Personalized" },
+  { label: "Courses", free: "Beginner only", premium: "Beginner & Intermediate", pro: "All including Advanced", elite: "All including Advanced", gm: "All including Advanced" },
+  { label: "Video Lessons", free: false, premium: "Basic", pro: "All + Advanced", elite: "All + Advanced", gm: "All + Advanced" },
+  { label: "Strategy Lounge Chat", free: false, premium: true, pro: true, elite: true, gm: true },
+  { label: "Ad-free Experience", free: false, premium: true, pro: true, elite: true, gm: true },
+  { label: "Premium Profile Badge", free: false, premium: true, pro: true, elite: true, gm: true },
+  { label: "Advanced Game Analytics", free: false, premium: "Basic", pro: "Full", elite: "Full", gm: "Full" },
+  { label: "Personalized Puzzle Training", free: false, premium: false, pro: true, elite: true, gm: true },
+  { label: "VIP Leaderboard", free: false, premium: false, pro: false, elite: true, gm: true },
+  { label: "VIP Tournaments", free: false, premium: false, pro: false, elite: true, gm: true },
+  { label: "Virtual Trophies & Collectibles", free: false, premium: false, pro: false, elite: true, gm: true },
+  { label: "Private Tournaments with Friends", free: false, premium: false, pro: false, elite: false, gm: true },
+  { label: "Priority Support", free: false, premium: false, pro: false, elite: false, gm: true },
+  { label: "Exclusive Collectible Rewards", free: false, premium: false, pro: false, elite: false, gm: true },
+];
+
+function CellDisplay({ value }: { value: string | boolean }) {
+  if (value === true) return <Check className="w-4 h-4 text-primary mx-auto" />;
+  if (value === false) return <X className="w-4 h-4 text-muted-foreground/30 mx-auto" />;
+  return <span className="text-xs text-foreground">{value}</span>;
+}
+
 const Premium = () => {
   const { user, isPremium, subscriptionTier, subscriptionEnd, checkSubscription } = useAuth();
   const navigate = useNavigate();
@@ -49,9 +74,7 @@ const Premium = () => {
     if (!user) { navigate("/login"); return; }
     setLoadingTier(tierKey);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId },
-      });
+      const { data, error } = await supabase.functions.invoke("create-checkout", { body: { priceId } });
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch {
@@ -93,15 +116,11 @@ const Premium = () => {
           </p>
         </div>
 
-        {/* Premium features grid */}
+        {/* Premium features grid for subscribers */}
         {isPremium && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
             {premiumFeatures.map((f) => (
-              <Link
-                key={f.href}
-                to={f.href}
-                className="bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-all group flex items-start gap-4"
-              >
+              <Link key={f.href} to={f.href} className="bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-all group flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/25 transition-colors">
                   <f.icon className="w-5 h-5 text-primary" />
                 </div>
@@ -117,6 +136,36 @@ const Premium = () => {
           </div>
         )}
 
+        {/* Free tier highlight */}
+        {!isPremium && (
+          <div className="mb-10 rounded-xl border border-border/50 bg-card p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                <Users className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div>
+                <h2 className="font-display text-xl font-bold">Free Plan</h2>
+                <p className="text-sm text-muted-foreground">You're currently on the free plan</p>
+              </div>
+              <span className="text-2xl font-bold ml-auto">$0</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { icon: Brain, label: "3 puzzles/day", desc: "Easy & Medium only" },
+                { icon: Trophy, label: "Open tournaments", desc: "Standard access" },
+                { icon: TrendingUp, label: "ELO leaderboard", desc: "Public rankings" },
+                { icon: Swords, label: "Play online", desc: "All time controls" },
+              ].map(f => (
+                <div key={f.label} className="rounded-lg border border-border/50 bg-muted/20 p-3 text-center">
+                  <f.icon className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+                  <p className="text-xs font-medium text-foreground">{f.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Tier cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
           {TIERS.map((tier) => {
@@ -125,12 +174,8 @@ const Premium = () => {
             const tierLevel = getTierLevel(tier.key);
             const canUpgrade = isPremium && tierLevel > userTierLevel;
             const isLower = isPremium && tierLevel <= userTierLevel && !isCurrentTier;
-
             return (
-              <Card
-                key={tier.key}
-                className={`bg-card relative flex flex-col ${tierAccents[tier.key]} ${isCurrentTier ? "shadow-lg" : ""} ${tier.popular ? "scale-[1.02]" : ""}`}
-              >
+              <Card key={tier.key} className={`bg-card relative flex flex-col ${tierAccents[tier.key]} ${isCurrentTier ? "shadow-lg" : ""} ${tier.popular ? "scale-[1.02]" : ""}`}>
                 {tier.popular && !isPremium && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge className="bg-blue-500 text-white border-0 text-xs">Most Popular</Badge>
@@ -145,9 +190,7 @@ const Premium = () => {
                   <div className={`w-10 h-10 rounded-full ${tierBadgeColors[tier.key]} flex items-center justify-center mx-auto mb-2`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <CardTitle className="text-xl" style={{ fontFamily: "var(--font-display)" }}>
-                    {tier.name}
-                  </CardTitle>
+                  <CardTitle className="text-xl" style={{ fontFamily: "var(--font-display)" }}>{tier.name}</CardTitle>
                   <p className="text-xs text-muted-foreground">{tier.description}</p>
                   <div className="mt-2">
                     <span className="text-3xl font-bold text-foreground">{tier.price}</span>
@@ -163,36 +206,21 @@ const Premium = () => {
                       </li>
                     ))}
                   </ul>
-
                   {isCurrentTier ? (
                     <div className="space-y-2">
                       <p className="text-center text-xs text-muted-foreground">
                         Active until {subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString() : "—"}
                       </p>
                       <Button onClick={handleManage} disabled={portalLoading} className="w-full" variant="outline" size="sm">
-                        {portalLoading ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : null}
-                        Manage
+                        {portalLoading ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : null} Manage
                       </Button>
-                      <Button onClick={handleRefresh} variant="ghost" className="w-full text-xs" size="sm">
-                        Refresh status
-                      </Button>
+                      <Button onClick={handleRefresh} variant="ghost" className="w-full text-xs" size="sm">Refresh status</Button>
                     </div>
                   ) : isLower ? (
-                    <Button disabled variant="outline" size="sm" className="w-full opacity-50">
-                      Included in your plan
-                    </Button>
+                    <Button disabled variant="outline" size="sm" className="w-full opacity-50">Included in your plan</Button>
                   ) : (
-                    <Button
-                      onClick={() => handleCheckout(tier.priceId, tier.key)}
-                      disabled={loadingTier === tier.key}
-                      className="w-full text-sm"
-                      size="sm"
-                    >
-                      {loadingTier === tier.key ? (
-                        <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                      ) : (
-                        <Icon className="w-3.5 h-3.5 mr-1" />
-                      )}
+                    <Button onClick={() => handleCheckout(tier.priceId, tier.key)} disabled={loadingTier === tier.key} className="w-full text-sm" size="sm">
+                      {loadingTier === tier.key ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Icon className="w-3.5 h-3.5 mr-1" />}
                       {canUpgrade ? "Upgrade" : "Subscribe"}
                     </Button>
                   )}
@@ -200,6 +228,39 @@ const Premium = () => {
               </Card>
             );
           })}
+        </div>
+
+        {/* Feature comparison table */}
+        <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+          <div className="p-4 border-b border-border/50">
+            <h2 className="font-display text-xl font-bold text-foreground text-center">Feature Comparison</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/50 bg-muted/30">
+                  <th className="text-left p-3 font-medium text-muted-foreground min-w-[180px]">Feature</th>
+                  <th className="p-3 font-medium text-muted-foreground text-center w-24">Free</th>
+                  <th className="p-3 font-medium text-primary text-center w-24">Premium</th>
+                  <th className="p-3 font-medium text-blue-400 text-center w-24">Pro</th>
+                  <th className="p-3 font-medium text-purple-400 text-center w-24">Elite</th>
+                  <th className="p-3 font-medium text-amber-400 text-center w-24">GM</th>
+                </tr>
+              </thead>
+              <tbody>
+                {FEATURE_ROWS.map((row, i) => (
+                  <tr key={row.label} className={`border-b border-border/30 ${i % 2 === 0 ? "" : "bg-muted/10"}`}>
+                    <td className="p-3 text-foreground font-medium">{row.label}</td>
+                    <td className="p-3 text-center"><CellDisplay value={row.free} /></td>
+                    <td className="p-3 text-center"><CellDisplay value={row.premium} /></td>
+                    <td className="p-3 text-center"><CellDisplay value={row.pro} /></td>
+                    <td className="p-3 text-center"><CellDisplay value={row.elite} /></td>
+                    <td className="p-3 text-center"><CellDisplay value={row.gm} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
       <Footer />
