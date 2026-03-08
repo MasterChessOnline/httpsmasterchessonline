@@ -3,10 +3,19 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { User, Trophy, Swords, TrendingUp, Calendar, Edit, Shield } from "lucide-react";
+import { User, Trophy, Swords, TrendingUp, Calendar, Edit, Shield, Crown, Star, Gem } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { type TierKey } from "@/lib/premium-tiers";
+
+const TIER_DISPLAY: Record<TierKey, { label: string; icon: typeof Crown; colorClass: string }> = {
+  premium: { label: "Premium", icon: Crown, colorClass: "text-primary" },
+  pro: { label: "Pro", icon: Star, colorClass: "text-blue-400" },
+  elite: { label: "Elite", icon: Gem, colorClass: "text-purple-400" },
+  grandmaster: { label: "Grandmaster", icon: Shield, colorClass: "text-amber-400" },
+};
 
 interface ProfileData {
   id: string;
@@ -34,7 +43,7 @@ interface GameHistory {
 
 const Profile = () => {
   const { userId } = useParams();
-  const { user, refreshProfile } = useAuth();
+  const { user, refreshProfile, subscriptionTier, isPremium } = useAuth();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [games, setGames] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,6 +134,10 @@ const Profile = () => {
 
   const tier = getRatingTier(profileData.rating);
 
+  // Show subscription badge only on own profile
+  const showSubBadge = isOwnProfile && isPremium && subscriptionTier;
+  const subDisplay = subscriptionTier ? TIER_DISPLAY[subscriptionTier] : null;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -149,7 +162,7 @@ const Profile = () => {
                     <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h1 className="font-display text-2xl font-bold text-foreground truncate">
                       {profileData.display_name || profileData.username || "Player"}
                     </h1>
@@ -158,6 +171,14 @@ const Profile = () => {
                         <Edit className="h-4 w-4" />
                       </button>
                     )}
+                    {showSubBadge && subDisplay && (() => {
+                      const TierIcon = subDisplay.icon;
+                      return (
+                        <Badge className={`${subDisplay.colorClass} border-current/30 bg-current/10 text-xs`}>
+                          <TierIcon className="w-3 h-3 mr-1" /> {subDisplay.label}
+                        </Badge>
+                      );
+                    })()}
                   </div>
                 )}
                 <div className="flex items-center gap-3 mt-1">

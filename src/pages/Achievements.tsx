@@ -7,12 +7,14 @@ import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { COLLECTIBLES, RARITY_COLORS, Collectible } from "@/lib/collectibles-data";
-import { Crown, Trophy, Star, Zap, Brain, Flame, Medal, TrendingUp, Swords, Lock } from "lucide-react";
+import { Crown, Trophy, Star, Zap, Brain, Flame, Medal, TrendingUp, Swords, Lock, Gem, Shield } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { hasAccess, type TierKey } from "@/lib/premium-tiers";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   trophy: Trophy, medal: Medal, crown: Crown, swords: Swords,
   "trending-up": TrendingUp, star: Star, zap: Zap, brain: Brain, flame: Flame,
+  gem: Gem, shield: Shield,
 };
 
 interface Achievement {
@@ -28,13 +30,8 @@ interface Achievement {
   reward_value: string | null;
 }
 
-interface UserAchievement {
-  achievement_id: string;
-  earned_at: string;
-}
-
 const Achievements = () => {
-  const { user, profile, isPremium, loading } = useAuth();
+  const { user, profile, isPremium, subscriptionTier, loading } = useAuth();
   const navigate = useNavigate();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [earned, setEarned] = useState<Set<string>>(new Set());
@@ -62,7 +59,7 @@ const Achievements = () => {
     fetchData();
   }, [user]);
 
-  // Check and auto-grant achievements based on profile stats
+  // Check and auto-grant achievements based on profile stats and tier
   useEffect(() => {
     if (!user || !profile || achievements.length === 0) return;
 
@@ -75,13 +72,15 @@ const Achievements = () => {
           case "games_played": qualifies = profile.games_played >= ach.requirement_value; break;
           case "rating": qualifies = profile.rating >= ach.requirement_value; break;
           case "premium": qualifies = isPremium; break;
+          case "tier_pro": qualifies = hasAccess(subscriptionTier, "pro"); break;
+          case "tier_elite": qualifies = hasAccess(subscriptionTier, "elite"); break;
+          case "tier_grandmaster": qualifies = hasAccess(subscriptionTier, "grandmaster"); break;
           default: break;
         }
         if (qualifies) {
           const { error } = await supabase.from("user_achievements").insert({ user_id: user.id, achievement_id: ach.id });
           if (!error) {
             setEarned((prev) => new Set([...prev, ach.id]));
-            // Grant collectible reward
             if (ach.reward_type === "collectible" && ach.reward_value) {
               const collectible = COLLECTIBLES.find((c) => c.key === ach.reward_value);
               if (collectible && !collectibles.has(ach.reward_value)) {
@@ -98,7 +97,7 @@ const Achievements = () => {
       }
     };
     checkAndGrant();
-  }, [user, profile, achievements, isPremium]);
+  }, [user, profile, achievements, isPremium, subscriptionTier]);
 
   const earnedCount = earned.size;
   const totalCount = achievements.length;
@@ -131,6 +130,7 @@ const Achievements = () => {
                 const isEarned = earned.has(ach.id);
                 const Icon = ICON_MAP[ach.icon] || Trophy;
                 const reward = ach.reward_value ? COLLECTIBLES.find((c) => c.key === ach.reward_value) : null;
+                const isTierReq = ach.requirement_type.startsWith("tier_");
                 return (
                   <div
                     key={ach.id}
@@ -150,6 +150,9 @@ const Achievements = () => {
                           {isEarned && <span className="text-primary text-xs">✓</span>}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5">{ach.description}</p>
+                        {isTierReq && !isEarned && (
+                          <p className="text-[10px] text-amber-400 mt-1">🔒 Requires {ach.requirement_type.replace("tier_", "").charAt(0).toUpperCase() + ach.requirement_type.replace("tier_", "").slice(1)} tier</p>
+                        )}
                         {reward && (
                           <p className="text-[10px] text-primary mt-1">Reward: {reward.preview} {reward.name}</p>
                         )}
