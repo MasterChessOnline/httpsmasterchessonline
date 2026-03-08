@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Play from "./pages/Play";
 import PlayOnline from "./pages/PlayOnline";
-import Puzzles from "./pages/Puzzles";
+
 import Learn from "./pages/Learn";
 import Tournaments from "./pages/Tournaments";
 import Login from "./pages/Login";
