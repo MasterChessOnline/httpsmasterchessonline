@@ -24,6 +24,9 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
+    const { priceId } = await req.json().catch(() => ({ priceId: null }));
+    if (!priceId) throw new Error("No priceId provided");
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -37,12 +40,7 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price: "price_1T8kXqFlIJYoBTqwzUYKWWJR",
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/premium?success=true`,
       cancel_url: `${req.headers.get("origin")}/premium?canceled=true`,

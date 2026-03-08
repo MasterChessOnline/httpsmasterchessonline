@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { getTierByProductId, type TierKey } from "@/lib/premium-tiers";
 
 interface Profile {
   id: string;
@@ -21,6 +22,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   isPremium: boolean;
+  subscriptionTier: TierKey | null;
   subscriptionEnd: string | null;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -33,6 +35,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   isPremium: false,
+  subscriptionTier: null,
   subscriptionEnd: null,
   signOut: async () => {},
   refreshProfile: async () => {},
@@ -46,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<TierKey | null>(null);
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
 
   const fetchProfile = async (userId: string) => {
@@ -61,10 +65,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase.functions.invoke("check-subscription");
       if (error) throw error;
-      setIsPremium(data?.subscribed ?? false);
+      const subscribed = data?.subscribed ?? false;
+      setIsPremium(subscribed);
       setSubscriptionEnd(data?.subscription_end ?? null);
+      if (subscribed && data?.product_id) {
+        setSubscriptionTier(getTierByProductId(data.product_id));
+      } else {
+        setSubscriptionTier(null);
+      }
     } catch {
       setIsPremium(false);
+      setSubscriptionTier(null);
       setSubscriptionEnd(null);
     }
   };
@@ -87,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setProfile(null);
           setIsPremium(false);
+          setSubscriptionTier(null);
           setSubscriptionEnd(null);
         }
         setLoading(false);
@@ -105,7 +117,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Refresh subscription status every 60 seconds
   useEffect(() => {
     if (!session?.user) return;
     const interval = setInterval(checkSubscription, 60000);
@@ -117,6 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSession(null);
     setProfile(null);
     setIsPremium(false);
+    setSubscriptionTier(null);
     setSubscriptionEnd(null);
   };
 
@@ -127,6 +139,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       profile,
       loading,
       isPremium,
+      subscriptionTier,
       subscriptionEnd,
       signOut,
       refreshProfile,
