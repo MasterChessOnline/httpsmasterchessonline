@@ -17,6 +17,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
+import Premium from "./pages/Premium";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
+            <Route path="/premium" element={<Premium />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
