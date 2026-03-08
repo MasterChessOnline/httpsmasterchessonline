@@ -85,8 +85,8 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
   const filtered = levelFilter === "all" ? COURSES : COURSES.filter((c) => c.level === levelFilter);
 
   const canAccessCourse = (course: Course) => {
-    if (course.level === "Beginner") return true; // free for all
-    if (course.level === "Intermediate") return true; // free for all, but limited lessons for free users
+    if (course.level === "Beginner") return true;
+    if (course.level === "Intermediate") return hasAccess(subscriptionTier, "premium");
     if (course.level === "Advanced") return hasAccess(subscriptionTier, "pro");
     return true;
   };
@@ -97,12 +97,12 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
       <div className="flex justify-center gap-2 mb-4 flex-wrap">
         {!isPremium && (
           <Badge className="bg-muted text-muted-foreground border-border">
-            Free: Beginner & Intermediate courses available
+            Free: Beginner courses only
           </Badge>
         )}
         {isPremium && !hasAccess(subscriptionTier, "pro") && (
           <Badge className="bg-primary/20 text-primary border-primary/30">
-            <Crown className="w-3 h-3 mr-1" /> Premium — All beginner & intermediate courses
+            <Crown className="w-3 h-3 mr-1" /> Premium — Beginner & Intermediate courses
           </Badge>
         )}
         {hasAccess(subscriptionTier, "pro") && (
@@ -140,8 +140,8 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
             >
               {!accessible && (
                 <div className="absolute top-3 right-3">
-                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px]">
-                    <Lock className="w-2.5 h-2.5 mr-0.5" /> Pro
+                  <Badge className={`text-[10px] ${course.level === "Advanced" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-primary/20 text-primary border-primary/30"}`}>
+                    <Lock className="w-2.5 h-2.5 mr-0.5" /> {course.level === "Advanced" ? "Pro" : "Premium"}
                   </Badge>
                 </div>
               )}
@@ -159,7 +159,7 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
                   <>Start Course <ChevronRight className="ml-1 h-4 w-4" /></>
                 ) : (
                   <>
-                    <Lock className="mr-1 h-3.5 w-3.5" /> Requires Pro
+                    <Lock className="mr-1 h-3.5 w-3.5" /> Requires {course.level === "Advanced" ? "Pro" : "Premium"}
                   </>
                 )}
               </Button>
