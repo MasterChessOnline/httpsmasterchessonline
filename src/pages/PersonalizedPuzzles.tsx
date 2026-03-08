@@ -68,7 +68,7 @@ const PersonalizedPuzzles = () => {
       const from = selectedSquare;
       const to = square;
       const g = new Chess(game.fen());
-      const expectedMove = puzzle.solution[moveIndex];
+      const expectedMove = puzzle.moves[moveIndex];
       try {
         const move = g.move({ from: from as Square, to: to as Square, promotion: "q" });
         if (move && `${move.from}${move.to}` === expectedMove) {
