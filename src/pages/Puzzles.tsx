@@ -3,21 +3,32 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, SkipForward, CheckCircle2, XCircle } from "lucide-react";
-
-const PIECE_UNICODE: Record<string, string> = {
-  wp: "♙", wn: "♘", wb: "♗", wr: "♖", wq: "♕", wk: "♔",
-  bp: "♟", bn: "♞", bb: "♝", br: "♜", bq: "♛", bk: "♚",
-};
+import { Lightbulb, SkipForward, CheckCircle2, XCircle, Eye } from "lucide-react";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
-// Sample puzzles: FEN + solution moves (user plays the winning side)
+// Same piece display as Play page
+const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
+  wk: { symbol: "♚", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wq: { symbol: "♛", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wr: { symbol: "♜", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wb: { symbol: "♝", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wn: { symbol: "♞", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wp: { symbol: "♟", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  bk: { symbol: "♚", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  bq: { symbol: "♛", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  br: { symbol: "♜", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  bb: { symbol: "♝", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  bn: { symbol: "♞", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  bp: { symbol: "♟", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+};
+
+// All puzzles are White to move
 const PUZZLES = [
-  { fen: "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4", solution: ["Qxf7"], title: "Scholar's Mate", hint: "Attack the weak f7 square!" },
-  { fen: "r2qr1k1/ppp2ppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP2PPP/R2QR1K1 w - - 0 1", solution: ["Bxf7"], title: "Pin & Win", hint: "Look for a piece that's pinned." },
-  { fen: "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1", solution: ["Re8"], title: "Back Rank Mate", hint: "The king is trapped on the back rank." },
+  { fen: "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4", solution: ["Qxf7#"], title: "Scholar's Mate", hint: "Attack the weak f7 square!", answer: "Qxf7# — The queen captures on f7, delivering checkmate." },
+  { fen: "r2qr1k1/ppp2ppp/2np1n2/2b1p1B1/2B1P1b1/2NP1N2/PPP2PPP/R2QR1K1 w - - 0 1", solution: ["Bxf7+"], title: "Pin & Win", hint: "Look for a piece that's pinned.", answer: "Bxf7+ — The bishop captures on f7 with check, winning material." },
+  { fen: "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1", solution: ["Re8#"], title: "Back Rank Mate", hint: "The king is trapped on the back rank.", answer: "Re8# — The rook delivers checkmate on the back rank." },
 ];
 
 const Puzzles = () => {
@@ -28,6 +39,7 @@ const Puzzles = () => {
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [showAnswer, setShowAnswer] = useState(false);
   const [solved, setSolved] = useState(false);
 
   const board = useMemo(() => game.board(), [game.fen()]);
@@ -40,6 +52,7 @@ const Puzzles = () => {
     setLegalMoves([]);
     setFeedback(null);
     setShowHint(false);
+    setShowAnswer(false);
     setSolved(false);
   };
 
@@ -99,22 +112,32 @@ const Puzzles = () => {
                   const isSelected = selectedSquare === square;
                   const isLegal = legalMoves.includes(square);
                   const pieceKey = piece ? `${piece.color}${piece.type}` : null;
+                  const pieceDisplay = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
+
                   return (
                     <button
                       key={square}
                       role="gridcell"
                       aria-label={`${file}${rank}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : ""}`}
-                      className={`aspect-square w-[12.5%] flex items-center justify-center text-2xl sm:text-4xl select-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset
+                      className={`aspect-square w-[12.5%] flex items-center justify-center text-3xl sm:text-5xl select-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset
                         ${isLight ? "bg-board-light" : "bg-board-dark"}
-                        ${isSelected ? "ring-2 ring-primary ring-inset" : ""}
+                        ${isSelected ? "ring-2 ring-primary ring-inset brightness-125" : ""}
+                        ${isLegal ? "cursor-pointer" : "cursor-default"}
                       `}
                       onClick={() => handleSquareClick(square)}
                       tabIndex={0}
                     >
-                      {isLegal && !piece && <span className="block h-3 w-3 rounded-full bg-primary/50" />}
-                      {pieceKey && (
-                        <span className={isLegal ? "drop-shadow-[0_0_6px_hsl(var(--primary))]" : ""}>
-                          {PIECE_UNICODE[pieceKey]}
+                      {isLegal && !piece && (
+                        <span className="block h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-primary/40" />
+                      )}
+                      {isLegal && pieceDisplay && (
+                        <span className={`${pieceDisplay.className} drop-shadow-[0_0_6px_hsl(var(--primary))]`}>
+                          {pieceDisplay.symbol}
+                        </span>
+                      )}
+                      {!isLegal && pieceDisplay && (
+                        <span className={pieceDisplay.className}>
+                          {pieceDisplay.symbol}
                         </span>
                       )}
                     </button>
@@ -129,7 +152,7 @@ const Puzzles = () => {
             <div className="rounded-lg border border-border/50 bg-card p-4">
               <h2 className="font-display text-lg font-semibold text-foreground">{puzzle.title}</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                {game.turn() === "w" ? "White" : "Black"} to move and win
+                White to move and win
               </p>
             </div>
 
@@ -150,6 +173,9 @@ const Puzzles = () => {
               <Button variant="outline" className="flex-1" onClick={() => setShowHint(!showHint)} aria-label="Show hint">
                 <Lightbulb className="mr-2 h-4 w-4" /> Hint
               </Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowAnswer(!showAnswer)} aria-label="Show answer">
+                <Eye className="mr-2 h-4 w-4" /> Answer
+              </Button>
               <Button
                 variant="outline"
                 className="flex-1"
@@ -162,7 +188,13 @@ const Puzzles = () => {
 
             {showHint && (
               <p className="text-sm text-primary bg-primary/10 rounded-lg p-3 border border-primary/20">
-                {puzzle.hint}
+                💡 {puzzle.hint}
+              </p>
+            )}
+
+            {showAnswer && (
+              <p className="text-sm text-accent-foreground bg-accent/20 rounded-lg p-3 border border-accent/30">
+                ✅ {puzzle.answer}
               </p>
             )}
           </div>
