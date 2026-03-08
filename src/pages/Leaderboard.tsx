@@ -70,7 +70,6 @@ const Leaderboard = () => {
         <div className="flex justify-center gap-2 mb-8 flex-wrap">
           {[
             { key: "elo" as const, label: "ELO Ratings", icon: TrendingUp },
-            { key: "puzzle" as const, label: "Puzzle Solvers", icon: Trophy },
             { key: "premium" as const, label: "VIP Board", icon: Gem },
           ].map(t => (
             <button
