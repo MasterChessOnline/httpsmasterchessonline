@@ -1,9 +1,9 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Flag, ChevronLeft, ChevronRight } from "lucide-react";
+import { RotateCcw, Bot, Users } from "lucide-react";
 
 const PIECE_UNICODE: Record<string, string> = {
   wp: "♙", wn: "♘", wb: "♗", wr: "♖", wq: "♕", wk: "♔",
@@ -13,57 +13,105 @@ const PIECE_UNICODE: Record<string, string> = {
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
+// Simple AI: pick a random legal move (with slight preference for captures)
+function getAIMove(game: Chess): string | null {
+  const moves = game.moves();
+  if (moves.length === 0) return null;
+  const captures = moves.filter((m) => m.includes("x"));
+  if (captures.length > 0 && Math.random() > 0.3) {
+    return captures[Math.floor(Math.random() * captures.length)];
+  }
+  return moves[Math.floor(Math.random() * moves.length)];
+}
+
+type GameMode = "local" | "ai";
+
 const Play = () => {
-  const [game, setGame] = useState(new Chess());
+  const [fen, setFen] = useState("start");
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const [mode, setMode] = useState<GameMode>("ai");
+  const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
+  const gameRef = useRef(new Chess());
 
-  const board = useMemo(() => game.board(), [game.fen()]);
+  const game = gameRef.current;
 
-  const handleSquareClick = useCallback(
-    (square: Square) => {
-      if (game.isGameOver()) return;
+  // Sync FEN state
+  const updateState = () => {
+    setFen(game.fen());
+  };
 
-      // If a piece is selected and we click a legal move target
-      if (selectedSquare && legalMoves.includes(square)) {
-        const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
+  // AI plays black
+  useEffect(() => {
+    if (mode !== "ai") return;
+    if (game.turn() !== "b") return;
+    if (game.isGameOver()) return;
+
+    const timeout = setTimeout(() => {
+      const aiMove = getAIMove(game);
+      if (aiMove) {
+        const move = game.move(aiMove);
         if (move) {
-          setGame(new Chess(game.fen()));
           setMoveHistory((prev) => [...prev, move.san]);
+          setLastMove({ from: move.from, to: move.to });
+          updateState();
         }
-        setSelectedSquare(null);
-        setLegalMoves([]);
-        return;
       }
+    }, 400);
 
-      // Select a piece
-      const piece = game.get(square);
-      if (piece && piece.color === game.turn()) {
-        setSelectedSquare(square);
-        const moves = game.moves({ square, verbose: true });
-        setLegalMoves(moves.map((m) => m.to as Square));
-      } else {
-        setSelectedSquare(null);
-        setLegalMoves([]);
+    return () => clearTimeout(timeout);
+  }, [fen, mode]);
+
+  const handleSquareClick = (square: Square) => {
+    if (game.isGameOver()) return;
+    if (mode === "ai" && game.turn() === "b") return;
+
+    // Move to legal square
+    if (selectedSquare && legalMoves.includes(square)) {
+      const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
+      if (move) {
+        setMoveHistory((prev) => [...prev, move.san]);
+        setLastMove({ from: move.from, to: move.to });
+        updateState();
       }
-    },
-    [game, selectedSquare, legalMoves]
-  );
+      setSelectedSquare(null);
+      setLegalMoves([]);
+      return;
+    }
 
-  const resetGame = () => {
-    setGame(new Chess());
+    // Select piece
+    const piece = game.get(square);
+    if (piece && piece.color === game.turn()) {
+      setSelectedSquare(square);
+      const moves = game.moves({ square, verbose: true });
+      setLegalMoves(moves.map((m) => m.to as Square));
+    } else {
+      setSelectedSquare(null);
+      setLegalMoves([]);
+    }
+  };
+
+  const resetGame = (newMode?: GameMode) => {
+    gameRef.current = new Chess();
+    setFen("start");
     setSelectedSquare(null);
     setLegalMoves([]);
     setMoveHistory([]);
+    setLastMove(null);
+    if (newMode) setMode(newMode);
   };
+
+  const board = game.board();
 
   const statusText = game.isCheckmate()
     ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
     : game.isDraw()
     ? "Draw!"
+    : game.isStalemate()
+    ? "Stalemate!"
     : game.isCheck()
-    ? `${game.turn() === "w" ? "White" : "Black"} is in check`
+    ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
     : `${game.turn() === "w" ? "White" : "Black"} to move`;
 
   return (
@@ -74,16 +122,12 @@ const Play = () => {
           Play <span className="text-gradient-gold">Chess</span>
         </h1>
         <p className="text-center text-muted-foreground mb-8">
-          Click a piece to select it, then click a highlighted square to move.
+          {mode === "ai" ? "You play White vs the computer" : "Two players on the same board"}
         </p>
 
         <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
           {/* Board */}
-          <div
-            className="w-full max-w-[min(90vw,480px)]"
-            role="grid"
-            aria-label="Chess board"
-          >
+          <div className="w-full max-w-[min(90vw,480px)]" role="grid" aria-label="Chess board">
             {RANKS.map((rank, ri) => (
               <div key={rank} className="flex" role="row">
                 {FILES.map((file, fi) => {
@@ -92,6 +136,7 @@ const Play = () => {
                   const piece = board[ri][fi];
                   const isSelected = selectedSquare === square;
                   const isLegal = legalMoves.includes(square);
+                  const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
                   const pieceKey = piece ? `${piece.color}${piece.type}` : null;
 
                   return (
@@ -99,22 +144,25 @@ const Play = () => {
                       key={square}
                       role="gridcell"
                       aria-label={`${file}${rank}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : ""}`}
-                      className={`aspect-square w-[12.5%] flex items-center justify-center text-2xl sm:text-4xl select-none transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset
+                      className={`aspect-square w-[12.5%] flex items-center justify-center text-2xl sm:text-4xl select-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset
                         ${isLight ? "bg-board-light" : "bg-board-dark"}
-                        ${isSelected ? "ring-2 ring-primary ring-inset brightness-110" : ""}
-                        ${isLegal ? "cursor-pointer" : ""}
+                        ${isSelected ? "ring-2 ring-primary ring-inset brightness-125" : ""}
+                        ${isLastMove ? "brightness-110" : ""}
+                        ${isLegal ? "cursor-pointer" : "cursor-default"}
                       `}
                       onClick={() => handleSquareClick(square)}
                       tabIndex={0}
                     >
                       {isLegal && !piece && (
-                        <span className="block h-3 w-3 rounded-full bg-primary/50" />
+                        <span className="block h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-primary/40" />
                       )}
-                      {pieceKey && (
-                        <span className={isLegal ? "drop-shadow-[0_0_6px_hsl(var(--primary))]" : ""}>
-                          {PIECE_UNICODE[pieceKey]}
+                      {isLegal && piece && (
+                        <span className="relative">
+                          <span className="absolute inset-0 rounded-full ring-4 ring-primary/50" />
+                          {PIECE_UNICODE[pieceKey!]}
                         </span>
                       )}
+                      {!isLegal && pieceKey && PIECE_UNICODE[pieceKey]}
                     </button>
                   );
                 })}
@@ -124,34 +172,48 @@ const Play = () => {
 
           {/* Sidebar */}
           <div className="w-full max-w-xs space-y-4">
-            <div
-              className="rounded-lg border border-border/50 bg-card p-4"
-              role="status"
-              aria-live="polite"
-            >
+            {/* Mode select */}
+            <div className="flex gap-2">
+              <Button
+                variant={mode === "ai" ? "default" : "outline"}
+                className="flex-1"
+                onClick={() => resetGame("ai")}
+                aria-label="Play vs computer"
+              >
+                <Bot className="mr-2 h-4 w-4" /> vs Computer
+              </Button>
+              <Button
+                variant={mode === "local" ? "default" : "outline"}
+                className="flex-1"
+                onClick={() => resetGame("local")}
+                aria-label="Play locally"
+              >
+                <Users className="mr-2 h-4 w-4" /> 2 Players
+              </Button>
+            </div>
+
+            {/* Status */}
+            <div className="rounded-lg border border-border/50 bg-card p-4" role="status" aria-live="polite">
               <p className="font-display text-lg font-semibold text-foreground">{statusText}</p>
             </div>
 
-            <div className="flex gap-2">
-              <Button onClick={resetGame} variant="outline" className="flex-1" aria-label="New game">
-                <RotateCcw className="mr-2 h-4 w-4" /> New Game
-              </Button>
-            </div>
+            <Button onClick={() => resetGame()} variant="outline" className="w-full" aria-label="New game">
+              <RotateCcw className="mr-2 h-4 w-4" /> New Game
+            </Button>
 
             {/* Move history */}
             <div className="rounded-lg border border-border/50 bg-card p-4 max-h-64 overflow-y-auto">
               <h3 className="font-display text-sm font-semibold text-foreground mb-2">Moves</h3>
               {moveHistory.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No moves yet</p>
+                <p className="text-xs text-muted-foreground">No moves yet — White plays first</p>
               ) : (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                <div className="grid grid-cols-[auto_1fr_1fr] gap-x-3 gap-y-1 text-sm">
                   {moveHistory.map((move, i) =>
                     i % 2 === 0 ? (
                       <div key={i} className="contents">
-                        <span className="text-muted-foreground">
-                          {Math.floor(i / 2) + 1}. {move}
-                        </span>
-                        <span className="text-foreground">{moveHistory[i + 1] || ""}</span>
+                        <span className="text-muted-foreground text-xs">{Math.floor(i / 2) + 1}.</span>
+                        <span className="text-foreground font-medium">{move}</span>
+                        <span className="text-muted-foreground">{moveHistory[i + 1] || ""}</span>
                       </div>
                     ) : null
                   )}
