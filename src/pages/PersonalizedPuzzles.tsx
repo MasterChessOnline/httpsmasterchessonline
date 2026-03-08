@@ -79,7 +79,7 @@ const PersonalizedPuzzles = () => {
             setSolved((s) => s + 1);
           } else {
             // Auto-reply opponent move
-            const opponentMove = puzzle.solution[nextIdx];
+            const opponentMove = puzzle.moves[nextIdx];
             setTimeout(() => {
               const g2 = new Chess(g.fen());
               g2.move({ from: opponentMove.slice(0, 2) as Square, to: opponentMove.slice(2, 4) as Square, promotion: "q" });
