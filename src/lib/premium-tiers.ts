@@ -24,7 +24,7 @@ export const TIERS: PremiumTier[] = [
     features: [
       "Ad-free experience",
       "Strategy Lounge chat",
-      "Unlimited puzzle history",
+      "Unlimited game history",
       "Basic game analytics",
       "Premium profile badge",
     ],
