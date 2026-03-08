@@ -130,36 +130,8 @@ const Leaderboard = () => {
             </>
           )}
 
-          {tab === "puzzle" && (
-            <>
-              {puzzleLeaders.length === 0 ? (
-                <p className="text-center text-muted-foreground py-12">No puzzle data this month yet. Solve today's puzzle to get on the board!</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {puzzleLeaders.map((entry, i) => {
-                    const isMe = user?.id === entry.user_id;
-                    return (
-                      <Link
-                        key={entry.user_id}
-                        to={`/profile/${entry.user_id}`}
-                        className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-primary/30 ${
-                          isMe ? "border-primary/30 bg-primary/5" : "border-border/50 bg-card"
-                        }`}
-                      >
-                        {getRankDisplay(i)}
-                        <span className={`font-medium flex-1 truncate ${isMe ? "text-primary" : "text-foreground"}`}>
-                          {entry.display_name}
-                          {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
-                        </span>
-                        <span className="font-mono text-lg font-bold text-primary">{entry.count}</span>
-                        <span className="text-[10px] text-muted-foreground">puzzles</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          )}
+
+
 
           {tab === "premium" && (
             <>
