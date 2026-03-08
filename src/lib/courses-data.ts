@@ -1,9 +1,21 @@
+export interface PracticeMove {
+  move: string;       // SAN notation e.g. "e4"
+  explanation: string; // shown after correct move
+}
+
 export interface Lesson {
   id: string;
   title: string;
   content: string;
   keyPoints: string[];
-  fen?: string; // optional board position to illustrate
+  fen?: string;
+  practiceLine?: {
+    startFen?: string; // defaults to starting position
+    playerColor: "w" | "b";
+    moves: PracticeMove[]; // the moves the student must find (alternating with auto-responses)
+    autoResponses: string[]; // opponent responses after each student move (SAN)
+    completionMessage: string;
+  };
 }
 
 export interface Course {
