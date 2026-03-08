@@ -239,6 +239,9 @@ const Play = () => {
               unlimited={unlimited}
             />
 
+            {/* Captured by opponent (shown on top) */}
+            <CapturedRow pieces={boardFlipped ? capturedPieces.white : capturedPieces.black} advantage={boardFlipped ? (capturedPieces.whiteAdv > 0 ? capturedPieces.whiteAdv : 0) : (capturedPieces.whiteAdv < 0 ? -capturedPieces.whiteAdv : 0)} />
+
             <div role="grid" aria-label="Chess board">
               {displayRanks.map((rank) => (
                 <div key={rank} className="flex" role="row">
@@ -287,6 +290,9 @@ const Play = () => {
                 </div>
               ))}
             </div>
+
+            {/* Captured by player (shown on bottom) */}
+            <CapturedRow pieces={boardFlipped ? capturedPieces.black : capturedPieces.white} advantage={boardFlipped ? (capturedPieces.whiteAdv < 0 ? -capturedPieces.whiteAdv : 0) : (capturedPieces.whiteAdv > 0 ? capturedPieces.whiteAdv : 0)} />
           </div>
 
           {/* Sidebar */}
