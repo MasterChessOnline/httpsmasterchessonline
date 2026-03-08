@@ -23,8 +23,7 @@ const Leaderboard = () => {
   const { user, isPremium, subscriptionTier } = useAuth();
   const [players, setPlayers] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"elo" | "puzzle" | "premium">("elo");
-  const [puzzleLeaders, setPuzzleLeaders] = useState<{ user_id: string; count: number; display_name: string }[]>([]);
+  const [tab, setTab] = useState<"elo" | "premium">("elo");
 
   const isElitePlus = hasAccess(subscriptionTier, "elite");
 
@@ -39,32 +38,6 @@ const Leaderboard = () => {
         setLoading(false);
       });
 
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-    supabase
-      .from("puzzle_solves")
-      .select("user_id")
-      .eq("solved", true)
-      .gte("puzzle_date", monthStart.toISOString().split("T")[0])
-      .then(async ({ data }) => {
-        if (!data) return;
-        const counts: Record<string, number> = {};
-        data.forEach(d => { counts[d.user_id] = (counts[d.user_id] || 0) + 1; });
-        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 20);
-        if (sorted.length === 0) return;
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, display_name")
-          .in("user_id", sorted.map(s => s[0]));
-        const nameMap: Record<string, string> = {};
-        profiles?.forEach(p => { nameMap[p.user_id] = p.display_name || "Player"; });
-        setPuzzleLeaders(sorted.map(([uid, count]) => ({
-          user_id: uid,
-          count,
-          display_name: nameMap[uid] || "Player",
-        })));
-      });
   }, []);
 
   const getRankDisplay = (i: number) => {
@@ -97,7 +70,6 @@ const Leaderboard = () => {
         <div className="flex justify-center gap-2 mb-8 flex-wrap">
           {[
             { key: "elo" as const, label: "ELO Ratings", icon: TrendingUp },
-            { key: "puzzle" as const, label: "Puzzle Solvers", icon: Trophy },
             { key: "premium" as const, label: "VIP Board", icon: Gem },
           ].map(t => (
             <button
@@ -158,36 +130,8 @@ const Leaderboard = () => {
             </>
           )}
 
-          {tab === "puzzle" && (
-            <>
-              {puzzleLeaders.length === 0 ? (
-                <p className="text-center text-muted-foreground py-12">No puzzle data this month yet. Solve today's puzzle to get on the board!</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {puzzleLeaders.map((entry, i) => {
-                    const isMe = user?.id === entry.user_id;
-                    return (
-                      <Link
-                        key={entry.user_id}
-                        to={`/profile/${entry.user_id}`}
-                        className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-primary/30 ${
-                          isMe ? "border-primary/30 bg-primary/5" : "border-border/50 bg-card"
-                        }`}
-                      >
-                        {getRankDisplay(i)}
-                        <span className={`font-medium flex-1 truncate ${isMe ? "text-primary" : "text-foreground"}`}>
-                          {entry.display_name}
-                          {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
-                        </span>
-                        <span className="font-mono text-lg font-bold text-primary">{entry.count}</span>
-                        <span className="text-[10px] text-muted-foreground">puzzles</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          )}
+
+
 
           {tab === "premium" && (
             <>

@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Play from "./pages/Play";
 import PlayOnline from "./pages/PlayOnline";
-import Puzzles from "./pages/Puzzles";
+
 import Learn from "./pages/Learn";
 import Tournaments from "./pages/Tournaments";
 import Login from "./pages/Login";
@@ -20,7 +20,7 @@ import Friends from "./pages/Friends";
 import Premium from "./pages/Premium";
 import PremiumChat from "./pages/PremiumChat";
 import VideoLessons from "./pages/VideoLessons";
-import PersonalizedPuzzles from "./pages/PersonalizedPuzzles";
+
 import Achievements from "./pages/Achievements";
 
 import NotFound from "./pages/NotFound";
@@ -38,7 +38,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/play" element={<Play />} />
             <Route path="/play/online" element={<PlayOnline />} />
-            <Route path="/puzzles" element={<Puzzles />} />
+            
             <Route path="/learn" element={<Learn />} />
             <Route path="/tournaments" element={<Tournaments />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
@@ -47,7 +47,7 @@ const App = () => (
             <Route path="/premium" element={<Premium />} />
             <Route path="/premium/chat" element={<PremiumChat />} />
             <Route path="/premium/lessons" element={<VideoLessons />} />
-            <Route path="/premium/puzzles" element={<PersonalizedPuzzles />} />
+            
             <Route path="/achievements" element={<Achievements />} />
             
             <Route path="/login" element={<Login />} />

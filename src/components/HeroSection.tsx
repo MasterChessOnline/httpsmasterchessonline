@@ -36,7 +36,7 @@ const HeroSection = () => {
         </h1>
 
         <p className="mx-auto mt-6 max-w-lg text-lg text-muted-foreground/90 leading-relaxed">
-          Play real opponents, solve daily puzzles, track your rating, and improve — all on one beautiful platform.
+          Play real opponents, join tournaments, track your rating, and improve — all on one beautiful platform.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
@@ -57,7 +57,7 @@ const HeroSection = () => {
         <div className="mt-20 grid grid-cols-3 gap-8 sm:gap-16">
           {[
             { icon: Users, label: "Active Players", value: "2.4M+" },
-            { icon: Trophy, label: "Daily Puzzles", value: "New Daily" },
+            { icon: Trophy, label: "Tournaments", value: "Live" },
             { icon: Crown, label: "ELO Tracking", value: "Live" },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="text-center">
