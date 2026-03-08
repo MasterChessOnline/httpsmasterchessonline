@@ -3,26 +3,33 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Bot, Users } from "lucide-react";
-
-const PIECE_UNICODE: Record<string, string> = {
-  wp: "♙", wn: "♘", wb: "♗", wr: "♖", wq: "♕", wk: "♔",
-  bp: "♟", bn: "♞", bb: "♝", br: "♜", bq: "♛", bk: "♚",
-};
+import { RotateCcw, Bot, Users, Brain, Zap, GraduationCap } from "lucide-react";
+import { getAIMove, Difficulty } from "@/lib/chess-ai";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
-// Simple AI: pick a random legal move (with slight preference for captures)
-function getAIMove(game: Chess): string | null {
-  const moves = game.moves();
-  if (moves.length === 0) return null;
-  const captures = moves.filter((m) => m.includes("x"));
-  if (captures.length > 0 && Math.random() > 0.3) {
-    return captures[Math.floor(Math.random() * captures.length)];
-  }
-  return moves[Math.floor(Math.random() * moves.length)];
-}
+// SVG-style piece rendering with clear black/white distinction
+const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
+  wk: { symbol: "♚", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wq: { symbol: "♛", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wr: { symbol: "♜", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wb: { symbol: "♝", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wn: { symbol: "♞", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  wp: { symbol: "♟", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
+  bk: { symbol: "♚", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  bq: { symbol: "♛", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  br: { symbol: "♜", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  bb: { symbol: "♝", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  bn: { symbol: "♞", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  bp: { symbol: "♟", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+};
+
+const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; icon: typeof Brain; desc: string }[] = [
+  { value: "beginner", label: "Beginner", icon: Zap, desc: "Makes mistakes often" },
+  { value: "intermediate", label: "Medium", icon: Brain, desc: "Decent tactical play" },
+  { value: "advanced", label: "Hard", icon: GraduationCap, desc: "Strong positional play" },
+];
 
 type GameMode = "local" | "ai";
 
@@ -32,12 +39,13 @@ const Play = () => {
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [mode, setMode] = useState<GameMode>("ai");
+  const [difficulty, setDifficulty] = useState<Difficulty>("beginner");
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
+  const [aiThinking, setAiThinking] = useState(false);
   const gameRef = useRef(new Chess());
 
   const game = gameRef.current;
 
-  // Sync FEN state
   const updateState = () => {
     setFen(game.fen());
   };
@@ -48,26 +56,27 @@ const Play = () => {
     if (game.turn() !== "b") return;
     if (game.isGameOver()) return;
 
+    setAiThinking(true);
     const timeout = setTimeout(() => {
-      const aiMove = getAIMove(game);
-      if (aiMove) {
-        const move = game.move(aiMove);
+      const aiMoveStr = getAIMove(game, difficulty);
+      if (aiMoveStr) {
+        const move = game.move(aiMoveStr);
         if (move) {
           setMoveHistory((prev) => [...prev, move.san]);
           setLastMove({ from: move.from, to: move.to });
           updateState();
         }
       }
-    }, 400);
+      setAiThinking(false);
+    }, difficulty === "advanced" ? 600 : 300);
 
     return () => clearTimeout(timeout);
-  }, [fen, mode]);
+  }, [fen, mode, difficulty]);
 
   const handleSquareClick = (square: Square) => {
     if (game.isGameOver()) return;
     if (mode === "ai" && game.turn() === "b") return;
 
-    // Move to legal square
     if (selectedSquare && legalMoves.includes(square)) {
       const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
       if (move) {
@@ -80,7 +89,6 @@ const Play = () => {
       return;
     }
 
-    // Select piece
     const piece = game.get(square);
     if (piece && piece.color === game.turn()) {
       setSelectedSquare(square);
@@ -99,6 +107,7 @@ const Play = () => {
     setLegalMoves([]);
     setMoveHistory([]);
     setLastMove(null);
+    setAiThinking(false);
     if (newMode) setMode(newMode);
   };
 
@@ -112,6 +121,8 @@ const Play = () => {
     ? "Stalemate!"
     : game.isCheck()
     ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
+    : aiThinking
+    ? "Computer is thinking…"
     : `${game.turn() === "w" ? "White" : "Black"} to move`;
 
   return (
@@ -122,7 +133,9 @@ const Play = () => {
           Play <span className="text-gradient-gold">Chess</span>
         </h1>
         <p className="text-center text-muted-foreground mb-8">
-          {mode === "ai" ? "You play White vs the computer" : "Two players on the same board"}
+          {mode === "ai"
+            ? `You play White vs Computer (${DIFFICULTY_OPTIONS.find((d) => d.value === difficulty)?.label})`
+            : "Two players on the same board"}
         </p>
 
         <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
@@ -138,16 +151,17 @@ const Play = () => {
                   const isLegal = legalMoves.includes(square);
                   const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
                   const pieceKey = piece ? `${piece.color}${piece.type}` : null;
+                  const pieceDisplay = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
 
                   return (
                     <button
                       key={square}
                       role="gridcell"
                       aria-label={`${file}${rank}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : ""}`}
-                      className={`aspect-square w-[12.5%] flex items-center justify-center text-2xl sm:text-4xl select-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset
+                      className={`aspect-square w-[12.5%] flex items-center justify-center text-3xl sm:text-5xl select-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset
                         ${isLight ? "bg-board-light" : "bg-board-dark"}
                         ${isSelected ? "ring-2 ring-primary ring-inset brightness-125" : ""}
-                        ${isLastMove ? "brightness-110" : ""}
+                        ${isLastMove && !isSelected ? "brightness-110" : ""}
                         ${isLegal ? "cursor-pointer" : "cursor-default"}
                       `}
                       onClick={() => handleSquareClick(square)}
@@ -156,13 +170,16 @@ const Play = () => {
                       {isLegal && !piece && (
                         <span className="block h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-primary/40" />
                       )}
-                      {isLegal && piece && (
-                        <span className="relative">
-                          <span className="absolute inset-0 rounded-full ring-4 ring-primary/50" />
-                          {PIECE_UNICODE[pieceKey!]}
+                      {isLegal && pieceDisplay && (
+                        <span className={`${pieceDisplay.className} drop-shadow-[0_0_6px_hsl(var(--primary))]`}>
+                          {pieceDisplay.symbol}
                         </span>
                       )}
-                      {!isLegal && pieceKey && PIECE_UNICODE[pieceKey]}
+                      {!isLegal && pieceDisplay && (
+                        <span className={pieceDisplay.className}>
+                          {pieceDisplay.symbol}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -191,6 +208,34 @@ const Play = () => {
                 <Users className="mr-2 h-4 w-4" /> 2 Players
               </Button>
             </div>
+
+            {/* Difficulty selector (AI mode only) */}
+            {mode === "ai" && (
+              <div className="rounded-lg border border-border/50 bg-card p-3 space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Difficulty</p>
+                <div className="flex gap-2">
+                  {DIFFICULTY_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => { setDifficulty(opt.value); resetGame(); }}
+                      className={`flex-1 rounded-lg px-2 py-2 text-center transition-all border ${
+                        difficulty === opt.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"
+                      }`}
+                      aria-label={`${opt.label} difficulty`}
+                      aria-pressed={difficulty === opt.value}
+                    >
+                      <opt.icon className="h-4 w-4 mx-auto mb-1" aria-hidden="true" />
+                      <span className="text-xs font-medium block">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  {DIFFICULTY_OPTIONS.find((d) => d.value === difficulty)?.desc}
+                </p>
+              </div>
+            )}
 
             {/* Status */}
             <div className="rounded-lg border border-border/50 bg-card p-4" role="status" aria-live="polite">
