@@ -199,12 +199,45 @@ export type Database = {
         }
         Relationships: []
       }
+      puzzle_solves: {
+        Row: {
+          created_at: string
+          id: string
+          puzzle_date: string
+          puzzle_index: number
+          solved: boolean
+          time_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          puzzle_date?: string
+          puzzle_index: number
+          solved?: boolean
+          time_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          puzzle_date?: string
+          puzzle_index?: number
+          solved?: boolean
+          time_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_elo_ratings: {
+        Args: { p_black_id: string; p_result: string; p_white_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
