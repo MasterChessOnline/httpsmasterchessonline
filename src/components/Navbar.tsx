@@ -1,4 +1,4 @@
-import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, Brain, GraduationCap, Wifi, Award, Star, Gem, Shield } from "lucide-react";
+import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, Brain, GraduationCap, Wifi, Award, Star, Gem, Shield, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
