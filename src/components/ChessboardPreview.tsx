@@ -1,3 +1,7 @@
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+
 const PIECES: Record<string, string> = {
   K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
   k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
@@ -20,15 +24,15 @@ const ChessboardPreview = () => {
       <div className="container mx-auto px-6">
         <div className="flex flex-col items-center gap-12 lg:flex-row lg:gap-20">
           {/* Board */}
-          <div className="w-full max-w-md flex-shrink-0">
-            <div className="grid grid-cols-8 overflow-hidden rounded-lg border border-border/50 shadow-glow">
+          <div className="w-full max-w-sm flex-shrink-0">
+            <div className="grid grid-cols-8 overflow-hidden rounded-xl border-2 border-border/50 shadow-glow">
               {INITIAL_BOARD.flatMap((row, r) =>
                 row.map((piece, c) => {
                   const isLight = (r + c) % 2 === 0;
                   return (
                     <div
                       key={`${r}-${c}`}
-                      className={`aspect-square flex items-center justify-center text-2xl sm:text-3xl select-none ${
+                      className={`aspect-square flex items-center justify-center text-xl sm:text-2xl select-none ${
                         isLight ? "bg-board-light" : "bg-board-dark"
                       }`}
                     >
@@ -41,14 +45,14 @@ const ChessboardPreview = () => {
           </div>
 
           {/* Text */}
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left max-w-lg">
             <h2 className="font-display text-3xl font-bold text-foreground sm:text-4xl">
               Play Anytime, <span className="text-gradient-gold">Anywhere</span>
             </h2>
-            <p className="mt-4 max-w-md text-muted-foreground leading-relaxed">
-              Jump into a game instantly. Whether you have 1 minute or 1 hour, there's always a match waiting for you. Our platform supports all time controls from bullet to correspondence.
+            <p className="mt-4 text-muted-foreground leading-relaxed">
+              Jump into a game instantly. Whether you have 1 minute or 1 hour, there's always a match waiting. Fully optimized for mobile, tablet, and desktop.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3 justify-center lg:justify-start">
+            <div className="mt-6 flex flex-wrap gap-2 justify-center lg:justify-start">
               {["Bullet", "Blitz", "Rapid", "Classical"].map((mode) => (
                 <span
                   key={mode}
@@ -57,6 +61,14 @@ const ChessboardPreview = () => {
                   {mode}
                 </span>
               ))}
+            </div>
+            <div className="mt-8">
+              <Link to="/play">
+                <Button size="lg" className="group">
+                  Start a Game
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

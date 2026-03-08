@@ -24,12 +24,13 @@ export interface OnlineGame {
 }
 
 export function useOnlineGame() {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [status, setStatus] = useState<OnlineGameStatus>("idle");
   const [game, setGame] = useState<OnlineGame | null>(null);
   const [error, setError] = useState<string | null>(null);
   const queueEntryId = useRef<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const eloUpdatedRef = useRef(false);
 
   const myColor = game
     ? game.white_player_id === user?.id ? "w" : "b"
@@ -48,12 +49,25 @@ export function useOnlineGame() {
       }, (payload) => {
         const updated = payload.new as OnlineGame;
         setGame(updated);
-        if (updated.status === "finished") setStatus("finished");
+        if (updated.status === "finished") {
+          setStatus("finished");
+          // Update ELO ratings
+          if (!eloUpdatedRef.current && updated.result) {
+            eloUpdatedRef.current = true;
+            supabase.rpc("update_elo_ratings", {
+              p_white_id: updated.white_player_id,
+              p_black_id: updated.black_player_id,
+              p_result: updated.result,
+            }).then(() => {
+              refreshProfile();
+            });
+          }
+        }
       })
       .subscribe();
 
     channelRef.current = channel;
-  }, []);
+  }, [refreshProfile]);
 
   const searchMatch = useCallback(async (timeControlIdx: number) => {
     if (!user || !profile) return;
@@ -97,6 +111,7 @@ export function useOnlineGame() {
         return;
       }
 
+      eloUpdatedRef.current = false;
       setGame(newGame as OnlineGame);
       setStatus("playing");
       subscribeToGame(newGame.id);
@@ -128,6 +143,7 @@ export function useOnlineGame() {
         }, async (payload) => {
           const newGame = payload.new as OnlineGame;
           if (newGame.white_player_id === user.id || newGame.black_player_id === user.id) {
+            eloUpdatedRef.current = false;
             setGame(newGame);
             setStatus("playing");
             subscribeToGame(newGame.id);
@@ -173,7 +189,18 @@ export function useOnlineGame() {
   const endGame = useCallback(async (result: string) => {
     if (!game) return;
     await supabase.from("online_games").update({ status: "finished", result }).eq("id", game.id);
-  }, [game]);
+    
+    // Also call ELO update directly for the player who ended the game
+    if (!eloUpdatedRef.current) {
+      eloUpdatedRef.current = true;
+      await supabase.rpc("update_elo_ratings", {
+        p_white_id: game.white_player_id,
+        p_black_id: game.black_player_id,
+        p_result: result,
+      });
+      refreshProfile();
+    }
+  }, [game, refreshProfile]);
 
   const resign = useCallback(async () => {
     if (!game || !myColor) return;
@@ -188,6 +215,7 @@ export function useOnlineGame() {
     setGame(null);
     setStatus("idle");
     setError(null);
+    eloUpdatedRef.current = false;
   }, []);
 
   useEffect(() => {
