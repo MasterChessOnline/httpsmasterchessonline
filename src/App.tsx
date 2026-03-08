@@ -47,7 +47,7 @@ const App = () => (
             <Route path="/premium" element={<Premium />} />
             <Route path="/premium/chat" element={<PremiumChat />} />
             <Route path="/premium/lessons" element={<VideoLessons />} />
-            <Route path="/premium/puzzles" element={<PersonalizedPuzzles />} />
+            
             <Route path="/achievements" element={<Achievements />} />
             
             <Route path="/login" element={<Login />} />
