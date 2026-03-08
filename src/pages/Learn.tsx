@@ -140,8 +140,8 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
             >
               {!accessible && (
                 <div className="absolute top-3 right-3">
-                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-[10px]">
-                    <Lock className="w-2.5 h-2.5 mr-0.5" /> Pro
+                  <Badge className={`text-[10px] ${course.level === "Advanced" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-primary/20 text-primary border-primary/30"}`}>
+                    <Lock className="w-2.5 h-2.5 mr-0.5" /> {course.level === "Advanced" ? "Pro" : "Premium"}
                   </Badge>
                 </div>
               )}
