@@ -1,4 +1,5 @@
 import { ArrowRight, Users, Trophy, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-chess.jpg";
 
@@ -35,13 +36,17 @@ const HeroSection = () => {
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
-          <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 text-base font-semibold shadow-glow">
-            Start Playing Free
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-          <Button size="lg" variant="outline" className="border-border text-foreground hover:bg-muted px-8 text-base">
-            Watch a Game
-          </Button>
+          <Link to="/play">
+            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 text-base font-semibold shadow-glow">
+              Start Playing Free
+              <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+            </Button>
+          </Link>
+          <Link to="/learn">
+            <Button size="lg" variant="outline" className="border-border text-foreground hover:bg-muted px-8 text-base">
+              Learn Chess
+            </Button>
+          </Link>
         </div>
 
         {/* Stats */}
