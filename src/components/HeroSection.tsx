@@ -57,7 +57,7 @@ const HeroSection = () => {
         <div className="mt-20 grid grid-cols-3 gap-8 sm:gap-16">
           {[
             { icon: Users, label: "Active Players", value: "2.4M+" },
-            { icon: Trophy, label: "Daily Puzzles", value: "New Daily" },
+            { icon: Trophy, label: "Tournaments", value: "Live" },
             { icon: Crown, label: "ELO Tracking", value: "Live" },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="text-center">
