@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Lightbulb, SkipForward, CheckCircle2, XCircle, Eye, Lock, Crown, Star } from "lucide-react";
-import { PUZZLES } from "@/lib/puzzles-data";
+import { PUZZLES, FREE_PUZZLES, PREMIUM_PUZZLES, PUZZLE_CATEGORIES } from "@/lib/puzzles-data";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasAccess } from "@/lib/premium-tiers";
 
