@@ -23,8 +23,7 @@ const Leaderboard = () => {
   const { user, isPremium, subscriptionTier } = useAuth();
   const [players, setPlayers] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"elo" | "puzzle" | "premium">("elo");
-  const [puzzleLeaders, setPuzzleLeaders] = useState<{ user_id: string; count: number; display_name: string }[]>([]);
+  const [tab, setTab] = useState<"elo" | "premium">("elo");
 
   const isElitePlus = hasAccess(subscriptionTier, "elite");
 
