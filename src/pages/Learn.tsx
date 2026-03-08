@@ -97,12 +97,12 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
       <div className="flex justify-center gap-2 mb-4 flex-wrap">
         {!isPremium && (
           <Badge className="bg-muted text-muted-foreground border-border">
-            Free: Beginner & Intermediate courses available
+            Free: Beginner courses only
           </Badge>
         )}
         {isPremium && !hasAccess(subscriptionTier, "pro") && (
           <Badge className="bg-primary/20 text-primary border-primary/30">
-            <Crown className="w-3 h-3 mr-1" /> Premium — All beginner & intermediate courses
+            <Crown className="w-3 h-3 mr-1" /> Premium — Beginner & Intermediate courses
           </Badge>
         )}
         {hasAccess(subscriptionTier, "pro") && (
