@@ -3,9 +3,10 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Bot, Users, Crown, Timer } from "lucide-react";
+import { RotateCcw, Bot, Users, Crown, Timer, Wifi } from "lucide-react";
 import { getAIMove, Difficulty, AI_LEVELS } from "@/lib/chess-ai";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
+import { Link } from "react-router-dom";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
