@@ -32,6 +32,7 @@ const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; icon: typeof Brain
 ];
 
 type GameMode = "local" | "ai";
+type PlayerColor = "w" | "b";
 
 const Play = () => {
   const [fen, setFen] = useState("start");
