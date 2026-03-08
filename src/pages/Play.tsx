@@ -3,7 +3,7 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Bot, Users, Brain, Zap, GraduationCap } from "lucide-react";
+import { RotateCcw, Bot, Users, Brain, Zap, GraduationCap, Crown } from "lucide-react";
 import { getAIMove, Difficulty } from "@/lib/chess-ai";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -32,6 +32,7 @@ const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; icon: typeof Brain
 ];
 
 type GameMode = "local" | "ai";
+type PlayerColor = "w" | "b";
 
 const Play = () => {
   const [fen, setFen] = useState("start");
@@ -40,6 +41,7 @@ const Play = () => {
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [mode, setMode] = useState<GameMode>("ai");
   const [difficulty, setDifficulty] = useState<Difficulty>("beginner");
+  const [playerColor, setPlayerColor] = useState<PlayerColor>("w");
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
   const [aiThinking, setAiThinking] = useState(false);
   const gameRef = useRef(new Chess());
@@ -50,10 +52,12 @@ const Play = () => {
     setFen(game.fen());
   };
 
-  // AI plays black
+  const aiColor = playerColor === "w" ? "b" : "w";
+
+  // AI plays its color
   useEffect(() => {
     if (mode !== "ai") return;
-    if (game.turn() !== "b") return;
+    if (game.turn() !== aiColor) return;
     if (game.isGameOver()) return;
 
     setAiThinking(true);
@@ -71,11 +75,11 @@ const Play = () => {
     }, difficulty === "advanced" ? 600 : 300);
 
     return () => clearTimeout(timeout);
-  }, [fen, mode, difficulty]);
+  }, [fen, mode, difficulty, aiColor]);
 
   const handleSquareClick = (square: Square) => {
     if (game.isGameOver()) return;
-    if (mode === "ai" && game.turn() === "b") return;
+    if (mode === "ai" && game.turn() === aiColor) return;
 
     if (selectedSquare && legalMoves.includes(square)) {
       const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
@@ -111,6 +115,9 @@ const Play = () => {
     if (newMode) setMode(newMode);
   };
 
+  const boardFlipped = playerColor === "b";
+  const displayFiles = boardFlipped ? [...FILES].reverse() : FILES;
+  const displayRanks = boardFlipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
 
   const statusText = game.isCheckmate()
@@ -134,19 +141,21 @@ const Play = () => {
         </h1>
         <p className="text-center text-muted-foreground mb-8">
           {mode === "ai"
-            ? `You play White vs Computer (${DIFFICULTY_OPTIONS.find((d) => d.value === difficulty)?.label})`
+            ? `You play ${playerColor === "w" ? "White" : "Black"} vs Computer (${DIFFICULTY_OPTIONS.find((d) => d.value === difficulty)?.label})`
             : "Two players on the same board"}
         </p>
 
         <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
           {/* Board */}
           <div className="w-full max-w-[min(90vw,480px)]" role="grid" aria-label="Chess board">
-            {RANKS.map((rank, ri) => (
+            {displayRanks.map((rank, ri) => (
               <div key={rank} className="flex" role="row">
-                {FILES.map((file, fi) => {
+                {displayFiles.map((file, fi) => {
                   const square = `${file}${rank}` as Square;
-                  const isLight = (ri + fi) % 2 === 0;
-                  const piece = board[ri][fi];
+                  const origRi = RANKS.indexOf(rank);
+                  const origFi = FILES.indexOf(file);
+                  const isLight = (origRi + origFi) % 2 === 0;
+                  const piece = board[origRi][origFi];
                   const isSelected = selectedSquare === square;
                   const isLegal = legalMoves.includes(square);
                   const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
