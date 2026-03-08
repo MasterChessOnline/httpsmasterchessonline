@@ -36,7 +36,7 @@ const HeroSection = () => {
         </h1>
 
         <p className="mx-auto mt-6 max-w-lg text-lg text-muted-foreground/90 leading-relaxed">
-          Play real opponents, solve daily puzzles, track your rating, and improve — all on one beautiful platform.
+          Play real opponents, join tournaments, track your rating, and improve — all on one beautiful platform.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
