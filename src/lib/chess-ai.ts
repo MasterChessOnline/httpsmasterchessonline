@@ -1,4 +1,4 @@
-import { Chess, Square, Piece } from "chess.js";
+import { Chess } from "chess.js";
 
 // Piece values for evaluation
 const PIECE_VALUES: Record<string, number> = {
@@ -39,10 +39,34 @@ const BISHOP_TABLE = [
   -20,-10,-10,-10,-10,-10,-10,-20,
 ];
 
+const ROOK_TABLE = [
+  0,  0,  0,  0,  0,  0,  0,  0,
+  5, 10, 10, 10, 10, 10, 10,  5,
+  -5,  0,  0,  0,  0,  0,  0, -5,
+  -5,  0,  0,  0,  0,  0,  0, -5,
+  -5,  0,  0,  0,  0,  0,  0, -5,
+  -5,  0,  0,  0,  0,  0,  0, -5,
+  -5,  0,  0,  0,  0,  0,  0, -5,
+  0,  0,  0,  5,  5,  0,  0,  0,
+];
+
+const KING_TABLE = [
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -20,-30,-30,-40,-40,-30,-30,-20,
+  -10,-20,-20,-20,-20,-20,-20,-10,
+  20, 20,  0,  0,  0,  0, 20, 20,
+  20, 30, 10,  0,  0, 10, 30, 20,
+];
+
 const POSITION_TABLES: Record<string, number[]> = {
   p: PAWN_TABLE,
   n: KNIGHT_TABLE,
   b: BISHOP_TABLE,
+  r: ROOK_TABLE,
+  k: KING_TABLE,
 };
 
 function getPositionBonus(piece: string, index: number, isWhite: boolean): number {
@@ -52,10 +76,14 @@ function getPositionBonus(piece: string, index: number, isWhite: boolean): numbe
   return table[i];
 }
 
-// Evaluate the board from white's perspective
 export function evaluateBoard(game: Chess): number {
   const board = game.board();
   let score = 0;
+
+  if (game.isCheckmate()) {
+    return game.turn() === "w" ? -50000 : 50000;
+  }
+  if (game.isDraw() || game.isStalemate()) return 0;
 
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
@@ -70,6 +98,10 @@ export function evaluateBoard(game: Chess): number {
       }
     }
   }
+
+  // Mobility bonus
+  const currentMoves = game.moves().length;
+  score += (game.turn() === "w" ? 1 : -1) * currentMoves * 2;
 
   return score;
 }
@@ -113,31 +145,52 @@ function minimax(
   }
 }
 
-export type Difficulty = "beginner" | "intermediate" | "advanced";
+export type Difficulty = "beginner" | "casual" | "intermediate" | "advanced" | "master";
 
-const DEPTH_MAP: Record<Difficulty, number> = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
-};
+export interface AILevel {
+  value: Difficulty;
+  label: string;
+  rating: number;
+  desc: string;
+  depth: number;
+  mistakeChance: number;
+}
 
-// Beginner makes random mistakes sometimes
-const MISTAKE_CHANCE: Record<Difficulty, number> = {
-  beginner: 0.4,
-  intermediate: 0.1,
-  advanced: 0,
-};
+export const AI_LEVELS: AILevel[] = [
+  { value: "beginner", label: "Novice", rating: 400, desc: "Random blunders, learns the basics", depth: 1, mistakeChance: 0.5 },
+  { value: "casual", label: "Casual", rating: 800, desc: "Sees simple tactics", depth: 2, mistakeChance: 0.25 },
+  { value: "intermediate", label: "Club", rating: 1200, desc: "Solid tactical awareness", depth: 3, mistakeChance: 0.1 },
+  { value: "advanced", label: "Expert", rating: 1600, desc: "Strong positional play", depth: 3, mistakeChance: 0.02 },
+  { value: "master", label: "Master", rating: 2000, desc: "Deep calculation, rarely blunders", depth: 4, mistakeChance: 0 },
+];
 
 export function getAIMove(game: Chess, difficulty: Difficulty): string | null {
   const moves = game.moves();
   if (moves.length === 0) return null;
 
+  const level = AI_LEVELS.find((l) => l.value === difficulty)!;
+
   // Random mistake chance
-  if (Math.random() < MISTAKE_CHANCE[difficulty]) {
+  if (Math.random() < level.mistakeChance) {
+    // For higher levels, pick a "less bad" random move instead of fully random
+    if (level.rating >= 800) {
+      const evaluated = moves.map((move) => {
+        game.move(move);
+        const score = evaluateBoard(game);
+        game.undo();
+        return { move, score };
+      });
+      const isWhite = game.turn() === "w";
+      evaluated.sort((a, b) => isWhite ? b.score - a.score : a.score - b.score);
+      // Pick from middle of the pack (not best, not worst)
+      const mid = Math.floor(evaluated.length / 2);
+      const range = Math.max(1, Math.floor(evaluated.length / 4));
+      return evaluated[mid + Math.floor(Math.random() * range) - Math.floor(range / 2)]?.move ?? moves[0];
+    }
     return moves[Math.floor(Math.random() * moves.length)];
   }
 
-  const depth = DEPTH_MAP[difficulty];
+  const depth = level.depth;
   const isWhite = game.turn() === "w";
 
   let bestMove = moves[0];
