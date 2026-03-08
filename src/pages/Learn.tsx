@@ -159,7 +159,7 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
                   <>Start Course <ChevronRight className="ml-1 h-4 w-4" /></>
                 ) : (
                   <>
-                    <Lock className="mr-1 h-3.5 w-3.5" /> Requires Pro
+                    <Lock className="mr-1 h-3.5 w-3.5" /> Requires {course.level === "Advanced" ? "Pro" : "Premium"}
                   </>
                 )}
               </Button>
