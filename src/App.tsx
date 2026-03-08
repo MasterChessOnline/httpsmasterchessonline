@@ -24,6 +24,9 @@ import VideoLessons from "./pages/VideoLessons";
 import Achievements from "./pages/Achievements";
 
 import NotFound from "./pages/NotFound";
+import Donate from "./pages/Donate";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCanceled from "./pages/PaymentCanceled";
 
 const queryClient = new QueryClient();
 
