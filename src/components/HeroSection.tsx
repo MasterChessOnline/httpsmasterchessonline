@@ -1,4 +1,5 @@
 import { ArrowRight, Users, Trophy, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-chess.jpg";
 
