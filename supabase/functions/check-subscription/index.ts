@@ -50,15 +50,18 @@ serve(async (req) => {
 
     const hasActiveSub = subscriptions.data.length > 0;
     let subscriptionEnd = null;
+    let productId = null;
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      productId = subscription.items.data[0]?.price?.product ?? null;
     }
 
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       subscription_end: subscriptionEnd,
+      product_id: productId,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
