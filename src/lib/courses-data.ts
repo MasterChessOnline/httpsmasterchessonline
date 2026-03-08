@@ -41,6 +41,15 @@ export const COURSES: Course[] = [
         content: "The center squares (e4, d4, e5, d5) are the most important squares on the board. Controlling them gives your pieces maximum mobility and flexibility. Start by advancing your e-pawn or d-pawn two squares forward.",
         keyPoints: ["Place pawns on e4/d4", "Central pawns control key squares", "Avoid moving the same piece twice early"],
         fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+        practiceLine: {
+          playerColor: "w",
+          moves: [
+            { move: "e4", explanation: "Great! 1.e4 — control the center with your king's pawn." },
+            { move: "d4", explanation: "2.d4! Now you occupy both central squares." },
+          ],
+          autoResponses: ["e5", "exd4"],
+          completionMessage: "Excellent! You've learned the basics of center control.",
+        },
       },
       {
         id: "of-2",
@@ -48,6 +57,16 @@ export const COURSES: Course[] = [
         content: "After establishing center control, bring your knights and bishops into the game. Knights should typically go to f3/c3 (or f6/c6 for Black). Bishops should be placed on active diagonals where they can influence the game.",
         keyPoints: ["Knights before bishops", "Develop toward the center", "Don't move the queen too early"],
         fen: "r1bqkbnr/pppppppp/2n5/8/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 2",
+        practiceLine: {
+          startFen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+          playerColor: "w",
+          moves: [
+            { move: "Nf3", explanation: "1.Nf3 — develop the knight toward the center, attacking e5." },
+            { move: "Bc4", explanation: "2.Bc4 — the bishop targets the weak f7 square." },
+          ],
+          autoResponses: ["Nc6", "Nf6"],
+          completionMessage: "Well done! Knights and bishops developed efficiently.",
+        },
       },
       {
         id: "of-3",
@@ -55,6 +74,15 @@ export const COURSES: Course[] = [
         content: "Castling serves two purposes: it moves your king to safety behind a wall of pawns, and it connects your rooks. Try to castle within the first 10 moves. Kingside castling (O-O) is usually safer than queenside (O-O-O).",
         keyPoints: ["King safety is paramount", "Castle within 10 moves", "Don't move pawns in front of castled king"],
         fen: "r1bqk2r/ppppbppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+        practiceLine: {
+          startFen: "r1bqk2r/ppppbppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+          playerColor: "w",
+          moves: [
+            { move: "O-O", explanation: "Castling kingside! Your king is safe and your rook is now connected." },
+          ],
+          autoResponses: [],
+          completionMessage: "Perfect! You've castled early and secured your king.",
+        },
       },
       {
         id: "of-4",
@@ -62,6 +90,16 @@ export const COURSES: Course[] = [
         content: "The Italian Game (1.e4 e5 2.Nf3 Nc6 3.Bc4) is one of the oldest and most natural openings. White develops the bishop to c4, targeting the weak f7 square. It leads to rich tactical play.",
         keyPoints: ["Targets f7 pawn", "Natural development", "Good for beginners to learn"],
         fen: "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+        practiceLine: {
+          playerColor: "w",
+          moves: [
+            { move: "e4", explanation: "1.e4 — start by controlling the center." },
+            { move: "Nf3", explanation: "2.Nf3 — develop your knight and attack e5." },
+            { move: "Bc4", explanation: "3.Bc4 — the Italian Game! Targeting the f7 pawn." },
+          ],
+          autoResponses: ["e5", "Nc6", "Bc5"],
+          completionMessage: "You've played the Italian Game opening! This is a classic setup for beginners.",
+        },
       },
       {
         id: "of-5",
@@ -69,6 +107,17 @@ export const COURSES: Course[] = [
         content: "The Sicilian Defense (1.e4 c5) is the most popular response to 1.e4 at all levels. Black immediately fights for the center asymmetrically. It leads to sharp, unbalanced positions with chances for both sides.",
         keyPoints: ["Asymmetric pawn structure", "Black fights for d4 control", "Sharp tactical play"],
         fen: "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2",
+        practiceLine: {
+          startFen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+          playerColor: "b",
+          moves: [
+            { move: "c5", explanation: "1...c5 — the Sicilian Defense! Fighting for the d4 square." },
+            { move: "d6", explanation: "2...d6 — solid development, preparing for Nf6." },
+            { move: "Nf6", explanation: "3...Nf6 — developing the knight and attacking the e4 pawn." },
+          ],
+          autoResponses: ["Nf3", "d4", "Nc3"],
+          completionMessage: "You've played the Sicilian Defense! The most popular response to 1.e4.",
+        },
       },
     ],
   },
