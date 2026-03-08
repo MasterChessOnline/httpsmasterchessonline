@@ -76,7 +76,8 @@ function getPositionBonus(piece: string, index: number, isWhite: boolean): numbe
   return table[i];
 }
 
-export function evaluateBoard(game: Chess): number {
+// Fast incremental evaluation without mobility (used in search)
+function evaluateMaterial(game: Chess): number {
   const board = game.board();
   let score = 0;
 
@@ -99,14 +100,81 @@ export function evaluateBoard(game: Chess): number {
     }
   }
 
-  // Mobility bonus
+  return score;
+}
+
+export function evaluateBoard(game: Chess): number {
+  let score = evaluateMaterial(game);
+  // Mobility bonus (only at root for display purposes)
   const currentMoves = game.moves().length;
   score += (game.turn() === "w" ? 1 : -1) * currentMoves * 2;
+  return score;
+}
+
+// Move ordering heuristic: score moves to search best candidates first
+function scoreMove(game: Chess, move: string): number {
+  let score = 0;
+  game.move(move);
+  if (game.isCheckmate()) { game.undo(); return 100000; }
+  if (game.inCheck()) score += 500;
+  game.undo();
+
+  // Captures: MVV-LVA heuristic
+  // SAN-based detection: captures contain 'x'
+  if (move.includes("x")) score += 1000;
+  // Promotions
+  if (move.includes("=")) score += 800;
 
   return score;
 }
 
-// Minimax with alpha-beta pruning
+function orderMoves(game: Chess, moves: string[]): string[] {
+  const scored = moves.map(m => ({ move: m, score: scoreMove(game, m) }));
+  scored.sort((a, b) => b.score - a.score);
+  return scored.map(s => s.move);
+}
+
+// Quiescence search to avoid horizon effect on captures
+function quiescence(game: Chess, alpha: number, beta: number, isMaximizing: boolean, maxQDepth: number): number {
+  const standPat = evaluateMaterial(game);
+
+  if (maxQDepth <= 0) return standPat;
+
+  if (isMaximizing) {
+    if (standPat >= beta) return beta;
+    if (standPat > alpha) alpha = standPat;
+  } else {
+    if (standPat <= alpha) return alpha;
+    if (standPat < beta) beta = standPat;
+  }
+
+  // Only search captures
+  const allMoves = game.moves();
+  const captures = allMoves.filter(m => m.includes("x"));
+  if (captures.length === 0) return standPat;
+
+  if (isMaximizing) {
+    for (const move of captures) {
+      game.move(move);
+      const eval_ = quiescence(game, alpha, beta, false, maxQDepth - 1);
+      game.undo();
+      if (eval_ > alpha) alpha = eval_;
+      if (beta <= alpha) break;
+    }
+    return alpha;
+  } else {
+    for (const move of captures) {
+      game.move(move);
+      const eval_ = quiescence(game, alpha, beta, true, maxQDepth - 1);
+      game.undo();
+      if (eval_ < beta) beta = eval_;
+      if (beta <= alpha) break;
+    }
+    return beta;
+  }
+}
+
+// Minimax with alpha-beta pruning + move ordering + quiescence
 function minimax(
   game: Chess,
   depth: number,
@@ -115,10 +183,10 @@ function minimax(
   isMaximizing: boolean
 ): number {
   if (depth === 0 || game.isGameOver()) {
-    return evaluateBoard(game);
+    return quiescence(game, alpha, beta, isMaximizing, 3);
   }
 
-  const moves = game.moves();
+  const moves = orderMoves(game, game.moves());
 
   if (isMaximizing) {
     let maxEval = -Infinity;
@@ -172,17 +240,15 @@ export function getAIMove(game: Chess, difficulty: Difficulty): string | null {
 
   // Random mistake chance
   if (Math.random() < level.mistakeChance) {
-    // For higher levels, pick a "less bad" random move instead of fully random
     if (level.rating >= 800) {
       const evaluated = moves.map((move) => {
         game.move(move);
-        const score = evaluateBoard(game);
+        const score = evaluateMaterial(game);
         game.undo();
         return { move, score };
       });
       const isWhite = game.turn() === "w";
       evaluated.sort((a, b) => isWhite ? b.score - a.score : a.score - b.score);
-      // Pick from middle of the pack (not best, not worst)
       const mid = Math.floor(evaluated.length / 2);
       const range = Math.max(1, Math.floor(evaluated.length / 4));
       return evaluated[mid + Math.floor(Math.random() * range) - Math.floor(range / 2)]?.move ?? moves[0];
@@ -193,10 +259,13 @@ export function getAIMove(game: Chess, difficulty: Difficulty): string | null {
   const depth = level.depth;
   const isWhite = game.turn() === "w";
 
-  let bestMove = moves[0];
+  // Use move ordering at root level too
+  const orderedMoves = orderMoves(game, moves);
+
+  let bestMove = orderedMoves[0];
   let bestEval = isWhite ? -Infinity : Infinity;
 
-  for (const move of moves) {
+  for (const move of orderedMoves) {
     game.move(move);
     const eval_ = minimax(game, depth - 1, -Infinity, Infinity, !isWhite);
     game.undo();
