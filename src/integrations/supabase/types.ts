@@ -229,6 +229,146 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_pairings: {
+        Row: {
+          black_player_id: string | null
+          created_at: string
+          game_id: string | null
+          id: string
+          result: string | null
+          round: number
+          tournament_id: string
+          white_player_id: string
+        }
+        Insert: {
+          black_player_id?: string | null
+          created_at?: string
+          game_id?: string | null
+          id?: string
+          result?: string | null
+          round: number
+          tournament_id: string
+          white_player_id: string
+        }
+        Update: {
+          black_player_id?: string | null
+          created_at?: string
+          game_id?: string | null
+          id?: string
+          result?: string | null
+          round?: number
+          tournament_id?: string
+          white_player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_pairings_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "online_games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_pairings_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_registrations: {
+        Row: {
+          created_at: string
+          id: string
+          rating_at_join: number
+          score: number
+          tiebreak: number
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating_at_join?: number
+          score?: number
+          tiebreak?: number
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating_at_join?: number
+          score?: number
+          tiebreak?: number
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_registrations_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          category: string
+          created_at: string
+          current_round: number
+          description: string
+          id: string
+          max_players: number
+          name: string
+          round_started_at: string | null
+          starts_at: string
+          status: string
+          time_control_increment: number
+          time_control_label: string
+          time_control_seconds: number
+          total_rounds: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          current_round?: number
+          description?: string
+          id?: string
+          max_players?: number
+          name: string
+          round_started_at?: string | null
+          starts_at?: string
+          status?: string
+          time_control_increment?: number
+          time_control_label?: string
+          time_control_seconds?: number
+          total_rounds?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          current_round?: number
+          description?: string
+          id?: string
+          max_players?: number
+          name?: string
+          round_started_at?: string | null
+          starts_at?: string
+          status?: string
+          time_control_increment?: number
+          time_control_label?: string
+          time_control_seconds?: number
+          total_rounds?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
