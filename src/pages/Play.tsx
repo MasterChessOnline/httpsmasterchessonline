@@ -88,6 +88,7 @@ const Play = () => {
 
   const handleTimeOut = useCallback((color: "w" | "b") => {
     setTimeoutWinner(color === "w" ? "Black" : "White");
+    playChessSound("gameOver");
   }, []);
 
   // AI plays its color
