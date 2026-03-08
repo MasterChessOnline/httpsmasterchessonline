@@ -246,6 +246,41 @@ const Play = () => {
               </div>
             )}
 
+            {/* Color picker (AI mode only) */}
+            {mode === "ai" && (
+              <div className="rounded-lg border border-border/50 bg-card p-3 space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Play as</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { if (playerColor !== "w") { setPlayerColor("w"); resetGame(); } }}
+                    className={`flex-1 rounded-lg px-2 py-2 text-center transition-all border ${
+                      playerColor === "w"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"
+                    }`}
+                    aria-label="Play as White"
+                    aria-pressed={playerColor === "w"}
+                  >
+                    <Crown className="h-4 w-4 mx-auto mb-1" aria-hidden="true" />
+                    <span className="text-xs font-medium block">White</span>
+                  </button>
+                  <button
+                    onClick={() => { if (playerColor !== "b") { setPlayerColor("b"); resetGame(); } }}
+                    className={`flex-1 rounded-lg px-2 py-2 text-center transition-all border ${
+                      playerColor === "b"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"
+                    }`}
+                    aria-label="Play as Black"
+                    aria-pressed={playerColor === "b"}
+                  >
+                    <Crown className="h-4 w-4 mx-auto mb-1" aria-hidden="true" />
+                    <span className="text-xs font-medium block">Black</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Status */}
             <div className="rounded-lg border border-border/50 bg-card p-4" role="status" aria-live="polite">
               <p className="font-display text-lg font-semibold text-foreground">{statusText}</p>
