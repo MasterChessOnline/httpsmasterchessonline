@@ -37,8 +37,8 @@ const PersonalizedPuzzles = () => {
     const rating = profile.rating;
     // Sort by difficulty matching player level
     return [...PUZZLES].sort((a, b) => {
-      const diffA = a.solution.length; // More moves = harder
-      const diffB = b.solution.length;
+      const diffA = a.moves.length;
+      const diffB = b.moves.length;
       // Lower rated players get easier puzzles first
       if (rating < 1300) return diffA - diffB;
       if (rating < 1600) return 0; // Mixed
