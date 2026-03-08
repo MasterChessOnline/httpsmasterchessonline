@@ -131,6 +131,7 @@ const PlayOnline = () => {
       gameRef.current = new Chess(onlineGame.fen);
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
       setGameStarted(true);
+      playChessSound("start");
     }
   }, [onlineStatus]);
 
