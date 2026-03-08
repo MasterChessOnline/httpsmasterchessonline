@@ -41,6 +41,7 @@ const Play = () => {
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [mode, setMode] = useState<GameMode>("ai");
   const [difficulty, setDifficulty] = useState<Difficulty>("beginner");
+  const [playerColor, setPlayerColor] = useState<PlayerColor>("w");
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
   const [aiThinking, setAiThinking] = useState(false);
   const gameRef = useRef(new Chess());
