@@ -203,12 +203,12 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev }: {
       <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
         <p className="text-foreground leading-relaxed text-base">{lesson.content}</p>
       </div>
-      {lesson.fen && (
-        <div className="mb-6">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">Position Example</p>
-          <MiniBoard fen={lesson.fen} />
-        </div>
-      )}
+      <div className="mb-6">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">
+          {lesson.fen ? "Position Example" : "Starting Position"}
+        </p>
+        <MiniBoard fen={lesson.fen || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"} />
+      </div>
       {lesson.keyPoints.length > 0 && (
         <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
           <h3 className="font-display text-sm font-semibold text-foreground mb-3">Key Takeaways</h3>
