@@ -141,7 +141,7 @@ const Play = () => {
         </h1>
         <p className="text-center text-muted-foreground mb-8">
           {mode === "ai"
-            ? `You play White vs Computer (${DIFFICULTY_OPTIONS.find((d) => d.value === difficulty)?.label})`
+            ? `You play ${playerColor === "w" ? "White" : "Black"} vs Computer (${DIFFICULTY_OPTIONS.find((d) => d.value === difficulty)?.label})`
             : "Two players on the same board"}
         </p>
 
