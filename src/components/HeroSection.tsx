@@ -1,4 +1,4 @@
-import { ArrowRight, Users, Trophy, Zap, Swords, Crown } from "lucide-react";
+import { ArrowRight, Users, Trophy, Zap, Swords, Crown, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-chess.jpg";
@@ -39,7 +39,7 @@ const HeroSection = () => {
           Play real opponents, join tournaments, track your rating, and improve — all on one beautiful platform.
         </p>
 
-        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
           <Link to={user ? "/play/online" : "/signup"}>
             <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 text-base font-semibold shadow-glow group">
               {user ? "Play Online" : "Start Playing Free"}
@@ -49,6 +49,11 @@ const HeroSection = () => {
           <Link to="/play">
             <Button size="lg" variant="outline" className="border-foreground/20 text-foreground hover:bg-foreground/5 px-8 text-base backdrop-blur-sm">
               <Swords className="mr-2 h-4 w-4" /> Play vs Computer
+            </Button>
+          </Link>
+          <Link to="/donate">
+            <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/10 px-8 text-base backdrop-blur-sm group">
+              <Heart className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" /> Support the Site
             </Button>
           </Link>
         </div>

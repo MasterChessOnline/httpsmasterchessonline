@@ -262,6 +262,45 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          item_id: string | null
+          item_type: string
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          item_id?: string | null
+          item_type: string
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          item_id?: string | null
+          item_type?: string
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       puzzle_solves: {
         Row: {
           created_at: string
@@ -384,6 +423,7 @@ export type Database = {
           created_at: string
           current_round: number
           description: string
+          entry_fee: number
           id: string
           max_players: number
           name: string
@@ -401,6 +441,7 @@ export type Database = {
           created_at?: string
           current_round?: number
           description?: string
+          entry_fee?: number
           id?: string
           max_players?: number
           name: string
@@ -418,6 +459,7 @@ export type Database = {
           created_at?: string
           current_round?: number
           description?: string
+          entry_fee?: number
           id?: string
           max_players?: number
           name?: string
