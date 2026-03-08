@@ -85,8 +85,8 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
   const filtered = levelFilter === "all" ? COURSES : COURSES.filter((c) => c.level === levelFilter);
 
   const canAccessCourse = (course: Course) => {
-    if (course.level === "Beginner") return true; // free for all
-    if (course.level === "Intermediate") return true; // free for all, but limited lessons for free users
+    if (course.level === "Beginner") return true;
+    if (course.level === "Intermediate") return hasAccess(subscriptionTier, "premium");
     if (course.level === "Advanced") return hasAccess(subscriptionTier, "pro");
     return true;
   };
