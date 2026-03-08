@@ -51,6 +51,11 @@ const HeroSection = () => {
               <Swords className="mr-2 h-4 w-4" /> Play vs Computer
             </Button>
           </Link>
+          <Link to="/donate">
+            <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/10 px-8 text-base backdrop-blur-sm group">
+              <Heart className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" /> Support the Site
+            </Button>
+          </Link>
         </div>
 
         {/* Stats */}

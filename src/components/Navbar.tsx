@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
   { label: "Achievements", href: "/achievements", icon: Award },
   { label: "Premium", href: "/premium", icon: Crown },
+  { label: "Donate", href: "/donate", icon: Heart },
 ];
 
 const TIER_ICONS: Record<TierKey, typeof Crown> = {

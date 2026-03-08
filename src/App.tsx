@@ -52,6 +52,9 @@ const App = () => (
             <Route path="/premium/lessons" element={<VideoLessons />} />
             
             <Route path="/achievements" element={<Achievements />} />
+            <Route path="/donate" element={<Donate />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/payment-canceled" element={<PaymentCanceled />} />
             
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
