@@ -68,10 +68,10 @@ const PersonalizedPuzzles = () => {
       const from = selectedSquare;
       const to = square;
       const g = new Chess(game.fen());
-      const expectedMove = puzzle.moves[moveIndex];
+      const expectedSan = puzzle.moves[moveIndex];
       try {
         const move = g.move({ from: from as Square, to: to as Square, promotion: "q" });
-        if (move && `${move.from}${move.to}` === expectedMove) {
+        if (move && move.san === expectedSan) {
           setGame(g);
           const nextIdx = moveIndex + 1;
           if (nextIdx >= puzzle.moves.length) {
@@ -79,12 +79,16 @@ const PersonalizedPuzzles = () => {
             setSolved((s) => s + 1);
           } else {
             // Auto-reply opponent move
-            const opponentMove = puzzle.moves[nextIdx];
+            const opponentSan = puzzle.moves[nextIdx];
             setTimeout(() => {
               const g2 = new Chess(g.fen());
-              g2.move({ from: opponentMove.slice(0, 2) as Square, to: opponentMove.slice(2, 4) as Square, promotion: "q" });
-              setGame(g2);
-              setMoveIndex(nextIdx + 1);
+              try {
+                g2.move(opponentSan);
+                setGame(g2);
+                setMoveIndex(nextIdx + 1);
+              } catch {
+                setMoveIndex(nextIdx + 1);
+              }
             }, 400);
             setMoveIndex(nextIdx);
           }
