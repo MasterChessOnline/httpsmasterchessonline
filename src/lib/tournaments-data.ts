@@ -1,3 +1,9 @@
+export interface TournamentTrophy {
+  place: 1 | 2 | 3;
+  label: string;
+  emoji: string;
+}
+
 export interface Tournament {
   id: string;
   name: string;
@@ -10,29 +16,163 @@ export interface Tournament {
   startDate: string;
   prize: string;
   category: "blitz" | "rapid" | "classical" | "themed";
+  rounds: number;
+  ratingRange?: string;
+  trophies: TournamentTrophy[];
 }
 
+const TOP3: TournamentTrophy[] = [
+  { place: 1, label: "Gold Trophy", emoji: "🥇" },
+  { place: 2, label: "Silver Trophy", emoji: "🥈" },
+  { place: 3, label: "Bronze Trophy", emoji: "🥉" },
+];
+
 export const TOURNAMENTS: Tournament[] = [
-  // Blitz
-  { id: "t1", name: "Daily Blitz Arena", topic: "Open Play", description: "Fast-paced 3-minute games. Highest score wins!", timeControl: "3+0", maxPlayers: 128, currentPlayers: 97, status: "live", startDate: "Today", prize: "500 Rating Points", category: "blitz" },
-  { id: "t2", name: "Bullet Brawl", topic: "Speed Chess", description: "1-minute madness. Pure instinct and speed.", timeControl: "1+0", maxPlayers: 256, currentPlayers: 213, status: "live", startDate: "Today", prize: "750 Rating Points", category: "blitz" },
-  { id: "t3", name: "Blitz Tactics Cup", topic: "Tactical Showdown", description: "Blitz games focused on sharp tactical positions.", timeControl: "3+2", maxPlayers: 64, currentPlayers: 41, status: "registering", startDate: "Tomorrow", prize: "1000 Rating Points", category: "blitz" },
-  { id: "t4", name: "Lightning Round", topic: "Hyperbullet", description: "30-second games for the bravest players.", timeControl: "0.5+0", maxPlayers: 128, currentPlayers: 0, status: "upcoming", startDate: "Mar 15", prize: "500 Rating Points", category: "blitz" },
+  // === BLITZ ===
+  {
+    id: "t1", name: "Daily Blitz Arena", topic: "Open Play",
+    description: "Fast-paced 3+0 blitz. 7 rounds of Swiss pairings — climb as high as you can!",
+    timeControl: "3+0", maxPlayers: 128, currentPlayers: 97, status: "live",
+    startDate: "Today", prize: "Top 3 Trophies + Rating Points", category: "blitz",
+    rounds: 7, trophies: TOP3,
+  },
+  {
+    id: "t2", name: "Bullet Brawl", topic: "Speed Chess",
+    description: "1-minute madness over 7 rounds. Pure instinct and speed decide the champion.",
+    timeControl: "1+0", maxPlayers: 256, currentPlayers: 213, status: "live",
+    startDate: "Today", prize: "Top 3 Trophies + Rating Points", category: "blitz",
+    rounds: 7, trophies: TOP3,
+  },
+  {
+    id: "t3", name: "Blitz Tactics Cup", topic: "Tactical Showdown",
+    description: "3+2 blitz with 9 Swiss rounds. Sharp tactical play rewarded!",
+    timeControl: "3+2", maxPlayers: 64, currentPlayers: 41, status: "registering",
+    startDate: "Tomorrow", prize: "Top 3 Trophies + 1000 Rating", category: "blitz",
+    rounds: 9, trophies: TOP3,
+  },
+  {
+    id: "t4", name: "Lightning Blitz Championship", topic: "Blitz Swiss",
+    description: "5+3 blitz — 8 rounds of Swiss system with ELO-rated pairings.",
+    timeControl: "5+3", maxPlayers: 128, currentPlayers: 0, status: "upcoming",
+    startDate: "Mar 15", prize: "Top 3 Trophies + Rating Points", category: "blitz",
+    rounds: 8, trophies: TOP3,
+  },
+  {
+    id: "t16", name: "Blitz Under 1400", topic: "Rating Restricted",
+    description: "Blitz tournament for players rated under 1400. 7 Swiss rounds.",
+    timeControl: "3+2", maxPlayers: 64, currentPlayers: 32, status: "registering",
+    startDate: "Tomorrow", prize: "Top 3 Trophies", category: "blitz",
+    rounds: 7, ratingRange: "Under 1400", trophies: TOP3,
+  },
+  {
+    id: "t17", name: "Blitz Open 1400-1800", topic: "Rating Restricted",
+    description: "Competitive blitz for intermediate players. 8 Swiss rounds with increment.",
+    timeControl: "5+2", maxPlayers: 64, currentPlayers: 48, status: "registering",
+    startDate: "Saturday", prize: "Top 3 Trophies + Rating", category: "blitz",
+    rounds: 8, ratingRange: "1400–1800", trophies: TOP3,
+  },
+  {
+    id: "t18", name: "Elite Blitz 1800+", topic: "Rating Restricted",
+    description: "High-rated blitz showdown. 9 rounds of intense competition.",
+    timeControl: "3+2", maxPlayers: 32, currentPlayers: 18, status: "registering",
+    startDate: "Sunday", prize: "Top 3 Trophies + 1500 Rating", category: "blitz",
+    rounds: 9, ratingRange: "1800+", trophies: TOP3,
+  },
 
-  // Rapid
-  { id: "t5", name: "Weekend Rapid Open", topic: "Open Rapid", description: "10-minute games with 5-second increment. Think and play.", timeControl: "10+5", maxPlayers: 256, currentPlayers: 184, status: "registering", startDate: "Saturday", prize: "1500 Rating Points", category: "rapid" },
-  { id: "t6", name: "Rapid Royale", topic: "Swiss System", description: "7-round Swiss format rapid tournament.", timeControl: "15+10", maxPlayers: 128, currentPlayers: 88, status: "registering", startDate: "Sunday", prize: "2000 Rating Points", category: "rapid" },
-  { id: "t7", name: "Rapid Rising Stars", topic: "Under 1500", description: "Rapid tournament for players rated under 1500.", timeControl: "10+0", maxPlayers: 64, currentPlayers: 52, status: "live", startDate: "Today", prize: "800 Rating Points", category: "rapid" },
-  { id: "t8", name: "Rapid Champions League", topic: "Elite Rapid", description: "Top-rated players compete in rapid format.", timeControl: "15+5", maxPlayers: 32, currentPlayers: 0, status: "upcoming", startDate: "Mar 20", prize: "3000 Rating Points", category: "rapid" },
+  // === RAPID ===
+  {
+    id: "t5", name: "Weekend Rapid Open", topic: "Open Rapid",
+    description: "10+5 rapid over 9 Swiss rounds. Think deep and play strong.",
+    timeControl: "10+5", maxPlayers: 256, currentPlayers: 184, status: "registering",
+    startDate: "Saturday", prize: "Top 3 Trophies + 1500 Rating", category: "rapid",
+    rounds: 9, trophies: TOP3,
+  },
+  {
+    id: "t6", name: "Rapid Royale", topic: "Swiss System",
+    description: "15+10 rapid — 7 rounds of Swiss pairings with full rating tracking.",
+    timeControl: "15+10", maxPlayers: 128, currentPlayers: 88, status: "registering",
+    startDate: "Sunday", prize: "Top 3 Trophies + 2000 Rating", category: "rapid",
+    rounds: 7, trophies: TOP3,
+  },
+  {
+    id: "t7", name: "Rapid Rising Stars", topic: "Under 1500",
+    description: "Rapid tournament for players rated under 1500. 7 Swiss rounds.",
+    timeControl: "10+0", maxPlayers: 64, currentPlayers: 52, status: "live",
+    startDate: "Today", prize: "Top 3 Trophies + Rating", category: "rapid",
+    rounds: 7, ratingRange: "Under 1500", trophies: TOP3,
+  },
+  {
+    id: "t8", name: "Rapid Champions League", topic: "Elite Rapid",
+    description: "Top-rated 15+5 rapid. 9 rounds of elite competition for serious players.",
+    timeControl: "15+5", maxPlayers: 32, currentPlayers: 0, status: "upcoming",
+    startDate: "Mar 20", prize: "Top 3 Trophies + 3000 Rating", category: "rapid",
+    rounds: 9, ratingRange: "1600+", trophies: TOP3,
+  },
+  {
+    id: "t19", name: "Rapid Under 1200", topic: "Rating Restricted",
+    description: "Beginner-friendly rapid. 7 rounds to build confidence and earn trophies.",
+    timeControl: "10+5", maxPlayers: 64, currentPlayers: 29, status: "registering",
+    startDate: "Saturday", prize: "Top 3 Trophies", category: "rapid",
+    rounds: 7, ratingRange: "Under 1200", trophies: TOP3,
+  },
+  {
+    id: "t20", name: "Rapid Grand Prix", topic: "Open Rapid",
+    description: "15+10 rapid Grand Prix — 8 rounds. All ratings welcome.",
+    timeControl: "15+10", maxPlayers: 128, currentPlayers: 67, status: "registering",
+    startDate: "Next Saturday", prize: "Top 3 Trophies + 2500 Rating", category: "rapid",
+    rounds: 8, trophies: TOP3,
+  },
 
-  // Classical
-  { id: "t9", name: "Monthly Classical", topic: "Classical Chess", description: "30-minute games with 15-second increment. Deep thinking.", timeControl: "30+15", maxPlayers: 64, currentPlayers: 38, status: "registering", startDate: "Mar 12", prize: "2500 Rating Points", category: "classical" },
-  { id: "t10", name: "Grand Classical Open", topic: "Long Format", description: "45-minute games. For those who love deep analysis.", timeControl: "45+30", maxPlayers: 32, currentPlayers: 0, status: "upcoming", startDate: "Mar 25", prize: "5000 Rating Points", category: "classical" },
+  // === CLASSICAL ===
+  {
+    id: "t9", name: "Monthly Classical", topic: "Classical Chess",
+    description: "30+15 classical over 7 Swiss rounds. Deep thinking rewarded.",
+    timeControl: "30+15", maxPlayers: 64, currentPlayers: 38, status: "registering",
+    startDate: "Mar 12", prize: "Top 3 Trophies + 2500 Rating", category: "classical",
+    rounds: 7, trophies: TOP3,
+  },
+  {
+    id: "t10", name: "Grand Classical Open", topic: "Long Format",
+    description: "45+30 classical — 7 rounds for those who love deep analysis.",
+    timeControl: "45+30", maxPlayers: 32, currentPlayers: 0, status: "upcoming",
+    startDate: "Mar 25", prize: "Top 3 Trophies + 5000 Rating", category: "classical",
+    rounds: 7, trophies: TOP3,
+  },
 
-  // Themed
-  { id: "t11", name: "King's Indian Attack", topic: "Opening Theme", description: "All games start from the King's Indian Attack position.", timeControl: "5+3", maxPlayers: 64, currentPlayers: 45, status: "registering", startDate: "Tomorrow", prize: "600 Rating Points", category: "themed" },
-  { id: "t12", name: "Sicilian Showdown", topic: "Sicilian Defense", description: "Every game begins with 1.e4 c5. Master the Sicilian!", timeControl: "5+3", maxPlayers: 128, currentPlayers: 92, status: "live", startDate: "Today", prize: "800 Rating Points", category: "themed" },
-  { id: "t13", name: "Endgame Masters", topic: "Endgame Only", description: "Games start from famous endgame positions.", timeControl: "10+5", maxPlayers: 64, currentPlayers: 28, status: "registering", startDate: "Mar 14", prize: "1000 Rating Points", category: "themed" },
-  { id: "t14", name: "Ruy Lopez Festival", topic: "Ruy Lopez", description: "All games begin from the Ruy Lopez. Classic chess!", timeControl: "10+5", maxPlayers: 64, currentPlayers: 0, status: "upcoming", startDate: "Mar 18", prize: "800 Rating Points", category: "themed" },
-  { id: "t15", name: "Queen's Gambit Cup", topic: "Queen's Gambit", description: "1.d4 d5 2.c4 — Will you accept or decline?", timeControl: "10+5", maxPlayers: 128, currentPlayers: 0, status: "upcoming", startDate: "Mar 22", prize: "1200 Rating Points", category: "themed" },
+  // === THEMED ===
+  {
+    id: "t11", name: "King's Indian Attack", topic: "Opening Theme",
+    description: "All games start from the KIA position. 7 Swiss rounds.",
+    timeControl: "5+3", maxPlayers: 64, currentPlayers: 45, status: "registering",
+    startDate: "Tomorrow", prize: "Top 3 Trophies", category: "themed",
+    rounds: 7, trophies: TOP3,
+  },
+  {
+    id: "t12", name: "Sicilian Showdown", topic: "Sicilian Defense",
+    description: "Every game begins with 1.e4 c5. 9 rounds of Sicilian mastery!",
+    timeControl: "5+3", maxPlayers: 128, currentPlayers: 92, status: "live",
+    startDate: "Today", prize: "Top 3 Trophies + 800 Rating", category: "themed",
+    rounds: 9, trophies: TOP3,
+  },
+  {
+    id: "t13", name: "Endgame Masters", topic: "Endgame Only",
+    description: "Games start from famous endgame positions. 7 Swiss rounds.",
+    timeControl: "10+5", maxPlayers: 64, currentPlayers: 28, status: "registering",
+    startDate: "Mar 14", prize: "Top 3 Trophies + 1000 Rating", category: "themed",
+    rounds: 7, trophies: TOP3,
+  },
+  {
+    id: "t14", name: "Ruy Lopez Festival", topic: "Ruy Lopez",
+    description: "Classic Ruy Lopez opening. 7 Swiss rounds of timeless chess.",
+    timeControl: "10+5", maxPlayers: 64, currentPlayers: 0, status: "upcoming",
+    startDate: "Mar 18", prize: "Top 3 Trophies", category: "themed",
+    rounds: 7, trophies: TOP3,
+  },
+  {
+    id: "t15", name: "Queen's Gambit Cup", topic: "Queen's Gambit",
+    description: "1.d4 d5 2.c4 — Accept or decline? 8 Swiss rounds to prove your skill.",
+    timeControl: "10+5", maxPlayers: 128, currentPlayers: 0, status: "upcoming",
+    startDate: "Mar 22", prize: "Top 3 Trophies + 1200 Rating", category: "themed",
+    rounds: 8, trophies: TOP3,
+  },
 ];
