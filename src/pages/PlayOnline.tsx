@@ -146,6 +146,16 @@ const PlayOnline = () => {
           else { bt += onlineGame.increment; setBlackTime(bt); }
         }
         makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
+        // Sound effects
+        if (game.isCheckmate() || game.isDraw() || game.isStalemate()) {
+          playChessSound("gameOver");
+        } else if (game.isCheck()) {
+          playChessSound("check");
+        } else if (move.captured) {
+          playChessSound("capture");
+        } else {
+          playChessSound("move");
+        }
         if (game.isCheckmate()) endGame(game.turn() === "w" ? "0-1" : "1-0");
         else if (game.isDraw() || game.isStalemate()) endGame("1/2-1/2");
       }
