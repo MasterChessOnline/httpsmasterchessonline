@@ -1,4 +1,4 @@
-import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, Brain, GraduationCap, Wifi, Award, Star, Gem, Shield } from "lucide-react";
+import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, Brain, GraduationCap, Wifi, Award, Star, Gem, Shield, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { label: "Learn", href: "/learn", icon: GraduationCap },
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
+  { label: "Analyse", href: "/analyse", icon: Search },
   { label: "Achievements", href: "/achievements", icon: Award },
   { label: "Premium", href: "/premium", icon: Crown },
 ];
