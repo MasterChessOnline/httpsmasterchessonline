@@ -99,11 +99,26 @@ const PlayOnline = () => {
   useEffect(() => {
     if (!onlineGame || onlineStatus !== "playing") return;
     if (onlineGame.fen !== game.fen()) {
+      const prevFen = game.fen();
       gameRef.current = new Chess(onlineGame.fen);
       setSelectedSquare(null);
       setLegalMoves([]);
       setGameStarted(true);
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
+      // Play sound for opponent's move (when FEN changed and it's now our turn)
+      if (prevFen !== "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" && gameRef.current.turn() === myColor) {
+        const g = gameRef.current;
+        if (g.isCheckmate() || g.isDraw() || g.isStalemate()) {
+          playChessSound("gameOver");
+        } else if (g.isCheck()) {
+          playChessSound("check");
+        } else {
+          // Check last move for capture by looking at SAN
+          const moves = onlineGame.pgn?.split(" ").filter(Boolean) || [];
+          const lastSan = moves[moves.length - 1] || "";
+          playChessSound(lastSan.includes("x") ? "capture" : "move");
+        }
+      }
     }
     setWhiteTime(onlineGame.white_time);
     setBlackTime(onlineGame.black_time);
