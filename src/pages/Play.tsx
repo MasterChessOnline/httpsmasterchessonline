@@ -115,6 +115,9 @@ const Play = () => {
     if (newMode) setMode(newMode);
   };
 
+  const boardFlipped = playerColor === "b";
+  const displayFiles = boardFlipped ? [...FILES].reverse() : FILES;
+  const displayRanks = boardFlipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
 
   const statusText = game.isCheckmate()
