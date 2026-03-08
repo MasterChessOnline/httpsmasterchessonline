@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          key: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+          reward_type: string | null
+          reward_value: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          key: string
+          name: string
+          requirement_type?: string
+          requirement_value?: number
+          reward_type?: string | null
+          reward_value?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          key?: string
+          name?: string
+          requirement_type?: string
+          requirement_value?: number
+          reward_type?: string | null
+          reward_value?: string | null
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string
@@ -151,6 +193,27 @@ export type Database = {
           updated_at?: string
           white_player_id?: string
           white_time?: number
+        }
+        Relationships: []
+      }
+      premium_chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -366,6 +429,62 @@ export type Database = {
           time_control_seconds?: number
           total_rounds?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_collectibles: {
+        Row: {
+          collectible_key: string
+          collectible_type: string
+          earned_at: string
+          equipped: boolean
+          id: string
+          user_id: string
+        }
+        Insert: {
+          collectible_key: string
+          collectible_type: string
+          earned_at?: string
+          equipped?: boolean
+          id?: string
+          user_id: string
+        }
+        Update: {
+          collectible_key?: string
+          collectible_type?: string
+          earned_at?: string
+          equipped?: boolean
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
