@@ -148,11 +148,13 @@ const Play = () => {
         <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
           {/* Board */}
           <div className="w-full max-w-[min(90vw,480px)]" role="grid" aria-label="Chess board">
-            {RANKS.map((rank, ri) => (
+            {displayRanks.map((rank, ri) => (
               <div key={rank} className="flex" role="row">
-                {FILES.map((file, fi) => {
+                {displayFiles.map((file, fi) => {
                   const square = `${file}${rank}` as Square;
-                  const isLight = (ri + fi) % 2 === 0;
+                  const origRi = RANKS.indexOf(rank);
+                  const origFi = FILES.indexOf(file);
+                  const isLight = (origRi + origFi) % 2 === 0;
                   const piece = board[ri][fi];
                   const isSelected = selectedSquare === square;
                   const isLegal = legalMoves.includes(square);
