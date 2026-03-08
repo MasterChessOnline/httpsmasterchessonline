@@ -10,7 +10,7 @@ import { COURSES, Course, Lesson } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasAccess } from "@/lib/premium-tiers";
 import InteractiveBoard from "@/components/learn/InteractiveBoard";
-import { LESSON_MOVES } from "@/lib/lesson-moves";
+import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   BookOpen, Target, Crown, Layout, Crosshair, Brain,
@@ -205,15 +205,39 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev }: {
       <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
         <p className="text-foreground leading-relaxed text-base">{lesson.content}</p>
       </div>
-      <div className="mb-6">
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">
-          Interactive Board
-        </p>
-        <InteractiveBoard
-          startFen={LESSON_MOVES[lesson.id]?.startFen || lesson.fen}
-          moves={LESSON_MOVES[lesson.id]?.moves || []}
-        />
-      </div>
+      {(() => {
+        const lessonData = LESSON_MOVES[lesson.id];
+        const variations: LessonVariation[] = lessonData?.variations && lessonData.variations.length > 0
+          ? lessonData.variations
+          : lessonData?.moves?.length
+            ? [{ name: "", startFen: lessonData.startFen, moves: lessonData.moves }]
+            : lesson.fen
+              ? [{ name: "Position", startFen: lesson.fen, moves: [] }]
+              : [];
+
+        return variations.length > 0 ? (
+          <div className="space-y-6 mb-6">
+            {variations.map((variation, vIdx) => (
+              <div key={vIdx}>
+                {variation.name && (
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">
+                    {variation.name}
+                  </p>
+                )}
+                {!variation.name && variations.length === 1 && (
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">
+                    Interactive Board
+                  </p>
+                )}
+                <InteractiveBoard
+                  startFen={variation.startFen || lesson.fen}
+                  moves={variation.moves}
+                />
+              </div>
+            ))}
+          </div>
+        ) : null;
+      })()}
       {lesson.keyPoints.length > 0 && (
         <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
           <h3 className="font-display text-sm font-semibold text-foreground mb-3">Key Takeaways</h3>

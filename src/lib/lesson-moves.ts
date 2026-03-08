@@ -1,16 +1,34 @@
 import { MoveStep } from "@/components/learn/InteractiveBoard";
 
 /**
- * Maps lesson IDs to interactive move sequences.
- * Each entry has an optional startFen (defaults to standard starting position)
- * and an array of moves with explanations.
+ * A single named variation with its own board and moves.
  */
-export interface LessonMoveData {
+export interface LessonVariation {
+  name: string;
   startFen?: string;
   moves: MoveStep[];
 }
 
+/**
+ * Maps lesson IDs to interactive move sequences.
+ * Each entry can have:
+ * - A single set of moves (backward compat)
+ * - Multiple named variations, each with its own board
+ */
+export interface LessonMoveData {
+  startFen?: string;
+  moves: MoveStep[];
+  variations?: LessonVariation[];
+}
+
 const M = (san: string, explanation: string): MoveStep => ({ san, explanation });
+
+/** Helper to create a named variation */
+const V = (name: string, moves: MoveStep[], startFen?: string): LessonVariation => ({
+  name,
+  startFen,
+  moves,
+});
 
 export const LESSON_MOVES: Record<string, LessonMoveData> = {
   // ===== OPENING FUNDAMENTALS =====
@@ -964,3 +982,672 @@ export const LESSON_MOVES: Record<string, LessonMoveData> = {
     ],
   },
 };
+
+// ===== VARIATIONS DATA =====
+// Add variations to lessons that naturally discuss multiple lines.
+// The UI will render one InteractiveBoard per variation.
+
+// Helper to add variations to existing entries
+function addVariations(id: string, variations: LessonVariation[]) {
+  if (LESSON_MOVES[id]) {
+    LESSON_MOVES[id].variations = variations;
+  } else {
+    LESSON_MOVES[id] = { moves: [], variations };
+  }
+}
+
+// === OPENING FUNDAMENTALS ===
+
+addVariations("of-4", [
+  V("Italian Game: Giuoco Piano", [
+    M("e4", "1.e4 — Open the game."),
+    M("e5", "1...e5."),
+    M("Nf3", "2.Nf3 — Attack e5."),
+    M("Nc6", "2...Nc6 — Defend."),
+    M("Bc4", "3.Bc4 — The Italian! Targeting f7."),
+    M("Bc5", "3...Bc5 — Giuoco Piano (Quiet Game)."),
+    M("c3", "4.c3 — Preparing d4."),
+    M("Nf6", "4...Nf6."),
+    M("d4", "5.d4! — The central break!"),
+  ]),
+  V("Italian Game: Two Knights Defense", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5."),
+    M("Nf3", "2.Nf3."),
+    M("Nc6", "2...Nc6."),
+    M("Bc4", "3.Bc4."),
+    M("Nf6", "3...Nf6 — The Two Knights! Counter-attacking e4 immediately."),
+    M("Ng5", "4.Ng5 — Threatening Nxf7! Aggressive."),
+    M("d5", "4...d5! — The best defense. Counter in the center."),
+    M("exd5", "5.exd5."),
+    M("Na5", "5...Na5 — Attacking the bishop. The Traxler (4...Bc5) is a wild alternative."),
+  ]),
+]);
+
+addVariations("of-5", [
+  V("Sicilian: Open (Najdorf)", [
+    M("e4", "1.e4."),
+    M("c5", "1...c5 — The Sicilian."),
+    M("Nf3", "2.Nf3."),
+    M("d6", "2...d6."),
+    M("d4", "3.d4."),
+    M("cxd4", "3...cxd4."),
+    M("Nxd4", "4.Nxd4."),
+    M("Nf6", "4...Nf6."),
+    M("Nc3", "5.Nc3."),
+    M("a6", "5...a6 — The Najdorf! The most popular Sicilian."),
+  ]),
+  V("Sicilian: Dragon", [
+    M("e4", "1.e4."),
+    M("c5", "1...c5."),
+    M("Nf3", "2.Nf3."),
+    M("d6", "2...d6."),
+    M("d4", "3.d4."),
+    M("cxd4", "3...cxd4."),
+    M("Nxd4", "4.Nxd4."),
+    M("Nf6", "4...Nf6."),
+    M("Nc3", "5.Nc3."),
+    M("g6", "5...g6 — The Dragon! Fianchetto the bishop for maximum aggression."),
+  ]),
+  V("Sicilian: Closed (Alapin)", [
+    M("e4", "1.e4."),
+    M("c5", "1...c5."),
+    M("c3", "2.c3 — The Alapin! Avoiding the Open Sicilian. Preparing d4."),
+    M("Nf6", "2...Nf6."),
+    M("e5", "3.e5 — Gaining space."),
+    M("Nd5", "3...Nd5 — Knight to a strong central square."),
+  ]),
+]);
+
+addVariations("of-13", [
+  V("1.e4 — King's Pawn", [
+    M("e4", "1.e4 — Opens lines for bishop and queen. Leads to open tactical games."),
+    M("e5", "1...e5 — Classical symmetric response."),
+    M("Nf3", "2.Nf3 — Natural development, attacking e5."),
+  ]),
+  V("1.d4 — Queen's Pawn", [
+    M("d4", "1.d4 — Strategic and solid. Leads to positional games."),
+    M("d5", "1...d5 — Classical response, contesting the center."),
+    M("c4", "2.c4 — The Queen's Gambit! Challenging Black's center."),
+  ]),
+  V("1.c4 — English Opening", [
+    M("c4", "1.c4 — The English! Flexible: can transpose to many systems."),
+    M("e5", "1...e5 — Reversed Sicilian structure."),
+    M("Nc3", "2.Nc3 — Develops toward the center."),
+  ]),
+]);
+
+addVariations("of-14", [
+  V("1...e5 — Classical", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5 — The most natural response. Symmetric and principled."),
+    M("Nf3", "2.Nf3 — Leads to Italian, Ruy Lopez, Scotch, etc."),
+  ]),
+  V("1...c5 — Sicilian Defense", [
+    M("e4", "1.e4."),
+    M("c5", "1...c5 — The Sicilian! Most popular and fighting response."),
+    M("Nf3", "2.Nf3 — Heading for the Open Sicilian."),
+  ]),
+  V("1...e6 — French Defense", [
+    M("e4", "1.e4."),
+    M("e6", "1...e6 — The French! Solid, strategic. Plans ...d5 next."),
+    M("d4", "2.d4."),
+    M("d5", "2...d5 — Challenging the center."),
+  ]),
+  V("1...c6 — Caro-Kann", [
+    M("e4", "1.e4."),
+    M("c6", "1...c6 — The Caro-Kann! Solid as a rock. Prepares ...d5 with active bishop."),
+    M("d4", "2.d4."),
+    M("d5", "2...d5 — Center challenged with the bishop still free."),
+  ]),
+]);
+
+addVariations("of-15", [
+  V("1...d5 — Classical QGD", [
+    M("d4", "1.d4."),
+    M("d5", "1...d5 — Directly contesting the center."),
+    M("c4", "2.c4 — The Queen's Gambit!"),
+    M("e6", "2...e6 — QGD: solid and classical."),
+  ]),
+  V("1...Nf6 — Indian Systems", [
+    M("d4", "1.d4."),
+    M("Nf6", "1...Nf6 — Flexible! Can lead to King's Indian, Nimzo, Queen's Indian."),
+    M("c4", "2.c4."),
+    M("g6", "2...g6 — King's Indian Defense: hypermodern and dynamic."),
+  ]),
+  V("1...f5 — Dutch Defense", [
+    M("d4", "1.d4."),
+    M("f5", "1...f5 — The Dutch! Aggressive claim on e4. Risky but dynamic."),
+    M("c4", "2.c4."),
+    M("Nf6", "2...Nf6 — Developing toward the center."),
+  ]),
+]);
+
+addVariations("of-22", [
+  V("King's Gambit", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5."),
+    M("f4", "2.f4 — The King's Gambit! White offers the f-pawn."),
+    M("exf4", "2...exf4 — Accepted."),
+    M("Nf3", "3.Nf3 — Rapid development, open f-file coming."),
+  ]),
+  V("Queen's Gambit", [
+    M("d4", "1.d4."),
+    M("d5", "1...d5."),
+    M("c4", "2.c4 — The Queen's Gambit! Not a true gambit — White can regain the pawn."),
+    M("dxc4", "2...dxc4 — Accepted."),
+    M("e3", "3.e3 — White will recapture the pawn naturally."),
+  ]),
+  V("Evans Gambit", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5."),
+    M("Nf3", "2.Nf3."),
+    M("Nc6", "2...Nc6."),
+    M("Bc4", "3.Bc4."),
+    M("Bc5", "3...Bc5."),
+    M("b4", "4.b4!? — The Evans Gambit! Sacrifice for rapid development."),
+  ]),
+]);
+
+// === TACTICAL PATTERNS ===
+
+addVariations("tp-2", [
+  V("Absolute Pin (against the King)", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5."),
+    M("Nf3", "2.Nf3."),
+    M("Nc6", "2...Nc6."),
+    M("Bb5", "3.Bb5 — Absolute pin! The Nc6 cannot move — it would expose the king to check."),
+  ]),
+  V("Relative Pin (against the Queen)", [
+    M("d4", "1.d4."),
+    M("d5", "1...d5."),
+    M("c4", "2.c4."),
+    M("e6", "2...e6."),
+    M("Nc3", "3.Nc3."),
+    M("Nf6", "3...Nf6."),
+    M("Bg5", "4.Bg5 — Relative pin! The Nf6 CAN move, but it would lose the queen behind it."),
+  ]),
+]);
+
+addVariations("tp-5", [
+  V("Knight Fork: King & Queen", [
+    M("Nxf7", "Nxf7! — The knight attacks the queen AND the rook simultaneously."),
+    M("Qe7", "Qe7 — Queen retreats."),
+    M("Nxh8", "Nxh8 — White wins the rook!"),
+  ], "r1bqk2r/pppp1ppp/2n2n2/2b1N3/2B1P3/8/PPPP1PPP/RNBQK2R w KQkq - 0 5"),
+  V("Knight Fork: King & Rook (from c7)", [
+    M("Nc7+", "Nc7+ — The classic royal fork from c7! Attacks king and rook."),
+    M("Kd8", "Kd8 — King must move."),
+    M("Nxa8", "Nxa8 — White wins the rook!"),
+  ], "r1bqkb1r/ppNp1ppp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq - 0 5"),
+]);
+
+addVariations("tp-12", [
+  V("The Greek Gift: Bxh7+", [
+    M("Bxh7+", "Bxh7+! — The Greek Gift! Ripping open the king's shelter."),
+    M("Kxh7", "Kxh7 — Forced to accept."),
+    M("Ng5+", "Ng5+ — Knight leaps in with check!"),
+    M("Kg8", "Kg8 — Retreating."),
+    M("Qh5", "Qh5 — Threatening Qxf7# and Qh7#. Devastating!"),
+  ], "r1bq1rk1/pppn1ppp/4pn2/3p2B1/1bBP4/2N1PN2/PPP2PPP/R2QK2R w KQ - 0 7"),
+  V("Greek Gift: Conditions Check", [
+    M("Bxh7+", "Bxh7+! — Before sacrificing, verify: Knight can reach g5? Queen can reach h5? No Nf6 to block?"),
+    M("Kxh7", "Kxh7."),
+    M("Ng5+", "Ng5+ — ✓ Knight reaches g5 with check."),
+    M("Kg6", "Kg6 — What if the king goes forward?"),
+    M("Qd3+", "Qd3+ — Check! Driving the king further into danger."),
+  ], "r1bq1rk1/pppn1ppp/4p3/3p2B1/1bBP4/2N1PN2/PPP2PPP/R2QK2R w KQ - 0 7"),
+]);
+
+// === ENDGAME MASTERY ===
+
+addVariations("em-1", [
+  V("King Leads the Pawn (Win)", [
+    M("Kf3", "Kf3 — King leads the pawn! Getting in front."),
+    M("Ke6", "Ke6 — Black tries to block."),
+    M("Ke4", "Ke4 — Opposition! Black must give way."),
+    M("Kd6", "Kd6 — Forced to step aside."),
+    M("Kf5", "Kf5 — King advances past the pawn."),
+    M("Ke7", "Ke7."),
+    M("Ke5", "Ke5 — Opposition again! White controls the key squares."),
+  ], "8/8/8/4k3/8/4K3/4P3/8 w - - 0 1"),
+  V("Pawn Ahead of King (Draw)", [
+    M("e4", "e4? — Pushing the pawn too early without king support."),
+    M("Ke6", "Ke6 — Black takes the opposition!"),
+    M("Ke4", "Ke4."),
+    M("Ke7", "Ke7 — Black maintains opposition. White cannot make progress."),
+    M("e5", "e5."),
+    M("Ke8", "Ke8! — Opposition! This is a draw — White's king can't advance."),
+  ], "8/8/8/4k3/8/4K3/4P3/8 w - - 0 1"),
+]);
+
+addVariations("em-4", [
+  V("King Inside the Square (Draw)", [
+    M("Ke2", "Ke2."),
+    M("Kc6", "Kc6 — Heading toward the pawn."),
+    M("Ke3", "Ke3."),
+    M("Kd7", "Kd7 — The king enters the 'square of the pawn.'"),
+    M("Ke4", "Ke4."),
+    M("Ke7", "Ke7 — Inside the square! Black will catch the pawn."),
+    M("e6", "e6."),
+    M("Ke8", "Ke8 — Caught! It's a draw."),
+  ], "8/8/8/1k2P3/8/8/8/4K3 w - - 0 1"),
+  V("King Outside the Square (Win)", [
+    M("e6", "e6! — Push immediately! Draw the square: e6-e8-c8-c6. Black is on b5 — OUTSIDE!"),
+    M("Kc6", "Kc6 — Trying to catch up."),
+    M("e7", "e7 — The pawn is too fast!"),
+    M("Kd7", "Kd7 — Almost there..."),
+    M("e8=Q", "e8=Q — Promoted! The king couldn't catch the pawn."),
+  ], "8/8/8/1k2P3/8/8/8/4K3 w - - 0 1"),
+]);
+
+// === QUEEN'S GAMBIT ===
+
+addVariations("qg-1", [
+  V("Queen's Gambit Declined (2...e6)", [
+    M("d4", "1.d4."),
+    M("d5", "1...d5."),
+    M("c4", "2.c4 — The Queen's Gambit!"),
+    M("e6", "2...e6 — Declined! Solid and classical."),
+    M("Nc3", "3.Nc3."),
+    M("Nf6", "3...Nf6 — Standard development."),
+  ]),
+  V("Queen's Gambit Accepted (2...dxc4)", [
+    M("d4", "1.d4."),
+    M("d5", "1...d5."),
+    M("c4", "2.c4."),
+    M("dxc4", "2...dxc4 — Accepted! Black takes the pawn."),
+    M("Nf3", "3.Nf3 — Don't rush to recapture. Develop first!"),
+    M("Nf6", "3...Nf6."),
+    M("e3", "4.e3 — Preparing Bxc4."),
+  ]),
+  V("Slav Defense (2...c6)", [
+    M("d4", "1.d4."),
+    M("d5", "1...d5."),
+    M("c4", "2.c4."),
+    M("c6", "2...c6 — The Slav! Supports d5 while keeping the bishop free."),
+    M("Nf3", "3.Nf3."),
+    M("Nf6", "3...Nf6."),
+    M("Nc3", "4.Nc3."),
+    M("Bf5", "4...Bf5 — Bishop developed outside the chain!"),
+  ]),
+]);
+
+// === RUY LOPEZ ===
+
+addVariations("rl-1", [
+  V("Morphy Defense (3...a6)", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5."),
+    M("Nf3", "2.Nf3."),
+    M("Nc6", "2...Nc6."),
+    M("Bb5", "3.Bb5 — The Ruy Lopez!"),
+    M("a6", "3...a6 — The Morphy Defense. Asking the bishop its intentions."),
+    M("Ba4", "4.Ba4 — Maintaining the pin."),
+    M("Nf6", "4...Nf6."),
+    M("O-O", "5.O-O — Castle early."),
+  ]),
+  V("Berlin Defense (3...Nf6)", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5."),
+    M("Nf3", "2.Nf3."),
+    M("Nc6", "2...Nc6."),
+    M("Bb5", "3.Bb5."),
+    M("Nf6", "3...Nf6 — The Berlin! Counter-attacks e4. Kramnik's weapon."),
+    M("O-O", "4.O-O."),
+    M("Nxe4", "4...Nxe4 — Berlin endgame coming: 5.d4 Nd6 6.Bxc6 dxc6 7.dxe5 Nf5 8.Qxd8+ Kxd8"),
+  ]),
+  V("Exchange Variation (4.Bxc6)", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5."),
+    M("Nf3", "2.Nf3."),
+    M("Nc6", "2...Nc6."),
+    M("Bb5", "3.Bb5."),
+    M("a6", "3...a6."),
+    M("Bxc6", "4.Bxc6 — The Exchange! Damages Black's structure."),
+    M("dxc6", "4...dxc6 — Doubled pawns, but Black gets the bishop pair."),
+  ]),
+]);
+
+// === KING'S INDIAN ===
+
+addVariations("ki-1", [
+  V("Classical Variation", [
+    M("d4", "1.d4."),
+    M("Nf6", "1...Nf6."),
+    M("c4", "2.c4."),
+    M("g6", "2...g6 — The KID!"),
+    M("Nc3", "3.Nc3."),
+    M("Bg7", "3...Bg7 — Fianchetto!"),
+    M("e4", "4.e4 — White builds a massive center."),
+    M("d6", "4...d6."),
+    M("Nf3", "5.Nf3."),
+    M("O-O", "5...O-O."),
+    M("Be2", "6.Be2 — Classical setup."),
+    M("e5", "6...e5! — The key break!"),
+  ]),
+  V("Sämisch Variation (5.f3)", [
+    M("d4", "1.d4."),
+    M("Nf6", "1...Nf6."),
+    M("c4", "2.c4."),
+    M("g6", "2...g6."),
+    M("Nc3", "3.Nc3."),
+    M("Bg7", "3...Bg7."),
+    M("e4", "4.e4."),
+    M("d6", "4...d6."),
+    M("f3", "5.f3 — The Sämisch! Aggressive. Prepares Be3+Qd2."),
+    M("O-O", "5...O-O."),
+  ]),
+  V("Fianchetto Variation", [
+    M("d4", "1.d4."),
+    M("Nf6", "1...Nf6."),
+    M("c4", "2.c4."),
+    M("g6", "2...g6."),
+    M("Nf3", "3.Nf3 — Avoiding e4. Fianchetto coming."),
+    M("Bg7", "3...Bg7."),
+    M("g3", "4.g3 — The Fianchetto! Positional approach."),
+    M("O-O", "4...O-O."),
+    M("Bg2", "5.Bg2 — Dueling fianchettos!"),
+  ]),
+]);
+
+// === FRENCH DEFENSE ===
+
+addVariations("fr-1", [
+  V("Advance Variation (3.e5)", [
+    M("e4", "1.e4."),
+    M("e6", "1...e6 — The French!"),
+    M("d4", "2.d4."),
+    M("d5", "2...d5."),
+    M("e5", "3.e5 — The Advance! White gains space."),
+    M("c5", "3...c5 — Attack the base of the chain!"),
+  ]),
+  V("Winawer Variation (3...Bb4)", [
+    M("e4", "1.e4."),
+    M("e6", "1...e6."),
+    M("d4", "2.d4."),
+    M("d5", "2...d5."),
+    M("Nc3", "3.Nc3."),
+    M("Bb4", "3...Bb4 — The Winawer! Pinning the knight. Very sharp."),
+  ]),
+  V("Classical Variation (3...Nf6)", [
+    M("e4", "1.e4."),
+    M("e6", "1...e6."),
+    M("d4", "2.d4."),
+    M("d5", "2...d5."),
+    M("Nc3", "3.Nc3."),
+    M("Nf6", "3...Nf6 — Classical: developing naturally."),
+    M("Bg5", "4.Bg5 — Pinning the knight!"),
+  ]),
+]);
+
+// === CARO-KANN ===
+
+addVariations("ck-1", [
+  V("Classical (3...dxe4 4...Bf5)", [
+    M("e4", "1.e4."),
+    M("c6", "1...c6 — The Caro-Kann!"),
+    M("d4", "2.d4."),
+    M("d5", "2...d5 — Challenge!"),
+    M("Nc3", "3.Nc3."),
+    M("dxe4", "3...dxe4."),
+    M("Nxe4", "4.Nxe4."),
+    M("Bf5", "4...Bf5 — The key move! Bishop outside the chain."),
+  ]),
+  V("Advance (3.e5)", [
+    M("e4", "1.e4."),
+    M("c6", "1...c6."),
+    M("d4", "2.d4."),
+    M("d5", "2...d5."),
+    M("e5", "3.e5 — The Advance! White gains space."),
+    M("Bf5", "3...Bf5 — Unlike the French, the bishop is active!"),
+    M("Nf3", "4.Nf3."),
+    M("e6", "4...e6 — Prepare ...c5."),
+  ]),
+  V("Panov-Botvinnik Attack", [
+    M("e4", "1.e4."),
+    M("c6", "1...c6."),
+    M("d4", "2.d4."),
+    M("d5", "2...d5."),
+    M("exd5", "3.exd5."),
+    M("cxd5", "3...cxd5."),
+    M("c4", "4.c4 — The Panov! Creating an IQP structure."),
+    M("Nf6", "4...Nf6 — Dynamic middlegame ahead."),
+  ]),
+]);
+
+// === LONDON SYSTEM ===
+
+addVariations("ls-1", [
+  V("Standard London Setup", [
+    M("d4", "1.d4 — Start the London."),
+    M("d5", "1...d5."),
+    M("Bf4", "2.Bf4 — Bishop BEFORE e3! The London move order."),
+    M("Nf6", "2...Nf6."),
+    M("e3", "3.e3 — Solidify the center."),
+    M("e6", "3...e6."),
+    M("Nf3", "4.Nf3."),
+    M("c5", "4...c5."),
+    M("Bd3", "5.Bd3 — London setup complete!"),
+  ]),
+  V("London vs King's Indian Setup", [
+    M("d4", "1.d4."),
+    M("Nf6", "1...Nf6."),
+    M("Bf4", "2.Bf4."),
+    M("g6", "2...g6 — KID-style."),
+    M("e3", "3.e3."),
+    M("Bg7", "3...Bg7."),
+    M("Nf3", "4.Nf3."),
+    M("O-O", "4...O-O."),
+    M("Nbd2", "5.Nbd2 — Supports the e4 break!"),
+  ]),
+]);
+
+// === SICILIAN DEEP DIVE ===
+
+addVariations("sd-1", [
+  V("Open Sicilian: Najdorf", [
+    M("e4", "1.e4."),
+    M("c5", "1...c5."),
+    M("Nf3", "2.Nf3."),
+    M("d6", "2...d6."),
+    M("d4", "3.d4."),
+    M("cxd4", "3...cxd4."),
+    M("Nxd4", "4.Nxd4."),
+    M("Nf6", "4...Nf6."),
+    M("Nc3", "5.Nc3."),
+    M("a6", "5...a6 — The Najdorf! Bobby Fischer's weapon."),
+  ]),
+  V("Open Sicilian: Dragon", [
+    M("e4", "1.e4."),
+    M("c5", "1...c5."),
+    M("Nf3", "2.Nf3."),
+    M("d6", "2...d6."),
+    M("d4", "3.d4."),
+    M("cxd4", "3...cxd4."),
+    M("Nxd4", "4.Nxd4."),
+    M("Nf6", "4...Nf6."),
+    M("Nc3", "5.Nc3."),
+    M("g6", "5...g6 — The Dragon! Fianchetto for maximum fire."),
+  ]),
+  V("Open Sicilian: Classical", [
+    M("e4", "1.e4."),
+    M("c5", "1...c5."),
+    M("Nf3", "2.Nf3."),
+    M("d6", "2...d6."),
+    M("d4", "3.d4."),
+    M("cxd4", "3...cxd4."),
+    M("Nxd4", "4.Nxd4."),
+    M("Nf6", "4...Nf6."),
+    M("Nc3", "5.Nc3."),
+    M("Nc6", "5...Nc6 — The Classical! Solid development."),
+  ]),
+]);
+
+// === SCANDINAVIAN ===
+
+addVariations("sc-1", [
+  V("Main Line: 2...Qxd5", [
+    M("e4", "1.e4."),
+    M("d5", "1...d5 — The Scandinavian!"),
+    M("exd5", "2.exd5."),
+    M("Qxd5", "2...Qxd5 — Queen recaptures."),
+    M("Nc3", "3.Nc3 — Attacking the queen."),
+    M("Qa5", "3...Qa5 — Main line. Safe and active."),
+  ]),
+  V("Modern: 2...Nf6", [
+    M("e4", "1.e4."),
+    M("d5", "1...d5."),
+    M("exd5", "2.exd5."),
+    M("Nf6", "2...Nf6 — The Modern Scandinavian! Don't take back with queen."),
+    M("d4", "3.d4."),
+    M("Nxd5", "3...Nxd5 — Knight recaptures. No queen exposure."),
+  ]),
+]);
+
+// === DUTCH DEFENSE ===
+
+addVariations("du-1", [
+  V("Leningrad Dutch", [
+    M("d4", "1.d4."),
+    M("f5", "1...f5 — The Dutch!"),
+    M("c4", "2.c4."),
+    M("Nf6", "2...Nf6."),
+    M("g3", "3.g3."),
+    M("g6", "3...g6 — Leningrad! Fianchetto for maximum aggression."),
+    M("Bg2", "4.Bg2."),
+    M("Bg7", "4...Bg7 — Powerful bishop on the long diagonal."),
+  ]),
+  V("Stonewall Dutch", [
+    M("d4", "1.d4."),
+    M("f5", "1...f5."),
+    M("c4", "2.c4."),
+    M("e6", "2...e6 — Stonewall setup coming."),
+    M("Nf3", "3.Nf3."),
+    M("Nf6", "3...Nf6."),
+    M("g3", "4.g3."),
+    M("d5", "4...d5 — The Stonewall! Pawns on d5, e6, f5 form a wall."),
+  ]),
+  V("Classical Dutch", [
+    M("d4", "1.d4."),
+    M("f5", "1...f5."),
+    M("c4", "2.c4."),
+    M("e6", "2...e6."),
+    M("Nf3", "3.Nf3."),
+    M("Nf6", "3...Nf6."),
+    M("g3", "4.g3."),
+    M("Be7", "4...Be7 — Classical: solid development before deciding on setup."),
+  ]),
+]);
+
+// === NIMZO-INDIAN ===
+
+addVariations("ni-1", [
+  V("Classical (4.Qc2)", [
+    M("d4", "1.d4."),
+    M("Nf6", "1...Nf6."),
+    M("c4", "2.c4."),
+    M("e6", "2...e6."),
+    M("Nc3", "3.Nc3."),
+    M("Bb4", "3...Bb4 — The Nimzo-Indian! Pinning the knight."),
+    M("Qc2", "4.Qc2 — Classical: prevents doubled pawns."),
+    M("O-O", "4...O-O — Flexible."),
+  ]),
+  V("Rubinstein (4.e3)", [
+    M("d4", "1.d4."),
+    M("Nf6", "1...Nf6."),
+    M("c4", "2.c4."),
+    M("e6", "2...e6."),
+    M("Nc3", "3.Nc3."),
+    M("Bb4", "3...Bb4."),
+    M("e3", "4.e3 — Rubinstein: accepts doubled pawns for central play."),
+    M("O-O", "4...O-O."),
+    M("Bd3", "5.Bd3 — Developing naturally."),
+  ]),
+  V("Kasparov Variation (4.Nf3)", [
+    M("d4", "1.d4."),
+    M("Nf6", "1...Nf6."),
+    M("c4", "2.c4."),
+    M("e6", "2...e6."),
+    M("Nc3", "3.Nc3."),
+    M("Bb4", "3...Bb4."),
+    M("Nf3", "4.Nf3 — Kasparov's choice. Flexible development."),
+    M("c5", "4...c5 — Challenging d4."),
+  ]),
+]);
+
+// === POSITIONAL PLAY ===
+
+addVariations("pp-1", [
+  V("Ideal Pawn Center (d4+e4)", [
+    M("e4", "1.e4."),
+    M("e5", "1...e5."),
+    M("d4", "2.d4 — Two pawns in the center!"),
+    M("exd4", "2...exd4."),
+    M("Qxd4", "3.Qxd4 — White maintains one pawn but center was opened."),
+  ]),
+  V("Pawn Chain: French Structure", [
+    M("e4", "1.e4."),
+    M("e6", "1...e6."),
+    M("d4", "2.d4."),
+    M("d5", "2...d5."),
+    M("e5", "3.e5 — Pawn chain! Base=d4, head=e5. Black attacks with ...c5."),
+    M("c5", "3...c5 — Targeting the base!"),
+  ]),
+  V("Isolated Queen's Pawn (IQP)", [
+    M("d4", "1.d4."),
+    M("d5", "1...d5."),
+    M("c4", "2.c4."),
+    M("e6", "2...e6."),
+    M("Nc3", "3.Nc3."),
+    M("Nf6", "3...Nf6."),
+    M("cxd5", "4.cxd5 — Creates the IQP after exd5."),
+    M("exd5", "4...exd5 — The isolated d-pawn! Dynamic in middlegame, weak in endgame."),
+  ]),
+]);
+
+// === CHECKMATE PATTERNS ===
+
+addVariations("cm-1", [
+  V("Back Rank Mate (Rook)", [
+    M("Re8#", "Re8# — Back rank mate! King trapped by f7, g7, h7."),
+  ], "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1"),
+  V("Back Rank Defense: Create Luft", [
+    M("h3", "h3 — Create 'luft' (breathing room) for your king. Always consider this prophylactic move!"),
+  ], "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1"),
+]);
+
+addVariations("cm-3", [
+  V("Classic Smothered Mate", [
+    M("Qe8+", "Qe8+! — Forcing the rook to capture."),
+    M("Rxe8", "Rxe8 — Forced."),
+    M("Nf7#", "Nf7# — Smothered mate! Boxed in by own pieces."),
+  ], "r1b3kr/ppp2Npp/8/8/3n4/8/PPPnQPPP/R1B1K2R w KQ - 0 1"),
+  V("Smothered Mate Setup (Philidor's Legacy)", [
+    M("Nf7+", "Nf7+ — Check with the knight."),
+    M("Kg8", "Kg8 — Only square."),
+    M("Nh6+", "Nh6+ — Double check! King MUST move."),
+    M("Kh8", "Kh8 — Forced into the corner."),
+    M("Qg8+", "Qg8+! — Sacrifice! Forcing Rxg8."),
+    M("Rxg8", "Rxg8 — Forced capture."),
+    M("Nf7#", "Nf7# — Smothered mate! Philidor's Legacy!"),
+  ], "r1b2rk1/pppp1Npp/8/8/8/2n5/PPP1QPPP/R1B2RK1 w - - 0 1"),
+]);
+
+// === ATTACKING CHESS ===
+
+addVariations("ac-1", [
+  V("Open the Center When Ahead in Development", [
+    M("d4", "d4! — Development advantage? Open the position!"),
+    M("exd4", "exd4."),
+    M("e5", "e5 — Gaining space, driving pieces back."),
+    M("d3", "d3 — Black struggles."),
+    M("exf6", "exf6 — Lines opening toward the king!"),
+  ], "r1bq1rk1/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQ1RK1 w - - 6 5"),
+  V("Piece Sacrifice to Open Lines", [
+    M("Bxf7+", "Bxf7+! — Sacrifice to expose the king!"),
+    M("Rxf7", "Rxf7 — Forced."),
+    M("Ng5", "Ng5 — Now the open f-file and the knight create threats."),
+  ], "r1bq1rk1/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQ1RK1 w - - 6 5"),
+]);
