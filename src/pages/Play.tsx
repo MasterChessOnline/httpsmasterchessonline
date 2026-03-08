@@ -3,7 +3,7 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Bot, Users, Brain, Zap, GraduationCap } from "lucide-react";
+import { RotateCcw, Bot, Users, Brain, Zap, GraduationCap, Crown } from "lucide-react";
 import { getAIMove, Difficulty } from "@/lib/chess-ai";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
