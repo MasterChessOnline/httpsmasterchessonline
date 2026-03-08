@@ -79,6 +79,14 @@ const Play = () => {
           setMoveHistory((prev) => [...prev, move.san]);
           setLastMove({ from: move.from, to: move.to });
           setGameStarted(true);
+          // Add increment for AI's move
+          if (!unlimited && timeControl.increment > 0) {
+            if (aiColor === "w") {
+              setWhiteTime((prev: number) => prev + timeControl.increment);
+            } else {
+              setBlackTime((prev: number) => prev + timeControl.increment);
+            }
+          }
           updateState();
         }
       }
