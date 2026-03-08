@@ -278,14 +278,27 @@ const Tournaments = () => {
                           <h2 className="font-display text-base font-semibold text-foreground">{t.name}</h2>
                           <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${style.bg}`}>{style.label}</span>
                           <Badge className="bg-muted text-muted-foreground border-border text-[10px]">Free</Badge>
+                          {t.ratingRange && (
+                            <Badge className="bg-accent/20 text-accent-foreground border-accent/30 text-[10px]">
+                              {t.ratingRange}
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">{t.topic}</p>
                         <p className="text-sm text-muted-foreground mt-1">{t.description}</p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2 flex-wrap">
                           <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{t.timeControl}</span>
+                          <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{t.rounds} rounds</span>
                           <span className="flex items-center gap-1"><Users className="h-3 w-3" />{t.currentPlayers}/{t.maxPlayers}</span>
                           <span>{t.startDate}</span>
-                          <span className="text-primary font-medium">🏆 {t.prize}</span>
+                        </div>
+                        {/* Trophies */}
+                        <div className="flex items-center gap-3 mt-2">
+                          {t.trophies.map((trophy) => (
+                            <span key={trophy.place} className="flex items-center gap-1 text-xs font-medium text-foreground/80">
+                              {trophy.emoji} {trophy.label}
+                            </span>
+                          ))}
                         </div>
                       </div>
                       <Button size="sm" variant={t.status === "live" ? "default" : "outline"} className="shrink-0"
