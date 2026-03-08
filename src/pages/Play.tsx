@@ -305,7 +305,7 @@ const Play = () => {
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                 <Timer className="h-3 w-3" /> Time Control
               </p>
-              <div className="flex gap-1">
+              <div className="grid grid-cols-4 gap-1">
                 {TIME_CONTROLS.map((tc, i) => (
                   <button
                     key={tc.label}
