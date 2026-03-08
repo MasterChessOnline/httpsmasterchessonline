@@ -75,7 +75,7 @@ const Play = () => {
     }, difficulty === "advanced" ? 600 : 300);
 
     return () => clearTimeout(timeout);
-  }, [fen, mode, difficulty]);
+  }, [fen, mode, difficulty, aiColor]);
 
   const handleSquareClick = (square: Square) => {
     if (game.isGameOver()) return;
