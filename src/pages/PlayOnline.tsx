@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw, Wifi, Flag, Timer, Loader2, Send } from "lucide-react";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
+import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,11 +99,26 @@ const PlayOnline = () => {
   useEffect(() => {
     if (!onlineGame || onlineStatus !== "playing") return;
     if (onlineGame.fen !== game.fen()) {
+      const prevFen = game.fen();
       gameRef.current = new Chess(onlineGame.fen);
       setSelectedSquare(null);
       setLegalMoves([]);
       setGameStarted(true);
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
+      // Play sound for opponent's move (when FEN changed and it's now our turn)
+      if (prevFen !== "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" && gameRef.current.turn() === myColor) {
+        const g = gameRef.current;
+        if (g.isCheckmate() || g.isDraw() || g.isStalemate()) {
+          playChessSound("gameOver");
+        } else if (g.isCheck()) {
+          playChessSound("check");
+        } else {
+          // Check last move for capture by looking at SAN
+          const moves = onlineGame.pgn?.split(" ").filter(Boolean) || [];
+          const lastSan = moves[moves.length - 1] || "";
+          playChessSound(lastSan.includes("x") ? "capture" : "move");
+        }
+      }
     }
     setWhiteTime(onlineGame.white_time);
     setBlackTime(onlineGame.black_time);
@@ -115,6 +131,7 @@ const PlayOnline = () => {
       gameRef.current = new Chess(onlineGame.fen);
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
       setGameStarted(true);
+      playChessSound("start");
     }
   }, [onlineStatus]);
 
@@ -128,6 +145,7 @@ const PlayOnline = () => {
   const handleTimeOut = useCallback((color: "w" | "b") => {
     const result = color === "w" ? "0-1" : "1-0";
     setTimeoutWinner(color === "w" ? "Black" : "White");
+    playChessSound("gameOver");
     if (onlineGame) endGame(result);
   }, [onlineGame, endGame]);
 
@@ -145,6 +163,16 @@ const PlayOnline = () => {
           else { bt += onlineGame.increment; setBlackTime(bt); }
         }
         makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
+        // Sound effects
+        if (game.isCheckmate() || game.isDraw() || game.isStalemate()) {
+          playChessSound("gameOver");
+        } else if (game.isCheck()) {
+          playChessSound("check");
+        } else if (move.captured) {
+          playChessSound("capture");
+        } else {
+          playChessSound("move");
+        }
         if (game.isCheckmate()) endGame(game.turn() === "w" ? "0-1" : "1-0");
         else if (game.isDraw() || game.isStalemate()) endGame("1/2-1/2");
       }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw, Bot, Users, Crown, Timer, Wifi } from "lucide-react";
 import { getAIMove, Difficulty, AI_LEVELS } from "@/lib/chess-ai";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
+import { playChessSound } from "@/lib/chess-sounds";
 import { Link } from "react-router-dom";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -87,6 +88,7 @@ const Play = () => {
 
   const handleTimeOut = useCallback((color: "w" | "b") => {
     setTimeoutWinner(color === "w" ? "Black" : "White");
+    playChessSound("gameOver");
   }, []);
 
   // AI plays its color
@@ -105,7 +107,6 @@ const Play = () => {
           setMoveHistory((prev) => [...prev, move.san]);
           setLastMove({ from: move.from, to: move.to });
           setGameStarted(true);
-          // Add increment for AI's move
           if (!unlimited && timeControl.increment > 0) {
             if (aiColor === "w") {
               setWhiteTime((prev: number) => prev + timeControl.increment);
@@ -114,6 +115,16 @@ const Play = () => {
             }
           }
           updateState();
+          // Sound effects
+          if (game.isCheckmate() || game.isDraw() || game.isStalemate()) {
+            playChessSound("gameOver");
+          } else if (game.isCheck()) {
+            playChessSound("check");
+          } else if (move.captured) {
+            playChessSound("capture");
+          } else {
+            playChessSound("move");
+          }
         }
       }
       setAiThinking(false);
@@ -129,11 +140,10 @@ const Play = () => {
     if (selectedSquare && legalMoves.includes(square)) {
       const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
       if (move) {
-        const movedColor = move.color; // color that just moved
+        const movedColor = move.color;
         setMoveHistory((prev) => [...prev, move.san]);
         setLastMove({ from: move.from, to: move.to });
         setGameStarted(true);
-        // Add increment for player's move
         if (!unlimited && timeControl.increment > 0) {
           if (movedColor === "w") {
             setWhiteTime((prev: number) => prev + timeControl.increment);
@@ -142,6 +152,16 @@ const Play = () => {
           }
         }
         updateState();
+        // Sound effects
+        if (game.isCheckmate() || game.isDraw() || game.isStalemate()) {
+          playChessSound("gameOver");
+        } else if (game.isCheck()) {
+          playChessSound("check");
+        } else if (move.captured) {
+          playChessSound("capture");
+        } else {
+          playChessSound("move");
+        }
       }
       setSelectedSquare(null);
       setLegalMoves([]);
