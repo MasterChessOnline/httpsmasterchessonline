@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw, Bot, Users, Crown, Timer, Wifi } from "lucide-react";
 import { getAIMove, Difficulty, AI_LEVELS } from "@/lib/chess-ai";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
+import { playChessSound } from "@/lib/chess-sounds";
 import { Link } from "react-router-dom";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];

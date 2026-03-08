@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RotateCcw, Wifi, Flag, Timer, Loader2, Send } from "lucide-react";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
+import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
