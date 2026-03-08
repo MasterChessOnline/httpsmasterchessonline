@@ -155,7 +155,7 @@ const Play = () => {
                   const origRi = RANKS.indexOf(rank);
                   const origFi = FILES.indexOf(file);
                   const isLight = (origRi + origFi) % 2 === 0;
-                  const piece = board[ri][fi];
+                  const piece = board[origRi][origFi];
                   const isSelected = selectedSquare === square;
                   const isLegal = legalMoves.includes(square);
                   const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
