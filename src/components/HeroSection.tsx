@@ -39,7 +39,7 @@ const HeroSection = () => {
           Play real opponents, join tournaments, track your rating, and improve — all on one beautiful platform.
         </p>
 
-        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
           <Link to={user ? "/play/online" : "/signup"}>
             <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 text-base font-semibold shadow-glow group">
               {user ? "Play Online" : "Start Playing Free"}
