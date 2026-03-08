@@ -166,17 +166,16 @@ const Analyse = () => {
               <Chessboard
                 options={{
                   position: currentFen,
-                  onPieceDrop: onDrop,
+                  onPieceDrop: onDrop as any,
                   boardOrientation: orientation,
-                  customBoardStyle: {
+                  boardStyle: {
                     borderRadius: "4px",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
                   },
-                  customDarkSquareStyle: { backgroundColor: "hsl(25 35% 30%)" },
-                  customLightSquareStyle: { backgroundColor: "hsl(33 40% 60%)" },
-                  customArrows: customArrows as any,
-                  customArrowColor: "rgba(255,170,0,0.7)",
-                  animationDuration: 150,
+                  darkSquareStyle: { backgroundColor: "hsl(25 35% 30%)" },
+                  lightSquareStyle: { backgroundColor: "hsl(33 40% 60%)" },
+                  arrows: customArrows.map(([s, e]) => ({ startSquare: s, endSquare: e, color: "rgba(255,170,0,0.7)" })),
+                  animationDurationInMs: 150,
                 }}
               />
             </div>
