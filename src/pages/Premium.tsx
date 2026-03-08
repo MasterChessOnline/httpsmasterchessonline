@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Check, Zap, Shield, Trophy, Sparkles, Loader2 } from "lucide-react";
+import { Crown, Check, Zap, Shield, Trophy, Sparkles, Loader2, MessageCircle, Play, Target, Award, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const features = [
@@ -18,6 +18,13 @@ const features = [
   { icon: Crown, label: "Premium profile badge" },
 ];
 
+const premiumFeatures = [
+  { icon: MessageCircle, label: "Strategy Lounge", description: "Real-time chat with premium members", href: "/premium/chat" },
+  { icon: Play, label: "Video Lessons", description: "Advanced tutorials and masterclasses", href: "/premium/lessons" },
+  { icon: Target, label: "Personalized Puzzles", description: "Puzzles matched to your skill level", href: "/premium/puzzles" },
+  { icon: Award, label: "Achievements", description: "Earn badges and collectible rewards", href: "/achievements" },
+];
+
 const Premium = () => {
   const { user, isPremium, subscriptionEnd, checkSubscription } = useAuth();
   const navigate = useNavigate();
@@ -25,22 +32,15 @@ const Premium = () => {
   const [portalLoading, setPortalLoading] = useState(false);
 
   const handleCheckout = async () => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    if (!user) { navigate("/login"); return; }
     setCheckoutLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout");
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
+      if (data?.url) window.open(data.url, "_blank");
     } catch {
       toast({ title: "Error", description: "Could not start checkout. Please try again.", variant: "destructive" });
-    } finally {
-      setCheckoutLoading(false);
-    }
+    } finally { setCheckoutLoading(false); }
   };
 
   const handleManage = async () => {
@@ -48,14 +48,10 @@ const Premium = () => {
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
+      if (data?.url) window.open(data.url, "_blank");
     } catch {
       toast({ title: "Error", description: "Could not open subscription management.", variant: "destructive" });
-    } finally {
-      setPortalLoading(false);
-    }
+    } finally { setPortalLoading(false); }
   };
 
   const handleRefresh = async () => {
@@ -66,7 +62,7 @@ const Premium = () => {
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "var(--font-body)" }}>
       <Navbar />
-      <main className="container mx-auto px-4 pt-28 pb-16 max-w-4xl">
+      <main className="container mx-auto px-4 pt-28 pb-16 max-w-5xl">
         <div className="text-center mb-12">
           <Badge className="bg-primary/20 text-primary border-primary/30 mb-4 text-sm">
             <Crown className="w-3.5 h-3.5 mr-1" /> Premium
@@ -77,6 +73,28 @@ const Premium = () => {
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
             Unlock the full KnightMate experience with premium features designed for serious players.
           </p>
+        </div>
+
+        {/* Premium features grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+          {premiumFeatures.map((f) => (
+            <Link
+              key={f.href}
+              to={f.href}
+              className="bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-all group flex items-start gap-4"
+            >
+              <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/25 transition-colors">
+                <f.icon className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold flex items-center gap-2">
+                  {f.label}
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                </h3>
+                <p className="text-sm text-muted-foreground">{f.description}</p>
+              </div>
+            </Link>
+          ))}
         </div>
 
         <Card className="bg-card border-primary/30 max-w-md mx-auto">

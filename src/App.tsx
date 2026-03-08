@@ -18,6 +18,10 @@ import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
 import Premium from "./pages/Premium";
+import PremiumChat from "./pages/PremiumChat";
+import VideoLessons from "./pages/VideoLessons";
+import PersonalizedPuzzles from "./pages/PersonalizedPuzzles";
+import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +44,10 @@ const App = () => (
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/premium" element={<Premium />} />
+            <Route path="/premium/chat" element={<PremiumChat />} />
+            <Route path="/premium/lessons" element={<VideoLessons />} />
+            <Route path="/premium/puzzles" element={<PersonalizedPuzzles />} />
+            <Route path="/achievements" element={<Achievements />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
