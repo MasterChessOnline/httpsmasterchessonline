@@ -52,10 +52,12 @@ const Play = () => {
     setFen(game.fen());
   };
 
-  // AI plays black
+  const aiColor = playerColor === "w" ? "b" : "w";
+
+  // AI plays its color
   useEffect(() => {
     if (mode !== "ai") return;
-    if (game.turn() !== "b") return;
+    if (game.turn() !== aiColor) return;
     if (game.isGameOver()) return;
 
     setAiThinking(true);
