@@ -64,7 +64,7 @@ const Analyse = () => {
   );
 
   const onDrop = useCallback(
-    (_piece: any, sourceSquare: string, targetSquare: string) => {
+    ({ sourceSquare, targetSquare }: { sourceSquare: string; targetSquare: string }) => {
       return makeMove(sourceSquare, targetSquare);
     },
     [makeMove]
