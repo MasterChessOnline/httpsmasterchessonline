@@ -18,6 +18,10 @@ import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
 import Premium from "./pages/Premium";
+import PremiumChat from "./pages/PremiumChat";
+import VideoLessons from "./pages/VideoLessons";
+import PersonalizedPuzzles from "./pages/PersonalizedPuzzles";
+import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
