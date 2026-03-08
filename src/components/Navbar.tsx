@@ -12,7 +12,6 @@ const NAV_ITEMS = [
   { label: "Learn", href: "/learn", icon: GraduationCap },
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
-  { label: "Analyse", href: "/analyse", icon: Search },
   { label: "Achievements", href: "/achievements", icon: Award },
   { label: "Premium", href: "/premium", icon: Crown },
 ];
