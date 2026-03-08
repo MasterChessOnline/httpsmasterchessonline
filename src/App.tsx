@@ -22,6 +22,7 @@ import PremiumChat from "./pages/PremiumChat";
 import VideoLessons from "./pages/VideoLessons";
 import PersonalizedPuzzles from "./pages/PersonalizedPuzzles";
 import Achievements from "./pages/Achievements";
+import Analyse from "./pages/Analyse";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
