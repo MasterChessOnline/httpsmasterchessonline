@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      matchmaking_queue: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          time_control_label: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating?: number
+          time_control_label?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          time_control_label?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      online_games: {
+        Row: {
+          black_player_id: string
+          black_time: number
+          created_at: string
+          fen: string
+          id: string
+          increment: number
+          last_move_at: string | null
+          last_move_from: string | null
+          last_move_to: string | null
+          pgn: string
+          result: string | null
+          status: string
+          time_control_label: string
+          turn: string
+          updated_at: string
+          white_player_id: string
+          white_time: number
+        }
+        Insert: {
+          black_player_id: string
+          black_time?: number
+          created_at?: string
+          fen?: string
+          id?: string
+          increment?: number
+          last_move_at?: string | null
+          last_move_from?: string | null
+          last_move_to?: string | null
+          pgn?: string
+          result?: string | null
+          status?: string
+          time_control_label?: string
+          turn?: string
+          updated_at?: string
+          white_player_id: string
+          white_time?: number
+        }
+        Update: {
+          black_player_id?: string
+          black_time?: number
+          created_at?: string
+          fen?: string
+          id?: string
+          increment?: number
+          last_move_at?: string | null
+          last_move_from?: string | null
+          last_move_to?: string | null
+          pgn?: string
+          result?: string | null
+          status?: string
+          time_control_label?: string
+          turn?: string
+          updated_at?: string
+          white_player_id?: string
+          white_time?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
