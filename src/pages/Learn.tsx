@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Target, Crown, Layout, Crosshair, Brain, ArrowLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { BookOpen, Target, Crown, Layout, Crosshair, Brain, ArrowLeft, ChevronRight, CheckCircle2, RotateCcw, Swords } from "lucide-react";
 import { COURSES, Course, Lesson } from "@/lib/courses-data";
 
 const ICON_MAP: Record<string, React.ElementType> = {
