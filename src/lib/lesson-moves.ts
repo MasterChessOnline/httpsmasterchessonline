@@ -1,0 +1,966 @@
+import { MoveStep } from "@/components/learn/InteractiveBoard";
+
+/**
+ * Maps lesson IDs to interactive move sequences.
+ * Each entry has an optional startFen (defaults to standard starting position)
+ * and an array of moves with explanations.
+ */
+export interface LessonMoveData {
+  startFen?: string;
+  moves: MoveStep[];
+}
+
+const M = (san: string, explanation: string): MoveStep => ({ san, explanation });
+
+export const LESSON_MOVES: Record<string, LessonMoveData> = {
+  // ===== OPENING FUNDAMENTALS =====
+  "of-1": {
+    moves: [
+      M("e4", "1.e4 — White stakes a claim in the center, controlling d5 and f5."),
+      M("e5", "1...e5 — Black mirrors, controlling d4 and f4."),
+      M("d4", "2.d4 — White immediately occupies both central squares!"),
+      M("exd4", "2...exd4 — Black captures but opens the center."),
+      M("Qxd4", "3.Qxd4 — White recaptures with a central queen (not ideal, but shows center control)."),
+    ],
+  },
+  "of-2": {
+    moves: [
+      M("e4", "1.e4 — Control the center."),
+      M("e5", "1...e5 — Classical response."),
+      M("Nf3", "2.Nf3 — Develop the knight toward the center, attacking e5."),
+      M("Nc6", "2...Nc6 — Black defends e5 and develops."),
+      M("Bc4", "3.Bc4 — Bishop develops to an active diagonal targeting f7."),
+      M("Bc5", "3...Bc5 — Black mirrors with an active bishop development."),
+    ],
+  },
+  "of-3": {
+    startFen: "r1bqk2r/ppppbppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+    moves: [
+      M("O-O", "4.O-O — Castle kingside! King is safe behind pawns, rook is activated."),
+      M("O-O", "4...O-O — Black also castles. Both kings are now safe."),
+      M("d3", "5.d3 — Support the center and prepare to develop the bishop."),
+      M("d6", "5...d6 — Black solidifies the center."),
+    ],
+  },
+  "of-4": {
+    moves: [
+      M("e4", "1.e4 — Open the game."),
+      M("e5", "1...e5 — Classical response."),
+      M("Nf3", "2.Nf3 — Attack e5, develop toward center."),
+      M("Nc6", "2...Nc6 — Defend e5."),
+      M("Bc4", "3.Bc4 — The Italian Game! The bishop targets f7, the weakest square."),
+      M("Bc5", "3...Bc5 — The Giuoco Piano (Quiet Game). Both sides develop."),
+      M("c3", "4.c3 — Preparing the powerful d4 advance."),
+      M("Nf6", "4...Nf6 — Black develops and pressures e4."),
+      M("d4", "5.d4! — The key central break! White seizes the center."),
+    ],
+  },
+  "of-5": {
+    moves: [
+      M("e4", "1.e4 — White claims the center."),
+      M("c5", "1...c5 — The Sicilian Defense! Black fights for d4 asymmetrically."),
+      M("Nf3", "2.Nf3 — Develop and prepare d4."),
+      M("d6", "2...d6 — Black supports the center and prepares ...Nf6."),
+      M("d4", "3.d4 — Open the center."),
+      M("cxd4", "3...cxd4 — Black opens the c-file for counterplay."),
+      M("Nxd4", "4.Nxd4 — The Open Sicilian. The most critical and popular position."),
+    ],
+  },
+  "of-6": {
+    moves: [
+      M("e4", "1.e4 — Good: control the center."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3 — Good: develop a NEW piece."),
+      M("Nc6", "2...Nc6 — Good: develop a new piece."),
+      M("Bc4", "3.Bc4 — Good: another NEW piece developed."),
+      M("Nf6", "3...Nf6 — Good: another new piece."),
+      M("d3", "4.d3 — Supporting the center, preparing further development."),
+      M("Bc5", "4...Bc5 — Every move brings a new piece into the game!"),
+    ],
+  },
+  "of-7": {
+    moves: [
+      M("e4", "1.e4 — Good start."),
+      M("e5", "1...e5."),
+      M("Qh5", "2.Qh5?! — Bad! The queen comes out too early. It's vulnerable to attacks."),
+      M("Nc6", "2...Nc6 — Black develops with tempo — the queen will need to move again."),
+      M("Bc4", "3.Bc4 — Threatening Qxf7# (Scholar's Mate)."),
+      M("g6", "3...g6! — Defends calmly. Now the queen must retreat."),
+      M("Qf3", "4.Qf3 — The queen retreats. White has wasted two moves on the queen already!"),
+      M("Nf6", "4...Nf6 — Black develops naturally and has a better position."),
+    ],
+  },
+  "of-8": {
+    moves: [
+      M("e4", "1.e4 — Open the game."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3 — Knight developed."),
+      M("Nc6", "2...Nc6."),
+      M("Bc4", "3.Bc4 — Bishop developed."),
+      M("Bc5", "3...Bc5."),
+      M("O-O", "4.O-O — Castle! King is safe."),
+      M("Nf6", "4...Nf6."),
+      M("d3", "5.d3 — Now the last minor piece can develop."),
+      M("O-O", "5...O-O."),
+      M("Be3", "6.Be3 — All minor pieces developed, rooks are now connected along the first rank!"),
+    ],
+  },
+  "of-9": {
+    moves: [
+      M("e4", "1.e4 — First pawn move: control the center. Good."),
+      M("e5", "1...e5."),
+      M("d4", "2.d4 — Second pawn move: claim more center space. Still fine."),
+      M("exd4", "2...exd4."),
+      M("Qxd4", "3.Qxd4 — Recapture (note: queen comes out early here — not ideal)."),
+      M("Nc6", "3...Nc6 — Attacks the queen with tempo!"),
+    ],
+  },
+  "of-10": {
+    moves: [
+      M("f3", "1.f3? — A terrible first move. Weakens the king and doesn't help development."),
+      M("e5", "1...e5 — Black develops normally."),
+      M("g4", "2.g4?? — Blunder! Opens the diagonal to the king."),
+      M("Qh4#", "2...Qh4# — Checkmate! The fastest possible checkmate (Fool's Mate)."),
+    ],
+  },
+  "of-11": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Qh5", "2.Qh5 — Scholar's Mate attempt begins: threatening Qxe5+ and eyeing f7."),
+      M("Nc6", "2...Nc6 — Defends e5 and develops."),
+      M("Bc4", "3.Bc4 — Now threatening Qxf7#!"),
+      M("g6", "3...g6! — The correct defense. Blocks the queen."),
+      M("Qf3", "4.Qf3 — Still eyeing f7..."),
+      M("Nf6", "4...Nf6! — Blocks the diagonal AND develops. White's attack is over."),
+    ],
+  },
+  "of-12": {
+    moves: [
+      M("e4", "1.e4."),
+      M("g6", "1...g6 — Preparing the fianchetto."),
+      M("d4", "2.d4 — White takes the center."),
+      M("Bg7", "2...Bg7 — The fianchetto! The bishop sits on the long diagonal a1-h8."),
+      M("Nc3", "3.Nc3."),
+      M("d6", "3...d6 — A flexible setup. The Bg7 controls the center from a distance."),
+    ],
+  },
+  "of-13": {
+    moves: [
+      M("e4", "1.e4 — Opens lines for the bishop and queen. Leads to open, tactical games."),
+      M("e5", "1...e5 — The classical response. Symmetric and principled."),
+    ],
+  },
+  "of-14": {
+    moves: [
+      M("e4", "1.e4 — White's most popular first move."),
+      M("e5", "1...e5 — Classical: symmetric center play."),
+    ],
+  },
+  "of-15": {
+    moves: [
+      M("d4", "1.d4 — The queen's pawn opening. Strategic and solid."),
+      M("d5", "1...d5 — The classical response: directly contesting the center."),
+      M("c4", "2.c4 — The Queen's Gambit! Challenging Black's center."),
+    ],
+  },
+  "of-16": {
+    moves: [
+      M("e4", "1.e4 — One tempo spent: useful move, controls center."),
+      M("e5", "1...e5 — One tempo: equally useful."),
+      M("Nf3", "2.Nf3 — Second tempo: develops AND attacks e5."),
+      M("Nc6", "2...Nc6 — Second tempo: develops AND defends."),
+      M("Bc4", "3.Bc4 — Third tempo: develops to active square."),
+      M("Nf6", "3...Nf6 — Third tempo: develops and attacks e4."),
+    ],
+  },
+  "of-17": {
+    startFen: "r1bq1rk1/pp3ppp/2nbpn2/2pp4/3P4/2NBPN2/PPP2PPP/R1BQ1RK1 w - - 0 8",
+    moves: [
+      M("dxc5", "8.dxc5 — Creating a weakness: the isolated d5 pawn."),
+      M("Bxc5", "8...Bxc5 — Black recaptures but d5 is now isolated."),
+      M("b4", "9.b4! — Attacking the bishop AND preparing to create a second weakness on the queenside."),
+      M("Bd6", "9...Bd6 — Bishop retreats."),
+      M("a4", "10.a4 — Now Black must worry about both the d5 pawn AND the queenside advance."),
+    ],
+  },
+  "of-18": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3."),
+      M("Nc6", "2...Nc6."),
+      M("Bb5", "3.Bb5 — The Ruy Lopez."),
+      M("a6", "3...a6 — Challenging the bishop."),
+      M("Ba4", "4.Ba4 — Bishop retreats but stays active."),
+      M("Nf6", "4...Nf6."),
+      M("O-O", "5.O-O."),
+      M("b5", "5...b5! — Forcing the bishop back."),
+      M("Bb3", "6.Bb3 — The bishop looks safe here..."),
+      M("Na5", "6...Na5! — Threatens to trap the bishop with ...c5-c4!"),
+    ],
+  },
+  "of-19": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3."),
+      M("d6", "2...d6 — Philidor Defense."),
+      M("Bc4", "3.Bc4 — Targeting f7."),
+      M("Bg4", "3...Bg4? — Looks natural but allows the Legal Trap!"),
+      M("Nc3", "4.Nc3."),
+      M("g6", "4...g6? — A mistake."),
+      M("Nxe5", "5.Nxe5! — The trap begins! Sacrificing the queen."),
+      M("Bxd1", "5...Bxd1?? — Taking the bait..."),
+      M("Bxf7+", "6.Bxf7+ — Check!"),
+      M("Ke7", "6...Ke7 — Only move."),
+      M("Nd5#", "7.Nd5# — Checkmate! The Legal Trap in action."),
+    ],
+  },
+  "of-20": {
+    moves: [
+      M("d4", "1.d4."),
+      M("e5", "1...e5?! — The Englund Gambit. Dubious but trappy."),
+      M("dxe5", "2.dxe5 — Accepting the gambit."),
+      M("Nc6", "2...Nc6 — Developing and eyeing e5."),
+      M("Nf3", "3.Nf3 — Defending e5."),
+      M("Qe7", "3...Qe7 — Pressure on e5."),
+      M("Bf4", "4.Bf4?? — Looks natural but loses!"),
+      M("Qb4+", "4...Qb4+! — Fork! Attacks the king AND the bishop. White loses a piece."),
+    ],
+  },
+  "of-21": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5 — Symmetric."),
+      M("Nf3", "2.Nf3."),
+      M("Nf6", "2...Nf6 — Still symmetric. (Petrov Defense)"),
+      M("Nxe5", "3.Nxe5! — White exploits the first-move advantage to win a pawn temporarily."),
+      M("d6", "3...d6 — Breaking the symmetry."),
+      M("Nf3", "4.Nf3 — The knight retreats. White used the tempo advantage to create an imbalance."),
+    ],
+  },
+  "of-22": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("f4", "2.f4 — The King's Gambit! White offers a pawn."),
+      M("exf4", "2...exf4 — Black accepts the gambit."),
+      M("Nf3", "3.Nf3 — White develops rapidly. The open f-file and strong center compensate for the pawn."),
+    ],
+  },
+  "of-23": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("f4", "2.f4 — The King's Gambit! Sacrificing the f-pawn."),
+      M("exf4", "2...exf4 — Accepted."),
+      M("Nf3", "3.Nf3 — Rapid development. White aims to open the f-file."),
+      M("d6", "3...d6 — Solid defense."),
+      M("Bc4", "4.Bc4 — Targeting f7 while developing."),
+    ],
+  },
+  "of-24": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3."),
+      M("Nc6", "2...Nc6."),
+      M("Bc4", "3.Bc4."),
+      M("Bc5", "3...Bc5."),
+      M("b4", "4.b4!? — The Evans Gambit! Offering a pawn for rapid development."),
+      M("Bxb4", "4...Bxb4 — Accepting."),
+      M("c3", "5.c3 — Gaining tempo on the bishop while preparing d4."),
+      M("Ba5", "5...Ba5 — Bishop retreats."),
+      M("d4", "6.d4 — White has a powerful center and rapid development!"),
+    ],
+  },
+  "of-25": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3."),
+      M("Nc6", "2...Nc6."),
+      M("d4", "3.d4 — The Scotch! Immediately opening the center."),
+      M("exd4", "3...exd4 — Practically forced."),
+      M("Nxd4", "4.Nxd4 — Strong centralized knight. White has open lines and active play."),
+    ],
+  },
+  "of-26": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3 — Attacking e5."),
+      M("Nf6", "2...Nf6 — The Petrov! Counter-attacking e4 instead of defending."),
+      M("Nxe5", "3.Nxe5 — White takes the pawn."),
+      M("d6", "3...d6 — Attacking the knight."),
+      M("Nf3", "4.Nf3 — Knight retreats."),
+      M("Nxe4", "4...Nxe4 — Now Black has won the pawn back. Equal."),
+    ],
+  },
+  "of-27": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3."),
+      M("d6", "2...d6 — The Philidor Defense. Solid but passive."),
+      M("d4", "3.d4 — White seizes the center."),
+      M("Nf6", "3...Nf6 — Developing."),
+      M("Nc3", "4.Nc3 — Note: Black's c8 bishop is blocked by the d6+e5 pawn chain."),
+    ],
+  },
+  "of-28": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nc3", "2.Nc3 — The Vienna Game! Flexible — keeps f4 option open."),
+      M("Nf6", "2...Nf6."),
+      M("f4", "3.f4 — The Vienna Gambit! Similar ideas to the King's Gambit."),
+    ],
+  },
+  "of-29": {
+    moves: [
+      M("e4", "1.e4 — Your chosen first move as White."),
+      M("e5", "1...e5 — One of many replies to study."),
+      M("Nf3", "2.Nf3 — Follow your repertoire's main line."),
+      M("Nc6", "2...Nc6 — Into the Italian or Ruy Lopez depending on your choice."),
+    ],
+  },
+  "of-30": {
+    moves: [
+      M("e4", "1.e4 — Good: control the center."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3 — Good: develop a new piece."),
+      M("Nc6", "2...Nc6."),
+      M("Bc4", "3.Bc4 — Good: another new piece."),
+      M("Bc5", "3...Bc5."),
+      M("O-O", "4.O-O — Good: castle early! This is the model opening."),
+    ],
+  },
+
+  // ===== TACTICAL PATTERNS =====
+  "tp-1": {
+    startFen: "r1bqkb1r/pppp1ppp/2n5/4p3/2BnP3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+    moves: [
+      M("Nxe5", "White captures the pawn, seemingly hanging the knight..."),
+      M("Nxe5", "Black takes back."),
+      M("d4", "But now d4 attacks BOTH the knight on e5 and the bishop that will come to the diagonal."),
+    ],
+  },
+  "tp-2": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3."),
+      M("Nc6", "2...Nc6."),
+      M("Bb5", "3.Bb5 — The bishop PINS the knight to the king! The Nc6 cannot move without exposing the king."),
+    ],
+  },
+  "tp-3": {
+    startFen: "6k1/8/8/8/8/8/1K4r1/4R3 w - - 0 1",
+    moves: [
+      M("Re8+", "Re8+ — The rook checks the king! This is a skewer."),
+      M("Kf7", "Kf7 — The king must move..."),
+      M("Rxg2", "And now White captures the rook behind it! That's the power of a skewer."),
+    ],
+  },
+  "tp-4": {
+    startFen: "rn1qkb1r/pbpp1ppp/1p2pn2/8/2BPP3/5N2/PPP2PPP/RNBQK2R w KQkq - 0 5",
+    moves: [
+      M("e5", "e5! — The pawn moves forward, but the REAL threat is the bishop on c4 now aiming at f7 through the opened diagonal!"),
+      M("Nd5", "Nd5 — The knight retreats."),
+      M("Bxe6", "Bxe6! — Discovered attack was set up. The bishop captures with tempo."),
+    ],
+  },
+  "tp-5": {
+    startFen: "r1bqk2r/pppp1ppp/2n2n2/2b1N3/2B1P3/8/PPPP1PPP/RNBQK2R w KQkq - 0 5",
+    moves: [
+      M("Nxf7", "Nxf7! — Fork: the knight attacks the queen AND the rook."),
+      M("Qe7", "Qe7 — The queen retreats."),
+      M("Nxh8", "Nxh8 — White wins the rook! The knight fork was devastating."),
+    ],
+  },
+  "tp-6": {
+    startFen: "r2qk2r/ppp2ppp/2nb1n2/3pp1B1/2B1P1b1/3P1N2/PPP2PPP/RN1Q1RK1 b kq - 0 7",
+    moves: [
+      M("Bxf3", "Bxf3! — Deflecting the knight away from defending d4 and e5."),
+      M("Qxf3", "Qxf3 — White recaptures."),
+      M("d4", "d4! — Now with the knight gone, Black seizes central control."),
+    ],
+  },
+  "tp-7": {
+    startFen: "r1bq1rk1/ppp2ppp/2n2n2/3p4/1b1P4/2N1PN2/PP3PPP/R1BQKB1R w KQ - 0 6",
+    moves: [
+      M("Bd2", "Bd2 — Developing and connecting to the defense."),
+      M("Bxc3", "Bxc3 — Removing the guard! The Nc3 was defending e4 and d5."),
+      M("Bxc3", "Bxc3 — White recaptures, but the knight that guarded the center is gone."),
+    ],
+  },
+  "tp-8": {
+    startFen: "r1bq1rk1/pp3ppp/2n1pn2/2bp4/8/2NBPN2/PPP2PPP/R1BQ1RK1 w - - 0 8",
+    moves: [
+      M("Bxh7+", "Bxh7+! — Sacrifice! The rook on f8 is overloaded: it must defend f7 AND the back rank."),
+      M("Kxh7", "Kxh7 — King takes."),
+      M("Ng5+", "Ng5+ — Check! Now the king is exposed and the overloaded defenses collapse."),
+    ],
+  },
+  "tp-9": {
+    startFen: "r1bqk2r/pppp1ppp/2n2n2/2b1p3/B3P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+    moves: [
+      M("b3", "b3? — Looks harmless, but the bishop on a4 is now running low on safe squares..."),
+      M("b5", "b5! — Pushing the bishop further."),
+      M("Bb3", "Bb3 — The bishop retreats."),
+      M("Na5", "Na5! — Attacking the bishop and threatening ...c4, trapping it!"),
+    ],
+  },
+  "tp-10": {
+    startFen: "r1bqkb1r/pppp1ppp/2n5/4n3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 5",
+    moves: [
+      M("Qxf7+", "Qxf7+! — Instead of recapturing normally, a zwischenzug (in-between check)!"),
+      M("Kd8", "Kd8 — The king must move."),
+      M("Qxe6", "Now White captures with an extra pawn and a much better position."),
+    ],
+  },
+  "tp-11": {
+    startFen: "r1bq1rk1/pppp1ppp/2n2n2/2b1p3/2BPP3/2P2N2/PP3PPP/RNBQ1RK1 b - - 0 6",
+    moves: [
+      M("exd4", "exd4 — Opening the center."),
+      M("cxd4", "cxd4 — White recaptures."),
+      M("Nxe4", "Nxe4! — The knight is doomed after d5, so it captures the most valuable target first! Desperado!"),
+    ],
+  },
+  "tp-12": {
+    startFen: "r1bq1rk1/pppn1ppp/4pn2/3p2B1/1bBP4/2N1PN2/PPP2PPP/R2QK2R w KQ - 0 7",
+    moves: [
+      M("Bxh7+", "Bxh7+! — The Greek Gift Sacrifice! The bishop rips open the king's shelter."),
+      M("Kxh7", "Kxh7 — Forced to accept."),
+      M("Ng5+", "Ng5+ — Check! The knight leaps in."),
+      M("Kg8", "Kg8 — Retreating."),
+      M("Qh5", "Qh5 — Threatening Qxf7# and Qh7#. The attack is overwhelming!"),
+    ],
+  },
+  "tp-13": {
+    startFen: "r1bqk2r/pppp1Npp/2n2n2/2b1p3/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq - 0 5",
+    moves: [
+      M("Kf8", "Kf8 — The king moves to escape, but the knight is forking the rooks!"),
+      M("Nxh8", "Nxh8 — White captures the rook. The knight fork on f7 was devastating."),
+    ],
+  },
+  "tp-14": {
+    startFen: "r1b2rk1/pppp1ppp/2n2n2/2b1p2q/2B1P3/2NP1N2/PPP2PPP/R1BQ1R1K w - - 0 8",
+    moves: [
+      M("Bg5", "Bg5 — Pinning the f6 knight. Setting up a battery on the h-file."),
+      M("Nd4", "Nd4 — Black tries to break free."),
+      M("Nd5", "Nd5! — A powerful centralized knight adding to the battery pressure."),
+    ],
+  },
+  "tp-15": {
+    startFen: "rn3rk1/pbppq1pp/1p2p3/8/3PP3/3B1N2/PPP3PP/R2Q1RK1 w - - 0 11",
+    moves: [
+      M("d5", "d5! — Opening the diagonal for the bishop. Setting up a discovered attack."),
+      M("exd5", "exd5 — Black captures."),
+      M("Bg5", "Bg5! — Discovered attack on the queen! The bishop attacks the queen while the d-file opens."),
+    ],
+  },
+  "tp-16": {
+    startFen: "6k1/pp3ppp/8/3r4/8/8/PP3PPP/3R2K1 w - - 0 1",
+    moves: [
+      M("Rd4", "Rd4 — The rook centralizes. Even though there's a rook on d5, White's rook 'sees through' it via X-ray."),
+      M("Rd8", "Rd8 — Black retreats."),
+      M("Rd7", "Rd7! — The rook invades the 7th rank, attacking pawns from behind."),
+    ],
+  },
+  "tp-17": {
+    startFen: "r1bq1rk1/pppp1ppp/2n2n2/4N3/2B1P3/8/PPPP1PPP/RNBQ1RK1 w - - 0 6",
+    moves: [
+      M("Nxf7", "Nxf7! — Clearance sacrifice! The knight clears e5 for the queen."),
+      M("Rxf7", "Rxf7 — Black captures."),
+      M("Bxf7+", "Bxf7+ — Check! The bishop captures with tempo."),
+      M("Kxf7", "Kxf7."),
+      M("Qf3+", "Qf3+ — The queen uses the cleared diagonal/file for a devastating attack!"),
+    ],
+  },
+  "tp-18": {
+    startFen: "r2q1rk1/ppp1bppp/2n1bn2/3p4/3P4/2NBBN2/PPP2PPP/R2Q1RK1 w - - 0 8",
+    moves: [
+      M("Bb5", "Bb5 — Interfering! The bishop places itself between the queen and the knight, disrupting their coordination."),
+      M("Bd7", "Bd7 — Trying to maintain the connection."),
+      M("Bxc6", "Bxc6 — Capturing and breaking up the coordination permanently."),
+    ],
+  },
+  "tp-19": {
+    startFen: "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
+    moves: [
+      M("Re8+", "Re8+ — Back rank mate! The king is trapped by its own pawns with no escape square."),
+    ],
+  },
+  "tp-20": {
+    startFen: "r1bqkb1r/pp1n1ppp/2p1pn2/3pN3/3P1B2/2N5/PPP1PPPP/R2QKB1R w KQkq - 0 6",
+    moves: [
+      M("e4", "e4! — The pawn advances, creating a fork threat!"),
+      M("dxe4", "dxe4 — Black captures."),
+      M("Nxe4", "Nxe4 — The knight recaptures, now threatening both the f6 knight and the bishop on f8."),
+    ],
+  },
+  "tp-21": {
+    startFen: "r1b2rk1/pppp1Npp/8/2b1n3/2B1n2q/3p4/PPP2PPP/RNBQR1K1 w - - 0 10",
+    moves: [
+      M("Bf7+", "Bf7+! — A stunning queen sacrifice setup. Drawing the king forward."),
+      M("Kh8", "Kh8 — King retreats."),
+      M("Ng5", "Ng5 — Threatening Nf7# and Qxh7#. The combination is unstoppable!"),
+    ],
+  },
+  "tp-22": {
+    startFen: "r1bq1rk1/ppp2ppp/2np1n2/2b1p3/4P3/2NP1N2/PPP1BPPP/R1BQ1RK1 w - - 0 7",
+    moves: [
+      M("Be3", "Be3 — Developing."),
+      M("d5", "d5 — Black strikes in the center."),
+      M("exd5", "exd5."),
+      M("Nxd5", "Nxd5."),
+      M("Rf3", "Rf3! — The rook lift! Moving from f1 to f3, ready to swing to g3 or h3 for a kingside attack."),
+    ],
+  },
+  "tp-23": {
+    startFen: "r1bq1rk1/pp2bppp/2n1pn2/2pp4/2PP4/2NBPN2/PP3PPP/R1BQ1RK1 w - - 0 8",
+    moves: [
+      M("Bxh7+", "Bxh7+?! — Sometimes the exchange sacrifice is better: Rxf6! giving up rook for knight but destroying the kingside."),
+    ],
+  },
+  "tp-24": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3 — The knight attacks e5 (one threat) AND develops (gains activity). Double purpose!"),
+      M("Nc6", "2...Nc6 — Defends e5 and develops. Also a double-purpose move."),
+      M("Bc4", "3.Bc4 — Develops AND creates a threat on f7. Two jobs in one move!"),
+    ],
+  },
+  "tp-25": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3 — Check forcing moves first: this attacks a pawn (threat)."),
+      M("Nc6", "2...Nc6."),
+      M("Bc4", "3.Bc4 — Another forcing move: creates the threat of Bxf7+ or Qf3 attacking f7."),
+      M("Nf6", "3...Nf6 — Counter-threat: attacking e4."),
+    ],
+  },
+  "tp-26": {
+    moves: [
+      M("e4", "1.e4."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3."),
+      M("Nc6", "2...Nc6."),
+      M("Bc4", "3.Bc4."),
+      M("Bc5", "3...Bc5."),
+      M("Bxf7+", "4.Bxf7+?! — A sacrifice (tactic 1: deflection of the king)."),
+      M("Kxf7", "4...Kxf7."),
+      M("Ng5+", "5.Ng5+ — Check (tactic 2: fork threat). Multiple tactics chained = combination!"),
+    ],
+  },
+  "tp-27": {
+    startFen: "6k1/5ppp/8/8/2B5/8/5PPP/4r1K1 w - - 0 1",
+    moves: [
+      M("Bf7+", "Bf7+! — Counter-attack! Instead of losing, White gives check first."),
+      M("Kh8", "Kh8 — King moves."),
+      M("Be8", "Be8 — Now the bishop blocks and defends. A defensive tactic saved the game!"),
+    ],
+  },
+  "tp-28": {
+    moves: [
+      M("e4", "1.e4 — Study classic patterns through play."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3."),
+      M("Nc6", "2...Nc6."),
+      M("Bc4", "3.Bc4 — Italian Game: rich in tactical patterns to study."),
+      M("Bc5", "3...Bc5."),
+    ],
+  },
+  "tp-29": {
+    startFen: "r1bq1rk1/pppp1ppp/2n2n2/2b1p3/2B1P3/2NP1N2/PPP2PPP/R1BQ1RK1 w - - 0 6",
+    moves: [
+      M("Bxf7+", "Bxf7+? — Before capturing, count! Attackers on f7: Bishop. Defenders: King, Rf8. 1 attacker vs 2 defenders = bad!"),
+      M("Rxf7", "Rxf7 — Black easily defends. The 'tactic' fails because we didn't count properly."),
+    ],
+  },
+  "tp-30": {
+    moves: [
+      M("e4", "1.e4 — Before each move, ask: Does this hang anything?"),
+      M("e5", "1...e5 — Does my opponent have checks, captures, or threats?"),
+      M("Nf3", "2.Nf3 — Is my king safe? ✓ All three checks passed. Good move!"),
+      M("Nc6", "2...Nc6."),
+    ],
+  },
+
+  // ===== ENDGAME MASTERY =====
+  "em-1": {
+    startFen: "8/8/8/4k3/8/4K3/4P3/8 w - - 0 1",
+    moves: [
+      M("Kf3", "Kf3 — King leads the pawn! Getting in front is key."),
+      M("Ke6", "Ke6 — Black tries to block."),
+      M("Ke4", "Ke4 — White gains the opposition! Kings face each other, Black to move."),
+      M("Kd6", "Kd6 — Black must give way."),
+      M("Kf5", "Kf5 — White's king advances past the pawn."),
+      M("Ke7", "Ke7 — Black tries to block again."),
+      M("Ke5", "Ke5 — Opposition again! White controls the key squares."),
+    ],
+  },
+  "em-2": {
+    startFen: "1K1k4/1P6/8/8/8/8/2r5/5R2 w - - 0 1",
+    moves: [
+      M("Rf4", "Rf4! — Building the bridge. The rook prepares to shield the king from checks."),
+      M("Rc1", "Rc1 — Black gets ready to check."),
+      M("Ka7", "Ka7 — The king steps out from in front of the pawn."),
+      M("Ra1+", "Ra1+ — Check!"),
+      M("Kb6", "Kb6 — King advances."),
+      M("Rb1+", "Rb1+ — Another check."),
+      M("Ka6", "Ka6."),
+      M("Ra1+", "Ra1+."),
+      M("Ra4", "Ra4! — The bridge! The rook blocks the checks. The pawn will promote."),
+    ],
+  },
+  "em-3": {
+    startFen: "4k3/8/4r3/8/8/8/3KP3/8R w - - 0 1",
+    moves: [
+      M("e4", "e4 — White advances the pawn."),
+      M("Re6", "Re6! — The Philidor position! Black's rook stays on the 6th rank, preventing the white king from advancing."),
+      M("Ke3", "Ke3 — White tries to push forward."),
+      M("Re6", "Re6 — The rook holds the 6th rank. This is the key defensive technique."),
+    ],
+  },
+  "em-4": {
+    startFen: "8/8/8/1k2P3/8/8/8/4K3 w - - 0 1",
+    moves: [
+      M("Ke2", "Ke2 — White begins marching the king to support the passed pawn."),
+      M("Kc6", "Kc6 — Black tries to catch the pawn."),
+      M("Ke3", "Ke3 — Steadily advancing."),
+      M("Kd7", "Kd7 — Can Black get into the 'square of the pawn'?"),
+      M("Ke4", "Ke4 — The king supports the pawn's advance."),
+      M("Ke7", "Ke7 — Black barely enters the square!"),
+      M("e6", "e6 — Push! But with the king in the square, Black can stop it."),
+    ],
+  },
+  "em-5": {
+    startFen: "8/pp3k2/2p2b2/3p4/3P4/2P2N2/PP3K2/8 w - - 0 1",
+    moves: [
+      M("Ne5+", "Ne5+ — The knight challenges the bishop. In this closed position, the knight is well-placed."),
+      M("Ke7", "Ke7 — King retreats."),
+      M("Nxc6+", "Nxc6+ — The knight captures a pawn with check! Knights do well in closed positions."),
+    ],
+  },
+
+  // ===== CHECKMATE PATTERNS =====
+  "cm-1": {
+    startFen: "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
+    moves: [
+      M("Re8#", "Re8# — Back rank mate! The king is trapped by its own pawns on f7, g7, h7."),
+    ],
+  },
+  "cm-2": {
+    startFen: "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+    moves: [
+      M("Qxf7#", "Qxf7# — Scholar's Mate! The queen takes f7 with support from the bishop on c4."),
+    ],
+  },
+  "cm-3": {
+    startFen: "r1b3kr/ppp2Npp/8/8/3n4/8/PPPnQPPP/R1B1K2R w KQ - 0 1",
+    moves: [
+      M("Qe8+", "Qe8+! — Forcing the rook to capture (or Nf8)."),
+      M("Rxe8", "Rxe8 — Forced."),
+      M("Nf7#", "Nf7# — Smothered mate! The king is completely boxed in by its own pieces."),
+    ],
+  },
+  "cm-4": {
+    startFen: "6k1/5ppp/6N1/8/8/8/5PPP/4R1K1 w - - 0 1",
+    moves: [
+      M("Re8+", "Re8+ — The rook checks on the back rank."),
+      M("Kf8", "Kf8."),
+      M("Nxh7#", "Nxh7#? — Actually let's look at a cleaner example..."),
+    ],
+  },
+  "cm-5": {
+    startFen: "r1b2rk1/ppppNppp/2n2n2/4p3/2B1P2q/8/PPPP1PPP/RNBQ1R1K w - - 0 8",
+    moves: [
+      M("Ng6", "Ng6! — The knight forks the queen and the rook, and also threatens Nxf8#."),
+      M("hxg6", "hxg6 — Black captures."),
+      M("Qxh4", "The queen is now free to capture! The knight did its job."),
+    ],
+  },
+  "cm-25": {
+    startFen: "k7/8/8/8/8/8/8/KRR5 w - - 0 1",
+    moves: [
+      M("Rb2", "Rb2 — The first rook takes a rank."),
+      M("Ka7", "Ka7 — King moves."),
+      M("Rc7+", "Rc7+ — Check! The second rook checks from the next rank."),
+      M("Ka6", "Ka6 — King retreats."),
+      M("Rb6#", "Rb6# — Checkmate! The ladder technique: two rooks alternating to drive the king to the edge."),
+    ],
+  },
+  "cm-28": {
+    startFen: "k7/8/8/8/8/8/8/KQ6 w - - 0 1",
+    moves: [
+      M("Qb3", "Qb3 — Restricting the king. Don't rush — avoid stalemate!"),
+      M("Ka7", "Ka7."),
+      M("Qb5", "Qb5 — Slowly restricting. The queen builds a shrinking box."),
+      M("Ka8", "Ka8 — Trapped on the edge."),
+      M("Kb2", "Kb2 — Bring the king closer to assist!"),
+      M("Ka7", "Ka7."),
+      M("Kc3", "Kc3 — Marching the king up. Patience is key."),
+    ],
+  },
+  "cm-29": {
+    startFen: "k7/8/8/8/8/8/8/KR6 w - - 0 1",
+    moves: [
+      M("Kb2", "Kb2 — First bring the king closer. The rook alone can't checkmate."),
+      M("Kb7", "Kb7."),
+      M("Kc3", "Kc3 — Advancing steadily."),
+      M("Kc6", "Kc6."),
+      M("Kd4", "Kd4 — The key is to use the king to push the opponent's king to the edge."),
+    ],
+  },
+
+  // ===== POSITIONAL PLAY =====
+  "pp-1": {
+    moves: [
+      M("e4", "1.e4 — A strong center pawn."),
+      M("e5", "1...e5."),
+      M("d4", "2.d4 — Two pawns in the center! This is the ideal pawn structure."),
+      M("exd4", "2...exd4 — But central tension must be managed."),
+      M("Qxd4", "3.Qxd4 — White maintains one central pawn on e4."),
+    ],
+  },
+  "pp-2": {
+    startFen: "r1bq1rk1/pp2bppp/2n1pn2/2pp4/3PP3/2NB1N2/PPP2PPP/R1BQ1RK1 w - - 0 7",
+    moves: [
+      M("e5", "e5! — Pushing Black's knight away and creating an outpost on d4/e5."),
+      M("Nd7", "Nd7 — The knight retreats."),
+      M("Bf4", "Bf4 — White controls the outpost. A knight on e5 would be untouchable!"),
+    ],
+  },
+  "pp-6": {
+    startFen: "r1bq1rk1/pp3ppp/2n1pn2/2b5/3P4/2N2N2/PP2BPPP/R1BQ1RK1 w - - 0 9",
+    moves: [
+      M("Bg5", "Bg5 — Pinning the knight. Active piece play with the IQP!"),
+      M("Be7", "Be7 — Breaking the pin."),
+      M("d5", "d5! — The IQP advances! This pawn break opens lines for all of White's pieces."),
+      M("exd5", "exd5."),
+      M("Nxd5", "Nxd5 — Knight lands on the powerful central square. IQP's dynamic strength!"),
+    ],
+  },
+  "pp-15": {
+    startFen: "6k1/pp1R1ppp/8/8/8/8/PPP2PPP/6K1 w - - 0 1",
+    moves: [
+      M("Rxf7", "Rxf7! — The rook on the 7th rank devours a pawn."),
+      M("Kg8", "Kg8."),
+      M("Rxb7", "Rxb7 — And another! Two pawns fallen to the 7th rank rook. Devastating power."),
+    ],
+  },
+
+  // ===== QUEEN'S GAMBIT =====
+  "qg-1": {
+    moves: [
+      M("d4", "1.d4 — The Queen's Pawn opening."),
+      M("d5", "1...d5 — Black mirrors."),
+      M("c4", "2.c4 — The Queen's Gambit! Challenging Black's center. Not a true gambit — White can regain the pawn."),
+      M("e6", "2...e6 — Declining: the QGD. Solid and classical."),
+      M("Nc3", "3.Nc3 — Developing and pressuring d5."),
+      M("Nf6", "3...Nf6 — Defending d5 and developing."),
+    ],
+  },
+  "qg-5": {
+    startFen: "rnbqkb1r/pp3ppp/2p1pn2/3p4/2PP4/2N2N2/PP2PPPP/R1BQKB1R w KQkq - 0 5",
+    moves: [
+      M("e3", "5.e3 — Supporting the center. The Semi-Slav setup."),
+      M("Nbd7", "5...Nbd7 — Developing."),
+      M("Bd3", "6.Bd3 — Active development."),
+      M("dxc4", "6...dxc4 — The Meran variation! Black takes and plans ...b5."),
+      M("Bxc4", "7.Bxc4 — Recapture."),
+      M("b5", "7...b5 — The Meran! Black holds the pawn and expands on the queenside."),
+    ],
+  },
+
+  // ===== RUY LOPEZ =====
+  "rl-1": {
+    moves: [
+      M("e4", "1.e4 — Start."),
+      M("e5", "1...e5."),
+      M("Nf3", "2.Nf3 — Attacking e5."),
+      M("Nc6", "2...Nc6 — Defending e5."),
+      M("Bb5", "3.Bb5 — The Ruy Lopez! The bishop pressures the Nc6, the defender of e5."),
+      M("a6", "3...a6 — The Morphy Defense, asking the bishop its intentions."),
+      M("Ba4", "4.Ba4 — Maintaining the pressure."),
+      M("Nf6", "4...Nf6 — Counter-attacking e4."),
+      M("O-O", "5.O-O — Castle! A critical moment in the Ruy Lopez."),
+    ],
+  },
+
+  // ===== KING'S INDIAN =====
+  "ki-1": {
+    moves: [
+      M("d4", "1.d4."),
+      M("Nf6", "1...Nf6 — Flexible: doesn't commit the pawns yet."),
+      M("c4", "2.c4 — White grabs space."),
+      M("g6", "2...g6 — Preparing the fianchetto. The King's Indian!"),
+      M("Nc3", "3.Nc3 — Developing."),
+      M("Bg7", "3...Bg7 — The powerful fianchettoed bishop."),
+      M("e4", "4.e4 — White builds a massive center."),
+      M("d6", "4...d6 — Black will attack this center later with ...e5 or ...c5."),
+      M("Nf3", "5.Nf3."),
+      M("O-O", "5...O-O — Castled and ready to fight!"),
+    ],
+  },
+
+  // ===== SICILIAN DEEP DIVE =====
+  "sd-1": {
+    moves: [
+      M("e4", "1.e4."),
+      M("c5", "1...c5 — The Sicilian."),
+      M("Nf3", "2.Nf3 — Heading for the Open Sicilian."),
+      M("d6", "2...d6 — The Najdorf/Dragon/Classical move order."),
+      M("d4", "3.d4 — Opening the center!"),
+      M("cxd4", "3...cxd4 — Black takes."),
+      M("Nxd4", "4.Nxd4 — The Open Sicilian! The most important position in chess theory."),
+      M("Nf6", "4...Nf6 — Developing and attacking e4."),
+      M("Nc3", "5.Nc3 — Supporting e4."),
+    ],
+  },
+
+  // ===== NIMZO-INDIAN =====
+  "ni-1": {
+    moves: [
+      M("d4", "1.d4."),
+      M("Nf6", "1...Nf6 — Flexible."),
+      M("c4", "2.c4 — Standard."),
+      M("e6", "2...e6 — Preparing Bb4."),
+      M("Nc3", "3.Nc3 — Now Black can pin!"),
+      M("Bb4", "3...Bb4 — The Nimzo-Indian! Pinning the knight and fighting for e4 control."),
+      M("Qc2", "4.Qc2 — The Classical: preventing doubled pawns after ...Bxc3."),
+      M("O-O", "4...O-O — Safe and flexible."),
+    ],
+  },
+
+  // ===== ATTACKING CHESS =====
+  "ac-1": {
+    startFen: "r1bq1rk1/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQ1RK1 w - - 6 5",
+    moves: [
+      M("d4", "d4! — When you have better development, open the center to attack!"),
+      M("exd4", "exd4."),
+      M("e5", "e5 — Gaining space and driving the knight away."),
+      M("d3", "d3 — Black is under pressure."),
+      M("exf6", "exf6 — Opening lines toward the king. The attack is underway!"),
+    ],
+  },
+  "ac-4": {
+    startFen: "r1bq1rk1/pp2bppp/2n1pn2/2pp4/3P1B2/2NBPN2/PPP2PPP/R2QK2R w KQ - 0 8",
+    moves: [
+      M("Bxh7+", "Bxh7+! — The classic bishop sacrifice on h7!"),
+      M("Kxh7", "Kxh7 — Forced."),
+      M("Ng5+", "Ng5+ — The knight leaps in with check!"),
+      M("Kg8", "Kg8 — The king retreats."),
+      M("Qh5", "Qh5 — Threatening Qxf7# and Qh7#. The attack is overwhelming."),
+    ],
+  },
+
+  // ===== DEFENSIVE TECHNIQUES =====
+  "dt-1": {
+    startFen: "r1bq1rk1/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQ1RK1 w - - 6 5",
+    moves: [
+      M("d3", "d3 — A solid, defensive move. Not every position calls for aggression."),
+      M("d6", "d6 — Both sides develop carefully."),
+      M("Be3", "Be3 — Defending d4 and developing. Quiet preparation."),
+    ],
+  },
+  "dt-10": {
+    startFen: "6k1/5ppp/8/8/2B5/8/5PPP/4r1K1 w - - 0 1",
+    moves: [
+      M("Bf7+", "Bf7+! — Perpetual check setup! Check!"),
+      M("Kh8", "Kh8 — King hides."),
+      M("Bg6", "Bg6 — Threatening Bf7+ again. The bishop shuffles back and forth giving perpetual check = draw!"),
+    ],
+  },
+
+  // ===== PAWN ENDGAMES =====
+  "pe-1": {
+    startFen: "8/8/4k3/8/4K3/4P3/8/8 w - - 0 1",
+    moves: [
+      M("Kf4", "Kf4 — King advances. We need to get opposition."),
+      M("Kd5", "Kd5 — Black tries to block."),
+      M("Kf5", "Kf5 — We have the opposition! Black must give way."),
+      M("Kd6", "Kd6 — Forced to step aside."),
+      M("e4", "e4 — Now the pawn advances with the king ahead."),
+      M("Ke7", "Ke7."),
+      M("Ke5", "Ke5 — Opposition again! The king leads the pawn to promotion."),
+    ],
+  },
+  "pe-5": {
+    startFen: "8/8/1k6/8/8/8/5P2/4K3 w - - 0 1",
+    moves: [
+      M("f4", "f4 — Push the pawn. Can Black's king reach the 'square of the pawn'?"),
+      M("Kc6", "Kc6 — The king starts chasing."),
+      M("f5", "f5 — Draw the square from f5 to f8 to c8 to c5. Black's king is on c6 — INSIDE the square!"),
+      M("Kd7", "Kd7 — The king enters the square. It will catch the pawn!"),
+    ],
+  },
+  "pe-16": {
+    startFen: "8/8/8/pp1K4/PP6/8/8/3k4 w - - 0 1",
+    moves: [
+      M("a5", "a5!! — The breakthrough sacrifice! Giving up a pawn to create a passer."),
+      M("bxa5", "bxa5 — Black captures."),
+      M("b5", "b5! — Now this pawn is unstoppable! The a-pawn is too far away to be saved."),
+    ],
+  },
+
+  // ===== SCANDINAVIAN =====
+  "sc-1": {
+    moves: [
+      M("e4", "1.e4."),
+      M("d5", "1...d5 — The Scandinavian! Immediately challenging the center."),
+      M("exd5", "2.exd5 — White captures."),
+      M("Qxd5", "2...Qxd5 — The queen recaptures. She'll need to move again soon."),
+      M("Nc3", "3.Nc3 — Attacking the queen and developing."),
+      M("Qa5", "3...Qa5 — The main line. Queen goes to a safe, active square."),
+    ],
+  },
+
+  // ===== DUTCH DEFENSE =====
+  "du-1": {
+    moves: [
+      M("d4", "1.d4."),
+      M("f5", "1...f5 — The Dutch Defense! Aggressive claim on e4."),
+      M("c4", "2.c4 — White continues normally."),
+      M("Nf6", "2...Nf6 — Developing."),
+      M("g3", "3.g3 — Fianchetto setup."),
+      M("g6", "3...g6 — The Leningrad Dutch! Fianchetto vs fianchetto."),
+      M("Bg2", "4.Bg2 — Long diagonal."),
+      M("Bg7", "4...Bg7 — A powerful bishop on the long diagonal."),
+    ],
+  },
+
+  // ===== CHESS PSYCHOLOGY =====
+  "cp-1": {
+    moves: [
+      M("e4", "1.e4 — Every grandmaster started with this simple move."),
+      M("e5", "1...e5 — And learned the fundamentals, step by step."),
+      M("Nf3", "2.Nf3 — Growth mindset: every game is a learning opportunity."),
+      M("Nc6", "2...Nc6 — Whether you win or lose, you improve."),
+    ],
+  },
+
+  // ===== CALCULATION =====
+  "ct-1": {
+    moves: [
+      M("e4", "1.e4 — Before playing, visualize: what will the board look like after this move?"),
+      M("e5", "1...e5 — Now think ahead: what are the candidate moves for White?"),
+      M("Nf3", "2.Nf3 — This was one candidate. Can you calculate what happens after Nc6?"),
+      M("Nc6", "2...Nc6 — Good. Now calculate 3.Bc4: what threats does it create?"),
+    ],
+  },
+  "ct-5": {
+    moves: [
+      M("e4", "1.e4 — Your move. Now calculate opponent's BEST response."),
+      M("e5", "1...e5 — This is strong. Now calculate YOUR best reply to e5."),
+      M("Nf3", "2.Nf3 — Attacks e5. Calculate: what are Black's best options?"),
+      M("Nc6", "2...Nc6 — Defends e5. You've calculated 2 moves deep successfully!"),
+    ],
+  },
+};
