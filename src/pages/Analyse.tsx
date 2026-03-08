@@ -163,18 +163,20 @@ const Analyse = () => {
             <EvaluationBar score={evalScore} mate={evalMate} orientation={orientation} />
             <div className="w-[min(480px,calc(100vw-80px))] aspect-square">
               <Chessboard
-                position={currentFen}
-                onPieceDrop={onDrop}
-                boardOrientation={orientation}
-                customBoardStyle={{
-                  borderRadius: "4px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+                options={{
+                  position: currentFen,
+                  onPieceDrop: onDrop,
+                  boardOrientation: orientation,
+                  customBoardStyle: {
+                    borderRadius: "4px",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+                  },
+                  customDarkSquareStyle: { backgroundColor: "hsl(25 35% 30%)" },
+                  customLightSquareStyle: { backgroundColor: "hsl(33 40% 60%)" },
+                  customArrows: customArrows as any,
+                  customArrowColor: "rgba(255,170,0,0.7)",
+                  animationDuration: 150,
                 }}
-                customDarkSquareStyle={{ backgroundColor: "hsl(25 35% 30%)" }}
-                customLightSquareStyle={{ backgroundColor: "hsl(33 40% 60%)" }}
-                customArrows={customArrows as any}
-                customArrowColor="rgba(255,170,0,0.7)"
-                animationDuration={150}
               />
             </div>
           </div>
