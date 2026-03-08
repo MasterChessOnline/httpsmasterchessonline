@@ -38,32 +38,6 @@ const Leaderboard = () => {
         setLoading(false);
       });
 
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-    supabase
-      .from("puzzle_solves")
-      .select("user_id")
-      .eq("solved", true)
-      .gte("puzzle_date", monthStart.toISOString().split("T")[0])
-      .then(async ({ data }) => {
-        if (!data) return;
-        const counts: Record<string, number> = {};
-        data.forEach(d => { counts[d.user_id] = (counts[d.user_id] || 0) + 1; });
-        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 20);
-        if (sorted.length === 0) return;
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, display_name")
-          .in("user_id", sorted.map(s => s[0]));
-        const nameMap: Record<string, string> = {};
-        profiles?.forEach(p => { nameMap[p.user_id] = p.display_name || "Player"; });
-        setPuzzleLeaders(sorted.map(([uid, count]) => ({
-          user_id: uid,
-          count,
-          display_name: nameMap[uid] || "Player",
-        })));
-      });
   }, []);
 
   const getRankDisplay = (i: number) => {
