@@ -103,9 +103,18 @@ const Play = () => {
     if (selectedSquare && legalMoves.includes(square)) {
       const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
       if (move) {
+        const movedColor = move.color; // color that just moved
         setMoveHistory((prev) => [...prev, move.san]);
         setLastMove({ from: move.from, to: move.to });
         setGameStarted(true);
+        // Add increment for player's move
+        if (!unlimited && timeControl.increment > 0) {
+          if (movedColor === "w") {
+            setWhiteTime((prev: number) => prev + timeControl.increment);
+          } else {
+            setBlackTime((prev: number) => prev + timeControl.increment);
+          }
+        }
         updateState();
       }
       setSelectedSquare(null);
