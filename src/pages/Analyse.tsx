@@ -64,9 +64,8 @@ const Analyse = () => {
   );
 
   const onDrop = useCallback(
-    ({ sourceSquare, targetSquare }: { piece: any; sourceSquare: string; targetSquare: string | null }) => {
-      if (!targetSquare) return false;
-      return makeMove(sourceSquare, targetSquare);
+    (source: string, target: string) => {
+      return makeMove(source, target);
     },
     [makeMove]
   );
@@ -164,19 +163,18 @@ const Analyse = () => {
             <EvaluationBar score={evalScore} mate={evalMate} orientation={orientation} />
             <div className="w-[min(480px,calc(100vw-80px))] aspect-square">
               <Chessboard
-                options={{
-                  position: currentFen,
-                  onPieceDrop: onDrop as any,
-                  boardOrientation: orientation,
-                  boardStyle: {
-                    borderRadius: "4px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
-                  },
-                  darkSquareStyle: { backgroundColor: "hsl(25 35% 30%)" },
-                  lightSquareStyle: { backgroundColor: "hsl(33 40% 60%)" },
-                  arrows: customArrows.map(([s, e]) => ({ startSquare: s, endSquare: e, color: "rgba(255,170,0,0.7)" })),
-                  animationDurationInMs: 150,
+                position={currentFen}
+                onPieceDrop={onDrop}
+                boardOrientation={orientation}
+                customBoardStyle={{
+                  borderRadius: "4px",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
                 }}
+                customDarkSquareStyle={{ backgroundColor: "hsl(25 35% 30%)" }}
+                customLightSquareStyle={{ backgroundColor: "hsl(33 40% 60%)" }}
+                customArrows={customArrows as any}
+                customArrowColor="rgba(255,170,0,0.7)"
+                animationDuration={150}
               />
             </div>
           </div>
