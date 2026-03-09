@@ -54,6 +54,7 @@ const App = () => (
             
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/donate" element={<Donate />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-canceled" element={<PaymentCanceled />} />
             
