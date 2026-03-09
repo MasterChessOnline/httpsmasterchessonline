@@ -8,9 +8,15 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+interface TopDonor {
+  total: number;
+  count: number;
+}
+
 const Donate = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [topDonors, setTopDonors] = useState<TopDonor[]>([]);
   const { toast } = useToast();
 
   const handleStripeDonation = async (amountInCents: number) => {
