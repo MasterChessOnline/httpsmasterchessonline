@@ -25,7 +25,7 @@ const Donate = () => {
       const { data, error } = await supabase.functions.invoke("create-payment", {
         body: {
           amount: amountInCents,
-          currency: "eur",
+          currency: "usd",
           itemType: "donation",
           returnUrl: window.location.origin,
         },
