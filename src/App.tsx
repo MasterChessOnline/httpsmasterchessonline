@@ -25,6 +25,7 @@ import Achievements from "./pages/Achievements";
 
 import NotFound from "./pages/NotFound";
 import Donate from "./pages/Donate";
+import Contact from "./pages/Contact";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 
@@ -53,6 +54,7 @@ const App = () => (
             
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/donate" element={<Donate />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-canceled" element={<PaymentCanceled />} />
             
