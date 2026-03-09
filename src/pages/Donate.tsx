@@ -52,7 +52,7 @@ const Donate = () => {
     if (isNaN(amount) || amount < 1) {
       toast({
         title: "Invalid amount",
-        description: "Please enter an amount of 1€ or more.",
+        description: "Please enter an amount of $1 or more.",
         variant: "destructive",
       });
       return;
