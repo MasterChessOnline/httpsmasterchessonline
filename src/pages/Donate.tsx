@@ -170,7 +170,46 @@ const Donate = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 container mx-auto px-6 py-24">
-        <div className="max-w-2xl mx-auto space-y-8">
+          <div className="max-w-2xl mx-auto space-y-8">
+            {/* Donation Goal Progress */}
+            {donationProgress.goal && (
+              <div className="bg-card/50 backdrop-blur-sm border border-primary/20 rounded-2xl p-6">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold text-primary">{donationProgress.goal.title}</h2>
+                    {donationProgress.goal.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{donationProgress.goal.description}</p>
+                    )}
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">
+                        ${(donationProgress.currentAmount / 100).toFixed(2)} raised
+                      </span>
+                      <span className="text-muted-foreground">
+                        ${(donationProgress.goal.target_amount / 100).toFixed(2)} goal
+                      </span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${donationProgress.progressPercentage}%` }}
+                      />
+                    </div>
+                    <div className="text-center">
+                      <span className="text-2xl font-bold text-primary">
+                        {donationProgress.progressPercentage.toFixed(1)}%
+                      </span>
+                      <span className="text-muted-foreground ml-2">complete</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          <div className="max-w-2xl mx-auto space-y-8">
           <div className="text-center space-y-4">
             <Heart className="h-12 w-12 text-primary mx-auto animate-pulse" />
             <h1 className="text-4xl font-bold font-display tracking-tight">Support MasterChess</h1>
