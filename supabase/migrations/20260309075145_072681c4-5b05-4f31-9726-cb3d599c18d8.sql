@@ -1,0 +1,1 @@
+UPDATE public.donation_goals SET target_amount = 10000 WHERE is_active = true;
