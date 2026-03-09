@@ -117,8 +117,8 @@ const Donate = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mt-12">
-            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
+          <div className="grid lg:grid-cols-3 gap-6 mt-12">
+            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm lg:col-span-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-primary" />
@@ -163,6 +163,47 @@ const Donate = () => {
               </CardContent>
             </Card>
 
+            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-primary" />
+                  Top Supporters
+                </CardTitle>
+                <CardDescription>Our amazing community</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {topDonors.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Be the first supporter!
+                  </p>
+                ) : (
+                  topDonors.map((donor, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
+                    >
+                      <div className="flex items-center gap-2">
+                        {getRankIcon(index)}
+                        <span className="text-sm font-medium">
+                          Anonymous Supporter #{index + 1}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-primary">
+                          {(donor.total / 100).toFixed(2)}€
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {donor.count} donation{donor.count !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-8">
             <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
