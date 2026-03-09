@@ -56,6 +56,42 @@ export type Database = {
         }
         Relationships: []
       }
+      donation_goals: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          target_amount: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          target_amount: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          target_amount?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       friendships: {
         Row: {
           created_at: string

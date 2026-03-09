@@ -13,10 +13,29 @@ interface TopDonor {
   count: number;
 }
 
+interface DonationGoal {
+  id: string;
+  title: string;
+  description: string | null;
+  target_amount: number;
+  currency: string;
+}
+
+interface DonationProgress {
+  goal: DonationGoal | null;
+  currentAmount: number;
+  progressPercentage: number;
+}
+
 const Donate = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [topDonors, setTopDonors] = useState<TopDonor[]>([]);
+  const [donationProgress, setDonationProgress] = useState<DonationProgress>({
+    goal: null,
+    currentAmount: 0,
+    progressPercentage: 0,
+  });
   const { toast } = useToast();
 
   const handleStripeDonation = async (amountInCents: number) => {
@@ -93,8 +112,51 @@ const Donate = () => {
     }
   };
 
+  const fetchDonationProgress = async () => {
+    try {
+      // Get active donation goal
+      const { data: goalData, error: goalError } = await supabase
+        .from("donation_goals")
+        .select("*")
+        .eq("is_active", true)
+        .single();
+
+      if (goalError) {
+        console.error("Error fetching donation goal:", goalError);
+        return;
+      }
+
+      // Get total donations for the goal currency
+      const { data: donationData, error: donationError } = await supabase
+        .from("purchases")
+        .select("amount")
+        .eq("item_type", "donation")
+        .eq("status", "completed")
+        .eq("currency", goalData.currency);
+
+      if (donationError) {
+        console.error("Error fetching donations:", donationError);
+        return;
+      }
+
+      const currentAmount = donationData?.reduce((sum, donation) => sum + donation.amount, 0) || 0;
+      const progressPercentage = goalData.target_amount > 0 
+        ? Math.min((currentAmount / goalData.target_amount) * 100, 100) 
+        : 0;
+
+      setDonationProgress({
+        goal: goalData,
+        currentAmount,
+        progressPercentage,
+      });
+    } catch (error) {
+      console.error("Error fetching donation progress:", error);
+    }
+  };
+
   useEffect(() => {
     fetchTopDonors();
+    fetchDonationProgress();
   }, []);
 
   const getRankIcon = (index: number) => {
@@ -108,8 +170,46 @@ const Donate = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 container mx-auto px-6 py-24">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <div className="text-center space-y-4">
+          <div className="max-w-2xl mx-auto space-y-8">
+            {/* Donation Goal Progress */}
+            {donationProgress.goal && (
+              <div className="bg-card/50 backdrop-blur-sm border border-primary/20 rounded-2xl p-6">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold text-primary">{donationProgress.goal.title}</h2>
+                    {donationProgress.goal.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{donationProgress.goal.description}</p>
+                    )}
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">
+                        ${(donationProgress.currentAmount / 100).toFixed(2)} raised
+                      </span>
+                      <span className="text-muted-foreground">
+                        ${(donationProgress.goal.target_amount / 100).toFixed(2)} goal
+                      </span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${donationProgress.progressPercentage}%` }}
+                      />
+                    </div>
+                    <div className="text-center">
+                      <span className="text-2xl font-bold text-primary">
+                        {donationProgress.progressPercentage.toFixed(1)}%
+                      </span>
+                      <span className="text-muted-foreground ml-2">complete</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="text-center space-y-4">
             <Heart className="h-12 w-12 text-primary mx-auto animate-pulse" />
             <h1 className="text-4xl font-bold font-display tracking-tight">Support MasterChess</h1>
             <p className="text-muted-foreground text-lg">
