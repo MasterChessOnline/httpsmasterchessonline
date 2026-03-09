@@ -13,6 +13,20 @@ interface TopDonor {
   count: number;
 }
 
+interface DonationGoal {
+  id: string;
+  title: string;
+  description: string | null;
+  target_amount: number;
+  currency: string;
+}
+
+interface DonationProgress {
+  goal: DonationGoal | null;
+  currentAmount: number;
+  progressPercentage: number;
+}
+
 const Donate = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [loading, setLoading] = useState(false);
