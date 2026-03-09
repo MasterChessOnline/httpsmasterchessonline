@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Heart, CreditCard } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, CreditCard, Trophy, Medal, Crown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,15 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+interface TopDonor {
+  total: number;
+  count: number;
+}
+
 const Donate = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [topDonors, setTopDonors] = useState<TopDonor[]>([]);
   const { toast } = useToast();
 
   const handleStripeDonation = async (amountInCents: number) => {
@@ -54,6 +60,50 @@ const Donate = () => {
     handleStripeDonation(Math.round(amount * 100));
   };
 
+  const fetchTopDonors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("purchases")
+        .select("user_id, amount")
+        .eq("item_type", "donation")
+        .eq("status", "completed");
+
+      if (error) throw error;
+
+      // Group by user_id and sum amounts, then sort by total
+      const donorMap = new Map<string | null, { total: number; count: number }>();
+      
+      data?.forEach((purchase) => {
+        const key = purchase.user_id || "anonymous";
+        const existing = donorMap.get(key) || { total: 0, count: 0 };
+        donorMap.set(key, {
+          total: existing.total + purchase.amount,
+          count: existing.count + 1,
+        });
+      });
+
+      // Convert to array and sort by total amount
+      const sortedDonors = Array.from(donorMap.values())
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10); // Top 10
+
+      setTopDonors(sortedDonors);
+    } catch (error) {
+      console.error("Error fetching top donors:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopDonors();
+  }, []);
+
+  const getRankIcon = (index: number) => {
+    if (index === 0) return <Crown className="h-5 w-5 text-primary" />;
+    if (index === 1) return <Medal className="h-5 w-5 text-muted-foreground" />;
+    if (index === 2) return <Medal className="h-5 w-5 text-secondary-foreground" />;
+    return <Trophy className="h-4 w-4 text-primary/60" />;
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -67,8 +117,8 @@ const Donate = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mt-12">
-            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
+          <div className="grid lg:grid-cols-3 gap-6 mt-12">
+            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm lg:col-span-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-primary" />
@@ -113,6 +163,47 @@ const Donate = () => {
               </CardContent>
             </Card>
 
+            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-primary" />
+                  Top Supporters
+                </CardTitle>
+                <CardDescription>Our amazing community</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {topDonors.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Be the first supporter!
+                  </p>
+                ) : (
+                  topDonors.map((donor, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
+                    >
+                      <div className="flex items-center gap-2">
+                        {getRankIcon(index)}
+                        <span className="text-sm font-medium">
+                          Anonymous Supporter
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-primary">
+                          {(donor.total / 100).toFixed(2)}€
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {donor.count} donation{donor.count !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-8">
             <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
