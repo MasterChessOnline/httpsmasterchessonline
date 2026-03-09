@@ -116,22 +116,21 @@ const Donate = () => {
             <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Coffee className="h-5 w-5 text-[#0070ba]" />
-                  PayPal
+                  <Heart className="h-5 w-5 text-primary" />
+                  Why Donate?
                 </CardTitle>
-                <CardDescription>Quick and easy via PayPal.me</CardDescription>
+                <CardDescription>Your support makes a difference</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Prefer PayPal? You can send a donation directly through our PayPal.me link.
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Every donation helps us:
                 </p>
-                <Button 
-                  className="w-full bg-[#0070ba] hover:bg-[#003087] text-white"
-                  onClick={() => window.open('https://paypal.me/masterchess', '_blank')}
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Donate via PayPal
-                </Button>
+                <ul className="text-sm text-muted-foreground space-y-2 list-disc list-inside">
+                  <li>Keep servers running 24/7</li>
+                  <li>Develop new lessons & puzzles</li>
+                  <li>Host free tournaments</li>
+                  <li>Keep the core experience ad-free</li>
+                </ul>
               </CardContent>
             </Card>
           </div>
