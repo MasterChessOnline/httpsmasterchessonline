@@ -136,7 +136,7 @@ const Donate = () => {
                       disabled={loading}
                       className="border-primary/20 hover:bg-primary/10"
                     >
-                      {amount}€
+                      ${amount}
                     </Button>
                   ))}
                 </div>
