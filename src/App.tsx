@@ -25,6 +25,7 @@ import Achievements from "./pages/Achievements";
 
 import NotFound from "./pages/NotFound";
 import Donate from "./pages/Donate";
+import Contact from "./pages/Contact";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 
