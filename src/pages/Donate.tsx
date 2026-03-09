@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Coffee, Heart, CreditCard, ExternalLink } from "lucide-react";
+import { Heart, CreditCard } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
