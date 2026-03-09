@@ -190,7 +190,7 @@ const Donate = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-primary">
-                          {(donor.total / 100).toFixed(2)}€
+                          ${(donor.total / 100).toFixed(2)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {donor.count} donation{donor.count !== 1 ? 's' : ''}
