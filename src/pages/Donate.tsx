@@ -185,7 +185,7 @@ const Donate = () => {
                       <div className="flex items-center gap-2">
                         {getRankIcon(index)}
                         <span className="text-sm font-medium">
-                          Anonymous Supporter #{index + 1}
+                          Anonymous Supporter
                         </span>
                       </div>
                       <div className="text-right">
