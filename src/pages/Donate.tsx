@@ -60,6 +60,50 @@ const Donate = () => {
     handleStripeDonation(Math.round(amount * 100));
   };
 
+  const fetchTopDonors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("purchases")
+        .select("user_id, amount")
+        .eq("item_type", "donation")
+        .eq("status", "completed");
+
+      if (error) throw error;
+
+      // Group by user_id and sum amounts, then sort by total
+      const donorMap = new Map<string | null, { total: number; count: number }>();
+      
+      data?.forEach((purchase) => {
+        const key = purchase.user_id || "anonymous";
+        const existing = donorMap.get(key) || { total: 0, count: 0 };
+        donorMap.set(key, {
+          total: existing.total + purchase.amount,
+          count: existing.count + 1,
+        });
+      });
+
+      // Convert to array and sort by total amount
+      const sortedDonors = Array.from(donorMap.values())
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10); // Top 10
+
+      setTopDonors(sortedDonors);
+    } catch (error) {
+      console.error("Error fetching top donors:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopDonors();
+  }, []);
+
+  const getRankIcon = (index: number) => {
+    if (index === 0) return <Crown className="h-5 w-5 text-yellow-500" />;
+    if (index === 1) return <Medal className="h-5 w-5 text-gray-400" />;
+    if (index === 2) return <Medal className="h-5 w-5 text-amber-600" />;
+    return <Trophy className="h-4 w-4 text-primary/60" />;
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
