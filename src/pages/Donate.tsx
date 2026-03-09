@@ -209,7 +209,7 @@ const Donate = () => {
               </div>
             )}
 
-          <div className="max-w-2xl mx-auto space-y-8">
+            <div className="text-center space-y-4">
           <div className="text-center space-y-4">
             <Heart className="h-12 w-12 text-primary mx-auto animate-pulse" />
             <h1 className="text-4xl font-bold font-display tracking-tight">Support MasterChess</h1>
