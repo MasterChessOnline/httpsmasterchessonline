@@ -31,6 +31,11 @@ const Donate = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [topDonors, setTopDonors] = useState<TopDonor[]>([]);
+  const [donationProgress, setDonationProgress] = useState<DonationProgress>({
+    goal: null,
+    currentAmount: 0,
+    progressPercentage: 0,
+  });
   const { toast } = useToast();
 
   const handleStripeDonation = async (amountInCents: number) => {
