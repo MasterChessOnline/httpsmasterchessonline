@@ -25,7 +25,7 @@ const Donate = () => {
       const { data, error } = await supabase.functions.invoke("create-payment", {
         body: {
           amount: amountInCents,
-          currency: "eur",
+          currency: "usd",
           itemType: "donation",
           returnUrl: window.location.origin,
         },
@@ -52,7 +52,7 @@ const Donate = () => {
     if (isNaN(amount) || amount < 1) {
       toast({
         title: "Invalid amount",
-        description: "Please enter an amount of 1€ or more.",
+        description: "Please enter an amount of $1 or more.",
         variant: "destructive",
       });
       return;
@@ -136,7 +136,7 @@ const Donate = () => {
                       disabled={loading}
                       className="border-primary/20 hover:bg-primary/10"
                     >
-                      {amount}€
+                      ${amount}
                     </Button>
                   ))}
                 </div>
@@ -151,7 +151,7 @@ const Donate = () => {
                       onChange={(e) => setCustomAmount(e.target.value)}
                       className="pr-8"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
                   </div>
                   <Button 
                     onClick={handleCustomDonation}
@@ -190,7 +190,7 @@ const Donate = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-primary">
-                          {(donor.total / 100).toFixed(2)}€
+                          ${(donor.total / 100).toFixed(2)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {donor.count} donation{donor.count !== 1 ? 's' : ''}
