@@ -112,8 +112,51 @@ const Donate = () => {
     }
   };
 
+  const fetchDonationProgress = async () => {
+    try {
+      // Get active donation goal
+      const { data: goalData, error: goalError } = await supabase
+        .from("donation_goals")
+        .select("*")
+        .eq("is_active", true)
+        .single();
+
+      if (goalError) {
+        console.error("Error fetching donation goal:", goalError);
+        return;
+      }
+
+      // Get total donations for the goal currency
+      const { data: donationData, error: donationError } = await supabase
+        .from("purchases")
+        .select("amount")
+        .eq("item_type", "donation")
+        .eq("status", "completed")
+        .eq("currency", goalData.currency);
+
+      if (donationError) {
+        console.error("Error fetching donations:", donationError);
+        return;
+      }
+
+      const currentAmount = donationData?.reduce((sum, donation) => sum + donation.amount, 0) || 0;
+      const progressPercentage = goalData.target_amount > 0 
+        ? Math.min((currentAmount / goalData.target_amount) * 100, 100) 
+        : 0;
+
+      setDonationProgress({
+        goal: goalData,
+        currentAmount,
+        progressPercentage,
+      });
+    } catch (error) {
+      console.error("Error fetching donation progress:", error);
+    }
+  };
+
   useEffect(() => {
     fetchTopDonors();
+    fetchDonationProgress();
   }, []);
 
   const getRankIcon = (index: number) => {
