@@ -149,10 +149,10 @@ const Premium = () => {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: Brain, label: "3 puzzles/day", desc: "Easy & Medium only" },
-                { icon: Trophy, label: "Open tournaments", desc: "Standard access" },
-                { icon: TrendingUp, label: "ELO leaderboard", desc: "Public rankings" },
-                { icon: Swords, label: "Play online", desc: "All time controls" },
+                { icon: Swords, label: "Play vs Computer", desc: "Basic AI opponent" },
+                { icon: Trophy, label: "Public leaderboard", desc: "View rankings" },
+                { icon: TrendingUp, label: "ELO tracking", desc: "Basic stats" },
+                { icon: Brain, label: "Beginner lessons", desc: "Limited access" },
               ].map(f => (
                 <div key={f.label} className="rounded-lg border border-border/50 bg-muted/20 p-3 text-center">
                   <f.icon className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
