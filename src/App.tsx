@@ -4,10 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import PremiumGuard from "@/components/PremiumGuard";
 import Index from "./pages/Index";
 import Play from "./pages/Play";
 import PlayOnline from "./pages/PlayOnline";
-
 import Learn from "./pages/Learn";
 import Tournaments from "./pages/Tournaments";
 import Login from "./pages/Login";
@@ -20,9 +20,7 @@ import Friends from "./pages/Friends";
 import Premium from "./pages/Premium";
 import PremiumChat from "./pages/PremiumChat";
 import VideoLessons from "./pages/VideoLessons";
-
 import Achievements from "./pages/Achievements";
-
 import NotFound from "./pages/NotFound";
 import Donate from "./pages/Donate";
 import Contact from "./pages/Contact";
@@ -41,17 +39,15 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/play" element={<Play />} />
-            <Route path="/play/online" element={<PlayOnline />} />
-            
-            <Route path="/learn" element={<Learn />} />
-            <Route path="/tournaments" element={<Tournaments />} />
+            <Route path="/play/online" element={<PremiumGuard><PlayOnline /></PremiumGuard>} />
+            <Route path="/learn" element={<PremiumGuard><Learn /></PremiumGuard>} />
+            <Route path="/tournaments" element={<PremiumGuard requiredTier="elite"><Tournaments /></PremiumGuard>} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/premium" element={<Premium />} />
-            <Route path="/premium/chat" element={<PremiumChat />} />
-            <Route path="/premium/lessons" element={<VideoLessons />} />
-            
+            <Route path="/premium/chat" element={<PremiumGuard><PremiumChat /></PremiumGuard>} />
+            <Route path="/premium/lessons" element={<PremiumGuard requiredTier="pro"><VideoLessons /></PremiumGuard>} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/contact" element={<Contact />} />

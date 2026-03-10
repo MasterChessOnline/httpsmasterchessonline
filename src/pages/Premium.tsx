@@ -14,7 +14,7 @@ import { TIERS, getTierLevel, type TierKey } from "@/lib/premium-tiers";
 const premiumFeatures = [
   { icon: MessageCircle, label: "Strategy Lounge", description: "Real-time chat with premium members", href: "/premium/chat" },
   { icon: Play, label: "Video Lessons", description: "Advanced tutorials and masterclasses", href: "/premium/lessons" },
-  { icon: Target, label: "Personalized Puzzles", description: "Puzzles matched to your skill level", href: "/premium/puzzles" },
+  { icon: Trophy, label: "Tournaments", description: "Compete in elite tournaments", href: "/tournaments" },
   { icon: Award, label: "Achievements", description: "Earn badges and collectible rewards", href: "/achievements" },
 ];
 
@@ -41,15 +41,13 @@ const tierBadgeColors: Record<TierKey, string> = {
 
 // Feature comparison table
 const FEATURE_ROWS = [
-  { label: "Daily Puzzles", free: "3/day", premium: "Unlimited", pro: "Unlimited", elite: "Unlimited", gm: "Unlimited" },
-  { label: "Puzzle Difficulties", free: "Easy & Medium", premium: "All", pro: "All + Personalized", elite: "All + Personalized", gm: "All + Personalized" },
+  { label: "Online Play", free: "Limited", premium: "Unlimited", pro: "Unlimited", elite: "Unlimited", gm: "Unlimited" },
   { label: "Courses", free: "Beginner only", premium: "Beginner & Intermediate", pro: "All including Advanced", elite: "All including Advanced", gm: "All including Advanced" },
   { label: "Video Lessons", free: false, premium: "Basic", pro: "All + Advanced", elite: "All + Advanced", gm: "All + Advanced" },
   { label: "Strategy Lounge Chat", free: false, premium: true, pro: true, elite: true, gm: true },
   { label: "Ad-free Experience", free: false, premium: true, pro: true, elite: true, gm: true },
   { label: "Premium Profile Badge", free: false, premium: true, pro: true, elite: true, gm: true },
   { label: "Advanced Game Analytics", free: false, premium: "Basic", pro: "Full", elite: "Full", gm: "Full" },
-  { label: "Personalized Puzzle Training", free: false, premium: false, pro: true, elite: true, gm: true },
   { label: "VIP Leaderboard", free: false, premium: false, pro: false, elite: true, gm: true },
   { label: "VIP Tournaments", free: false, premium: false, pro: false, elite: true, gm: true },
   { label: "Virtual Trophies & Collectibles", free: false, premium: false, pro: false, elite: true, gm: true },
@@ -151,10 +149,10 @@ const Premium = () => {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: Brain, label: "3 puzzles/day", desc: "Easy & Medium only" },
-                { icon: Trophy, label: "Open tournaments", desc: "Standard access" },
-                { icon: TrendingUp, label: "ELO leaderboard", desc: "Public rankings" },
-                { icon: Swords, label: "Play online", desc: "All time controls" },
+                { icon: Swords, label: "Play vs Computer", desc: "Basic AI opponent" },
+                { icon: Trophy, label: "Public leaderboard", desc: "View rankings" },
+                { icon: TrendingUp, label: "ELO tracking", desc: "Basic stats" },
+                { icon: Brain, label: "Beginner lessons", desc: "Limited access" },
               ].map(f => (
                 <div key={f.label} className="rounded-lg border border-border/50 bg-muted/20 p-3 text-center">
                   <f.icon className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
