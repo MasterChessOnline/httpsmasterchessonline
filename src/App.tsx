@@ -39,17 +39,15 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/play" element={<Play />} />
-            <Route path="/play/online" element={<PlayOnline />} />
-            
-            <Route path="/learn" element={<Learn />} />
-            <Route path="/tournaments" element={<Tournaments />} />
+            <Route path="/play/online" element={<PremiumGuard><PlayOnline /></PremiumGuard>} />
+            <Route path="/learn" element={<PremiumGuard><Learn /></PremiumGuard>} />
+            <Route path="/tournaments" element={<PremiumGuard requiredTier="elite"><Tournaments /></PremiumGuard>} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/premium" element={<Premium />} />
-            <Route path="/premium/chat" element={<PremiumChat />} />
-            <Route path="/premium/lessons" element={<VideoLessons />} />
-            
+            <Route path="/premium/chat" element={<PremiumGuard><PremiumChat /></PremiumGuard>} />
+            <Route path="/premium/lessons" element={<PremiumGuard requiredTier="pro"><VideoLessons /></PremiumGuard>} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/contact" element={<Contact />} />
