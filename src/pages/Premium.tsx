@@ -14,7 +14,7 @@ import { TIERS, getTierLevel, type TierKey } from "@/lib/premium-tiers";
 const premiumFeatures = [
   { icon: MessageCircle, label: "Strategy Lounge", description: "Real-time chat with premium members", href: "/premium/chat" },
   { icon: Play, label: "Video Lessons", description: "Advanced tutorials and masterclasses", href: "/premium/lessons" },
-  { icon: Target, label: "Personalized Puzzles", description: "Puzzles matched to your skill level", href: "/premium/puzzles" },
+  { icon: Trophy, label: "Tournaments", description: "Compete in elite tournaments", href: "/tournaments" },
   { icon: Award, label: "Achievements", description: "Earn badges and collectible rewards", href: "/achievements" },
 ];
 
