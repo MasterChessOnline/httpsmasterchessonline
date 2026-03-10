@@ -41,15 +41,13 @@ const tierBadgeColors: Record<TierKey, string> = {
 
 // Feature comparison table
 const FEATURE_ROWS = [
-  { label: "Daily Puzzles", free: "3/day", premium: "Unlimited", pro: "Unlimited", elite: "Unlimited", gm: "Unlimited" },
-  { label: "Puzzle Difficulties", free: "Easy & Medium", premium: "All", pro: "All + Personalized", elite: "All + Personalized", gm: "All + Personalized" },
+  { label: "Online Play", free: "Limited", premium: "Unlimited", pro: "Unlimited", elite: "Unlimited", gm: "Unlimited" },
   { label: "Courses", free: "Beginner only", premium: "Beginner & Intermediate", pro: "All including Advanced", elite: "All including Advanced", gm: "All including Advanced" },
   { label: "Video Lessons", free: false, premium: "Basic", pro: "All + Advanced", elite: "All + Advanced", gm: "All + Advanced" },
   { label: "Strategy Lounge Chat", free: false, premium: true, pro: true, elite: true, gm: true },
   { label: "Ad-free Experience", free: false, premium: true, pro: true, elite: true, gm: true },
   { label: "Premium Profile Badge", free: false, premium: true, pro: true, elite: true, gm: true },
   { label: "Advanced Game Analytics", free: false, premium: "Basic", pro: "Full", elite: "Full", gm: "Full" },
-  { label: "Personalized Puzzle Training", free: false, premium: false, pro: true, elite: true, gm: true },
   { label: "VIP Leaderboard", free: false, premium: false, pro: false, elite: true, gm: true },
   { label: "VIP Tournaments", free: false, premium: false, pro: false, elite: true, gm: true },
   { label: "Virtual Trophies & Collectibles", free: false, premium: false, pro: false, elite: true, gm: true },
