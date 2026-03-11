@@ -303,6 +303,14 @@ const Tournaments = () => {
                           <h2 className="font-display text-base font-semibold text-foreground">{t.name}</h2>
                           <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${style.bg}`}>{style.label}</span>
                           <Badge className="bg-muted text-muted-foreground border-border text-[10px]">Free</Badge>
+                          {(() => {
+                            const FmtIcon = FORMAT_ICONS[t.format];
+                            return (
+                              <Badge className="bg-secondary/50 text-secondary-foreground border-secondary/30 text-[10px]">
+                                <FmtIcon className="w-2.5 h-2.5 mr-0.5" /> {FORMAT_LABELS[t.format].label}
+                              </Badge>
+                            );
+                          })()}
                           {t.ratingRange && (
                             <Badge className="bg-accent/20 text-accent-foreground border-accent/30 text-[10px]">
                               {t.ratingRange}
