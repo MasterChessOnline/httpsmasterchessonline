@@ -247,7 +247,7 @@ const Tournaments = () => {
             </div>
 
             {/* Status filter */}
-            <div className="flex justify-center gap-2 mb-8">
+            <div className="flex justify-center gap-2 mb-4">
               {["all", "live", "registering", "upcoming"].map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-all border ${
@@ -257,6 +257,23 @@ const Tournaments = () => {
                   {s === "all" ? "All Status" : s.charAt(0).toUpperCase() + s.slice(1)}
                 </button>
               ))}
+            </div>
+
+            {/* Format filter */}
+            <div className="flex justify-center gap-2 mb-8">
+              {(["all", "swiss", "round-robin", "single-elimination"] as const).map((f) => {
+                const FormatIcon = f !== "all" ? FORMAT_ICONS[f] : Trophy;
+                return (
+                  <button key={f} onClick={() => setFormatFilter(f)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all border ${
+                      formatFilter === f ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"
+                    }`}
+                  >
+                    <FormatIcon className="h-3 w-3" />
+                    {f === "all" ? "All Formats" : FORMAT_LABELS[f].label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Free tier note */}
