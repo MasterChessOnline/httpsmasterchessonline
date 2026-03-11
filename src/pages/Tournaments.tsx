@@ -29,14 +29,22 @@ const Tournaments = () => {
   const navigate = useNavigate();
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [formatFilter, setFormatFilter] = useState<"all" | TournamentFormat>("all");
   const [viewMode, setViewMode] = useState<"open" | "premium" | "vip">("open");
 
   const isElitePlus = hasAccess(subscriptionTier, "elite");
   const isGrandmaster = hasAccess(subscriptionTier, "grandmaster");
 
+  const FORMAT_ICONS: Record<TournamentFormat, typeof GitBranch> = {
+    swiss: RefreshCw,
+    "round-robin": Network,
+    "single-elimination": GitBranch,
+  };
+
   const filtered = TOURNAMENTS.filter((t) => {
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
+    if (formatFilter !== "all" && t.format !== formatFilter) return false;
     return true;
   });
 
