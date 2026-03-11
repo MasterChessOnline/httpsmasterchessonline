@@ -5,8 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, Users, Zap, Swords, BookOpen, Timer, Lock, Crown, Gem, Shield, Star } from "lucide-react";
-import { TOURNAMENTS, Tournament } from "@/lib/tournaments-data";
+import { Trophy, Clock, Users, Zap, Swords, BookOpen, Timer, Lock, Crown, Gem, Shield, Star, GitBranch, RefreshCw, Network } from "lucide-react";
+import { TOURNAMENTS, Tournament, FORMAT_LABELS, TournamentFormat } from "@/lib/tournaments-data";
 import { hasAccess } from "@/lib/premium-tiers";
 
 const CATEGORY_OPTIONS = [
@@ -29,14 +29,22 @@ const Tournaments = () => {
   const navigate = useNavigate();
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [formatFilter, setFormatFilter] = useState<"all" | TournamentFormat>("all");
   const [viewMode, setViewMode] = useState<"open" | "premium" | "vip">("open");
 
   const isElitePlus = hasAccess(subscriptionTier, "elite");
   const isGrandmaster = hasAccess(subscriptionTier, "grandmaster");
 
+  const FORMAT_ICONS: Record<TournamentFormat, typeof GitBranch> = {
+    swiss: RefreshCw,
+    "round-robin": Network,
+    "single-elimination": GitBranch,
+  };
+
   const filtered = TOURNAMENTS.filter((t) => {
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
+    if (formatFilter !== "all" && t.format !== formatFilter) return false;
     return true;
   });
 
@@ -239,7 +247,7 @@ const Tournaments = () => {
             </div>
 
             {/* Status filter */}
-            <div className="flex justify-center gap-2 mb-8">
+            <div className="flex justify-center gap-2 mb-4">
               {["all", "live", "registering", "upcoming"].map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-all border ${
@@ -249,6 +257,23 @@ const Tournaments = () => {
                   {s === "all" ? "All Status" : s.charAt(0).toUpperCase() + s.slice(1)}
                 </button>
               ))}
+            </div>
+
+            {/* Format filter */}
+            <div className="flex justify-center gap-2 mb-8">
+              {(["all", "swiss", "round-robin", "single-elimination"] as const).map((f) => {
+                const FormatIcon = f !== "all" ? FORMAT_ICONS[f] : Trophy;
+                return (
+                  <button key={f} onClick={() => setFormatFilter(f)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all border ${
+                      formatFilter === f ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"
+                    }`}
+                  >
+                    <FormatIcon className="h-3 w-3" />
+                    {f === "all" ? "All Formats" : FORMAT_LABELS[f].label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Free tier note */}
@@ -278,6 +303,14 @@ const Tournaments = () => {
                           <h2 className="font-display text-base font-semibold text-foreground">{t.name}</h2>
                           <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${style.bg}`}>{style.label}</span>
                           <Badge className="bg-muted text-muted-foreground border-border text-[10px]">Free</Badge>
+                          {(() => {
+                            const FmtIcon = FORMAT_ICONS[t.format];
+                            return (
+                              <Badge className="bg-secondary/50 text-secondary-foreground border-secondary/30 text-[10px]">
+                                <FmtIcon className="w-2.5 h-2.5 mr-0.5" /> {FORMAT_LABELS[t.format].label}
+                              </Badge>
+                            );
+                          })()}
                           {t.ratingRange && (
                             <Badge className="bg-accent/20 text-accent-foreground border-accent/30 text-[10px]">
                               {t.ratingRange}

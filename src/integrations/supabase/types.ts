@@ -484,6 +484,7 @@ export type Database = {
           current_round: number
           description: string
           entry_fee: number
+          format: string
           id: string
           max_players: number
           name: string
@@ -502,6 +503,7 @@ export type Database = {
           current_round?: number
           description?: string
           entry_fee?: number
+          format?: string
           id?: string
           max_players?: number
           name: string
@@ -520,6 +522,7 @@ export type Database = {
           current_round?: number
           description?: string
           entry_fee?: number
+          format?: string
           id?: string
           max_players?: number
           name?: string
