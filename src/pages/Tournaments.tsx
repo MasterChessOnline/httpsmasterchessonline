@@ -5,8 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Clock, Users, Zap, Swords, BookOpen, Timer, Lock, Crown, Gem, Shield, Star } from "lucide-react";
-import { TOURNAMENTS, Tournament } from "@/lib/tournaments-data";
+import { Trophy, Clock, Users, Zap, Swords, BookOpen, Timer, Lock, Crown, Gem, Shield, Star, GitBranch, RefreshCw, Network } from "lucide-react";
+import { TOURNAMENTS, Tournament, FORMAT_LABELS, TournamentFormat } from "@/lib/tournaments-data";
 import { hasAccess } from "@/lib/premium-tiers";
 
 const CATEGORY_OPTIONS = [
