@@ -4,6 +4,8 @@ export interface TournamentTrophy {
   emoji: string;
 }
 
+export type TournamentFormat = "swiss" | "round-robin" | "single-elimination";
+
 export interface Tournament {
   id: string;
   name: string;
@@ -16,6 +18,7 @@ export interface Tournament {
   startDate: string;
   prize: string;
   category: "blitz" | "rapid" | "classical" | "themed";
+  format: TournamentFormat;
   rounds: number;
   ratingRange?: string;
   trophies: TournamentTrophy[];
