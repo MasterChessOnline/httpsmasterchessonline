@@ -66,7 +66,7 @@ export default function GameControls({
               <p className="text-[10px] text-muted-foreground">Choose difficulty</p>
             </div>
           </div>
-          <div className="grid grid-cols-5 gap-1">
+          <div className="grid grid-cols-3 gap-1.5">
             {BOT_LEVELS.map((lvl) => (
               <button
                 key={lvl.value}
