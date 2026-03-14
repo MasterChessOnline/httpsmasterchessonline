@@ -1,4 +1,4 @@
-import { ArrowRight, Users, Trophy, Zap, Swords, Crown, Heart } from "lucide-react";
+import { ArrowRight, Users, Trophy, Zap, Crown, BookOpen, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-chess.jpg";
@@ -29,32 +29,30 @@ const HeroSection = () => {
         </div>
 
         <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-8xl opacity-0 animate-fade-up stagger-1">
-          Your Next
+          Learn &amp; Play Chess
           <br />
-          <span className="text-gradient-gold">Grandmaster</span>
-          <br />
-          Move Awaits
+          <span className="text-gradient-gold">with DailyChess_12</span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-lg text-lg text-muted-foreground/90 leading-relaxed opacity-0 animate-fade-up stagger-2">
-          Play real opponents, join tournaments, track your rating, and improve — all on one beautifully crafted platform.
+        <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground/90 leading-relaxed opacity-0 animate-fade-up stagger-2">
+          Free online games, lessons, and premium content. Play real opponents, join tournaments, and improve with personalized training.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center opacity-0 animate-fade-up stagger-3">
-          <Link to={user ? "/play/online" : "/signup"}>
+          <Link to={user ? "/play/online" : "/play"}>
             <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 text-base font-semibold shadow-glow-lg group animate-glow-pulse">
-              {user ? "Play Online" : "Start Playing Free"}
+              Play Now
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </Button>
           </Link>
-          <Link to="/play">
+          <Link to="/learn">
             <Button size="lg" variant="outline" className="border-foreground/20 text-foreground hover:bg-foreground/5 px-8 text-base backdrop-blur-md">
-              <Swords className="mr-2 h-4 w-4" /> Play vs Computer
+              <BookOpen className="mr-2 h-4 w-4" /> Book a Lesson
             </Button>
           </Link>
-          <Link to="/donate">
+          <Link to="/premium">
             <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/10 px-8 text-base backdrop-blur-md group">
-              <Heart className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" /> Support Us
+              <Sparkles className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" /> Join Premium
             </Button>
           </Link>
         </div>
@@ -62,7 +60,7 @@ const HeroSection = () => {
         <div className="mt-20 grid grid-cols-3 gap-8 sm:gap-16 opacity-0 animate-fade-up stagger-4">
           {[
             { icon: Users, label: "Active Players", value: "2.4M+" },
-            { icon: Trophy, label: "Tournaments", value: "Live" },
+            { icon: Trophy, label: "Free Tournaments", value: "Daily" },
             { icon: Crown, label: "ELO Tracking", value: "Real-time" },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="text-center group">
