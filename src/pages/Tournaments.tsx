@@ -100,6 +100,7 @@ const Tournaments = () => {
   const { user, isPremium, subscriptionTier } = useAuth();
   const navigate = useNavigate();
   const { streak } = useStreak(user?.id);
+  const { activeTournament } = useActiveTournament(user?.id);
   const [viewTab, setViewTab] = useState<ViewTab>("all");
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
