@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { hasAccess } from "@/lib/premium-tiers";
 import { toast } from "@/hooks/use-toast";
 import { useStreak } from "@/hooks/use-streak";
+import { useActiveTournament } from "@/hooks/use-active-tournament";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
