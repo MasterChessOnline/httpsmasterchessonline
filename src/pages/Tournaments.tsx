@@ -357,7 +357,16 @@ const Tournaments = () => {
         {/* ============ TOURNAMENTS ============ */}
         {viewTab === "all" && (
           <div className="mx-auto max-w-2xl">
-            {/* Filters + Create */}
+            {/* Search + Filters + Create */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name or time control (e.g. 3+0, bullet)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 bg-card border-border/50"
+              />
+            </div>
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <div className="flex gap-1.5 flex-wrap">
                 {CATEGORY_OPTIONS.map((opt) => (
