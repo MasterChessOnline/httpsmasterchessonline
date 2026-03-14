@@ -16,6 +16,7 @@ import { hasAccess } from "@/lib/premium-tiers";
 import { toast } from "@/hooks/use-toast";
 import { useStreak } from "@/hooks/use-streak";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
+import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
