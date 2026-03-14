@@ -93,7 +93,7 @@ const Tournaments = () => {
   const [viewTab, setViewTab] = useState<ViewTab>("all");
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-
+  const [searchQuery, setSearchQuery] = useState("");
   const [dbTournaments, setDbTournaments] = useState<DbTournament[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
   const [creating, setCreating] = useState(false);
