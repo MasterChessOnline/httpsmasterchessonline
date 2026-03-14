@@ -296,10 +296,15 @@ const Tournaments = () => {
           </div>
           <div className="flex flex-col gap-1.5 shrink-0">
             {t.status === "registering" && !isJoined && (
-              <Button size="sm" onClick={() => handleJoinTournament(t.id)} disabled={isJoiningThis || isFull}>
-                {isJoiningThis ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-                {isFull ? "Full" : "Join"}
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                <Button size="sm" onClick={() => handleJoinTournament(t.id)} disabled={cannotJoin}>
+                  {isJoiningThis ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                  {isFull ? "Full" : hasActiveTournament ? "In Tournament" : "Join"}
+                </Button>
+                {hasActiveTournament && (
+                  <span className="text-[10px] text-muted-foreground">Leave current first</span>
+                )}
+              </div>
             )}
             {t.status === "registering" && isJoined && (
               <Button size="sm" variant="outline" onClick={() => navigate(`/tournaments/${t.id}`)}>
