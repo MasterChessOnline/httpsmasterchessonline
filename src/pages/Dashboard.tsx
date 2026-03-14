@@ -305,6 +305,23 @@ const Dashboard = () => {
                 )}
               </div>
 
+              {/* AI Analysis CTA */}
+              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
+                <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" /> DailyChess_12 Analysis
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Play a game against the DailyChess_12 Bot and get instant AI feedback on your mistakes, strengths, and a performance score.
+                </p>
+                <div className="flex gap-2">
+                  <Link to="/play">
+                    <Button size="sm">
+                      <Swords className="mr-2 h-4 w-4" /> Play vs Bot
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
               {/* Upcoming tournaments */}
               <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
                 <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">

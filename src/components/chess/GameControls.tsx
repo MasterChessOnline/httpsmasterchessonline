@@ -26,11 +26,9 @@ interface GameControlsProps {
 }
 
 const BOT_LEVELS: { value: Difficulty; label: string; rating: string; desc: string }[] = [
-  { value: "beginner", label: "Beginner", rating: "400", desc: "Learning the basics" },
-  { value: "casual", label: "Easy", rating: "800", desc: "Casual opponent" },
-  { value: "intermediate", label: "Intermediate", rating: "1200", desc: "Club-level play" },
-  { value: "advanced", label: "Advanced", rating: "1600", desc: "Tough competition" },
-  { value: "master", label: "Master", rating: "2000", desc: "Elite challenge" },
+  { value: "beginner", label: "Beginner", rating: "600", desc: "Friendly practice, occasional blunders" },
+  { value: "intermediate", label: "Intermediate", rating: "1200", desc: "Solid tactical awareness" },
+  { value: "advanced", label: "Advanced", rating: "1800", desc: "Deep calculation, rarely blunders" },
 ];
 
 export default function GameControls({
@@ -68,7 +66,7 @@ export default function GameControls({
               <p className="text-[10px] text-muted-foreground">Choose difficulty</p>
             </div>
           </div>
-          <div className="grid grid-cols-5 gap-1">
+          <div className="grid grid-cols-3 gap-1.5">
             {BOT_LEVELS.map((lvl) => (
               <button
                 key={lvl.value}
@@ -95,7 +93,7 @@ export default function GameControls({
         <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
           <Timer className="h-3 w-3" /> Time Control
         </p>
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
           {TIME_CONTROLS.map((tc, i) => (
             <button
               key={tc.label}
