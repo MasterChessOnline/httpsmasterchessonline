@@ -287,11 +287,12 @@ Deno.serve(async (req) => {
           if (!pendingPairings || pendingPairings.length === 0) {
             // All games done - auto advance
             if (tournament.current_round >= tournament.total_rounds) {
-              // Tournament finished
+              // Tournament finished - award badges
               await supabase
                 .from("tournaments")
                 .update({ status: "finished" })
                 .eq("id", pairing.tournament_id);
+              await awardTournamentBadges(supabase, pairing.tournament_id);
             } else {
               // Generate next round pairings
               await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
@@ -433,4 +434,48 @@ async function generateNextRound(supabase: any, tournamentId: string, nextRound:
       round_started_at: new Date().toISOString(),
     })
     .eq("id", tournamentId);
+}
+
+async function awardTournamentBadges(supabase: any, tournamentId: string) {
+  // Get final standings
+  const { data: standings } = await supabase
+    .from("tournament_registrations")
+    .select("user_id, score")
+    .eq("tournament_id", tournamentId)
+    .order("score", { ascending: false });
+
+  if (!standings || standings.length === 0) return;
+
+  // Get achievement IDs
+  const { data: achievements } = await supabase
+    .from("achievements")
+    .select("id, key")
+    .in("key", ["tournament_gold", "tournament_silver", "tournament_bronze", "tournament_win"]);
+
+  if (!achievements) return;
+  const achMap = new Map(achievements.map((a: any) => [a.key, a.id]));
+
+  // Award placement badges
+  const placements = [
+    { idx: 0, key: "tournament_gold" },
+    { idx: 1, key: "tournament_silver" },
+    { idx: 2, key: "tournament_bronze" },
+  ];
+
+  for (const { idx, key } of placements) {
+    if (standings[idx] && achMap.has(key)) {
+      await supabase.from("user_achievements").upsert({
+        user_id: standings[idx].user_id,
+        achievement_id: achMap.get(key),
+      }, { onConflict: "user_id,achievement_id", ignoreDuplicates: true }).select();
+    }
+  }
+
+  // Also award tournament_win to 1st place
+  if (standings[0] && achMap.has("tournament_win")) {
+    await supabase.from("user_achievements").upsert({
+      user_id: standings[0].user_id,
+      achievement_id: achMap.get("tournament_win"),
+    }, { onConflict: "user_id,achievement_id", ignoreDuplicates: true }).select();
+  }
 }
