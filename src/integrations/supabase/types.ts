@@ -509,6 +509,36 @@ export type Database = {
           },
         ]
       }
+      tournament_streaks: {
+        Row: {
+          current_streak: number
+          id: string
+          last_participation_date: string | null
+          longest_streak: number
+          total_tournaments_played: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          id?: string
+          last_participation_date?: string | null
+          longest_streak?: number
+          total_tournaments_played?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          id?: string
+          last_participation_date?: string | null
+          longest_streak?: number
+          total_tournaments_played?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tournaments: {
         Row: {
           category: string
