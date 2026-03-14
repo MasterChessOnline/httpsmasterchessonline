@@ -401,7 +401,7 @@ const Tournaments = () => {
               </Button>
             </div>
 
-            <div className="flex gap-1.5 mb-5">
+            <div className="flex gap-1.5 mb-3 flex-wrap">
               {["all", "active", "registering", "finished"].map((s) => (
                 <button key={s} onClick={() => setStatusFilter(s)}
                   className={`rounded-full px-3 py-1 text-[11px] font-medium transition-all border ${
@@ -411,6 +411,33 @@ const Tournaments = () => {
                 </button>
               ))}
             </div>
+
+            {/* Skill tier filter */}
+            <div className="flex gap-1.5 mb-5 flex-wrap">
+              {SKILL_OPTIONS.map((opt) => (
+                <button key={opt.value} onClick={() => setSkillFilter(opt.value)}
+                  className={`rounded-full px-3 py-1 text-[11px] font-medium transition-all border ${
+                    skillFilter === opt.value ? "border-accent bg-accent/20 text-accent-foreground" : "border-border/40 bg-muted/20 text-muted-foreground hover:border-accent/30"
+                  }`}>
+                  {opt.value === "beginner" ? "🟢 " : opt.value === "intermediate" ? "🟡 " : opt.value === "advanced" ? "🔴 " : ""}{opt.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Streak banner */}
+            {user && streak && streak.current_streak > 0 && (
+              <div className="mb-5 rounded-lg border border-accent/30 bg-accent/10 p-3 flex items-center gap-3">
+                <Flame className="w-5 h-5 text-accent-foreground shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    🔥 {streak.current_streak}-day streak!
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {streak.total_tournaments_played} tournaments played · Best streak: {streak.longest_streak} days
+                  </p>
+                </div>
+              </div>
+            )}
 
             {!isPremium && (
               <div className="mb-5 rounded-lg border border-border/40 bg-card p-3 flex items-center gap-3">
