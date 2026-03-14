@@ -35,6 +35,9 @@ const TournamentLobby = () => {
     join, leave, startTournament, sendChat,
   } = useTournament(id);
 
+  const { streak } = useStreak(user?.id);
+  useTournamentNotifications(tournament, myPairing, user?.id);
+
   const [chatInput, setChatInput] = useState("");
   const [joining, setJoining] = useState(false);
   const [starting, setStarting] = useState(false);
