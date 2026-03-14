@@ -320,10 +320,10 @@ const PlayOnline = () => {
                   {/* Time control */}
                   <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Timer className="h-3 w-3" /> Time Control</p>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
                       {TIME_CONTROLS.filter((_, i) => i < TIME_CONTROLS.length - 1).map((t, i) => (
                         <button key={t.label} onClick={() => setTimeControlIdx(i)} disabled={onlineStatus === "searching"}
-                          className={`rounded-lg px-2 py-3 text-center transition-all border text-sm font-medium ${timeControlIdx === i ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"} disabled:opacity-50`}>
+                          className={`rounded-lg px-1.5 py-2.5 text-center transition-all border text-xs font-medium ${timeControlIdx === i ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"} disabled:opacity-50`}>
                           {t.label}
                         </button>
                       ))}

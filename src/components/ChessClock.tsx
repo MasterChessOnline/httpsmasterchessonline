@@ -8,13 +8,24 @@ export interface TimeControl {
 }
 
 export const TIME_CONTROLS: TimeControl[] = [
+  // Bullet
   { label: "1+0", seconds: 60, increment: 0 },
   { label: "1+1", seconds: 60, increment: 1 },
+  { label: "2+1", seconds: 120, increment: 1 },
+  // Blitz
   { label: "3+0", seconds: 180, increment: 0 },
   { label: "3+2", seconds: 180, increment: 2 },
+  { label: "5+0", seconds: 300, increment: 0 },
   { label: "5+3", seconds: 300, increment: 3 },
+  // Rapid
+  { label: "10+0", seconds: 600, increment: 0 },
   { label: "10+5", seconds: 600, increment: 5 },
-  { label: "∞", seconds: 0, increment: 0 }, // unlimited
+  { label: "15+10", seconds: 900, increment: 10 },
+  { label: "30+0", seconds: 1800, increment: 0 },
+  // Classical
+  { label: "60+30", seconds: 3600, increment: 30 },
+  // Unlimited
+  { label: "∞", seconds: 0, increment: 0 },
 ];
 
 interface ChessClockProps {
