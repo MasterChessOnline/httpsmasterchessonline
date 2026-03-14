@@ -49,6 +49,7 @@ const App = () => (
             <Route path="/play/online" element={<PremiumGuard><PlayOnline /></PremiumGuard>} />
             <Route path="/learn" element={<PremiumGuard><Learn /></PremiumGuard>} />
             <Route path="/tournaments" element={<Tournaments />} />
+            <Route path="/tournaments/:id" element={<TournamentLobby />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />
