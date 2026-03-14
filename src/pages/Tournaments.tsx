@@ -212,6 +212,10 @@ const Tournaments = () => {
   const filtered = dbTournaments.filter(t => {
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      if (!t.name.toLowerCase().includes(q) && !t.time_control_label.toLowerCase().includes(q)) return false;
+    }
     return true;
   });
 
