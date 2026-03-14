@@ -24,6 +24,7 @@ interface Notification {
 const Dashboard = () => {
   const { user, profile, isPremium, subscriptionTier, loading } = useAuth();
   const navigate = useNavigate();
+  const { activeTournament } = useActiveTournament(user?.id);
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [puzzleStreak, setPuzzleStreak] = useState(0);
