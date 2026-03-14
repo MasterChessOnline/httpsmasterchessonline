@@ -154,7 +154,7 @@ const Navbar = () => {
           className="border-t border-border/40 glass px-6 py-4 md:hidden animate-in slide-in-from-top-2 duration-200"
         >
           <div className="flex flex-col gap-1">
-            {NAV_ITEMS.map((item) => {
+            {NAV_ITEMS.filter(item => !item.auth || user).map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <Link
