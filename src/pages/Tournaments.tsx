@@ -9,11 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Clock, Users, Zap, Swords, Timer, Crown, Gem,
   RefreshCw, Network, GitBranch, Calendar,
-  TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search,
+  TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search, Flame,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { hasAccess } from "@/lib/premium-tiers";
 import { toast } from "@/hooks/use-toast";
+import { useStreak } from "@/hooks/use-streak";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
