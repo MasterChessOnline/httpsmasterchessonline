@@ -15,7 +15,6 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceKey);
 
-  // Also create a user-context client for auth
   const authHeader = req.headers.get("Authorization");
   const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
     global: { headers: { Authorization: authHeader || "" } },
@@ -32,278 +31,20 @@ Deno.serve(async (req) => {
   const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players } = await req.json();
 
   try {
-    // ===================== CREATE TOURNAMENT =====================
     if (action === "create") {
-      const { data: tournament, error } = await supabase
-        .from("tournaments")
-        .insert({
-          name: `${category?.charAt(0).toUpperCase() + category?.slice(1) || "Blitz"} Arena`,
-          description: `Auto-created ${format || "swiss"} tournament`,
-          category: category || "blitz",
-          format: format || "swiss",
-          total_rounds: total_rounds || 5,
-          max_players: max_players || 32,
-          time_control_label: time_control_label || "5+3",
-          time_control_seconds: time_control_seconds || 300,
-          time_control_increment: time_control_increment || 3,
-          status: "registering",
-          starts_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return new Response(JSON.stringify({ tournament }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return await handleCreate(supabase, { category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment });
     }
-
-    // ===================== JOIN TOURNAMENT =====================
     if (action === "join") {
-      // Get user profile for rating
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("rating")
-        .eq("user_id", user.id)
-        .single();
-
-      const rating = profile?.rating || 1200;
-
-      // Check if already registered
-      const { data: existing } = await supabase
-        .from("tournament_registrations")
-        .select("id")
-        .eq("tournament_id", tournament_id)
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (existing) {
-        return new Response(JSON.stringify({ message: "Already registered" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Check tournament capacity
-      const { data: tournament } = await supabase
-        .from("tournaments")
-        .select("max_players, status")
-        .eq("id", tournament_id)
-        .single();
-
-      if (!tournament || tournament.status === "finished") {
-        return new Response(JSON.stringify({ error: "Tournament not available" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const { count } = await supabase
-        .from("tournament_registrations")
-        .select("id", { count: "exact", head: true })
-        .eq("tournament_id", tournament_id);
-
-      if ((count || 0) >= tournament.max_players) {
-        return new Response(JSON.stringify({ error: "Tournament is full" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const { error } = await supabase.from("tournament_registrations").insert({
-        tournament_id,
-        user_id: user.id,
-        rating_at_join: rating,
-      });
-
-      if (error) throw error;
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return await handleJoin(supabase, user.id, tournament_id);
     }
-
-    // ===================== LEAVE TOURNAMENT =====================
     if (action === "leave") {
-      await supabase
-        .from("tournament_registrations")
-        .delete()
-        .eq("tournament_id", tournament_id)
-        .eq("user_id", user.id);
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return await handleLeave(supabase, user.id, tournament_id);
     }
-
-    // ===================== START TOURNAMENT =====================
     if (action === "start") {
-      const { data: tournament } = await supabase
-        .from("tournaments")
-        .select("*")
-        .eq("id", tournament_id)
-        .single();
-
-      if (!tournament || tournament.status !== "registering") {
-        return new Response(JSON.stringify({ error: "Cannot start" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Get all registered players sorted by rating for skill-based pairing
-      const { data: players } = await supabase
-        .from("tournament_registrations")
-        .select("user_id, rating_at_join, score")
-        .eq("tournament_id", tournament_id)
-        .order("rating_at_join", { ascending: false });
-
-      if (!players || players.length < 2) {
-        return new Response(JSON.stringify({ error: "Need at least 2 players" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Generate round 1 pairings (by rating proximity)
-      const pairings = generateSwissPairings(players, 1);
-
-      // Create online games for each pairing
-      for (const pairing of pairings) {
-        const { data: onlineGame } = await supabase
-          .from("online_games")
-          .insert({
-            white_player_id: pairing.white,
-            black_player_id: pairing.black,
-            white_time: tournament.time_control_seconds,
-            black_time: tournament.time_control_seconds,
-            time_control_label: tournament.time_control_label,
-            increment: tournament.time_control_increment,
-          })
-          .select()
-          .single();
-
-        await supabase.from("tournament_pairings").insert({
-          tournament_id,
-          round: 1,
-          white_player_id: pairing.white,
-          black_player_id: pairing.black,
-          game_id: onlineGame?.id || null,
-        });
-      }
-
-      // Handle bye if odd number of players
-      if (players.length % 2 === 1) {
-        const byePlayer = players[players.length - 1];
-        await supabase.from("tournament_pairings").insert({
-          tournament_id,
-          round: 1,
-          white_player_id: byePlayer.user_id,
-          black_player_id: null,
-          result: "1-0", // bye = win
-        });
-        // Award bye point
-        await supabase
-          .from("tournament_registrations")
-          .update({ score: 1 })
-          .eq("tournament_id", tournament_id)
-          .eq("user_id", byePlayer.user_id);
-      }
-
-      await supabase
-        .from("tournaments")
-        .update({
-          status: "active",
-          current_round: 1,
-          round_started_at: new Date().toISOString(),
-        })
-        .eq("id", tournament_id);
-
-      return new Response(JSON.stringify({ success: true, round: 1 }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return await handleStart(supabase, tournament_id);
     }
-
-    // ===================== REPORT GAME RESULT =====================
     if (action === "report_result") {
-      // Update pairing result
-      await supabase
-        .from("tournament_pairings")
-        .update({ result })
-        .eq("game_id", game_id);
-
-      // Get pairing info
-      const { data: pairing } = await supabase
-        .from("tournament_pairings")
-        .select("tournament_id, white_player_id, black_player_id")
-        .eq("game_id", game_id)
-        .single();
-
-      if (pairing) {
-        // Update scores
-        const whiteScore = result === "1-0" ? 1 : result === "1/2-1/2" ? 0.5 : 0;
-        const blackScore = result === "0-1" ? 1 : result === "1/2-1/2" ? 0.5 : 0;
-
-        if (whiteScore > 0) {
-          const { data: reg } = await supabase
-            .from("tournament_registrations")
-            .select("score")
-            .eq("tournament_id", pairing.tournament_id)
-            .eq("user_id", pairing.white_player_id)
-            .single();
-          await supabase
-            .from("tournament_registrations")
-            .update({ score: (Number(reg?.score) || 0) + whiteScore })
-            .eq("tournament_id", pairing.tournament_id)
-            .eq("user_id", pairing.white_player_id);
-        }
-        if (blackScore > 0 && pairing.black_player_id) {
-          const { data: reg } = await supabase
-            .from("tournament_registrations")
-            .select("score")
-            .eq("tournament_id", pairing.tournament_id)
-            .eq("user_id", pairing.black_player_id)
-            .single();
-          await supabase
-            .from("tournament_registrations")
-            .update({ score: (Number(reg?.score) || 0) + blackScore })
-            .eq("tournament_id", pairing.tournament_id)
-            .eq("user_id", pairing.black_player_id);
-        }
-
-        // Check if all games in current round are done
-        const { data: tournament } = await supabase
-          .from("tournaments")
-          .select("current_round, total_rounds")
-          .eq("id", pairing.tournament_id)
-          .single();
-
-        if (tournament) {
-          const { data: pendingPairings } = await supabase
-            .from("tournament_pairings")
-            .select("id")
-            .eq("tournament_id", pairing.tournament_id)
-            .eq("round", tournament.current_round)
-            .is("result", null);
-
-          if (!pendingPairings || pendingPairings.length === 0) {
-            // All games done - auto advance
-            if (tournament.current_round >= tournament.total_rounds) {
-              // Tournament finished - award badges
-              await supabase
-                .from("tournaments")
-                .update({ status: "finished" })
-                .eq("id", pairing.tournament_id);
-              await awardTournamentBadges(supabase, pairing.tournament_id);
-            } else {
-              // Generate next round pairings
-              await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
-            }
-          }
-        }
-      }
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return await handleReportResult(supabase, game_id, result);
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {
@@ -318,12 +59,327 @@ Deno.serve(async (req) => {
   }
 });
 
-// Swiss pairing: pair players by score first, then rating proximity
+// ===================== CREATE =====================
+async function handleCreate(supabase: any, opts: any) {
+  const { data: tournament, error } = await supabase
+    .from("tournaments")
+    .insert({
+      name: `${opts.category?.charAt(0).toUpperCase() + opts.category?.slice(1) || "Blitz"} Arena`,
+      description: `Auto-created ${opts.format || "swiss"} tournament`,
+      category: opts.category || "blitz",
+      format: opts.format || "swiss",
+      total_rounds: opts.total_rounds || 5,
+      max_players: opts.max_players || 32,
+      time_control_label: opts.time_control_label || "5+3",
+      time_control_seconds: opts.time_control_seconds || 300,
+      time_control_increment: opts.time_control_increment || 3,
+      status: "registering",
+      starts_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return jsonRes({ tournament });
+}
+
+// ===================== JOIN =====================
+async function handleJoin(supabase: any, userId: string, tournament_id: string) {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("rating")
+    .eq("user_id", userId)
+    .single();
+
+  const rating = profile?.rating || 1200;
+
+  const { data: existing } = await supabase
+    .from("tournament_registrations")
+    .select("id")
+    .eq("tournament_id", tournament_id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (existing) {
+    return jsonRes({ message: "Already registered" });
+  }
+
+  const { data: tournament } = await supabase
+    .from("tournaments")
+    .select("max_players, status")
+    .eq("id", tournament_id)
+    .single();
+
+  if (!tournament || tournament.status === "finished") {
+    return jsonRes({ error: "Tournament not available" }, 400);
+  }
+
+  const { count } = await supabase
+    .from("tournament_registrations")
+    .select("id", { count: "exact", head: true })
+    .eq("tournament_id", tournament_id);
+
+  if ((count || 0) >= tournament.max_players) {
+    return jsonRes({ error: "Tournament is full" }, 400);
+  }
+
+  const { error } = await supabase.from("tournament_registrations").insert({
+    tournament_id,
+    user_id: userId,
+    rating_at_join: rating,
+  });
+
+  if (error) throw error;
+
+  // Track streak
+  await updateStreak(supabase, userId);
+
+  return jsonRes({ success: true });
+}
+
+// ===================== LEAVE =====================
+async function handleLeave(supabase: any, userId: string, tournament_id: string) {
+  await supabase
+    .from("tournament_registrations")
+    .delete()
+    .eq("tournament_id", tournament_id)
+    .eq("user_id", userId);
+
+  return jsonRes({ success: true });
+}
+
+// ===================== START =====================
+async function handleStart(supabase: any, tournament_id: string) {
+  const { data: tournament } = await supabase
+    .from("tournaments")
+    .select("*")
+    .eq("id", tournament_id)
+    .single();
+
+  if (!tournament || tournament.status !== "registering") {
+    return jsonRes({ error: "Cannot start" }, 400);
+  }
+
+  const { data: players } = await supabase
+    .from("tournament_registrations")
+    .select("user_id, rating_at_join, score")
+    .eq("tournament_id", tournament_id)
+    .order("rating_at_join", { ascending: false });
+
+  if (!players || players.length < 2) {
+    return jsonRes({ error: "Need at least 2 players" }, 400);
+  }
+
+  const pairings = generateSwissPairings(players, 1);
+
+  for (const pairing of pairings) {
+    const { data: onlineGame } = await supabase
+      .from("online_games")
+      .insert({
+        white_player_id: pairing.white,
+        black_player_id: pairing.black,
+        white_time: tournament.time_control_seconds,
+        black_time: tournament.time_control_seconds,
+        time_control_label: tournament.time_control_label,
+        increment: tournament.time_control_increment,
+      })
+      .select()
+      .single();
+
+    await supabase.from("tournament_pairings").insert({
+      tournament_id,
+      round: 1,
+      white_player_id: pairing.white,
+      black_player_id: pairing.black,
+      game_id: onlineGame?.id || null,
+    });
+  }
+
+  if (players.length % 2 === 1) {
+    const byePlayer = players[players.length - 1];
+    await supabase.from("tournament_pairings").insert({
+      tournament_id,
+      round: 1,
+      white_player_id: byePlayer.user_id,
+      black_player_id: null,
+      result: "1-0",
+    });
+    await supabase
+      .from("tournament_registrations")
+      .update({ score: 1 })
+      .eq("tournament_id", tournament_id)
+      .eq("user_id", byePlayer.user_id);
+  }
+
+  await supabase
+    .from("tournaments")
+    .update({
+      status: "active",
+      current_round: 1,
+      round_started_at: new Date().toISOString(),
+    })
+    .eq("id", tournament_id);
+
+  return jsonRes({ success: true, round: 1 });
+}
+
+// ===================== REPORT RESULT =====================
+async function handleReportResult(supabase: any, game_id: string, result: string) {
+  await supabase
+    .from("tournament_pairings")
+    .update({ result })
+    .eq("game_id", game_id);
+
+  const { data: pairing } = await supabase
+    .from("tournament_pairings")
+    .select("tournament_id, white_player_id, black_player_id")
+    .eq("game_id", game_id)
+    .single();
+
+  if (pairing) {
+    const whiteScore = result === "1-0" ? 1 : result === "1/2-1/2" ? 0.5 : 0;
+    const blackScore = result === "0-1" ? 1 : result === "1/2-1/2" ? 0.5 : 0;
+
+    if (whiteScore > 0) {
+      const { data: reg } = await supabase
+        .from("tournament_registrations")
+        .select("score")
+        .eq("tournament_id", pairing.tournament_id)
+        .eq("user_id", pairing.white_player_id)
+        .single();
+      await supabase
+        .from("tournament_registrations")
+        .update({ score: (Number(reg?.score) || 0) + whiteScore })
+        .eq("tournament_id", pairing.tournament_id)
+        .eq("user_id", pairing.white_player_id);
+    }
+    if (blackScore > 0 && pairing.black_player_id) {
+      const { data: reg } = await supabase
+        .from("tournament_registrations")
+        .select("score")
+        .eq("tournament_id", pairing.tournament_id)
+        .eq("user_id", pairing.black_player_id)
+        .single();
+      await supabase
+        .from("tournament_registrations")
+        .update({ score: (Number(reg?.score) || 0) + blackScore })
+        .eq("tournament_id", pairing.tournament_id)
+        .eq("user_id", pairing.black_player_id);
+    }
+
+    const { data: tournament } = await supabase
+      .from("tournaments")
+      .select("current_round, total_rounds")
+      .eq("id", pairing.tournament_id)
+      .single();
+
+    if (tournament) {
+      const { data: pendingPairings } = await supabase
+        .from("tournament_pairings")
+        .select("id")
+        .eq("tournament_id", pairing.tournament_id)
+        .eq("round", tournament.current_round)
+        .is("result", null);
+
+      if (!pendingPairings || pendingPairings.length === 0) {
+        if (tournament.current_round >= tournament.total_rounds) {
+          await supabase
+            .from("tournaments")
+            .update({ status: "finished" })
+            .eq("id", pairing.tournament_id);
+          await awardTournamentBadges(supabase, pairing.tournament_id);
+        } else {
+          await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
+        }
+      }
+    }
+  }
+
+  return jsonRes({ success: true });
+}
+
+// ===================== STREAK TRACKING =====================
+async function updateStreak(supabase: any, userId: string) {
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: existing } = await supabase
+    .from("tournament_streaks")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!existing) {
+    await supabase.from("tournament_streaks").insert({
+      user_id: userId,
+      current_streak: 1,
+      longest_streak: 1,
+      last_participation_date: today,
+      total_tournaments_played: 1,
+    });
+  } else {
+    if (existing.last_participation_date === today) {
+      // Already counted today, just increment total
+      await supabase
+        .from("tournament_streaks")
+        .update({ total_tournaments_played: existing.total_tournaments_played + 1, updated_at: new Date().toISOString() })
+        .eq("user_id", userId);
+      return;
+    }
+
+    const lastDate = new Date(existing.last_participation_date);
+    const todayDate = new Date(today);
+    const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    let newStreak = 1;
+    if (diffDays === 1) {
+      newStreak = existing.current_streak + 1;
+    }
+
+    const longestStreak = Math.max(existing.longest_streak, newStreak);
+
+    await supabase
+      .from("tournament_streaks")
+      .update({
+        current_streak: newStreak,
+        longest_streak: longestStreak,
+        last_participation_date: today,
+        total_tournaments_played: existing.total_tournaments_played + 1,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId);
+
+    // Award streak achievements
+    await awardStreakBadges(supabase, userId, newStreak, existing.total_tournaments_played + 1);
+  }
+}
+
+async function awardStreakBadges(supabase: any, userId: string, streak: number, totalPlayed: number) {
+  const { data: achievements } = await supabase
+    .from("achievements")
+    .select("id, key, requirement_type, requirement_value")
+    .in("requirement_type", ["streak", "tournaments_played"]);
+
+  if (!achievements) return;
+
+  for (const ach of achievements) {
+    const qualifies =
+      (ach.requirement_type === "streak" && streak >= ach.requirement_value) ||
+      (ach.requirement_type === "tournaments_played" && totalPlayed >= ach.requirement_value);
+
+    if (qualifies) {
+      await supabase.from("user_achievements").upsert({
+        user_id: userId,
+        achievement_id: ach.id,
+      }, { onConflict: "user_id,achievement_id", ignoreDuplicates: true }).select();
+    }
+  }
+}
+
+// ===================== SWISS PAIRING =====================
 function generateSwissPairings(
   players: Array<{ user_id: string; rating_at_join: number; score: number | null }>,
   round: number
 ) {
-  // Sort by score desc, then rating desc
   const sorted = [...players].sort((a, b) => {
     const scoreDiff = (Number(b.score) || 0) - (Number(a.score) || 0);
     if (scoreDiff !== 0) return scoreDiff;
@@ -337,7 +393,6 @@ function generateSwissPairings(
     if (paired.has(sorted[i].user_id)) continue;
     for (let j = i + 1; j < sorted.length; j++) {
       if (paired.has(sorted[j].user_id)) continue;
-      // Alternate colors based on round
       const whiteFirst = (i + round) % 2 === 0;
       pairings.push({
         white: whiteFirst ? sorted[i].user_id : sorted[j].user_id,
@@ -392,9 +447,7 @@ async function generateNextRound(supabase: any, tournamentId: string, nextRound:
     });
   }
 
-  // Handle bye
   if (players.length % 2 === 1) {
-    // Give bye to lowest-scored player who hasn't had a bye
     const { data: previousByes } = await supabase
       .from("tournament_pairings")
       .select("white_player_id")
@@ -437,7 +490,6 @@ async function generateNextRound(supabase: any, tournamentId: string, nextRound:
 }
 
 async function awardTournamentBadges(supabase: any, tournamentId: string) {
-  // Get final standings
   const { data: standings } = await supabase
     .from("tournament_registrations")
     .select("user_id, score")
@@ -446,7 +498,6 @@ async function awardTournamentBadges(supabase: any, tournamentId: string) {
 
   if (!standings || standings.length === 0) return;
 
-  // Get achievement IDs
   const { data: achievements } = await supabase
     .from("achievements")
     .select("id, key")
@@ -455,7 +506,6 @@ async function awardTournamentBadges(supabase: any, tournamentId: string) {
   if (!achievements) return;
   const achMap = new Map(achievements.map((a: any) => [a.key, a.id]));
 
-  // Award placement badges
   const placements = [
     { idx: 0, key: "tournament_gold" },
     { idx: 1, key: "tournament_silver" },
@@ -471,11 +521,18 @@ async function awardTournamentBadges(supabase: any, tournamentId: string) {
     }
   }
 
-  // Also award tournament_win to 1st place
   if (standings[0] && achMap.has("tournament_win")) {
     await supabase.from("user_achievements").upsert({
       user_id: standings[0].user_id,
       achievement_id: achMap.get("tournament_win"),
     }, { onConflict: "user_id,achievement_id", ignoreDuplicates: true }).select();
   }
+}
+
+// ===================== HELPERS =====================
+function jsonRes(data: any, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }

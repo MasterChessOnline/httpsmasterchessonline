@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTournament } from "@/hooks/use-tournament";
+import { useTournamentNotifications } from "@/hooks/use-tournament-notifications";
+import { useStreak } from "@/hooks/use-streak";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Trophy, Clock, Users, Swords, Timer, Crown, Send, Eye, MessageSquare,
-  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap,
+  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -32,6 +34,9 @@ const TournamentLobby = () => {
     isRegistered, loading, myPairing,
     join, leave, startTournament, sendChat,
   } = useTournament(id);
+
+  const { streak } = useStreak(user?.id);
+  useTournamentNotifications(tournament, myPairing, user?.id);
 
   const [chatInput, setChatInput] = useState("");
   const [joining, setJoining] = useState(false);
@@ -138,6 +143,21 @@ const TournamentLobby = () => {
                 <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {registrations.length}/{tournament.max_players} players</span>
                 {isActive && <span className="flex items-center gap-1"><Zap className="h-3 w-3 text-primary" /> Round {tournament.current_round}/{tournament.total_rounds}</span>}
               </div>
+              {streak && streak.current_streak > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge className="bg-accent/20 text-accent-foreground border-accent/30 text-[10px]">
+                    <Flame className="h-3 w-3 mr-0.5 text-orange-500" /> {streak.current_streak}-day streak
+                  </Badge>
+                  {streak.longest_streak > streak.current_streak && (
+                    <Badge variant="outline" className="text-[10px]">
+                      Best: {streak.longest_streak} days
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="text-[10px]">
+                    {streak.total_tournaments_played} tournaments played
+                  </Badge>
+                </div>
+              )}
             </div>
             <div className="flex gap-2">
               {isRegistering && !isRegistered && (
