@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTournament } from "@/hooks/use-tournament";
+import { useTournamentNotifications } from "@/hooks/use-tournament-notifications";
+import { useStreak } from "@/hooks/use-streak";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Trophy, Clock, Users, Swords, Timer, Crown, Send, Eye, MessageSquare,
-  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap,
+  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
