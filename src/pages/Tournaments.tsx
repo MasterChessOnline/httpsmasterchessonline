@@ -18,9 +18,17 @@ import { useStreak } from "@/hooks/use-streak";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
+  { value: "bullet", label: "Bullet", icon: Zap },
   { value: "blitz", label: "Blitz", icon: Zap },
   { value: "rapid", label: "Rapid", icon: Timer },
   { value: "classical", label: "Classical", icon: Clock },
+];
+
+const SKILL_OPTIONS = [
+  { value: "all", label: "All Levels" },
+  { value: "beginner", label: "Beginner", maxRating: 1000 },
+  { value: "intermediate", label: "Intermediate", maxRating: 1400 },
+  { value: "advanced", label: "Advanced", maxRating: 9999 },
 ];
 
 const statusStyles: Record<string, { bg: string; label: string }> = {
