@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import PremiumGuard from "@/components/PremiumGuard";
 import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
 import PlayOnline from "./pages/PlayOnline";
 import Learn from "./pages/Learn";
@@ -38,6 +39,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/play" element={<Play />} />
             <Route path="/play/online" element={<PremiumGuard><PlayOnline /></PremiumGuard>} />
             <Route path="/learn" element={<PremiumGuard><Learn /></PremiumGuard>} />

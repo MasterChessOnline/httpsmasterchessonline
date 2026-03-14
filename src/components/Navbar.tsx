@@ -1,4 +1,4 @@
-import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Wifi, Award, Heart } from "lucide-react";
+import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Wifi, Award, Heart, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { type TierKey } from "@/lib/premium-tiers";
 import { Star, Gem, Shield } from "lucide-react";
 
 const NAV_ITEMS = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
   { label: "Play", href: "/play", icon: Swords },
   { label: "Online", href: "/play/online", icon: Wifi },
   { label: "Learn", href: "/learn", icon: GraduationCap },
@@ -67,7 +68,7 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden items-center gap-0.5 md:flex">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.filter(item => !item.auth || user).map((item) => {
             const isActive = location.pathname === item.href;
             return (
               <Link
@@ -153,7 +154,7 @@ const Navbar = () => {
           className="border-t border-border/40 glass px-6 py-4 md:hidden animate-in slide-in-from-top-2 duration-200"
         >
           <div className="flex flex-col gap-1">
-            {NAV_ITEMS.map((item) => {
+            {NAV_ITEMS.filter(item => !item.auth || user).map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <Link
