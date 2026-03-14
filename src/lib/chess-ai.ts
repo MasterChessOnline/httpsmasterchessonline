@@ -213,7 +213,7 @@ function minimax(
   }
 }
 
-export type Difficulty = "beginner" | "casual" | "intermediate" | "advanced" | "master";
+export type Difficulty = "beginner" | "intermediate" | "advanced";
 
 export interface AILevel {
   value: Difficulty;
