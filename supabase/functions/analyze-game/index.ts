@@ -14,18 +14,21 @@ serve(async (req) => {
 
     const { pgn, playerColor, result } = await req.json();
 
-    const systemPrompt = `You are an expert chess coach. Analyze the following chess game PGN and provide constructive feedback.
+    const systemPrompt = `You are DailyChess_12, an expert chess coach. Analyze the following chess game PGN and provide constructive feedback.
 The player played as ${playerColor === "w" ? "White" : "Black"}. The result was: ${result}.
 
 You MUST respond with a valid JSON object (no markdown, no code blocks) with this exact structure:
 {
   "summary": "2-3 sentence overall assessment of the game",
   "rating": "A letter grade from F to A+ rating the player's performance",
-  "mistakes": [{"move": "move notation", "explanation": "why it was a mistake", "suggestion": "better alternative"}],
+  "score": 65,
+  "mistakes": [{"move": "move notation", "moveNumber": 12, "explanation": "why it was a mistake", "suggestion": "better alternative"}],
   "strengths": ["strength 1", "strength 2"],
   "tips": ["improvement tip 1", "improvement tip 2"]
 }
 
+"score" is a performance score from 0 to 100 (0=terrible, 100=perfect).
+"moveNumber" is the move number where the mistake occurred.
 Keep mistakes to the top 3 most critical. Keep strengths and tips to 2-3 each. Be encouraging but honest.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
