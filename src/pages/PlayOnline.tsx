@@ -291,40 +291,149 @@ const PlayOnline = () => {
         <Navbar />
         <main className="container mx-auto px-6 pt-24 pb-16">
           <h1 className="font-display text-4xl font-bold text-foreground text-center mb-2">
-            Play <span className="text-gradient-gold">Online</span>
+            Free <span className="text-gradient-gold">Online</span> Games
           </h1>
-          <p className="text-center text-muted-foreground mb-8">Find an opponent and play in real-time</p>
-          <div className="max-w-md mx-auto space-y-6">
-            <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Timer className="h-3 w-3" /> Time Control</p>
-              <div className="grid grid-cols-4 gap-2">
-                {TIME_CONTROLS.filter((_, i) => i < TIME_CONTROLS.length - 1).map((t, i) => (
-                  <button key={t.label} onClick={() => setTimeControlIdx(i)} disabled={onlineStatus === "searching"}
-                    className={`rounded-lg px-2 py-3 text-center transition-all border text-sm font-medium ${timeControlIdx === i ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"} disabled:opacity-50`}>
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-lg border border-border/50 bg-card p-4">
-              <p className="text-sm text-muted-foreground">Playing as</p>
-              <p className="font-display text-lg font-bold text-foreground">{profile?.display_name || profile?.username || "Player"}</p>
-              <p className="text-xs text-muted-foreground">Rating: {profile?.rating || 1200}</p>
-            </div>
-            {onlineError && <p className="text-sm text-destructive text-center">{onlineError}</p>}
-            {onlineStatus === "searching" ? (
-              <div className="text-center space-y-4">
-                <div className="flex items-center justify-center gap-2 text-primary">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="font-medium">Looking for an opponent…</span>
+          <p className="text-center text-muted-foreground mb-2">Play against real opponents — no Premium required</p>
+
+          {/* Live stats bar */}
+          <div className="flex items-center justify-center gap-6 mb-8 text-sm">
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <Users className="h-3.5 w-3.5" /> {activePlayers} online
+            </span>
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <Swords className="h-3.5 w-3.5" /> {liveGames.length} games live
+            </span>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <Tabs defaultValue="play" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsTrigger value="play">Find Match</TabsTrigger>
+                <TabsTrigger value="spectate"><Eye className="h-3.5 w-3.5 mr-1" /> Spectate</TabsTrigger>
+                <TabsTrigger value="leaderboard"><Trophy className="h-3.5 w-3.5 mr-1" /> Leaderboard</TabsTrigger>
+              </TabsList>
+
+              {/* FIND MATCH TAB */}
+              <TabsContent value="play">
+                <div className="max-w-md mx-auto space-y-6">
+                  {/* Time control */}
+                  <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Timer className="h-3 w-3" /> Time Control</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {TIME_CONTROLS.filter((_, i) => i < TIME_CONTROLS.length - 1).map((t, i) => (
+                        <button key={t.label} onClick={() => setTimeControlIdx(i)} disabled={onlineStatus === "searching"}
+                          className={`rounded-lg px-2 py-3 text-center transition-all border text-sm font-medium ${timeControlIdx === i ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"} disabled:opacity-50`}>
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Skill tier */}
+                  <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Skill Level</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {SKILL_TIERS.map(tier => (
+                        <button key={tier.key} onClick={() => setSkillTier(tier.key)} disabled={onlineStatus === "searching"}
+                          className={`rounded-lg px-2 py-3 text-center transition-all border text-sm font-medium ${skillTier === tier.key ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"} disabled:opacity-50`}>
+                          {tier.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      {skillTier === "all" ? "Match with anyone" : `Rating ${SKILL_TIERS.find(t => t.key === skillTier)?.ratingRange[0]}–${SKILL_TIERS.find(t => t.key === skillTier)?.ratingRange[1]}`}
+                    </p>
+                  </div>
+
+                  {/* Player card */}
+                  <div className="rounded-lg border border-border/50 bg-card p-4">
+                    <p className="text-sm text-muted-foreground">Playing as</p>
+                    <p className="font-display text-lg font-bold text-foreground">{profile?.display_name || profile?.username || "Player"}</p>
+                    <p className="text-xs text-muted-foreground">Rating: {profile?.rating || 1200}</p>
+                  </div>
+
+                  {onlineError && <p className="text-sm text-destructive text-center">{onlineError}</p>}
+                  {onlineStatus === "searching" ? (
+                    <div className="text-center space-y-4">
+                      <div className="flex items-center justify-center gap-2 text-primary">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span className="font-medium">Looking for an opponent…</span>
+                      </div>
+                      <Button variant="outline" onClick={cancelSearch}>Cancel</Button>
+                    </div>
+                  ) : (
+                    <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
+                      <Wifi className="mr-2 h-5 w-5" /> Find Match
+                    </Button>
+                  )}
                 </div>
-                <Button variant="outline" onClick={cancelSearch}>Cancel</Button>
-              </div>
-            ) : (
-              <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
-                <Wifi className="mr-2 h-5 w-5" /> Find Match
-              </Button>
-            )}
+              </TabsContent>
+
+              {/* SPECTATE TAB */}
+              <TabsContent value="spectate">
+                <div className="max-w-2xl mx-auto">
+                  {liveGames.length === 0 ? (
+                    <div className="text-center py-16">
+                      <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">No live games right now. Check back soon!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground mb-4">{liveGames.length} game{liveGames.length !== 1 ? "s" : ""} in progress</p>
+                      {liveGames.map(g => (
+                        <div key={g.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-card p-4 hover:border-primary/30 transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
+                            <div>
+                              <p className="text-sm font-medium text-foreground">{g.time_control_label} Game</p>
+                              <p className="text-xs text-muted-foreground">{g.turn === "w" ? "White" : "Black"} to move</p>
+                            </div>
+                          </div>
+                          <Link to={`/play/online?spectate=${g.id}`}>
+                            <Button variant="outline" size="sm"><Eye className="h-3.5 w-3.5 mr-1" /> Watch</Button>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* LEADERBOARD TAB */}
+              <TabsContent value="leaderboard">
+                <div className="max-w-2xl mx-auto">
+                  <div className="space-y-1.5">
+                    {topPlayers.map((p, i) => {
+                      const winRate = p.games_played > 0 ? Math.round((p.games_won / p.games_played) * 100) : 0;
+                      const isMe = user?.id === p.user_id;
+                      return (
+                        <Link key={p.user_id} to={`/profile/${p.user_id}`}
+                          className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-primary/30 ${isMe ? "border-primary/30 bg-primary/5" : "border-border/50 bg-card"}`}>
+                          <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center shrink-0">
+                            {i < 3 ? <Trophy className={`h-4 w-4 ${i === 0 ? "text-primary" : "text-muted-foreground"}`} /> :
+                            <span className="text-xs font-bold text-muted-foreground">{i + 1}</span>}
+                          </div>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className={`font-medium truncate ${isMe ? "text-primary" : "text-foreground"}`}>
+                              {p.display_name || "Anonymous"}{isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
+                            </span>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="font-mono text-lg font-bold text-primary">{p.rating}</p>
+                            <p className="text-[10px] text-muted-foreground">{p.games_played}G · {winRate}%W</p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  <div className="text-center mt-6">
+                    <Link to="/leaderboard"><Button variant="outline" size="sm">View Full Leaderboard</Button></Link>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
         <Footer />
