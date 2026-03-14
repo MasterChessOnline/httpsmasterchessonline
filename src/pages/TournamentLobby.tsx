@@ -143,6 +143,21 @@ const TournamentLobby = () => {
                 <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {registrations.length}/{tournament.max_players} players</span>
                 {isActive && <span className="flex items-center gap-1"><Zap className="h-3 w-3 text-primary" /> Round {tournament.current_round}/{tournament.total_rounds}</span>}
               </div>
+              {streak && streak.current_streak > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge className="bg-accent/20 text-accent-foreground border-accent/30 text-[10px]">
+                    <Flame className="h-3 w-3 mr-0.5 text-orange-500" /> {streak.current_streak}-day streak
+                  </Badge>
+                  {streak.longest_streak > streak.current_streak && (
+                    <Badge variant="outline" className="text-[10px]">
+                      Best: {streak.longest_streak} days
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="text-[10px]">
+                    {streak.total_tournaments_played} tournaments played
+                  </Badge>
+                </div>
+              )}
             </div>
             <div className="flex gap-2">
               {isRegistering && !isRegistered && (
