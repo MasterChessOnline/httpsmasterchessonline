@@ -29,13 +29,13 @@ const HeroSection = () => {
         </div>
 
         <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-8xl opacity-0 animate-fade-up stagger-1">
-          Learn &amp; Play Chess
+          Learn and Play Chess on
           <br />
-          <span className="text-gradient-gold">with DailyChess_12</span>
+          <span className="text-gradient-gold">MasterChessOnline</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground/90 leading-relaxed opacity-0 animate-fade-up stagger-2">
-          Free online games, lessons, and premium content. Play real opponents, join tournaments, and improve with personalized training.
+          Free online games, lessons, and premium content.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center opacity-0 animate-fade-up stagger-3">
