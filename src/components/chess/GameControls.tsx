@@ -27,9 +27,9 @@ interface GameControlsProps {
 
 const BOT_LEVELS: { value: Difficulty; label: string; rating: string; desc: string }[] = [
   { value: "beginner", label: "Beginner", rating: "400", desc: "Learning the basics" },
-  { value: "easy", label: "Easy", rating: "800", desc: "Casual opponent" },
+  { value: "casual", label: "Easy", rating: "800", desc: "Casual opponent" },
   { value: "intermediate", label: "Intermediate", rating: "1200", desc: "Club-level play" },
-  { value: "hard", label: "Advanced", rating: "1600", desc: "Tough competition" },
+  { value: "advanced", label: "Advanced", rating: "1600", desc: "Tough competition" },
   { value: "master", label: "Master", rating: "2000", desc: "Elite challenge" },
 ];
 
