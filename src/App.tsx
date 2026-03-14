@@ -52,6 +52,7 @@ const App = () => (
             <Route path="/premium/chat" element={<PremiumGuard><PremiumChat /></PremiumGuard>} />
             <Route path="/premium/lessons" element={<PremiumGuard requiredTier="pro"><VideoLessons /></PremiumGuard>} />
             <Route path="/achievements" element={<Achievements />} />
+            <Route path="/lessons" element={<Lessons />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
