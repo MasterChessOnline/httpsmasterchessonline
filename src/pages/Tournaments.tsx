@@ -470,6 +470,7 @@ const Tournaments = () => {
               </div>
             )}
 
+            {!isPremium && (
               <div className="mb-5 rounded-lg border border-border/40 bg-card p-3 flex items-center gap-3">
                 <Crown className="w-4 h-4 text-primary shrink-0" />
                 <p className="text-xs text-muted-foreground flex-1">
