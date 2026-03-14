@@ -27,6 +27,7 @@ import Donate from "./pages/Donate";
 import Contact from "./pages/Contact";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
+import Lessons from "./pages/Lessons";
 
 const queryClient = new QueryClient();
 
