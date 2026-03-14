@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Clock, Users, Zap, Swords, Timer, Crown, Gem,
   RefreshCw, Network, GitBranch, Calendar,
-  TrendingUp, Medal, User, Plus, Loader2, Play, Lock,
+  TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { hasAccess } from "@/lib/premium-tiers";
 import { toast } from "@/hooks/use-toast";
 
