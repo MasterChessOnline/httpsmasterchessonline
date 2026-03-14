@@ -25,6 +25,9 @@ import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 import Donate from "./pages/Donate";
 import Contact from "./pages/Contact";
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import Lessons from "./pages/Lessons";
@@ -55,6 +58,9 @@ const App = () => (
             <Route path="/lessons" element={<Lessons />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-canceled" element={<PaymentCanceled />} />
             
