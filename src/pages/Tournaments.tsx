@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Clock, Users, Zap, Swords, BookOpen, Timer, Lock, Crown, Gem,
   Shield, Star, GitBranch, RefreshCw, Network, Calendar, CalendarDays,
-  TrendingUp, Medal, User,
+  TrendingUp, Medal, User, Plus, Loader2, Play,
 } from "lucide-react";
 import { TOURNAMENTS, Tournament, FORMAT_LABELS, TournamentFormat, TournamentAccess } from "@/lib/tournaments-data";
 import { hasAccess } from "@/lib/premium-tiers";
+import { toast } from "@/hooks/use-toast";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
@@ -31,9 +32,11 @@ const SCHEDULE_OPTIONS = [
 
 const statusStyles: Record<string, { bg: string; label: string }> = {
   live: { bg: "bg-accent text-accent-foreground", label: "🔴 Live" },
+  active: { bg: "bg-accent text-accent-foreground", label: "🔴 Live" },
   registering: { bg: "bg-primary/10 text-primary", label: "Open" },
   upcoming: { bg: "bg-muted text-muted-foreground", label: "Upcoming" },
   completed: { bg: "bg-muted text-muted-foreground", label: "Completed" },
+  finished: { bg: "bg-muted text-muted-foreground", label: "Completed" },
 };
 
 const FORMAT_ICONS: Record<TournamentFormat, typeof GitBranch> = {
@@ -48,7 +51,22 @@ const ACCESS_BADGES: Record<TournamentAccess, { label: string; className: string
   vip: { label: "VIP", className: "bg-purple-500/20 text-purple-400 border-purple-500/30", icon: Gem },
 };
 
-type ViewTab = "free" | "premium" | "vip" | "leaderboard";
+type ViewTab = "live" | "free" | "premium" | "vip" | "leaderboard";
+
+interface DbTournament {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  format: string;
+  total_rounds: number;
+  current_round: number;
+  max_players: number;
+  status: string;
+  time_control_label: string;
+  starts_at: string;
+  player_count?: number;
+}
 
 interface LeaderboardEntry {
   id: string;
@@ -125,16 +143,60 @@ function TournamentCard({ t, canJoin }: { t: Tournament; canJoin: boolean }) {
 const Tournaments = () => {
   const { user, isPremium, subscriptionTier } = useAuth();
   const navigate = useNavigate();
-  const [viewTab, setViewTab] = useState<ViewTab>("free");
+  const [viewTab, setViewTab] = useState<ViewTab>("live");
   const [category, setCategory] = useState("all");
   const [schedule, setSchedule] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // DB tournaments
+  const [dbTournaments, setDbTournaments] = useState<DbTournament[]>([]);
+  const [dbLoading, setDbLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
 
   // Leaderboard state
   const [lbPlayers, setLbPlayers] = useState<LeaderboardEntry[]>([]);
   const [lbLoading, setLbLoading] = useState(false);
 
   const isElitePlus = hasAccess(subscriptionTier, "elite");
+
+  // Fetch DB tournaments
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      setDbLoading(true);
+      const { data } = await supabase
+        .from("tournaments")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (data) {
+        // Get player counts
+        const tournaments = data as DbTournament[];
+        const ids = tournaments.map(t => t.id);
+        if (ids.length > 0) {
+          for (const t of tournaments) {
+            const { count } = await supabase
+              .from("tournament_registrations")
+              .select("id", { count: "exact", head: true })
+              .eq("tournament_id", t.id);
+            t.player_count = count || 0;
+          }
+        }
+        setDbTournaments(tournaments);
+      }
+      setDbLoading(false);
+    };
+    fetchTournaments();
+
+    // Subscribe to tournament changes
+    const channel = supabase.channel("tournaments-list")
+      .on("postgres_changes", { event: "*", schema: "public", table: "tournaments" }, () => {
+        fetchTournaments();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   useEffect(() => {
     if (viewTab === "leaderboard" && lbPlayers.length === 0) {
@@ -151,6 +213,36 @@ const Tournaments = () => {
     }
   }, [viewTab]);
 
+  const handleCreateTournament = async () => {
+    if (!user) { navigate("/login"); return; }
+    setCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-tournament", {
+        body: {
+          action: "create",
+          time_control_label: "5+3",
+          time_control_seconds: 300,
+          time_control_increment: 3,
+          category: "blitz",
+          format: "swiss",
+          total_rounds: 5,
+          max_players: 32,
+        },
+      });
+      if (error) throw error;
+      if (data?.tournament?.id) {
+        // Auto-join
+        await supabase.functions.invoke("manage-tournament", {
+          body: { action: "join", tournament_id: data.tournament.id },
+        });
+        navigate(`/tournaments/${data.tournament.id}`);
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+    setCreating(false);
+  };
+
   const getFilteredTournaments = (access: TournamentAccess) => {
     return TOURNAMENTS.filter((t) => {
       if (t.access !== access) return false;
@@ -165,7 +257,10 @@ const Tournaments = () => {
   const premiumTournaments = getFilteredTournaments("premium");
   const vipTournaments = getFilteredTournaments("vip");
 
-  const liveCount = TOURNAMENTS.filter((t) => t.access === "free" && t.status === "live").length;
+  const liveDbTournaments = dbTournaments.filter(t => t.status === "active" || t.status === "registering");
+  const finishedDbTournaments = dbTournaments.filter(t => t.status === "finished");
+
+  const liveCount = TOURNAMENTS.filter((t) => t.access === "free" && t.status === "live").length + liveDbTournaments.length;
 
   const getRankDisplay = (i: number) => {
     if (i === 0) return <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center"><Crown className="h-3.5 w-3.5 text-primary" /></div>;
@@ -201,10 +296,11 @@ const Tournaments = () => {
         {/* Main tabs */}
         <div className="flex justify-center gap-1.5 mb-6 flex-wrap">
           {[
-            { key: "free" as ViewTab, label: "Free Tournaments", icon: Trophy, color: "primary" },
-            { key: "premium" as ViewTab, label: "Premium", icon: Crown, color: "primary" },
-            { key: "vip" as ViewTab, label: "VIP & GM", icon: Gem, color: "purple-400" },
-            { key: "leaderboard" as ViewTab, label: "Leaderboard", icon: TrendingUp, color: "primary" },
+            { key: "live" as ViewTab, label: "Live Tournaments", icon: Zap },
+            { key: "free" as ViewTab, label: "Free Events", icon: Trophy },
+            { key: "premium" as ViewTab, label: "Premium", icon: Crown },
+            { key: "vip" as ViewTab, label: "VIP & GM", icon: Gem },
+            { key: "leaderboard" as ViewTab, label: "Leaderboard", icon: TrendingUp },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -222,10 +318,99 @@ const Tournaments = () => {
           ))}
         </div>
 
+        {/* ============ LIVE DB TOURNAMENTS ============ */}
+        {viewTab === "live" && (
+          <div className="mx-auto max-w-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display text-lg font-semibold text-foreground">Online Tournaments</h2>
+              <Button onClick={handleCreateTournament} disabled={creating} size="sm">
+                {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+                Create Tournament
+              </Button>
+            </div>
+
+            {dbLoading ? (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => <div key={i} className="h-20 rounded-xl bg-muted/30 animate-pulse" />)}
+              </div>
+            ) : liveDbTournaments.length === 0 ? (
+              <div className="text-center py-12">
+                <Swords className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground mb-4">No live tournaments right now.</p>
+                <Button onClick={handleCreateTournament} disabled={creating}>
+                  {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+                  Create One
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {liveDbTournaments.map(t => {
+                  const style = statusStyles[t.status] || statusStyles.registering;
+                  return (
+                    <Link key={t.id} to={`/tournaments/${t.id}`}
+                      className="block rounded-xl border border-border/50 bg-card p-4 transition-all hover:border-primary/30 hover:shadow-glow">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h3 className="font-display text-sm font-semibold text-foreground">{t.name}</h3>
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${style.bg}`}>{style.label}</span>
+                            <Badge className="bg-secondary/50 text-secondary-foreground border-secondary/30 text-[10px]">
+                              {t.format}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">{t.description}</p>
+                          <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-2">
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{t.time_control_label}</span>
+                            <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{t.total_rounds}R</span>
+                            <span className="flex items-center gap-1"><Users className="h-3 w-3" />{t.player_count || 0}/{t.max_players}</span>
+                            {t.status === "active" && (
+                              <span className="flex items-center gap-1 text-primary"><Zap className="h-3 w-3" />Round {t.current_round}/{t.total_rounds}</span>
+                            )}
+                          </div>
+                        </div>
+                        <Button size="sm" variant={t.status === "active" ? "default" : "outline"}>
+                          {t.status === "active" ? <><Play className="w-3 h-3 mr-1" /> View</> : "Join"}
+                        </Button>
+                      </div>
+                      {(t.player_count || 0) > 0 && (
+                        <div className="mt-3">
+                          <div className="w-full h-1 bg-muted rounded-full">
+                            <div className="h-full bg-primary/60 rounded-full transition-all" style={{ width: `${((t.player_count || 0) / t.max_players) * 100}%` }} />
+                          </div>
+                        </div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Recent finished tournaments */}
+            {finishedDbTournaments.length > 0 && (
+              <div className="mt-8">
+                <h3 className="font-display text-sm font-semibold text-muted-foreground mb-3">Recently Completed</h3>
+                <div className="space-y-2">
+                  {finishedDbTournaments.slice(0, 5).map(t => (
+                    <Link key={t.id} to={`/tournaments/${t.id}`}
+                      className="block rounded-lg border border-border/30 bg-card/50 p-3 transition-all hover:border-primary/20">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-sm font-medium text-foreground">{t.name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">{t.player_count || 0} players</span>
+                        </div>
+                        <Badge variant="outline" className="text-[10px]">Finished</Badge>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ============ FREE TOURNAMENTS ============ */}
         {viewTab === "free" && (
           <>
-            {/* Filters */}
             <div className="flex flex-wrap justify-center gap-1.5 mb-3">
               {SCHEDULE_OPTIONS.map((opt) => (
                 <button key={opt.value} onClick={() => setSchedule(opt.value)}
@@ -260,7 +445,6 @@ const Tournaments = () => {
               ))}
             </div>
 
-            {/* Upgrade hint */}
             {!isPremium && (
               <div className="max-w-2xl mx-auto mb-5 rounded-lg border border-border/40 bg-card p-3 flex items-center gap-3">
                 <Crown className="w-4 h-4 text-primary shrink-0" />
@@ -362,12 +546,11 @@ const Tournaments = () => {
               <p className="text-xs text-muted-foreground mt-2">Top players ranked by ELO rating</p>
             </div>
 
-            {/* Quick stats */}
             <div className="grid grid-cols-3 gap-3 mb-6">
               {[
                 { label: "Free Tournaments", value: TOURNAMENTS.filter((t) => t.access === "free").length, icon: Trophy },
-                { label: "Premium Exclusive", value: TOURNAMENTS.filter((t) => t.access === "premium").length, icon: Crown },
-                { label: "Live Now", value: TOURNAMENTS.filter((t) => t.status === "live").length, icon: Zap },
+                { label: "Online Tournaments", value: dbTournaments.length, icon: Zap },
+                { label: "Live Now", value: liveDbTournaments.length, icon: Play },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border border-border/40 bg-card p-3 text-center">
                   <s.icon className="w-4 h-4 text-primary mx-auto mb-1" />
