@@ -99,9 +99,11 @@ function getSkillLabel(category: string) {
 const Tournaments = () => {
   const { user, isPremium, subscriptionTier } = useAuth();
   const navigate = useNavigate();
+  const { streak } = useStreak(user?.id);
   const [viewTab, setViewTab] = useState<ViewTab>("all");
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [skillFilter, setSkillFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [dbTournaments, setDbTournaments] = useState<DbTournament[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
