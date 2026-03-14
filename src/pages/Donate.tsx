@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, CreditCard, Trophy, Medal, Crown } from "lucide-react";
+import { Heart, CreditCard, Trophy, Medal, Crown, Gift, Zap, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -27,9 +27,16 @@ interface DonationProgress {
   progressPercentage: number;
 }
 
+const presetAmounts = [
+  { value: 3, label: "$3", icon: Heart, description: "Buy us a coffee" },
+  { value: 5, label: "$5", icon: Star, description: "Support a feature" },
+  { value: 10, label: "$10", icon: Crown, description: "Champion supporter" },
+];
+
 const Donate = () => {
   const [customAmount, setCustomAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [topDonors, setTopDonors] = useState<TopDonor[]>([]);
   const [donationProgress, setDonationProgress] = useState<DonationProgress>({
     goal: null,
@@ -79,6 +86,12 @@ const Donate = () => {
     handleStripeDonation(Math.round(amount * 100));
   };
 
+  const handlePresetClick = (amount: number) => {
+    setSelectedAmount(amount);
+    setCustomAmount("");
+    handleStripeDonation(amount * 100);
+  };
+
   const fetchTopDonors = async () => {
     try {
       const { data, error } = await supabase
@@ -89,9 +102,7 @@ const Donate = () => {
 
       if (error) throw error;
 
-      // Group by user_id and sum amounts, then sort by total
       const donorMap = new Map<string | null, { total: number; count: number }>();
-      
       data?.forEach((purchase) => {
         const key = purchase.user_id || "anonymous";
         const existing = donorMap.get(key) || { total: 0, count: 0 };
@@ -101,10 +112,9 @@ const Donate = () => {
         });
       });
 
-      // Convert to array and sort by total amount
       const sortedDonors = Array.from(donorMap.values())
         .sort((a, b) => b.total - a.total)
-        .slice(0, 10); // Top 10
+        .slice(0, 10);
 
       setTopDonors(sortedDonors);
     } catch (error) {
@@ -114,19 +124,14 @@ const Donate = () => {
 
   const fetchDonationProgress = async () => {
     try {
-      // Get active donation goal
       const { data: goalData, error: goalError } = await supabase
         .from("donation_goals")
         .select("*")
         .eq("is_active", true)
         .single();
 
-      if (goalError) {
-        console.error("Error fetching donation goal:", goalError);
-        return;
-      }
+      if (goalError) return;
 
-      // Get total donations for the goal currency
       const { data: donationData, error: donationError } = await supabase
         .from("purchases")
         .select("amount")
@@ -134,21 +139,14 @@ const Donate = () => {
         .eq("status", "completed")
         .eq("currency", goalData.currency);
 
-      if (donationError) {
-        console.error("Error fetching donations:", donationError);
-        return;
-      }
+      if (donationError) return;
 
-      const currentAmount = donationData?.reduce((sum, donation) => sum + donation.amount, 0) || 0;
-      const progressPercentage = goalData.target_amount > 0 
-        ? Math.min((currentAmount / goalData.target_amount) * 100, 100) 
+      const currentAmount = donationData?.reduce((sum, d) => sum + d.amount, 0) || 0;
+      const progressPercentage = goalData.target_amount > 0
+        ? Math.min((currentAmount / goalData.target_amount) * 100, 100)
         : 0;
 
-      setDonationProgress({
-        goal: goalData,
-        currentAmount,
-        progressPercentage,
-      });
+      setDonationProgress({ goal: goalData, currentAmount, progressPercentage });
     } catch (error) {
       console.error("Error fetching donation progress:", error);
     }
@@ -170,132 +168,140 @@ const Donate = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 container mx-auto px-6 py-24">
-          <div className="max-w-2xl mx-auto space-y-8">
-            {/* Donation Goal Progress */}
-            {donationProgress.goal && (
-              <div className="bg-card/50 backdrop-blur-sm border border-primary/20 rounded-2xl p-6">
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h2 className="text-xl font-semibold text-primary">{donationProgress.goal.title}</h2>
-                    {donationProgress.goal.description && (
-                      <p className="text-sm text-muted-foreground mt-2">{donationProgress.goal.description}</p>
-                    )}
-                  </div>
-                  
-                  {/* Progress Bar */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">
-                        ${(donationProgress.currentAmount / 100).toFixed(2)} raised
-                      </span>
-                      <span className="text-muted-foreground">
-                        ${(donationProgress.goal.target_amount / 100).toFixed(2)} goal
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-1000 ease-out"
-                        style={{ width: `${donationProgress.progressPercentage}%` }}
-                      />
-                    </div>
-                    <div className="text-center">
-                      <span className="text-2xl font-bold text-primary">
-                        {donationProgress.progressPercentage.toFixed(1)}%
-                      </span>
-                      <span className="text-muted-foreground ml-2">complete</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="text-center space-y-4">
-            <Heart className="h-12 w-12 text-primary mx-auto animate-pulse" />
-            <h1 className="text-4xl font-bold font-display tracking-tight">Support MasterChess</h1>
-            <p className="text-muted-foreground text-lg">
-              Your donations help us keep the servers running, develop new lessons, host tournaments, and keep the core features ad-free.
+        <div className="max-w-3xl mx-auto space-y-10">
+          {/* Hero */}
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <Heart className="h-4 w-4 text-primary animate-pulse" />
+              <span className="text-sm font-medium text-primary">Community Supported</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight">
+              Support MasterChessOnline
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              Help <span className="font-semibold text-foreground">DailyChess_12</span> keep the servers running, develop new lessons, host tournaments, and keep the core features ad-free.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-6 mt-12">
-            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm lg:col-span-2">
+          {/* Donation Goal Progress */}
+          {donationProgress.goal && (
+            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
+              <CardContent className="p-6 space-y-4 relative">
+                <div className="text-center">
+                  <h2 className="text-xl font-semibold text-primary">{donationProgress.goal.title}</h2>
+                  {donationProgress.goal.description && (
+                    <p className="text-sm text-muted-foreground mt-1">{donationProgress.goal.description}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">
+                      ${(donationProgress.currentAmount / 100).toFixed(2)} raised
+                    </span>
+                    <span className="text-muted-foreground">
+                      ${(donationProgress.goal.target_amount / 100).toFixed(2)} goal
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${donationProgress.progressPercentage}%` }}
+                    />
+                  </div>
+                  <p className="text-center text-2xl font-bold text-primary">
+                    {donationProgress.progressPercentage.toFixed(1)}%
+                    <span className="text-sm font-normal text-muted-foreground ml-2">complete</span>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Preset Amounts */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {presetAmounts.map(({ value, label, icon: Icon, description }) => (
+              <button
+                key={value}
+                onClick={() => handlePresetClick(value)}
+                disabled={loading}
+                className="group relative p-6 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/5 transition-all duration-200 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Icon className="h-8 w-8 text-primary mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                <p className="text-2xl font-bold text-foreground">{label}</p>
+                <p className="text-xs text-muted-foreground mt-1">{description}</p>
+              </button>
+            ))}
+          </div>
+
+          <div className="grid lg:grid-cols-5 gap-6">
+            {/* Payment Card */}
+            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm lg:col-span-3">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-primary" />
-                  Card / Apple Pay
+                  Custom Amount
                 </CardTitle>
-                <CardDescription>Secure payment via Stripe</CardDescription>
+                <CardDescription>Card, Apple Pay, Google Pay via Stripe</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-2">
-                  {[1, 5, 10].map((amount) => (
-                    <Button
-                      key={amount}
-                      variant="outline"
-                      onClick={() => handleStripeDonation(amount * 100)}
-                      disabled={loading}
-                      className="border-primary/20 hover:bg-primary/10"
-                    >
-                      ${amount}
-                    </Button>
-                  ))}
-                </div>
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2">
                   <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
                     <Input
                       type="number"
                       min="1"
                       step="1"
-                      placeholder="Custom amount"
+                      placeholder="Enter amount"
                       value={customAmount}
-                      onChange={(e) => setCustomAmount(e.target.value)}
-                      className="pr-8"
+                      onChange={(e) => {
+                        setCustomAmount(e.target.value);
+                        setSelectedAmount(null);
+                      }}
+                      className="pl-7"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
                   </div>
-                  <Button 
+                  <Button
                     onClick={handleCustomDonation}
                     disabled={loading || !customAmount}
+                    className="min-w-[100px]"
                   >
+                    <Gift className="h-4 w-4 mr-2" />
                     Donate
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  All payments are securely processed. You'll be redirected to a secure checkout page.
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            {/* Top Supporters */}
+            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm lg:col-span-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <Trophy className="h-5 w-5 text-primary" />
                   Top Supporters
                 </CardTitle>
-                <CardDescription>Our amazing community</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-1.5">
                 {topDonors.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">
                     Be the first supporter!
                   </p>
                 ) : (
-                  topDonors.map((donor, index) => (
+                  topDonors.slice(0, 5).map((donor, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
                     >
                       <div className="flex items-center gap-2">
                         {getRankIcon(index)}
-                        <span className="text-sm font-medium">
-                          Anonymous Supporter
-                        </span>
+                        <span className="text-sm font-medium">Anonymous</span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-primary">
-                          ${(donor.total / 100).toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {donor.count} donation{donor.count !== 1 ? 's' : ''}
-                        </p>
-                      </div>
+                      <span className="text-sm font-semibold text-primary">
+                        ${(donor.total / 100).toFixed(0)}
+                      </span>
                     </div>
                   ))
                 )}
@@ -303,28 +309,24 @@ const Donate = () => {
             </Card>
           </div>
 
-          <div className="mt-8">
-            <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-primary" />
-                  Why Donate?
-                </CardTitle>
-                <CardDescription>Your support makes a difference</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Every donation helps us:
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-2 list-disc list-inside">
-                  <li>Keep servers running 24/7</li>
-                  <li>Develop new lessons & puzzles</li>
-                  <li>Host free tournaments</li>
-                  <li>Keep the core experience ad-free</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Why Donate */}
+          <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="grid sm:grid-cols-4 gap-6 text-center">
+                {[
+                  { icon: Zap, text: "Keep servers running 24/7" },
+                  { icon: Star, text: "Develop new lessons & puzzles" },
+                  { icon: Trophy, text: "Host free tournaments" },
+                  { icon: Heart, text: "Keep the experience ad-free" },
+                ].map(({ icon: Icon, text }, i) => (
+                  <div key={i} className="space-y-2">
+                    <Icon className="h-6 w-6 text-primary mx-auto" />
+                    <p className="text-sm text-muted-foreground">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
       <Footer />
