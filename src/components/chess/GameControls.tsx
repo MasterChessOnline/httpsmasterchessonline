@@ -93,7 +93,7 @@ export default function GameControls({
         <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
           <Timer className="h-3 w-3" /> Time Control
         </p>
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
           {TIME_CONTROLS.map((tc, i) => (
             <button
               key={tc.label}
