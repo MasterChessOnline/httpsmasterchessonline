@@ -27,6 +27,7 @@ import Donate from "./pages/Donate";
 import Contact from "./pages/Contact";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
+import Lessons from "./pages/Lessons";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/premium/chat" element={<PremiumGuard><PremiumChat /></PremiumGuard>} />
             <Route path="/premium/lessons" element={<PremiumGuard requiredTier="pro"><VideoLessons /></PremiumGuard>} />
             <Route path="/achievements" element={<Achievements />} />
+            <Route path="/lessons" element={<Lessons />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
