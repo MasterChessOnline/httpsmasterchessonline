@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Clock, Users, Zap, Swords, Timer, Crown, Gem,
   RefreshCw, Network, GitBranch, Calendar,
-  TrendingUp, Medal, User, Plus, Loader2, Play, Lock,
+  TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { hasAccess } from "@/lib/premium-tiers";
 import { toast } from "@/hooks/use-toast";
 
@@ -92,7 +93,7 @@ const Tournaments = () => {
   const [viewTab, setViewTab] = useState<ViewTab>("all");
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-
+  const [searchQuery, setSearchQuery] = useState("");
   const [dbTournaments, setDbTournaments] = useState<DbTournament[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -211,6 +212,10 @@ const Tournaments = () => {
   const filtered = dbTournaments.filter(t => {
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      if (!t.name.toLowerCase().includes(q) && !t.time_control_label.toLowerCase().includes(q)) return false;
+    }
     return true;
   });
 
@@ -352,7 +357,16 @@ const Tournaments = () => {
         {/* ============ TOURNAMENTS ============ */}
         {viewTab === "all" && (
           <div className="mx-auto max-w-2xl">
-            {/* Filters + Create */}
+            {/* Search + Filters + Create */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name or time control (e.g. 3+0, bullet)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 bg-card border-border/50"
+              />
+            </div>
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <div className="flex gap-1.5 flex-wrap">
                 {CATEGORY_OPTIONS.map((opt) => (
