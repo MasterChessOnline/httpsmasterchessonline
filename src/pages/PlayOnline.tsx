@@ -38,6 +38,30 @@ interface ChatMessage {
   created_at: string;
 }
 
+const SKILL_TIERS = [
+  { key: "all", label: "Any", ratingRange: [0, 9999] },
+  { key: "beginner", label: "Beginner", ratingRange: [0, 999] },
+  { key: "intermediate", label: "Intermediate", ratingRange: [1000, 1499] },
+  { key: "advanced", label: "Advanced", ratingRange: [1500, 9999] },
+] as const;
+
+interface LiveGame {
+  id: string;
+  white_player_id: string;
+  black_player_id: string;
+  time_control_label: string;
+  fen: string;
+  turn: string;
+}
+
+interface LeaderEntry {
+  user_id: string;
+  display_name: string | null;
+  rating: number;
+  games_won: number;
+  games_played: number;
+}
+
 const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -51,10 +75,16 @@ const PlayOnline = () => {
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
   const [timeControlIdx, setTimeControlIdx] = useState(4);
+  const [skillTier, setSkillTier] = useState("all");
   const gameRef = useRef(new Chess());
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Live stats
+  const [activePlayers, setActivePlayers] = useState(0);
+  const [liveGames, setLiveGames] = useState<LiveGame[]>([]);
+  const [topPlayers, setTopPlayers] = useState<LeaderEntry[]>([]);
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
