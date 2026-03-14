@@ -92,6 +92,39 @@ const PlayOnline = () => {
   const [blackTime, setBlackTime] = useState(tc.seconds);
   const [gameStarted, setGameStarted] = useState(false);
 
+  // Fetch live stats (active players, live games, leaderboard)
+  useEffect(() => {
+    if (onlineStatus !== "idle") return;
+
+    const fetchStats = async () => {
+      // Count active games
+      const { data: games } = await supabase
+        .from("online_games")
+        .select("id, white_player_id, black_player_id, time_control_label, fen, turn")
+        .eq("status", "active")
+        .limit(20);
+      
+      if (games) {
+        setLiveGames(games as LiveGame[]);
+        const playerIds = new Set<string>();
+        games.forEach(g => { playerIds.add(g.white_player_id); playerIds.add(g.black_player_id); });
+        setActivePlayers(playerIds.size);
+      }
+
+      // Top 10 leaderboard
+      const { data: leaders } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, rating, games_won, games_played")
+        .order("rating", { ascending: false })
+        .limit(10);
+      if (leaders) setTopPlayers(leaders as LeaderEntry[]);
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 15000);
+    return () => clearInterval(interval);
+  }, [onlineStatus]);
+
   const game = gameRef.current;
   const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
 
