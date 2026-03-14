@@ -448,7 +448,28 @@ const Tournaments = () => {
               </div>
             )}
 
-            {!isPremium && (
+            {/* Active tournament banner */}
+            {activeTournament && (
+              <div className="mb-5 rounded-lg border border-primary/30 bg-primary/10 p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Swords className="w-4 h-4 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      You're in: {activeTournament.tournament_name}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {activeTournament.tournament_status === "active"
+                        ? `Round ${activeTournament.current_round}/${activeTournament.total_rounds} · ${activeTournament.time_control_label}`
+                        : `Starting soon · ${activeTournament.time_control_label}`}
+                    </p>
+                  </div>
+                </div>
+                <Button size="sm" onClick={() => navigate(`/tournaments/${activeTournament.tournament_id}`)}>
+                  Go to Lobby
+                </Button>
+              </div>
+            )}
+
               <div className="mb-5 rounded-lg border border-border/40 bg-card p-3 flex items-center gap-3">
                 <Crown className="w-4 h-4 text-primary shrink-0" />
                 <p className="text-xs text-muted-foreground flex-1">
