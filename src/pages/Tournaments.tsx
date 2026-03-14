@@ -258,6 +258,8 @@ const Tournaments = () => {
     const isJoined = myRegistrations.has(t.id);
     const isJoiningThis = joiningId === t.id;
     const isFull = (t.player_count || 0) >= t.max_players;
+    const hasActiveTournament = !!activeTournament && activeTournament.tournament_id !== t.id;
+    const cannotJoin = isJoiningThis || isFull || hasActiveTournament;
 
     return (
       <article key={t.id} className="rounded-xl border border-border/50 bg-card p-4 sm:p-5 transition-all hover:border-primary/30 hover:shadow-glow">
