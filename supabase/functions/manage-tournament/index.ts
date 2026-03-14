@@ -104,6 +104,27 @@ async function handleJoin(supabase: any, userId: string, tournament_id: string) 
     return jsonRes({ message: "Already registered" });
   }
 
+  // Enforce one-tournament-at-a-time: check if user is in any active/registering tournament
+  const { data: allRegs } = await supabase
+    .from("tournament_registrations")
+    .select("tournament_id")
+    .eq("user_id", userId);
+
+  if (allRegs && allRegs.length > 0) {
+    const regTournamentIds = allRegs.map((r: any) => r.tournament_id);
+    const { data: activeTournaments } = await supabase
+      .from("tournaments")
+      .select("id, name")
+      .in("id", regTournamentIds)
+      .in("status", ["registering", "active"]);
+
+    if (activeTournaments && activeTournaments.length > 0) {
+      return jsonRes({
+        error: `You're already registered in "${activeTournaments[0].name}". Complete or withdraw first.`,
+      }, 400);
+    }
+  }
+
   const { data: tournament } = await supabase
     .from("tournaments")
     .select("max_players, status")

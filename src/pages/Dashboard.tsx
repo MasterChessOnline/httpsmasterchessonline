@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useActiveTournament } from "@/hooks/use-active-tournament";
+import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Crown, Trophy, Swords, Flame, BookOpen, Bell,
-  TrendingUp, Calendar, Sparkles, Target, Award, Users
+  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap
 } from "lucide-react";
 
 interface Notification {
@@ -23,6 +25,11 @@ interface Notification {
 const Dashboard = () => {
   const { user, profile, isPremium, subscriptionTier, loading } = useAuth();
   const navigate = useNavigate();
+  const { activeTournament } = useActiveTournament(user?.id);
+  useTournamentReminder(user?.id, (name, min) => {
+    // The browser notification is handled inside the hook
+    // This callback can be used for in-app toasts if desired
+  });
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [puzzleStreak, setPuzzleStreak] = useState(0);
@@ -165,6 +172,29 @@ const Dashboard = () => {
               </Link>
             </div>
           </div>
+
+          {/* Active tournament banner */}
+          {activeTournament && (
+            <div className="rounded-xl border border-primary/30 bg-primary/10 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-primary/20 p-2.5">
+                  <Trophy className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{activeTournament.tournament_name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {activeTournament.tournament_status === "active"
+                      ? `🔴 Live · Round ${activeTournament.current_round}/${activeTournament.total_rounds}`
+                      : `Starting soon`}
+                    {" · "}{activeTournament.time_control_label}
+                  </p>
+                </div>
+              </div>
+              <Button size="sm" onClick={() => navigate(`/tournaments/${activeTournament.tournament_id}`)}>
+                <Zap className="h-3 w-3 mr-1" /> Go to Lobby
+              </Button>
+            </div>
+          )}
 
           {/* Stats row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

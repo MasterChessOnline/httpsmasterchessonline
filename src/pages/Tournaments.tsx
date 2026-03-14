@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { hasAccess } from "@/lib/premium-tiers";
 import { toast } from "@/hooks/use-toast";
 import { useStreak } from "@/hooks/use-streak";
+import { useActiveTournament } from "@/hooks/use-active-tournament";
+import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
@@ -100,6 +102,8 @@ const Tournaments = () => {
   const { user, isPremium, subscriptionTier } = useAuth();
   const navigate = useNavigate();
   const { streak } = useStreak(user?.id);
+  const { activeTournament } = useActiveTournament(user?.id);
+  useTournamentReminder(user?.id);
   const [viewTab, setViewTab] = useState<ViewTab>("all");
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -256,6 +260,8 @@ const Tournaments = () => {
     const isJoined = myRegistrations.has(t.id);
     const isJoiningThis = joiningId === t.id;
     const isFull = (t.player_count || 0) >= t.max_players;
+    const hasActiveTournament = !!activeTournament && activeTournament.tournament_id !== t.id;
+    const cannotJoin = isJoiningThis || isFull || hasActiveTournament;
 
     return (
       <article key={t.id} className="rounded-xl border border-border/50 bg-card p-4 sm:p-5 transition-all hover:border-primary/30 hover:shadow-glow">
@@ -292,10 +298,15 @@ const Tournaments = () => {
           </div>
           <div className="flex flex-col gap-1.5 shrink-0">
             {t.status === "registering" && !isJoined && (
-              <Button size="sm" onClick={() => handleJoinTournament(t.id)} disabled={isJoiningThis || isFull}>
-                {isJoiningThis ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-                {isFull ? "Full" : "Join"}
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                <Button size="sm" onClick={() => handleJoinTournament(t.id)} disabled={cannotJoin}>
+                  {isJoiningThis ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                  {isFull ? "Full" : hasActiveTournament ? "In Tournament" : "Join"}
+                </Button>
+                {hasActiveTournament && (
+                  <span className="text-[10px] text-muted-foreground">Leave current first</span>
+                )}
+              </div>
             )}
             {t.status === "registering" && isJoined && (
               <Button size="sm" variant="outline" onClick={() => navigate(`/tournaments/${t.id}`)}>
@@ -436,6 +447,28 @@ const Tournaments = () => {
                     {streak.total_tournaments_played} tournaments played · Best streak: {streak.longest_streak} days
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Active tournament banner */}
+            {activeTournament && (
+              <div className="mb-5 rounded-lg border border-primary/30 bg-primary/10 p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Swords className="w-4 h-4 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      You're in: {activeTournament.tournament_name}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {activeTournament.tournament_status === "active"
+                        ? `Round ${activeTournament.current_round}/${activeTournament.total_rounds} · ${activeTournament.time_control_label}`
+                        : `Starting soon · ${activeTournament.time_control_label}`}
+                    </p>
+                  </div>
+                </div>
+                <Button size="sm" onClick={() => navigate(`/tournaments/${activeTournament.tournament_id}`)}>
+                  Go to Lobby
+                </Button>
               </div>
             )}
 
