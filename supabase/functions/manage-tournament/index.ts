@@ -287,11 +287,12 @@ Deno.serve(async (req) => {
           if (!pendingPairings || pendingPairings.length === 0) {
             // All games done - auto advance
             if (tournament.current_round >= tournament.total_rounds) {
-              // Tournament finished
+              // Tournament finished - award badges
               await supabase
                 .from("tournaments")
                 .update({ status: "finished" })
                 .eq("id", pairing.tournament_id);
+              await awardTournamentBadges(supabase, pairing.tournament_id);
             } else {
               // Generate next round pairings
               await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
