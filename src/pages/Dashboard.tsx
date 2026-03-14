@@ -26,6 +26,10 @@ const Dashboard = () => {
   const { user, profile, isPremium, subscriptionTier, loading } = useAuth();
   const navigate = useNavigate();
   const { activeTournament } = useActiveTournament(user?.id);
+  useTournamentReminder(user?.id, (name, min) => {
+    // The browser notification is handled inside the hook
+    // This callback can be used for in-app toasts if desired
+  });
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [puzzleStreak, setPuzzleStreak] = useState(0);
