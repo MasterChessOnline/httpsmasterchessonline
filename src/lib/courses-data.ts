@@ -716,6 +716,7 @@ export const COURSES: Course[] = [
     title: "The Nimzo-Indian Defense",
     description: "The most respected defense against 1.d4 — flexible and dynamic.",
     level: "Advanced",
+    tier: "premium",
     icon: "Crown",
     lessons: [
       { id: "ni-1", title: "Nimzo-Indian Basics", content: "The Nimzo-Indian (1.d4 Nf6 2.c4 e6 3.Nc3 Bb4) pins the knight and fights for e4 control. It's considered the most theoretically sound defense against 1.d4.", keyPoints: ["Bb4 pins the knight", "Fights for e4 control", "Most respected d4 defense"], fen: "rnbqk2r/pppp1ppp/4pn2/8/1bPP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 2 4",
