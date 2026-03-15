@@ -32,6 +32,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
 import Lessons from "./pages/Lessons";
 import TournamentLobby from "./pages/TournamentLobby";
+import StoryMode from "./pages/StoryMode";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/premium/lessons" element={<PremiumGuard requiredTier="pro"><VideoLessons /></PremiumGuard>} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/lessons" element={<Lessons />} />
+            <Route path="/story" element={<StoryMode />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<About />} />

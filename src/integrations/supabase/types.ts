@@ -391,6 +391,36 @@ export type Database = {
         }
         Relationships: []
       }
+      story_progress: {
+        Row: {
+          chapter_key: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          stars: number
+          user_id: string
+        }
+        Insert: {
+          chapter_key: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          stars?: number
+          user_id: string
+        }
+        Update: {
+          chapter_key?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          stars?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       tournament_chat_messages: {
         Row: {
           created_at: string

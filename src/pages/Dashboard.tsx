@@ -4,13 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
 import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
+import { useStoryProgress } from "@/hooks/use-story-progress";
+import { TOTAL_CHAPTERS } from "@/lib/story-data";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Crown, Trophy, Swords, Flame, BookOpen, Bell,
-  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap
+  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap, Star
 } from "lucide-react";
 
 interface Notification {
@@ -33,6 +35,8 @@ const Dashboard = () => {
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [puzzleStreak, setPuzzleStreak] = useState(0);
+  const { completedCount: storyCompleted, totalStars: storyStars } = useStoryProgress(user?.id);
+  const storyPct = Math.round((storyCompleted / TOTAL_CHAPTERS) * 100);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -303,6 +307,33 @@ const Dashboard = () => {
                     })}
                   </div>
                 )}
+              </div>
+
+              {/* Story Mode progress */}
+              <div className="rounded-xl border border-primary/20 bg-primary/5 backdrop-blur-sm p-5">
+                <h2 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary" /> Story Mode
+                </h2>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-muted-foreground">Adventure Progress</span>
+                      <span className="font-mono text-primary font-bold">{storyCompleted}/{TOTAL_CHAPTERS}</span>
+                    </div>
+                    <Progress value={storyPct} className="h-2.5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" /> {storyStars} stars earned
+                    </span>
+                    <span className="text-xs text-muted-foreground">{storyPct}% complete</span>
+                  </div>
+                  <Link to="/story">
+                    <Button size="sm" className="w-full">
+                      <Swords className="mr-2 h-4 w-4" /> {storyCompleted > 0 ? "Continue Adventure" : "Start Adventure"}
+                    </Button>
+                  </Link>
+                </div>
               </div>
 
               {/* AI Analysis CTA */}
