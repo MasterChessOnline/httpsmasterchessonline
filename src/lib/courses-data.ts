@@ -675,6 +675,7 @@ export const COURSES: Course[] = [
     title: "The Sicilian Defense: Deep Dive",
     description: "Master the world's most popular and complex chess opening.",
     level: "Advanced",
+    tier: "premium",
     icon: "Target",
     lessons: [
       { id: "sd-1", title: "Open Sicilian: 2.Nf3 + 3.d4", content: "The Open Sicilian (1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4) is the main battleground. White gets open lines; Black gets the semi-open c-file and queenside play.", keyPoints: ["Most theoretical opening in chess", "White: open lines + kingside attack", "Black: c-file + queenside play"], fen: "rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
