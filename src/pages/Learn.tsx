@@ -283,10 +283,8 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   const filtered = levelFilter === "all" ? COURSES : COURSES.filter((c) => c.level === levelFilter);
 
   const canAccessCourse = (course: Course) => {
-    if (course.level === "Beginner") return true;
-    if (course.level === "Intermediate") return hasAccess(subscriptionTier, "premium");
-    if (course.level === "Advanced") return hasAccess(subscriptionTier, "pro");
-    return true;
+    if (course.tier === "free") return true;
+    return isPremium;
   };
 
   return (
