@@ -255,6 +255,7 @@ export const COURSES: Course[] = [
     title: "Strategy Masterclass",
     description: "Deep strategic concepts for serious improvement.",
     level: "Advanced",
+    tier: "premium",
     icon: "Brain",
     lessons: [
       L("sm-1", "Prophylaxis", "Prevent the opponent's plans before improving your own position. Ask 'What does my opponent want?' before each move.", ["Ask what opponent wants", "Prevent before improving", "Key skill of world champions"], "r1bq1rk1/pp2bppp/2n1pn2/2pp4/2PP4/2NBPN2/PP3PPP/R1BQ1RK1 w - - 0 8"),
