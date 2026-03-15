@@ -1,83 +1,119 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { Chess, Square } from "chess.js";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Target, Crown, Layout, Crosshair, Brain, ArrowLeft, ChevronRight, CheckCircle2, Lock, Star } from "lucide-react";
+import {
+  BookOpen, Target, Crown, Layout, Crosshair, Brain,
+  ArrowLeft, ChevronRight, CheckCircle2, Lock, Star,
+  Bookmark, BookmarkCheck, Flame, Trophy, BarChart3,
+  Play, Video,
+} from "lucide-react";
 import { COURSES, Course, Lesson } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasAccess } from "@/lib/premium-tiers";
 import InteractiveBoard from "@/components/learn/InteractiveBoard";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
+import { useLessonProgress } from "@/hooks/use-lesson-progress";
+import { toast } from "@/hooks/use-toast";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   BookOpen, Target, Crown, Layout, Crosshair, Brain,
 };
 
-const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
-  wk: { symbol: "♚", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wq: { symbol: "♛", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wr: { symbol: "♜", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wb: { symbol: "♝", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wn: { symbol: "♞", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wp: { symbol: "♟", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  bk: { symbol: "♚", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  bq: { symbol: "♛", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  br: { symbol: "♜", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  bb: { symbol: "♝", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  bn: { symbol: "♞", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  bp: { symbol: "♟", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-};
-
-const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
-const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
-
-function parseFen(fen: string) {
-  const rows = fen.split(" ")[0].split("/");
-  const board: (null | { color: string; type: string })[][] = [];
-  for (const row of rows) {
-    const boardRow: (null | { color: string; type: string })[] = [];
-    for (const ch of row) {
-      if (/\d/.test(ch)) { for (let i = 0; i < parseInt(ch); i++) boardRow.push(null); }
-      else { boardRow.push({ color: ch === ch.toUpperCase() ? "w" : "b", type: ch.toLowerCase() }); }
-    }
-    board.push(boardRow);
-  }
-  return board;
-}
-
-function MiniBoard({ fen }: { fen: string }) {
-  const board = parseFen(fen);
+/* ──── YouTube Embed Component ──── */
+function YouTubeEmbed({ videoUrl, title }: { videoUrl: string; title: string }) {
   return (
-    <div className="w-full max-w-[280px] mx-auto rounded-lg overflow-hidden border border-border/50">
-      {RANKS.map((rank, ri) => (
-        <div key={rank} className="flex">
-          {FILES.map((file, fi) => {
-            const isLight = (ri + fi) % 2 === 0;
-            const piece = board[ri]?.[fi];
-            const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-            const pieceDisplay = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
-            return (
-              <div key={`${file}${rank}`} className={`aspect-square w-[12.5%] flex items-center justify-center text-xl sm:text-2xl ${isLight ? "bg-board-light" : "bg-board-dark"}`}>
-                {pieceDisplay && <span className={pieceDisplay.className}>{pieceDisplay.symbol}</span>}
-              </div>
-            );
-          })}
-        </div>
-      ))}
+    <div className="rounded-xl overflow-hidden border border-border/50 mb-6">
+      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+        <iframe
+          className="absolute inset-0 w-full h-full"
+          src={videoUrl}
+          title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
     </div>
   );
 }
 
-function getRequiredTier(level: string): string | null {
-  if (level === "Advanced") return "pro";
-  if (level === "Intermediate") return null; // free with premium
-  return null; // Beginner always free
+/* ──── Streak Banner ──── */
+function StreakBanner({ streak }: { streak: { current_streak: number; longest_streak: number; total_lessons_completed: number } }) {
+  return (
+    <div className="flex flex-wrap justify-center gap-4 mb-8">
+      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border/30">
+        <Flame className="w-5 h-5 text-orange-500" />
+        <div>
+          <p className="text-xs text-muted-foreground">Daily Streak</p>
+          <p className="text-lg font-bold text-foreground font-mono">{streak.current_streak} day{streak.current_streak !== 1 ? "s" : ""}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border/30">
+        <Trophy className="w-5 h-5 text-primary" />
+        <div>
+          <p className="text-xs text-muted-foreground">Best Streak</p>
+          <p className="text-lg font-bold text-foreground font-mono">{streak.longest_streak} day{streak.longest_streak !== 1 ? "s" : ""}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border/30">
+        <BarChart3 className="w-5 h-5 text-green-500" />
+        <div>
+          <p className="text-xs text-muted-foreground">Completed</p>
+          <p className="text-lg font-bold text-foreground font-mono">{streak.total_lessons_completed} lesson{streak.total_lessons_completed !== 1 ? "s" : ""}</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => void }) {
+/* ──── Bookmarked Lessons Panel ──── */
+function BookmarkedPanel({
+  bookmarks,
+  onGoToLesson,
+}: {
+  bookmarks: { lesson_id: string; course_id: string }[];
+  onGoToLesson: (courseId: string, lessonId: string) => void;
+}) {
+  if (bookmarks.length === 0) return null;
+
+  return (
+    <div className="mb-8 rounded-xl border border-primary/20 bg-primary/5 p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <BookmarkCheck className="w-4 h-4 text-primary" />
+        <h3 className="font-display text-sm font-semibold text-foreground">Bookmarked Lessons</h3>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {bookmarks.slice(0, 8).map((b) => {
+          const course = COURSES.find((c) => c.id === b.course_id);
+          const lesson = course?.lessons.find((l) => l.id === b.lesson_id);
+          if (!course || !lesson) return null;
+          return (
+            <button
+              key={b.lesson_id}
+              onClick={() => onGoToLesson(b.course_id, b.lesson_id)}
+              className="text-xs px-3 py-1.5 rounded-lg bg-card border border-border/50 hover:border-primary/30 transition-colors text-left"
+            >
+              <span className="text-muted-foreground">{course.title} → </span>
+              <span className="text-foreground font-medium">{lesson.title}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ──── Course List ──── */
+function CourseList({
+  onSelectCourse,
+  getCourseProgress,
+}: {
+  onSelectCourse: (course: Course) => void;
+  getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
+}) {
   const { isPremium, subscriptionTier } = useAuth();
   const navigate = useNavigate();
   const [levelFilter, setLevelFilter] = useState<string>("all");
@@ -107,7 +143,7 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
         )}
         {hasAccess(subscriptionTier, "pro") && (
           <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-            <Star className="w-3 h-3 mr-1" /> Pro — All courses unlocked including Advanced
+            <Star className="w-3 h-3 mr-1" /> Pro — All courses unlocked
           </Badge>
         )}
       </div>
@@ -132,6 +168,8 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
         {filtered.map((course) => {
           const Icon = ICON_MAP[course.icon] || BookOpen;
           const accessible = canAccessCourse(course);
+          const prog = getCourseProgress(course.id, course.lessons.length);
+
           return (
             <article
               key={course.id}
@@ -150,13 +188,31 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
               </div>
               <h2 className="font-display text-lg font-semibold text-foreground">{course.title}</h2>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{course.description}</p>
+
+              {/* Progress bar */}
+              {accessible && prog.completed > 0 && (
+                <div className="mt-3">
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                    <span>{prog.completed}/{prog.total} completed</span>
+                    <span>{prog.percent}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-muted rounded-full">
+                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${prog.percent}%` }} />
+                  </div>
+                </div>
+              )}
+
               <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                 <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-primary font-medium">{course.level}</span>
                 <span>{course.lessons.length} lessons</span>
               </div>
               <Button className="mt-4 w-full" size="sm" variant={accessible ? "default" : "outline"}>
                 {accessible ? (
-                  <>Start Course <ChevronRight className="ml-1 h-4 w-4" /></>
+                  prog.completed > 0 ? (
+                    <>{prog.percent === 100 ? "Review Course" : "Continue"} <ChevronRight className="ml-1 h-4 w-4" /></>
+                  ) : (
+                    <>Start Course <ChevronRight className="ml-1 h-4 w-4" /></>
+                  )
                 ) : (
                   <>
                     <Lock className="mr-1 h-3.5 w-3.5" /> Requires {course.level === "Advanced" ? "Pro" : "Premium"}
@@ -184,27 +240,195 @@ function CourseList({ onSelectCourse }: { onSelectCourse: (course: Course) => vo
   );
 }
 
-function LessonView({ course, lessonIdx, onBack, onNext, onPrev }: {
-  course: Course; lessonIdx: number; onBack: () => void; onNext: () => void; onPrev: () => void;
+/* ──── Course Detail ──── */
+function CourseDetail({
+  course,
+  onBack,
+  onSelectLesson,
+  isCompleted,
+  isBookmarked,
+  getCourseProgress,
+}: {
+  course: Course;
+  onBack: () => void;
+  onSelectLesson: (idx: number) => void;
+  isCompleted: (id: string) => boolean;
+  isBookmarked: (id: string) => boolean;
+  getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
+}) {
+  const { isPremium } = useAuth();
+  const navigate = useNavigate();
+  const Icon = ICON_MAP[course.icon] || BookOpen;
+  const maxFreeLessons = course.level === "Beginner" ? course.lessons.length : (!isPremium ? 2 : course.lessons.length);
+  const prog = getCourseProgress(course.id, course.lessons.length);
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
+        <ArrowLeft className="h-4 w-4" /> All Courses
+      </button>
+      <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="inline-flex rounded-lg bg-primary/10 p-3"><Icon className="h-6 w-6 text-primary" /></div>
+          <div>
+            <h2 className="font-display text-2xl font-bold text-foreground">{course.title}</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs text-primary font-medium">{course.level}</span>
+              <span className="text-xs text-muted-foreground">{course.lessons.length} lessons</span>
+            </div>
+          </div>
+        </div>
+        <p className="text-muted-foreground mb-4">{course.description}</p>
+
+        {/* Course progress */}
+        <div className="flex justify-between text-xs text-muted-foreground mb-1">
+          <span>{prog.completed}/{prog.total} completed</span>
+          <span>{prog.percent}%</span>
+        </div>
+        <div className="w-full h-2 bg-muted rounded-full">
+          <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${prog.percent}%` }} />
+        </div>
+      </div>
+
+      <h3 className="font-display text-lg font-semibold text-foreground mb-4">Lessons</h3>
+      <div className="space-y-2">
+        {course.lessons.map((lesson, idx) => {
+          const locked = idx >= maxFreeLessons;
+          const completed = isCompleted(lesson.id);
+          const bookmarked = isBookmarked(lesson.id);
+
+          return (
+            <button
+              key={lesson.id}
+              onClick={() => locked ? navigate("/premium") : onSelectLesson(idx)}
+              className={`w-full flex items-center gap-4 rounded-lg border border-border/50 bg-card p-4 hover:border-primary/30 hover:shadow-glow transition-all text-left ${locked ? "opacity-60" : ""}`}
+            >
+              <span className={`flex items-center justify-center h-8 w-8 rounded-full shrink-0 text-sm font-bold ${
+                completed
+                  ? "bg-green-500/20 text-green-500"
+                  : locked
+                    ? "bg-muted text-muted-foreground"
+                    : "bg-primary/10 text-primary"
+              }`}>
+                {completed ? <CheckCircle2 className="h-4 w-4" /> : locked ? <Lock className="h-3.5 w-3.5" /> : idx + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-foreground truncate">{lesson.title}</p>
+                <p className="text-xs text-muted-foreground truncate">{lesson.keyPoints[0]}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {bookmarked && <Bookmark className="h-3.5 w-3.5 text-primary fill-primary" />}
+                {locked ? (
+                  <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]"><Crown className="w-2.5 h-2.5 mr-0.5" /> Premium</Badge>
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {maxFreeLessons < course.lessons.length && (
+        <div className="mt-6 text-center">
+          <Button onClick={() => navigate("/premium")} variant="outline" className="border-primary/30 text-primary">
+            <Crown className="w-4 h-4 mr-2" /> Unlock all {course.lessons.length} lessons
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ──── DailyChess_12 Video Tips (embedded per lesson) ──── */
+const LESSON_VIDEOS: Record<string, string> = {
+  "of-1": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  "of-4": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  "tp-1": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  "tp-2": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+};
+
+/* ──── Lesson View ──── */
+function LessonView({
+  course,
+  lessonIdx,
+  onBack,
+  onNext,
+  onPrev,
+  isCompleted,
+  isBookmarked,
+  onMarkComplete,
+  onToggleBookmark,
+}: {
+  course: Course;
+  lessonIdx: number;
+  onBack: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+  isCompleted: (id: string) => boolean;
+  isBookmarked: (id: string) => boolean;
+  onMarkComplete: (courseId: string, lessonId: string) => void;
+  onToggleBookmark: (courseId: string, lessonId: string) => void;
 }) {
   const lesson = course.lessons[lessonIdx];
   const totalLessons = course.lessons.length;
+  const completed = isCompleted(lesson.id);
+  const bookmarked = isBookmarked(lesson.id);
+  const videoUrl = LESSON_VIDEOS[lesson.id];
+
   return (
     <div className="max-w-3xl mx-auto">
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
         <ArrowLeft className="h-4 w-4" /> Back to {course.title}
       </button>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-        <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-primary font-medium">{course.level}</span>
-        <span>Lesson {lessonIdx + 1} of {totalLessons}</span>
+
+      {/* Lesson header */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-primary font-medium">{course.level}</span>
+          <span>Lesson {lessonIdx + 1} of {totalLessons}</span>
+          {completed && (
+            <Badge className="bg-green-500/20 text-green-500 border-green-500/30 text-[10px]">
+              <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" /> Completed
+            </Badge>
+          )}
+        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleBookmark(course.id, lesson.id); }}
+          className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
+          aria-label={bookmarked ? "Remove bookmark" : "Bookmark lesson"}
+        >
+          {bookmarked ? (
+            <BookmarkCheck className="w-5 h-5 text-primary" />
+          ) : (
+            <Bookmark className="w-5 h-5 text-muted-foreground hover:text-primary" />
+          )}
+        </button>
       </div>
+
       <h2 className="font-display text-2xl font-bold text-foreground mb-4">{lesson.title}</h2>
+
+      {/* Progress bar */}
       <div className="w-full h-1.5 bg-muted rounded-full mb-6">
         <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${((lessonIdx + 1) / totalLessons) * 100}%` }} />
       </div>
+
+      {/* Video embed */}
+      {videoUrl && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+            <Video className="w-3.5 h-3.5 text-primary" />
+            <span className="font-medium">DailyChess_12 Video Tip</span>
+          </div>
+          <YouTubeEmbed videoUrl={videoUrl} title={lesson.title} />
+        </div>
+      )}
+
+      {/* Lesson content */}
       <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
         <p className="text-foreground leading-relaxed text-base">{lesson.content}</p>
       </div>
+
+      {/* Interactive board */}
       {(() => {
         const lessonData = LESSON_MOVES[lesson.id];
         const variations: LessonVariation[] = lessonData?.variations && lessonData.variations.length > 0
@@ -238,6 +462,8 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev }: {
           </div>
         ) : null;
       })()}
+
+      {/* Key points */}
       {lesson.keyPoints.length > 0 && (
         <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
           <h3 className="font-display text-sm font-semibold text-foreground mb-3">Key Takeaways</h3>
@@ -250,105 +476,102 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev }: {
           </ul>
         </div>
       )}
-      <div className="flex gap-3">
-        <Button variant="outline" onClick={onPrev} disabled={lessonIdx === 0} className="flex-1">Previous</Button>
-        <Button onClick={onNext} disabled={lessonIdx === totalLessons - 1} className="flex-1">
-          {lessonIdx === totalLessons - 1 ? "Course Complete!" : "Next Lesson"}
-          {lessonIdx < totalLessons - 1 && <ChevronRight className="ml-1 h-4 w-4" />}
-        </Button>
-      </div>
-    </div>
-  );
-}
 
-function CourseDetail({ course, onBack, onSelectLesson }: {
-  course: Course; onBack: () => void; onSelectLesson: (idx: number) => void;
-}) {
-  const { isPremium } = useAuth();
-  const navigate = useNavigate();
-  const Icon = ICON_MAP[course.icon] || BookOpen;
-  // Free users: first 2 lessons only for intermediate+
-  const maxFreeLessons = course.level === "Beginner" ? course.lessons.length : (!isPremium ? 2 : course.lessons.length);
+      {/* Mark as Complete + Navigation */}
+      <div className="space-y-3">
+        {!completed && (
+          <Button
+            onClick={() => {
+              onMarkComplete(course.id, lesson.id);
+              toast({ title: "Lesson completed! 🎉", description: `"${lesson.title}" marked as complete.` });
+            }}
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            size="lg"
+          >
+            <CheckCircle2 className="w-4 h-4 mr-2" /> Mark as Complete
+          </Button>
+        )}
 
-  return (
-    <div className="max-w-2xl mx-auto">
-      <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
-        <ArrowLeft className="h-4 w-4" /> All Courses
-      </button>
-      <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="inline-flex rounded-lg bg-primary/10 p-3"><Icon className="h-6 w-6 text-primary" /></div>
-          <div>
-            <h2 className="font-display text-2xl font-bold text-foreground">{course.title}</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs text-primary font-medium">{course.level}</span>
-              <span className="text-xs text-muted-foreground">{course.lessons.length} lessons</span>
-            </div>
-          </div>
-        </div>
-        <p className="text-muted-foreground">{course.description}</p>
-      </div>
-      <h3 className="font-display text-lg font-semibold text-foreground mb-4">Lessons</h3>
-      <div className="space-y-2">
-        {course.lessons.map((lesson, idx) => {
-          const locked = idx >= maxFreeLessons;
-          return (
-            <button
-              key={lesson.id}
-              onClick={() => locked ? navigate("/premium") : onSelectLesson(idx)}
-              className={`w-full flex items-center gap-4 rounded-lg border border-border/50 bg-card p-4 hover:border-primary/30 hover:shadow-glow transition-all text-left ${locked ? "opacity-60" : ""}`}
-            >
-              <span className={`flex items-center justify-center h-8 w-8 rounded-full ${locked ? "bg-muted" : "bg-primary/10"} text-${locked ? "muted-foreground" : "primary"} text-sm font-bold shrink-0`}>
-                {locked ? <Lock className="h-3.5 w-3.5" /> : idx + 1}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground truncate">{lesson.title}</p>
-                <p className="text-xs text-muted-foreground truncate">{lesson.keyPoints[0]}</p>
-              </div>
-              {locked ? (
-                <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]"><Crown className="w-2.5 h-2.5 mr-0.5" /> Premium</Badge>
-              ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-      {maxFreeLessons < course.lessons.length && (
-        <div className="mt-6 text-center">
-          <Button onClick={() => navigate("/premium")} variant="outline" className="border-primary/30 text-primary">
-            <Crown className="w-4 h-4 mr-2" /> Unlock all {course.lessons.length} lessons
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onPrev} disabled={lessonIdx === 0} className="flex-1">Previous</Button>
+          <Button
+            onClick={() => {
+              if (!completed) {
+                onMarkComplete(course.id, lesson.id);
+              }
+              onNext();
+            }}
+            disabled={lessonIdx === totalLessons - 1}
+            className="flex-1"
+          >
+            {lessonIdx === totalLessons - 1 ? "Course Complete!" : "Next Lesson"}
+            {lessonIdx < totalLessons - 1 && <ChevronRight className="ml-1 h-4 w-4" />}
           </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
+/* ──── Main Page ──── */
 type View = "list" | "course" | "lesson";
 
 const Learn = () => {
+  const { user } = useAuth();
   const [view, setView] = useState<View>("list");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [lessonIdx, setLessonIdx] = useState(0);
+  const {
+    streak, bookmarks: bookmarkData, loading,
+    markComplete, toggleBookmark, isCompleted, isBookmarked, getCourseProgress,
+  } = useLessonProgress();
+
+  const goToLesson = useCallback((courseId: string, lessonId: string) => {
+    const course = COURSES.find((c) => c.id === courseId);
+    if (!course) return;
+    const idx = course.lessons.findIndex((l) => l.id === lessonId);
+    if (idx < 0) return;
+    setSelectedCourse(course);
+    setLessonIdx(idx);
+    setView("lesson");
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-6 pt-24 pb-16">
+      <main className="container mx-auto px-4 sm:px-6 pt-24 pb-16">
         <h1 className="font-display text-4xl font-bold text-foreground text-center mb-2">
           Learn <span className="text-gradient-gold">Chess</span>
         </h1>
-        <p className="text-center text-muted-foreground mb-8">
+        <p className="text-center text-muted-foreground mb-6">
           {view === "list" && "Structured courses from beginner to advanced."}
           {view === "course" && selectedCourse && `${selectedCourse.title} — ${selectedCourse.lessons.length} lessons`}
           {view === "lesson" && selectedCourse && `${selectedCourse.title} — Lesson ${lessonIdx + 1}`}
         </p>
+
+        {/* Streak + Bookmarks on list view */}
+        {view === "list" && user && !loading && (
+          <>
+            <StreakBanner streak={streak} />
+            <BookmarkedPanel bookmarks={bookmarkData} onGoToLesson={goToLesson} />
+          </>
+        )}
+
         {view === "list" && (
-          <CourseList onSelectCourse={(course) => { setSelectedCourse(course); setView("course"); }} />
+          <CourseList
+            onSelectCourse={(course) => { setSelectedCourse(course); setView("course"); }}
+            getCourseProgress={getCourseProgress}
+          />
         )}
         {view === "course" && selectedCourse && (
-          <CourseDetail course={selectedCourse} onBack={() => setView("list")} onSelectLesson={(idx) => { setLessonIdx(idx); setView("lesson"); }} />
+          <CourseDetail
+            course={selectedCourse}
+            onBack={() => setView("list")}
+            onSelectLesson={(idx) => { setLessonIdx(idx); setView("lesson"); }}
+            isCompleted={isCompleted}
+            isBookmarked={isBookmarked}
+            getCourseProgress={getCourseProgress}
+          />
         )}
         {view === "lesson" && selectedCourse && (
           <LessonView
@@ -357,6 +580,10 @@ const Learn = () => {
             onBack={() => setView("course")}
             onNext={() => setLessonIdx((i) => Math.min(i + 1, selectedCourse.lessons.length - 1))}
             onPrev={() => setLessonIdx((i) => Math.max(i - 1, 0))}
+            isCompleted={isCompleted}
+            isBookmarked={isBookmarked}
+            onMarkComplete={markComplete}
+            onToggleBookmark={toggleBookmark}
           />
         )}
       </main>
