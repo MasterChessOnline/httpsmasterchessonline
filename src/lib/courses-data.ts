@@ -126,6 +126,7 @@ export const COURSES: Course[] = [
     description: "King and pawn endings, rook endings, and theoretical draws.",
     level: "Advanced",
     icon: "Crown",
+    category: "endgame",
     lessons: [
       L("em-1", "King & Pawn vs King", "The most fundamental endgame. The key concept is 'opposition' — when kings face each other with one square between them. The side NOT to move has the opposition.", ["Opposition is key", "King must lead the pawn", "Know the drawing zone"], "8/8/8/4k3/8/4K3/4P3/8 w - - 0 1"),
       L("em-2", "The Lucena Position", "The most important winning technique in rook endings. With a rook and pawn on the 7th rank (king in front), win by 'building a bridge' — using your rook to shield the king from checks.", ["Build a bridge with the rook", "King shelters behind rook", "Must know by heart"], "1K1k4/1P6/8/8/8/8/2r5/5R2 w - - 0 1"),
