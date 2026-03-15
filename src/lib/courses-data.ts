@@ -837,6 +837,7 @@ export const COURSES: Course[] = [
     title: "Pawn Endgame Mastery",
     description: "Pure king and pawn endings — where calculation and technique decide everything.",
     level: "Advanced",
+    tier: "premium",
     icon: "Crown",
     lessons: [
       L("pe-1", "Opposition Fundamentals", "Direct opposition: kings face each other one square apart. The side NOT to move has the advantage. This is the most important endgame concept.", ["Side not to move has advantage", "Most important endgame concept", "Practice recognizing it"]),
