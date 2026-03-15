@@ -90,6 +90,7 @@ export const COURSES: Course[] = [
     description: "Learn forks, pins, skewers, discovered attacks, and more.",
     level: "Intermediate",
     icon: "Target",
+    tier: "premium",
     category: "tactics",
     lessons: [
       L("tp-1", "The Fork", "A fork is when a single piece attacks two or more enemy pieces simultaneously. Knights are especially good at forking because of their unusual movement pattern.", ["One piece attacks two+ pieces", "Knights are natural forkers", "Look for undefended pieces"], "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"),
