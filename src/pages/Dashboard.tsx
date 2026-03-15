@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
 import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
+import { useStoryProgress } from "@/hooks/use-story-progress";
+import { TOTAL_CHAPTERS } from "@/lib/story-data";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
