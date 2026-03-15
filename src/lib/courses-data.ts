@@ -423,6 +423,7 @@ export const COURSES: Course[] = [
     title: "The French Defense",
     description: "A solid and strategic defense against 1.e4 for Black.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Layout",
     lessons: [
       { id: "fr-1", title: "French Defense Basics", content: "The French (1.e4 e6) is solid and strategic. After 2.d4 d5, Black creates a pawn chain. The challenge: the light-squared bishop.", keyPoints: ["1...e6 — solid but slightly passive", "Strong pawn chain", "Light-squared bishop problem"], fen: "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
