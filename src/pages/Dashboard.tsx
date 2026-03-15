@@ -15,8 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Crown, Trophy, Swords, Flame, BookOpen, Bell,
-  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap, Star
+  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap, Star, CheckCircle
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Notification {
   id: string;
