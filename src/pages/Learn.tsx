@@ -397,7 +397,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
       {/* Course Header Card */}
       <div className="rounded-xl border border-border/50 bg-gradient-to-br from-card via-card to-muted/20 overflow-hidden mb-8">
         {/* Accent bar */}
-        <div className={`h-1.5 w-full ${course.level === "Beginner" ? "bg-green-500/60" : course.level === "Intermediate" ? "bg-primary/60" : "bg-blue-500/60"}`} />
+        <div className={`h-1.5 w-full ${course.tier === "free" ? "bg-green-500/60" : "bg-primary/60"}`} />
 
         <div className="p-6 sm:p-8">
           <div className="flex items-start gap-4 mb-5">
