@@ -6,6 +6,7 @@ import ChessBoard from "@/components/chess/ChessBoard";
 import CapturedPieces from "@/components/chess/CapturedPieces";
 import GameControls from "@/components/chess/GameControls";
 import AnalysisPanel from "@/components/chess/AnalysisPanel";
+import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { getAIMove, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
 import { playChessSound } from "@/lib/chess-sounds";
