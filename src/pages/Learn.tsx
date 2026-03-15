@@ -315,21 +315,39 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
       </div>
 
       {/* Filters */}
-      <div className="flex justify-center gap-2 mb-8 flex-wrap">
-        {levels.map(({ key, label, icon: LvlIcon }) => (
-          <button
-            key={key}
-            onClick={() => setLevelFilter(key)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
-              levelFilter === key
-                ? "border-primary bg-primary/10 text-primary shadow-glow"
-                : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-            }`}
-          >
-            <LvlIcon className="w-3.5 h-3.5" />
-            {label}
-          </button>
-        ))}
+      <div className="flex flex-col items-center gap-3 mb-8">
+        <div className="flex justify-center gap-2 flex-wrap">
+          {levels.map(({ key, label, icon: LvlIcon }) => (
+            <button
+              key={key}
+              onClick={() => setLevelFilter(key)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
+                levelFilter === key
+                  ? "border-primary bg-primary/10 text-primary shadow-glow"
+                  : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+              }`}
+            >
+              <LvlIcon className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="flex justify-center gap-2 flex-wrap">
+          {tiers.map(({ key, label, icon: TierIcon }) => (
+            <button
+              key={key}
+              onClick={() => setTierFilter(key)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all border ${
+                tierFilter === key
+                  ? key === "free" ? "border-green-500 bg-green-500/10 text-green-400 shadow-glow" : key === "premium" ? "border-primary bg-primary/10 text-primary shadow-glow" : "border-primary bg-primary/10 text-primary shadow-glow"
+                  : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+              }`}
+            >
+              <TierIcon className="w-3 h-3" />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Course grid */}
