@@ -256,7 +256,7 @@ function CourseCard({ course, onClick, progress, accessible }: {
               <>Start Course <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
             )
           ) : (
-            <><Lock className="mr-1 h-3 w-3" /> Unlock with {lvl.label}</>
+            <><Lock className="mr-1 h-3 w-3" /> Unlock with Premium</>
           )}
         </Button>
       </div>
