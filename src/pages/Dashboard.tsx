@@ -8,6 +8,7 @@ import { useStoryProgress } from "@/hooks/use-story-progress";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { TOTAL_CHAPTERS } from "@/lib/story-data";
 import { COURSES } from "@/lib/courses-data";
+import { getTodaysPuzzle, getTodayDateString } from "@/lib/daily-puzzles";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
