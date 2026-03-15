@@ -18,12 +18,15 @@ export interface Lesson {
   };
 }
 
+export type CourseCategory = "basics" | "openings" | "tactics" | "middlegame" | "endgame" | "strategy" | "mindset";
+
 export interface Course {
   id: string;
   title: string;
   description: string;
   level: "Beginner" | "Intermediate" | "Advanced";
   icon: string;
+  category: CourseCategory;
   lessons: Lesson[];
 }
 
