@@ -26,7 +26,7 @@ export interface Course {
   description: string;
   level: "Beginner" | "Intermediate" | "Advanced";
   icon: string;
-  category: CourseCategory;
+  category?: CourseCategory;
   lessons: Lesson[];
 }
 
