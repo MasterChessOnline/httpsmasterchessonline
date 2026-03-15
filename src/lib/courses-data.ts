@@ -958,6 +958,7 @@ export const COURSES: Course[] = [
     description: "Learn how pieces move, basic rules, and your very first strategies.",
     level: "Beginner",
     icon: "BookOpen",
+    tier: "free",
     category: "basics",
     lessons: [
       L("cb-1", "The Chessboard", "The chessboard has 64 squares arranged in an 8×8 grid. Squares alternate between light and dark. The board is placed so each player has a light square in the bottom-right corner.", ["64 squares, 8×8 grid", "Light square in bottom-right", "Files (columns) and ranks (rows)"]),
