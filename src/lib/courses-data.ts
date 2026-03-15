@@ -633,6 +633,7 @@ export const COURSES: Course[] = [
     title: "The Dutch Defense",
     description: "An aggressive counter to 1.d4 — fighting for the initiative as Black.",
     level: "Advanced",
+    tier: "premium",
     icon: "Crosshair",
     lessons: [
       { id: "du-1", title: "Dutch Defense Basics", content: "The Dutch (1.d4 f5) is aggressive and unbalanced. Black stakes a kingside claim immediately.", keyPoints: ["1...f5 fights for e4 control", "Commits to kingside", "Risky but aggressive"], fen: "rnbqkbnr/ppppp1pp/8/5p2/3P4/8/PPP1PPPP/RNBQKBNR w KQkq f6 0 2",
