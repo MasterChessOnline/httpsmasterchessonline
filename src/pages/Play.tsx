@@ -100,29 +100,51 @@ const Play = () => {
     return () => clearTimeout(timeout);
   }, [fen, mode, difficulty, aiColor, isGameOver]);
 
+  const isPromotionMove = (from: Square, to: Square): boolean => {
+    const piece = game.get(from);
+    if (!piece || piece.type !== "p") return false;
+    const toRank = parseInt(to[1]);
+    return (piece.color === "w" && toRank === 8) || (piece.color === "b" && toRank === 1);
+  };
+
+  const executeMove = (from: Square, to: Square, promotion: PromotionPiece = "q") => {
+    const move = game.move({ from, to, promotion });
+    if (move) {
+      setMoveHistory((prev) => [...prev, move.san]);
+      setLastMove({ from: move.from, to: move.to });
+      setGameStarted(true);
+      if (!unlimited && timeControl.increment > 0) {
+        if (move.color === "w") setWhiteTime((p) => p + timeControl.increment);
+        else setBlackTime((p) => p + timeControl.increment);
+      }
+      updateState();
+      if (game.isCheckmate() || game.isDraw() || game.isStalemate()) playChessSound("gameOver");
+      else if (game.isCheck()) playChessSound("check");
+      else if (move.captured) playChessSound("capture");
+      else playChessSound("move");
+    }
+    setSelectedSquare(null);
+    setLegalMoves([]);
+  };
+
+  const handlePromotionSelect = (piece: PromotionPiece) => {
+    if (!pendingPromotion) return;
+    executeMove(pendingPromotion.from, pendingPromotion.to, piece);
+    setPendingPromotion(null);
+  };
+
   const handleSquareClick = (square: Square) => {
-    if (isGameOver) return;
+    if (isGameOver || pendingPromotion) return;
     if (mode === "ai" && game.turn() === aiColor) return;
     setHintSquare(null);
 
     if (selectedSquare && legalMoves.includes(square)) {
-      const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
-      if (move) {
-        setMoveHistory((prev) => [...prev, move.san]);
-        setLastMove({ from: move.from, to: move.to });
-        setGameStarted(true);
-        if (!unlimited && timeControl.increment > 0) {
-          if (move.color === "w") setWhiteTime((p) => p + timeControl.increment);
-          else setBlackTime((p) => p + timeControl.increment);
-        }
-        updateState();
-        if (game.isCheckmate() || game.isDraw() || game.isStalemate()) playChessSound("gameOver");
-        else if (game.isCheck()) playChessSound("check");
-        else if (move.captured) playChessSound("capture");
-        else playChessSound("move");
+      // Check for promotion
+      if (isPromotionMove(selectedSquare, square)) {
+        setPendingPromotion({ from: selectedSquare, to: square });
+        return;
       }
-      setSelectedSquare(null);
-      setLegalMoves([]);
+      executeMove(selectedSquare, square);
       return;
     }
 
