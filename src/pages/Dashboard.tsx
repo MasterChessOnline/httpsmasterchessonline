@@ -5,7 +5,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
 import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
 import { useStoryProgress } from "@/hooks/use-story-progress";
+import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { TOTAL_CHAPTERS } from "@/lib/story-data";
+import { COURSES } from "@/lib/courses-data";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,10 @@ const Dashboard = () => {
   const [puzzleStreak, setPuzzleStreak] = useState(0);
   const { completedCount: storyCompleted, totalStars: storyStars } = useStoryProgress(user?.id);
   const storyPct = Math.round((storyCompleted / TOTAL_CHAPTERS) * 100);
+  const { streak: learningStreak, getCourseProgress } = useLessonProgress();
+  const totalCourseLessons = COURSES.reduce((s, c) => s + c.lessons.length, 0);
+  const totalCompleted = COURSES.reduce((s, c) => s + getCourseProgress(c.id, c.lessons.length).completed, 0);
+  const overallLearningPct = totalCourseLessons > 0 ? Math.round((totalCompleted / totalCourseLessons) * 100) : 0;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -307,6 +313,33 @@ const Dashboard = () => {
                     })}
                   </div>
                 )}
+              </div>
+
+              {/* Learning Progress */}
+              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
+                <h2 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary" /> Learning Progress
+                </h2>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-muted-foreground">Courses Completion</span>
+                      <span className="font-mono text-primary font-bold">{totalCompleted}/{totalCourseLessons}</span>
+                    </div>
+                    <Progress value={overallLearningPct} className="h-2.5" />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Flame className="h-3 w-3 text-orange-500" /> {learningStreak.current_streak} day streak
+                    </span>
+                    <span>{overallLearningPct}% complete</span>
+                  </div>
+                  <Link to="/learn">
+                    <Button size="sm" className="w-full">
+                      <BookOpen className="mr-2 h-4 w-4" /> {totalCompleted > 0 ? "Continue Learning" : "Start Learning"}
+                    </Button>
+                  </Link>
+                </div>
               </div>
 
               {/* Story Mode progress */}
