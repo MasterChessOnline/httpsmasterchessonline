@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
-import { hasAccess } from "@/lib/premium-tiers";
+import { } from "@/lib/premium-tiers";
 import InteractiveBoard from "@/components/learn/InteractiveBoard";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
