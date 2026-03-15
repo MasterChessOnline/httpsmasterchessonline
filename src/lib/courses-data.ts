@@ -20,6 +20,8 @@ export interface Lesson {
 
 export type CourseCategory = "basics" | "openings" | "tactics" | "middlegame" | "endgame" | "strategy" | "mindset";
 
+export type CourseTier = "free" | "premium";
+
 export interface Course {
   id: string;
   title: string;
@@ -27,6 +29,7 @@ export interface Course {
   level: "Beginner" | "Intermediate" | "Advanced";
   icon: string;
   category?: CourseCategory;
+  tier: CourseTier;
   lessons: Lesson[];
 }
 
@@ -41,6 +44,7 @@ export const COURSES: Course[] = [
     description: "Master the key opening principles and popular systems.",
     level: "Beginner",
     icon: "BookOpen",
+    tier: "free",
     category: "openings",
     lessons: [
       { id: "of-1", title: "Control the Center", content: "The center squares (e4, d4, e5, d5) are the most important squares on the board. Controlling them gives your pieces maximum mobility and flexibility. Start by advancing your e-pawn or d-pawn two squares forward.", keyPoints: ["Place pawns on e4/d4", "Central pawns control key squares", "Avoid moving the same piece twice early"], fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
@@ -86,6 +90,7 @@ export const COURSES: Course[] = [
     description: "Learn forks, pins, skewers, discovered attacks, and more.",
     level: "Intermediate",
     icon: "Target",
+    tier: "premium",
     category: "tactics",
     lessons: [
       L("tp-1", "The Fork", "A fork is when a single piece attacks two or more enemy pieces simultaneously. Knights are especially good at forking because of their unusual movement pattern.", ["One piece attacks two+ pieces", "Knights are natural forkers", "Look for undefended pieces"], "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"),
@@ -126,6 +131,7 @@ export const COURSES: Course[] = [
     description: "King and pawn endings, rook endings, and theoretical draws.",
     level: "Advanced",
     icon: "Crown",
+    tier: "premium",
     category: "endgame",
     lessons: [
       L("em-1", "King & Pawn vs King", "The most fundamental endgame. The key concept is 'opposition' — when kings face each other with one square between them. The side NOT to move has the opposition.", ["Opposition is key", "King must lead the pawn", "Know the drawing zone"], "8/8/8/4k3/8/4K3/4P3/8 w - - 0 1"),
@@ -166,6 +172,7 @@ export const COURSES: Course[] = [
     description: "Understand pawn structures, outposts, and piece activity.",
     level: "Intermediate",
     icon: "Layout",
+    tier: "premium",
     category: "strategy",
     lessons: [
       L("pp-1", "Pawn Structure Basics", "Pawns are the soul of chess. Your pawn structure determines piece placement, plans, and endgame prospects. Isolated, doubled, and backward pawns are typical weaknesses.", ["Pawns determine the game's character", "Avoid creating weaknesses", "Pawn moves are permanent"], "rnbqkbnr/pppppppp/8/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2"),
@@ -206,6 +213,7 @@ export const COURSES: Course[] = [
     description: "Recognize and execute the most common mating patterns.",
     level: "Beginner",
     icon: "Crosshair",
+    tier: "free",
     category: "tactics",
     lessons: [
       L("cm-1", "Back Rank Mate", "A rook or queen checkmates a king trapped on its first rank by its own pawns. One of the most common patterns. Create a 'luft' (escape square) for your king.", ["King trapped by own pawns", "Rook or queen delivers mate", "Create an escape square"], "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1"),
@@ -247,6 +255,7 @@ export const COURSES: Course[] = [
     title: "Strategy Masterclass",
     description: "Deep strategic concepts for serious improvement.",
     level: "Advanced",
+    tier: "premium",
     icon: "Brain",
     lessons: [
       L("sm-1", "Prophylaxis", "Prevent the opponent's plans before improving your own position. Ask 'What does my opponent want?' before each move.", ["Ask what opponent wants", "Prevent before improving", "Key skill of world champions"], "r1bq1rk1/pp2bppp/2n1pn2/2pp4/2PP4/2NBPN2/PP3PPP/R1BQ1RK1 w - - 0 8"),
@@ -286,6 +295,7 @@ export const COURSES: Course[] = [
     title: "The Queen's Gambit",
     description: "Master the most classical 1.d4 opening system with both White and Black.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Crown",
     lessons: [
       { id: "qg-1", title: "Queen's Gambit Basics", content: "The Queen's Gambit (1.d4 d5 2.c4) is one of the oldest and most respected openings. White offers a pawn for center control.", keyPoints: ["1.d4 d5 2.c4", "Not a true gambit", "Most classical opening"], fen: "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq c3 0 2",
@@ -329,6 +339,7 @@ export const COURSES: Course[] = [
     title: "The Ruy Lopez",
     description: "The 'Spanish Game' — the most classical e4 e5 opening.",
     level: "Intermediate",
+    tier: "premium",
     icon: "BookOpen",
     lessons: [
       { id: "rl-1", title: "Ruy Lopez Basics", content: "The Ruy Lopez (1.e4 e5 2.Nf3 Nc6 3.Bb5) puts pressure on the e5 defender, creating long-term tension.", keyPoints: ["3.Bb5 pressures the e5 defender", "Long-term strategic tension", "Played for centuries"], fen: "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
@@ -370,6 +381,7 @@ export const COURSES: Course[] = [
     title: "The King's Indian Defense",
     description: "A hypermodern fighting system for Black against 1.d4.",
     level: "Advanced",
+    tier: "premium",
     icon: "Brain",
     lessons: [
       { id: "ki-1", title: "King's Indian Setup", content: "The KID (1.d4 Nf6 2.c4 g6) lets White build a center, then attacks it. Fianchetto the bishop and prepare ...e5 and ...f5.", keyPoints: ["Let White build, then attack", "Fianchetto the bishop", "Prepare ...e5 and ...f5"], fen: "rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
@@ -411,6 +423,7 @@ export const COURSES: Course[] = [
     title: "The French Defense",
     description: "A solid and strategic defense against 1.e4 for Black.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Layout",
     lessons: [
       { id: "fr-1", title: "French Defense Basics", content: "The French (1.e4 e6) is solid and strategic. After 2.d4 d5, Black creates a pawn chain. The challenge: the light-squared bishop.", keyPoints: ["1...e6 — solid but slightly passive", "Strong pawn chain", "Light-squared bishop problem"], fen: "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
@@ -452,6 +465,7 @@ export const COURSES: Course[] = [
     title: "The Caro-Kann Defense",
     description: "A rock-solid defense against 1.e4 — favored by world champions.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Target",
     lessons: [
       { id: "ck-1", title: "Caro-Kann Basics", content: "The Caro-Kann (1.e4 c6) prepares ...d5 while keeping the bishop free.", keyPoints: ["1...c6 prepares ...d5", "Bishop stays active", "Ultra-solid"], fen: "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
@@ -493,6 +507,7 @@ export const COURSES: Course[] = [
     title: "The London System",
     description: "A universal opening system for White — easy to learn, hard to crack.",
     level: "Beginner",
+    tier: "free",
     icon: "BookOpen",
     lessons: [
       { id: "ls-1", title: "London System Setup", content: "The London (1.d4, 2.Bf4, 3.e3, 4.Nf3, 5.Bd3) is flexible and works against almost anything.", keyPoints: ["Bf4 before e3", "Works against nearly everything", "Safe, solid, easy"], fen: "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3",
@@ -534,6 +549,7 @@ export const COURSES: Course[] = [
     title: "The English Opening",
     description: "A flexible 1.c4 system — the reversed Sicilian for White.",
     level: "Advanced",
+    tier: "premium",
     icon: "Brain",
     lessons: [
       { id: "en-1", title: "English Opening Basics", content: "The English (1.c4) controls d5 and is extremely flexible. It's a reversed Sicilian with an extra tempo.", keyPoints: ["1.c4 controls d5", "Extremely flexible", "Reversed Sicilian"], fen: "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1",
@@ -575,6 +591,7 @@ export const COURSES: Course[] = [
     title: "The Scandinavian Defense",
     description: "A direct and aggressive response to 1.e4 — simple and effective.",
     level: "Beginner",
+    tier: "free",
     icon: "Crosshair",
     lessons: [
       { id: "sc-1", title: "Scandinavian Basics", content: "The Scandinavian (1.e4 d5) immediately challenges White's center. After 2.exd5 Qxd5 3.Nc3, the queen moves but Black develops fast.", keyPoints: ["1...d5 challenges e4", "Queen comes out early", "Simple plans"], fen: "rnb1kbnr/ppp1pppp/8/3q4/8/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 3",
@@ -616,6 +633,7 @@ export const COURSES: Course[] = [
     title: "The Dutch Defense",
     description: "An aggressive counter to 1.d4 — fighting for the initiative as Black.",
     level: "Advanced",
+    tier: "premium",
     icon: "Crosshair",
     lessons: [
       { id: "du-1", title: "Dutch Defense Basics", content: "The Dutch (1.d4 f5) is aggressive and unbalanced. Black stakes a kingside claim immediately.", keyPoints: ["1...f5 fights for e4 control", "Commits to kingside", "Risky but aggressive"], fen: "rnbqkbnr/ppppp1pp/8/5p2/3P4/8/PPP1PPPP/RNBQKBNR w KQkq f6 0 2",
@@ -657,6 +675,7 @@ export const COURSES: Course[] = [
     title: "The Sicilian Defense: Deep Dive",
     description: "Master the world's most popular and complex chess opening.",
     level: "Advanced",
+    tier: "premium",
     icon: "Target",
     lessons: [
       { id: "sd-1", title: "Open Sicilian: 2.Nf3 + 3.d4", content: "The Open Sicilian (1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4) is the main battleground. White gets open lines; Black gets the semi-open c-file and queenside play.", keyPoints: ["Most theoretical opening in chess", "White: open lines + kingside attack", "Black: c-file + queenside play"], fen: "rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
@@ -697,6 +716,7 @@ export const COURSES: Course[] = [
     title: "The Nimzo-Indian Defense",
     description: "The most respected defense against 1.d4 — flexible and dynamic.",
     level: "Advanced",
+    tier: "premium",
     icon: "Crown",
     lessons: [
       { id: "ni-1", title: "Nimzo-Indian Basics", content: "The Nimzo-Indian (1.d4 Nf6 2.c4 e6 3.Nc3 Bb4) pins the knight and fights for e4 control. It's considered the most theoretically sound defense against 1.d4.", keyPoints: ["Bb4 pins the knight", "Fights for e4 control", "Most respected d4 defense"], fen: "rnbqk2r/pppp1ppp/4pn2/8/1bPP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 2 4",
@@ -737,6 +757,7 @@ export const COURSES: Course[] = [
     title: "The Art of Attack",
     description: "Learn to launch devastating attacks on the enemy king.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Crosshair",
     lessons: [
       L("ac-1", "When to Attack", "Attack when you have a lead in development, better piece activity, or your opponent's king is unsafe. Without these factors, an attack will fail.", ["Development advantage", "Superior piece activity", "Unsafe enemy king"]),
@@ -776,6 +797,7 @@ export const COURSES: Course[] = [
     title: "Defensive Mastery",
     description: "The art of defense — survive, counter-attack, and turn the tables.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Layout",
     lessons: [
       L("dt-1", "When to Defend", "Defend when your opponent has the initiative, your king is under pressure, or you're behind in material. Recognition is the first step.", ["Recognize when you're defending", "Opponent has initiative", "King under pressure"]),
@@ -815,6 +837,7 @@ export const COURSES: Course[] = [
     title: "Pawn Endgame Mastery",
     description: "Pure king and pawn endings — where calculation and technique decide everything.",
     level: "Advanced",
+    tier: "premium",
     icon: "Crown",
     lessons: [
       L("pe-1", "Opposition Fundamentals", "Direct opposition: kings face each other one square apart. The side NOT to move has the advantage. This is the most important endgame concept.", ["Side not to move has advantage", "Most important endgame concept", "Practice recognizing it"]),
@@ -854,6 +877,7 @@ export const COURSES: Course[] = [
     title: "Chess Psychology & Mindset",
     description: "Master the mental game — focus, confidence, and competitive resilience.",
     level: "Beginner",
+    tier: "free",
     icon: "Brain",
     lessons: [
       L("cp-1", "The Growth Mindset in Chess", "Talent is developed, not fixed. Every grandmaster started as a beginner. Embrace challenges and learn from losses — they're the best teachers.", ["Talent is developed", "Embrace challenges", "Losses are teachers"]),
@@ -893,6 +917,7 @@ export const COURSES: Course[] = [
     title: "Calculation & Visualization",
     description: "Train your brain to see moves ahead — the core skill of chess mastery.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Brain",
     lessons: [
       L("ct-1", "What is Calculation?", "Calculation is the ability to see moves ahead in your mind. It involves considering your move, opponent's response, your reply, and so on — a 'tree' of possibilities.", ["See moves ahead mentally", "Tree of possibilities", "Core chess skill"]),
@@ -933,6 +958,7 @@ export const COURSES: Course[] = [
     description: "Learn how pieces move, basic rules, and your very first strategies.",
     level: "Beginner",
     icon: "BookOpen",
+    tier: "free",
     category: "basics",
     lessons: [
       L("cb-1", "The Chessboard", "The chessboard has 64 squares arranged in an 8×8 grid. Squares alternate between light and dark. The board is placed so each player has a light square in the bottom-right corner.", ["64 squares, 8×8 grid", "Light square in bottom-right", "Files (columns) and ranks (rows)"]),
@@ -963,6 +989,7 @@ export const COURSES: Course[] = [
     description: "Bridge the gap between opening and endgame — learn to create and execute plans.",
     level: "Beginner",
     icon: "Layout",
+    tier: "free",
     category: "middlegame",
     lessons: [
       L("mg-1", "What is a Plan?", "A plan is a series of moves aimed at a strategic goal. Without a plan, you're just making random moves. Every position has clues about what to do.", ["Series of moves toward a goal", "Don't play randomly", "Position gives clues"]),
@@ -993,6 +1020,7 @@ export const COURSES: Course[] = [
     description: "The most common endgame type — master the essential positions and techniques.",
     level: "Intermediate",
     icon: "Crown",
+    tier: "premium",
     category: "endgame",
     lessons: [
       L("re-1", "Why Rook Endgames Matter", "Rook endgames occur in roughly 50% of all games that reach an endgame. Knowing the key positions and techniques is essential for every player.", ["50% of all endgames", "Most common type", "Essential knowledge"]),

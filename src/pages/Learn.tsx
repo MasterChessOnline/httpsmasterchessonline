@@ -12,9 +12,9 @@ import {
   Play, Video, Sparkles, Lightbulb, ChevronDown, ChevronUp,
   GraduationCap, Clock, Zap, Shield, Award,
 } from "lucide-react";
-import { COURSES, Course, Lesson, CourseCategory } from "@/lib/courses-data";
+import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
-import { hasAccess } from "@/lib/premium-tiers";
+
 import InteractiveBoard from "@/components/learn/InteractiveBoard";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
@@ -25,9 +25,14 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const LEVEL_CONFIG = {
-  Beginner: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", icon: Shield, label: "Free" },
-  Intermediate: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", icon: Zap, label: "Premium" },
-  Advanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Award, label: "Pro" },
+  Beginner: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", icon: Shield, label: "Beginner" },
+  Intermediate: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", icon: Zap, label: "Intermediate" },
+  Advanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Award, label: "Advanced" },
+};
+
+const TIER_CONFIG = {
+  free: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", label: "Free" },
+  premium: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", label: "Premium" },
 };
 
 /* ──── YouTube Embed ──── */
@@ -195,6 +200,7 @@ function CourseCard({ course, onClick, progress, accessible }: {
 }) {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
+  const tierCfg = TIER_CONFIG[course.tier];
   const navigate = useNavigate();
 
   return (
@@ -205,7 +211,7 @@ function CourseCard({ course, onClick, progress, accessible }: {
       }`}
     >
       {/* Top accent bar */}
-      <div className={`h-1 w-full ${course.level === "Beginner" ? "bg-green-500/50" : course.level === "Intermediate" ? "bg-primary/50" : "bg-blue-500/50"}`} />
+      <div className={`h-1 w-full ${course.tier === "free" ? "bg-green-500/50" : "bg-primary/50"}`} />
 
       <div className="p-5">
         {/* Header row */}
@@ -218,12 +224,14 @@ function CourseCard({ course, onClick, progress, accessible }: {
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
+              <span className={`text-[10px] font-semibold uppercase tracking-wider ${tierCfg.color}`}>{tierCfg.label}</span>
+              <span className="text-[10px] text-muted-foreground">·</span>
               <span className="text-[10px] text-muted-foreground">{course.lessons.length} chapters</span>
             </div>
           </div>
           {!accessible && (
-            <Badge className={`text-[10px] ${lvl.bg} ${lvl.color} ${lvl.border} shrink-0`}>
-              <Lock className="w-2.5 h-2.5 mr-0.5" /> {lvl.label}
+            <Badge className={`text-[10px] ${tierCfg.bg} ${tierCfg.color} ${tierCfg.border} shrink-0`}>
+              <Lock className="w-2.5 h-2.5 mr-0.5" /> Premium
             </Badge>
           )}
         </div>
@@ -248,7 +256,7 @@ function CourseCard({ course, onClick, progress, accessible }: {
               <>Start Course <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
             )
           ) : (
-            <><Lock className="mr-1 h-3 w-3" /> Unlock with {lvl.label}</>
+            <><Lock className="mr-1 h-3 w-3" /> Unlock with Premium</>
           )}
         </Button>
       </div>
@@ -261,9 +269,10 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   onSelectCourse: (course: Course) => void;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const { isPremium, subscriptionTier } = useAuth();
+  const { isPremium } = useAuth();
   const navigate = useNavigate();
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [tierFilter, setTierFilter] = useState<string>("all");
 
   const levels = [
     { key: "all", label: "All Levels", icon: BookOpen },
@@ -272,13 +281,21 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
     { key: "Advanced", label: "Advanced", icon: Award },
   ];
 
-  const filtered = levelFilter === "all" ? COURSES : COURSES.filter((c) => c.level === levelFilter);
+  const tiers = [
+    { key: "all", label: "All", icon: BookOpen },
+    { key: "free", label: "Free", icon: Shield },
+    { key: "premium", label: "Premium", icon: Crown },
+  ];
+
+  const filtered = COURSES.filter((c) => {
+    if (levelFilter !== "all" && c.level !== levelFilter) return false;
+    if (tierFilter !== "all" && c.tier !== tierFilter) return false;
+    return true;
+  });
 
   const canAccessCourse = (course: Course) => {
-    if (course.level === "Beginner") return true;
-    if (course.level === "Intermediate") return hasAccess(subscriptionTier, "premium");
-    if (course.level === "Advanced") return hasAccess(subscriptionTier, "pro");
-    return true;
+    if (course.tier === "free") return true;
+    return isPremium;
   };
 
   return (
@@ -287,37 +304,50 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
       <div className="flex justify-center mb-6">
         {!isPremium && (
           <Badge className="bg-muted text-muted-foreground border-border text-xs px-3 py-1">
-            <Shield className="w-3 h-3 mr-1.5" /> Free Plan — Beginner courses + 2 preview chapters per premium course
+            <Shield className="w-3 h-3 mr-1.5" /> Free Plan — Free courses + 2 preview chapters per premium course
           </Badge>
         )}
-        {isPremium && !hasAccess(subscriptionTier, "pro") && (
+        {isPremium && (
           <Badge className="bg-primary/20 text-primary border-primary/30 text-xs px-3 py-1">
-            <Crown className="w-3 h-3 mr-1.5" /> Premium — Beginner & Intermediate unlocked
-          </Badge>
-        )}
-        {hasAccess(subscriptionTier, "pro") && (
-          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs px-3 py-1">
-            <Star className="w-3 h-3 mr-1.5" /> Pro — All courses unlocked
+            <Crown className="w-3 h-3 mr-1.5" /> Premium — All courses unlocked
           </Badge>
         )}
       </div>
 
       {/* Filters */}
-      <div className="flex justify-center gap-2 mb-8 flex-wrap">
-        {levels.map(({ key, label, icon: LvlIcon }) => (
-          <button
-            key={key}
-            onClick={() => setLevelFilter(key)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
-              levelFilter === key
-                ? "border-primary bg-primary/10 text-primary shadow-glow"
-                : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-            }`}
-          >
-            <LvlIcon className="w-3.5 h-3.5" />
-            {label}
-          </button>
-        ))}
+      <div className="flex flex-col items-center gap-3 mb-8">
+        <div className="flex justify-center gap-2 flex-wrap">
+          {levels.map(({ key, label, icon: LvlIcon }) => (
+            <button
+              key={key}
+              onClick={() => setLevelFilter(key)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
+                levelFilter === key
+                  ? "border-primary bg-primary/10 text-primary shadow-glow"
+                  : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+              }`}
+            >
+              <LvlIcon className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="flex justify-center gap-2 flex-wrap">
+          {tiers.map(({ key, label, icon: TierIcon }) => (
+            <button
+              key={key}
+              onClick={() => setTierFilter(key)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all border ${
+                tierFilter === key
+                  ? key === "free" ? "border-green-500 bg-green-500/10 text-green-400 shadow-glow" : key === "premium" ? "border-primary bg-primary/10 text-primary shadow-glow" : "border-primary bg-primary/10 text-primary shadow-glow"
+                  : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+              }`}
+            >
+              <TierIcon className="w-3 h-3" />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Course grid */}
@@ -359,17 +389,15 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   isBookmarked: (id: string) => boolean;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const { isPremium, subscriptionTier } = useAuth();
+  const { isPremium } = useAuth();
   const navigate = useNavigate();
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const prog = getCourseProgress(course.id, course.lessons.length);
 
   const canAccessCourse = (() => {
-    if (course.level === "Beginner") return true;
-    if (course.level === "Intermediate") return hasAccess(subscriptionTier, "premium");
-    if (course.level === "Advanced") return hasAccess(subscriptionTier, "pro");
-    return true;
+    if (course.tier === "free") return true;
+    return isPremium;
   })();
 
   const maxFreeLessons = canAccessCourse ? course.lessons.length : 2;
@@ -398,7 +426,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
       {/* Course Header Card */}
       <div className="rounded-xl border border-border/50 bg-gradient-to-br from-card via-card to-muted/20 overflow-hidden mb-8">
         {/* Accent bar */}
-        <div className={`h-1.5 w-full ${course.level === "Beginner" ? "bg-green-500/60" : course.level === "Intermediate" ? "bg-primary/60" : "bg-blue-500/60"}`} />
+        <div className={`h-1.5 w-full ${course.tier === "free" ? "bg-green-500/60" : "bg-primary/60"}`} />
 
         <div className="p-6 sm:p-8">
           <div className="flex items-start gap-4 mb-5">
