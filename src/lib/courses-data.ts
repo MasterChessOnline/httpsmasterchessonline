@@ -20,6 +20,8 @@ export interface Lesson {
 
 export type CourseCategory = "basics" | "openings" | "tactics" | "middlegame" | "endgame" | "strategy" | "mindset";
 
+export type CourseTier = "free" | "premium";
+
 export interface Course {
   id: string;
   title: string;
@@ -27,6 +29,7 @@ export interface Course {
   level: "Beginner" | "Intermediate" | "Advanced";
   icon: string;
   category?: CourseCategory;
+  tier: CourseTier;
   lessons: Lesson[];
 }
 
