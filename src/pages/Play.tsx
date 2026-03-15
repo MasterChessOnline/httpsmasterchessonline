@@ -32,6 +32,7 @@ const Play = () => {
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
   const [hintsEnabled, setHintsEnabled] = useState(false);
   const [hintSquare, setHintSquare] = useState<Square | null>(null);
+  const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const gameRef = useRef(new Chess());
 
   const [timeControlIdx, setTimeControlIdx] = useState(6); // unlimited
