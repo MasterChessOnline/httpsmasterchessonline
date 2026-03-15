@@ -757,6 +757,7 @@ export const COURSES: Course[] = [
     title: "The Art of Attack",
     description: "Learn to launch devastating attacks on the enemy king.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Crosshair",
     lessons: [
       L("ac-1", "When to Attack", "Attack when you have a lead in development, better piece activity, or your opponent's king is unsafe. Without these factors, an attack will fail.", ["Development advantage", "Superior piece activity", "Unsafe enemy king"]),
