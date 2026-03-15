@@ -200,6 +200,7 @@ function CourseCard({ course, onClick, progress, accessible }: {
 }) {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
+  const tierCfg = TIER_CONFIG[course.tier];
   const navigate = useNavigate();
 
   return (
