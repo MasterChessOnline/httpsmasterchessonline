@@ -293,17 +293,12 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
       <div className="flex justify-center mb-6">
         {!isPremium && (
           <Badge className="bg-muted text-muted-foreground border-border text-xs px-3 py-1">
-            <Shield className="w-3 h-3 mr-1.5" /> Free Plan — Beginner courses + 2 preview chapters per premium course
+            <Shield className="w-3 h-3 mr-1.5" /> Free Plan — Free courses + 2 preview chapters per premium course
           </Badge>
         )}
-        {isPremium && !hasAccess(subscriptionTier, "pro") && (
+        {isPremium && (
           <Badge className="bg-primary/20 text-primary border-primary/30 text-xs px-3 py-1">
-            <Crown className="w-3 h-3 mr-1.5" /> Premium — Beginner & Intermediate unlocked
-          </Badge>
-        )}
-        {hasAccess(subscriptionTier, "pro") && (
-          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs px-3 py-1">
-            <Star className="w-3 h-3 mr-1.5" /> Pro — All courses unlocked
+            <Crown className="w-3 h-3 mr-1.5" /> Premium — All courses unlocked
           </Badge>
         )}
       </div>
