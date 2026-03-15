@@ -169,6 +169,7 @@ const Play = () => {
     setTimeoutWinner(null);
     setGameStarted(false);
     setHintSquare(null);
+    setPendingPromotion(null);
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
     if (newMode) setMode(newMode);
