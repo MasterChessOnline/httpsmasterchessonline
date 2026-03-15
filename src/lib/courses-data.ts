@@ -797,6 +797,7 @@ export const COURSES: Course[] = [
     title: "Defensive Mastery",
     description: "The art of defense — survive, counter-attack, and turn the tables.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Layout",
     lessons: [
       L("dt-1", "When to Defend", "Defend when your opponent has the initiative, your king is under pressure, or you're behind in material. Recognition is the first step.", ["Recognize when you're defending", "Opponent has initiative", "King under pressure"]),
