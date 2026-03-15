@@ -1020,6 +1020,7 @@ export const COURSES: Course[] = [
     description: "The most common endgame type — master the essential positions and techniques.",
     level: "Intermediate",
     icon: "Crown",
+    tier: "premium",
     category: "endgame",
     lessons: [
       L("re-1", "Why Rook Endgames Matter", "Rook endgames occur in roughly 50% of all games that reach an endgame. Knowing the key positions and techniques is essential for every player.", ["50% of all endgames", "Most common type", "Essential knowledge"]),
