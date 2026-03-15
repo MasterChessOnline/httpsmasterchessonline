@@ -39,6 +39,7 @@ const Dashboard = () => {
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [puzzleStreak, setPuzzleStreak] = useState(0);
+  const [dailySolved, setDailySolved] = useState(false);
   const { completedCount: storyCompleted, totalStars: storyStars } = useStoryProgress(user?.id);
   const storyPct = Math.round((storyCompleted / TOTAL_CHAPTERS) * 100);
   const { streak: learningStreak, getCourseProgress } = useLessonProgress();
