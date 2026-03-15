@@ -591,6 +591,7 @@ export const COURSES: Course[] = [
     title: "The Scandinavian Defense",
     description: "A direct and aggressive response to 1.e4 — simple and effective.",
     level: "Beginner",
+    tier: "free",
     icon: "Crosshair",
     lessons: [
       { id: "sc-1", title: "Scandinavian Basics", content: "The Scandinavian (1.e4 d5) immediately challenges White's center. After 2.exd5 Qxd5 3.Nc3, the queen moves but Black develops fast.", keyPoints: ["1...d5 challenges e4", "Queen comes out early", "Simple plans"], fen: "rnb1kbnr/ppp1pppp/8/3q4/8/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 3",
