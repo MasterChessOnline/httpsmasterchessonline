@@ -381,6 +381,7 @@ export const COURSES: Course[] = [
     title: "The King's Indian Defense",
     description: "A hypermodern fighting system for Black against 1.d4.",
     level: "Advanced",
+    tier: "premium",
     icon: "Brain",
     lessons: [
       { id: "ki-1", title: "King's Indian Setup", content: "The KID (1.d4 Nf6 2.c4 g6) lets White build a center, then attacks it. Fianchetto the bishop and prepare ...e5 and ...f5.", keyPoints: ["Let White build, then attack", "Fianchetto the bishop", "Prepare ...e5 and ...f5"], fen: "rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
