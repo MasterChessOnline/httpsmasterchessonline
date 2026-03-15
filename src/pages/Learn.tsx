@@ -367,10 +367,8 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   const prog = getCourseProgress(course.id, course.lessons.length);
 
   const canAccessCourse = (() => {
-    if (course.level === "Beginner") return true;
-    if (course.level === "Intermediate") return hasAccess(subscriptionTier, "premium");
-    if (course.level === "Advanced") return hasAccess(subscriptionTier, "pro");
-    return true;
+    if (course.tier === "free") return true;
+    return isPremium;
   })();
 
   const maxFreeLessons = canAccessCourse ? course.lessons.length : 2;
