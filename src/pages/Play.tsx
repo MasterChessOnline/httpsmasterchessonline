@@ -323,6 +323,14 @@ const Play = () => {
           </div>
         </div>
       </main>
+
+      <PromotionDialog
+        isOpen={!!pendingPromotion}
+        color={game.turn()}
+        onSelect={handlePromotionSelect}
+        onCancel={() => setPendingPromotion(null)}
+      />
+
       <Footer />
     </div>
   );
