@@ -35,6 +35,8 @@ const Dashboard = () => {
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [puzzleStreak, setPuzzleStreak] = useState(0);
+  const { completedCount: storyCompleted, totalStars: storyStars } = useStoryProgress(user?.id);
+  const storyPct = Math.round((storyCompleted / TOTAL_CHAPTERS) * 100);
 
   useEffect(() => {
     if (!loading && !user) {
