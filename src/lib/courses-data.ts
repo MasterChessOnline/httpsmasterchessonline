@@ -465,6 +465,7 @@ export const COURSES: Course[] = [
     title: "The Caro-Kann Defense",
     description: "A rock-solid defense against 1.e4 — favored by world champions.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Target",
     lessons: [
       { id: "ck-1", title: "Caro-Kann Basics", content: "The Caro-Kann (1.e4 c6) prepares ...d5 while keeping the bishop free.", keyPoints: ["1...c6 prepares ...d5", "Bishop stays active", "Ultra-solid"], fen: "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
