@@ -107,6 +107,20 @@ const Dashboard = () => {
         }
         setPuzzleStreak(streak);
       });
+
+    // Check if today's daily challenge is solved
+    const todayStr = getTodayDateString();
+    supabase
+      .from("puzzle_solves")
+      .select("solved")
+      .eq("user_id", user.id)
+      .eq("puzzle_date", todayStr)
+      .eq("puzzle_index", 0)
+      .eq("solved", true)
+      .maybeSingle()
+      .then(({ data }) => {
+        setDailySolved(!!data);
+      });
   }, [user]);
 
   if (loading) {
