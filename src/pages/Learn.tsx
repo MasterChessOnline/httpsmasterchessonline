@@ -272,6 +272,7 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   const { isPremium } = useAuth();
   const navigate = useNavigate();
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [tierFilter, setTierFilter] = useState<string>("all");
 
   const levels = [
     { key: "all", label: "All Levels", icon: BookOpen },
@@ -280,7 +281,17 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
     { key: "Advanced", label: "Advanced", icon: Award },
   ];
 
-  const filtered = levelFilter === "all" ? COURSES : COURSES.filter((c) => c.level === levelFilter);
+  const tiers = [
+    { key: "all", label: "All", icon: BookOpen },
+    { key: "free", label: "Free", icon: Shield },
+    { key: "premium", label: "Premium", icon: Crown },
+  ];
+
+  const filtered = COURSES.filter((c) => {
+    if (levelFilter !== "all" && c.level !== levelFilter) return false;
+    if (tierFilter !== "all" && c.tier !== tierFilter) return false;
+    return true;
+  });
 
   const canAccessCourse = (course: Course) => {
     if (course.tier === "free") return true;
