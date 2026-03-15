@@ -39,6 +39,10 @@ const Dashboard = () => {
   const [puzzleStreak, setPuzzleStreak] = useState(0);
   const { completedCount: storyCompleted, totalStars: storyStars } = useStoryProgress(user?.id);
   const storyPct = Math.round((storyCompleted / TOTAL_CHAPTERS) * 100);
+  const { streak: learningStreak, getCourseProgress } = useLessonProgress();
+  const totalCourseLessons = COURSES.reduce((s, c) => s + c.lessons.length, 0);
+  const totalCompleted = COURSES.reduce((s, c) => s + getCourseProgress(c.id, c.lessons.length).completed, 0);
+  const overallLearningPct = totalCourseLessons > 0 ? Math.round((totalCompleted / totalCourseLessons) * 100) : 0;
 
   useEffect(() => {
     if (!loading && !user) {
