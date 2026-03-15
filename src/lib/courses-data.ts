@@ -206,6 +206,7 @@ export const COURSES: Course[] = [
     description: "Recognize and execute the most common mating patterns.",
     level: "Beginner",
     icon: "Crosshair",
+    category: "tactics",
     lessons: [
       L("cm-1", "Back Rank Mate", "A rook or queen checkmates a king trapped on its first rank by its own pawns. One of the most common patterns. Create a 'luft' (escape square) for your king.", ["King trapped by own pawns", "Rook or queen delivers mate", "Create an escape square"], "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1"),
       L("cm-2", "Scholar's Mate", "Qh5+Bc4+Qxf7# targets the weak f7 square. Easily defended with knowledge — play ...Nf6 or ...g6.", ["Targets weak f7 square", "Defend with Nf6", "Teaches threat awareness"], "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4"),
