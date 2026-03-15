@@ -339,6 +339,7 @@ export const COURSES: Course[] = [
     title: "The Ruy Lopez",
     description: "The 'Spanish Game' — the most classical e4 e5 opening.",
     level: "Intermediate",
+    tier: "premium",
     icon: "BookOpen",
     lessons: [
       { id: "rl-1", title: "Ruy Lopez Basics", content: "The Ruy Lopez (1.e4 e5 2.Nf3 Nc6 3.Bb5) puts pressure on the e5 defender, creating long-term tension.", keyPoints: ["3.Bb5 pressures the e5 defender", "Long-term strategic tension", "Played for centuries"], fen: "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
