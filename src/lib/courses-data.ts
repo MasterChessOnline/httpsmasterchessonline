@@ -989,6 +989,7 @@ export const COURSES: Course[] = [
     description: "Bridge the gap between opening and endgame — learn to create and execute plans.",
     level: "Beginner",
     icon: "Layout",
+    tier: "free",
     category: "middlegame",
     lessons: [
       L("mg-1", "What is a Plan?", "A plan is a series of moves aimed at a strategic goal. Without a plan, you're just making random moves. Every position has clues about what to do.", ["Series of moves toward a goal", "Don't play randomly", "Position gives clues"]),
