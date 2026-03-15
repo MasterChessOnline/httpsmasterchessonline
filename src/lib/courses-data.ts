@@ -44,6 +44,7 @@ export const COURSES: Course[] = [
     description: "Master the key opening principles and popular systems.",
     level: "Beginner",
     icon: "BookOpen",
+    tier: "free",
     category: "openings",
     lessons: [
       { id: "of-1", title: "Control the Center", content: "The center squares (e4, d4, e5, d5) are the most important squares on the board. Controlling them gives your pieces maximum mobility and flexibility. Start by advancing your e-pawn or d-pawn two squares forward.", keyPoints: ["Place pawns on e4/d4", "Central pawns control key squares", "Avoid moving the same piece twice early"], fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
