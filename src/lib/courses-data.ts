@@ -507,6 +507,7 @@ export const COURSES: Course[] = [
     title: "The London System",
     description: "A universal opening system for White — easy to learn, hard to crack.",
     level: "Beginner",
+    tier: "free",
     icon: "BookOpen",
     lessons: [
       { id: "ls-1", title: "London System Setup", content: "The London (1.d4, 2.Bf4, 3.e3, 4.Nf3, 5.Bd3) is flexible and works against almost anything.", keyPoints: ["Bf4 before e3", "Works against nearly everything", "Safe, solid, easy"], fen: "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3",
