@@ -224,6 +224,8 @@ function CourseCard({ course, onClick, progress, accessible }: {
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
+              <span className={`text-[10px] font-semibold uppercase tracking-wider ${tierCfg.color}`}>{tierCfg.label}</span>
+              <span className="text-[10px] text-muted-foreground">·</span>
               <span className="text-[10px] text-muted-foreground">{course.lessons.length} chapters</span>
             </div>
           </div>
