@@ -230,8 +230,8 @@ function CourseCard({ course, onClick, progress, accessible }: {
             </div>
           </div>
           {!accessible && (
-            <Badge className={`text-[10px] ${lvl.bg} ${lvl.color} ${lvl.border} shrink-0`}>
-              <Lock className="w-2.5 h-2.5 mr-0.5" /> {lvl.label}
+            <Badge className={`text-[10px] ${tierCfg.bg} ${tierCfg.color} ${tierCfg.border} shrink-0`}>
+              <Lock className="w-2.5 h-2.5 mr-0.5" /> Premium
             </Badge>
           )}
         </div>
