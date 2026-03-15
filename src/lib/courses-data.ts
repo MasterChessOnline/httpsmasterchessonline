@@ -295,6 +295,7 @@ export const COURSES: Course[] = [
     title: "The Queen's Gambit",
     description: "Master the most classical 1.d4 opening system with both White and Black.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Crown",
     lessons: [
       { id: "qg-1", title: "Queen's Gambit Basics", content: "The Queen's Gambit (1.d4 d5 2.c4) is one of the oldest and most respected openings. White offers a pawn for center control.", keyPoints: ["1.d4 d5 2.c4", "Not a true gambit", "Most classical opening"], fen: "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq c3 0 2",
