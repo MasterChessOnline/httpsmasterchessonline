@@ -131,6 +131,7 @@ export const COURSES: Course[] = [
     description: "King and pawn endings, rook endings, and theoretical draws.",
     level: "Advanced",
     icon: "Crown",
+    tier: "premium",
     category: "endgame",
     lessons: [
       L("em-1", "King & Pawn vs King", "The most fundamental endgame. The key concept is 'opposition' — when kings face each other with one square between them. The side NOT to move has the opposition.", ["Opposition is key", "King must lead the pawn", "Know the drawing zone"], "8/8/8/4k3/8/4K3/4P3/8 w - - 0 1"),
