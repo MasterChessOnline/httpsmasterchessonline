@@ -8,14 +8,16 @@ import { useStoryProgress } from "@/hooks/use-story-progress";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { TOTAL_CHAPTERS } from "@/lib/story-data";
 import { COURSES } from "@/lib/courses-data";
+import { getTodaysPuzzle, getTodayDateString } from "@/lib/daily-puzzles";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Crown, Trophy, Swords, Flame, BookOpen, Bell,
-  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap, Star
+  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap, Star, CheckCircle
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Notification {
   id: string;
@@ -37,6 +39,7 @@ const Dashboard = () => {
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [puzzleStreak, setPuzzleStreak] = useState(0);
+  const [dailySolved, setDailySolved] = useState(false);
   const { completedCount: storyCompleted, totalStars: storyStars } = useStoryProgress(user?.id);
   const storyPct = Math.round((storyCompleted / TOTAL_CHAPTERS) * 100);
   const { streak: learningStreak, getCourseProgress } = useLessonProgress();
@@ -103,6 +106,20 @@ const Dashboard = () => {
           }
         }
         setPuzzleStreak(streak);
+      });
+
+    // Check if today's daily challenge is solved
+    const todayStr = getTodayDateString();
+    supabase
+      .from("puzzle_solves")
+      .select("solved")
+      .eq("user_id", user.id)
+      .eq("puzzle_date", todayStr)
+      .eq("puzzle_index", 0)
+      .eq("solved", true)
+      .maybeSingle()
+      .then(({ data }) => {
+        setDailySolved(!!data);
       });
   }, [user]);
 
@@ -252,6 +269,49 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
+
+              {/* Daily Challenge Widget */}
+              {(() => {
+                const todayPuzzle = getTodaysPuzzle();
+                const typeLabels: Record<string, string> = { "mate-in-2": "Mate in 2", tactical: "Tactical", endgame: "Endgame" };
+                return (
+                  <div className={`rounded-xl border p-5 ${dailySolved ? "border-green-500/30 bg-green-500/5" : "border-primary/30 bg-primary/5"}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dailySolved ? "bg-green-500/20" : "bg-primary/20"}`}>
+                          {dailySolved
+                            ? <CheckCircle className="h-5 w-5 text-green-400" />
+                            : <Target className="h-5 w-5 text-primary" />}
+                        </div>
+                        <div>
+                          <h3 className="font-display font-semibold text-foreground flex items-center gap-2">
+                            Daily Challenge
+                            {dailySolved && <Badge className="bg-green-500/20 text-green-400 text-[10px]">Solved ✓</Badge>}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {dailySolved
+                              ? "Great job! Come back tomorrow for a new puzzle."
+                              : `${todayPuzzle.title} · ${typeLabels[todayPuzzle.type] || todayPuzzle.type}`}
+                          </p>
+                        </div>
+                      </div>
+                      <Link to="/daily">
+                        <Button size="sm" variant={dailySolved ? "outline" : "default"}>
+                          {dailySolved ? "View" : <>
+                            <Zap className="mr-1 h-4 w-4" /> Solve
+                          </>}
+                        </Button>
+                      </Link>
+                    </div>
+                    {!dailySolved && puzzleStreak > 0 && (
+                      <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                        <Flame className="h-3.5 w-3.5 text-orange-400" />
+                        <span>{puzzleStreak}-day streak — solve today to keep it going!</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Progress tracking */}
               <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
