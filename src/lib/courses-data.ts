@@ -917,6 +917,7 @@ export const COURSES: Course[] = [
     title: "Calculation & Visualization",
     description: "Train your brain to see moves ahead — the core skill of chess mastery.",
     level: "Intermediate",
+    tier: "premium",
     icon: "Brain",
     lessons: [
       L("ct-1", "What is Calculation?", "Calculation is the ability to see moves ahead in your mind. It involves considering your move, opponent's response, your reply, and so on — a 'tree' of possibilities.", ["See moves ahead mentally", "Tree of possibilities", "Core chess skill"]),
