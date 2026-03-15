@@ -25,9 +25,14 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const LEVEL_CONFIG = {
-  Beginner: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", icon: Shield, label: "Free" },
-  Intermediate: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", icon: Zap, label: "Premium" },
-  Advanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Award, label: "Pro" },
+  Beginner: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", icon: Shield, label: "Beginner" },
+  Intermediate: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", icon: Zap, label: "Intermediate" },
+  Advanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Award, label: "Advanced" },
+};
+
+const TIER_CONFIG = {
+  free: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", label: "Free" },
+  premium: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", label: "Premium" },
 };
 
 /* ──── YouTube Embed ──── */
