@@ -309,6 +309,33 @@ const Dashboard = () => {
                 )}
               </div>
 
+              {/* Story Mode progress */}
+              <div className="rounded-xl border border-primary/20 bg-primary/5 backdrop-blur-sm p-5">
+                <h2 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary" /> Story Mode
+                </h2>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-muted-foreground">Adventure Progress</span>
+                      <span className="font-mono text-primary font-bold">{storyCompleted}/{TOTAL_CHAPTERS}</span>
+                    </div>
+                    <Progress value={storyPct} className="h-2.5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" /> {storyStars} stars earned
+                    </span>
+                    <span className="text-xs text-muted-foreground">{storyPct}% complete</span>
+                  </div>
+                  <Link to="/story">
+                    <Button size="sm" className="w-full">
+                      <Swords className="mr-2 h-4 w-4" /> {storyCompleted > 0 ? "Continue Adventure" : "Start Adventure"}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
               {/* AI Analysis CTA */}
               <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
                 <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
