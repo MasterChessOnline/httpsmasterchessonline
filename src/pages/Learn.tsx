@@ -12,7 +12,7 @@ import {
   Play, Video, Sparkles, Lightbulb, ChevronDown, ChevronUp,
   GraduationCap, Clock, Zap, Shield, Award,
 } from "lucide-react";
-import { COURSES, Course, Lesson, CourseCategory } from "@/lib/courses-data";
+import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasAccess } from "@/lib/premium-tiers";
 import InteractiveBoard from "@/components/learn/InteractiveBoard";
