@@ -166,6 +166,7 @@ export const COURSES: Course[] = [
     description: "Understand pawn structures, outposts, and piece activity.",
     level: "Intermediate",
     icon: "Layout",
+    category: "strategy",
     lessons: [
       L("pp-1", "Pawn Structure Basics", "Pawns are the soul of chess. Your pawn structure determines piece placement, plans, and endgame prospects. Isolated, doubled, and backward pawns are typical weaknesses.", ["Pawns determine the game's character", "Avoid creating weaknesses", "Pawn moves are permanent"], "rnbqkbnr/pppppppp/8/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2"),
       L("pp-2", "Outposts", "An outpost is a square that cannot be attacked by enemy pawns. Knights on outposts (especially 5th/6th rank) are extremely strong.", ["Safe from pawn attacks", "Knights love outposts", "5th/6th rank outposts are powerful"], "r1bq1rk1/pp2bppp/2n1pn2/2pp4/3PP3/2NB1N2/PPP2PPP/R1BQ1RK1 w - - 0 7"),
