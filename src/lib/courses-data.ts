@@ -18,12 +18,15 @@ export interface Lesson {
   };
 }
 
+export type CourseCategory = "basics" | "openings" | "tactics" | "middlegame" | "endgame" | "strategy" | "mindset";
+
 export interface Course {
   id: string;
   title: string;
   description: string;
   level: "Beginner" | "Intermediate" | "Advanced";
   icon: string;
+  category?: CourseCategory;
   lessons: Lesson[];
 }
 
@@ -38,6 +41,7 @@ export const COURSES: Course[] = [
     description: "Master the key opening principles and popular systems.",
     level: "Beginner",
     icon: "BookOpen",
+    category: "openings",
     lessons: [
       { id: "of-1", title: "Control the Center", content: "The center squares (e4, d4, e5, d5) are the most important squares on the board. Controlling them gives your pieces maximum mobility and flexibility. Start by advancing your e-pawn or d-pawn two squares forward.", keyPoints: ["Place pawns on e4/d4", "Central pawns control key squares", "Avoid moving the same piece twice early"], fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
         practiceLine: { playerColor: "w", moves: [{ move: "e4", explanation: "Great! 1.e4 — control the center with your king's pawn." }, { move: "d4", explanation: "2.d4! Now you occupy both central squares." }], autoResponses: ["e5", "exd4"], completionMessage: "Excellent! You've learned the basics of center control." } },
@@ -82,6 +86,7 @@ export const COURSES: Course[] = [
     description: "Learn forks, pins, skewers, discovered attacks, and more.",
     level: "Intermediate",
     icon: "Target",
+    category: "tactics",
     lessons: [
       L("tp-1", "The Fork", "A fork is when a single piece attacks two or more enemy pieces simultaneously. Knights are especially good at forking because of their unusual movement pattern.", ["One piece attacks two+ pieces", "Knights are natural forkers", "Look for undefended pieces"], "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"),
       L("tp-2", "The Pin", "A pin occurs when a piece restricts movement of a defending piece because moving it would expose a more valuable piece behind it.", ["Bishops and rooks create pins", "Absolute pins are against the king", "Exploit pinned pieces"], "r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3"),
@@ -121,6 +126,7 @@ export const COURSES: Course[] = [
     description: "King and pawn endings, rook endings, and theoretical draws.",
     level: "Advanced",
     icon: "Crown",
+    category: "endgame",
     lessons: [
       L("em-1", "King & Pawn vs King", "The most fundamental endgame. The key concept is 'opposition' — when kings face each other with one square between them. The side NOT to move has the opposition.", ["Opposition is key", "King must lead the pawn", "Know the drawing zone"], "8/8/8/4k3/8/4K3/4P3/8 w - - 0 1"),
       L("em-2", "The Lucena Position", "The most important winning technique in rook endings. With a rook and pawn on the 7th rank (king in front), win by 'building a bridge' — using your rook to shield the king from checks.", ["Build a bridge with the rook", "King shelters behind rook", "Must know by heart"], "1K1k4/1P6/8/8/8/8/2r5/5R2 w - - 0 1"),
@@ -160,6 +166,7 @@ export const COURSES: Course[] = [
     description: "Understand pawn structures, outposts, and piece activity.",
     level: "Intermediate",
     icon: "Layout",
+    category: "strategy",
     lessons: [
       L("pp-1", "Pawn Structure Basics", "Pawns are the soul of chess. Your pawn structure determines piece placement, plans, and endgame prospects. Isolated, doubled, and backward pawns are typical weaknesses.", ["Pawns determine the game's character", "Avoid creating weaknesses", "Pawn moves are permanent"], "rnbqkbnr/pppppppp/8/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2"),
       L("pp-2", "Outposts", "An outpost is a square that cannot be attacked by enemy pawns. Knights on outposts (especially 5th/6th rank) are extremely strong.", ["Safe from pawn attacks", "Knights love outposts", "5th/6th rank outposts are powerful"], "r1bq1rk1/pp2bppp/2n1pn2/2pp4/3PP3/2NB1N2/PPP2PPP/R1BQ1RK1 w - - 0 7"),
@@ -199,6 +206,7 @@ export const COURSES: Course[] = [
     description: "Recognize and execute the most common mating patterns.",
     level: "Beginner",
     icon: "Crosshair",
+    category: "tactics",
     lessons: [
       L("cm-1", "Back Rank Mate", "A rook or queen checkmates a king trapped on its first rank by its own pawns. One of the most common patterns. Create a 'luft' (escape square) for your king.", ["King trapped by own pawns", "Rook or queen delivers mate", "Create an escape square"], "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1"),
       L("cm-2", "Scholar's Mate", "Qh5+Bc4+Qxf7# targets the weak f7 square. Easily defended with knowledge — play ...Nf6 or ...g6.", ["Targets weak f7 square", "Defend with Nf6", "Teaches threat awareness"], "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4"),
@@ -917,6 +925,96 @@ export const COURSES: Course[] = [
       L("ct-28", "Improving Calculation Speed", "Speed comes from pattern recognition. The more patterns you know, the faster you calculate. Study tactics books and solve puzzles daily.", ["Pattern recognition = speed", "Study tactics books", "Daily puzzle practice"]),
       L("ct-29", "Visualization Milestones", "Track your progress: can you visualize 2 moves? 3? 4? When you can consistently see 4 moves ahead, you're at a strong club level.", ["2 moves = beginner", "3 moves = intermediate", "4+ moves = strong club"]),
       L("ct-30", "Building a Calculation Training Plan", "Train daily: 15 min puzzles (varied difficulty), 10 min blindfold exercises, 5 min game analysis (find the best move). Track progress.", ["Daily training plan", "Mix difficulty levels", "Track your progress"]),
+    ],
+  },
+  {
+    id: "chess-basics",
+    title: "Chess Basics & Rules",
+    description: "Learn how pieces move, basic rules, and your very first strategies.",
+    level: "Beginner",
+    icon: "BookOpen",
+    category: "basics",
+    lessons: [
+      L("cb-1", "The Chessboard", "The chessboard has 64 squares arranged in an 8×8 grid. Squares alternate between light and dark. The board is placed so each player has a light square in the bottom-right corner.", ["64 squares, 8×8 grid", "Light square in bottom-right", "Files (columns) and ranks (rows)"]),
+      L("cb-2", "The Pawn", "Pawns move one square forward (or two from the starting position). They capture diagonally. Pawns can promote to any piece when they reach the opposite end.", ["Moves forward, captures diagonally", "Two squares from start", "Promotes on the 8th rank"]),
+      L("cb-3", "The Knight", "The knight moves in an L-shape: two squares in one direction and one square perpendicular. It's the only piece that can jump over others.", ["L-shaped movement", "Jumps over pieces", "Changes square color each move"]),
+      L("cb-4", "The Bishop", "The bishop moves diagonally any number of squares. Each player starts with two bishops — one on light squares, one on dark squares. A bishop stays on its starting color.", ["Moves diagonally", "Stays on one color", "Two bishops cover all squares"]),
+      L("cb-5", "The Rook", "The rook moves horizontally or vertically any number of squares. Rooks are very powerful in the endgame and belong on open files.", ["Moves in straight lines", "Horizontally or vertically", "Powerful in endgames"]),
+      L("cb-6", "The Queen", "The queen combines the rook and bishop — she moves horizontally, vertically, or diagonally any number of squares. The most powerful piece on the board.", ["Moves like rook + bishop", "Most powerful piece", "Worth about 9 pawns"]),
+      L("cb-7", "The King", "The king moves one square in any direction. The king can never move into check. Protecting your king while attacking your opponent's is the essence of chess.", ["Moves one square any direction", "Cannot move into check", "Most important piece"]),
+      L("cb-8", "Check, Checkmate, and Stalemate", "Check: the king is under attack. Checkmate: the king is under attack and cannot escape — the game is over. Stalemate: no legal moves but not in check — it's a draw.", ["Check = king attacked", "Checkmate = game over", "Stalemate = draw"]),
+      L("cb-9", "Castling", "Castling moves the king two squares toward a rook, and the rook jumps over to the other side. You cannot castle through check, out of check, or if king/rook has moved.", ["King moves two squares", "Rook jumps over", "Cannot castle through check"]),
+      L("cb-10", "En Passant", "When a pawn advances two squares from its starting position, an adjacent enemy pawn can capture it 'in passing' as if it had only moved one square. Must be done immediately.", ["Special pawn capture", "Only after a two-square advance", "Must capture immediately"]),
+      L("cb-11", "Piece Values", "Approximate values: Pawn = 1, Knight = 3, Bishop = 3, Rook = 5, Queen = 9. The king is invaluable. Use these to evaluate trades.", ["Pawn=1, Knight=3, Bishop=3", "Rook=5, Queen=9", "King is priceless"]),
+      L("cb-12", "How Games End", "Games end by: checkmate (win), resignation, stalemate (draw), draw by agreement, threefold repetition, 50-move rule, or insufficient material.", ["Checkmate or resignation", "Multiple draw types", "Know all the rules"]),
+      L("cb-13", "Notation: Reading Chess Moves", "Chess notation records moves: piece letter (K, Q, R, B, N) + destination square. Pawns have no letter. Captures use 'x'. Check is '+', checkmate is '#'.", ["Piece + destination square", "x for captures", "+ for check, # for mate"]),
+      L("cb-14", "Your First Opening Moves", "Start by controlling the center: 1.e4 or 1.d4. Then develop knights and bishops toward the center. Castle early to protect your king.", ["Control the center", "Develop pieces", "Castle early"]),
+      L("cb-15", "Basic Checkmates: King + Queen vs King", "Use the queen to restrict the opponent's king, then bring your king up to help. Avoid stalemate! The queen alone cannot checkmate.", ["Restrict the king with queen", "Bring your king to help", "Avoid stalemate!"]),
+      L("cb-16", "Basic Checkmates: King + Rook vs King", "Drive the enemy king to the edge using your king and rook together. The rook cuts off ranks while the king approaches.", ["Drive king to the edge", "Rook cuts off ranks", "King approaches to help"]),
+      L("cb-17", "Winning Material", "Look for undefended pieces and capture them. Count attackers vs defenders before making captures. Free pieces win games!", ["Find undefended pieces", "Count attackers vs defenders", "Free material wins"]),
+      L("cb-18", "Simple Tactics: The Fork", "A fork attacks two pieces at once. The opponent can only save one. Knights are especially good at forking because of their unique movement.", ["Attack two pieces at once", "Opponent saves only one", "Knights fork best"]),
+      L("cb-19", "Simple Tactics: The Pin", "A pin prevents a piece from moving because a more valuable piece is behind it. Bishops and rooks create pins most often.", ["Piece can't move safely", "More valuable piece behind", "Bishops and rooks pin"]),
+      L("cb-20", "Your First Game Plan", "Every game: 1) Control the center 2) Develop all pieces 3) Castle early 4) Connect rooks 5) Create a plan based on the position. Follow these steps!", ["Five-step plan", "Center → Develop → Castle", "Then create your plan"]),
+    ],
+  },
+  {
+    id: "middlegame-mastery",
+    title: "Middlegame Planning",
+    description: "Bridge the gap between opening and endgame — learn to create and execute plans.",
+    level: "Beginner",
+    icon: "Layout",
+    category: "middlegame",
+    lessons: [
+      L("mg-1", "What is a Plan?", "A plan is a series of moves aimed at a strategic goal. Without a plan, you're just making random moves. Every position has clues about what to do.", ["Series of moves toward a goal", "Don't play randomly", "Position gives clues"]),
+      L("mg-2", "Evaluating a Position", "Before planning, evaluate: Who has better pieces? Better pawn structure? Safer king? More space? The side with more advantages should play actively.", ["Compare pieces, pawns, kings", "More advantages = play actively", "Evaluate before planning"]),
+      L("mg-3", "Finding the Weakest Point", "Every position has weak points — backward pawns, undefended pieces, a poorly placed king. Target the weakest point for your attack.", ["Find structural weaknesses", "Target undefended pieces", "Attack the weakest point"]),
+      L("mg-4", "When to Attack", "Attack when you have better development, your opponent's king is unsafe, or you have more pieces on the attacking side. Don't attack without advantages!", ["Need advantages first", "Development lead", "Unsafe enemy king"]),
+      L("mg-5", "When to Defend", "Defend when your opponent has the initiative. Exchange attacking pieces, create counter-threats, and simplify. Passive defense usually fails.", ["Recognize when to defend", "Exchange attackers", "Active defense is better"]),
+      L("mg-6", "Piece Coordination", "Pieces should work together. Two rooks on the same file, knight and bishop covering each other, queen supported by minor pieces — coordination wins games.", ["Pieces work as a team", "Rooks on the same file", "Support each other"]),
+      L("mg-7", "Open Files for Rooks", "Rooks are strongest on open files (no pawns). Seize open files with your rooks and penetrate to the 7th rank.", ["Rooks need open files", "Seize them first", "Penetrate to the 7th rank"]),
+      L("mg-8", "Good Knights vs Bad Bishops", "A knight on a central outpost is often better than a bishop blocked by its own pawns. Recognize when your knight dominates.", ["Outpost knight is powerful", "Bad bishop is blocked", "Central outpost = domination"]),
+      L("mg-9", "Pawn Breaks", "A pawn break is advancing a pawn to open lines. Common breaks: c5 (vs d4), e5 (vs d4), f5, d5. Time them when your pieces are ready.", ["Pawn advance to open lines", "Common breaks: c5, e5, f5, d5", "Timing matters"]),
+      L("mg-10", "Creating a Passed Pawn", "A passed pawn has no enemy pawns in its way. Create one by exchanging pawns and advancing. Passed pawns are powerful in the middlegame and endgame.", ["No enemy pawns ahead", "Exchange pawns to create one", "Very powerful in endgames"]),
+      L("mg-11", "The Minority Attack", "Use fewer pawns to attack more. Example: advance b4-b5 against a7-b7-c6 to create a weakness on c6 or an isolated pawn.", ["Fewer pawns attack more", "b4-b5 is the classic example", "Creates structural weakness"]),
+      L("mg-12", "Centralization", "Place your pieces on central squares where they control the most squares. A centralized knight or bishop is significantly stronger than one on the edge.", ["Center = maximum control", "Central pieces are powerful", "Edge pieces are weak"]),
+      L("mg-13", "Weak Squares", "A weak square can't be defended by pawns. Place your pieces on your opponent's weak squares, especially central ones. They become outposts.", ["Can't be defended by pawns", "Place pieces there", "Central weak squares = outposts"]),
+      L("mg-14", "The Two Weaknesses Principle", "One weakness can usually be defended. Create a second weakness on the other side of the board to stretch the defense. The defender can't cover both.", ["One weakness is holdable", "Two weaknesses overwhelm", "Attack on both flanks"]),
+      L("mg-15", "Trading Pieces: When and Why", "Trade when: ahead in material, defending, or opponent has active pieces. Keep pieces when: attacking, have space advantage, or your pieces are better.", ["Trade when ahead", "Keep pieces when attacking", "Trade opponent's best pieces"]),
+      L("mg-16", "Improving Your Worst Piece", "Find your least active piece and improve its position. This simple strategy is often the best plan when no clear target exists.", ["Find worst-placed piece", "Improve it", "Best default plan"]),
+      L("mg-17", "Prophylactic Thinking", "Before improving your position, ask: 'What does my opponent want to do?' If their plan is dangerous, stop it first.", ["Ask what opponent wants", "Stop dangerous plans first", "Then improve your position"]),
+      L("mg-18", "Transition to Endgame", "When your advantage is structural (better pawns, passed pawn), simplify by exchanging pieces. Structural advantages grow in endgames.", ["Structural edge → simplify", "Exchange pieces, not pawns", "Endgame amplifies advantage"]),
+      L("mg-19", "King Safety in the Middlegame", "Keep pawns in front of your castled king. Don't push them unless necessary. h3/g3 (or h6/g6) can be useful but also create weaknesses.", ["Keep pawn shield intact", "Don't push unnecessarily", "h3 luft can be double-edged"]),
+      L("mg-20", "Thinking Process: Before Every Move", "1) What changed after opponent's move? 2) Are there threats? 3) What are my candidate moves? 4) Calculate top 2-3 5) Choose the best.", ["5-step process", "Check threats first", "Calculate before moving"]),
+    ],
+  },
+  {
+    id: "rook-endgames",
+    title: "Rook Endgames",
+    description: "The most common endgame type — master the essential positions and techniques.",
+    level: "Intermediate",
+    icon: "Crown",
+    category: "endgame",
+    lessons: [
+      L("re-1", "Why Rook Endgames Matter", "Rook endgames occur in roughly 50% of all games that reach an endgame. Knowing the key positions and techniques is essential for every player.", ["50% of all endgames", "Most common type", "Essential knowledge"]),
+      L("re-2", "The Lucena Position", "The most important winning position: king in front of the pawn, rook behind. Win by 'building a bridge' — Rook to the 4th rank, then shield the king.", ["King in front of pawn", "Build a bridge", "Most important winning technique"], "1K1k4/1P6/8/8/8/8/2r5/5R2 w - - 0 1"),
+      L("re-3", "The Philidor Position", "The most important drawing position: keep your rook on the 6th rank to prevent the opposing king from advancing. When the pawn advances, check from behind.", ["Rook on 6th rank", "Prevents king advance", "Check from behind when pawn pushes"], "4k3/8/4r3/8/8/8/3KP3/8R w - - 0 1"),
+      L("re-4", "Rook Activity", "An active rook (cutting off the king, attacking pawns) is more valuable than a passive one. Always prioritize rook activity, even at the cost of a pawn.", ["Activity > material", "Cut off the king", "Attack pawns"]),
+      L("re-5", "Rooks Behind Passed Pawns", "Tarrasch's rule: place your rook BEHIND passed pawns — your own and your opponent's. Behind your pawn supports advance; behind theirs restricts it.", ["Behind your passed pawn", "Behind opponent's passer too", "Tarrasch's golden rule"]),
+      L("re-6", "Cutting Off the King", "Use your rook to cut off the opposing king by files or ranks. A cut-off king cannot participate in the endgame, giving you a decisive advantage.", ["Cut off by files or ranks", "King can't participate", "Decisive advantage"]),
+      L("re-7", "The 7th Rank Domination", "A rook on the 7th rank attacks pawns from behind, restricts the king, and threatens mate. Two rooks on the 7th are often devastating.", ["Attack pawns from behind", "Restrict the king", "Two rooks on 7th = crushing"]),
+      L("re-8", "Rook + Pawn vs Rook: Short Side Defense", "The defending king should go to the 'short side' (less space between the pawn and the edge). The rook checks from the 'long side.'", ["King to short side", "Rook checks from long side", "Key defensive technique"]),
+      L("re-9", "Rook + Pawn vs Rook: Rook Pawn", "Rook pawns (a and h) are the hardest to promote. The defending rook on the a-file (or h-file) creates a fortress. Many positions are drawn.", ["Hardest pawn to promote", "Fortress defense possible", "Many theoretical draws"]),
+      L("re-10", "Rook + 2 Pawns vs Rook", "Usually winning, but the defender has drawing chances if the pawns are doubled, on the same side, or the rook is very active.", ["Usually winning", "Doubled pawns draw more", "Active defense helps"]),
+      L("re-11", "Rook Endgame Principles", "Key principles: 1) Activate your rook 2) Centralize your king 3) Create a passed pawn 4) Place rook behind passed pawns 5) Don't be passive.", ["Five key principles", "Activity is king", "Don't be passive"]),
+      L("re-12", "Pawn Majority Play", "Use your pawn majority to create a passed pawn. Advance the candidate pawn (the one without an opposing pawn) to create a passer.", ["Advance the candidate", "Create a passed pawn", "Majority = potential passer"]),
+      L("re-13", "The Rook Lift", "In rook endgames, the rook can attack from the side by moving along ranks. A rook on the 3rd rank can swing to the kingside or queenside as needed.", ["Attack from the side", "Rook along ranks", "Flexible positioning"]),
+      L("re-14", "Trading into a Won King + Pawn Ending", "Sometimes the best plan is to sacrifice the exchange (or trade rooks) to reach a winning king and pawn ending. Calculate precisely!", ["Trade rooks if K+P ending wins", "Calculate precisely", "Common winning technique"]),
+      L("re-15", "The Outside Passed Pawn", "An outside passed pawn distracts the defending king. While the king chases the pawn, your king invades and captures pawns on the other side.", ["Distracts defending king", "King invades other side", "Powerful winning technique"]),
+      L("re-16", "Defending with a Passive Rook", "If your rook must be passive (defending a pawn), look for chances to activate it with a sacrifice or pawn break. A passive rook is a burden.", ["Passive rook is a burden", "Look for activation chances", "Sacrifice or break to activate"]),
+      L("re-17", "The Vancura Position", "With a rook pawn (a or h), the defender can draw with the Vancura position: rook on the a-file (6th rank), checking from the side if the king approaches.", ["Drawing technique with rook pawn", "Rook checks from the side", "Key defensive resource"]),
+      L("re-18", "Double Rook Endgames", "With two rooks each, activity matters even more. Coordinate your rooks (double on a file or rank). The 7th rank with two rooks is devastating.", ["Coordinate both rooks", "Double on files or ranks", "7th rank domination"]),
+      L("re-19", "Rook vs Pawns", "A rook usually stops 1-2 pawns easily, but 3 connected passed pawns on the 6th rank beat a rook! Know the tipping points.", ["Rook stops 1-2 pawns", "3 on 6th rank beats a rook", "Know the tipping points"]),
+      L("re-20", "Practical Rook Endgame Tips", "In time trouble: activate your rook, centralize your king, and don't let your rook become passive. These principles save many games.", ["Activate the rook", "Centralize the king", "Avoid passive rook"]),
     ],
   },
 ];
