@@ -211,7 +211,7 @@ function CourseCard({ course, onClick, progress, accessible }: {
       }`}
     >
       {/* Top accent bar */}
-      <div className={`h-1 w-full ${course.level === "Beginner" ? "bg-green-500/50" : course.level === "Intermediate" ? "bg-primary/50" : "bg-blue-500/50"}`} />
+      <div className={`h-1 w-full ${course.tier === "free" ? "bg-green-500/50" : "bg-primary/50"}`} />
 
       <div className="p-5">
         {/* Header row */}
