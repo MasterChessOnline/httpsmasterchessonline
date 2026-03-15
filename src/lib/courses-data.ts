@@ -549,6 +549,7 @@ export const COURSES: Course[] = [
     title: "The English Opening",
     description: "A flexible 1.c4 system — the reversed Sicilian for White.",
     level: "Advanced",
+    tier: "premium",
     icon: "Brain",
     lessons: [
       { id: "en-1", title: "English Opening Basics", content: "The English (1.c4) controls d5 and is extremely flexible. It's a reversed Sicilian with an extra tempo.", keyPoints: ["1.c4 controls d5", "Extremely flexible", "Reversed Sicilian"], fen: "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1",
