@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Crown, Trophy, Swords, Flame, BookOpen, Bell,
-  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap
+  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap, Star
 } from "lucide-react";
 
 interface Notification {
