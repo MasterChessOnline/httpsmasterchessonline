@@ -172,6 +172,93 @@ export type Database = {
           },
         ]
       }
+      learning_streaks: {
+        Row: {
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          longest_streak: number
+          total_lessons_completed: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          total_lessons_completed?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          total_lessons_completed?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lesson_bookmarks: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          id: string
+          lesson_id: string
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       matchmaking_queue: {
         Row: {
           created_at: string
