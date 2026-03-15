@@ -33,6 +33,7 @@ import PaymentCanceled from "./pages/PaymentCanceled";
 import Lessons from "./pages/Lessons";
 import TournamentLobby from "./pages/TournamentLobby";
 import StoryMode from "./pages/StoryMode";
+import DailyChallenge from "./pages/DailyChallenge";
 
 const queryClient = new QueryClient();
 
