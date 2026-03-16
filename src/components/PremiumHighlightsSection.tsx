@@ -1,6 +1,8 @@
 import { Crown, BookOpen, Trophy, Flame, Gift, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const benefits = [
   { icon: BookOpen, text: "Full lesson library with exclusive content" },
@@ -18,53 +20,70 @@ const PremiumHighlightsSection = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-[150px] pointer-events-none" />
 
       <div className="container mx-auto px-6 relative">
-        <div className="max-w-4xl mx-auto">
-          <div className="rounded-3xl border border-primary/20 bg-card/60 backdrop-blur-sm p-10 sm:p-14 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
+        <ScrollReveal>
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              className="rounded-3xl border border-primary/20 bg-card/60 backdrop-blur-sm p-10 sm:p-14 relative overflow-hidden"
+              whileHover={{ borderColor: "hsl(43 80% 55% / 0.4)" }}
+              transition={{ duration: 0.4 }}
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
 
-            <div className="relative">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center">
-                  <Crown className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <span className="text-xs font-semibold tracking-widest text-primary uppercase">Premium Membership</span>
-                  <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
-                    Unlock Your <span className="text-gradient-gold">Full Potential</span>
-                  </h2>
-                </div>
-              </div>
-
-              <p className="text-muted-foreground leading-relaxed mb-8 max-w-2xl">
-                Go beyond the basics. Premium members get exclusive access to DailyChess_12's complete lesson library, elite tournaments, personalized training, and much more.
-              </p>
-
-              <div className="grid gap-3 sm:grid-cols-2 mb-10">
-                {benefits.map(({ icon: Icon, text }, i) => (
-                  <div key={i} className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <Icon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="text-foreground/90">{text}</span>
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-6">
+                  <motion.div
+                    className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center"
+                    whileHover={{ rotate: 15, scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Crown className="h-6 w-6 text-primary" />
+                  </motion.div>
+                  <div>
+                    <span className="text-xs font-semibold tracking-widest text-primary uppercase">Premium Membership</span>
+                    <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
+                      Unlock Your <span className="text-gradient-gold">Full Potential</span>
+                    </h2>
                   </div>
-                ))}
-              </div>
+                </div>
 
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link to="/premium">
-                  <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 text-base font-semibold shadow-glow-lg animate-glow-pulse">
-                    <Sparkles className="mr-2 h-4 w-4" /> Join Premium
-                  </Button>
-                </Link>
-                <Link to="/premium">
-                  <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/10 px-8 text-base">
-                    View All Plans
-                  </Button>
-                </Link>
+                <p className="text-muted-foreground leading-relaxed mb-8 max-w-2xl">
+                  Go beyond the basics. Premium members get exclusive access to DailyChess_12's complete lesson library, elite tournaments, personalized training, and much more.
+                </p>
+
+                <div className="grid gap-3 sm:grid-cols-2 mb-10">
+                  {benefits.map(({ icon: Icon, text }, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex items-center gap-3 text-sm group"
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.08 }}
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                        <Icon className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="text-foreground/90">{text}</span>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to="/premium">
+                    <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 px-8 text-base font-semibold shadow-glow-lg animate-glow-pulse transition-transform duration-200">
+                      <Sparkles className="mr-2 h-4 w-4" /> Join Premium
+                    </Button>
+                  </Link>
+                  <Link to="/premium">
+                    <Button size="lg" variant="outline" className="border-primary/20 text-primary hover:bg-primary/10 hover:scale-105 px-8 text-base transition-transform duration-200">
+                      View All Plans
+                    </Button>
+                  </Link>
+                </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

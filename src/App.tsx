@@ -2,9 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Suspense, lazy } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import PremiumGuard from "@/components/PremiumGuard";
+import ChessLoadingScreen from "@/components/ChessLoadingScreen";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
@@ -37,6 +40,54 @@ import DailyChallenge from "./pages/DailyChallenge";
 
 const queryClient = new QueryClient();
 
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2, ease: "easeInOut" }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/play" element={<Play />} />
+          <Route path="/play/online" element={<PlayOnline />} />
+          <Route path="/learn" element={<PremiumGuard><Learn /></PremiumGuard>} />
+          <Route path="/tournaments" element={<Tournaments />} />
+          <Route path="/tournaments/:id" element={<TournamentLobby />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/profile/:userId" element={<Profile />} />
+          <Route path="/friends" element={<Friends />} />
+          <Route path="/premium" element={<Premium />} />
+          <Route path="/premium/chat" element={<PremiumGuard><PremiumChat /></PremiumGuard>} />
+          <Route path="/premium/lessons" element={<PremiumGuard requiredTier="pro"><VideoLessons /></PremiumGuard>} />
+          <Route path="/achievements" element={<Achievements />} />
+          <Route path="/lessons" element={<Lessons />} />
+          <Route path="/story" element={<StoryMode />} />
+          <Route path="/daily" element={<DailyChallenge />} />
+          <Route path="/donate" element={<Donate />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/payment-canceled" element={<PaymentCanceled />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -44,38 +95,9 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/play" element={<Play />} />
-            <Route path="/play/online" element={<PlayOnline />} />
-            <Route path="/learn" element={<PremiumGuard><Learn /></PremiumGuard>} />
-            <Route path="/tournaments" element={<Tournaments />} />
-            <Route path="/tournaments/:id" element={<TournamentLobby />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/profile/:userId" element={<Profile />} />
-            <Route path="/friends" element={<Friends />} />
-            <Route path="/premium" element={<Premium />} />
-            <Route path="/premium/chat" element={<PremiumGuard><PremiumChat /></PremiumGuard>} />
-            <Route path="/premium/lessons" element={<PremiumGuard requiredTier="pro"><VideoLessons /></PremiumGuard>} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="/lessons" element={<Lessons />} />
-            <Route path="/story" element={<StoryMode />} />
-            <Route path="/daily" element={<DailyChallenge />} />
-            <Route path="/donate" element={<Donate />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/payment-canceled" element={<PaymentCanceled />} />
-            
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<ChessLoadingScreen />}>
+            <AnimatedRoutes />
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
