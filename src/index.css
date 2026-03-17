@@ -108,6 +108,29 @@
     border: 1px solid hsl(220 15% 18% / 0.5);
   }
 
+  /* Button hover glow + scale */
+  .btn-glow {
+    @apply transition-all duration-300 ease-out;
+  }
+  .btn-glow:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 24px hsl(43 80% 55% / 0.25), 0 0 60px hsl(43 80% 55% / 0.1);
+  }
+
+  /* Card hover lift + glow */
+  .card-hover {
+    @apply transition-all duration-400 ease-out;
+  }
+  .card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 32px hsl(43 80% 55% / 0.12), 0 0 0 1px hsl(43 80% 55% / 0.15);
+  }
+
+  /* Parallax wrapper */
+  .parallax-slow {
+    will-change: transform;
+  }
+
   /* Staggered animation delays */
   .stagger-1 { animation-delay: 0.1s; }
   .stagger-2 { animation-delay: 0.2s; }

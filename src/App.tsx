@@ -93,6 +93,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        <CursorGlow />
         <Toaster />
         <Sonner />
         <BrowserRouter>
