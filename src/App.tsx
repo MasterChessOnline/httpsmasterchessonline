@@ -8,6 +8,7 @@ import { Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PremiumGuard from "@/components/PremiumGuard";
 import ChessLoadingScreen from "@/components/ChessLoadingScreen";
+import CursorGlow from "@/components/CursorGlow";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
@@ -92,6 +93,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        <CursorGlow />
         <Toaster />
         <Sonner />
         <BrowserRouter>
