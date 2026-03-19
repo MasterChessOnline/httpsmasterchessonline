@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { Chess, Square } from "chess.js";
-import { playChessSound } from "@/lib/chess-sounds";
+import { motion, AnimatePresence } from "framer-motion";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -35,7 +35,7 @@ export default function ChessBoard({
   const board = game.board();
 
   return (
-    <div className="w-full max-w-[min(85vw,520px)] mx-auto">
+    <div className="w-full max-w-[min(90vw,520px)] mx-auto">
       {/* Coordinate labels top */}
       <div className="flex ml-6 mr-1 mb-0.5">
         {displayFiles.map((f) => (
@@ -84,7 +84,8 @@ export default function ChessBoard({
                     aria-label={`${file}${rank}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : ""}`}
                     className={`aspect-square w-[12.5%] flex items-center justify-center select-none transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset relative
                       ${bgClass}
-                      ${isLegal || (isPlayerTurn && !isGameOver) ? "cursor-pointer" : "cursor-default"}
+                      ${isSelected ? "shadow-[inset_0_0_16px_hsl(43_80%_55%/0.3)]" : ""}
+                      ${isLegal || (isPlayerTurn && !isGameOver) ? "cursor-pointer active:scale-95" : "cursor-default"}
                     `}
                     onClick={() => onSquareClick(square)}
                     tabIndex={0}
@@ -97,17 +98,21 @@ export default function ChessBoard({
                     {isLegal && pd && (
                       <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />
                     )}
-                    {/* Piece */}
+                    {/* Piece with animation */}
                     {pd && (
-                      <span
-                        className={`text-[min(6vw,3.2rem)] leading-none ${
+                      <motion.span
+                        key={`${square}-${pieceKey}`}
+                        initial={isLastMv && lastMove?.to === square ? { scale: 1.15 } : false}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                        className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none ${
                           pd.white
                             ? "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                             : "text-[hsl(220,20%,12%)] drop-shadow-[0_0_3px_rgba(255,255,255,0.35)]"
-                        }`}
+                        } ${isSelected ? "drop-shadow-[0_0_8px_hsl(43_80%_55%/0.5)]" : ""}`}
                       >
                         {pd.symbol}
-                      </span>
+                      </motion.span>
                     )}
                   </button>
                 );

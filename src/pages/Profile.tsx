@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { motion } from "framer-motion";
 import { type TierKey } from "@/lib/premium-tiers";
 
 const TIER_DISPLAY: Record<TierKey, { label: string; icon: typeof Crown; colorClass: string }> = {
@@ -40,6 +42,14 @@ interface GameHistory {
   created_at: string;
   status: string;
 }
+
+const BADGES = [
+  { key: "beginner", label: "Beginner", icon: "🎯", condition: (p: ProfileData) => p.games_played >= 1 },
+  { key: "grinder", label: "Grinder", icon: "🔥", condition: (p: ProfileData) => p.games_played >= 50 },
+  { key: "winner", label: "Winner", icon: "🏆", condition: (p: ProfileData) => p.games_won >= 10 },
+  { key: "master", label: "Master", icon: "👑", condition: (p: ProfileData) => p.rating >= 1800 },
+  { key: "centurion", label: "Centurion", icon: "💯", condition: (p: ProfileData) => p.games_played >= 100 },
+];
 
 const Profile = () => {
   const { userId } = useParams();
@@ -98,10 +108,10 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="container mx-auto px-6 pt-24 pb-16">
+        <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
           <div className="max-w-2xl mx-auto space-y-4">
-            <div className="h-32 rounded-xl bg-muted/30 animate-pulse" />
-            <div className="h-48 rounded-xl bg-muted/30 animate-pulse" />
+            <div className="h-40 rounded-2xl bg-muted/30 animate-pulse" />
+            <div className="h-48 rounded-2xl bg-muted/30 animate-pulse" />
           </div>
         </main>
         <Footer />
@@ -113,7 +123,7 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="container mx-auto px-6 pt-24 pb-16 text-center">
+        <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16 text-center">
           <p className="text-muted-foreground">Player not found.</p>
         </main>
         <Footer />
@@ -133,21 +143,25 @@ const Profile = () => {
   };
 
   const tier = getRatingTier(profileData.rating);
-
-  // Show subscription badge only on own profile
   const showSubBadge = isOwnProfile && isPremium && subscriptionTier;
   const subDisplay = subscriptionTier ? TIER_DISPLAY[subscriptionTier] : null;
+  const earnedBadges = BADGES.filter(b => b.condition(profileData));
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-6 pt-24 pb-16">
+      <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
         <div className="max-w-2xl mx-auto space-y-4">
-          {/* Profile header */}
-          <div className="rounded-xl border border-border/50 bg-card p-6">
+          {/* Profile header with glassmorphism */}
+          <motion.div
+            className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md p-5 sm:p-6 glass-border"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shrink-0">
-                <User className="h-8 w-8 text-primary" />
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shrink-0 shadow-glow">
+                <User className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
                 {editing ? (
@@ -163,7 +177,7 @@ const Profile = () => {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="font-display text-2xl font-bold text-foreground truncate">
+                    <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground truncate">
                       {profileData.display_name || profileData.username || "Player"}
                     </h1>
                     {isOwnProfile && (
@@ -181,8 +195,8 @@ const Profile = () => {
                     })()}
                   </div>
                 )}
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Joined {new Date(profileData.created_at).toLocaleDateString()}
                   </span>
                   <span className={`text-xs font-bold uppercase flex items-center gap-1 ${tier.color}`}>
@@ -191,7 +205,7 @@ const Profile = () => {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <p className="font-mono text-3xl font-bold text-primary">{profileData.rating}</p>
+                <p className="font-mono text-2xl sm:text-3xl font-bold text-primary drop-shadow-[0_0_8px_hsl(43_80%_55%/0.3)]">{profileData.rating}</p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">ELO Rating</p>
               </div>
             </div>
@@ -210,26 +224,70 @@ const Profile = () => {
                 </Link>
               </div>
             )}
-          </div>
+          </motion.div>
 
-          {/* Stats */}
+          {/* Stats with progress bars */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "Games", value: profileData.games_played, icon: Swords },
-              { label: "Wins", value: profileData.games_won, icon: Trophy },
-              { label: "Win Rate", value: `${winRate}%`, icon: TrendingUp },
-              { label: "Draws", value: profileData.games_drawn, icon: Swords },
-            ].map(stat => (
-              <div key={stat.label} className="rounded-xl border border-border/50 bg-card p-4 text-center">
+              { label: "Games", value: profileData.games_played, icon: Swords, progress: Math.min(profileData.games_played, 100) },
+              { label: "Wins", value: profileData.games_won, icon: Trophy, progress: winRate },
+              { label: "Win Rate", value: `${winRate}%`, icon: TrendingUp, progress: winRate },
+              { label: "Draws", value: profileData.games_drawn, icon: Swords, progress: profileData.games_played > 0 ? Math.round((profileData.games_drawn / profileData.games_played) * 100) : 0 },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                className="rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm p-4 text-center glass-border"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
                 <stat.icon className="h-4 w-4 text-primary mx-auto mb-1.5" />
                 <p className="font-mono text-xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{stat.label}</p>
-              </div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">{stat.label}</p>
+                <Progress value={stat.progress} className="h-1.5" />
+              </motion.div>
             ))}
           </div>
 
+          {/* Badges */}
+          {earnedBadges.length > 0 && (
+            <motion.div
+              className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm p-4 sm:p-5 glass-border"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h2 className="font-display text-lg font-semibold text-foreground mb-3">Badges</h2>
+              <div className="flex flex-wrap gap-2">
+                {earnedBadges.map((badge) => (
+                  <div
+                    key={badge.key}
+                    className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2"
+                  >
+                    <span className="text-lg">{badge.icon}</span>
+                    <span className="text-sm font-medium text-foreground">{badge.label}</span>
+                  </div>
+                ))}
+                {BADGES.filter(b => !b.condition(profileData)).map((badge) => (
+                  <div
+                    key={badge.key}
+                    className="flex items-center gap-2 rounded-xl border border-border/30 bg-muted/20 px-3 py-2 opacity-40"
+                  >
+                    <span className="text-lg grayscale">{badge.icon}</span>
+                    <span className="text-sm font-medium text-muted-foreground">{badge.label}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
           {/* Match history */}
-          <div className="rounded-xl border border-border/50 bg-card p-4">
+          <motion.div
+            className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm p-4 glass-border"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             <h2 className="font-display text-lg font-semibold text-foreground mb-3">Recent Games</h2>
             {games.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">No games played yet. <Link to="/play/online" className="text-primary hover:underline">Play your first game!</Link></p>
@@ -256,7 +314,7 @@ const Profile = () => {
                 })}
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
       </main>
       <Footer />

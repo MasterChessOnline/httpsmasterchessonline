@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import PremiumGuard from "@/components/PremiumGuard";
 import ChessLoadingScreen from "@/components/ChessLoadingScreen";
 import CursorGlow from "@/components/CursorGlow";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
@@ -100,7 +101,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Suspense fallback={<ChessLoadingScreen />}>
-            <AnimatedRoutes />
+            <div className="pb-16 md:pb-0">
+              <AnimatedRoutes />
+            </div>
+            <MobileBottomNav />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
