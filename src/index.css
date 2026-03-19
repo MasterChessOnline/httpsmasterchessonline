@@ -145,6 +145,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Safe area for bottom nav */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Remove tap highlight on mobile */
+.tap-highlight-none {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -158,4 +168,13 @@ html {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(43 80% 55% / 0.4);
+}
+
+/* Glow pulse animation for CTA */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px hsl(43 80% 55% / 0.2); }
+  50% { box-shadow: 0 0 40px hsl(43 80% 55% / 0.35); }
+}
+.animate-glow-pulse {
+  animation: glow-pulse 2.5s ease-in-out infinite;
 }

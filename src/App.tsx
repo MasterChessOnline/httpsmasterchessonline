@@ -101,7 +101,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Suspense fallback={<ChessLoadingScreen />}>
-            <AnimatedRoutes />
+            <div className="pb-16 md:pb-0">
+              <AnimatedRoutes />
+            </div>
+            <MobileBottomNav />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
