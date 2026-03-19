@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import PremiumGuard from "@/components/PremiumGuard";
 import ChessLoadingScreen from "@/components/ChessLoadingScreen";
 import CursorGlow from "@/components/CursorGlow";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
