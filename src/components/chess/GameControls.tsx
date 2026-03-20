@@ -167,9 +167,16 @@ export default function GameControls({
         </div>
       )}
 
-      <Button onClick={onNewGame} variant="outline" size="sm" className="w-full">
-        <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> New Game
-      </Button>
+      {/* Rematch button (prominent after game over) */}
+      {isGameOver ? (
+        <Button onClick={onNewGame} size="sm" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+          <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Rematch
+        </Button>
+      ) : (
+        <Button onClick={onNewGame} variant="outline" size="sm" className="w-full">
+          <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> New Game
+        </Button>
+      )}
 
       {/* Move history */}
       <div className="rounded-xl border border-border/40 bg-card p-3 max-h-48 overflow-y-auto">
