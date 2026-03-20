@@ -161,7 +161,7 @@ const Navbar = () => {
             transition={{ duration: 0.25, ease: "easeInOut" }}
           >
             <div className="flex flex-col gap-1">
-              {NAV_ITEMS.filter(item => !item.auth || user).map((item, i) => {
+              {NAV_ITEMS.map((item, i) => {
                 const isActive = location.pathname === item.href;
                 return (
                   <motion.div
