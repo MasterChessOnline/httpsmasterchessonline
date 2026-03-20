@@ -51,6 +51,7 @@ const Play = () => {
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [resignedBy, setResignedBy] = useState<"w" | "b" | null>(null);
   const [drawAgreed, setDrawAgreed] = useState(false);
+  const [streamerMode, setStreamerMode] = useState(false);
   const gameRef = useRef(new Chess());
   const positionHistory = useRef<string[]>([]);
 
