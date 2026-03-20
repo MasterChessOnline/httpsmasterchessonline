@@ -138,9 +138,8 @@ function evalToBarPct(cp: number, mate: number | null): number {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function OpeningExplorer() {
-  const [game, setGame] = useState(new Chess());
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [viewIndex, setViewIndex] = useState(0); // how many moves deep we're viewing
+  const [viewIndex, setViewIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [depth, setDepth] = useState([16]);
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
@@ -160,11 +159,29 @@ export default function OpeningExplorer() {
   const engineRef = useRef(getStockfishEngine());
   const abortRef = useRef(0);
 
-  // Current FEN based on viewIndex
-  const currentFen = useMemo(() => {
-    if (viewIndex === 0) return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    return history[viewIndex - 1]?.fen || game.fen();
-  }, [viewIndex, history, game]);
+  // Build a Chess instance for the current view position
+  const viewGame = useMemo(() => {
+    const g = new Chess();
+    for (let i = 0; i < viewIndex && i < history.length; i++) {
+      g.move(history[i].san);
+    }
+    return g;
+  }, [viewIndex, history]);
+
+  const currentFen = viewGame.fen();
+
+  // Legal moves for selected square
+  const legalMoves = useMemo(() => {
+    if (!selectedSquare) return [] as Square[];
+    return viewGame.moves({ square: selectedSquare, verbose: true }).map(m => m.to as Square);
+  }, [selectedSquare, viewGame]);
+
+  // Last move
+  const lastMove = useMemo(() => {
+    if (viewIndex === 0) return null;
+    const h = history[viewIndex - 1];
+    return h ? { from: h.from, to: h.to } : null;
+  }, [viewIndex, history]);
 
   // Init engine
   useEffect(() => {
