@@ -286,7 +286,6 @@ export default function OpeningExplorer() {
       const newHistory = [...movesToReplay, entry];
       setHistory(newHistory);
       setViewIndex(newHistory.length);
-      setGame(newGame);
     } catch {}
   }, [history, viewIndex, bookMoves]);
 
