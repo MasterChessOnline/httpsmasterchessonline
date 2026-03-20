@@ -54,6 +54,7 @@ const Play = () => {
   const [resignedBy, setResignedBy] = useState<"w" | "b" | null>(null);
   const [drawAgreed, setDrawAgreed] = useState(false);
   const [streamerMode, setStreamerMode] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const gameRef = useRef(new Chess());
   const positionHistory = useRef<string[]>([]);
 
