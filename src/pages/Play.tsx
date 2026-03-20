@@ -7,6 +7,7 @@ import ChessBoard from "@/components/chess/ChessBoard";
 import CapturedPieces from "@/components/chess/CapturedPieces";
 import GameControls from "@/components/chess/GameControls";
 import AnalysisPanel from "@/components/chess/AnalysisPanel";
+import GameSummary from "@/components/chess/GameSummary";
 import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { getAIMove, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
@@ -15,7 +16,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Swords, TrendingUp, Trophy, Target, BookOpen, Monitor, MonitorOff } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Swords, TrendingUp, Trophy, Target, BookOpen, Monitor, MonitorOff, Keyboard } from "lucide-react";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
