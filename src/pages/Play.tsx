@@ -10,7 +10,8 @@ import AnalysisPanel from "@/components/chess/AnalysisPanel";
 import GameSummary from "@/components/chess/GameSummary";
 import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
-import { getAIMove, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
+import { type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
+import { getStockfishEngine, difficultyToStockfish } from "@/lib/stockfish-engine";
 import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +58,19 @@ const Play = () => {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const gameRef = useRef(new Chess());
   const positionHistory = useRef<string[]>([]);
+  const stockfishReady = useRef(false);
+
+  // Initialize Stockfish engine
+  useEffect(() => {
+    const engine = getStockfishEngine();
+    engine.init().then(() => {
+      stockfishReady.current = true;
+      engine.newGame();
+    }).catch(() => {
+      console.warn("Stockfish failed to load, falling back to built-in AI");
+    });
+    return () => {}; // keep engine alive as singleton
+  }, []);
 
   const [timeControlIdx, setTimeControlIdx] = useState(6); // unlimited
   const timeControl = TIME_CONTROLS[timeControlIdx];
@@ -107,51 +121,73 @@ const Play = () => {
     playChessSound("gameOver");
   }, []);
 
-  // Generate hint
+  // Generate hint using Stockfish
   useEffect(() => {
     if (!hintsEnabled || mode !== "ai" || game.turn() !== playerColor || isGameOver) {
       setHintSquare(null);
       return;
     }
-    const timer = setTimeout(() => {
-      const bestMove = getAIMove(game, "intermediate");
-      if (bestMove) {
-        const tempGame = new Chess(game.fen());
-        const move = tempGame.move(bestMove);
-        if (move) setHintSquare(move.from as Square);
-      }
-    }, 1500);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      if (!stockfishReady.current) return;
+      const engine = getStockfishEngine();
+      const result = await engine.getBestMove(game.fen(), 500, 8);
+      if (cancelled || !result.bestMove) return;
+      const from = result.bestMove.substring(0, 2) as Square;
+      setHintSquare(from);
+    }, 800);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [fen, hintsEnabled, mode, playerColor, isGameOver]);
 
-  // AI plays
+  // AI plays using Stockfish
   useEffect(() => {
     if (mode !== "ai" || game.turn() !== aiColor || isGameOver) return;
+    let cancelled = false;
     setAiThinking(true);
-    const thinkTime = currentLevel.depth >= 4 ? 800 : currentLevel.depth >= 3 ? 500 : 300;
-    const timeout = setTimeout(() => {
-      const aiMoveStr = getAIMove(game, difficulty);
-      if (aiMoveStr) {
-        const move = game.move(aiMoveStr);
-        if (move) {
-          setMoveHistory((prev) => [...prev, move.san]);
-          setLastMove({ from: move.from, to: move.to });
-          setGameStarted(true);
-          trackPosition();
-          if (!unlimited && timeControl.increment > 0) {
-            if (aiColor === "w") setWhiteTime((p) => p + timeControl.increment);
-            else setBlackTime((p) => p + timeControl.increment);
-          }
-          updateState();
-          if (game.isCheckmate() || game.isDraw() || game.isStalemate()) playChessSound("gameOver");
-          else if (game.isCheck()) playChessSound("check");
-          else if (move.captured) playChessSound("capture");
-          else playChessSound("move");
+
+    const makeAIMove = async () => {
+      const engine = getStockfishEngine();
+      if (!stockfishReady.current) {
+        await engine.init();
+        stockfishReady.current = true;
+      }
+
+      const settings = difficultyToStockfish(difficulty);
+      engine.setSkillLevel(settings.skillLevel);
+
+      const result = await engine.getBestMove(game.fen(), settings.moveTimeMs, settings.depth);
+      if (cancelled || !result.bestMove) {
+        setAiThinking(false);
+        return;
+      }
+
+      // Convert UCI move (e.g. "e2e4", "e7e8q") to chess.js format
+      const from = result.bestMove.substring(0, 2) as Square;
+      const to = result.bestMove.substring(2, 4) as Square;
+      const promotion = result.bestMove.length > 4 ? result.bestMove[4] as any : undefined;
+
+      const move = game.move({ from, to, promotion });
+      if (move) {
+        setMoveHistory((prev) => [...prev, move.san]);
+        setLastMove({ from: move.from, to: move.to });
+        setGameStarted(true);
+        trackPosition();
+        if (!unlimited && timeControl.increment > 0) {
+          if (aiColor === "w") setWhiteTime((p) => p + timeControl.increment);
+          else setBlackTime((p) => p + timeControl.increment);
         }
+        updateState();
+        if (game.isCheckmate() || game.isDraw() || game.isStalemate()) playChessSound("gameOver");
+        else if (game.isCheck()) playChessSound("check");
+        else if (move.captured) playChessSound("capture");
+        else playChessSound("move");
       }
       setAiThinking(false);
-    }, thinkTime);
-    return () => clearTimeout(timeout);
+    };
+
+    // Small delay for UX feel
+    const timeout = setTimeout(makeAIMove, 200);
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, [fen, mode, difficulty, aiColor, isGameOver]);
 
   const isPromotionMove = (from: Square, to: Square): boolean => {
@@ -255,6 +291,10 @@ const Play = () => {
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
     if (newMode) setMode(newMode);
+    // Reset Stockfish for new game
+    if (stockfishReady.current) {
+      getStockfishEngine().newGame();
+    }
   };
 
   const changeTimeControl = (idx: number) => {
