@@ -55,7 +55,7 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden items-center gap-0.5 md:flex">
-          {NAV_ITEMS.filter(item => !item.auth || user).map((item) => {
+          {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.href;
             return (
               <Link
