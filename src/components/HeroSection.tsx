@@ -107,7 +107,7 @@ const HeroSection = () => {
           transition={{ duration: 0.6, delay: 2.1 }}
         >
           {[
-            { icon: Users, label: "Active Players", value: "2.4M+" },
+            { icon: Zap, label: "Matchmaking", value: "Fast" },
             { icon: Trophy, label: "Free Tournaments", value: "Daily" },
             { icon: Crown, label: "ELO Tracking", value: "Real-time" },
           ].map(({ icon: Icon, label, value }) => (
