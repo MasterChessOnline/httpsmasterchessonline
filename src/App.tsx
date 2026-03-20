@@ -33,6 +33,7 @@ import Lessons from "./pages/Lessons";
 import TournamentLobby from "./pages/TournamentLobby";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
+import GameHistory from "./pages/GameHistory";
 
 const queryClient = new QueryClient();
 
