@@ -1,4 +1,4 @@
-import { Crown, Youtube, Heart } from "lucide-react";
+import { Crown, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -27,13 +27,6 @@ const Footer = () => (
                 <Youtube className="h-4 w-4" />
                 DailyChess_12
               </a>
-              <Link
-                to="/donate"
-                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Heart className="h-4 w-4" />
-                Donate
-              </Link>
             </div>
           </div>
           {[
@@ -49,7 +42,7 @@ const Footer = () => (
               title: "Improve",
               links: [
                 { label: "Courses", href: "/learn" },
-                { label: "Video Lessons", href: "/premium/lessons" },
+                { label: "Video Lessons", href: "/video-lessons" },
                 { label: "Leaderboard", href: "/leaderboard" },
               ],
             },
@@ -59,7 +52,6 @@ const Footer = () => (
                 { label: "About", href: "/about" },
                 { label: "Contact", href: "/contact" },
                 { label: "Friends", href: "/friends" },
-                { label: "Support Us", href: "/donate" },
               ],
             },
           ].map((section) => (

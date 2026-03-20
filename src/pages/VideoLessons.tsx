@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VIDEO_LESSONS, VideoLesson } from "@/lib/video-lessons-data";
-import { Crown, Play, Lock, Clock, Star } from "lucide-react";
-import { hasAccess } from "@/lib/premium-tiers";
+import { Play, Clock } from "lucide-react";
 
 const CATEGORIES = [
   { value: "all", label: "All" },
@@ -31,8 +28,6 @@ const difficultyColor: Record<string, string> = {
 };
 
 const VideoLessons = () => {
-  const { isPremium, subscriptionTier } = useAuth();
-  const navigate = useNavigate();
   const [category, setCategory] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
   const [selectedVideo, setSelectedVideo] = useState<VideoLesson | null>(null);
@@ -42,20 +37,6 @@ const VideoLessons = () => {
     if (difficulty !== "all" && v.difficulty !== difficulty) return false;
     return true;
   });
-
-  // Basic premium gets beginner/intermediate, Pro+ gets all including advanced
-  const canWatch = (lesson: VideoLesson) => {
-    if (!lesson.premium) return true;
-    if (!isPremium) return false;
-    if (lesson.difficulty === "advanced") return hasAccess(subscriptionTier, "pro");
-    return true;
-  };
-
-  const getRequiredTier = (lesson: VideoLesson) => {
-    if (!lesson.premium) return null;
-    if (lesson.difficulty === "advanced") return "Pro ($10/mo)";
-    return "Premium ($4.99/mo)";
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -69,11 +50,6 @@ const VideoLessons = () => {
             Master Class <span className="text-gradient-gold">Lessons</span>
           </h1>
           <p className="text-muted-foreground mt-2">Learn from curated video lessons covering every aspect of chess.</p>
-          {!hasAccess(subscriptionTier, "pro") && isPremium && (
-            <p className="text-xs text-muted-foreground mt-1">
-              <Star className="w-3 h-3 inline mr-1" />Upgrade to <span className="text-blue-400 font-semibold">Pro</span> for advanced lessons
-            </p>
-          )}
         </div>
 
         {/* Filters */}
@@ -105,7 +81,7 @@ const VideoLessons = () => {
         </div>
 
         {/* Video modal */}
-        {selectedVideo && canWatch(selectedVideo) && (
+        {selectedVideo && (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedVideo(null)}>
             <div className="bg-card border border-border rounded-xl max-w-3xl w-full p-4" onClick={(e) => e.stopPropagation()}>
               <div className="aspect-video bg-muted rounded-lg mb-3 flex items-center justify-center">
@@ -125,49 +101,33 @@ const VideoLessons = () => {
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((lesson) => {
-            const accessible = canWatch(lesson);
-            const reqTier = getRequiredTier(lesson);
-            return (
-              <div
-                key={lesson.id}
-                className={`bg-card border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-all group cursor-pointer ${!accessible ? "opacity-70" : ""}`}
-                onClick={() => accessible ? setSelectedVideo(lesson) : navigate("/premium")}
-              >
-                <div className="relative aspect-video bg-muted">
-                  <img src={lesson.thumbnail} alt={lesson.title} className="w-full h-full object-cover" loading="lazy" />
-                  <div className="absolute inset-0 bg-background/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    {accessible ? (
-                      <Play className="w-12 h-12 text-primary" />
-                    ) : (
-                      <div className="text-center">
-                        <Lock className="w-10 h-10 text-primary mx-auto" />
-                        {reqTier && <p className="text-xs text-primary mt-1">Requires {reqTier}</p>}
-                      </div>
-                    )}
-                  </div>
-                  {lesson.premium && (
-                    <Badge className="absolute top-2 right-2 bg-primary/90 text-primary-foreground text-[10px]">
-                      <Crown className="w-2.5 h-2.5 mr-0.5" /> {lesson.difficulty === "advanced" ? "Pro" : "Premium"}
-                    </Badge>
-                  )}
-                  <span className="absolute bottom-2 right-2 bg-background/80 text-foreground text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1">
-                    <Clock className="w-2.5 h-2.5" /> {lesson.duration}
-                  </span>
+          {filtered.map((lesson) => (
+            <div
+              key={lesson.id}
+              className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-all group cursor-pointer"
+              onClick={() => setSelectedVideo(lesson)}
+            >
+              <div className="relative aspect-video bg-muted">
+                <img src={lesson.thumbnail} alt={lesson.title} className="w-full h-full object-cover" loading="lazy" />
+                <div className="absolute inset-0 bg-background/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Play className="w-12 h-12 text-primary" />
                 </div>
-                <div className="p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${difficultyColor[lesson.difficulty]}`}>
-                      {lesson.difficulty}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground capitalize">{lesson.category}</span>
-                  </div>
-                  <h3 className="text-sm font-semibold line-clamp-2">{lesson.title}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{lesson.description}</p>
-                </div>
+                <span className="absolute bottom-2 right-2 bg-background/80 text-foreground text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1">
+                  <Clock className="w-2.5 h-2.5" /> {lesson.duration}
+                </span>
               </div>
-            );
-          })}
+              <div className="p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${difficultyColor[lesson.difficulty]}`}>
+                    {lesson.difficulty}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground capitalize">{lesson.category}</span>
+                </div>
+                <h3 className="text-sm font-semibold line-clamp-2">{lesson.title}</h3>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{lesson.description}</p>
+              </div>
+            </div>
+          ))}
         </div>
 
         {filtered.length === 0 && (

@@ -3,21 +3,13 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { User, Trophy, Swords, TrendingUp, Calendar, Edit, Shield, Crown, Star, Gem } from "lucide-react";
+import { User, Trophy, Swords, TrendingUp, Calendar, Edit } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { type TierKey } from "@/lib/premium-tiers";
-
-const TIER_DISPLAY: Record<TierKey, { label: string; icon: typeof Crown; colorClass: string }> = {
-  premium: { label: "Premium", icon: Crown, colorClass: "text-primary" },
-  pro: { label: "Pro", icon: Star, colorClass: "text-blue-400" },
-  elite: { label: "Elite", icon: Gem, colorClass: "text-purple-400" },
-  grandmaster: { label: "Grandmaster", icon: Shield, colorClass: "text-amber-400" },
-};
 
 interface ProfileData {
   id: string;
@@ -53,7 +45,7 @@ const BADGES = [
 
 const Profile = () => {
   const { userId } = useParams();
-  const { user, refreshProfile, subscriptionTier, isPremium } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [games, setGames] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,8 +135,6 @@ const Profile = () => {
   };
 
   const tier = getRatingTier(profileData.rating);
-  const showSubBadge = isOwnProfile && isPremium && subscriptionTier;
-  const subDisplay = subscriptionTier ? TIER_DISPLAY[subscriptionTier] : null;
   const earnedBadges = BADGES.filter(b => b.condition(profileData));
 
   return (
@@ -152,7 +142,7 @@ const Profile = () => {
       <Navbar />
       <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
         <div className="max-w-2xl mx-auto space-y-4">
-          {/* Profile header with glassmorphism */}
+          {/* Profile header */}
           <motion.div
             className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md p-5 sm:p-6 glass-border"
             initial={{ opacity: 0, y: 20 }}
@@ -185,112 +175,96 @@ const Profile = () => {
                         <Edit className="h-4 w-4" />
                       </button>
                     )}
-                    {showSubBadge && subDisplay && (() => {
-                      const TierIcon = subDisplay.icon;
-                      return (
-                        <Badge className={`${subDisplay.colorClass} border-current/30 bg-current/10 text-xs`}>
-                          <TierIcon className="w-3 h-3 mr-1" /> {subDisplay.label}
-                        </Badge>
-                      );
-                    })()}
                   </div>
                 )}
                 <div className="flex items-center gap-3 mt-1 flex-wrap">
                   <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Joined {new Date(profileData.created_at).toLocaleDateString()}
                   </span>
-                  <span className={`text-xs font-bold uppercase flex items-center gap-1 ${tier.color}`}>
-                    <Shield className="h-3 w-3" /> {tier.label}
-                  </span>
+                  <Badge variant="outline" className={`${tier.color} text-[10px]`}>{tier.label}</Badge>
                 </div>
-              </div>
-              <div className="text-right shrink-0">
-                <p className="font-mono text-2xl sm:text-3xl font-bold text-primary drop-shadow-[0_0_8px_hsl(43_80%_55%/0.3)]">{profileData.rating}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">ELO Rating</p>
               </div>
             </div>
 
-            {!isOwnProfile && user && (
-              <div className="mt-4 flex gap-2">
-                {friendStatus === "accepted" ? (
-                  <span className="text-sm text-accent-foreground flex items-center gap-1">✓ Friends</span>
+            {/* Rating display */}
+            <div className="mt-4 text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">ELO Rating</p>
+              <p className="font-mono text-4xl sm:text-5xl font-bold text-primary drop-shadow-glow">{profileData.rating}</p>
+            </div>
+
+            {/* Friend actions */}
+            {user && !isOwnProfile && (
+              <div className="mt-4 flex justify-center">
+                {!friendStatus ? (
+                  <Button size="sm" onClick={sendFriendRequest}>Add Friend</Button>
                 ) : friendStatus === "pending" ? (
-                  <span className="text-sm text-muted-foreground">Friend request sent</span>
-                ) : (
-                  <Button size="sm" variant="outline" onClick={sendFriendRequest}>Add Friend</Button>
-                )}
-                <Link to="/play/online">
-                  <Button size="sm" variant="outline">Challenge</Button>
-                </Link>
+                  <Badge variant="outline" className="text-muted-foreground">Friend Request Pending</Badge>
+                ) : friendStatus === "accepted" ? (
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Friends ✓</Badge>
+                ) : null}
               </div>
             )}
           </motion.div>
 
-          {/* Stats with progress bars */}
+          {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "Games", value: profileData.games_played, icon: Swords, progress: Math.min(profileData.games_played, 100) },
-              { label: "Wins", value: profileData.games_won, icon: Trophy, progress: winRate },
-              { label: "Win Rate", value: `${winRate}%`, icon: TrendingUp, progress: winRate },
-              { label: "Draws", value: profileData.games_drawn, icon: Swords, progress: profileData.games_played > 0 ? Math.round((profileData.games_drawn / profileData.games_played) * 100) : 0 },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                className="rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm p-4 text-center glass-border"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <stat.icon className="h-4 w-4 text-primary mx-auto mb-1.5" />
+              { label: "Played", value: profileData.games_played, icon: Swords },
+              { label: "Won", value: profileData.games_won, icon: Trophy },
+              { label: "Win Rate", value: `${winRate}%`, icon: TrendingUp },
+              { label: "Drawn", value: profileData.games_drawn, icon: Swords },
+            ].map(stat => (
+              <div key={stat.label} className="rounded-xl border border-border/50 bg-card/80 p-3 text-center">
+                <stat.icon className="h-4 w-4 mx-auto mb-1 text-primary" />
                 <p className="font-mono text-xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">{stat.label}</p>
-                <Progress value={stat.progress} className="h-1.5" />
-              </motion.div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+              </div>
             ))}
           </div>
 
           {/* Badges */}
           {earnedBadges.length > 0 && (
-            <motion.div
-              className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm p-4 sm:p-5 glass-border"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <h2 className="font-display text-lg font-semibold text-foreground mb-3">Badges</h2>
+            <div className="rounded-xl border border-border/50 bg-card/80 p-5">
+              <h3 className="font-display text-sm font-semibold text-foreground mb-3">Badges</h3>
               <div className="flex flex-wrap gap-2">
-                {earnedBadges.map((badge) => (
-                  <div
-                    key={badge.key}
-                    className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2"
-                  >
-                    <span className="text-lg">{badge.icon}</span>
-                    <span className="text-sm font-medium text-foreground">{badge.label}</span>
-                  </div>
-                ))}
-                {BADGES.filter(b => !b.condition(profileData)).map((badge) => (
-                  <div
-                    key={badge.key}
-                    className="flex items-center gap-2 rounded-xl border border-border/30 bg-muted/20 px-3 py-2 opacity-40"
-                  >
-                    <span className="text-lg grayscale">{badge.icon}</span>
-                    <span className="text-sm font-medium text-muted-foreground">{badge.label}</span>
-                  </div>
+                {earnedBadges.map(b => (
+                  <Badge key={b.key} variant="outline" className="text-sm gap-1.5 px-3 py-1">
+                    {b.icon} {b.label}
+                  </Badge>
                 ))}
               </div>
-            </motion.div>
+              {/* Progress to next badges */}
+              <div className="mt-4 space-y-2">
+                {BADGES.filter(b => !b.condition(profileData)).slice(0, 2).map(b => {
+                  let progress = 0;
+                  let target = 0;
+                  let current = 0;
+                  if (b.key === "grinder") { current = profileData.games_played; target = 50; }
+                  else if (b.key === "winner") { current = profileData.games_won; target = 10; }
+                  else if (b.key === "master") { current = profileData.rating; target = 1800; }
+                  else if (b.key === "centurion") { current = profileData.games_played; target = 100; }
+                  else { current = profileData.games_played; target = 1; }
+                  progress = Math.min((current / target) * 100, 100);
+
+                  return (
+                    <div key={b.key}>
+                      <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                        <span>{b.icon} {b.label}</span>
+                        <span>{current}/{target}</span>
+                      </div>
+                      <Progress value={progress} className="h-1.5" />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
-          {/* Match history */}
-          <motion.div
-            className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm p-4 glass-border"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <h2 className="font-display text-lg font-semibold text-foreground mb-3">Recent Games</h2>
+          {/* Game History */}
+          <div className="rounded-xl border border-border/50 bg-card/80 p-5">
+            <h3 className="font-display text-sm font-semibold text-foreground mb-3">Recent Games</h3>
             {games.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">No games played yet. <Link to="/play/online" className="text-primary hover:underline">Play your first game!</Link></p>
+              <p className="text-sm text-muted-foreground text-center py-4">No games played yet.</p>
             ) : (
               <div className="space-y-1.5">
                 {games.map(g => {
@@ -300,21 +274,19 @@ const Profile = () => {
                   return (
                     <div key={g.id} className="flex items-center justify-between rounded-lg border border-border/30 bg-muted/20 px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${won ? "bg-accent/20 text-accent-foreground" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${won ? "bg-accent/20 text-accent-foreground" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}>
                           {won ? "W" : drew ? "D" : "L"}
                         </span>
-                        <span className="text-sm text-foreground">{isWhite ? "White" : "Black"}</span>
+                        <span className="text-xs text-foreground">{isWhite ? "White" : "Black"}</span>
+                        <span className="text-[10px] text-muted-foreground">{g.time_control_label}</span>
                       </div>
-                      <div className="text-right">
-                        <span className="text-xs text-muted-foreground">{g.time_control_label}</span>
-                        <span className="text-xs text-muted-foreground ml-2">{new Date(g.created_at).toLocaleDateString()}</span>
-                      </div>
+                      <span className="text-[10px] text-muted-foreground">{new Date(g.created_at).toLocaleDateString()}</span>
                     </div>
                   );
                 })}
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
       </main>
       <Footer />

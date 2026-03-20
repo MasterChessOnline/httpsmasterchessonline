@@ -21,12 +21,10 @@ interface LeaderboardEntry {
 }
 
 const Leaderboard = () => {
-  const { user, isPremium, subscriptionTier } = useAuth();
+  const { user } = useAuth();
   const [players, setPlayers] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"elo" | "premium">("elo");
-
-  const isElitePlus = hasAccess(subscriptionTier, "elite");
+  const [tab, setTab] = useState<"elo">("elo");
 
   useEffect(() => {
     supabase

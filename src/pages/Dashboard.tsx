@@ -13,7 +13,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
-  Crown, Trophy, Swords, Flame, BookOpen, Bell,
+  Trophy, Swords, Flame, BookOpen, Bell,
   TrendingUp, Calendar, Sparkles, Award, Users, Zap, Star
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ interface Notification {
 }
 
 const Dashboard = () => {
-  const { user, profile, isPremium, subscriptionTier, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const { activeTournament } = useActiveTournament(user?.id);
   useTournamentReminder(user?.id, () => {});
@@ -190,34 +190,6 @@ const Dashboard = () => {
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Left column - Main content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Membership status */}
-              <div className={`rounded-xl border p-5 ${isPremium ? "border-primary/30 bg-primary/5" : "border-border/50 bg-card/80"}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isPremium ? "bg-primary/20" : "bg-muted"}`}>
-                      <Crown className={`h-5 w-5 ${isPremium ? "text-primary" : "text-muted-foreground"}`} />
-                    </div>
-                    <div>
-                      <h3 className="font-display font-semibold text-foreground">
-                        {isPremium ? `Premium ${subscriptionTier ? `(${subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1)})` : ""}` : "Free Plan"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {isPremium
-                          ? "Full access to all premium features"
-                          : "Upgrade to unlock exclusive content & tournaments"}
-                      </p>
-                    </div>
-                  </div>
-                  {!isPremium && (
-                    <Link to="/premium">
-                      <Button size="sm" className="shadow-glow">
-                        <Sparkles className="mr-2 h-4 w-4" /> Upgrade
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </div>
-
               {/* Progress tracking */}
               <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
                 <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">

@@ -18,7 +18,7 @@ const testimonials = [
   {
     name: "James W.",
     rating: 5,
-    text: "Premium membership is worth every penny. The exclusive tournaments and daily training keep me coming back every day.",
+    text: "The exclusive tournaments and daily training keep me coming back every day. Best chess platform I've used.",
     level: "Advanced",
   },
   {
