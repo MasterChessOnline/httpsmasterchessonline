@@ -11,11 +11,9 @@ import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Brain, BookOpen, RotateCcw, ChevronLeft, ChevronRight,
-  ChevronsLeft, ChevronsRight, Zap, TrendingUp, ArrowRight,
-  Star, BarChart3, Search, FlipVertical
+  ChevronsLeft, ChevronsRight, Zap, Star, BarChart3, FlipVertical
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
