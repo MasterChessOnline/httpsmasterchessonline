@@ -34,6 +34,7 @@ import TournamentLobby from "./pages/TournamentLobby";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
 import GameHistory from "./pages/GameHistory";
+import Analysis from "./pages/Analysis";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ function AnimatedRoutes() {
           <Route path="/story" element={<StoryMode />} />
           <Route path="/openings" element={<OpeningTrainer />} />
           <Route path="/history" element={<GameHistory />} />
+          <Route path="/analysis" element={<Analysis />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />

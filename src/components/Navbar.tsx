@@ -1,4 +1,4 @@
-import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Award, LayoutDashboard, Crown } from "lucide-react";
+import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Award, LayoutDashboard, Crown, Brain } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
   { label: "Learn", href: "/learn", icon: GraduationCap },
   { label: "Leaderboard", href: "/leaderboard", icon: Award },
+  { label: "Analysis", href: "/analysis", icon: Brain },
 ];
 
 const Navbar = () => {
