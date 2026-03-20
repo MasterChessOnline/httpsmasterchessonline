@@ -134,7 +134,7 @@ export default function Analysis() {
 
   // Fetch explorer data when position or db changes
   useEffect(() => {
-    if (sidebarTab !== "explorer") return;
+    if (bottomTab !== "explorer") return;
     let cancelled = false;
     setExplorerLoading(true);
     const fetchFn = explorerDb === "masters" ? fetchMasterExplorerData : fetchExplorerData;
@@ -142,7 +142,7 @@ export default function Analysis() {
       if (!cancelled) { setExplorerData(data); setExplorerLoading(false); }
     });
     return () => { cancelled = true; };
-  }, [currentFen, explorerDb, sidebarTab]);
+  }, [currentFen, explorerDb, bottomTab]);
 
   // ── Interactive logic ──
   const evaluatePosition = useCallback(async (fen: string, fenBefore: string, moveSan: string, moveFrom: string, moveTo: string, color: "w" | "b", moveNum: number) => {
