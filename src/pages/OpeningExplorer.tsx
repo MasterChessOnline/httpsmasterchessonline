@@ -254,7 +254,6 @@ export default function OpeningExplorer() {
       const newHistory = [...movesToReplay, entry];
       setHistory(newHistory);
       setViewIndex(newHistory.length);
-      setGame(newGame);
       setSelectedSquare(null);
     } catch {
       // Invalid move
