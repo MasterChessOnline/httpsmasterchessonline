@@ -688,13 +688,6 @@ export default function Analysis() {
               )}
             </AnimatePresence>
 
-            {/* Live eval for interactive (when no moves yet or current position) */}
-            {mode === "interactive" && liveMoveHistory.length === 0 && !liveEvaluating && (
-              <div className="rounded-xl border border-border/40 bg-card p-4 text-center text-muted-foreground text-sm">
-                <MousePointerClick className="h-6 w-6 mx-auto mb-2 text-primary/60" />
-                <p>Click pieces to make moves — Stockfish will evaluate each position automatically</p>
-              </div>
-            )}
           </div>
 
           {/* ── Right Column ── */}
