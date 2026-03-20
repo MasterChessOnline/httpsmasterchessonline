@@ -269,7 +269,6 @@ export default function OpeningExplorer() {
       const move = newGame.move(san);
       if (!move) return;
 
-      const simpleFen = simplifyFen(newGame.fen());
       const bookMove = bookMoves.find(bm => bm.san === san);
 
       const entry: HistoryEntry = {
