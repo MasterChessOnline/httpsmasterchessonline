@@ -319,17 +319,44 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* AI Analysis CTA */}
-              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" /> DailyChess_12 Analysis
+              {/* Quick Improve - 1 lesson + 1 game */}
+              <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm p-5">
+                <h2 className="font-display text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" /> Quick Improve
                 </h2>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Play a game against the DailyChess_12 Bot and get instant AI feedback on your mistakes, strengths, and a performance score.
+                  Complete 1 mini lesson + play 1 quick game to sharpen your skills in under 10 minutes.
                 </p>
                 <div className="flex gap-2">
-                  <Link to="/play">
+                  <Link to="/learn" className="flex-1">
+                    <Button size="sm" variant="outline" className="w-full">
+                      <BookOpen className="mr-2 h-4 w-4" /> 1 Lesson
+                    </Button>
+                  </Link>
+                  <Link to="/play" className="flex-1">
+                    <Button size="sm" className="w-full">
+                      <Swords className="mr-2 h-4 w-4" /> 1 Quick Game
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* AI Analysis CTA */}
+              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
+                <h2 className="font-display text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" /> Game Analysis
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Analyze any game with Stockfish engine. Find mistakes, blunders, and learn the best moves. Explore opening theory with real game statistics.
+                </p>
+                <div className="flex gap-2">
+                  <Link to="/analysis">
                     <Button size="sm">
+                      <TrendingUp className="mr-2 h-4 w-4" /> Open Analysis Board
+                    </Button>
+                  </Link>
+                  <Link to="/play">
+                    <Button size="sm" variant="outline">
                       <Swords className="mr-2 h-4 w-4" /> Play vs Bot
                     </Button>
                   </Link>

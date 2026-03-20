@@ -82,7 +82,7 @@ type SidebarTab = "analysis" | "explorer" | "pgn";
 
 // ── Component ──
 export default function Analysis() {
-  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("analysis");
+  const [_sidebarTab] = useState<SidebarTab>("analysis");
   const [depth, setDepth] = useState(15);
   const [flipped, setFlipped] = useState(false);
   const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
