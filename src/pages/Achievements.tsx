@@ -97,7 +97,7 @@ const Achievements = () => {
       }
     };
     checkAndGrant();
-  }, [user, profile, achievements, isPremium, subscriptionTier]);
+  }, [user, profile, achievements]);
 
   const earnedCount = earned.size;
   const totalCount = achievements.length;

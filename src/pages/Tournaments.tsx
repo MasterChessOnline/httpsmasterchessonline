@@ -472,14 +472,6 @@ const Tournaments = () => {
               </div>
             )}
 
-            {!isPremium && (
-              <div className="mb-5 rounded-lg border border-border/40 bg-card p-3 flex items-center gap-3">
-                <Crown className="w-4 h-4 text-primary shrink-0" />
-                <p className="text-xs text-muted-foreground flex-1">
-                  <span className="text-primary font-medium cursor-pointer" onClick={() => navigate("/premium")}>Upgrade to Premium</span> for exclusive tournaments with bigger prizes and special badges!
-                </p>
-              </div>
-            )}
 
             {dbLoading ? (
               <div className="space-y-2">

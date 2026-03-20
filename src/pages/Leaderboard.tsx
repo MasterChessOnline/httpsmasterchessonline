@@ -199,7 +199,7 @@ const Leaderboard = () => {
             </>
           )}
 
-          {tab === "premium" && (
+          {false && (
             <>
               {!isElitePlus ? (
                 <div className="text-center py-16">
