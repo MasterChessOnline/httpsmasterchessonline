@@ -31,7 +31,7 @@ interface Achievement {
 }
 
 const Achievements = () => {
-  const { user, profile, isPremium, subscriptionTier, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [earned, setEarned] = useState<Set<string>>(new Set());

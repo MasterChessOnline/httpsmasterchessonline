@@ -99,7 +99,7 @@ function getSkillLabel(category: string) {
 }
 
 const Tournaments = () => {
-  const { user, isPremium, subscriptionTier } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { streak } = useStreak(user?.id);
   const { activeTournament } = useActiveTournament(user?.id);
