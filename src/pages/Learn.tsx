@@ -30,10 +30,6 @@ const LEVEL_CONFIG = {
   Advanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Award, label: "Advanced" },
 };
 
-const TIER_CONFIG = {
-  free: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", label: "Free" },
-  premium: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", label: "Premium" },
-};
 
 /* ──── YouTube Embed ──── */
 function YouTubeEmbed({ videoUrl, title }: { videoUrl: string; title: string }) {
