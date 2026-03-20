@@ -387,266 +387,283 @@ export default function Analysis() {
   })), [activeEvals]);
   const goFn = pgnComplete ? goToPgnMove : goToLiveMove;
 
+  // ── Bottom panel tab ──
+  const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
+
   // ── Render ──
   return (
     <div className="min-h-screen bg-[hsl(220,20%,12%)]">
       <Navbar />
-      <main className="flex justify-center items-start gap-0 pt-4 pb-8 px-2 lg:px-4 min-h-[calc(100vh-64px)]">
-        {/* ── LEFT: Eval Bar + Board ── */}
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2 mb-1 self-start ml-10">
-            <div className="w-4 h-4 rounded-sm bg-[hsl(220,15%,20%)] border border-border/30" />
-            <span className="text-xs font-semibold text-foreground/80">Black</span>
-            {explorerData?.opening && (
-              <Badge variant="outline" className="text-[10px] ml-2">{explorerData.opening.eco} {explorerData.opening.name}</Badge>
-            )}
+      <main className="flex flex-col items-center pt-4 pb-8 px-2 lg:px-4 min-h-[calc(100vh-64px)]">
+        {/* ── TOP ROW: Board + Analysis Sidebar ── */}
+        <div className="flex justify-center items-start gap-0 w-full max-w-[920px]">
+          {/* ── LEFT: Eval Bar + Board ── */}
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-2 mb-1 self-start ml-10">
+              <div className="w-4 h-4 rounded-sm bg-[hsl(220,15%,20%)] border border-border/30" />
+              <span className="text-xs font-semibold text-foreground/80">Black</span>
+              {explorerData?.opening && (
+                <Badge variant="outline" className="text-[10px] ml-2">{explorerData.opening.eco} {explorerData.opening.name}</Badge>
+              )}
+            </div>
+
+            <div className="flex items-stretch">
+              {/* Eval Bar */}
+              <div className="w-7 shrink-0 rounded-sm overflow-hidden mr-1.5 relative flex flex-col" style={{ minHeight: 420 }}>
+                <motion.div className="bg-[hsl(220,15%,18%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${100 - evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
+                <motion.div className="bg-[hsl(60,10%,90%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className={`text-[9px] font-bold font-mono px-0.5 ${evalCpForBar >= 0 ? 'text-[hsl(220,15%,18%)]' : 'text-[hsl(60,10%,90%)]'}`}>
+                    {formatEval(evalCpForBar, evalMateForBar)}
+                  </span>
+                </div>
+                {liveEvaluating && !pgnComplete && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <Loader2 className="h-3 w-3 text-primary animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              {/* Board */}
+              <div className="w-[min(50vw,460px)]">
+                <ChessBoard
+                  game={boardGame}
+                  flipped={flipped}
+                  selectedSquare={!pgnComplete ? selectedSquare : null}
+                  legalMoves={!pgnComplete ? legalMoves : []}
+                  lastMove={lastMoveDisplay}
+                  isGameOver={false}
+                  isPlayerTurn={!pgnComplete && liveViewIdx < 0}
+                  onSquareClick={!pgnComplete ? handleInteractiveSquareClick : () => {}}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mt-1 self-start ml-10">
+              <div className="w-4 h-4 rounded-sm bg-[hsl(60,10%,90%)] border border-border/30" />
+              <span className="text-xs font-semibold text-foreground/80">White</span>
+            </div>
+
+            {/* Board controls */}
+            <div className="flex items-center gap-1 mt-2">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setFlipped(!flipped)}>
+                <FlipVertical className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={resetInteractive} title="New analysis">
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          <div className="flex items-stretch">
-            {/* Eval Bar */}
-            <div className="w-7 shrink-0 rounded-sm overflow-hidden mr-1.5 relative flex flex-col" style={{ minHeight: 420 }}>
-              <motion.div className="bg-[hsl(220,15%,18%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${100 - evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
-              <motion.div className="bg-[hsl(60,10%,90%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className={`text-[9px] font-bold font-mono px-0.5 ${evalCpForBar >= 0 ? 'text-[hsl(220,15%,18%)]' : 'text-[hsl(60,10%,90%)]'}`}>
-                  {formatEval(evalCpForBar, evalMateForBar)}
-                </span>
+          {/* ── RIGHT: Analysis Sidebar ── */}
+          <div className="w-[340px] lg:w-[380px] shrink-0 ml-3 flex flex-col bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden" style={{ minHeight: 500 }}>
+            {/* Header */}
+            <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/20 bg-[hsl(220,18%,14%)]">
+              <Brain className="h-4 w-4 text-primary" />
+              <span className="text-xs font-bold text-foreground">Analysis</span>
+              <span className="text-[10px] text-muted-foreground ml-auto">Stockfish · D{depth}</span>
+            </div>
+
+            {/* Engine eval */}
+            <div className="px-3 py-2 border-b border-border/20">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-mono font-bold text-foreground">{formatEval(evalCpForBar, evalMateForBar)}</span>
+                {liveCurrentEval.bestMoveSan && !pgnComplete && (
+                  <span className="text-xs text-muted-foreground">Best: <span className="text-foreground font-mono font-semibold">{liveCurrentEval.bestMoveSan}</span></span>
+                )}
               </div>
-              {liveEvaluating && !pgnComplete && (
-                <div className="absolute inset-0 flex items-center justify-center z-20">
-                  <Loader2 className="h-3 w-3 text-primary animate-spin" />
+              {currentEval && ["blunder", "mistake", "inaccuracy"].includes(currentEval.classification) && (
+                <div className="flex items-center gap-1.5 mt-1 text-xs">
+                  <span className={CLASS_STYLES[currentEval.classification].color}>{CLASS_STYLES[currentEval.classification].label}</span>
+                  <span className="text-muted-foreground">— Best was</span>
+                  <span className="text-foreground font-mono font-semibold">{currentEval.bestMoveSan}</span>
+                </div>
+              )}
+              {/* Alt lines */}
+              {(pgnComplete ? currentEval?.altLines : liveCurrentEval.altLines)?.slice(0, 3).map((line, li) => (
+                <div key={li} className="flex items-center justify-between text-[11px] mt-0.5">
+                  <span className="font-mono text-foreground/70">{line.san}</span>
+                  <span className="font-mono text-muted-foreground">{formatEval(line.eval, line.mate)}</span>
+                </div>
+              ))}
+              {/* Depth slider */}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-[9px] text-muted-foreground">Depth</span>
+                <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} className="flex-1" />
+                <span className="text-[9px] text-muted-foreground w-4 text-right">{depth}</span>
+              </div>
+            </div>
+
+            {/* Eval graph */}
+            {activeEvals.length > 1 && (
+              <div className="px-3 py-2 border-b border-border/20">
+                <div className="relative h-14 w-full">
+                  <div className="absolute top-1/2 left-0 right-0 h-px bg-border/40" />
+                  <svg viewBox={`0 0 ${graphData.length} 100`} className="w-full h-full" preserveAspectRatio="none">
+                    {graphData.map((d, i) => {
+                      const normalized = (d.eval + 500) / 1000;
+                      const y = Math.max(0, Math.min(100, (1 - normalized) * 100));
+                      const height = Math.abs(50 - y);
+                      const isAbove = y < 50;
+                      const isActive = activeIdx === i;
+                      const isBad = d.classification === "blunder" || d.classification === "mistake";
+                      let fill = "hsl(0, 0%, 45%)";
+                      if (isBad) fill = d.classification === "blunder" ? "hsl(0, 70%, 50%)" : "hsl(30, 80%, 50%)";
+                      if (isActive) fill = "hsl(120, 50%, 50%)";
+                      return <rect key={i} x={i} y={isAbove ? y : 50} width={0.8} height={Math.max(1, height)} fill={fill} className="cursor-pointer" onClick={() => goFn(i)} rx={0.2} />;
+                    })}
+                  </svg>
+                  {activeIdx >= 0 && (
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-primary/60" style={{ left: `${(activeIdx / graphData.length) * 100}%` }} />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Summary bar */}
+            {activeEvals.length > 0 && (
+              <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/20 text-[10px]">
+                <div className="flex gap-2">
+                  <span className="text-cyan-400">✦ {brilliant}</span>
+                  <span className="text-yellow-400">?! {inaccuracies}</span>
+                  <span className="text-orange-400">? {mistakes}</span>
+                  <span className="text-red-500">?? {blunders}</span>
+                </div>
+                <div className="flex gap-2 text-muted-foreground">
+                  <span>W: {calcAccuracy(whiteEvals)}%</span>
+                  <span>B: {calcAccuracy(blackEvals)}%</span>
+                </div>
+              </div>
+            )}
+
+            {/* Move list */}
+            <div className="flex-1 overflow-y-auto px-2 py-1 max-h-[240px]" ref={moveListRef}>
+              {activeEvals.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                  <MousePointerClick className="h-7 w-7 mb-2 text-primary/40" />
+                  <p className="text-sm">Click pieces to make moves</p>
+                  <p className="text-[10px] mt-1">or import a PGN below</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-1 gap-y-0.5">
+                  {activeEvals.map((mv, i) => {
+                    const s = CLASS_STYLES[mv.classification];
+                    const isActive = activeIdx === i;
+                    const showNum = mv.color === "w";
+                    return (
+                      <button key={i} onClick={() => goFn(i)}
+                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors ${
+                          isActive ? "bg-[hsl(120,40%,35%)] text-white" : "hover:bg-[hsl(220,18%,22%)] text-foreground/80"
+                        } ${mv.color === "w" ? "col-start-1" : "col-start-2"}`}>
+                        {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
+                        {!showNum && <span className="w-5 shrink-0" />}
+                        <span className="font-mono font-medium">{mv.san}</span>
+                        {s.symbol && <span className={`text-[9px] font-bold ${isActive ? "text-white/80" : s.color}`}>{s.symbol}</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
 
-            {/* Board */}
-            <div className="w-[min(58vw,500px)]">
-              <ChessBoard
-                game={boardGame}
-                flipped={flipped}
-                selectedSquare={!pgnComplete ? selectedSquare : null}
-                legalMoves={!pgnComplete ? legalMoves : []}
-                lastMove={lastMoveDisplay}
-                isGameOver={false}
-                isPlayerTurn={!pgnComplete && liveViewIdx < 0}
-                onSquareClick={!pgnComplete ? handleInteractiveSquareClick : () => {}}
-              />
+            {/* Bottom navigation */}
+            <div className="border-t border-border/20 px-3 py-2 flex items-center justify-between bg-[hsl(220,18%,14%)]">
+              <div className="flex items-center gap-0.5">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(-1)} disabled={activeEvals.length === 0}>
+                  <ChevronsLeft className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeIdx - 1)} disabled={activeIdx <= -1}>
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeIdx + 1)} disabled={activeIdx >= activeEvals.length - 1}>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeEvals.length - 1)} disabled={activeIdx >= activeEvals.length - 1}>
+                  <ChevronsRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-1">
+                {!pgnComplete && liveMoveHistory.length > 0 && (
+                  <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={undoLastMove}>
+                    <RotateCcw className="h-3 w-3 mr-1" /> Undo
+                  </Button>
+                )}
+                {activeEvals.length > 0 && (
+                  <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={downloadPGN}>
+                    <Download className="h-3 w-3 mr-1" /> PGN
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 mt-1 self-start ml-10">
-            <div className="w-4 h-4 rounded-sm bg-[hsl(60,10%,90%)] border border-border/30" />
-            <span className="text-xs font-semibold text-foreground/80">White</span>
-          </div>
-
-          {/* Board controls */}
-          <div className="flex items-center gap-1 mt-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setFlipped(!flipped)}>
-              <FlipVertical className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={resetInteractive} title="New analysis">
-              <RotateCcw className="h-4 w-4" />
-            </Button>
           </div>
         </div>
 
-        {/* ── RIGHT: Sidebar ── */}
-        <div className="w-[360px] lg:w-[400px] shrink-0 ml-3 flex flex-col bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden" style={{ minHeight: 540 }}>
-          {/* Tab Header */}
-          <div className="flex border-b border-border/20">
-            <TabButton active={sidebarTab === "analysis"} onClick={() => setSidebarTab("analysis")} icon={<Brain className="h-3.5 w-3.5" />} label="Analysis" />
-            <TabButton active={sidebarTab === "explorer"} onClick={() => setSidebarTab("explorer")} icon={<Globe className="h-3.5 w-3.5" />} label="Explorer" />
-            <TabButton active={sidebarTab === "pgn"} onClick={() => setSidebarTab("pgn")} icon={<FileText className="h-3.5 w-3.5" />} label="Import" />
-          </div>
+        {/* ── BOTTOM ROW: Explorer & Import (always visible) ── */}
+        <div className="w-full max-w-[920px] mt-4">
+          <div className="bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden">
+            {/* Tab bar */}
+            <div className="flex border-b border-border/20">
+              <BottomTabButton active={bottomTab === "explorer"} onClick={() => setBottomTab("explorer")} icon={<Globe className="h-3.5 w-3.5" />} label="Opening Explorer" />
+              <BottomTabButton active={bottomTab === "import"} onClick={() => setBottomTab("import")} icon={<Upload className="h-3.5 w-3.5" />} label="Import PGN" />
+            </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
-              {/* ── ANALYSIS TAB ── */}
-              {sidebarTab === "analysis" && (
-                <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-full">
-                  {/* Engine eval */}
-                  <div className="px-3 py-2 border-b border-border/20 bg-[hsl(220,18%,14%)]">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Brain className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Stockfish · D{depth}</span>
-                      </div>
-                      <span className="text-sm font-mono font-bold text-foreground">{formatEval(evalCpForBar, evalMateForBar)}</span>
-                    </div>
-                    {liveCurrentEval.bestMoveSan && !pgnComplete && (
-                      <p className="text-xs text-muted-foreground mt-0.5">Best: <span className="text-foreground font-mono font-semibold">{liveCurrentEval.bestMoveSan}</span></p>
-                    )}
-                    {currentEval && ["blunder", "mistake", "inaccuracy"].includes(currentEval.classification) && (
-                      <div className="flex items-center gap-1.5 mt-1 text-xs">
-                        <span className={CLASS_STYLES[currentEval.classification].color}>{CLASS_STYLES[currentEval.classification].label}</span>
-                        <span className="text-muted-foreground">— Best was</span>
-                        <span className="text-foreground font-mono font-semibold">{currentEval.bestMoveSan}</span>
-                      </div>
-                    )}
-                    {/* Alt lines */}
-                    {(pgnComplete ? currentEval?.altLines : liveCurrentEval.altLines)?.slice(0, 3).map((line, li) => (
-                      <div key={li} className="flex items-center justify-between text-[11px] mt-0.5">
-                        <span className="font-mono text-foreground/70">{line.san}</span>
-                        <span className="font-mono text-muted-foreground">{formatEval(line.eval, line.mate)}</span>
-                      </div>
-                    ))}
-                    {/* Depth slider */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[9px] text-muted-foreground">Depth</span>
-                      <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} className="flex-1" />
-                      <span className="text-[9px] text-muted-foreground w-4 text-right">{depth}</span>
-                    </div>
-                  </div>
-
-                  {/* Eval graph */}
-                  {activeEvals.length > 1 && (
-                    <div className="px-3 py-2 border-b border-border/20">
-                      <div className="relative h-14 w-full">
-                        <div className="absolute top-1/2 left-0 right-0 h-px bg-border/40" />
-                        <svg viewBox={`0 0 ${graphData.length} 100`} className="w-full h-full" preserveAspectRatio="none">
-                          {graphData.map((d, i) => {
-                            const normalized = (d.eval + 500) / 1000;
-                            const y = Math.max(0, Math.min(100, (1 - normalized) * 100));
-                            const height = Math.abs(50 - y);
-                            const isAbove = y < 50;
-                            const isActive = activeIdx === i;
-                            const isBad = d.classification === "blunder" || d.classification === "mistake";
-                            let fill = "hsl(0, 0%, 45%)";
-                            if (isBad) fill = d.classification === "blunder" ? "hsl(0, 70%, 50%)" : "hsl(30, 80%, 50%)";
-                            if (isActive) fill = "hsl(120, 50%, 50%)";
-                            return <rect key={i} x={i} y={isAbove ? y : 50} width={0.8} height={Math.max(1, height)} fill={fill} className="cursor-pointer" onClick={() => goFn(i)} rx={0.2} />;
-                          })}
-                        </svg>
-                        {activeIdx >= 0 && (
-                          <div className="absolute top-0 bottom-0 w-0.5 bg-primary/60" style={{ left: `${(activeIdx / graphData.length) * 100}%` }} />
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Summary bar */}
-                  {activeEvals.length > 0 && (
-                    <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/20 text-[10px]">
-                      <div className="flex gap-2">
-                        <span className="text-cyan-400">✦ {brilliant}</span>
-                        <span className="text-yellow-400">?! {inaccuracies}</span>
-                        <span className="text-orange-400">? {mistakes}</span>
-                        <span className="text-red-500">?? {blunders}</span>
-                      </div>
-                      <div className="flex gap-2 text-muted-foreground">
-                        <span>W: {calcAccuracy(whiteEvals)}%</span>
-                        <span>B: {calcAccuracy(blackEvals)}%</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Move list */}
-                  <div className="flex-1 overflow-y-auto px-2 py-1 max-h-[280px]" ref={moveListRef}>
-                    {activeEvals.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                        <MousePointerClick className="h-7 w-7 mb-2 text-primary/40" />
-                        <p className="text-sm">Click pieces to make moves</p>
-                        <p className="text-[10px] mt-1">or import a PGN to analyze</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-x-1 gap-y-0.5">
-                        {activeEvals.map((mv, i) => {
-                          const s = CLASS_STYLES[mv.classification];
-                          const isActive = activeIdx === i;
-                          const showNum = mv.color === "w";
-                          return (
-                            <button key={i} onClick={() => goFn(i)}
-                              className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors ${
-                                isActive ? "bg-[hsl(120,40%,35%)] text-white" : "hover:bg-[hsl(220,18%,22%)] text-foreground/80"
-                              } ${mv.color === "w" ? "col-start-1" : "col-start-2"}`}>
-                              {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
-                              {!showNum && <span className="w-5 shrink-0" />}
-                              <span className="font-mono font-medium">{mv.san}</span>
-                              {s.symbol && <span className={`text-[9px] font-bold ${isActive ? "text-white/80" : s.color}`}>{s.symbol}</span>}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* ── EXPLORER TAB ── */}
-              {sidebarTab === "explorer" && (
-                <motion.div key="explorer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col">
+              {/* ── EXPLORER ── */}
+              {bottomTab === "explorer" && (
+                <motion.div key="explorer-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   {/* DB selector */}
-                  <div className="flex items-center gap-2 px-3 py-2 border-b border-border/20">
-                    <Globe className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-xs font-bold text-foreground">Opening Explorer</span>
-                    <div className="ml-auto flex gap-0.5">
-                      <button
-                        onClick={() => setExplorerDb("lichess")}
-                        className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "lichess" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                      >
-                        Lichess
+                  <div className="flex items-center gap-3 px-4 py-2 border-b border-border/10">
+                    <div className="flex gap-1">
+                      <button onClick={() => setExplorerDb("lichess")} className={`text-[11px] px-3 py-1 rounded transition-colors ${explorerDb === "lichess" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-[hsl(220,18%,22%)]"}`}>
+                        Lichess DB
                       </button>
-                      <button
-                        onClick={() => setExplorerDb("masters")}
-                        className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "masters" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                      >
-                        Masters
+                      <button onClick={() => setExplorerDb("masters")} className={`text-[11px] px-3 py-1 rounded transition-colors ${explorerDb === "masters" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-[hsl(220,18%,22%)]"}`}>
+                        Masters DB
                       </button>
                     </div>
+                    {explorerData && (
+                      <span className="text-[10px] text-muted-foreground ml-auto flex items-center gap-1">
+                        <Database className="h-3 w-3" />
+                        {formatGames(explorerData.totalGames)} games
+                        {explorerData.opening && <Badge variant="outline" className="text-[9px] px-1.5 py-0 ml-1">{explorerData.opening.eco} {explorerData.opening.name}</Badge>}
+                      </span>
+                    )}
                   </div>
 
                   {explorerLoading ? (
-                    <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center justify-center py-6">
                       <Loader2 className="h-5 w-5 text-primary animate-spin" />
                       <span className="text-xs text-muted-foreground ml-2">Loading games...</span>
                     </div>
                   ) : explorerData && explorerData.moves.length > 0 ? (
-                    <div className="flex flex-col">
-                      {/* Position stats */}
-                      <div className="px-3 py-2 border-b border-border/20">
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-1">
-                          <Database className="h-3 w-3" />
-                          <span>{formatGames(explorerData.totalGames)} games</span>
-                          {explorerData.opening && (
-                            <Badge variant="outline" className="text-[9px] px-1 py-0">{explorerData.opening.eco}</Badge>
-                          )}
-                        </div>
-                        {/* Win/Draw/Loss bar */}
-                        {explorerData.totalGames > 0 && (
-                          <div className="flex h-3 rounded-full overflow-hidden">
-                            <div className="bg-[hsl(0,0%,95%)] transition-all" style={{ width: `${(explorerData.white / explorerData.totalGames) * 100}%` }} />
-                            <div className="bg-[hsl(0,0%,60%)] transition-all" style={{ width: `${(explorerData.draws / explorerData.totalGames) * 100}%` }} />
-                            <div className="bg-[hsl(220,15%,20%)] transition-all" style={{ width: `${(explorerData.black / explorerData.totalGames) * 100}%` }} />
+                    <div>
+                      {/* Win/Draw/Loss bar */}
+                      {explorerData.totalGames > 0 && (
+                        <div className="px-4 py-2 border-b border-border/10">
+                          <div className="flex h-4 rounded-full overflow-hidden">
+                            <div className="bg-[hsl(0,0%,95%)] flex items-center justify-center transition-all" style={{ width: `${(explorerData.white / explorerData.totalGames) * 100}%` }}>
+                              <span className="text-[9px] font-bold text-[hsl(220,15%,20%)]">{((explorerData.white / explorerData.totalGames) * 100).toFixed(0)}%</span>
+                            </div>
+                            <div className="bg-[hsl(0,0%,60%)] flex items-center justify-center transition-all" style={{ width: `${(explorerData.draws / explorerData.totalGames) * 100}%` }}>
+                              <span className="text-[9px] font-bold text-white">{((explorerData.draws / explorerData.totalGames) * 100).toFixed(0)}%</span>
+                            </div>
+                            <div className="bg-[hsl(220,15%,20%)] flex items-center justify-center transition-all" style={{ width: `${(explorerData.black / explorerData.totalGames) * 100}%` }}>
+                              <span className="text-[9px] font-bold text-[hsl(0,0%,90%)]">{((explorerData.black / explorerData.totalGames) * 100).toFixed(0)}%</span>
+                            </div>
                           </div>
-                        )}
-                        <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
-                          <span>White {explorerData.totalGames > 0 ? ((explorerData.white / explorerData.totalGames) * 100).toFixed(0) : 0}%</span>
-                          <span>Draw {explorerData.totalGames > 0 ? ((explorerData.draws / explorerData.totalGames) * 100).toFixed(0) : 0}%</span>
-                          <span>Black {explorerData.totalGames > 0 ? ((explorerData.black / explorerData.totalGames) * 100).toFixed(0) : 0}%</span>
                         </div>
-                      </div>
+                      )}
 
-                      {/* Move table header */}
-                      <div className="grid grid-cols-[50px_1fr_44px_44px_44px_52px] gap-0 text-[9px] text-muted-foreground px-3 py-1 border-b border-border/10 uppercase tracking-wider">
-                        <span>Move</span>
-                        <span>Win bar</span>
-                        <span className="text-center">W%</span>
-                        <span className="text-center">D%</span>
-                        <span className="text-center">L%</span>
-                        <span className="text-right">Games</span>
+                      {/* Move table */}
+                      <div className="grid grid-cols-[60px_1fr_50px_50px_50px_60px] gap-0 text-[9px] text-muted-foreground px-4 py-1.5 border-b border-border/10 uppercase tracking-wider font-semibold">
+                        <span>Move</span><span>Win bar</span><span className="text-center">W%</span><span className="text-center">D%</span><span className="text-center">L%</span><span className="text-right">Games</span>
                       </div>
-
-                      {/* Move rows */}
-                      <div className="overflow-y-auto max-h-[260px]">
+                      <div className="max-h-[200px] overflow-y-auto">
                         {explorerData.moves.sort((a, b) => b.games - a.games).map((mv) => (
-                          <button
-                            key={mv.san}
-                            onClick={() => playExplorerMove(mv.san)}
-                            className="w-full grid grid-cols-[50px_1fr_44px_44px_44px_52px] gap-0 text-[11px] px-3 py-1.5 hover:bg-[hsl(220,18%,22%)] transition-colors border-b border-border/5"
-                          >
+                          <button key={mv.san} onClick={() => playExplorerMove(mv.san)}
+                            className="w-full grid grid-cols-[60px_1fr_50px_50px_50px_60px] gap-0 text-[11px] px-4 py-1.5 hover:bg-[hsl(220,18%,22%)] transition-colors border-b border-border/5">
                             <span className="font-mono font-bold text-foreground">{mv.san}</span>
-                            <div className="flex items-center pr-2">
+                            <div className="flex items-center pr-3">
                               <div className="flex h-2.5 w-full rounded-full overflow-hidden">
                                 <div className="bg-[hsl(0,0%,92%)]" style={{ width: `${mv.winRate}%` }} />
                                 <div className="bg-[hsl(0,0%,60%)]" style={{ width: `${mv.drawRate}%` }} />
@@ -663,99 +680,65 @@ export default function Analysis() {
 
                       {/* Top games */}
                       {explorerData.topGames && explorerData.topGames.length > 0 && (
-                        <div className="px-3 py-2 border-t border-border/20">
+                        <div className="px-4 py-2 border-t border-border/20">
                           <div className="flex items-center gap-1.5 mb-1">
                             <Trophy className="h-3 w-3 text-primary" />
                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Top Games</span>
                           </div>
-                          {explorerData.topGames.map((g, i) => (
-                            <a
-                              key={i}
-                              href={`https://lichess.org/${g.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-between text-[10px] py-0.5 hover:text-primary transition-colors"
-                            >
-                              <span className="text-foreground/80 truncate">
-                                {g.white.name} ({g.white.rating}) vs {g.black.name} ({g.black.rating})
-                              </span>
-                              <span className="text-muted-foreground ml-2 shrink-0">
-                                {g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"} · {g.year}
-                              </span>
-                            </a>
-                          ))}
+                          <div className="flex flex-wrap gap-x-6 gap-y-0.5">
+                            {explorerData.topGames.map((g, i) => (
+                              <a key={i} href={`https://lichess.org/${g.id}`} target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-[10px] py-0.5 hover:text-primary transition-colors">
+                                <span className="text-foreground/80">{g.white.name} ({g.white.rating}) vs {g.black.name} ({g.black.rating})</span>
+                                <span className="text-muted-foreground">{g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"} · {g.year}</span>
+                              </a>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                      <Database className="h-7 w-7 mb-2 text-primary/30" />
-                      <p className="text-sm">No games found</p>
-                      <p className="text-[10px] mt-1">This position is outside the database</p>
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <Database className="h-6 w-6 mb-2 text-primary/30" />
+                      <p className="text-sm">No games found for this position</p>
+                      <p className="text-[10px] mt-1">Make moves on the board to explore openings</p>
                     </div>
                   )}
                 </motion.div>
               )}
 
-              {/* ── PGN IMPORT TAB ── */}
-              {sidebarTab === "pgn" && (
-                <motion.div key="pgn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-3 space-y-3">
-                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Upload className="h-4 w-4 text-primary" />Import PGN / FEN
-                  </h3>
-                  <Textarea
-                    placeholder={"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6...\n\nOr paste full PGN with headers"}
-                    value={pgnInput} onChange={(e) => setPgnInput(e.target.value)}
-                    rows={8} className="font-mono text-xs resize-none bg-[hsl(220,18%,20%)] border-border/30" maxLength={10000}
-                  />
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>Depth: {depth}</span>
-                    <span>{depth <= 10 ? "Fast" : depth <= 18 ? "Standard" : "Deep"}</span>
+              {/* ── IMPORT PGN ── */}
+              {bottomTab === "import" && (
+                <motion.div key="import-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4">
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <Textarea
+                        placeholder={"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6...\n\nOr paste full PGN with headers"}
+                        value={pgnInput} onChange={(e) => setPgnInput(e.target.value)}
+                        rows={5} className="font-mono text-xs resize-none bg-[hsl(220,18%,20%)] border-border/30" maxLength={10000}
+                      />
+                    </div>
+                    <div className="w-[200px] flex flex-col gap-2">
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                        <span>Depth: {depth}</span>
+                        <span>{depth <= 10 ? "Fast" : depth <= 18 ? "Standard" : "Deep"}</span>
+                      </div>
+                      <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} />
+                      {error && <p className="text-xs text-destructive">{error}</p>}
+                      <Button onClick={runAnalysis} disabled={analyzing || !pgnInput.trim()} className="w-full bg-[hsl(120,40%,45%)] hover:bg-[hsl(120,40%,50%)] text-white font-semibold text-xs">
+                        {analyzing ? <><Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />Analyzing {progress}%</> : <><Brain className="mr-2 h-3.5 w-3.5" />Analyze Game</>}
+                      </Button>
+                      {analyzing && <Progress value={progress} className="h-1.5" />}
+                      {pgnComplete && (
+                        <Button variant="outline" onClick={clearPgnAnalysis} className="w-full text-xs">
+                          <Trash2 className="mr-2 h-3 w-3" /> Clear & New
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} />
-                  {error && <p className="text-xs text-destructive">{error}</p>}
-                  <Button onClick={runAnalysis} disabled={analyzing || !pgnInput.trim()} className="w-full bg-[hsl(120,40%,45%)] hover:bg-[hsl(120,40%,50%)] text-white font-semibold">
-                    {analyzing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing {progress}%...</> : <><Brain className="mr-2 h-4 w-4" />Analyze Game</>}
-                  </Button>
-                  {analyzing && <Progress value={progress} className="h-1.5" />}
-                  {pgnComplete && (
-                    <Button variant="outline" onClick={clearPgnAnalysis} className="w-full text-xs">
-                      <Trash2 className="mr-2 h-3 w-3" /> Clear & Start New
-                    </Button>
-                  )}
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-
-          {/* Bottom navigation */}
-          <div className="border-t border-border/20 px-3 py-2 flex items-center justify-between bg-[hsl(220,18%,14%)]">
-            <div className="flex items-center gap-0.5">
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(-1)} disabled={activeEvals.length === 0}>
-                <ChevronsLeft className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeIdx - 1)} disabled={activeIdx <= -1}>
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeIdx + 1)} disabled={activeIdx >= activeEvals.length - 1}>
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeEvals.length - 1)} disabled={activeIdx >= activeEvals.length - 1}>
-                <ChevronsRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-            <div className="flex items-center gap-1">
-              {!pgnComplete && liveMoveHistory.length > 0 && (
-                <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={undoLastMove}>
-                  <RotateCcw className="h-3 w-3 mr-1" /> Undo
-                </Button>
-              )}
-              {activeEvals.length > 0 && (
-                <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={downloadPGN}>
-                  <Download className="h-3 w-3 mr-1" /> PGN
-                </Button>
-              )}
-            </div>
           </div>
         </div>
       </main>
@@ -764,11 +747,11 @@ export default function Analysis() {
 }
 
 // ── Sub-components ──
-function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+function BottomTabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
     <button
       onClick={onClick}
-      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-colors border-b-2 ${
+      className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 ${
         active ? "border-primary text-primary bg-primary/5" : "border-transparent text-muted-foreground hover:text-foreground"
       }`}
     >
