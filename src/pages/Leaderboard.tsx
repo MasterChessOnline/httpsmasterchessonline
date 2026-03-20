@@ -23,7 +23,7 @@ const Leaderboard = () => {
   const { user } = useAuth();
   const [players, setPlayers] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"elo">("elo");
+  const [filter, setFilter] = useState<"all" | "top50" | "active">("all");
 
   useEffect(() => {
     supabase
