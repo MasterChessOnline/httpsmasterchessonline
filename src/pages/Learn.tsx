@@ -387,8 +387,8 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
             <button
               key={lesson.id}
               onClick={() => {
-                if (status.premiumLocked) navigate("/premium");
-                else if (status.sequentialLocked) toast({ title: "Complete previous chapter first", description: `Finish "${course.lessons[idx - 1].title}" to unlock this chapter.` });
+                if (status.sequentialLocked) toast({ title: "Complete previous chapter first", description: `Finish "${course.lessons[idx - 1].title}" to unlock this chapter.` });
+                else onSelectLesson(idx);
                 else onSelectLesson(idx);
               }}
               className={`w-full flex items-center gap-3 sm:gap-4 rounded-xl border p-4 transition-all text-left group ${
