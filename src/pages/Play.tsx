@@ -372,17 +372,52 @@ const Play = () => {
       <main className="container mx-auto px-4 pt-24 pb-16">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="flex justify-center gap-2 mb-3">
+          <div className="flex justify-center gap-2 mb-3 flex-wrap">
             <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
               <Swords className="w-3 h-3 mr-1" /> Play Chess
             </Badge>
-            <button
-              onClick={() => setStreamerMode(true)}
-              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
-            >
-              <Monitor className="w-3 h-3" /> Streamer Mode
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setStreamerMode(true)}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+                >
+                  <Monitor className="w-3 h-3" /> Streamer Mode
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Hide UI, show only board (F)</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setShowShortcuts(s => !s)}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+                >
+                  <Keyboard className="w-3 h-3" /> Shortcuts
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>R=Resign, D=Draw, F=Fullscreen, N=New Game</TooltipContent>
+            </Tooltip>
           </div>
+          {showShortcuts && (
+            <div className="mb-3 rounded-lg border border-border/40 bg-card/80 p-3 max-w-sm mx-auto">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Keyboard Shortcuts</p>
+              <div className="grid grid-cols-2 gap-1.5 text-xs">
+                {[
+                  { key: "R", action: "Resign" },
+                  { key: "D", action: "Offer Draw" },
+                  { key: "F", action: "Toggle Fullscreen" },
+                  { key: "N", action: "New Game" },
+                  { key: "?", action: "Toggle Shortcuts" },
+                ].map(s => (
+                  <div key={s.key} className="flex items-center gap-2">
+                    <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border/50 font-mono text-[10px] text-foreground">{s.key}</kbd>
+                    <span className="text-muted-foreground">{s.action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
             {mode === "ai" ? (
               <>
