@@ -389,7 +389,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   isBookmarked: (id: string) => boolean;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const { isPremium } = useAuth();
+  const isPremium = true;
   const navigate = useNavigate();
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
