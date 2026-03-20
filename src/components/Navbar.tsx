@@ -56,7 +56,7 @@ const Navbar = () => {
 
         <div className="hidden items-center gap-0.5 md:flex">
           {NAV_ITEMS.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href);
             return (
               <Link
                 key={item.label}
