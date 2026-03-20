@@ -602,7 +602,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
       )}
 
       {/* AI Feedback */}
-      <AIFeedbackPanel lesson={lesson} isPremium={isPremium} />
+      <AIFeedbackPanel lesson={lesson} />
 
       {/* Mark as Complete + Navigation */}
       <div className="space-y-3 mt-8">
