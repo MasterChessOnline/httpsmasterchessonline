@@ -277,36 +277,49 @@ export default function Analysis() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-          {/* Left: Board + Eval Bar */}
+          {/* Left: Eval Bar + Board side by side */}
           <div className="space-y-4">
-            {/* Eval Bar */}
-            {analysisComplete && (
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-6 rounded-full overflow-hidden bg-muted/30 border border-border/40 relative">
+            <div className="flex gap-2 items-stretch">
+              {/* Vertical Eval Bar */}
+              <div className="w-8 shrink-0 flex flex-col items-center">
+                <div className="w-full flex-1 rounded-lg overflow-hidden border border-border/40 relative bg-[hsl(220,15%,18%)] min-h-[320px]">
+                  {/* White (top portion) */}
                   <motion.div
-                    className="h-full bg-foreground rounded-full"
-                    initial={{ width: "50%" }}
-                    animate={{ width: `${evalPercent}%` }}
-                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                    className="absolute top-0 left-0 right-0 bg-foreground/90"
+                    initial={{ height: "50%" }}
+                    animate={{ height: `${100 - evalPercent}%` }}
+                    transition={{ type: "spring", stiffness: 180, damping: 22 }}
                   />
-                  <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-primary-foreground mix-blend-difference">
-                    {currentEval ? formatEval(currentEval.eval, currentEval.mate) : "0.0"}
-                  </span>
+                  {/* Eval label */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-between py-1.5 pointer-events-none">
+                    <span className={`text-[10px] font-bold font-mono z-10 ${evalPercent < 50 ? "text-background" : "text-foreground/60"}`}>
+                      {currentEval && (currentEval.eval >= 0 || currentEval.mate !== null)
+                        ? formatEval(Math.abs(currentEval.eval), currentEval.mate !== null && currentEval.mate > 0 ? currentEval.mate : null)
+                        : !currentEval ? "" : ""}
+                    </span>
+                    <span className={`text-[10px] font-bold font-mono z-10 ${evalPercent >= 50 ? "text-foreground" : "text-foreground/60"}`}>
+                      {currentEval && (currentEval.eval < 0 || (currentEval.mate !== null && currentEval.mate < 0))
+                        ? formatEval(Math.abs(currentEval.eval), currentEval.mate !== null && currentEval.mate < 0 ? Math.abs(currentEval.mate) : null)
+                        : !currentEval ? "" : ""}
+                    </span>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Chess Board */}
-            <ChessBoard
-              game={displayGame.current}
-              flipped={false}
-              selectedSquare={null}
-              legalMoves={[]}
-              lastMove={lastMove}
-              isGameOver={false}
-              isPlayerTurn={false}
-              onSquareClick={() => {}}
-            />
+              {/* Chess Board */}
+              <div className="flex-1">
+                <ChessBoard
+                  game={displayGame.current}
+                  flipped={false}
+                  selectedSquare={null}
+                  legalMoves={[]}
+                  lastMove={lastMove}
+                  isGameOver={false}
+                  isPlayerTurn={false}
+                  onSquareClick={() => {}}
+                />
+              </div>
+            </div>
 
             {/* Navigation Controls */}
             {analysisComplete && (
