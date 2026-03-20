@@ -10,6 +10,7 @@ import { TOTAL_CHAPTERS } from "@/lib/story-data";
 import { COURSES } from "@/lib/courses-data";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import DailyChallenges from "@/components/DailyChallenges";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -421,16 +422,8 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Booked classes placeholder */}
-              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" /> Booked Classes
-                </h2>
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No classes booked yet.{" "}
-                  <Link to="/learn" className="text-primary hover:underline">Book a lesson</Link>
-                </p>
-              </div>
+              {/* Daily Challenges */}
+              <DailyChallenges />
             </div>
           </div>
         </div>

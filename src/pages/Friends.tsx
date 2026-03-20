@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { User, UserPlus, Check, X, Loader2 } from "lucide-react";
+import { User, UserPlus, Check, X, Loader2, Swords, Circle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 interface FriendRow {
@@ -113,13 +113,24 @@ const Friends = () => {
             ) : (
               accepted.map(f => {
                 const otherId = getOtherId(f);
+                // Simple online heuristic: random for demo
+                const isOnline = otherId.charCodeAt(0) % 3 === 0;
                 return (
-                  <Link key={f.id} to={`/profile/${otherId}`}
-                    className="flex items-center gap-3 rounded-lg border border-border/50 bg-card p-3 hover:border-primary/30 transition-all">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="flex-1 font-medium text-foreground">{getName(otherId)}</span>
+                  <div key={f.id} className="flex items-center gap-3 rounded-lg border border-border/50 bg-card p-3 hover:border-primary/30 transition-all">
+                    <div className="relative">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <Circle className={`absolute -bottom-0.5 -right-0.5 h-2 w-2 ${isOnline ? "fill-green-500 text-green-500" : "fill-muted-foreground/40 text-muted-foreground/40"}`} />
+                    </div>
+                    <Link to={`/profile/${otherId}`} className="flex-1 font-medium text-foreground hover:text-primary min-w-0 truncate">
+                      {getName(otherId)}
+                    </Link>
                     <span className="font-mono text-sm text-primary">{profiles[otherId]?.rating || 1200}</span>
-                  </Link>
+                    <Link to="/play">
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-primary hover:bg-primary/10">
+                        <Swords className="h-3 w-3 mr-1" /> Challenge
+                      </Button>
+                    </Link>
+                  </div>
                 );
               })
             )}

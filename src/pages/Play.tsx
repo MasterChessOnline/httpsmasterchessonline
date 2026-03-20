@@ -7,6 +7,7 @@ import ChessBoard from "@/components/chess/ChessBoard";
 import CapturedPieces from "@/components/chess/CapturedPieces";
 import GameControls from "@/components/chess/GameControls";
 import AnalysisPanel from "@/components/chess/AnalysisPanel";
+import GameSummary from "@/components/chess/GameSummary";
 import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { getAIMove, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
@@ -15,7 +16,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Swords, TrendingUp, Trophy, Target, BookOpen, Monitor, MonitorOff } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Swords, TrendingUp, Trophy, Target, BookOpen, Monitor, MonitorOff, Keyboard } from "lucide-react";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -52,6 +54,7 @@ const Play = () => {
   const [resignedBy, setResignedBy] = useState<"w" | "b" | null>(null);
   const [drawAgreed, setDrawAgreed] = useState(false);
   const [streamerMode, setStreamerMode] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const gameRef = useRef(new Chess());
   const positionHistory = useRef<string[]>([]);
 
@@ -68,6 +71,22 @@ const Play = () => {
   const currentLevel = AI_LEVELS.find((l) => l.value === difficulty)!;
 
   const updateState = () => setFen(game.fen());
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      switch (e.key.toLowerCase()) {
+        case "r": if (!isGameOver && moveHistory.length > 0) handleResign(); break;
+        case "d": if (!isGameOver && moveHistory.length >= 2) handleOfferDraw(); break;
+        case "f": setStreamerMode(prev => !prev); break;
+        case "n": resetGame(); break;
+        case "?": setShowShortcuts(prev => !prev); break;
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isGameOver, moveHistory.length]);
 
   // Track positions for threefold repetition
   const trackPosition = () => {
@@ -353,17 +372,52 @@ const Play = () => {
       <main className="container mx-auto px-4 pt-24 pb-16">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="flex justify-center gap-2 mb-3">
+          <div className="flex justify-center gap-2 mb-3 flex-wrap">
             <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
               <Swords className="w-3 h-3 mr-1" /> Play Chess
             </Badge>
-            <button
-              onClick={() => setStreamerMode(true)}
-              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
-            >
-              <Monitor className="w-3 h-3" /> Streamer Mode
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setStreamerMode(true)}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+                >
+                  <Monitor className="w-3 h-3" /> Streamer Mode
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Hide UI, show only board (F)</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setShowShortcuts(s => !s)}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+                >
+                  <Keyboard className="w-3 h-3" /> Shortcuts
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>R=Resign, D=Draw, F=Fullscreen, N=New Game</TooltipContent>
+            </Tooltip>
           </div>
+          {showShortcuts && (
+            <div className="mb-3 rounded-lg border border-border/40 bg-card/80 p-3 max-w-sm mx-auto">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Keyboard Shortcuts</p>
+              <div className="grid grid-cols-2 gap-1.5 text-xs">
+                {[
+                  { key: "R", action: "Resign" },
+                  { key: "D", action: "Offer Draw" },
+                  { key: "F", action: "Toggle Fullscreen" },
+                  { key: "N", action: "New Game" },
+                  { key: "?", action: "Toggle Shortcuts" },
+                ].map(s => (
+                  <div key={s.key} className="flex items-center gap-2">
+                    <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border/50 font-mono text-[10px] text-foreground">{s.key}</kbd>
+                    <span className="text-muted-foreground">{s.action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
             {mode === "ai" ? (
               <>
@@ -446,37 +500,19 @@ const Play = () => {
               canResign={moveHistory.length > 0}
             />
 
+            {/* Game Summary Report */}
+            {isGameOver && gameResult && moveHistory.length >= 4 && (
+              <GameSummary
+                moveHistory={moveHistory}
+                result={gameResult}
+                playerColor={playerColor}
+                difficulty={difficulty}
+              />
+            )}
+
             {/* Post-game analysis */}
             {isGameOver && gameResult && pgn && mode === "ai" && (
               <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />
-            )}
-
-            {/* Play + Learn: Post-game lesson recommendations */}
-            {isGameOver && gameResult && moveHistory.length >= 4 && (
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">Recommended Lessons</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Based on your game, we recommend these areas:</p>
-                <div className="space-y-2">
-                  {getRecommendations().map((rec) => (
-                    <Link
-                      key={rec.phase}
-                      to={rec.link}
-                      className="flex items-center gap-3 p-2.5 rounded-lg bg-card border border-border/30 hover:border-primary/30 transition-all group"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <BookOpen className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-foreground">{rec.label}</p>
-                        <p className="text-[10px] text-muted-foreground">{rec.desc}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
             )}
           </div>
         </div>
