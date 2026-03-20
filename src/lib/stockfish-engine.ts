@@ -4,10 +4,18 @@
  */
 
 export interface StockfishResult {
-  bestMove: string; // e.g. "e2e4"
-  evaluation?: number; // centipawns from white's perspective
+  bestMove: string;
+  evaluation?: number;
   depth?: number;
-  mate?: number | null; // mate in N moves, null if no mate
+  mate?: number | null;
+}
+
+export interface MultiPvLine {
+  pv: string[];    // UCI moves
+  pvSan: string[]; // SAN moves
+  eval: number;
+  mate: number | null;
+  depth: number;
 }
 
 type MessageCallback = (msg: string) => void;
@@ -18,7 +26,6 @@ class StockfishEngine {
   private messageCallbacks: MessageCallback[] = [];
   private initPromise: Promise<void> | null = null;
 
-  /** Spin up the engine once and reuse it. */
   async init(): Promise<void> {
     if (this.initPromise) return this.initPromise;
 
@@ -54,24 +61,20 @@ class StockfishEngine {
     this.worker?.postMessage(cmd);
   }
 
-  /** Set Stockfish Skill Level (0–20) and corresponding options. */
   setSkillLevel(level: number) {
     const clamped = Math.max(0, Math.min(20, level));
     this.send(`setoption name Skill Level value ${clamped}`);
   }
 
-  /** Start a new game (clears hash tables). */
+  setMultiPV(count: number) {
+    this.send(`setoption name MultiPV value ${Math.max(1, Math.min(5, count))}`);
+  }
+
   newGame() {
     this.send("ucinewgame");
     this.send("isready");
   }
 
-  /**
-   * Get the best move for a given FEN position.
-   * @param fen - FEN string of the current position
-   * @param moveTimeMs - time to think in milliseconds
-   * @param depth - optional max depth (overrides moveTime if set)
-   */
   getBestMove(fen: string, moveTimeMs = 1000, depth?: number): Promise<StockfishResult> {
     return new Promise((resolve) => {
       if (!this.worker || !this.ready) {
@@ -84,7 +87,6 @@ class StockfishEngine {
       let mate: number | null = null;
 
       const handler: MessageCallback = (msg) => {
-        // Parse evaluation from info lines
         if (msg.startsWith("info") && msg.includes("score")) {
           const depthMatch = msg.match(/depth (\d+)/);
           if (depthMatch) bestDepth = parseInt(depthMatch[1]);
@@ -96,30 +98,18 @@ class StockfishEngine {
           }
 
           const mateMatch = msg.match(/score mate (-?\d+)/);
-          if (mateMatch) {
-            mate = parseInt(mateMatch[1]);
-          }
+          if (mateMatch) mate = parseInt(mateMatch[1]);
         }
 
-        // Parse best move
         if (msg.startsWith("bestmove")) {
           const parts = msg.split(" ");
           const bestMove = parts[1] || "";
-
-          // Remove handler
           this.messageCallbacks = this.messageCallbacks.filter((cb) => cb !== handler);
-
-          resolve({
-            bestMove,
-            evaluation,
-            depth: bestDepth,
-            mate,
-          });
+          resolve({ bestMove, evaluation, depth: bestDepth, mate });
         }
       };
 
       this.messageCallbacks.push(handler);
-
       this.send(`position fen ${fen}`);
       if (depth) {
         this.send(`go depth ${depth}`);
@@ -129,7 +119,6 @@ class StockfishEngine {
     });
   }
 
-  /** Evaluate a position without making a move. */
   evaluate(fen: string, depth = 15): Promise<{ evaluation: number; mate: number | null }> {
     return new Promise((resolve) => {
       if (!this.worker || !this.ready) {
@@ -143,10 +132,7 @@ class StockfishEngine {
       const handler: MessageCallback = (msg) => {
         if (msg.startsWith("info") && msg.includes("score")) {
           const cpMatch = msg.match(/score cp (-?\d+)/);
-          if (cpMatch) {
-            evaluation = parseInt(cpMatch[1]);
-            mate = null;
-          }
+          if (cpMatch) { evaluation = parseInt(cpMatch[1]); mate = null; }
           const mateMatch = msg.match(/score mate (-?\d+)/);
           if (mateMatch) mate = parseInt(mateMatch[1]);
         }
@@ -163,7 +149,55 @@ class StockfishEngine {
     });
   }
 
-  /** Clean up the worker. */
+  /** Get top N lines (Multi-PV) for a position. */
+  getMultiPV(fen: string, numLines: number, depth: number): Promise<MultiPvLine[]> {
+    return new Promise((resolve) => {
+      if (!this.worker || !this.ready) {
+        resolve([]);
+        return;
+      }
+
+      this.setMultiPV(numLines);
+      const lines: Map<number, MultiPvLine> = new Map();
+
+      const handler: MessageCallback = (msg) => {
+        if (msg.startsWith("info") && msg.includes("multipv") && msg.includes("score")) {
+          const pvIdxMatch = msg.match(/multipv (\d+)/);
+          const depthMatch = msg.match(/depth (\d+)/);
+          const pvMovesMatch = msg.match(/ pv (.+)/);
+          if (!pvIdxMatch) return;
+
+          const pvIdx = parseInt(pvIdxMatch[1]);
+          const d = depthMatch ? parseInt(depthMatch[1]) : 0;
+          const pvMoves = pvMovesMatch ? pvMovesMatch[1].split(" ") : [];
+
+          let evalCp = 0;
+          let mateVal: number | null = null;
+          const cpMatch = msg.match(/score cp (-?\d+)/);
+          if (cpMatch) evalCp = parseInt(cpMatch[1]);
+          const mateMatch = msg.match(/score mate (-?\d+)/);
+          if (mateMatch) mateVal = parseInt(mateMatch[1]);
+
+          lines.set(pvIdx, { pv: pvMoves, pvSan: [], eval: evalCp, mate: mateVal, depth: d });
+        }
+
+        if (msg.startsWith("bestmove")) {
+          this.messageCallbacks = this.messageCallbacks.filter((cb) => cb !== handler);
+          // Reset MultiPV to 1
+          this.setMultiPV(1);
+          resolve(Array.from(lines.values()).sort((a, b) => {
+            // Sort by PV index (already keyed)
+            return 0;
+          }));
+        }
+      };
+
+      this.messageCallbacks.push(handler);
+      this.send(`position fen ${fen}`);
+      this.send(`go depth ${depth}`);
+    });
+  }
+
   destroy() {
     this.worker?.terminate();
     this.worker = null;
@@ -173,7 +207,6 @@ class StockfishEngine {
   }
 }
 
-// Singleton instance
 let engineInstance: StockfishEngine | null = null;
 
 export function getStockfishEngine(): StockfishEngine {
@@ -183,10 +216,6 @@ export function getStockfishEngine(): StockfishEngine {
   return engineInstance;
 }
 
-/**
- * Map our difficulty levels to Stockfish settings.
- * Returns { skillLevel, moveTimeMs, depth }
- */
 export function difficultyToStockfish(difficulty: "beginner" | "intermediate" | "advanced") {
   switch (difficulty) {
     case "beginner":
