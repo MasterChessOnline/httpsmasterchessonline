@@ -352,7 +352,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
           </div>
 
           {/* Quick action */}
-          {!allCompleted && canAccessCourse && nextLessonIdx >= 0 && (
+          {!allCompleted && nextLessonIdx >= 0 && (
             <Button
               className="mt-5"
               onClick={() => onSelectLesson(nextLessonIdx)}
