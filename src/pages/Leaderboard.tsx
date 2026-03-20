@@ -60,14 +60,6 @@ const Leaderboard = () => {
     );
   };
 
-  const premiumPlayers = players
-    .filter(p => p.games_played >= 5)
-    .sort((a, b) => {
-      const wrA = a.games_won / a.games_played;
-      const wrB = b.games_won / b.games_played;
-      return wrB - wrA || b.rating - a.rating;
-    })
-    .slice(0, 50);
 
   const renderTopThree = (list: LeaderboardEntry[]) => {
     const top3 = list.slice(0, 3);

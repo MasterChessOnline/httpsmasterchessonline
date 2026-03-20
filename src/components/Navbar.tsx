@@ -1,4 +1,4 @@
-import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Wifi, Award, LayoutDashboard, Crown } from "lucide-react";
+import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Award, LayoutDashboard, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";

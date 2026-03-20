@@ -1,4 +1,4 @@
-import { Swords, GraduationCap, User, Home } from "lucide-react";
+import { Swords, GraduationCap, User, Home, Trophy } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { label: "Home", href: "/", icon: Home },
   { label: "Play", href: "/play", icon: Swords },
   { label: "Learn", href: "/learn", icon: GraduationCap },
+  { label: "Rank", href: "/leaderboard", icon: Trophy },
   { label: "Profile", href: "/profile", icon: User, auth: true },
 ];
 
