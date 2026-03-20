@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 const NAV_ITEMS = [
   { label: "Home", href: "/", icon: Home },
   { label: "Play", href: "/play", icon: Swords },
-  { label: "Puzzles", href: "/daily", icon: Target },
   { label: "Learn", href: "/learn", icon: GraduationCap },
   { label: "Profile", href: "/profile", icon: User, auth: true },
 ];
