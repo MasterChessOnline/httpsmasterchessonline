@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { User, UserPlus, Check, X, Loader2 } from "lucide-react";
+import { User, UserPlus, Check, X, Loader2, Swords, Circle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 interface FriendRow {
