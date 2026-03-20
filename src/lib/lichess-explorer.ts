@@ -43,7 +43,9 @@ async function rateLimitedFetch(url: string): Promise<Response> {
   const wait = Math.max(0, RATE_LIMIT_MS - (now - lastRequest));
   if (wait > 0) await new Promise(r => setTimeout(r, wait));
   lastRequest = Date.now();
-  return fetch(url);
+  return fetch(url, {
+    headers: { "Accept": "application/json" },
+  });
 }
 
 /**
