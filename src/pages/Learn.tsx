@@ -218,11 +218,14 @@ function CourseCard({ course, onClick, progress }: {
 }
 
 /* ──── Course List ──── */
+const CORE_IDS = new Set(["core-beginner", "core-intermediate", "core-advanced"]);
+
 function CourseList({ onSelectCourse, getCourseProgress }: {
   onSelectCourse: (course: Course) => void;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [showAdditional, setShowAdditional] = useState(false);
 
   const levels = [
     { key: "all", label: "All Levels", icon: BookOpen },
@@ -231,48 +234,95 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
     { key: "Advanced", label: "Advanced", icon: Award },
   ];
 
-  const filtered = COURSES.filter((c) => {
+  const coreCourses = COURSES.filter((c) => CORE_IDS.has(c.id));
+  const additionalCourses = COURSES.filter((c) => {
+    if (CORE_IDS.has(c.id)) return false;
     if (levelFilter !== "all" && c.level !== levelFilter) return false;
     return true;
   });
+
+  // Total core lessons
+  const totalCoreLessons = coreCourses.reduce((s, c) => s + c.lessons.length, 0);
 
   return (
     <>
       {/* All Free badge */}
       <div className="flex justify-center mb-6">
         <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs px-3 py-1">
-          <Shield className="w-3 h-3 mr-1.5" /> All courses are 100% free
+          <Shield className="w-3 h-3 mr-1.5" /> All {COURSES.reduce((s, c) => s + c.lessons.length, 0)}+ lessons are 100% free
         </Badge>
       </div>
 
-      {/* Level filter */}
-      <div className="flex justify-center gap-2 flex-wrap mb-8">
-        {levels.map(({ key, label, icon: LvlIcon }) => (
-          <button
-            key={key}
-            onClick={() => setLevelFilter(key)}
-            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
-              levelFilter === key
-                ? "border-primary bg-primary/10 text-primary shadow-glow"
-                : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-            }`}
-          >
-            <LvlIcon className="w-3.5 h-3.5" />
-            {label}
-          </button>
-        ))}
+      {/* ── CORE CURRICULUM ── */}
+      <div className="mb-10">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
+          <h2 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
+            <Star className="w-5 h-5 text-primary fill-primary" /> Core Curriculum · {totalCoreLessons} Lessons
+          </h2>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
+        </div>
+        <p className="text-center text-muted-foreground text-sm mb-5">
+          Start here — 50 structured lessons from beginner to advanced, step by step.
+        </p>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {coreCourses.map((course) => (
+            <CourseCard
+              key={course.id}
+              course={course}
+              onClick={() => onSelectCourse(course)}
+              progress={getCourseProgress(course.id, course.lessons.length)}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Course grid */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((course) => (
-          <CourseCard
-            key={course.id}
-            course={course}
-            onClick={() => onSelectCourse(course)}
-            progress={getCourseProgress(course.id, course.lessons.length)}
-          />
-        ))}
+      {/* ── ADDITIONAL COURSES ── */}
+      <div>
+        <button
+          onClick={() => setShowAdditional(!showAdditional)}
+          className="w-full flex items-center justify-center gap-2 mb-6 text-sm text-muted-foreground hover:text-primary transition-colors"
+        >
+          <div className="h-px flex-1 bg-border/50" />
+          <span className="flex items-center gap-1.5 font-medium shrink-0">
+            {showAdditional ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {showAdditional ? "Hide" : "Show"} Additional Deep-Dive Courses ({additionalCourses.length})
+          </span>
+          <div className="h-px flex-1 bg-border/50" />
+        </button>
+
+        {showAdditional && (
+          <>
+            {/* Level filter */}
+            <div className="flex justify-center gap-2 flex-wrap mb-8">
+              {levels.map(({ key, label, icon: LvlIcon }) => (
+                <button
+                  key={key}
+                  onClick={() => setLevelFilter(key)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
+                    levelFilter === key
+                      ? "border-primary bg-primary/10 text-primary shadow-glow"
+                      : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                  }`}
+                >
+                  <LvlIcon className="w-3.5 h-3.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {additionalCourses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onClick={() => onSelectCourse(course)}
+                  progress={getCourseProgress(course.id, course.lessons.length)}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </>
   );
