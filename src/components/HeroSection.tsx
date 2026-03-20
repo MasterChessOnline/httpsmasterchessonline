@@ -76,7 +76,7 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.5 }}
         >
-          Free online games, lessons, and premium content.
+          Free online games, lessons, and training.
         </motion.p>
 
         {/* CTA Buttons */}
