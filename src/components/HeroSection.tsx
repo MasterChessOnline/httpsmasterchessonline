@@ -112,9 +112,10 @@ const HeroSection = () => {
           transition={{ duration: 0.6, delay: 2.1 }}
         >
           {[
-            { icon: Zap, label: "Matchmaking", value: "Fast" },
+            { icon: Zap, label: "Fast Matchmaking", value: "Instant" },
             { icon: Trophy, label: "Free Tournaments", value: "Daily" },
-            { icon: Crown, label: "ELO Tracking", value: "Real-time" },
+            { icon: Crown, label: "ELO Rating", value: "Unlimited" },
+            { icon: Target, label: "Game Analysis", value: "Stockfish" },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="text-center group">
               <motion.div
