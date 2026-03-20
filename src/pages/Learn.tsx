@@ -453,13 +453,8 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
                 </div>
               </div>
 
-              {/* Right side */}
               <div className="shrink-0">
-                {status.premiumLocked ? (
-                  <Badge className="bg-primary/15 text-primary border-primary/25 text-[10px]">
-                    <Crown className="w-2.5 h-2.5 mr-0.5" /> Premium
-                  </Badge>
-                ) : status.sequentialLocked ? (
+                {status.sequentialLocked ? (
                   <span className="text-[10px] text-muted-foreground/40">Locked</span>
                 ) : (
                   <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
