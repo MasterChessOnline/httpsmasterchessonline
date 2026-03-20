@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { COLLECTIBLES, RARITY_COLORS, Collectible } from "@/lib/collectibles-data";
 import { Crown, Trophy, Star, Zap, Brain, Flame, Medal, TrendingUp, Swords, Lock, Gem, Shield } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { hasAccess, type TierKey } from "@/lib/premium-tiers";
+
 
 const ICON_MAP: Record<string, React.ElementType> = {
   trophy: Trophy, medal: Medal, crown: Crown, swords: Swords,
@@ -71,10 +71,10 @@ const Achievements = () => {
           case "games_won": qualifies = profile.games_won >= ach.requirement_value; break;
           case "games_played": qualifies = profile.games_played >= ach.requirement_value; break;
           case "rating": qualifies = profile.rating >= ach.requirement_value; break;
-          case "premium": qualifies = isPremium; break;
-          case "tier_pro": qualifies = hasAccess(subscriptionTier, "pro"); break;
-          case "tier_elite": qualifies = hasAccess(subscriptionTier, "elite"); break;
-          case "tier_grandmaster": qualifies = hasAccess(subscriptionTier, "grandmaster"); break;
+          case "premium":
+          case "tier_pro":
+          case "tier_elite":
+          case "tier_grandmaster": qualifies = true; break;
           default: break;
         }
         if (qualifies) {
@@ -97,7 +97,7 @@ const Achievements = () => {
       }
     };
     checkAndGrant();
-  }, [user, profile, achievements, isPremium, subscriptionTier]);
+  }, [user, profile, achievements]);
 
   const earnedCount = earned.size;
   const totalCount = achievements.length;

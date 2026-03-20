@@ -269,7 +269,7 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   onSelectCourse: (course: Course) => void;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const { isPremium } = useAuth();
+  const isPremium = true;
   const navigate = useNavigate();
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [tierFilter, setTierFilter] = useState<string>("all");
@@ -389,7 +389,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   isBookmarked: (id: string) => boolean;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const { isPremium } = useAuth();
+  const isPremium = true;
   const navigate = useNavigate();
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
@@ -613,7 +613,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
   onMarkComplete: (courseId: string, lessonId: string) => void;
   onToggleBookmark: (courseId: string, lessonId: string) => void;
 }) {
-  const { isPremium } = useAuth();
+  const isPremium = true;
   const [showVideo, setShowVideo] = useState(false);
   const lesson = course.lessons[lessonIdx];
   const totalLessons = course.lessons.length;
