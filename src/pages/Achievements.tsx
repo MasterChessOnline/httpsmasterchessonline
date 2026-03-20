@@ -71,10 +71,10 @@ const Achievements = () => {
           case "games_won": qualifies = profile.games_won >= ach.requirement_value; break;
           case "games_played": qualifies = profile.games_played >= ach.requirement_value; break;
           case "rating": qualifies = profile.rating >= ach.requirement_value; break;
-          case "premium": qualifies = isPremium; break;
-          case "tier_pro": qualifies = hasAccess(subscriptionTier, "pro"); break;
-          case "tier_elite": qualifies = hasAccess(subscriptionTier, "elite"); break;
-          case "tier_grandmaster": qualifies = hasAccess(subscriptionTier, "grandmaster"); break;
+          case "premium":
+          case "tier_pro":
+          case "tier_elite":
+          case "tier_grandmaster": qualifies = true; break;
           default: break;
         }
         if (qualifies) {
