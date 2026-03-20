@@ -169,29 +169,22 @@ const LESSON_VIDEOS: Record<string, string> = {
 };
 
 /* ──── Course Card ──── */
-function CourseCard({ course, onClick, progress, accessible }: {
+function CourseCard({ course, onClick, progress }: {
   course: Course;
   onClick: () => void;
   progress: { completed: number; total: number; percent: number };
-  accessible: boolean;
 }) {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
-  const tierCfg = TIER_CONFIG[course.tier];
-  const navigate = useNavigate();
 
   return (
     <article
-      onClick={() => accessible ? onClick() : navigate("/premium")}
-      className={`group relative rounded-xl border bg-card overflow-hidden transition-all cursor-pointer hover:shadow-glow ${
-        accessible ? "border-border/50 hover:border-primary/40" : "border-border/30 opacity-75"
-      }`}
+      onClick={onClick}
+      className="group relative rounded-xl border border-border/50 hover:border-primary/40 bg-card overflow-hidden transition-all cursor-pointer hover:shadow-glow"
     >
-      {/* Top accent bar */}
-      <div className={`h-1 w-full ${course.tier === "free" ? "bg-green-500/50" : "bg-primary/50"}`} />
+      <div className="h-1 w-full bg-primary/50" />
 
       <div className="p-5">
-        {/* Header row */}
         <div className="flex items-start gap-3 mb-3">
           <div className={`rounded-lg ${lvl.bg} p-2.5 shrink-0`}>
             <Icon className={`h-5 w-5 ${lvl.color}`} />
@@ -201,21 +194,13 @@ function CourseCard({ course, onClick, progress, accessible }: {
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
-              <span className={`text-[10px] font-semibold uppercase tracking-wider ${tierCfg.color}`}>{tierCfg.label}</span>
-              <span className="text-[10px] text-muted-foreground">·</span>
               <span className="text-[10px] text-muted-foreground">{course.lessons.length} chapters</span>
             </div>
           </div>
-          {!accessible && (
-            <Badge className={`text-[10px] ${tierCfg.bg} ${tierCfg.color} ${tierCfg.border} shrink-0`}>
-              <Lock className="w-2.5 h-2.5 mr-0.5" /> Premium
-            </Badge>
-          )}
         </div>
 
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-4">{course.description}</p>
 
-        {/* Progress */}
         <div className="space-y-1.5">
           <div className="flex justify-between text-[10px]">
             <span className="text-muted-foreground">{progress.completed} of {progress.total} chapters</span>
@@ -224,16 +209,11 @@ function CourseCard({ course, onClick, progress, accessible }: {
           <Progress value={progress.percent} className="h-1.5" />
         </div>
 
-        {/* CTA */}
-        <Button className="mt-4 w-full" size="sm" variant={accessible ? "default" : "outline"}>
-          {accessible ? (
-            progress.completed > 0 ? (
-              <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
-            ) : (
-              <>Start Course <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
-            )
+        <Button className="mt-4 w-full" size="sm">
+          {progress.completed > 0 ? (
+            <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           ) : (
-            <><Lock className="mr-1 h-3 w-3" /> Unlock with Premium</>
+            <>Start Course <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           )}
         </Button>
       </div>
