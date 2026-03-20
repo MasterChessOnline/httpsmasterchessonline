@@ -336,11 +336,6 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" /> ~{Math.ceil(course.lessons.length * 5)} min
                 </span>
-                {!canAccessCourse && (
-                  <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">
-                    <Lock className="w-2.5 h-2.5 mr-0.5" /> {maxFreeLessons} free previews
-                  </Badge>
-                )}
               </div>
             </div>
           </div>
