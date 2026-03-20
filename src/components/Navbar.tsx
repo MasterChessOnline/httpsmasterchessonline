@@ -1,11 +1,9 @@
-import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Wifi, Award, Heart, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Wifi, Award, LayoutDashboard, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { type TierKey } from "@/lib/premium-tiers";
-import { Star, Gem, Shield } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
@@ -15,20 +13,12 @@ const NAV_ITEMS = [
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
   { label: "Lessons", href: "/lessons", icon: GraduationCap },
-  { label: "Premium", href: "/premium", icon: Crown },
 ];
-
-const TIER_ICONS: Record<TierKey, typeof Crown> = {
-  premium: Crown, pro: Star, elite: Gem, grandmaster: Shield,
-};
-const TIER_COLORS: Record<TierKey, string> = {
-  premium: "text-primary", pro: "text-blue-400", elite: "text-purple-400", grandmaster: "text-amber-400",
-};
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, profile, loading, signOut, isPremium, subscriptionTier } = useAuth();
+  const { user, profile, loading, signOut } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -38,9 +28,6 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
-
-  const TierIcon = subscriptionTier ? TIER_ICONS[subscriptionTier] : null;
-  const tierColor = subscriptionTier ? TIER_COLORS[subscriptionTier] : "";
 
   return (
     <motion.nav
@@ -116,9 +103,6 @@ const Navbar = () => {
                 </span>
                 {profile && (
                   <span className="font-mono text-xs text-primary font-bold">{profile.rating}</span>
-                )}
-                {isPremium && TierIcon && (
-                  <TierIcon className={`h-3.5 w-3.5 ${tierColor}`} />
                 )}
               </Link>
               <Button
@@ -212,7 +196,6 @@ const Navbar = () => {
                       </div>
                       <span>{profile?.display_name || user.email?.split("@")[0]}</span>
                       {profile && <span className="font-mono text-xs text-primary ml-auto">{profile.rating}</span>}
-                      {isPremium && TierIcon && <TierIcon className={`h-3.5 w-3.5 ml-1 ${tierColor}`} />}
                     </Link>
                     <Link
                       to="/friends"

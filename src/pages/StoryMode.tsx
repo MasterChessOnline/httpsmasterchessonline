@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStoryProgress } from "@/hooks/use-story-progress";
 import { STORY_CHAPTERS, TOTAL_CHAPTERS, getArcColor, type StoryChapter } from "@/lib/story-data";
@@ -14,11 +14,11 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   BookOpen, Lock, CheckCircle, Star, ChevronRight, Swords,
-  Trophy, ArrowLeft, Loader2, Crown, Play, Video
+  Trophy, ArrowLeft, Loader2, Play, Video
 } from "lucide-react";
 
 const StoryMode = () => {
-  const { user, isPremium, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { progress, loading: progressLoading, markCompleted, completedCount, totalStars } = useStoryProgress(user?.id);
 
@@ -32,25 +32,9 @@ const StoryMode = () => {
   const [gameResult, setGameResult] = useState<string | null>(null);
   const gameRef = useRef(new Chess());
 
-  // Determine which chapters are unlocked
-  const firstProgressDate = Object.values(progress).reduce((earliest, p) => {
-    if (!p.completed_at) return earliest;
-    const d = new Date(p.completed_at).getTime();
-    return earliest === 0 ? d : Math.min(earliest, d);
-  }, 0);
-
-  const daysSinceStart = firstProgressDate > 0
-    ? Math.floor((Date.now() - firstProgressDate) / (1000 * 60 * 60 * 24))
-    : 0;
-
+  // All chapters unlocked - determine sequential unlock
   const isChapterUnlocked = (ch: StoryChapter, idx: number): boolean => {
-    if (ch.isFree) return true;
-    if (!user) return false;
-    if (!isPremium) return false;
-    // First premium chapter is always available
-    if (idx <= 1) return true;
-    // Check day unlock
-    if (ch.dayUnlock > daysSinceStart && completedCount === 0) return ch.dayUnlock === 0;
+    if (idx === 0) return true;
     // Must have completed previous chapter
     const prevKey = STORY_CHAPTERS[idx - 1]?.key;
     if (prevKey && !progress[prevKey]?.completed) return false;
@@ -63,7 +47,6 @@ const StoryMode = () => {
     return "advanced";
   };
 
-  // Start playing a chapter
   const startChapter = (ch: StoryChapter) => {
     setSelectedChapter(ch);
     setPlaying(true);
@@ -80,7 +63,6 @@ const StoryMode = () => {
   const game = gameRef.current;
   const isGameOver = game.isGameOver() || !!gameResult;
 
-  // AI moves (black)
   useEffect(() => {
     if (!playing || !selectedChapter || game.turn() !== "b" || isGameOver) return;
     setAiThinking(true);
@@ -123,7 +105,6 @@ const StoryMode = () => {
         if (game.isCheckmate()) {
           setGameResult("1-0");
           playChessSound("gameOver");
-          // Player won!
           if (selectedChapter) {
             const stars = game.moveNumber() <= 20 ? 3 : game.moveNumber() <= 35 ? 2 : 1;
             markCompleted(selectedChapter.key, stars);
@@ -162,11 +143,9 @@ const StoryMode = () => {
     );
   }
 
-  // Playing a chapter
   if (playing && selectedChapter) {
     const won = gameResult === "1-0";
     const lost = gameResult === "0-1";
-    const drew = gameResult === "draw";
 
     return (
       <div className="min-h-screen bg-background">
@@ -250,10 +229,8 @@ const StoryMode = () => {
     );
   }
 
-  // Chapter selection map
   const progressPct = Math.round((completedCount / TOTAL_CHAPTERS) * 100);
 
-  // Group by arc
   const arcs: { name: string; chapters: { ch: StoryChapter; idx: number }[] }[] = [];
   STORY_CHAPTERS.forEach((ch, idx) => {
     const arcName = ch.subtitle;
@@ -281,7 +258,6 @@ const StoryMode = () => {
           </p>
         </div>
 
-        {/* Progress bar */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="flex justify-between items-center text-sm mb-2">
             <span className="text-muted-foreground">Story Progress</span>
@@ -290,11 +266,10 @@ const StoryMode = () => {
           <Progress value={progressPct} className="h-3" />
           <div className="flex justify-between items-center text-xs text-muted-foreground mt-1.5">
             <span>{totalStars} ⭐ earned</span>
-            <span>New chapters unlock daily</span>
+            <span>Complete chapters to unlock the next</span>
           </div>
         </div>
 
-        {/* Arc sections */}
         <div className="max-w-3xl mx-auto space-y-8">
           {arcs.map(arc => (
             <div key={arc.name}>
@@ -306,7 +281,6 @@ const StoryMode = () => {
                   const unlocked = isChapterUnlocked(ch, idx);
                   const completed = progress[ch.key]?.completed;
                   const stars = progress[ch.key]?.stars || 0;
-                  const needsPremium = !ch.isFree && !isPremium;
 
                   return (
                     <div
@@ -314,23 +288,22 @@ const StoryMode = () => {
                       className={`rounded-xl border p-4 transition-all ${
                         completed
                           ? "border-green-500/30 bg-green-500/5"
-                          : unlocked && !needsPremium
+                          : unlocked
                           ? "border-border/50 bg-card hover:border-primary/30 cursor-pointer"
                           : "border-border/30 bg-muted/10 opacity-60"
                       }`}
                       onClick={() => {
-                        if (needsPremium) { navigate("/premium"); return; }
                         if (unlocked) startChapter(ch);
                       }}
                     >
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                          completed ? "bg-green-500/20" : unlocked && !needsPremium ? "bg-primary/15" : "bg-muted/30"
+                          completed ? "bg-green-500/20" : unlocked ? "bg-primary/15" : "bg-muted/30"
                         }`}>
                           {completed ? (
                             <CheckCircle className="h-5 w-5 text-green-400" />
-                          ) : !unlocked || needsPremium ? (
-                            needsPremium ? <Crown className="h-5 w-5 text-muted-foreground" /> : <Lock className="h-5 w-5 text-muted-foreground" />
+                          ) : !unlocked ? (
+                            <Lock className="h-5 w-5 text-muted-foreground" />
                           ) : (
                             <Swords className="h-5 w-5 text-primary" />
                           )}
@@ -356,11 +329,8 @@ const StoryMode = () => {
 
                         <div className="shrink-0 flex items-center gap-2">
                           <span className="text-xs font-mono text-muted-foreground">{ch.aiRating} Elo</span>
-                          {unlocked && !needsPremium && !completed && (
+                          {unlocked && !completed && (
                             <ChevronRight className="h-4 w-4 text-primary" />
-                          )}
-                          {needsPremium && (
-                            <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">Premium</Badge>
                           )}
                         </div>
                       </div>
