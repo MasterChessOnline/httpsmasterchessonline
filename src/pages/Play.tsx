@@ -58,6 +58,19 @@ const Play = () => {
   const [showShortcuts, setShowShortcuts] = useState(false);
   const gameRef = useRef(new Chess());
   const positionHistory = useRef<string[]>([]);
+  const stockfishReady = useRef(false);
+
+  // Initialize Stockfish engine
+  useEffect(() => {
+    const engine = getStockfishEngine();
+    engine.init().then(() => {
+      stockfishReady.current = true;
+      engine.newGame();
+    }).catch(() => {
+      console.warn("Stockfish failed to load, falling back to built-in AI");
+    });
+    return () => {}; // keep engine alive as singleton
+  }, []);
 
   const [timeControlIdx, setTimeControlIdx] = useState(6); // unlimited
   const timeControl = TIME_CONTROLS[timeControlIdx];
