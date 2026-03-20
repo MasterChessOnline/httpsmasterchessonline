@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/", icon: LayoutDashboard },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
   { label: "Play", href: "/play", icon: Swords },
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
   { label: "Learn", href: "/learn", icon: GraduationCap },
