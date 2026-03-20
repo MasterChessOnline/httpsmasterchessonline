@@ -38,7 +38,7 @@ import PaymentCanceled from "./pages/PaymentCanceled";
 import Lessons from "./pages/Lessons";
 import TournamentLobby from "./pages/TournamentLobby";
 import StoryMode from "./pages/StoryMode";
-import DailyChallenge from "./pages/DailyChallenge";
+// DailyChallenge removed
 import OpeningTrainer from "./pages/OpeningTrainer";
 
 const queryClient = new QueryClient();
@@ -72,7 +72,7 @@ function AnimatedRoutes() {
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/story" element={<StoryMode />} />
-          <Route path="/daily" element={<DailyChallenge />} />
+          {/* Daily challenge route removed */}
           <Route path="/openings" element={<OpeningTrainer />} />
           <Route path="/donate" element={<Donate />} />
           <Route path="/contact" element={<Contact />} />

@@ -1,4 +1,4 @@
-import { Bot, Swords, Users, Wifi, Crown, Timer, RotateCcw, Lightbulb } from "lucide-react";
+import { Bot, Swords, Users, Wifi, Crown, Timer, RotateCcw, Lightbulb, Flag, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AI_LEVELS, type Difficulty } from "@/lib/chess-ai";
@@ -23,6 +23,9 @@ interface GameControlsProps {
   onTimeControlChange: (idx: number) => void;
   onNewGame: () => void;
   onToggleHints: () => void;
+  onResign?: () => void;
+  onOfferDraw?: () => void;
+  canResign?: boolean;
 }
 
 const BOT_LEVELS: { value: Difficulty; label: string; rating: string; desc: string }[] = [
@@ -36,6 +39,7 @@ export default function GameControls({
   statusText, moveHistory, isGameOver, hintsEnabled,
   onModeChange, onDifficultyChange, onColorChange,
   onTimeControlChange, onNewGame, onToggleHints,
+  onResign, onOfferDraw, canResign = false,
 }: GameControlsProps) {
   return (
     <div className="w-full lg:max-w-xs space-y-3">
@@ -150,6 +154,18 @@ export default function GameControls({
       <div className="rounded-xl border border-border/40 bg-card p-3" role="status" aria-live="polite">
         <p className="font-display text-sm font-semibold text-foreground">{statusText}</p>
       </div>
+
+      {/* Resign & Draw buttons */}
+      {canResign && !isGameOver && (
+        <div className="flex gap-2">
+          <Button onClick={onResign} variant="destructive" size="sm" className="flex-1">
+            <Flag className="mr-1.5 h-3.5 w-3.5" /> Resign
+          </Button>
+          <Button onClick={onOfferDraw} variant="outline" size="sm" className="flex-1">
+            <Handshake className="mr-1.5 h-3.5 w-3.5" /> Draw
+          </Button>
+        </div>
+      )}
 
       <Button onClick={onNewGame} variant="outline" size="sm" className="w-full">
         <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> New Game

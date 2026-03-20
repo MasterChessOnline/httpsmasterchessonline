@@ -8,14 +8,13 @@ import { useStoryProgress } from "@/hooks/use-story-progress";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { TOTAL_CHAPTERS } from "@/lib/story-data";
 import { COURSES } from "@/lib/courses-data";
-import { getTodaysPuzzle, getTodayDateString } from "@/lib/daily-puzzles";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Crown, Trophy, Swords, Flame, BookOpen, Bell,
-  TrendingUp, Calendar, Sparkles, Target, Award, Users, Zap, Star, CheckCircle
+  TrendingUp, Calendar, Sparkles, Award, Users, Zap, Star
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -32,14 +31,9 @@ const Dashboard = () => {
   const { user, profile, isPremium, subscriptionTier, loading } = useAuth();
   const navigate = useNavigate();
   const { activeTournament } = useActiveTournament(user?.id);
-  useTournamentReminder(user?.id, (name, min) => {
-    // The browser notification is handled inside the hook
-    // This callback can be used for in-app toasts if desired
-  });
+  useTournamentReminder(user?.id, () => {});
   const [upcomingTournaments, setUpcomingTournaments] = useState<any[]>([]);
   const [recentGames, setRecentGames] = useState<any[]>([]);
-  const [puzzleStreak, setPuzzleStreak] = useState(0);
-  const [dailySolved, setDailySolved] = useState(false);
   const { completedCount: storyCompleted, totalStars: storyStars } = useStoryProgress(user?.id);
   const storyPct = Math.round((storyCompleted / TOTAL_CHAPTERS) * 100);
   const { streak: learningStreak, getCourseProgress } = useLessonProgress();
@@ -56,7 +50,6 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Fetch upcoming tournaments user is registered for
     supabase
       .from("tournament_registrations")
       .select("tournament_id, tournaments(name, starts_at, status, time_control_label)")
@@ -66,7 +59,6 @@ const Dashboard = () => {
         setUpcomingTournaments(data || []);
       });
 
-    // Fetch recent games
     supabase
       .from("online_games")
       .select("id, result, status, created_at, time_control_label, white_player_id, black_player_id")
@@ -76,50 +68,6 @@ const Dashboard = () => {
       .limit(5)
       .then(({ data }) => {
         setRecentGames(data || []);
-      });
-
-    // Calculate puzzle streak (consecutive days with solves)
-    supabase
-      .from("puzzle_solves")
-      .select("puzzle_date")
-      .eq("user_id", user.id)
-      .eq("solved", true)
-      .order("puzzle_date", { ascending: false })
-      .limit(30)
-      .then(({ data }) => {
-        if (!data || data.length === 0) {
-          setPuzzleStreak(0);
-          return;
-        }
-        let streak = 0;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const dates = [...new Set(data.map(d => d.puzzle_date))].sort().reverse();
-        for (let i = 0; i < dates.length; i++) {
-          const expected = new Date(today);
-          expected.setDate(expected.getDate() - i);
-          const dateStr = expected.toISOString().split("T")[0];
-          if (dates[i] === dateStr) {
-            streak++;
-          } else {
-            break;
-          }
-        }
-        setPuzzleStreak(streak);
-      });
-
-    // Check if today's daily challenge is solved
-    const todayStr = getTodayDateString();
-    supabase
-      .from("puzzle_solves")
-      .select("solved")
-      .eq("user_id", user.id)
-      .eq("puzzle_date", todayStr)
-      .eq("puzzle_index", 0)
-      .eq("solved", true)
-      .maybeSingle()
-      .then(({ data }) => {
-        setDailySolved(!!data);
       });
   }, [user]);
 
@@ -156,10 +104,10 @@ const Dashboard = () => {
     {
       id: "2",
       icon: Flame,
-      title: puzzleStreak > 0 ? `${puzzleStreak}-day streak! Keep going!` : "Start your streak today!",
-      description: puzzleStreak > 0
-        ? "Complete today's puzzles to extend your streak."
-        : "Solve daily puzzles to build your training streak.",
+      title: learningStreak.current_streak > 0 ? `${learningStreak.current_streak}-day learning streak!` : "Start your streak today!",
+      description: learningStreak.current_streak > 0
+        ? "Complete a lesson today to extend your streak."
+        : "Start learning to build your training streak.",
       time: "Today",
       type: "streak",
     },
@@ -229,7 +177,7 @@ const Dashboard = () => {
               { label: "ELO Rating", value: profile.rating, icon: TrendingUp, color: "text-primary" },
               { label: "Games Played", value: profile.games_played, icon: Swords, color: "text-primary" },
               { label: "Win Rate", value: `${winRate}%`, icon: Trophy, color: "text-primary" },
-              { label: "Day Streak", value: puzzleStreak, icon: Flame, color: "text-primary" },
+              { label: "Learning Streak", value: learningStreak.current_streak, icon: Flame, color: "text-primary" },
             ].map(stat => (
               <div key={stat.label} className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-4 text-center">
                 <stat.icon className={`h-5 w-5 mx-auto mb-2 ${stat.color}`} />
@@ -270,53 +218,10 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Daily Challenge Widget */}
-              {(() => {
-                const todayPuzzle = getTodaysPuzzle();
-                const typeLabels: Record<string, string> = { "mate-in-2": "Mate in 2", tactical: "Tactical", endgame: "Endgame" };
-                return (
-                  <div className={`rounded-xl border p-5 ${dailySolved ? "border-green-500/30 bg-green-500/5" : "border-primary/30 bg-primary/5"}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dailySolved ? "bg-green-500/20" : "bg-primary/20"}`}>
-                          {dailySolved
-                            ? <CheckCircle className="h-5 w-5 text-green-400" />
-                            : <Target className="h-5 w-5 text-primary" />}
-                        </div>
-                        <div>
-                          <h3 className="font-display font-semibold text-foreground flex items-center gap-2">
-                            Daily Challenge
-                            {dailySolved && <Badge className="bg-green-500/20 text-green-400 text-[10px]">Solved ✓</Badge>}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {dailySolved
-                              ? "Great job! Come back tomorrow for a new puzzle."
-                              : `${todayPuzzle.title} · ${typeLabels[todayPuzzle.type] || todayPuzzle.type}`}
-                          </p>
-                        </div>
-                      </div>
-                      <Link to="/daily">
-                        <Button size="sm" variant={dailySolved ? "outline" : "default"}>
-                          {dailySolved ? "View" : <>
-                            <Zap className="mr-1 h-4 w-4" /> Solve
-                          </>}
-                        </Button>
-                      </Link>
-                    </div>
-                    {!dailySolved && puzzleStreak > 0 && (
-                      <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                        <Flame className="h-3.5 w-3.5 text-orange-400" />
-                        <span>{puzzleStreak}-day streak — solve today to keep it going!</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-
               {/* Progress tracking */}
               <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
                 <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Target className="h-5 w-5 text-primary" /> Progress Tracking
+                  <TrendingUp className="h-5 w-5 text-primary" /> Progress Tracking
                 </h2>
                 <div className="space-y-4">
                   <div>
@@ -328,10 +233,10 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-muted-foreground">Daily training streak</span>
-                      <span className="text-foreground font-medium">{puzzleStreak} / 7 days</span>
+                      <span className="text-muted-foreground">Learning streak</span>
+                      <span className="text-foreground font-medium">{learningStreak.current_streak} / 7 days</span>
                     </div>
-                    <Progress value={Math.min((puzzleStreak / 7) * 100, 100)} className="h-2" />
+                    <Progress value={Math.min((learningStreak.current_streak / 7) * 100, 100)} className="h-2" />
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-1.5">

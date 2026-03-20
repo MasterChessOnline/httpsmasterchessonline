@@ -1,4 +1,4 @@
-import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Wifi, Award, Heart, LayoutDashboard, Target } from "lucide-react";
+import { Crown, Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Wifi, Award, Heart, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,7 +9,6 @@ import { Star, Gem, Shield } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
-  { label: "Daily", href: "/daily", icon: Target },
   { label: "Play", href: "/play", icon: Swords },
   { label: "Online", href: "/play/online", icon: Wifi },
   { label: "Learn", href: "/learn", icon: GraduationCap },

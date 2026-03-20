@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Chess, Square } from "chess.js";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
@@ -13,10 +14,25 @@ import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Swords, TrendingUp, Trophy, Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Swords, TrendingUp, Trophy, Target, BookOpen } from "lucide-react";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
+
+// Lesson recommendations based on game phase of mistakes
+const PHASE_RECOMMENDATIONS = [
+  { phase: "opening", label: "Opening Fundamentals", desc: "Review key opening principles and common setups", link: "/learn" },
+  { phase: "middlegame", label: "Middlegame Strategy", desc: "Improve your tactical vision and planning", link: "/learn" },
+  { phase: "endgame", label: "Endgame Techniques", desc: "Master essential endgame patterns", link: "/learn" },
+];
+
+function getGamePhase(moveNumber: number, totalMoves: number): string {
+  const ratio = moveNumber / Math.max(totalMoves, 1);
+  if (ratio < 0.3) return "opening";
+  if (ratio < 0.7) return "middlegame";
+  return "endgame";
+}
 
 const Play = () => {
   const { user, profile } = useAuth();
@@ -33,7 +49,10 @@ const Play = () => {
   const [hintsEnabled, setHintsEnabled] = useState(false);
   const [hintSquare, setHintSquare] = useState<Square | null>(null);
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
+  const [resignedBy, setResignedBy] = useState<"w" | "b" | null>(null);
+  const [drawAgreed, setDrawAgreed] = useState(false);
   const gameRef = useRef(new Chess());
+  const positionHistory = useRef<string[]>([]);
 
   const [timeControlIdx, setTimeControlIdx] = useState(6); // unlimited
   const timeControl = TIME_CONTROLS[timeControlIdx];
@@ -43,11 +62,25 @@ const Play = () => {
   const [gameStarted, setGameStarted] = useState(false);
 
   const game = gameRef.current;
-  const isGameOver = game.isGameOver() || !!timeoutWinner;
+  const isGameOver = game.isGameOver() || !!timeoutWinner || !!resignedBy || drawAgreed;
   const aiColor = playerColor === "w" ? "b" : "w";
   const currentLevel = AI_LEVELS.find((l) => l.value === difficulty)!;
 
   const updateState = () => setFen(game.fen());
+
+  // Track positions for threefold repetition
+  const trackPosition = () => {
+    // Use FEN without move counters for position comparison
+    const parts = game.fen().split(" ");
+    const posKey = parts.slice(0, 4).join(" ");
+    positionHistory.current.push(posKey);
+    // Check threefold repetition
+    const count = positionHistory.current.filter(p => p === posKey).length;
+    if (count >= 3) {
+      setDrawAgreed(true);
+      playChessSound("gameOver");
+    }
+  };
 
   const handleTimeOut = useCallback((color: "w" | "b") => {
     setTimeoutWinner(color === "w" ? "Black" : "White");
@@ -84,6 +117,7 @@ const Play = () => {
           setMoveHistory((prev) => [...prev, move.san]);
           setLastMove({ from: move.from, to: move.to });
           setGameStarted(true);
+          trackPosition();
           if (!unlimited && timeControl.increment > 0) {
             if (aiColor === "w") setWhiteTime((p) => p + timeControl.increment);
             else setBlackTime((p) => p + timeControl.increment);
@@ -113,6 +147,7 @@ const Play = () => {
       setMoveHistory((prev) => [...prev, move.san]);
       setLastMove({ from: move.from, to: move.to });
       setGameStarted(true);
+      trackPosition();
       if (!unlimited && timeControl.increment > 0) {
         if (move.color === "w") setWhiteTime((p) => p + timeControl.increment);
         else setBlackTime((p) => p + timeControl.increment);
@@ -139,7 +174,6 @@ const Play = () => {
     setHintSquare(null);
 
     if (selectedSquare && legalMoves.includes(square)) {
-      // Check for promotion
       if (isPromotionMove(selectedSquare, square)) {
         setPendingPromotion({ from: selectedSquare, to: square });
         return;
@@ -158,6 +192,31 @@ const Play = () => {
     }
   };
 
+  const handleResign = () => {
+    if (isGameOver || moveHistory.length === 0) return;
+    if (mode === "ai") {
+      setResignedBy(playerColor);
+    } else {
+      setResignedBy(game.turn());
+    }
+    playChessSound("gameOver");
+  };
+
+  const handleOfferDraw = () => {
+    if (isGameOver || moveHistory.length < 2) return;
+    if (mode === "ai") {
+      // AI accepts draw if position is roughly equal (simplified: accept if move count > 40)
+      if (moveHistory.length > 40) {
+        setDrawAgreed(true);
+        playChessSound("gameOver");
+      }
+    } else {
+      // In local mode, just agree immediately
+      setDrawAgreed(true);
+      playChessSound("gameOver");
+    }
+  };
+
   const resetGame = (newMode?: GameMode) => {
     gameRef.current = new Chess();
     setFen("start");
@@ -170,6 +229,9 @@ const Play = () => {
     setGameStarted(false);
     setHintSquare(null);
     setPendingPromotion(null);
+    setResignedBy(null);
+    setDrawAgreed(false);
+    positionHistory.current = [];
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
     if (newMode) setMode(newMode);
@@ -181,6 +243,9 @@ const Play = () => {
     setBlackTime(TIME_CONTROLS[idx].seconds);
     setTimeoutWinner(null);
     setGameStarted(false);
+    setResignedBy(null);
+    setDrawAgreed(false);
+    positionHistory.current = [];
     gameRef.current = new Chess();
     setFen("start");
     setSelectedSquare(null);
@@ -206,12 +271,16 @@ const Play = () => {
   const boardFlipped = playerColor === "b";
   const isPlayerTurn = mode === "ai" ? game.turn() === playerColor : true;
 
-  const statusText = timeoutWinner
+  const statusText = resignedBy
+    ? `${resignedBy === "w" ? "White" : "Black"} resigned! ${resignedBy === "w" ? "Black" : "White"} wins!`
+    : drawAgreed
+    ? "Draw agreed!"
+    : timeoutWinner
     ? `${timeoutWinner} wins on time!`
     : game.isCheckmate()
     ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
     : game.isDraw() ? "Draw!"
-    : game.isStalemate() ? "Stalemate!"
+    : game.isStalemate() ? "Stalemate — Draw!"
     : game.isCheck()
     ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
     : aiThinking ? "DailyChess_12 is thinking…"
@@ -219,7 +288,10 @@ const Play = () => {
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
 
-  const gameResult = game.isCheckmate()
+  const gameResult = resignedBy
+    ? (resignedBy === "w" ? "0-1" : "1-0")
+    : drawAgreed ? "1/2-1/2"
+    : game.isCheckmate()
     ? (game.turn() === "w" ? "0-1" : "1-0")
     : game.isDraw() || game.isStalemate() ? "1/2-1/2"
     : timeoutWinner === "White" ? "1-0"
@@ -227,6 +299,19 @@ const Play = () => {
     : null;
 
   const pgn = game.pgn();
+
+  // Determine recommended lessons based on where mistakes likely occurred
+  const getRecommendations = () => {
+    if (!isGameOver || !gameResult) return [];
+    const totalMoves = moveHistory.length;
+    if (totalMoves < 4) return [PHASE_RECOMMENDATIONS[0]];
+    // Simple heuristic: recommend based on game length
+    const recs = [];
+    if (totalMoves <= 20) recs.push(PHASE_RECOMMENDATIONS[0]);
+    if (totalMoves > 10 && totalMoves <= 50) recs.push(PHASE_RECOMMENDATIONS[1]);
+    if (totalMoves > 30) recs.push(PHASE_RECOMMENDATIONS[2]);
+    return recs.length > 0 ? recs : [PHASE_RECOMMENDATIONS[1]];
+  };
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
@@ -314,11 +399,42 @@ const Play = () => {
               onTimeControlChange={changeTimeControl}
               onNewGame={() => resetGame()}
               onToggleHints={() => setHintsEnabled(!hintsEnabled)}
+              onResign={handleResign}
+              onOfferDraw={handleOfferDraw}
+              canResign={moveHistory.length > 0}
             />
 
             {/* Post-game analysis */}
             {isGameOver && gameResult && pgn && mode === "ai" && (
               <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />
+            )}
+
+            {/* Play + Learn: Post-game lesson recommendations */}
+            {isGameOver && gameResult && moveHistory.length >= 4 && (
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground">Recommended Lessons</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Based on your game, we recommend these areas:</p>
+                <div className="space-y-2">
+                  {getRecommendations().map((rec) => (
+                    <Link
+                      key={rec.phase}
+                      to={rec.link}
+                      className="flex items-center gap-3 p-2.5 rounded-lg bg-card border border-border/30 hover:border-primary/30 transition-all group"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <BookOpen className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-semibold text-foreground">{rec.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{rec.desc}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
