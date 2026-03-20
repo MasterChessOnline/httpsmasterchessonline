@@ -82,9 +82,10 @@ type SidebarTab = "analysis" | "explorer" | "pgn";
 
 // ── Component ──
 export default function Analysis() {
-  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("analysis");
+  // sidebar is always analysis now
   const [depth, setDepth] = useState(15);
   const [flipped, setFlipped] = useState(false);
+  const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
 
@@ -134,7 +135,7 @@ export default function Analysis() {
 
   // Fetch explorer data when position or db changes
   useEffect(() => {
-    if (sidebarTab !== "explorer") return;
+    if (bottomTab !== "explorer") return;
     let cancelled = false;
     setExplorerLoading(true);
     const fetchFn = explorerDb === "masters" ? fetchMasterExplorerData : fetchExplorerData;
@@ -142,7 +143,7 @@ export default function Analysis() {
       if (!cancelled) { setExplorerData(data); setExplorerLoading(false); }
     });
     return () => { cancelled = true; };
-  }, [currentFen, explorerDb, sidebarTab]);
+  }, [currentFen, explorerDb, bottomTab]);
 
   // ── Interactive logic ──
   const evaluatePosition = useCallback(async (fen: string, fenBefore: string, moveSan: string, moveFrom: string, moveTo: string, color: "w" | "b", moveNum: number) => {
@@ -300,7 +301,7 @@ export default function Analysis() {
     if (!stockfishReady.current) {
       const engine = getStockfishEngine(); await engine.init(); stockfishReady.current = true;
     }
-    setAnalyzing(true); setSidebarTab("analysis");
+    setAnalyzing(true);
     const engine = getStockfishEngine(); engine.newGame();
     const evals: MoveEval[] = [];
     const evalGame = new Chess();
@@ -387,8 +388,7 @@ export default function Analysis() {
   })), [activeEvals]);
   const goFn = pgnComplete ? goToPgnMove : goToLiveMove;
 
-  // ── Bottom panel tab ──
-  const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
+  // bottomTab declared at top of component
 
   // ── Render ──
   return (

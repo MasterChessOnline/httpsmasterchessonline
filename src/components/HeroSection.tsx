@@ -87,9 +87,9 @@ const HeroSection = () => {
           transition={{ duration: 0.6, delay: 1.8 }}
         >
           <Link to={user ? "/play/online" : "/play"}>
-            <Button size="lg" className="btn-glow bg-primary text-primary-foreground hover:bg-primary/90 px-8 text-base font-semibold shadow-glow-lg group animate-glow-pulse">
+            <Button size="lg" className="btn-glow bg-primary text-primary-foreground hover:bg-primary/90 px-10 py-6 text-lg font-bold shadow-glow-lg group animate-glow-pulse">
               Play Now
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </Button>
           </Link>
           <Link to="/learn">
@@ -97,19 +97,25 @@ const HeroSection = () => {
               <BookOpen className="mr-2 h-4 w-4" /> Start Training
             </Button>
           </Link>
+          <Link to="/analysis">
+            <Button size="lg" variant="outline" className="btn-glow border-foreground/20 text-foreground hover:bg-foreground/5 px-8 text-base backdrop-blur-md">
+              <Target className="mr-2 h-4 w-4" /> Analyze Games
+            </Button>
+          </Link>
         </motion.div>
 
         {/* Stats */}
         <motion.div
-          className="mt-20 grid grid-cols-3 gap-8 sm:gap-16"
+          className="mt-20 grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-12"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 2.1 }}
         >
           {[
-            { icon: Zap, label: "Matchmaking", value: "Fast" },
+            { icon: Zap, label: "Fast Matchmaking", value: "Instant" },
             { icon: Trophy, label: "Free Tournaments", value: "Daily" },
-            { icon: Crown, label: "ELO Tracking", value: "Real-time" },
+            { icon: Crown, label: "ELO Rating", value: "Unlimited" },
+            { icon: Target, label: "Game Analysis", value: "Stockfish" },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="text-center group">
               <motion.div
