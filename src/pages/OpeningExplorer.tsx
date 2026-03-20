@@ -296,7 +296,6 @@ export default function OpeningExplorer() {
   }, [history.length]);
 
   const reset = useCallback(() => {
-    setGame(new Chess());
     setHistory([]);
     setViewIndex(0);
     setSelectedSquare(null);
