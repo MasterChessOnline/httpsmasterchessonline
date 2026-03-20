@@ -301,7 +301,7 @@ export default function Analysis() {
     if (!stockfishReady.current) {
       const engine = getStockfishEngine(); await engine.init(); stockfishReady.current = true;
     }
-    setAnalyzing(true); setSidebarTab("analysis");
+    setAnalyzing(true);
     const engine = getStockfishEngine(); engine.newGame();
     const evals: MoveEval[] = [];
     const evalGame = new Chess();
