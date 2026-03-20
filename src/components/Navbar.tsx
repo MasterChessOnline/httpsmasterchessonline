@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
   { label: "Learn", href: "/learn", icon: GraduationCap },
   { label: "Leaderboard", href: "/leaderboard", icon: Award },
+  { label: "Analysis", href: "/analysis", icon: Brain },
 ];
 
 const Navbar = () => {
