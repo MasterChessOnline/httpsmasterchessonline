@@ -856,19 +856,40 @@ export default function Analysis() {
 
             {/* Depth settings for interactive */}
             {mode === "interactive" && (
-              <div className="rounded-xl border border-border/40 bg-card p-3 space-y-2">
-                <button onClick={() => setShowSettings(p => !p)}
-                  className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors w-full">
-                  <Settings2 className="h-3 w-3" /> Analysis Depth: {depth}
-                </button>
-                {showSettings && (
-                  <div className="pt-1">
-                    <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} className="w-full" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground/60 mt-1">
-                      <span>Fast (8)</span><span>Deep (22)</span>
-                    </div>
-                  </div>
-                )}
+              <div className="rounded-xl border border-border/40 bg-card p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-bold text-foreground">Engine Settings</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Analysis Depth: <strong className="text-foreground">{depth}</strong></span>
+                  <span className="text-[10px] text-muted-foreground/60">{depth <= 10 ? "Fast" : depth <= 18 ? "Standard" : "Deep"}</span>
+                </div>
+                <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} className="w-full" />
+                <div className="flex justify-between text-[10px] text-muted-foreground/60">
+                  <span>Fast (8)</span><span>Deep (22)</span>
+                </div>
+              </div>
+            )}
+
+            {/* Current position eval for interactive when no history */}
+            {mode === "interactive" && liveMoveHistory.length === 0 && (
+              <div className="rounded-xl border border-border/40 bg-card p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-bold text-foreground">Position</span>
+                </div>
+                <div className="text-center py-3">
+                  <p className="text-3xl font-bold font-mono text-foreground">
+                    {formatEval(evalCpForBar, evalMateForBar)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Equal starting position</p>
+                </div>
+                <div className="text-center text-muted-foreground text-sm">
+                  <MousePointerClick className="h-5 w-5 mx-auto mb-1.5 text-primary/60" />
+                  Click pieces to make moves.<br/>
+                  <span className="text-xs">Stockfish evaluates each position in real time.</span>
+                </div>
               </div>
             )}
           </div>
