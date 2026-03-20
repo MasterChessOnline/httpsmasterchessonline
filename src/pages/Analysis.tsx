@@ -85,6 +85,7 @@ export default function Analysis() {
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("analysis");
   const [depth, setDepth] = useState(15);
   const [flipped, setFlipped] = useState(false);
+  const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
 
