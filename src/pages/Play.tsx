@@ -72,6 +72,22 @@ const Play = () => {
 
   const updateState = () => setFen(game.fen());
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      switch (e.key.toLowerCase()) {
+        case "r": if (!isGameOver && moveHistory.length > 0) handleResign(); break;
+        case "d": if (!isGameOver && moveHistory.length >= 2) handleOfferDraw(); break;
+        case "f": setStreamerMode(prev => !prev); break;
+        case "n": resetGame(); break;
+        case "?": setShowShortcuts(prev => !prev); break;
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isGameOver, moveHistory.length]);
+
   // Track positions for threefold repetition
   const trackPosition = () => {
     // Use FEN without move counters for position comparison
