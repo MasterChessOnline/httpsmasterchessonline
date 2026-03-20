@@ -388,8 +388,7 @@ export default function Analysis() {
   })), [activeEvals]);
   const goFn = pgnComplete ? goToPgnMove : goToLiveMove;
 
-  // ── Bottom panel tab ──
-  const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
+  // bottomTab declared at top of component
 
   // ── Render ──
   return (
