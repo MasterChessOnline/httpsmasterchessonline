@@ -76,7 +76,7 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.5 }}
         >
-          Free online games, lessons, and premium content.
+          Free online games, lessons, and training.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -90,11 +90,6 @@ const HeroSection = () => {
             <Button size="lg" className="btn-glow bg-primary text-primary-foreground hover:bg-primary/90 px-8 text-base font-semibold shadow-glow-lg group animate-glow-pulse">
               Play Now
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-            </Button>
-          </Link>
-          <Link to="/daily">
-            <Button size="lg" variant="outline" className="btn-glow border-foreground/20 text-foreground hover:bg-foreground/5 px-8 text-base backdrop-blur-md">
-              <Target className="mr-2 h-4 w-4" /> Solve Puzzles
             </Button>
           </Link>
           <Link to="/learn">
@@ -112,7 +107,7 @@ const HeroSection = () => {
           transition={{ duration: 0.6, delay: 2.1 }}
         >
           {[
-            { icon: Users, label: "Active Players", value: "2.4M+" },
+            { icon: Zap, label: "Matchmaking", value: "Fast" },
             { icon: Trophy, label: "Free Tournaments", value: "Daily" },
             { icon: Crown, label: "ELO Tracking", value: "Real-time" },
           ].map(({ icon: Icon, label, value }) => (

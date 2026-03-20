@@ -30,10 +30,6 @@ const LEVEL_CONFIG = {
   Advanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Award, label: "Advanced" },
 };
 
-const TIER_CONFIG = {
-  free: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", label: "Free" },
-  premium: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", label: "Premium" },
-};
 
 /* ──── YouTube Embed ──── */
 function YouTubeEmbed({ videoUrl, title }: { videoUrl: string; title: string }) {
@@ -114,7 +110,7 @@ function BookmarkedPanel({ bookmarks, onGoToLesson }: {
 }
 
 /* ──── AI Feedback Panel ──── */
-function AIFeedbackPanel({ lesson, isPremium }: { lesson: Lesson; isPremium: boolean }) {
+function AIFeedbackPanel({ lesson }: { lesson: Lesson }) {
   const [expanded, setExpanded] = useState(false);
 
   const feedback = useMemo(() => {
@@ -126,29 +122,6 @@ function AIFeedbackPanel({ lesson, isPremium }: { lesson: Lesson; isPremium: boo
     const suggestedMoves = lesson.practiceLine?.moves?.slice(0, 2).map(m => m.move) || ["e4", "d4"];
     return { tips, suggestedMoves };
   }, [lesson]);
-
-  if (!isPremium) {
-    return (
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 mb-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/10 pointer-events-none" />
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <h4 className="font-display text-sm font-semibold text-foreground">AI Feedback Preview</h4>
-          <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] ml-auto">
-            <Crown className="w-2.5 h-2.5 mr-0.5" /> Premium
-          </Badge>
-        </div>
-        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{feedback.tips[0]}</p>
-        <div className="blur-sm select-none pointer-events-none">
-          <p className="text-xs text-muted-foreground">{feedback.tips[1]}</p>
-          <p className="text-xs text-muted-foreground mt-1">Suggested: {feedback.suggestedMoves.join(", ")}</p>
-        </div>
-        <Button size="sm" className="mt-3 relative z-10" onClick={() => window.location.href = "/premium"}>
-          <Crown className="w-3.5 h-3.5 mr-1.5" /> Unlock Full AI Feedback
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="rounded-xl border border-border/50 bg-card p-5 mb-6">
@@ -192,29 +165,22 @@ const LESSON_VIDEOS: Record<string, string> = {
 };
 
 /* ──── Course Card ──── */
-function CourseCard({ course, onClick, progress, accessible }: {
+function CourseCard({ course, onClick, progress }: {
   course: Course;
   onClick: () => void;
   progress: { completed: number; total: number; percent: number };
-  accessible: boolean;
 }) {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
-  const tierCfg = TIER_CONFIG[course.tier];
-  const navigate = useNavigate();
 
   return (
     <article
-      onClick={() => accessible ? onClick() : navigate("/premium")}
-      className={`group relative rounded-xl border bg-card overflow-hidden transition-all cursor-pointer hover:shadow-glow ${
-        accessible ? "border-border/50 hover:border-primary/40" : "border-border/30 opacity-75"
-      }`}
+      onClick={onClick}
+      className="group relative rounded-xl border border-border/50 hover:border-primary/40 bg-card overflow-hidden transition-all cursor-pointer hover:shadow-glow"
     >
-      {/* Top accent bar */}
-      <div className={`h-1 w-full ${course.tier === "free" ? "bg-green-500/50" : "bg-primary/50"}`} />
+      <div className="h-1 w-full bg-primary/50" />
 
       <div className="p-5">
-        {/* Header row */}
         <div className="flex items-start gap-3 mb-3">
           <div className={`rounded-lg ${lvl.bg} p-2.5 shrink-0`}>
             <Icon className={`h-5 w-5 ${lvl.color}`} />
@@ -224,21 +190,13 @@ function CourseCard({ course, onClick, progress, accessible }: {
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
-              <span className={`text-[10px] font-semibold uppercase tracking-wider ${tierCfg.color}`}>{tierCfg.label}</span>
-              <span className="text-[10px] text-muted-foreground">·</span>
               <span className="text-[10px] text-muted-foreground">{course.lessons.length} chapters</span>
             </div>
           </div>
-          {!accessible && (
-            <Badge className={`text-[10px] ${tierCfg.bg} ${tierCfg.color} ${tierCfg.border} shrink-0`}>
-              <Lock className="w-2.5 h-2.5 mr-0.5" /> Premium
-            </Badge>
-          )}
         </div>
 
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-4">{course.description}</p>
 
-        {/* Progress */}
         <div className="space-y-1.5">
           <div className="flex justify-between text-[10px]">
             <span className="text-muted-foreground">{progress.completed} of {progress.total} chapters</span>
@@ -247,16 +205,11 @@ function CourseCard({ course, onClick, progress, accessible }: {
           <Progress value={progress.percent} className="h-1.5" />
         </div>
 
-        {/* CTA */}
-        <Button className="mt-4 w-full" size="sm" variant={accessible ? "default" : "outline"}>
-          {accessible ? (
-            progress.completed > 0 ? (
-              <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
-            ) : (
-              <>Start Course <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
-            )
+        <Button className="mt-4 w-full" size="sm">
+          {progress.completed > 0 ? (
+            <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           ) : (
-            <><Lock className="mr-1 h-3 w-3" /> Unlock with Premium</>
+            <>Start Course <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           )}
         </Button>
       </div>
@@ -269,10 +222,7 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   onSelectCourse: (course: Course) => void;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const isPremium = true;
-  const navigate = useNavigate();
   const [levelFilter, setLevelFilter] = useState<string>("all");
-  const [tierFilter, setTierFilter] = useState<string>("all");
 
   const levels = [
     { key: "all", label: "All Levels", icon: BookOpen },
@@ -281,73 +231,36 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
     { key: "Advanced", label: "Advanced", icon: Award },
   ];
 
-  const tiers = [
-    { key: "all", label: "All", icon: BookOpen },
-    { key: "free", label: "Free", icon: Shield },
-    { key: "premium", label: "Premium", icon: Crown },
-  ];
-
   const filtered = COURSES.filter((c) => {
     if (levelFilter !== "all" && c.level !== levelFilter) return false;
-    if (tierFilter !== "all" && c.tier !== tierFilter) return false;
     return true;
   });
 
-  const canAccessCourse = (course: Course) => {
-    if (course.tier === "free") return true;
-    return isPremium;
-  };
-
   return (
     <>
-      {/* Tier badge */}
+      {/* All Free badge */}
       <div className="flex justify-center mb-6">
-        {!isPremium && (
-          <Badge className="bg-muted text-muted-foreground border-border text-xs px-3 py-1">
-            <Shield className="w-3 h-3 mr-1.5" /> Free Plan — Free courses + 2 preview chapters per premium course
-          </Badge>
-        )}
-        {isPremium && (
-          <Badge className="bg-primary/20 text-primary border-primary/30 text-xs px-3 py-1">
-            <Crown className="w-3 h-3 mr-1.5" /> Premium — All courses unlocked
-          </Badge>
-        )}
+        <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs px-3 py-1">
+          <Shield className="w-3 h-3 mr-1.5" /> All courses are 100% free
+        </Badge>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col items-center gap-3 mb-8">
-        <div className="flex justify-center gap-2 flex-wrap">
-          {levels.map(({ key, label, icon: LvlIcon }) => (
-            <button
-              key={key}
-              onClick={() => setLevelFilter(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
-                levelFilter === key
-                  ? "border-primary bg-primary/10 text-primary shadow-glow"
-                  : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-              }`}
-            >
-              <LvlIcon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="flex justify-center gap-2 flex-wrap">
-          {tiers.map(({ key, label, icon: TierIcon }) => (
-            <button
-              key={key}
-              onClick={() => setTierFilter(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all border ${
-                tierFilter === key
-                  ? key === "free" ? "border-green-500 bg-green-500/10 text-green-400 shadow-glow" : key === "premium" ? "border-primary bg-primary/10 text-primary shadow-glow" : "border-primary bg-primary/10 text-primary shadow-glow"
-                  : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-              }`}
-            >
-              <TierIcon className="w-3 h-3" />
-              {label}
-            </button>
-          ))}
-        </div>
+      {/* Level filter */}
+      <div className="flex justify-center gap-2 flex-wrap mb-8">
+        {levels.map(({ key, label, icon: LvlIcon }) => (
+          <button
+            key={key}
+            onClick={() => setLevelFilter(key)}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
+              levelFilter === key
+                ? "border-primary bg-primary/10 text-primary shadow-glow"
+                : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+            }`}
+          >
+            <LvlIcon className="w-3.5 h-3.5" />
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Course grid */}
@@ -358,24 +271,9 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
             course={course}
             onClick={() => onSelectCourse(course)}
             progress={getCourseProgress(course.id, course.lessons.length)}
-            accessible={canAccessCourse(course)}
           />
         ))}
       </div>
-
-      {/* Upsell */}
-      {!isPremium && (
-        <div className="mt-12 max-w-lg mx-auto rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-8 text-center">
-          <Crown className="w-10 h-10 text-primary mx-auto mb-4" />
-          <h3 className="font-display text-xl font-bold text-foreground mb-2">Unlock Premium Learning</h3>
-          <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto">
-            Get unlimited course access, AI feedback from DailyChess_12, exclusive video lessons, and personalized training plans.
-          </p>
-          <Button onClick={() => navigate("/premium")} size="lg">
-            View Plans — from $4.99/mo
-          </Button>
-        </div>
-      )}
     </>
   );
 }
@@ -389,25 +287,14 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   isBookmarked: (id: string) => boolean;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const isPremium = true;
-  const navigate = useNavigate();
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const prog = getCourseProgress(course.id, course.lessons.length);
 
-  const canAccessCourse = (() => {
-    if (course.tier === "free") return true;
-    return isPremium;
-  })();
-
-  const maxFreeLessons = canAccessCourse ? course.lessons.length : 2;
-
   const getLessonStatus = (idx: number) => {
     const completed = isCompleted(course.lessons[idx].id);
-    const premiumLocked = idx >= maxFreeLessons;
     const sequentialLocked = idx > 0 && !isCompleted(course.lessons[idx - 1].id) && !completed;
-    const locked = premiumLocked || (sequentialLocked && !premiumLocked);
-    return { completed, premiumLocked, sequentialLocked: locked && !premiumLocked, locked: premiumLocked || locked };
+    return { completed, premiumLocked: false, sequentialLocked, locked: sequentialLocked };
   };
 
   const hasVideo = (id: string) => !!LESSON_VIDEOS[id];
@@ -445,11 +332,6 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" /> ~{Math.ceil(course.lessons.length * 5)} min
                 </span>
-                {!canAccessCourse && (
-                  <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">
-                    <Lock className="w-2.5 h-2.5 mr-0.5" /> {maxFreeLessons} free previews
-                  </Badge>
-                )}
               </div>
             </div>
           </div>
@@ -466,7 +348,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
           </div>
 
           {/* Quick action */}
-          {!allCompleted && canAccessCourse && nextLessonIdx >= 0 && (
+          {!allCompleted && nextLessonIdx >= 0 && (
             <Button
               className="mt-5"
               onClick={() => onSelectLesson(nextLessonIdx)}
@@ -501,8 +383,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
             <button
               key={lesson.id}
               onClick={() => {
-                if (status.premiumLocked) navigate("/premium");
-                else if (status.sequentialLocked) toast({ title: "Complete previous chapter first", description: `Finish "${course.lessons[idx - 1].title}" to unlock this chapter.` });
+                if (status.sequentialLocked) toast({ title: "Complete previous chapter first", description: `Finish "${course.lessons[idx - 1].title}" to unlock this chapter.` });
                 else onSelectLesson(idx);
               }}
               className={`w-full flex items-center gap-3 sm:gap-4 rounded-xl border p-4 transition-all text-left group ${
@@ -521,9 +402,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
                   ? "bg-green-500/20 text-green-400"
                   : isNext
                     ? "bg-primary/20 text-primary ring-2 ring-primary/30"
-                    : status.premiumLocked
-                      ? "bg-muted/50 text-muted-foreground/50"
-                      : status.sequentialLocked
+                    : status.sequentialLocked
                         ? "bg-muted/30 text-muted-foreground/30"
                         : "bg-primary/10 text-primary"
               }`}>
@@ -569,13 +448,8 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
                 </div>
               </div>
 
-              {/* Right side */}
               <div className="shrink-0">
-                {status.premiumLocked ? (
-                  <Badge className="bg-primary/15 text-primary border-primary/25 text-[10px]">
-                    <Crown className="w-2.5 h-2.5 mr-0.5" /> Premium
-                  </Badge>
-                ) : status.sequentialLocked ? (
+                {status.sequentialLocked ? (
                   <span className="text-[10px] text-muted-foreground/40">Locked</span>
                 ) : (
                   <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -586,17 +460,6 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
         })}
       </div>
 
-      {!canAccessCourse && (
-        <div className="mt-8 text-center rounded-xl border border-primary/30 bg-primary/5 p-6">
-          <Crown className="w-8 h-8 text-primary mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground mb-3">
-            Enjoying the preview? Unlock all {course.lessons.length} chapters.
-          </p>
-          <Button onClick={() => navigate("/premium")}>
-            <Crown className="w-4 h-4 mr-2" /> Unlock Full Course
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
@@ -613,7 +476,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
   onMarkComplete: (courseId: string, lessonId: string) => void;
   onToggleBookmark: (courseId: string, lessonId: string) => void;
 }) {
-  const isPremium = true;
+  
   const [showVideo, setShowVideo] = useState(false);
   const lesson = course.lessons[lessonIdx];
   const totalLessons = course.lessons.length;
@@ -735,7 +598,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
       )}
 
       {/* AI Feedback */}
-      <AIFeedbackPanel lesson={lesson} isPremium={isPremium} />
+      <AIFeedbackPanel lesson={lesson} />
 
       {/* Mark as Complete + Navigation */}
       <div className="space-y-3 mt-8">

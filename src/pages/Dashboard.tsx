@@ -134,17 +134,24 @@ const Dashboard = () => {
               </h1>
               <p className="text-muted-foreground mt-1">Here's your chess journey at a glance.</p>
             </div>
-            <div className="flex gap-2">
-              <Link to="/play/online">
+            <div className="flex gap-2 flex-wrap">
+              <Link to="/play">
                 <Button size="sm">
                   <Swords className="mr-2 h-4 w-4" /> Play Now
                 </Button>
               </Link>
               <Link to="/learn">
                 <Button size="sm" variant="outline">
-                  <BookOpen className="mr-2 h-4 w-4" /> Learn
+                  <BookOpen className="mr-2 h-4 w-4" /> Continue Training
                 </Button>
               </Link>
+              {recentGames.length > 0 && (
+                <Link to="/play">
+                  <Button size="sm" variant="outline">
+                    <Zap className="mr-2 h-4 w-4" /> Play Again
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
 

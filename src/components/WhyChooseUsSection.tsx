@@ -11,7 +11,7 @@ const reasons = [
   {
     icon: Sparkles,
     title: "Cleaner Than Lichess",
-    description: "Modern, premium design with intuitive navigation. No clutter, just chess.",
+    description: "Modern, clean design with intuitive navigation. No clutter, just chess.",
   },
   {
     icon: Smartphone,

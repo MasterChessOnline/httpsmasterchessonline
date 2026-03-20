@@ -31,7 +31,7 @@ export const VIDEO_LESSONS: VideoLesson[] = [
     thumbnail: "https://images.unsplash.com/photo-1560174038-da43ac74f01b?w=400&h=225&fit=crop",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     difficulty: "intermediate",
-    premium: true,
+    premium: false,
   },
   {
     id: "v3",
@@ -53,7 +53,7 @@ export const VIDEO_LESSONS: VideoLesson[] = [
     thumbnail: "https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=400&h=225&fit=crop",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     difficulty: "advanced",
-    premium: true,
+    premium: false,
   },
   {
     id: "v5",
@@ -75,7 +75,7 @@ export const VIDEO_LESSONS: VideoLesson[] = [
     thumbnail: "https://images.unsplash.com/photo-1611195974226-a6a9be4a5c53?w=400&h=225&fit=crop",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     difficulty: "advanced",
-    premium: true,
+    premium: false,
   },
   {
     id: "v7",
@@ -86,7 +86,7 @@ export const VIDEO_LESSONS: VideoLesson[] = [
     thumbnail: "https://images.unsplash.com/photo-1604948501466-4e9c339b9c24?w=400&h=225&fit=crop",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     difficulty: "intermediate",
-    premium: true,
+    premium: false,
   },
   {
     id: "v8",
@@ -97,7 +97,7 @@ export const VIDEO_LESSONS: VideoLesson[] = [
     thumbnail: "https://images.unsplash.com/photo-1538340141413-b93b456a023f?w=400&h=225&fit=crop",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     difficulty: "advanced",
-    premium: true,
+    premium: false,
   },
   {
     id: "v9",
@@ -108,6 +108,6 @@ export const VIDEO_LESSONS: VideoLesson[] = [
     thumbnail: "https://images.unsplash.com/photo-1495548054858-0e78bb53e694?w=400&h=225&fit=crop",
     videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     difficulty: "intermediate",
-    premium: true,
+    premium: false,
   },
 ];

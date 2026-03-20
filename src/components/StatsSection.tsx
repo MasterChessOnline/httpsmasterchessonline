@@ -4,10 +4,10 @@ import ScrollReveal from "@/components/ScrollReveal";
 import AnimatedCounter from "@/components/AnimatedCounter";
 
 const stats = [
-  { icon: Users, label: "Players Online", value: "2.4K+" },
-  { icon: Gamepad2, label: "Games Played", value: "150K+" },
-  { icon: Brain, label: "Puzzles Solved", value: "80K+" },
-  { icon: TrendingUp, label: "Avg. Rating Gain", value: "+120" },
+  { icon: Users, label: "Real-time Play", value: "Live" },
+  { icon: Gamepad2, label: "Fast Matchmaking", value: "Instant" },
+  { icon: Brain, label: "Free Courses", value: "25+" },
+  { icon: TrendingUp, label: "No Ads", value: "100%" },
 ];
 
 const StatsSection = () => {
