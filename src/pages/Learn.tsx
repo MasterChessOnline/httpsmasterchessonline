@@ -114,7 +114,7 @@ function BookmarkedPanel({ bookmarks, onGoToLesson }: {
 }
 
 /* ──── AI Feedback Panel ──── */
-function AIFeedbackPanel({ lesson, isPremium }: { lesson: Lesson; isPremium: boolean }) {
+function AIFeedbackPanel({ lesson }: { lesson: Lesson }) {
   const [expanded, setExpanded] = useState(false);
 
   const feedback = useMemo(() => {
@@ -126,29 +126,6 @@ function AIFeedbackPanel({ lesson, isPremium }: { lesson: Lesson; isPremium: boo
     const suggestedMoves = lesson.practiceLine?.moves?.slice(0, 2).map(m => m.move) || ["e4", "d4"];
     return { tips, suggestedMoves };
   }, [lesson]);
-
-  if (!isPremium) {
-    return (
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 mb-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/10 pointer-events-none" />
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <h4 className="font-display text-sm font-semibold text-foreground">AI Feedback Preview</h4>
-          <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] ml-auto">
-            <Crown className="w-2.5 h-2.5 mr-0.5" /> Premium
-          </Badge>
-        </div>
-        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{feedback.tips[0]}</p>
-        <div className="blur-sm select-none pointer-events-none">
-          <p className="text-xs text-muted-foreground">{feedback.tips[1]}</p>
-          <p className="text-xs text-muted-foreground mt-1">Suggested: {feedback.suggestedMoves.join(", ")}</p>
-        </div>
-        <Button size="sm" className="mt-3 relative z-10" onClick={() => window.location.href = "/premium"}>
-          <Crown className="w-3.5 h-3.5 mr-1.5" /> Unlock Full AI Feedback
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="rounded-xl border border-border/50 bg-card p-5 mb-6">
