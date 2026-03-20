@@ -10,6 +10,7 @@ import { TOTAL_CHAPTERS } from "@/lib/story-data";
 import { COURSES } from "@/lib/courses-data";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import DailyChallenges from "@/components/DailyChallenges";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {

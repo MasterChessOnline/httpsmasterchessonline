@@ -500,37 +500,19 @@ const Play = () => {
               canResign={moveHistory.length > 0}
             />
 
+            {/* Game Summary Report */}
+            {isGameOver && gameResult && moveHistory.length >= 4 && (
+              <GameSummary
+                moveHistory={moveHistory}
+                result={gameResult}
+                playerColor={playerColor}
+                difficulty={difficulty}
+              />
+            )}
+
             {/* Post-game analysis */}
             {isGameOver && gameResult && pgn && mode === "ai" && (
               <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />
-            )}
-
-            {/* Play + Learn: Post-game lesson recommendations */}
-            {isGameOver && gameResult && moveHistory.length >= 4 && (
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">Recommended Lessons</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Based on your game, we recommend these areas:</p>
-                <div className="space-y-2">
-                  {getRecommendations().map((rec) => (
-                    <Link
-                      key={rec.phase}
-                      to={rec.link}
-                      className="flex items-center gap-3 p-2.5 rounded-lg bg-card border border-border/30 hover:border-primary/30 transition-all group"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <BookOpen className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-foreground">{rec.label}</p>
-                        <p className="text-[10px] text-muted-foreground">{rec.desc}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
             )}
           </div>
         </div>
