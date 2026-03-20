@@ -229,9 +229,14 @@ const Dashboard = () => {
 
               {/* Recent games */}
               <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Swords className="h-5 w-5 text-primary" /> Recent Games
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
+                    <Swords className="h-5 w-5 text-primary" /> Recent Games
+                  </h2>
+                  {recentGames.length > 0 && (
+                    <Link to="/history" className="text-xs text-primary hover:underline">View All →</Link>
+                  )}
+                </div>
                 {recentGames.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-6">
                     No games yet.{" "}
@@ -246,7 +251,7 @@ const Dashboard = () => {
                       return (
                         <div key={g.id} className="flex items-center justify-between rounded-lg border border-border/30 bg-muted/20 px-4 py-2.5">
                           <div className="flex items-center gap-3">
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${won ? "bg-accent/20 text-accent-foreground" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${won ? "bg-green-500/15 text-green-400" : drew ? "bg-muted text-muted-foreground" : "bg-red-500/15 text-red-400"}`}>
                               {won ? "WIN" : drew ? "DRAW" : "LOSS"}
                             </span>
                             <span className="text-sm text-foreground">{isWhite ? "White" : "Black"} · {g.time_control_label}</span>
