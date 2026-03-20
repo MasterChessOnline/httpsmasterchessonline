@@ -291,6 +291,10 @@ const Play = () => {
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
     if (newMode) setMode(newMode);
+    // Reset Stockfish for new game
+    if (stockfishReady.current) {
+      getStockfishEngine().newGame();
+    }
   };
 
   const changeTimeControl = (idx: number) => {
