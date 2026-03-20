@@ -33,6 +33,7 @@ import Lessons from "./pages/Lessons";
 import TournamentLobby from "./pages/TournamentLobby";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
+import OpeningExplorer from "./pages/OpeningExplorer";
 import GameHistory from "./pages/GameHistory";
 import Analysis from "./pages/Analysis";
 
@@ -66,6 +67,7 @@ function AnimatedRoutes() {
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/story" element={<StoryMode />} />
           <Route path="/openings" element={<OpeningTrainer />} />
+          <Route path="/opening-explorer" element={<OpeningExplorer />} />
           <Route path="/history" element={<GameHistory />} />
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/contact" element={<Contact />} />
