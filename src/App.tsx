@@ -33,6 +33,7 @@ import Lessons from "./pages/Lessons";
 import TournamentLobby from "./pages/TournamentLobby";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
+import OpeningExplorer from "./pages/OpeningExplorer";
 import GameHistory from "./pages/GameHistory";
 import Analysis from "./pages/Analysis";
 
