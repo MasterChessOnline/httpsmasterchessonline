@@ -291,25 +291,14 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   isBookmarked: (id: string) => boolean;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const isPremium = true;
-  const navigate = useNavigate();
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const prog = getCourseProgress(course.id, course.lessons.length);
 
-  const canAccessCourse = (() => {
-    if (course.tier === "free") return true;
-    return isPremium;
-  })();
-
-  const maxFreeLessons = canAccessCourse ? course.lessons.length : 2;
-
   const getLessonStatus = (idx: number) => {
     const completed = isCompleted(course.lessons[idx].id);
-    const premiumLocked = idx >= maxFreeLessons;
     const sequentialLocked = idx > 0 && !isCompleted(course.lessons[idx - 1].id) && !completed;
-    const locked = premiumLocked || (sequentialLocked && !premiumLocked);
-    return { completed, premiumLocked, sequentialLocked: locked && !premiumLocked, locked: premiumLocked || locked };
+    return { completed, premiumLocked: false, sequentialLocked, locked: sequentialLocked };
   };
 
   const hasVideo = (id: string) => !!LESSON_VIDEOS[id];
