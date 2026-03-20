@@ -465,17 +465,6 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
         })}
       </div>
 
-      {!canAccessCourse && (
-        <div className="mt-8 text-center rounded-xl border border-primary/30 bg-primary/5 p-6">
-          <Crown className="w-8 h-8 text-primary mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground mb-3">
-            Enjoying the preview? Unlock all {course.lessons.length} chapters.
-          </p>
-          <Button onClick={() => navigate("/premium")}>
-            <Crown className="w-4 h-4 mr-2" /> Unlock Full Course
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
