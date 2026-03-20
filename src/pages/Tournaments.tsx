@@ -12,7 +12,7 @@ import {
   TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search, Flame,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { hasAccess } from "@/lib/premium-tiers";
+
 import { toast } from "@/hooks/use-toast";
 import { useStreak } from "@/hooks/use-streak";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
