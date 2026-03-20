@@ -92,11 +92,6 @@ const HeroSection = () => {
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </Button>
           </Link>
-          <Link to="/daily">
-            <Button size="lg" variant="outline" className="btn-glow border-foreground/20 text-foreground hover:bg-foreground/5 px-8 text-base backdrop-blur-md">
-              <Target className="mr-2 h-4 w-4" /> Solve Puzzles
-            </Button>
-          </Link>
           <Link to="/learn">
             <Button size="lg" variant="outline" className="btn-glow border-foreground/20 text-foreground hover:bg-foreground/5 px-8 text-base backdrop-blur-md">
               <BookOpen className="mr-2 h-4 w-4" /> Start Training
