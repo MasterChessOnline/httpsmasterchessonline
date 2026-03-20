@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { Trophy, Medal, User, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Badge } from "@/components/ui/badge";
+
 
 import { motion } from "framer-motion";
 
