@@ -314,15 +314,56 @@ const Play = () => {
     return recs.length > 0 ? recs : [PHASE_RECOMMENDATIONS[1]];
   };
 
+  if (streamerMode) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center relative">
+        <button
+          onClick={() => setStreamerMode(false)}
+          className="absolute top-4 right-4 z-20 px-3 py-1.5 rounded-lg bg-card/80 border border-border/50 text-xs text-muted-foreground hover:text-foreground transition-colors backdrop-blur-sm"
+        >
+          <MonitorOff className="w-3.5 h-3.5 inline mr-1.5" /> Exit Streamer Mode
+        </button>
+        <div className="w-full max-w-[min(90vw,600px)]">
+          <ChessBoard
+            game={game}
+            flipped={boardFlipped}
+            selectedSquare={selectedSquare}
+            legalMoves={legalMoves}
+            lastMove={lastMove}
+            isGameOver={isGameOver}
+            isPlayerTurn={isPlayerTurn}
+            hintSquare={null}
+            onSquareClick={handleSquareClick}
+          />
+        </div>
+        <p className="mt-4 text-sm text-muted-foreground font-mono">{statusText}</p>
+        <PromotionDialog
+          isOpen={!!pendingPromotion}
+          color={game.turn()}
+          onSelect={handlePromotionSelect}
+          onCancel={() => setPendingPromotion(null)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
       <Navbar />
       <main className="container mx-auto px-4 pt-24 pb-16">
         {/* Header */}
         <div className="text-center mb-6">
-          <Badge className="bg-primary/20 text-primary border-primary/30 mb-3 text-xs">
-            <Swords className="w-3 h-3 mr-1" /> Play Chess
-          </Badge>
+          <div className="flex justify-center gap-2 mb-3">
+            <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
+              <Swords className="w-3 h-3 mr-1" /> Play Chess
+            </Badge>
+            <button
+              onClick={() => setStreamerMode(true)}
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+            >
+              <Monitor className="w-3 h-3" /> Streamer Mode
+            </button>
+          </div>
           <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
             {mode === "ai" ? (
               <>
