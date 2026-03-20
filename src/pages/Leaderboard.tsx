@@ -145,26 +145,12 @@ const Leaderboard = () => {
         </h1>
         <p className="text-center text-muted-foreground mb-6">See who's on top</p>
 
-        {/* Tabs */}
-        <div className="flex justify-center gap-2 mb-8 flex-wrap">
-          {[
-            { key: "elo" as const, label: "ELO Ratings", icon: TrendingUp },
-            { key: "premium" as const, label: "VIP Board", icon: Gem },
-          ].map(t => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all border ${
-                tab === t.key
-                  ? "border-primary bg-primary/10 text-primary shadow-glow"
-                  : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"
-              }`}
-            >
-              <t.icon className="h-3.5 w-3.5" />
-              {t.label}
-              {t.key === "premium" && <Crown className="h-3 w-3 text-purple-400" />}
-            </button>
-          ))}
+        {/* Tab Header */}
+        <div className="flex justify-center gap-2 mb-8">
+          <div className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium border border-primary bg-primary/10 text-primary shadow-glow">
+            <TrendingUp className="h-3.5 w-3.5" />
+            ELO Ratings
+          </div>
         </div>
 
         <div className="max-w-2xl mx-auto">
