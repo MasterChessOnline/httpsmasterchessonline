@@ -521,30 +521,36 @@ export default function Analysis() {
           {/* ── Left Column: Board + Graph ── */}
           <div className="space-y-4">
             {/* Board + Eval Bar */}
-            <div className="flex gap-2 items-stretch">
-              {/* Vertical Eval Bar */}
-              <div className="w-8 shrink-0">
-                <div className="w-full h-full rounded-lg overflow-hidden border border-border/40 relative bg-[hsl(220,15%,18%)] min-h-[320px]">
-                  <motion.div
-                    className="absolute top-0 left-0 right-0 bg-foreground/90"
-                    initial={{ height: "50%" }}
-                    animate={{ height: `${100 - evalPercent}%` }}
-                    transition={{ type: "spring", stiffness: 180, damping: 22 }}
-                  />
-                  <div className="absolute inset-0 flex flex-col items-center justify-between py-1.5 pointer-events-none">
-                    <span className={`text-[10px] font-bold font-mono z-10 ${evalPercent < 50 ? "text-background" : "text-foreground/60"}`}>
-                      {evalCpForBar >= 0 ? formatEval(evalCpForBar, evalMateForBar && evalMateForBar > 0 ? evalMateForBar : null) : ""}
-                    </span>
-                    <span className={`text-[10px] font-bold font-mono z-10 ${evalPercent >= 50 ? "text-foreground" : "text-foreground/60"}`}>
-                      {evalCpForBar < 0 ? formatEval(Math.abs(evalCpForBar), evalMateForBar && evalMateForBar < 0 ? Math.abs(evalMateForBar) : null) : ""}
-                    </span>
-                  </div>
-                  {liveEvaluating && mode === "interactive" && (
-                    <div className="absolute inset-0 flex items-center justify-center z-20">
-                      <Loader2 className="h-3.5 w-3.5 text-primary animate-spin" />
-                    </div>
-                  )}
+            <div className="flex gap-3 items-stretch">
+              {/* Vertical Eval Bar - Chess.com style */}
+              <div className="w-8 shrink-0 rounded-lg overflow-hidden border border-border relative flex flex-col" style={{ minHeight: 400 }}>
+                {/* Black (dark) portion - top */}
+                <motion.div
+                  className="bg-foreground"
+                  initial={{ flexBasis: "50%" }}
+                  animate={{ flexBasis: `${100 - evalPercent}%` }}
+                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                  style={{ flexShrink: 0 }}
+                />
+                {/* White (light) portion - bottom */}
+                <motion.div
+                  className="bg-white"
+                  initial={{ flexBasis: "50%" }}
+                  animate={{ flexBasis: `${evalPercent}%` }}
+                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                  style={{ flexShrink: 0 }}
+                />
+                {/* Eval label */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="text-[10px] font-bold font-mono bg-card/90 text-foreground px-1 py-0.5 rounded shadow-sm">
+                    {formatEval(evalCpForBar, evalMateForBar)}
+                  </span>
                 </div>
+                {liveEvaluating && mode === "interactive" && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20 bg-card/30">
+                    <Loader2 className="h-3.5 w-3.5 text-primary animate-spin" />
+                  </div>
+                )}
               </div>
 
               <div className="flex-1">
@@ -556,7 +562,7 @@ export default function Analysis() {
                   lastMove={lastMoveDisplay}
                   isGameOver={false}
                   isPlayerTurn={mode === "interactive" && liveViewIdx < 0}
-                  onSquareClick={mode === "interactive" ? handleInteractiveSquareClick : (mode === "pgn" ? () => {} : () => {})}
+                  onSquareClick={mode === "interactive" ? handleInteractiveSquareClick : () => {}}
                 />
               </div>
             </div>
@@ -682,13 +688,6 @@ export default function Analysis() {
               )}
             </AnimatePresence>
 
-            {/* Live eval for interactive (when no moves yet or current position) */}
-            {mode === "interactive" && liveMoveHistory.length === 0 && !liveEvaluating && (
-              <div className="rounded-xl border border-border/40 bg-card p-4 text-center text-muted-foreground text-sm">
-                <MousePointerClick className="h-6 w-6 mx-auto mb-2 text-primary/60" />
-                <p>Click pieces to make moves — Stockfish will evaluate each position automatically</p>
-              </div>
-            )}
           </div>
 
           {/* ── Right Column ── */}
@@ -850,19 +849,40 @@ export default function Analysis() {
 
             {/* Depth settings for interactive */}
             {mode === "interactive" && (
-              <div className="rounded-xl border border-border/40 bg-card p-3 space-y-2">
-                <button onClick={() => setShowSettings(p => !p)}
-                  className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors w-full">
-                  <Settings2 className="h-3 w-3" /> Analysis Depth: {depth}
-                </button>
-                {showSettings && (
-                  <div className="pt-1">
-                    <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} className="w-full" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground/60 mt-1">
-                      <span>Fast (8)</span><span>Deep (22)</span>
-                    </div>
-                  </div>
-                )}
+              <div className="rounded-xl border border-border/40 bg-card p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-bold text-foreground">Engine Settings</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Analysis Depth: <strong className="text-foreground">{depth}</strong></span>
+                  <span className="text-[10px] text-muted-foreground/60">{depth <= 10 ? "Fast" : depth <= 18 ? "Standard" : "Deep"}</span>
+                </div>
+                <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} className="w-full" />
+                <div className="flex justify-between text-[10px] text-muted-foreground/60">
+                  <span>Fast (8)</span><span>Deep (22)</span>
+                </div>
+              </div>
+            )}
+
+            {/* Current position eval for interactive when no history */}
+            {mode === "interactive" && liveMoveHistory.length === 0 && (
+              <div className="rounded-xl border border-border/40 bg-card p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-bold text-foreground">Position</span>
+                </div>
+                <div className="text-center py-3">
+                  <p className="text-3xl font-bold font-mono text-foreground">
+                    {formatEval(evalCpForBar, evalMateForBar)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Equal starting position</p>
+                </div>
+                <div className="text-center text-muted-foreground text-sm">
+                  <MousePointerClick className="h-5 w-5 mx-auto mb-1.5 text-primary/60" />
+                  Click pieces to make moves.<br/>
+                  <span className="text-xs">Stockfish evaluates each position in real time.</span>
+                </div>
               </div>
             )}
           </div>
