@@ -1,4 +1,4 @@
-import { Swords, Target, GraduationCap, User, Home } from "lucide-react";
+import { Swords, GraduationCap, User, Home } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";

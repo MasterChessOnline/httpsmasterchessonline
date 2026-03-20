@@ -9,7 +9,6 @@ import { Star, Gem, Shield } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
-  { label: "Daily", href: "/daily", icon: Target },
   { label: "Play", href: "/play", icon: Swords },
   { label: "Online", href: "/play/online", icon: Wifi },
   { label: "Learn", href: "/learn", icon: GraduationCap },
