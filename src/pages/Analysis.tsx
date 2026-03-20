@@ -3,16 +3,19 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
+import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Upload, Trash2, Zap, AlertTriangle, CheckCircle2, XCircle, ArrowRight,
   Download, BarChart3, Settings2, TrendingUp, MousePointerClick, RotateCcw,
-  Play, ChevronDown, History, FileText, Plus, Search, Save, BookOpen
+  Play, ChevronDown, History, FileText, Plus, Search, Save, BookOpen,
+  Globe, Database, Trophy, FlipVertical
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -58,36 +61,6 @@ function evalToBarPct(cp: number, mate: number | null): number {
   return Math.max(5, Math.min(95, 50 + 50 * (2 / (1 + Math.exp(-0.4 * x)) - 1)));
 }
 
-const OPENINGS: [string[], string][] = [
-  [["e4", "e5", "Nf3", "Nc6", "Bb5"], "Ruy Lopez"],
-  [["e4", "e5", "Nf3", "Nc6", "Bc4"], "Italian Game"],
-  [["e4", "c5"], "Sicilian Defense"],
-  [["e4", "e6"], "French Defense"],
-  [["e4", "c6"], "Caro-Kann Defense"],
-  [["e4", "d5"], "Scandinavian Defense"],
-  [["e4", "e5", "Nf3", "Nf6"], "Petrov's Defense"],
-  [["d4", "d5", "c4"], "Queen's Gambit"],
-  [["d4", "Nf6", "c4", "g6"], "King's Indian Defense"],
-  [["d4", "Nf6", "c4", "e6", "Nc3", "Bb4"], "Nimzo-Indian Defense"],
-  [["d4", "d5", "Bf4"], "London System"],
-  [["d4", "Nf6"], "Indian Defense"],
-  [["e4", "e5"], "Open Game"],
-  [["d4", "d5"], "Closed Game"],
-  [["Nf3"], "Réti Opening"],
-  [["c4"], "English Opening"],
-];
-
-function detectOpening(moves: string[]): string {
-  let bestMatch = "Unknown Opening";
-  let bestLen = 0;
-  for (const [pattern, name] of OPENINGS) {
-    if (pattern.length <= moves.length && pattern.length > bestLen) {
-      if (pattern.every((m, i) => moves[i] === m)) { bestMatch = name; bestLen = pattern.length; }
-    }
-  }
-  return bestMatch;
-}
-
 function uciToSan(fen: string, uci: string): string {
   try {
     const g = new Chess(fen);
@@ -99,12 +72,19 @@ function uciToSan(fen: string, uci: string): string {
   } catch { return uci; }
 }
 
-type SidebarPanel = "menu" | "pgn" | "moves" | "summary";
+function formatGames(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
+type SidebarTab = "analysis" | "explorer" | "pgn";
 
 // ── Component ──
 export default function Analysis() {
-  const [sidebarPanel, setSidebarPanel] = useState<SidebarPanel>("menu");
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("analysis");
   const [depth, setDepth] = useState(15);
+  const [flipped, setFlipped] = useState(false);
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
 
@@ -131,10 +111,38 @@ export default function Analysis() {
   const [liveViewIdx, setLiveViewIdx] = useState(-1);
   const prevEvalRef = useRef(0);
 
+  // Explorer state
+  const [explorerData, setExplorerData] = useState<ExplorerData | null>(null);
+  const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("lichess");
+  const [explorerLoading, setExplorerLoading] = useState(false);
+
+  // Current FEN for explorer
+  const currentFen = useMemo(() => {
+    if (pgnComplete && pgnCurrentIdx >= 0 && pgnCurrentIdx < pgnMoveEvals.length) {
+      return pgnMoveEvals[pgnCurrentIdx].fen;
+    }
+    if (liveViewIdx >= 0 && liveViewIdx < liveMoveHistory.length) {
+      return liveMoveHistory[liveViewIdx].fen;
+    }
+    return liveGame.fen();
+  }, [pgnComplete, pgnCurrentIdx, pgnMoveEvals, liveViewIdx, liveMoveHistory, liveGame]);
+
   useEffect(() => {
     const engine = getStockfishEngine();
     engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
   }, []);
+
+  // Fetch explorer data when position or db changes
+  useEffect(() => {
+    if (sidebarTab !== "explorer") return;
+    let cancelled = false;
+    setExplorerLoading(true);
+    const fetchFn = explorerDb === "masters" ? fetchMasterExplorerData : fetchExplorerData;
+    fetchFn(currentFen).then(data => {
+      if (!cancelled) { setExplorerData(data); setExplorerLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [currentFen, explorerDb, sidebarTab]);
 
   // ── Interactive logic ──
   const evaluatePosition = useCallback(async (fen: string, fenBefore: string, moveSan: string, moveFrom: string, moveTo: string, color: "w" | "b", moveNum: number) => {
@@ -179,7 +187,6 @@ export default function Analysis() {
           setLiveFen(newFen); setLiveLastMove({ from: move.from, to: move.to });
           setSelectedSquare(null); setLegalMoves([]); setLiveGame(new Chess(newFen));
           evaluatePosition(newFen, fenBefore, move.san, move.from, move.to, move.color, Math.ceil(liveMoveHistory.length / 2) + 1);
-          if (sidebarPanel === "menu") setSidebarPanel("moves");
           return;
         }
       } catch {}
@@ -189,7 +196,24 @@ export default function Analysis() {
       setSelectedSquare(square);
       setLegalMoves(game.moves({ square, verbose: true }).map(m => m.to as Square));
     } else { setSelectedSquare(null); setLegalMoves([]); }
-  }, [liveGame, selectedSquare, evaluatePosition, liveMoveHistory.length, liveViewIdx, sidebarPanel]);
+  }, [liveGame, selectedSquare, evaluatePosition, liveMoveHistory.length, liveViewIdx]);
+
+  // Play an explorer move
+  const playExplorerMove = useCallback((san: string) => {
+    if (pgnComplete) return; // can't add moves to PGN analysis
+    if (liveViewIdx >= 0) return;
+    const game = liveGame;
+    try {
+      const fenBefore = game.fen();
+      const move = game.move(san);
+      if (move) {
+        const newFen = game.fen();
+        setLiveFen(newFen); setLiveLastMove({ from: move.from, to: move.to });
+        setSelectedSquare(null); setLegalMoves([]); setLiveGame(new Chess(newFen));
+        evaluatePosition(newFen, fenBefore, move.san, move.from, move.to, move.color, Math.ceil(liveMoveHistory.length / 2) + 1);
+      }
+    } catch {}
+  }, [liveGame, evaluatePosition, liveMoveHistory.length, liveViewIdx, pgnComplete]);
 
   const resetInteractive = useCallback(() => {
     const fresh = new Chess();
@@ -198,7 +222,7 @@ export default function Analysis() {
     setLiveCurrentEval({ cp: 0, mate: null, bestMove: "", bestMoveSan: "", altLines: [] });
     setLiveViewIdx(-1); prevEvalRef.current = 0;
     setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
-    setSidebarPanel("menu");
+    setExplorerData(null);
   }, []);
 
   const undoLastMove = useCallback(() => {
@@ -276,7 +300,7 @@ export default function Analysis() {
     if (!stockfishReady.current) {
       const engine = getStockfishEngine(); await engine.init(); stockfishReady.current = true;
     }
-    setAnalyzing(true); setSidebarPanel("moves");
+    setAnalyzing(true); setSidebarTab("analysis");
     const engine = getStockfishEngine(); engine.newGame();
     const evals: MoveEval[] = [];
     const evalGame = new Chess();
@@ -314,14 +338,12 @@ export default function Analysis() {
     setPgnInput(""); setPgnMoveEvals([]); setPgnComplete(false);
     setPgnCurrentIdx(-1); setError(""); setProgress(0);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
-    setSidebarPanel("menu");
   };
 
   const downloadPGN = () => {
     const evals = pgnComplete ? pgnMoveEvals : liveMoveHistory;
     if (evals.length === 0) return;
-    const op = detectOpening(evals.map(m => m.san));
-    let pgn = `[Event "Game Analysis"]\n[Opening "${op}"]\n\n`;
+    let pgn = `[Event "Game Analysis"]\n\n`;
     evals.forEach((mv) => {
       if (mv.color === "w") pgn += `${mv.moveNumber}. `;
       pgn += mv.san;
@@ -349,7 +371,6 @@ export default function Analysis() {
   const mistakes = activeEvals.filter(e => e.classification === "mistake").length;
   const inaccuracies = activeEvals.filter(e => e.classification === "inaccuracy").length;
   const brilliant = activeEvals.filter(e => e.classification === "brilliant").length;
-  const opening = useMemo(() => detectOpening(activeEvals.map(m => m.san)), [activeEvals]);
   const lastMoveDisplay = pgnComplete
     ? (pgnCurrentIdx >= 0 ? { from: pgnMoveEvals[pgnCurrentIdx].from, to: pgnMoveEvals[pgnCurrentIdx].to } : null)
     : liveLastMove;
@@ -373,29 +394,19 @@ export default function Analysis() {
       <main className="flex justify-center items-start gap-0 pt-4 pb-8 px-2 lg:px-4 min-h-[calc(100vh-64px)]">
         {/* ── LEFT: Eval Bar + Board ── */}
         <div className="flex flex-col items-center">
-          {/* Black label */}
           <div className="flex items-center gap-2 mb-1 self-start ml-10">
-            <div className="w-5 h-5 rounded-sm bg-[hsl(220,15%,20%)] border border-border/30" />
-            <span className="text-sm font-semibold text-foreground/80">Black</span>
+            <div className="w-4 h-4 rounded-sm bg-[hsl(220,15%,20%)] border border-border/30" />
+            <span className="text-xs font-semibold text-foreground/80">Black</span>
+            {explorerData?.opening && (
+              <Badge variant="outline" className="text-[10px] ml-2">{explorerData.opening.eco} {explorerData.opening.name}</Badge>
+            )}
           </div>
 
           <div className="flex items-stretch">
             {/* Eval Bar */}
             <div className="w-7 shrink-0 rounded-sm overflow-hidden mr-1.5 relative flex flex-col" style={{ minHeight: 420 }}>
-              <motion.div
-                className="bg-[hsl(220,15%,18%)]"
-                initial={{ flexBasis: "50%" }}
-                animate={{ flexBasis: `${100 - evalPercent}%` }}
-                transition={{ type: "spring", stiffness: 180, damping: 22 }}
-                style={{ flexShrink: 0 }}
-              />
-              <motion.div
-                className="bg-[hsl(60,10%,90%)]"
-                initial={{ flexBasis: "50%" }}
-                animate={{ flexBasis: `${evalPercent}%` }}
-                transition={{ type: "spring", stiffness: 180, damping: 22 }}
-                style={{ flexShrink: 0 }}
-              />
+              <motion.div className="bg-[hsl(220,15%,18%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${100 - evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
+              <motion.div className="bg-[hsl(60,10%,90%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span className={`text-[9px] font-bold font-mono px-0.5 ${evalCpForBar >= 0 ? 'text-[hsl(220,15%,18%)]' : 'text-[hsl(60,10%,90%)]'}`}>
                   {formatEval(evalCpForBar, evalMateForBar)}
@@ -409,10 +420,10 @@ export default function Analysis() {
             </div>
 
             {/* Board */}
-            <div className="w-[min(60vw,520px)]">
+            <div className="w-[min(58vw,500px)]">
               <ChessBoard
                 game={boardGame}
-                flipped={false}
+                flipped={flipped}
                 selectedSquare={!pgnComplete ? selectedSquare : null}
                 legalMoves={!pgnComplete ? legalMoves : []}
                 lastMove={lastMoveDisplay}
@@ -423,151 +434,75 @@ export default function Analysis() {
             </div>
           </div>
 
-          {/* White label */}
           <div className="flex items-center gap-2 mt-1 self-start ml-10">
-            <div className="w-5 h-5 rounded-sm bg-[hsl(60,10%,90%)] border border-border/30" />
-            <span className="text-sm font-semibold text-foreground/80">White</span>
+            <div className="w-4 h-4 rounded-sm bg-[hsl(60,10%,90%)] border border-border/30" />
+            <span className="text-xs font-semibold text-foreground/80">White</span>
+          </div>
+
+          {/* Board controls */}
+          <div className="flex items-center gap-1 mt-2">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setFlipped(!flipped)}>
+              <FlipVertical className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={resetInteractive} title="New analysis">
+              <RotateCcw className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
         {/* ── RIGHT: Sidebar ── */}
-        <div className="w-[340px] lg:w-[380px] shrink-0 ml-4 flex flex-col bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden" style={{ minHeight: 520 }}>
-          {/* Header */}
-          <div className="flex items-center justify-center gap-2 px-4 py-3 border-b border-border/20">
-            <Brain className="h-5 w-5 text-primary" />
-            <span className="text-base font-bold text-foreground">Analysis</span>
+        <div className="w-[360px] lg:w-[400px] shrink-0 ml-3 flex flex-col bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden" style={{ minHeight: 540 }}>
+          {/* Tab Header */}
+          <div className="flex border-b border-border/20">
+            <TabButton active={sidebarTab === "analysis"} onClick={() => setSidebarTab("analysis")} icon={<Brain className="h-3.5 w-3.5" />} label="Analysis" />
+            <TabButton active={sidebarTab === "explorer"} onClick={() => setSidebarTab("explorer")} icon={<Globe className="h-3.5 w-3.5" />} label="Explorer" />
+            <TabButton active={sidebarTab === "pgn"} onClick={() => setSidebarTab("pgn")} icon={<FileText className="h-3.5 w-3.5" />} label="Import" />
           </div>
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
-              {sidebarPanel === "menu" && (
-                <motion.div key="menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-1">
-                  <SidebarMenuItem icon={<MousePointerClick className="h-4 w-4" />} label="Make Moves" desc="Click pieces on the board" onClick={() => setSidebarPanel("moves")} />
-                  <SidebarMenuItem icon={<Plus className="h-4 w-4" />} label="Set Up Position" desc="Custom FEN position" onClick={() => {}} />
-                  <SidebarMenuItem icon={<History className="h-4 w-4" />} label="Load From Game History" desc="Analyze a past game" onClick={() => {}} />
-                  <SidebarMenuItem icon={<FileText className="h-4 w-4" />} label="Load From FEN/PGN(s)" desc="Paste PGN or FEN" onClick={() => setSidebarPanel("pgn")} chevron />
-
-                  {/* PGN Input inline */}
-                  <div className="px-3 pt-2 pb-1">
-                    <Textarea
-                      placeholder="Paste one or more PGNs, or drag & drop your PGN file here."
-                      value={pgnInput}
-                      onChange={(e) => setPgnInput(e.target.value)}
-                      rows={4}
-                      className="font-mono text-xs resize-none bg-[hsl(220,18%,20%)] border-border/30 placeholder:text-muted-foreground/40"
-                      maxLength={10000}
-                    />
-                  </div>
-
-                  <div className="px-3 pb-2">
-                    <Button
-                      onClick={runAnalysis}
-                      disabled={analyzing || !pgnInput.trim()}
-                      className="w-full bg-[hsl(120,40%,45%)] hover:bg-[hsl(120,40%,50%)] text-white font-semibold"
-                    >
-                      {analyzing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</> : "Add Game(s)"}
-                    </Button>
-                    {analyzing && (
-                      <div className="mt-2 space-y-1">
-                        <Progress value={progress} className="h-1.5" />
-                        <p className="text-[10px] text-muted-foreground text-center">{progress}% — depth {depth}</p>
+              {/* ── ANALYSIS TAB ── */}
+              {sidebarTab === "analysis" && (
+                <motion.div key="analysis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-full">
+                  {/* Engine eval */}
+                  <div className="px-3 py-2 border-b border-border/20 bg-[hsl(220,18%,14%)]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Brain className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Stockfish · D{depth}</span>
+                      </div>
+                      <span className="text-sm font-mono font-bold text-foreground">{formatEval(evalCpForBar, evalMateForBar)}</span>
+                    </div>
+                    {liveCurrentEval.bestMoveSan && !pgnComplete && (
+                      <p className="text-xs text-muted-foreground mt-0.5">Best: <span className="text-foreground font-mono font-semibold">{liveCurrentEval.bestMoveSan}</span></p>
+                    )}
+                    {currentEval && ["blunder", "mistake", "inaccuracy"].includes(currentEval.classification) && (
+                      <div className="flex items-center gap-1.5 mt-1 text-xs">
+                        <span className={CLASS_STYLES[currentEval.classification].color}>{CLASS_STYLES[currentEval.classification].label}</span>
+                        <span className="text-muted-foreground">— Best was</span>
+                        <span className="text-foreground font-mono font-semibold">{currentEval.bestMoveSan}</span>
                       </div>
                     )}
-                    {error && <p className="text-xs text-destructive mt-1">{error}</p>}
-                  </div>
-
-                  <SidebarMenuItem icon={<BookOpen className="h-4 w-4" />} label="Load Previous Analysis" desc="Resume saved analysis" onClick={() => {}} />
-                </motion.div>
-              )}
-
-              {sidebarPanel === "pgn" && (
-                <motion.div key="pgn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-3 space-y-3">
-                  <button onClick={() => setSidebarPanel("menu")} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                    <ChevronLeft className="h-3 w-3" /> Back
-                  </button>
-                  <h3 className="text-sm font-bold text-foreground">Load From FEN/PGN</h3>
-                  <Textarea
-                    placeholder={"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6...\n\nOr paste full PGN with headers"}
-                    value={pgnInput} onChange={(e) => setPgnInput(e.target.value)}
-                    rows={10} className="font-mono text-xs resize-none bg-[hsl(220,18%,20%)] border-border/30" maxLength={10000}
-                  />
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-muted-foreground">Depth: {depth}</span>
-                    <span className="text-[10px] text-muted-foreground/60">{depth <= 10 ? "Fast" : depth <= 18 ? "Standard" : "Deep"}</span>
-                  </div>
-                  <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} />
-                  {error && <p className="text-xs text-destructive">{error}</p>}
-                  <Button onClick={runAnalysis} disabled={analyzing || !pgnInput.trim()} className="w-full bg-[hsl(120,40%,45%)] hover:bg-[hsl(120,40%,50%)] text-white font-semibold">
-                    {analyzing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</> : <><Brain className="mr-2 h-4 w-4" />Analyze Game</>}
-                  </Button>
-                  {analyzing && <Progress value={progress} className="h-1.5" />}
-                </motion.div>
-              )}
-
-              {sidebarPanel === "moves" && (
-                <motion.div key="moves" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-full">
-                  {/* Top bar */}
-                  <div className="flex items-center justify-between px-3 py-2 border-b border-border/20">
-                    <button onClick={() => setSidebarPanel("menu")} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                      <ChevronLeft className="h-3 w-3" /> Menu
-                    </button>
-                    <div className="flex items-center gap-1">
-                      {!pgnComplete && (
-                        <>
-                          <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={undoLastMove} disabled={liveMoveHistory.length === 0}>
-                            <RotateCcw className="h-3 w-3 mr-1" /> Undo
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={resetInteractive}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </>
-                      )}
-                      {pgnComplete && (
-                        <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={clearPgnAnalysis}>
-                          <Search className="h-3 w-3 mr-1" /> New
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Engine eval */}
-                  {(activeEvals.length > 0 || liveCurrentEval.bestMoveSan) && (
-                    <div className="px-3 py-2 border-b border-border/20 bg-[hsl(220,18%,14%)]">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Engine · Depth {depth}</span>
-                        <span className="text-sm font-mono font-bold text-foreground">
-                          {formatEval(evalCpForBar, evalMateForBar)}
-                        </span>
+                    {/* Alt lines */}
+                    {(pgnComplete ? currentEval?.altLines : liveCurrentEval.altLines)?.slice(0, 3).map((line, li) => (
+                      <div key={li} className="flex items-center justify-between text-[11px] mt-0.5">
+                        <span className="font-mono text-foreground/70">{line.san}</span>
+                        <span className="font-mono text-muted-foreground">{formatEval(line.eval, line.mate)}</span>
                       </div>
-                      {liveCurrentEval.bestMoveSan && !pgnComplete && (
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Best: <span className="text-foreground font-mono font-semibold">{liveCurrentEval.bestMoveSan}</span>
-                        </p>
-                      )}
-                      {currentEval && ["blunder", "mistake", "inaccuracy"].includes(currentEval.classification) && (
-                        <div className="flex items-center gap-1.5 mt-1 text-xs">
-                          <span className={CLASS_STYLES[currentEval.classification].color}>
-                            {CLASS_STYLES[currentEval.classification].label}
-                          </span>
-                          <span className="text-muted-foreground">— Best was</span>
-                          <span className="text-foreground font-mono font-semibold">{currentEval.bestMoveSan}</span>
-                        </div>
-                      )}
-                      {/* Alt lines */}
-                      {(pgnComplete ? currentEval?.altLines : liveCurrentEval.altLines)?.slice(0, 3).map((line, li) => (
-                        <div key={li} className="flex items-center justify-between text-[11px] mt-0.5">
-                          <span className="font-mono text-foreground/70">{line.san}</span>
-                          <span className="font-mono text-muted-foreground">{formatEval(line.eval, line.mate)}</span>
-                        </div>
-                      ))}
+                    ))}
+                    {/* Depth slider */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[9px] text-muted-foreground">Depth</span>
+                      <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} className="flex-1" />
+                      <span className="text-[9px] text-muted-foreground w-4 text-right">{depth}</span>
                     </div>
-                  )}
+                  </div>
 
                   {/* Eval graph */}
                   {activeEvals.length > 1 && (
                     <div className="px-3 py-2 border-b border-border/20">
-                      <div className="relative h-16 w-full">
+                      <div className="relative h-14 w-full">
                         <div className="absolute top-1/2 left-0 right-0 h-px bg-border/40" />
                         <svg viewBox={`0 0 ${graphData.length} 100`} className="w-full h-full" preserveAspectRatio="none">
                           {graphData.map((d, i) => {
@@ -590,13 +525,29 @@ export default function Analysis() {
                     </div>
                   )}
 
+                  {/* Summary bar */}
+                  {activeEvals.length > 0 && (
+                    <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/20 text-[10px]">
+                      <div className="flex gap-2">
+                        <span className="text-cyan-400">✦ {brilliant}</span>
+                        <span className="text-yellow-400">?! {inaccuracies}</span>
+                        <span className="text-orange-400">? {mistakes}</span>
+                        <span className="text-red-500">?? {blunders}</span>
+                      </div>
+                      <div className="flex gap-2 text-muted-foreground">
+                        <span>W: {calcAccuracy(whiteEvals)}%</span>
+                        <span>B: {calcAccuracy(blackEvals)}%</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Move list */}
-                  <div className="flex-1 overflow-y-auto px-2 py-1 max-h-[300px]" ref={moveListRef}>
+                  <div className="flex-1 overflow-y-auto px-2 py-1 max-h-[280px]" ref={moveListRef}>
                     {activeEvals.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                        <MousePointerClick className="h-8 w-8 mb-3 text-primary/40" />
+                      <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                        <MousePointerClick className="h-7 w-7 mb-2 text-primary/40" />
                         <p className="text-sm">Click pieces to make moves</p>
-                        <p className="text-[10px] mt-1">Stockfish evaluates every position</p>
+                        <p className="text-[10px] mt-1">or import a PGN to analyze</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-x-1 gap-y-0.5">
@@ -605,12 +556,10 @@ export default function Analysis() {
                           const isActive = activeIdx === i;
                           const showNum = mv.color === "w";
                           return (
-                            <button key={i}
-                              onClick={() => goFn(i)}
+                            <button key={i} onClick={() => goFn(i)}
                               className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors ${
                                 isActive ? "bg-[hsl(120,40%,35%)] text-white" : "hover:bg-[hsl(220,18%,22%)] text-foreground/80"
-                              } ${mv.color === "w" ? "col-start-1" : "col-start-2"}`}
-                            >
+                              } ${mv.color === "w" ? "col-start-1" : "col-start-2"}`}>
                               {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
                               {!showNum && <span className="w-5 shrink-0" />}
                               <span className="font-mono font-medium">{mv.san}</span>
@@ -624,34 +573,156 @@ export default function Analysis() {
                 </motion.div>
               )}
 
-              {sidebarPanel === "summary" && (
-                <motion.div key="summary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-3 space-y-3">
-                  <button onClick={() => setSidebarPanel("moves")} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                    <ChevronLeft className="h-3 w-3" /> Back
-                  </button>
+              {/* ── EXPLORER TAB ── */}
+              {sidebarTab === "explorer" && (
+                <motion.div key="explorer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col">
+                  {/* DB selector */}
+                  <div className="flex items-center gap-2 px-3 py-2 border-b border-border/20">
+                    <Globe className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-xs font-bold text-foreground">Opening Explorer</span>
+                    <div className="ml-auto flex gap-0.5">
+                      <button
+                        onClick={() => setExplorerDb("lichess")}
+                        className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "lichess" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        Lichess
+                      </button>
+                      <button
+                        onClick={() => setExplorerDb("masters")}
+                        className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "masters" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        Masters
+                      </button>
+                    </div>
+                  </div>
+
+                  {explorerLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                      <span className="text-xs text-muted-foreground ml-2">Loading games...</span>
+                    </div>
+                  ) : explorerData && explorerData.moves.length > 0 ? (
+                    <div className="flex flex-col">
+                      {/* Position stats */}
+                      <div className="px-3 py-2 border-b border-border/20">
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-1">
+                          <Database className="h-3 w-3" />
+                          <span>{formatGames(explorerData.totalGames)} games</span>
+                          {explorerData.opening && (
+                            <Badge variant="outline" className="text-[9px] px-1 py-0">{explorerData.opening.eco}</Badge>
+                          )}
+                        </div>
+                        {/* Win/Draw/Loss bar */}
+                        {explorerData.totalGames > 0 && (
+                          <div className="flex h-3 rounded-full overflow-hidden">
+                            <div className="bg-[hsl(0,0%,95%)] transition-all" style={{ width: `${(explorerData.white / explorerData.totalGames) * 100}%` }} />
+                            <div className="bg-[hsl(0,0%,60%)] transition-all" style={{ width: `${(explorerData.draws / explorerData.totalGames) * 100}%` }} />
+                            <div className="bg-[hsl(220,15%,20%)] transition-all" style={{ width: `${(explorerData.black / explorerData.totalGames) * 100}%` }} />
+                          </div>
+                        )}
+                        <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
+                          <span>White {explorerData.totalGames > 0 ? ((explorerData.white / explorerData.totalGames) * 100).toFixed(0) : 0}%</span>
+                          <span>Draw {explorerData.totalGames > 0 ? ((explorerData.draws / explorerData.totalGames) * 100).toFixed(0) : 0}%</span>
+                          <span>Black {explorerData.totalGames > 0 ? ((explorerData.black / explorerData.totalGames) * 100).toFixed(0) : 0}%</span>
+                        </div>
+                      </div>
+
+                      {/* Move table header */}
+                      <div className="grid grid-cols-[50px_1fr_44px_44px_44px_52px] gap-0 text-[9px] text-muted-foreground px-3 py-1 border-b border-border/10 uppercase tracking-wider">
+                        <span>Move</span>
+                        <span>Win bar</span>
+                        <span className="text-center">W%</span>
+                        <span className="text-center">D%</span>
+                        <span className="text-center">L%</span>
+                        <span className="text-right">Games</span>
+                      </div>
+
+                      {/* Move rows */}
+                      <div className="overflow-y-auto max-h-[260px]">
+                        {explorerData.moves.sort((a, b) => b.games - a.games).map((mv) => (
+                          <button
+                            key={mv.san}
+                            onClick={() => playExplorerMove(mv.san)}
+                            className="w-full grid grid-cols-[50px_1fr_44px_44px_44px_52px] gap-0 text-[11px] px-3 py-1.5 hover:bg-[hsl(220,18%,22%)] transition-colors border-b border-border/5"
+                          >
+                            <span className="font-mono font-bold text-foreground">{mv.san}</span>
+                            <div className="flex items-center pr-2">
+                              <div className="flex h-2.5 w-full rounded-full overflow-hidden">
+                                <div className="bg-[hsl(0,0%,92%)]" style={{ width: `${mv.winRate}%` }} />
+                                <div className="bg-[hsl(0,0%,60%)]" style={{ width: `${mv.drawRate}%` }} />
+                                <div className="bg-[hsl(220,15%,22%)]" style={{ width: `${mv.lossRate}%` }} />
+                              </div>
+                            </div>
+                            <span className="text-center text-[hsl(0,0%,90%)]">{mv.winRate.toFixed(0)}</span>
+                            <span className="text-center text-muted-foreground">{mv.drawRate.toFixed(0)}</span>
+                            <span className="text-center text-muted-foreground/70">{mv.lossRate.toFixed(0)}</span>
+                            <span className="text-right text-muted-foreground">{formatGames(mv.games)}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Top games */}
+                      {explorerData.topGames && explorerData.topGames.length > 0 && (
+                        <div className="px-3 py-2 border-t border-border/20">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Trophy className="h-3 w-3 text-primary" />
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Top Games</span>
+                          </div>
+                          {explorerData.topGames.map((g, i) => (
+                            <a
+                              key={i}
+                              href={`https://lichess.org/${g.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-between text-[10px] py-0.5 hover:text-primary transition-colors"
+                            >
+                              <span className="text-foreground/80 truncate">
+                                {g.white.name} ({g.white.rating}) vs {g.black.name} ({g.black.rating})
+                              </span>
+                              <span className="text-muted-foreground ml-2 shrink-0">
+                                {g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"} · {g.year}
+                              </span>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                      <Database className="h-7 w-7 mb-2 text-primary/30" />
+                      <p className="text-sm">No games found</p>
+                      <p className="text-[10px] mt-1">This position is outside the database</p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* ── PGN IMPORT TAB ── */}
+              {sidebarTab === "pgn" && (
+                <motion.div key="pgn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-3 space-y-3">
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-primary" /> Game Summary
+                    <Upload className="h-4 w-4 text-primary" />Import PGN / FEN
                   </h3>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Opening</span>
-                    <Badge variant="secondary" className="font-mono text-[10px]">{opening}</Badge>
+                  <Textarea
+                    placeholder={"1. e4 e5 2. Nf3 Nc6 3. Bb5 a6...\n\nOr paste full PGN with headers"}
+                    value={pgnInput} onChange={(e) => setPgnInput(e.target.value)}
+                    rows={8} className="font-mono text-xs resize-none bg-[hsl(220,18%,20%)] border-border/30" maxLength={10000}
+                  />
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                    <span>Depth: {depth}</span>
+                    <span>{depth <= 10 ? "Fast" : depth <= 18 ? "Standard" : "Deep"}</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-lg bg-[hsl(220,18%,20%)] p-2 text-center">
-                      <p className="text-lg font-bold text-foreground">{calcAccuracy(whiteEvals)}%</p>
-                      <p className="text-[10px] text-muted-foreground">White Accuracy</p>
-                    </div>
-                    <div className="rounded-lg bg-[hsl(220,18%,20%)] p-2 text-center">
-                      <p className="text-lg font-bold text-foreground">{calcAccuracy(blackEvals)}%</p>
-                      <p className="text-[10px] text-muted-foreground">Black Accuracy</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5 text-center">
-                    <StatBox count={brilliant} label="Brilliant" color="cyan" />
-                    <StatBox count={inaccuracies} label="Inaccuracy" color="yellow" />
-                    <StatBox count={mistakes} label="Mistake" color="orange" />
-                    <StatBox count={blunders} label="Blunder" color="red" />
-                  </div>
+                  <Slider value={[depth]} onValueChange={([v]) => setDepth(v)} min={8} max={22} step={1} />
+                  {error && <p className="text-xs text-destructive">{error}</p>}
+                  <Button onClick={runAnalysis} disabled={analyzing || !pgnInput.trim()} className="w-full bg-[hsl(120,40%,45%)] hover:bg-[hsl(120,40%,50%)] text-white font-semibold">
+                    {analyzing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing {progress}%...</> : <><Brain className="mr-2 h-4 w-4" />Analyze Game</>}
+                  </Button>
+                  {analyzing && <Progress value={progress} className="h-1.5" />}
+                  {pgnComplete && (
+                    <Button variant="outline" onClick={clearPgnAnalysis} className="w-full text-xs">
+                      <Trash2 className="mr-2 h-3 w-3" /> Clear & Start New
+                    </Button>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -659,33 +730,30 @@ export default function Analysis() {
 
           {/* Bottom navigation */}
           <div className="border-t border-border/20 px-3 py-2 flex items-center justify-between bg-[hsl(220,18%,14%)]">
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => goFn(-1)} disabled={activeEvals.length === 0}>
-                <ChevronsLeft className="h-4 w-4" />
+            <div className="flex items-center gap-0.5">
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(-1)} disabled={activeEvals.length === 0}>
+                <ChevronsLeft className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => goFn(activeIdx - 1)} disabled={activeIdx <= -1}>
-                <ChevronLeft className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeIdx - 1)} disabled={activeIdx <= -1}>
+                <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => goFn(activeIdx + 1)} disabled={activeIdx >= activeEvals.length - 1}>
-                <ChevronRight className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeIdx + 1)} disabled={activeIdx >= activeEvals.length - 1}>
+                <ChevronRight className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => goFn(activeEvals.length - 1)} disabled={activeIdx >= activeEvals.length - 1}>
-                <ChevronsRight className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => goFn(activeEvals.length - 1)} disabled={activeIdx >= activeEvals.length - 1}>
+                <ChevronsRight className="h-3.5 w-3.5" />
               </Button>
             </div>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="sm" className="h-8 text-[10px] px-2" onClick={resetInteractive}>
-                <Search className="h-3 w-3 mr-1" /> New
-              </Button>
+              {!pgnComplete && liveMoveHistory.length > 0 && (
+                <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={undoLastMove}>
+                  <RotateCcw className="h-3 w-3 mr-1" /> Undo
+                </Button>
+              )}
               {activeEvals.length > 0 && (
-                <>
-                  <Button variant="ghost" size="sm" className="h-8 text-[10px] px-2" onClick={downloadPGN}>
-                    <Save className="h-3 w-3 mr-1" /> Save
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 text-[10px] px-2" onClick={() => setSidebarPanel("summary")}>
-                    <BarChart3 className="h-3 w-3 mr-1" /> Review
-                  </Button>
-                </>
+                <Button variant="ghost" size="sm" className="h-7 text-[10px] px-2" onClick={downloadPGN}>
+                  <Download className="h-3 w-3 mr-1" /> PGN
+                </Button>
               )}
             </div>
           </div>
@@ -696,25 +764,16 @@ export default function Analysis() {
 }
 
 // ── Sub-components ──
-
-function SidebarMenuItem({ icon, label, desc, onClick, chevron }: { icon: React.ReactNode; label: string; desc?: string; onClick: () => void; chevron?: boolean }) {
+function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[hsl(220,18%,20%)] transition-colors text-left group">
-      <span className="text-muted-foreground group-hover:text-foreground transition-colors">{icon}</span>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground">{label}</p>
-        {desc && <p className="text-[10px] text-muted-foreground truncate">{desc}</p>}
-      </div>
-      <ChevronRight className={`h-4 w-4 text-muted-foreground/40 ${chevron ? 'rotate-90' : ''}`} />
+    <button
+      onClick={onClick}
+      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-colors border-b-2 ${
+        active ? "border-primary text-primary bg-primary/5" : "border-transparent text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {icon}
+      {label}
     </button>
-  );
-}
-
-function StatBox({ count, label, color }: { count: number; label: string; color: string }) {
-  return (
-    <div className={`rounded-lg bg-${color}-500/10 border border-${color}-500/20 px-1 py-1.5`}>
-      <p className={`text-sm font-bold text-${color}-400`}>{count}</p>
-      <p className={`text-[9px] text-${color}-300`}>{label}</p>
-    </div>
   );
 }
