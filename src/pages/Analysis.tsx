@@ -521,30 +521,36 @@ export default function Analysis() {
           {/* ── Left Column: Board + Graph ── */}
           <div className="space-y-4">
             {/* Board + Eval Bar */}
-            <div className="flex gap-2 items-stretch">
-              {/* Vertical Eval Bar */}
-              <div className="w-8 shrink-0">
-                <div className="w-full h-full rounded-lg overflow-hidden border border-border/40 relative bg-[hsl(220,15%,18%)] min-h-[320px]">
-                  <motion.div
-                    className="absolute top-0 left-0 right-0 bg-foreground/90"
-                    initial={{ height: "50%" }}
-                    animate={{ height: `${100 - evalPercent}%` }}
-                    transition={{ type: "spring", stiffness: 180, damping: 22 }}
-                  />
-                  <div className="absolute inset-0 flex flex-col items-center justify-between py-1.5 pointer-events-none">
-                    <span className={`text-[10px] font-bold font-mono z-10 ${evalPercent < 50 ? "text-background" : "text-foreground/60"}`}>
-                      {evalCpForBar >= 0 ? formatEval(evalCpForBar, evalMateForBar && evalMateForBar > 0 ? evalMateForBar : null) : ""}
-                    </span>
-                    <span className={`text-[10px] font-bold font-mono z-10 ${evalPercent >= 50 ? "text-foreground" : "text-foreground/60"}`}>
-                      {evalCpForBar < 0 ? formatEval(Math.abs(evalCpForBar), evalMateForBar && evalMateForBar < 0 ? Math.abs(evalMateForBar) : null) : ""}
-                    </span>
-                  </div>
-                  {liveEvaluating && mode === "interactive" && (
-                    <div className="absolute inset-0 flex items-center justify-center z-20">
-                      <Loader2 className="h-3.5 w-3.5 text-primary animate-spin" />
-                    </div>
-                  )}
+            <div className="flex gap-3 items-stretch">
+              {/* Vertical Eval Bar - Chess.com style */}
+              <div className="w-8 shrink-0 rounded-lg overflow-hidden border border-border relative flex flex-col" style={{ minHeight: 400 }}>
+                {/* Black (dark) portion - top */}
+                <motion.div
+                  className="bg-foreground"
+                  initial={{ flexBasis: "50%" }}
+                  animate={{ flexBasis: `${100 - evalPercent}%` }}
+                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                  style={{ flexShrink: 0 }}
+                />
+                {/* White (light) portion - bottom */}
+                <motion.div
+                  className="bg-white"
+                  initial={{ flexBasis: "50%" }}
+                  animate={{ flexBasis: `${evalPercent}%` }}
+                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                  style={{ flexShrink: 0 }}
+                />
+                {/* Eval label */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="text-[10px] font-bold font-mono bg-card/90 text-foreground px-1 py-0.5 rounded shadow-sm">
+                    {formatEval(evalCpForBar, evalMateForBar)}
+                  </span>
                 </div>
+                {liveEvaluating && mode === "interactive" && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20 bg-card/30">
+                    <Loader2 className="h-3.5 w-3.5 text-primary animate-spin" />
+                  </div>
+                )}
               </div>
 
               <div className="flex-1">
@@ -556,7 +562,7 @@ export default function Analysis() {
                   lastMove={lastMoveDisplay}
                   isGameOver={false}
                   isPlayerTurn={mode === "interactive" && liveViewIdx < 0}
-                  onSquareClick={mode === "interactive" ? handleInteractiveSquareClick : (mode === "pgn" ? () => {} : () => {})}
+                  onSquareClick={mode === "interactive" ? handleInteractiveSquareClick : () => {}}
                 />
               </div>
             </div>
