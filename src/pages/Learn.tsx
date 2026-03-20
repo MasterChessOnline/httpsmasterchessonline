@@ -269,7 +269,7 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   onSelectCourse: (course: Course) => void;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const { isPremium } = useAuth();
+  const isPremium = true;
   const navigate = useNavigate();
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [tierFilter, setTierFilter] = useState<string>("all");
