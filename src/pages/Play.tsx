@@ -107,73 +107,51 @@ const Play = () => {
     playChessSound("gameOver");
   }, []);
 
-  // Generate hint using Stockfish
+  // Generate hint
   useEffect(() => {
     if (!hintsEnabled || mode !== "ai" || game.turn() !== playerColor || isGameOver) {
       setHintSquare(null);
       return;
     }
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      if (!stockfishReady.current) return;
-      const engine = getStockfishEngine();
-      const result = await engine.getBestMove(game.fen(), 500, 8);
-      if (cancelled || !result.bestMove) return;
-      const from = result.bestMove.substring(0, 2) as Square;
-      setHintSquare(from);
-    }, 800);
-    return () => { cancelled = true; clearTimeout(timer); };
+    const timer = setTimeout(() => {
+      const bestMove = getAIMove(game, "intermediate");
+      if (bestMove) {
+        const tempGame = new Chess(game.fen());
+        const move = tempGame.move(bestMove);
+        if (move) setHintSquare(move.from as Square);
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
   }, [fen, hintsEnabled, mode, playerColor, isGameOver]);
 
-  // AI plays using Stockfish
+  // AI plays
   useEffect(() => {
     if (mode !== "ai" || game.turn() !== aiColor || isGameOver) return;
-    let cancelled = false;
     setAiThinking(true);
-
-    const makeAIMove = async () => {
-      const engine = getStockfishEngine();
-      if (!stockfishReady.current) {
-        await engine.init();
-        stockfishReady.current = true;
-      }
-
-      const settings = difficultyToStockfish(difficulty);
-      engine.setSkillLevel(settings.skillLevel);
-
-      const result = await engine.getBestMove(game.fen(), settings.moveTimeMs, settings.depth);
-      if (cancelled || !result.bestMove) {
-        setAiThinking(false);
-        return;
-      }
-
-      // Convert UCI move (e.g. "e2e4", "e7e8q") to chess.js format
-      const from = result.bestMove.substring(0, 2) as Square;
-      const to = result.bestMove.substring(2, 4) as Square;
-      const promotion = result.bestMove.length > 4 ? result.bestMove[4] as any : undefined;
-
-      const move = game.move({ from, to, promotion });
-      if (move) {
-        setMoveHistory((prev) => [...prev, move.san]);
-        setLastMove({ from: move.from, to: move.to });
-        setGameStarted(true);
-        trackPosition();
-        if (!unlimited && timeControl.increment > 0) {
-          if (aiColor === "w") setWhiteTime((p) => p + timeControl.increment);
-          else setBlackTime((p) => p + timeControl.increment);
+    const thinkTime = currentLevel.depth >= 4 ? 800 : currentLevel.depth >= 3 ? 500 : 300;
+    const timeout = setTimeout(() => {
+      const aiMoveStr = getAIMove(game, difficulty);
+      if (aiMoveStr) {
+        const move = game.move(aiMoveStr);
+        if (move) {
+          setMoveHistory((prev) => [...prev, move.san]);
+          setLastMove({ from: move.from, to: move.to });
+          setGameStarted(true);
+          trackPosition();
+          if (!unlimited && timeControl.increment > 0) {
+            if (aiColor === "w") setWhiteTime((p) => p + timeControl.increment);
+            else setBlackTime((p) => p + timeControl.increment);
+          }
+          updateState();
+          if (game.isCheckmate() || game.isDraw() || game.isStalemate()) playChessSound("gameOver");
+          else if (game.isCheck()) playChessSound("check");
+          else if (move.captured) playChessSound("capture");
+          else playChessSound("move");
         }
-        updateState();
-        if (game.isCheckmate() || game.isDraw() || game.isStalemate()) playChessSound("gameOver");
-        else if (game.isCheck()) playChessSound("check");
-        else if (move.captured) playChessSound("capture");
-        else playChessSound("move");
       }
       setAiThinking(false);
-    };
-
-    // Small delay for UX feel
-    const timeout = setTimeout(makeAIMove, 200);
-    return () => { cancelled = true; clearTimeout(timeout); };
+    }, thinkTime);
+    return () => clearTimeout(timeout);
   }, [fen, mode, difficulty, aiColor, isGameOver]);
 
   const isPromotionMove = (from: Square, to: Square): boolean => {
