@@ -238,7 +238,6 @@ export default function OpeningExplorer() {
       const move = newGame.move({ from: from as Square, to: to as Square, promotion: "q" });
       if (!move) return;
 
-      const simpleFen = simplifyFen(newGame.fen());
       const bookMove = bookMoves.find(bm => bm.san === move.san);
 
       const entry: HistoryEntry = {
