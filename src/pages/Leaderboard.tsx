@@ -6,7 +6,6 @@ import { Trophy, Medal, User, Crown, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 import { motion } from "framer-motion";
 
