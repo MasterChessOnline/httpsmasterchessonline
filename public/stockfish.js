@@ -1,0 +1,1 @@
+Couldn't find the requested file /src/stockfish-16.1-lite-single.js in stockfish.
