@@ -4,32 +4,20 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
-import { OPENINGS_DATABASE, OpeningMove } from "@/lib/openings-data";
+import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
+import { OPENINGS_DATABASE } from "@/lib/openings-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Brain, BookOpen, RotateCcw, ChevronLeft, ChevronRight,
-  ChevronsLeft, ChevronsRight, Zap, Star, BarChart3, FlipVertical
+  ChevronsLeft, ChevronsRight, Zap, Star, BarChart3, FlipVertical,
+  Globe, Database, Trophy, Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
-
-interface BookMove {
-  san: string;
-  uci: string;
-  frequency: number; // percentage
-  winRate: number;
-  drawRate: number;
-  lossRate: number;
-  games: number;
-  openingName?: string;
-  explanation?: string;
-  isMainLine?: boolean;
-}
-
+// ── Types ──
 interface EngineLineInfo {
   pv: string[];
   eval: number;
@@ -42,83 +30,6 @@ interface HistoryEntry {
   fen: string;
   from: string;
   to: string;
-  bookMove?: BookMove;
-}
-
-// ── Opening Book Builder ───────────────────────────────────────────────────────
-
-// Build a lookup map from FEN → available book moves from our openings database
-function buildOpeningBook(): Map<string, BookMove[]> {
-  const book = new Map<string, BookMove[]>();
-  const chess = new Chess();
-
-  function walkTree(nodes: OpeningMove[], openingName: string) {
-    const fen = simplifyFen(chess.fen());
-    
-    // Collect all moves available at this position
-    const movesAtPosition: BookMove[] = [];
-    
-    for (const node of nodes) {
-      try {
-        const move = chess.move(node.san);
-        if (move) {
-          // Simulate stats based on main line status
-          const isMain = node.isMainLine !== false;
-          const freq = isMain ? 45 + Math.random() * 30 : 5 + Math.random() * 20;
-          const winRate = 30 + Math.random() * 25;
-          const drawRate = 20 + Math.random() * 20;
-          const games = isMain ? 5000 + Math.floor(Math.random() * 50000) : 500 + Math.floor(Math.random() * 5000);
-          
-          movesAtPosition.push({
-            san: node.san,
-            uci: move.from + move.to + (move.promotion || ""),
-            frequency: freq,
-            winRate,
-            drawRate,
-            lossRate: 100 - winRate - drawRate,
-            games,
-            openingName,
-            explanation: node.explanation,
-            isMainLine: isMain,
-          });
-          
-          // Recurse into children
-          walkTree(node.children, openingName);
-          chess.undo();
-        }
-      } catch {
-        // Invalid move in this position, skip
-      }
-    }
-
-    if (movesAtPosition.length > 0) {
-      const existing = book.get(fen) || [];
-      // Merge, avoiding duplicates
-      for (const bm of movesAtPosition) {
-        if (!existing.find(e => e.san === bm.san)) {
-          existing.push(bm);
-        }
-      }
-      // Normalize frequencies
-      const total = existing.reduce((s, m) => s + m.frequency, 0);
-      if (total > 0) {
-        for (const m of existing) m.frequency = Math.round((m.frequency / total) * 100);
-      }
-      book.set(fen, existing);
-    }
-  }
-
-  for (const opening of OPENINGS_DATABASE) {
-    chess.reset();
-    walkTree(opening.tree, opening.name);
-  }
-
-  return book;
-}
-
-function simplifyFen(fen: string): string {
-  // Remove move counters for book lookup (keep position, turn, castling, en passant)
-  return fen.split(" ").slice(0, 4).join(" ");
 }
 
 function formatEval(cp: number, mate: number | null): string {
@@ -133,8 +44,13 @@ function evalToBarPct(cp: number, mate: number | null): number {
   return Math.max(5, Math.min(95, 50 + 50 * (2 / (1 + Math.exp(-0.4 * x)) - 1)));
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
+function formatGames(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
 
+// ── Component ──
 export default function OpeningExplorer() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [viewIndex, setViewIndex] = useState(0);
@@ -149,15 +65,14 @@ export default function OpeningExplorer() {
   const [analyzing, setAnalyzing] = useState(false);
   const [bestMoveUci, setBestMoveUci] = useState("");
 
-  // Opening book
-  const openingBook = useMemo(() => buildOpeningBook(), []);
-  const [bookMoves, setBookMoves] = useState<BookMove[]>([]);
-  const [currentOpening, setCurrentOpening] = useState("Starting Position");
+  // Lichess explorer state
+  const [explorerData, setExplorerData] = useState<ExplorerData | null>(null);
+  const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("lichess");
+  const [explorerLoading, setExplorerLoading] = useState(false);
 
   const engineRef = useRef(getStockfishEngine());
   const abortRef = useRef(0);
 
-  // Build a Chess instance for the current view position
   const viewGame = useMemo(() => {
     const g = new Chess();
     for (let i = 0; i < viewIndex && i < history.length; i++) {
@@ -168,13 +83,11 @@ export default function OpeningExplorer() {
 
   const currentFen = viewGame.fen();
 
-  // Legal moves for selected square
   const legalMoves = useMemo(() => {
     if (!selectedSquare) return [] as Square[];
     return viewGame.moves({ square: selectedSquare, verbose: true }).map(m => m.to as Square);
   }, [selectedSquare, viewGame]);
 
-  // Last move
   const lastMove = useMemo(() => {
     if (viewIndex === 0) return null;
     const h = history[viewIndex - 1];
@@ -183,38 +96,31 @@ export default function OpeningExplorer() {
 
   // Init engine
   useEffect(() => {
-    const engine = engineRef.current;
-    engine.init().then(() => {
+    engineRef.current.init().then(() => {
       setEngineReady(true);
-      engine.newGame();
+      engineRef.current.newGame();
     });
   }, []);
 
-  // Look up book moves and run Stockfish whenever position changes
+  // Fetch Lichess explorer data when position changes
   useEffect(() => {
-    const fen = currentFen;
-    const simpleFen = simplifyFen(fen);
-    
-    // Book lookup
-    const moves = openingBook.get(simpleFen) || [];
-    setBookMoves(moves);
+    let cancelled = false;
+    setExplorerLoading(true);
+    const fetchFn = explorerDb === "masters" ? fetchMasterExplorerData : fetchExplorerData;
+    fetchFn(currentFen).then(data => {
+      if (!cancelled) { setExplorerData(data); setExplorerLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [currentFen, explorerDb]);
 
-    // Detect opening name
-    if (history.length > 0 && viewIndex > 0) {
-      const lastBook = history.slice(0, viewIndex).reverse().find(h => h.bookMove?.openingName);
-      setCurrentOpening(lastBook?.bookMove?.openingName || "Unknown Position");
-    } else {
-      setCurrentOpening("Starting Position");
-    }
-
-    // Stockfish analysis
+  // Run Stockfish when position changes
+  useEffect(() => {
     if (!engineReady) return;
     const id = ++abortRef.current;
     setAnalyzing(true);
-
     const engine = engineRef.current;
     engine.setMultiPV(3);
-    engine.getMultiPV(fen, 3, depth[0]).then(lines => {
+    engine.getMultiPV(currentFen, 3, depth[0]).then(lines => {
       if (abortRef.current !== id) return;
       setEngineLines(lines);
       if (lines.length > 0) {
@@ -223,83 +129,49 @@ export default function OpeningExplorer() {
       }
       setAnalyzing(false);
     });
-  }, [currentFen, engineReady, depth, openingBook, history, viewIndex]);
+  }, [currentFen, engineReady, depth]);
 
-  // Handle user move on the board
   const handleMove = useCallback((from: string, to: string) => {
-    // If viewing history, truncate forward moves
     const newGame = new Chess();
     const movesToReplay = history.slice(0, viewIndex);
-    for (const h of movesToReplay) {
-      newGame.move(h.san);
-    }
-
+    for (const h of movesToReplay) newGame.move(h.san);
     try {
       const move = newGame.move({ from: from as Square, to: to as Square, promotion: "q" });
       if (!move) return;
-
-      const bookMove = bookMoves.find(bm => bm.san === move.san);
-
-      const entry: HistoryEntry = {
-        san: move.san,
-        fen: newGame.fen(),
-        from: move.from,
-        to: move.to,
-        bookMove,
-      };
-
+      const entry: HistoryEntry = { san: move.san, fen: newGame.fen(), from: move.from, to: move.to };
       const newHistory = [...movesToReplay, entry];
       setHistory(newHistory);
       setViewIndex(newHistory.length);
       setSelectedSquare(null);
-    } catch {
-      // Invalid move
-    }
-  }, [history, viewIndex, bookMoves]);
+    } catch {}
+  }, [history, viewIndex]);
 
-  // Play a book move by clicking
-  const playBookMove = useCallback((san: string) => {
+  const playExplorerMove = useCallback((san: string) => {
     const newGame = new Chess();
     const movesToReplay = history.slice(0, viewIndex);
-    for (const h of movesToReplay) {
-      newGame.move(h.san);
-    }
-
+    for (const h of movesToReplay) newGame.move(h.san);
     try {
       const move = newGame.move(san);
       if (!move) return;
-
-      const bookMove = bookMoves.find(bm => bm.san === san);
-
-      const entry: HistoryEntry = {
-        san: move.san,
-        fen: newGame.fen(),
-        from: move.from,
-        to: move.to,
-        bookMove,
-      };
-
+      const entry: HistoryEntry = { san: move.san, fen: newGame.fen(), from: move.from, to: move.to };
       const newHistory = [...movesToReplay, entry];
       setHistory(newHistory);
       setViewIndex(newHistory.length);
     } catch {}
-  }, [history, viewIndex, bookMoves]);
+  }, [history, viewIndex]);
 
-  // Navigation
   const goTo = useCallback((idx: number) => {
     setViewIndex(Math.max(0, Math.min(history.length, idx)));
     setSelectedSquare(null);
   }, [history.length]);
 
   const reset = useCallback(() => {
-    setHistory([]);
-    setViewIndex(0);
-    setSelectedSquare(null);
+    setHistory([]); setViewIndex(0); setSelectedSquare(null);
   }, []);
 
-  // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "ArrowLeft") goTo(viewIndex - 1);
       if (e.key === "ArrowRight") goTo(viewIndex + 1);
       if (e.key === "Home") goTo(0);
@@ -309,11 +181,8 @@ export default function OpeningExplorer() {
     return () => window.removeEventListener("keydown", handler);
   }, [goTo, viewIndex, history.length]);
 
-  // Remove unused highlight variables - ChessBoard uses lastMove + hintSquare props instead
-
   const evalPct = evalToBarPct(engineEval.cp, engineEval.mate);
   const evalText = formatEval(engineEval.cp, engineEval.mate);
-  const isWhiteTurn = currentFen.includes(" w ");
 
   return (
     <div className="min-h-screen bg-background">
@@ -323,7 +192,9 @@ export default function OpeningExplorer() {
         <div className="flex items-center gap-3 mb-4">
           <BookOpen className="w-6 h-6 text-primary" />
           <h1 className="text-2xl font-bold">Opening Explorer</h1>
-          <Badge variant="outline">{currentOpening}</Badge>
+          {explorerData?.opening && (
+            <Badge variant="outline">{explorerData.opening.eco} · {explorerData.opening.name}</Badge>
+          )}
           {analyzing && <Brain className="w-4 h-4 text-primary animate-pulse" />}
         </div>
 
@@ -331,33 +202,11 @@ export default function OpeningExplorer() {
           {/* Left: Eval Bar + Board */}
           <div className="flex gap-2">
             {/* Vertical eval bar */}
-            <div className="hidden sm:flex flex-col w-8 rounded-lg overflow-hidden border border-border bg-muted/30 relative"
-                 style={{ minHeight: 400 }}>
-              <div className="absolute top-1 left-0 right-0 text-center text-[10px] font-bold z-10"
-                   style={{ color: evalPct < 50 ? "hsl(var(--foreground))" : "hsl(var(--background))" }}>
-                {engineEval.mate !== null && engineEval.mate < 0 ? evalText : !isWhiteTurn && evalPct < 50 ? evalText : ""}
-              </div>
-              {/* Black portion */}
-              <motion.div
-                className="bg-foreground"
-                animate={{ height: `${100 - evalPct}%` }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />
-              {/* White portion */}
-              <motion.div
-                className="bg-background flex-1"
-                animate={{ height: `${evalPct}%` }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              />
-              <div className="absolute bottom-1 left-0 right-0 text-center text-[10px] font-bold z-10"
-                   style={{ color: evalPct >= 50 ? "hsl(var(--background))" : "hsl(var(--foreground))" }}>
-                {engineEval.mate !== null && engineEval.mate > 0 ? evalText : isWhiteTurn && evalPct >= 50 ? evalText : ""}
-              </div>
-              {/* Eval number center */}
+            <div className="hidden sm:flex flex-col w-8 rounded-lg overflow-hidden border border-border bg-muted/30 relative" style={{ minHeight: 400 }}>
+              <motion.div className="bg-foreground" animate={{ height: `${100 - evalPct}%` }} transition={{ duration: 0.5, ease: "easeOut" }} />
+              <motion.div className="bg-background flex-1" animate={{ height: `${evalPct}%` }} transition={{ duration: 0.5, ease: "easeOut" }} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-bold bg-background/80 px-1 rounded text-foreground">
-                  {evalText}
-                </span>
+                <span className="text-[10px] font-bold bg-background/80 px-1 rounded text-foreground">{evalText}</span>
               </div>
             </div>
 
@@ -380,7 +229,6 @@ export default function OpeningExplorer() {
                   }
                 }}
               />
-              {/* Controls under board */}
               <div className="flex items-center justify-between mt-2 gap-1">
                 <div className="flex gap-1">
                   <Button size="sm" variant="ghost" onClick={() => goTo(0)}><ChevronsLeft className="w-4 h-4" /></Button>
@@ -389,12 +237,8 @@ export default function OpeningExplorer() {
                   <Button size="sm" variant="ghost" onClick={() => goTo(history.length)}><ChevronsRight className="w-4 h-4" /></Button>
                 </div>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => setFlipped(!flipped)}>
-                    <FlipVertical className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={reset}>
-                    <RotateCcw className="w-4 h-4" />
-                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setFlipped(!flipped)}><FlipVertical className="w-4 h-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={reset}><RotateCcw className="w-4 h-4" /></Button>
                 </div>
               </div>
             </div>
@@ -415,77 +259,112 @@ export default function OpeningExplorer() {
                 </div>
               </div>
               <div className="space-y-1">
-                {engineLines.length === 0 && (
-                  <div className="text-xs text-muted-foreground">Analyzing...</div>
-                )}
+                {engineLines.length === 0 && <div className="text-xs text-muted-foreground">Analyzing...</div>}
                 {engineLines.map((line, i) => (
                   <div key={i} className={`flex items-center gap-2 text-xs p-1.5 rounded ${i === 0 ? "bg-primary/10" : "bg-muted/30"}`}>
-                    <span className={`font-bold min-w-[48px] ${
-                      (line.mate !== null ? (line.mate > 0 ? true : false) : line.eval > 0) 
-                        ? "text-green-400" : "text-red-400"
-                    }`}>
+                    <span className={`font-bold min-w-[48px] ${(line.mate !== null ? (line.mate > 0) : line.eval > 0) ? "text-green-400" : "text-red-400"}`}>
                       {formatEval(line.eval, line.mate)}
                     </span>
-                    <span className="text-muted-foreground truncate">
-                      {line.pv.slice(0, 8).join(" ")}
-                    </span>
+                    <span className="text-muted-foreground truncate">{line.pv.slice(0, 8).join(" ")}</span>
                     {i === 0 && <Zap className="w-3 h-3 text-primary ml-auto shrink-0" />}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Opening Book Moves */}
+            {/* Lichess Explorer – Real Data */}
             <div className="rounded-lg border border-border bg-card p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold">Opening Book</span>
-                {bookMoves.length > 0 && (
-                  <Badge variant="outline" className="text-[10px]">{bookMoves.length} moves</Badge>
-                )}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold">Opening Explorer</span>
+                </div>
+                <div className="flex gap-0.5">
+                  <button onClick={() => setExplorerDb("lichess")}
+                    className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "lichess" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                    Lichess
+                  </button>
+                  <button onClick={() => setExplorerDb("masters")}
+                    className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "masters" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                    Masters
+                  </button>
+                </div>
               </div>
 
-              {bookMoves.length === 0 ? (
-                <div className="text-xs text-muted-foreground py-2">
-                  Out of book — Stockfish is your guide from here.
+              {explorerLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-xs text-muted-foreground ml-2">Loading...</span>
                 </div>
-              ) : (
-                <div className="space-y-0.5">
-                  {/* Header */}
-                  <div className="grid grid-cols-[60px_1fr_60px_60px_60px_70px] gap-1 text-[10px] text-muted-foreground px-1 pb-1 border-b border-border">
-                    <span>Move</span>
-                    <span>Opening</span>
-                    <span className="text-center">Win%</span>
-                    <span className="text-center">Draw%</span>
-                    <span className="text-center">Loss%</span>
-                    <span className="text-right">Games</span>
-                  </div>
-                  {bookMoves
-                    .sort((a, b) => b.frequency - a.frequency)
-                    .map((bm, i) => (
-                      <button
-                        key={bm.san}
-                        onClick={() => playBookMove(bm.san)}
-                        className={`w-full grid grid-cols-[60px_1fr_60px_60px_60px_70px] gap-1 text-xs px-1 py-1.5 rounded hover:bg-primary/10 transition-colors text-left ${
-                          i === 0 ? "bg-primary/5" : ""
-                        }`}
-                      >
-                        <span className="font-bold text-foreground flex items-center gap-1">
-                          {bm.san}
-                          {bm.isMainLine && <Star className="w-2.5 h-2.5 text-primary" />}
-                        </span>
-                        <span className="text-muted-foreground truncate text-[10px]">
-                          {bm.explanation || bm.openingName || ""}
-                        </span>
-                        <span className="text-center text-green-400">{bm.winRate.toFixed(0)}%</span>
-                        <span className="text-center text-muted-foreground">{bm.drawRate.toFixed(0)}%</span>
-                        <span className="text-center text-red-400">{bm.lossRate.toFixed(0)}%</span>
-                        <span className="text-right text-muted-foreground">
-                          {bm.games > 1000 ? `${(bm.games / 1000).toFixed(1)}k` : bm.games}
-                        </span>
+              ) : explorerData && explorerData.moves.length > 0 ? (
+                <>
+                  {/* Position stats bar */}
+                  {explorerData.totalGames > 0 && (
+                    <div className="mb-2">
+                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-1">
+                        <Database className="h-3 w-3" />
+                        <span>{formatGames(explorerData.totalGames)} games</span>
+                      </div>
+                      <div className="flex h-3 rounded-full overflow-hidden">
+                        <div className="bg-[hsl(0,0%,92%)]" style={{ width: `${(explorerData.white / explorerData.totalGames) * 100}%` }} />
+                        <div className="bg-[hsl(0,0%,55%)]" style={{ width: `${(explorerData.draws / explorerData.totalGames) * 100}%` }} />
+                        <div className="bg-[hsl(220,15%,22%)]" style={{ width: `${(explorerData.black / explorerData.totalGames) * 100}%` }} />
+                      </div>
+                      <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
+                        <span>White {((explorerData.white / explorerData.totalGames) * 100).toFixed(0)}%</span>
+                        <span>Draw {((explorerData.draws / explorerData.totalGames) * 100).toFixed(0)}%</span>
+                        <span>Black {((explorerData.black / explorerData.totalGames) * 100).toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Move table */}
+                  <div className="space-y-0">
+                    <div className="grid grid-cols-[50px_1fr_42px_42px_42px_52px] gap-0 text-[9px] text-muted-foreground px-1 pb-1 border-b border-border uppercase tracking-wider">
+                      <span>Move</span><span>Bar</span>
+                      <span className="text-center">W%</span><span className="text-center">D%</span><span className="text-center">L%</span>
+                      <span className="text-right">Games</span>
+                    </div>
+                    {explorerData.moves.sort((a, b) => b.games - a.games).map((mv) => (
+                      <button key={mv.san} onClick={() => playExplorerMove(mv.san)}
+                        className="w-full grid grid-cols-[50px_1fr_42px_42px_42px_52px] gap-0 text-xs px-1 py-1.5 rounded hover:bg-primary/10 transition-colors text-left border-b border-border/10">
+                        <span className="font-bold text-foreground">{mv.san}</span>
+                        <div className="flex items-center pr-2">
+                          <div className="flex h-2.5 w-full rounded-full overflow-hidden">
+                            <div className="bg-[hsl(0,0%,92%)]" style={{ width: `${mv.winRate}%` }} />
+                            <div className="bg-[hsl(0,0%,55%)]" style={{ width: `${mv.drawRate}%` }} />
+                            <div className="bg-[hsl(220,15%,22%)]" style={{ width: `${mv.lossRate}%` }} />
+                          </div>
+                        </div>
+                        <span className="text-center text-foreground/90">{mv.winRate.toFixed(0)}</span>
+                        <span className="text-center text-muted-foreground">{mv.drawRate.toFixed(0)}</span>
+                        <span className="text-center text-muted-foreground/70">{mv.lossRate.toFixed(0)}</span>
+                        <span className="text-right text-muted-foreground">{formatGames(mv.games)}</span>
                       </button>
                     ))}
-                </div>
+                  </div>
+
+                  {/* Top games */}
+                  {explorerData.topGames && explorerData.topGames.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Trophy className="h-3 w-3 text-primary" />
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase">Top Games</span>
+                      </div>
+                      {explorerData.topGames.map((g, i) => (
+                        <a key={i} href={`https://lichess.org/${g.id}`} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center justify-between text-[10px] py-0.5 hover:text-primary transition-colors">
+                          <span className="text-foreground/80 truncate">{g.white.name} ({g.white.rating}) vs {g.black.name} ({g.black.rating})</span>
+                          <span className="text-muted-foreground ml-2 shrink-0">
+                            {g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"} · {g.year}
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-xs text-muted-foreground py-2">Out of book — Stockfish is your guide.</div>
               )}
             </div>
 
@@ -497,51 +376,24 @@ export default function OpeningExplorer() {
               </div>
               <ScrollArea className="max-h-40">
                 <div className="flex flex-wrap gap-0.5">
-                  <button
-                    onClick={() => goTo(0)}
-                    className={`text-xs px-1.5 py-0.5 rounded transition-colors ${
-                      viewIndex === 0 ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-                    }`}
-                  >
+                  <button onClick={() => goTo(0)}
+                    className={`text-xs px-1.5 py-0.5 rounded transition-colors ${viewIndex === 0 ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>
                     Start
                   </button>
                   {history.map((h, i) => {
                     const isWhiteMove = i % 2 === 0;
                     const moveNum = Math.floor(i / 2) + 1;
                     return (
-                      <button
-                        key={i}
-                        onClick={() => goTo(i + 1)}
-                        className={`text-xs px-1.5 py-0.5 rounded transition-colors flex items-center gap-0.5 ${
-                          viewIndex === i + 1 ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-                        }`}
-                      >
+                      <button key={i} onClick={() => goTo(i + 1)}
+                        className={`text-xs px-1.5 py-0.5 rounded transition-colors flex items-center gap-0.5 ${viewIndex === i + 1 ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}>
                         {isWhiteMove && <span className="text-muted-foreground">{moveNum}.</span>}
-                        <span className={h.bookMove ? "text-foreground" : "text-muted-foreground italic"}>
-                          {h.san}
-                        </span>
-                        {h.bookMove && <BookOpen className="w-2.5 h-2.5 text-primary" />}
+                        <span>{h.san}</span>
                       </button>
                     );
                   })}
                 </div>
               </ScrollArea>
             </div>
-
-            {/* Explanation panel */}
-            {viewIndex > 0 && history[viewIndex - 1]?.bookMove?.explanation && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-lg border border-primary/30 bg-primary/5 p-3"
-              >
-                <p className="text-sm text-foreground">
-                  <strong>{history[viewIndex - 1].san}</strong>
-                  {" — "}
-                  {history[viewIndex - 1].bookMove!.explanation}
-                </p>
-              </motion.div>
-            )}
           </div>
         </div>
       </div>
