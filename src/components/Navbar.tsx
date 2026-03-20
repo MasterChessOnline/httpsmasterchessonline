@@ -6,13 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
+  { label: "Home", href: "/", icon: LayoutDashboard },
   { label: "Play", href: "/play", icon: Swords },
-  { label: "Online", href: "/play/online", icon: Wifi },
-  { label: "Learn", href: "/learn", icon: GraduationCap },
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
-  { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
-  { label: "Lessons", href: "/lessons", icon: GraduationCap },
+  { label: "Learn", href: "/learn", icon: GraduationCap },
+  { label: "Leaderboard", href: "/leaderboard", icon: Award },
 ];
 
 const Navbar = () => {
