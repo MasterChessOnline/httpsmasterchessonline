@@ -1,4 +1,4 @@
-import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Wifi, Award, LayoutDashboard, Crown } from "lucide-react";
+import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Award, LayoutDashboard, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,13 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
+  { label: "Home", href: "/", icon: LayoutDashboard },
   { label: "Play", href: "/play", icon: Swords },
-  { label: "Online", href: "/play/online", icon: Wifi },
-  { label: "Learn", href: "/learn", icon: GraduationCap },
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
-  { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
-  { label: "Lessons", href: "/lessons", icon: GraduationCap },
+  { label: "Learn", href: "/learn", icon: GraduationCap },
+  { label: "Leaderboard", href: "/leaderboard", icon: Award },
 ];
 
 const Navbar = () => {
@@ -57,8 +55,8 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden items-center gap-0.5 md:flex">
-          {NAV_ITEMS.filter(item => !item.auth || user).map((item) => {
-            const isActive = location.pathname === item.href;
+          {NAV_ITEMS.map((item) => {
+            const isActive = item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href);
             return (
               <Link
                 key={item.label}
@@ -163,7 +161,7 @@ const Navbar = () => {
             transition={{ duration: 0.25, ease: "easeInOut" }}
           >
             <div className="flex flex-col gap-1">
-              {NAV_ITEMS.filter(item => !item.auth || user).map((item, i) => {
+              {NAV_ITEMS.map((item, i) => {
                 const isActive = location.pathname === item.href;
                 return (
                   <motion.div

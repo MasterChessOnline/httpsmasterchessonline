@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Trophy, Medal, User, Crown, TrendingUp, Star, Gem, Shield, Lock } from "lucide-react";
+import { Trophy, Medal, User, Crown, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 import { motion } from "framer-motion";
 
@@ -61,14 +60,6 @@ const Leaderboard = () => {
     );
   };
 
-  const premiumPlayers = players
-    .filter(p => p.games_played >= 5)
-    .sort((a, b) => {
-      const wrA = a.games_won / a.games_played;
-      const wrB = b.games_won / b.games_played;
-      return wrB - wrA || b.rating - a.rating;
-    })
-    .slice(0, 50);
 
   const renderTopThree = (list: LeaderboardEntry[]) => {
     const top3 = list.slice(0, 3);
