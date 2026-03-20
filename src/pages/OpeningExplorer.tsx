@@ -386,12 +386,21 @@ export default function OpeningExplorer() {
             {/* Board */}
             <div className="w-full max-w-[480px]">
               <ChessBoard
-                fen={currentFen}
-                onMove={handleMove}
+                game={viewGame}
                 flipped={flipped}
                 selectedSquare={selectedSquare}
-                onSquareClick={(sq) => setSelectedSquare(sq === selectedSquare ? null : sq as Square)}
-                customSquareStyles={{ ...lastMoveHighlight, ...bestMoveHighlight }}
+                legalMoves={legalMoves}
+                lastMove={lastMove}
+                isGameOver={false}
+                isPlayerTurn={true}
+                hintSquare={bestMoveUci.length >= 4 ? (bestMoveUci.slice(0, 2) as Square) : null}
+                onSquareClick={(sq) => {
+                  if (selectedSquare && legalMoves.includes(sq)) {
+                    handleMove(selectedSquare, sq);
+                  } else {
+                    setSelectedSquare(sq === selectedSquare ? null : sq);
+                  }
+                }}
               />
               {/* Controls under board */}
               <div className="flex items-center justify-between mt-2 gap-1">
