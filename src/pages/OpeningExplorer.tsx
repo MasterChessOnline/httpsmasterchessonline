@@ -313,25 +313,7 @@ export default function OpeningExplorer() {
     return () => window.removeEventListener("keydown", handler);
   }, [goTo, viewIndex, history.length]);
 
-  // Highlight best move squares
-  const bestMoveHighlight = useMemo(() => {
-    if (!bestMoveUci || bestMoveUci.length < 4) return {};
-    return {
-      [bestMoveUci.slice(0, 2)]: "rgba(34, 197, 94, 0.35)",
-      [bestMoveUci.slice(2, 4)]: "rgba(34, 197, 94, 0.55)",
-    };
-  }, [bestMoveUci]);
-
-  // Last move highlight
-  const lastMoveHighlight = useMemo(() => {
-    if (viewIndex === 0) return {};
-    const last = history[viewIndex - 1];
-    if (!last) return {};
-    return {
-      [last.from]: "rgba(255, 215, 0, 0.3)",
-      [last.to]: "rgba(255, 215, 0, 0.4)",
-    };
-  }, [viewIndex, history]);
+  // Remove unused highlight variables - ChessBoard uses lastMove + hintSquare props instead
 
   const evalPct = evalToBarPct(engineEval.cp, engineEval.mate);
   const evalText = formatEval(engineEval.cp, engineEval.mate);
