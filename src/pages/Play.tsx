@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Swords, TrendingUp, Trophy, Target, BookOpen } from "lucide-react";
+import { Swords, TrendingUp, Trophy, Target, BookOpen, Monitor, MonitorOff } from "lucide-react";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
