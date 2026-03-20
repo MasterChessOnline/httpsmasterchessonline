@@ -480,7 +480,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
   onMarkComplete: (courseId: string, lessonId: string) => void;
   onToggleBookmark: (courseId: string, lessonId: string) => void;
 }) {
-  const isPremium = true;
+  
   const [showVideo, setShowVideo] = useState(false);
   const lesson = course.lessons[lessonIdx];
   const totalLessons = course.lessons.length;
