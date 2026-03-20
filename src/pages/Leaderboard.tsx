@@ -158,51 +158,52 @@ const Leaderboard = () => {
         </div>
 
         <div className="max-w-2xl mx-auto">
-          {tab === "elo" && (
-            <>
-              {loading ? (
-                <div className="space-y-2">
-                  {[...Array(5)].map((_, i) => <div key={i} className="h-14 rounded-xl bg-muted/30 animate-pulse" />)}
+          {(() => {
+            let filtered = players;
+            if (filter === "top50") filtered = players.slice(0, 50);
+            if (filter === "active") filtered = players.filter(p => p.games_played >= 5);
+            
+            return loading ? (
+              <div className="space-y-2">
+                {[...Array(5)].map((_, i) => <div key={i} className="h-14 rounded-xl bg-muted/30 animate-pulse" />)}
+              </div>
+            ) : filtered.length === 0 ? (
+              <p className="text-center text-muted-foreground py-12">No players yet. Be the first!</p>
+            ) : (
+              <>
+                {renderTopThree(filtered)}
+                <div className="space-y-1.5">
+                  {filtered.slice(3).map((player, idx) => {
+                    const i = idx + 3;
+                    const winRate = player.games_played > 0 ? Math.round((player.games_won / player.games_played) * 100) : 0;
+                    const isMe = user?.id === player.user_id;
+                    return (
+                      <Link
+                        key={player.id}
+                        to={`/profile/${player.user_id}`}
+                        className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-primary/30 ${
+                          isMe ? "border-primary/30 bg-primary/5" : "border-border/50 bg-card/60 backdrop-blur-sm"
+                        }`}
+                      >
+                        {getRankDisplay(i)}
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className={`font-medium truncate ${isMe ? "text-primary" : "text-foreground"}`}>
+                            {player.display_name || player.username || "Anonymous"}
+                            {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
+                          </span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="font-mono text-lg font-bold text-primary">{player.rating}</p>
+                          <p className="text-[10px] text-muted-foreground">{player.games_played}G · {winRate}%W</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
-              ) : players.length === 0 ? (
-                <p className="text-center text-muted-foreground py-12">No players yet. Be the first!</p>
-              ) : (
-                <>
-                  {renderTopThree(players)}
-                  <div className="space-y-1.5">
-                    {players.slice(3).map((player, idx) => {
-                      const i = idx + 3;
-                      const winRate = player.games_played > 0 ? Math.round((player.games_won / player.games_played) * 100) : 0;
-                      const isMe = user?.id === player.user_id;
-                      return (
-                        <Link
-                          key={player.id}
-                          to={`/profile/${player.user_id}`}
-                          className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-primary/30 ${
-                            isMe ? "border-primary/30 bg-primary/5" : "border-border/50 bg-card/60 backdrop-blur-sm"
-                          }`}
-                        >
-                          {getRankDisplay(i)}
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <span className={`font-medium truncate ${isMe ? "text-primary" : "text-foreground"}`}>
-                              {player.display_name || player.username || "Anonymous"}
-                              {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
-                            </span>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="font-mono text-lg font-bold text-primary">{player.rating}</p>
-                            <p className="text-[10px] text-muted-foreground">{player.games_played}G · {winRate}%W</p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </>
-          )}
-
+              </>
+            );
+          })()}
         </div>
       </main>
       <Footer />
