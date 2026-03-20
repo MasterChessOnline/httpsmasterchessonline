@@ -199,65 +199,6 @@ const Leaderboard = () => {
             </>
           )}
 
-          {false && (
-            <>
-              {!isElitePlus ? (
-                <div className="text-center py-16">
-                  <Lock className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-                  <h2 className="text-xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>VIP Leaderboard</h2>
-                  <p className="text-muted-foreground mb-2">
-                    The VIP leaderboard ranks players by win rate and is exclusive to Elite and Grandmaster members.
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    Required tier: <span className="text-purple-400 font-semibold">Elite ($15/mo)</span> or higher
-                  </p>
-                  <Link to="/premium">
-                    <Button className="bg-primary text-primary-foreground">
-                      <Gem className="w-4 h-4 mr-2" /> View Plans
-                    </Button>
-                  </Link>
-                </div>
-              ) : premiumPlayers.length === 0 ? (
-                <p className="text-center text-muted-foreground py-12">No qualifying players yet (minimum 5 games).</p>
-              ) : (
-                <>
-                  <div className="text-center mb-4">
-                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                      <Gem className="w-3 h-3 mr-1" /> VIP Leaderboard — Ranked by Win Rate
-                    </Badge>
-                  </div>
-                  <div className="space-y-1.5">
-                    {premiumPlayers.map((player, i) => {
-                      const winRate = Math.round((player.games_won / player.games_played) * 100);
-                      const isMe = user?.id === player.user_id;
-                      return (
-                        <Link
-                          key={player.id}
-                          to={`/profile/${player.user_id}`}
-                          className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-purple-500/30 ${
-                            isMe ? "border-purple-500/30 bg-purple-500/5" : i < 3 ? "border-purple-500/10 bg-card" : "border-border/50 bg-card"
-                          }`}
-                        >
-                          {getRankDisplay(i)}
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <span className={`font-medium truncate ${isMe ? "text-purple-400" : "text-foreground"}`}>
-                              {player.display_name || player.username || "Anonymous"}
-                              {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
-                            </span>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="font-mono text-lg font-bold text-purple-400">{winRate}%</p>
-                            <p className="text-[10px] text-muted-foreground">{player.rating} ELO · {player.games_played}G</p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </>
-          )}
         </div>
       </main>
       <Footer />
