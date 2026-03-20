@@ -136,12 +136,25 @@ const Leaderboard = () => {
         </h1>
         <p className="text-center text-muted-foreground mb-6">See who's on top</p>
 
-        {/* Tab Header */}
-        <div className="flex justify-center gap-2 mb-8">
-          <div className="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium border border-primary bg-primary/10 text-primary shadow-glow">
-            <TrendingUp className="h-3.5 w-3.5" />
-            ELO Ratings
-          </div>
+        {/* Filters */}
+        <div className="flex justify-center gap-2 mb-8 flex-wrap">
+          {[
+            { key: "all" as const, label: "All Players" },
+            { key: "top50" as const, label: "Top 50" },
+            { key: "active" as const, label: "Active (5+ games)" },
+          ].map(f => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium border transition-all ${
+                filter === f.key
+                  ? "border-primary bg-primary/10 text-primary shadow-glow"
+                  : "border-border/50 text-muted-foreground hover:border-primary/30"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
 
         <div className="max-w-2xl mx-auto">
