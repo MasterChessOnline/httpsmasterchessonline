@@ -226,10 +226,7 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   onSelectCourse: (course: Course) => void;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const isPremium = true;
-  const navigate = useNavigate();
   const [levelFilter, setLevelFilter] = useState<string>("all");
-  const [tierFilter, setTierFilter] = useState<string>("all");
 
   const levels = [
     { key: "all", label: "All Levels", icon: BookOpen },
@@ -238,73 +235,36 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
     { key: "Advanced", label: "Advanced", icon: Award },
   ];
 
-  const tiers = [
-    { key: "all", label: "All", icon: BookOpen },
-    { key: "free", label: "Free", icon: Shield },
-    { key: "premium", label: "Premium", icon: Crown },
-  ];
-
   const filtered = COURSES.filter((c) => {
     if (levelFilter !== "all" && c.level !== levelFilter) return false;
-    if (tierFilter !== "all" && c.tier !== tierFilter) return false;
     return true;
   });
 
-  const canAccessCourse = (course: Course) => {
-    if (course.tier === "free") return true;
-    return isPremium;
-  };
-
   return (
     <>
-      {/* Tier badge */}
+      {/* All Free badge */}
       <div className="flex justify-center mb-6">
-        {!isPremium && (
-          <Badge className="bg-muted text-muted-foreground border-border text-xs px-3 py-1">
-            <Shield className="w-3 h-3 mr-1.5" /> Free Plan — Free courses + 2 preview chapters per premium course
-          </Badge>
-        )}
-        {isPremium && (
-          <Badge className="bg-primary/20 text-primary border-primary/30 text-xs px-3 py-1">
-            <Crown className="w-3 h-3 mr-1.5" /> Premium — All courses unlocked
-          </Badge>
-        )}
+        <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs px-3 py-1">
+          <Shield className="w-3 h-3 mr-1.5" /> All courses are 100% free
+        </Badge>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col items-center gap-3 mb-8">
-        <div className="flex justify-center gap-2 flex-wrap">
-          {levels.map(({ key, label, icon: LvlIcon }) => (
-            <button
-              key={key}
-              onClick={() => setLevelFilter(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
-                levelFilter === key
-                  ? "border-primary bg-primary/10 text-primary shadow-glow"
-                  : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-              }`}
-            >
-              <LvlIcon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="flex justify-center gap-2 flex-wrap">
-          {tiers.map(({ key, label, icon: TierIcon }) => (
-            <button
-              key={key}
-              onClick={() => setTierFilter(key)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all border ${
-                tierFilter === key
-                  ? key === "free" ? "border-green-500 bg-green-500/10 text-green-400 shadow-glow" : key === "premium" ? "border-primary bg-primary/10 text-primary shadow-glow" : "border-primary bg-primary/10 text-primary shadow-glow"
-                  : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-              }`}
-            >
-              <TierIcon className="w-3 h-3" />
-              {label}
-            </button>
-          ))}
-        </div>
+      {/* Level filter */}
+      <div className="flex justify-center gap-2 flex-wrap mb-8">
+        {levels.map(({ key, label, icon: LvlIcon }) => (
+          <button
+            key={key}
+            onClick={() => setLevelFilter(key)}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
+              levelFilter === key
+                ? "border-primary bg-primary/10 text-primary shadow-glow"
+                : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+            }`}
+          >
+            <LvlIcon className="w-3.5 h-3.5" />
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Course grid */}
@@ -315,24 +275,9 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
             course={course}
             onClick={() => onSelectCourse(course)}
             progress={getCourseProgress(course.id, course.lessons.length)}
-            accessible={canAccessCourse(course)}
           />
         ))}
       </div>
-
-      {/* Upsell */}
-      {!isPremium && (
-        <div className="mt-12 max-w-lg mx-auto rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-8 text-center">
-          <Crown className="w-10 h-10 text-primary mx-auto mb-4" />
-          <h3 className="font-display text-xl font-bold text-foreground mb-2">Unlock Premium Learning</h3>
-          <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto">
-            Get unlimited course access, AI feedback from DailyChess_12, exclusive video lessons, and personalized training plans.
-          </p>
-          <Button onClick={() => navigate("/premium")} size="lg">
-            View Plans — from $4.99/mo
-          </Button>
-        </div>
-      )}
     </>
   );
 }
