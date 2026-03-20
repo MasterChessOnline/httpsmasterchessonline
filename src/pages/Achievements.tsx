@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { COLLECTIBLES, RARITY_COLORS, Collectible } from "@/lib/collectibles-data";
 import { Crown, Trophy, Star, Zap, Brain, Flame, Medal, TrendingUp, Swords, Lock, Gem, Shield } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { hasAccess, type TierKey } from "@/lib/premium-tiers";
+
 
 const ICON_MAP: Record<string, React.ElementType> = {
   trophy: Trophy, medal: Medal, crown: Crown, swords: Swords,
