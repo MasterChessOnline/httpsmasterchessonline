@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/", icon: LayoutDashboard },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
   { label: "Play", href: "/play", icon: Swords },
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
   { label: "Learn", href: "/learn", icon: GraduationCap },
@@ -55,7 +55,7 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden items-center gap-0.5 md:flex">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.filter(item => !item.auth || user).map((item) => {
             const isActive = item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href);
             return (
               <Link
@@ -161,7 +161,7 @@ const Navbar = () => {
             transition={{ duration: 0.25, ease: "easeInOut" }}
           >
             <div className="flex flex-col gap-1">
-              {NAV_ITEMS.map((item, i) => {
+              {NAV_ITEMS.filter(item => !item.auth || user).map((item, i) => {
                 const isActive = location.pathname === item.href;
                 return (
                   <motion.div
