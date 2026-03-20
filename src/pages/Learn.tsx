@@ -407,9 +407,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
                   ? "bg-green-500/20 text-green-400"
                   : isNext
                     ? "bg-primary/20 text-primary ring-2 ring-primary/30"
-                    : status.premiumLocked
-                      ? "bg-muted/50 text-muted-foreground/50"
-                      : status.sequentialLocked
+                    : status.sequentialLocked
                         ? "bg-muted/30 text-muted-foreground/30"
                         : "bg-primary/10 text-primary"
               }`}>
