@@ -80,6 +80,7 @@ const PlayOnline = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number; avatar_url: string | null } | null>(null);
 
   // Live stats
   const [activePlayers, setActivePlayers] = useState(0);
@@ -91,6 +92,17 @@ const PlayOnline = () => {
   const [whiteTime, setWhiteTime] = useState(tc.seconds);
   const [blackTime, setBlackTime] = useState(tc.seconds);
   const [gameStarted, setGameStarted] = useState(false);
+
+  const opponentId = onlineGame
+    ? myColor === "w" ? onlineGame.black_player_id : onlineGame.white_player_id
+    : null;
+
+  useEffect(() => {
+    if (!opponentId) return;
+    supabase.from("profiles").select("display_name, rating, avatar_url").eq("user_id", opponentId).single().then(({ data }) => {
+      if (data) setOpponentProfile(data);
+    });
+  }, [opponentId]);
 
   // Fetch live stats (active players, live games, leaderboard)
   useEffect(() => {
