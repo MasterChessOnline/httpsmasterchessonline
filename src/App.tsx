@@ -36,6 +36,9 @@ import OpeningTrainer from "./pages/OpeningTrainer";
 import OpeningExplorer from "./pages/OpeningExplorer";
 import GameHistory from "./pages/GameHistory";
 import Analysis from "./pages/Analysis";
+import RatingCalculator from "./pages/RatingCalculator";
+import ChessTools from "./pages/ChessTools";
+import PieceValues from "./pages/PieceValues";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +73,9 @@ function AnimatedRoutes() {
           <Route path="/opening-explorer" element={<OpeningExplorer />} />
           <Route path="/history" element={<GameHistory />} />
           <Route path="/analysis" element={<Analysis />} />
+          <Route path="/rating-calculator" element={<RatingCalculator />} />
+          <Route path="/tools" element={<ChessTools />} />
+          <Route path="/piece-values" element={<PieceValues />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />

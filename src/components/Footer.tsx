@@ -47,6 +47,9 @@ const Footer = () => (
                 { label: "Game Analysis", href: "/analysis" },
                 { label: "Opening Explorer", href: "/opening-explorer" },
                 { label: "Story Mode", href: "/story" },
+                { label: "Rating Calculator", href: "/rating-calculator" },
+                { label: "Piece Values", href: "/piece-values" },
+                { label: "All Tools", href: "/tools" },
               ],
             },
             {
