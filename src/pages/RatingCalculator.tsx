@@ -356,7 +356,7 @@ const RatingCalculator = () => {
                   { range: "2400–2500", title: "Int'l Master", desc: "IM title", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
                   { range: "2500+", title: "Grandmaster", desc: "GM title", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
                 ].map((tier) => (
-                  <div key={tier.range} className={`rounded-lg ${bg} border ${tier.border} ${tier.bg} p-3`}>
+                  <div key={tier.range} className={`rounded-lg border ${tier.border} ${tier.bg} p-3`}>
                     <p className={`font-mono text-sm font-bold ${tier.color}`}>{tier.range}</p>
                     <p className="text-xs font-semibold text-foreground mt-0.5">{tier.title}</p>
                     <p className="text-[10px] text-muted-foreground">{tier.desc}</p>
