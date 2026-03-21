@@ -453,28 +453,18 @@ const PlayOnline = () => {
     );
   }
 
-  // Fetch opponent profile
-  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number; avatar_url: string | null } | null>(null);
-  const opponentId = onlineGame
-    ? myColor === "w" ? onlineGame.black_player_id : onlineGame.white_player_id
-    : null;
-
-  useEffect(() => {
-    if (!opponentId) return;
-    supabase.from("profiles").select("display_name, rating, avatar_url").eq("user_id", opponentId).single().then(({ data }) => {
-      if (data) setOpponentProfile(data);
-    });
-  }, [opponentId]);
-
   const myName = profile?.display_name || profile?.username || "You";
   const myRating = profile?.rating || 1200;
   const oppName = opponentProfile?.display_name || "Opponent";
   const oppRating = opponentProfile?.rating || 1200;
 
-  const topPlayer = boardFlipped ? { name: myName, rating: myRating, isMe: true, time: myColor === "w" ? whiteTime : blackTime, color: myColor }
-    : { name: oppName, rating: oppRating, isMe: false, time: myColor === "w" ? blackTime : whiteTime, color: myColor === "w" ? "b" : "w" };
-  const bottomPlayer = boardFlipped ? { name: oppName, rating: oppRating, isMe: false, time: myColor === "w" ? blackTime : whiteTime, color: myColor === "w" ? "b" : "w" }
-    : { name: myName, rating: myRating, isMe: true, time: myColor === "w" ? whiteTime : blackTime, color: myColor };
+  const oppColor = myColor === "w" ? "b" as const : "w" as const;
+  const topPlayer = boardFlipped
+    ? { name: myName, rating: myRating, isMe: true, time: myColor === "w" ? whiteTime : blackTime, color: myColor! }
+    : { name: oppName, rating: oppRating, isMe: false, time: myColor === "w" ? blackTime : whiteTime, color: oppColor };
+  const bottomPlayer = boardFlipped
+    ? { name: oppName, rating: oppRating, isMe: false, time: myColor === "w" ? blackTime : whiteTime, color: oppColor }
+    : { name: myName, rating: myRating, isMe: true, time: myColor === "w" ? whiteTime : blackTime, color: myColor! };
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
