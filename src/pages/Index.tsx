@@ -6,6 +6,7 @@ import WhyChooseUsSection from "@/components/WhyChooseUsSection";
 import YouTubeSection from "@/components/YouTubeSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ChessboardPreview from "@/components/ChessboardPreview";
+import CallToActionSection from "@/components/CallToActionSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -15,10 +16,11 @@ const Index = () => {
       <HeroSection />
       <StatsSection />
       <FeaturesSection />
+      <ChessboardPreview />
       <WhyChooseUsSection />
       <YouTubeSection />
       <TestimonialsSection />
-      <ChessboardPreview />
+      <CallToActionSection />
       <Footer />
     </div>
   );
