@@ -80,6 +80,7 @@ const PlayOnline = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number; avatar_url: string | null } | null>(null);
 
   // Live stats
   const [activePlayers, setActivePlayers] = useState(0);
@@ -91,6 +92,17 @@ const PlayOnline = () => {
   const [whiteTime, setWhiteTime] = useState(tc.seconds);
   const [blackTime, setBlackTime] = useState(tc.seconds);
   const [gameStarted, setGameStarted] = useState(false);
+
+  const opponentId = onlineGame
+    ? myColor === "w" ? onlineGame.black_player_id : onlineGame.white_player_id
+    : null;
+
+  useEffect(() => {
+    if (!opponentId) return;
+    supabase.from("profiles").select("display_name, rating, avatar_url").eq("user_id", opponentId).single().then(({ data }) => {
+      if (data) setOpponentProfile(data);
+    });
+  }, [opponentId]);
 
   // Fetch live stats (active players, live games, leaderboard)
   useEffect(() => {
@@ -441,22 +453,74 @@ const PlayOnline = () => {
     );
   }
 
+  const myName = profile?.display_name || profile?.username || "You";
+  const myRating = profile?.rating || 1200;
+  const oppName = opponentProfile?.display_name || "Opponent";
+  const oppRating = opponentProfile?.rating || 1200;
+
+  const isWhite = myColor === "w";
+  const oppColor = isWhite ? "b" as const : "w" as const;
+  const topPlayer = boardFlipped
+    ? { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: (myColor || "w") as "w" | "b" }
+    : { name: oppName, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor };
+  const bottomPlayer = boardFlipped
+    ? { name: oppName, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor }
+    : { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: (myColor || "w") as "w" | "b" };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const PlayerBar = ({ player, isTop }: { player: typeof topPlayer; isTop: boolean }) => {
+    const isActive = !isGameOver && gameStarted && game.turn() === player.color;
+    return (
+      <div className={`flex items-center justify-between rounded-xl border px-4 py-2.5 transition-all duration-300 ${
+        isActive ? "border-primary/50 bg-primary/5 shadow-[0_0_15px_hsl(var(--primary)/0.1)]" : "border-border/40 bg-card/60"
+      }`}>
+        <div className="flex items-center gap-3">
+          <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold ${
+            player.color === "w" ? "bg-foreground text-background" : "bg-muted-foreground/20 text-foreground"
+          }`}>
+            {player.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className={`text-sm font-semibold ${player.isMe ? "text-primary" : "text-foreground"}`}>{player.name}</span>
+              {isActive && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
+            </div>
+            <span className="text-xs text-muted-foreground font-mono">{player.rating} ELO</span>
+          </div>
+        </div>
+        {!unlimited && (
+          <div className={`font-mono text-xl font-bold px-3 py-1 rounded-lg ${
+            isActive ? "bg-primary/15 text-primary" : "bg-muted/30 text-muted-foreground"
+          } ${player.time <= 30 && isActive ? "text-red-400 animate-pulse" : ""}`}>
+            {formatTime(player.time)}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-6 pt-24 pb-16">
-        <h1 className="font-display text-4xl font-bold text-foreground text-center mb-2">
-          Play <span className="text-gradient-gold">Online</span>
-        </h1>
-        <p className="text-center text-muted-foreground mb-8">You are {myColor === "w" ? "White" : "Black"}</p>
+      <main className="container mx-auto px-4 pt-20 pb-16">
+        <div className="flex flex-col items-center gap-4 lg:flex-row lg:items-start lg:justify-center lg:gap-6">
+          {/* Board column */}
+          <div className="w-full max-w-[min(90vw,520px)] space-y-2">
+            <PlayerBar player={topPlayer} isTop />
 
-        <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
-          <div className="w-full max-w-[min(90vw,480px)] space-y-2">
             {!unlimited && (
-              <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor}
-                isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
+              <div className="sr-only">
+                <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor}
+                  isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
+              </div>
             )}
-            <div role="grid" aria-label="Chess board">
+
+            <div className="rounded-xl overflow-hidden shadow-[0_0_30px_hsl(var(--primary)/0.08)] border border-border/30" role="grid" aria-label="Chess board">
               {displayRanks.map((rank) => (
                 <div key={rank} className="flex" role="row">
                   {displayFiles.map((file) => {
@@ -471,72 +535,90 @@ const PlayOnline = () => {
                     const pieceKey = piece ? `${piece.color}${piece.type}` : null;
                     const pieceDisplay = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
 
+                    let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
+                    if (isSelected) bgClass = "bg-primary/40";
+                    else if (isLastMove) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
+
                     return (
                       <button key={square} role="gridcell"
                         aria-label={`${file}${rank}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : ""}`}
-                        className={`aspect-square w-[12.5%] flex items-center justify-center text-3xl sm:text-5xl select-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset
-                          ${isLight ? "bg-board-light" : "bg-board-dark"}
-                          ${isSelected ? "ring-2 ring-primary ring-inset brightness-125" : ""}
-                          ${isLastMove && !isSelected ? "brightness-110" : ""}
-                          ${isLegal ? "cursor-pointer" : "cursor-default"}`}
+                        className={`aspect-square w-[12.5%] flex items-center justify-center select-none transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset relative
+                          ${bgClass}
+                          ${isLegal || (game.turn() === myColor && !isGameOver) ? "cursor-pointer active:scale-95" : "cursor-default"}`}
                         onClick={() => handleSquareClick(square)} tabIndex={0}>
-                        {isLegal && !piece && <span className="block h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-primary/40" />}
-                        {isLegal && pieceDisplay && <span className={`${pieceDisplay.className} drop-shadow-[0_0_6px_hsl(var(--primary))]`}>{pieceDisplay.symbol}</span>}
-                        {!isLegal && pieceDisplay && <span className={pieceDisplay.className}>{pieceDisplay.symbol}</span>}
+                        {isLegal && !piece && <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />}
+                        {isLegal && pieceDisplay && <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />}
+                        {pieceDisplay && <span className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none ${pieceDisplay.className}`}>{pieceDisplay.symbol}</span>}
                       </button>
                     );
                   })}
                 </div>
               ))}
             </div>
+
+            <PlayerBar player={bottomPlayer} isTop={false} />
+
+            {/* Status + actions */}
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <p className="text-sm font-medium text-foreground">{statusText}</p>
+              <div className="flex gap-2">
+                {onlineStatus === "playing" && !isGameOver && (
+                  <Button onClick={resign} variant="destructive" size="sm"><Flag className="mr-1.5 h-3.5 w-3.5" /> Resign</Button>
+                )}
+                {isGameOver && (
+                  <Button onClick={resetOnline} size="sm"><RotateCcw className="mr-1.5 h-3.5 w-3.5" /> New Game</Button>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="w-full max-w-xs space-y-4">
-            <div className="rounded-lg border border-border/50 bg-card p-4" role="status" aria-live="polite">
-              <p className="font-display text-lg font-semibold text-foreground">{statusText}</p>
-            </div>
-
-            {onlineStatus === "playing" && !isGameOver && (
-              <Button onClick={resign} variant="destructive" className="w-full"><Flag className="mr-2 h-4 w-4" /> Resign</Button>
-            )}
-            {isGameOver && (
-              <Button onClick={resetOnline} variant="outline" className="w-full"><RotateCcw className="mr-2 h-4 w-4" /> New Game</Button>
-            )}
-
+          {/* Side panel */}
+          <div className="w-full max-w-xs space-y-3 lg:mt-0">
             {/* Move history */}
-            <div className="rounded-lg border border-border/50 bg-card p-4 max-h-40 overflow-y-auto">
-              <h3 className="font-display text-sm font-semibold text-foreground mb-2">Moves</h3>
-              {moveHistory.length === 0 ? <p className="text-xs text-muted-foreground">No moves yet</p> : (
-                <div className="grid grid-cols-[auto_1fr_1fr] gap-x-3 gap-y-1 text-sm">
-                  {moveHistory.map((move, i) => i % 2 === 0 ? (
-                    <div key={i} className="contents">
-                      <span className="text-muted-foreground text-xs">{Math.floor(i / 2) + 1}.</span>
-                      <span className="text-foreground font-medium">{move}</span>
-                      <span className="text-muted-foreground">{moveHistory[i + 1] || ""}</span>
-                    </div>
-                  ) : null)}
-                </div>
-              )}
+            <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-4">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Moves</h3>
+              <div className="max-h-48 overflow-y-auto">
+                {moveHistory.length === 0 ? <p className="text-xs text-muted-foreground italic">Game starting…</p> : (
+                  <div className="grid grid-cols-[auto_1fr_1fr] gap-x-3 gap-y-1 text-sm">
+                    {moveHistory.map((move, i) => i % 2 === 0 ? (
+                      <div key={i} className="contents">
+                        <span className="text-muted-foreground/60 text-xs font-mono">{Math.floor(i / 2) + 1}.</span>
+                        <span className="text-foreground font-medium font-mono">{move}</span>
+                        <span className="text-muted-foreground font-mono">{moveHistory[i + 1] || ""}</span>
+                      </div>
+                    ) : null)}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Chat */}
             {onlineGame && (
-              <div className="rounded-lg border border-border/50 bg-card p-3 space-y-2">
-                <h3 className="font-display text-sm font-semibold text-foreground">Chat</h3>
-                <div className="h-32 overflow-y-auto space-y-1 text-xs">
+              <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-4 space-y-3">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Game Chat</h3>
+                <div className="h-40 overflow-y-auto space-y-1.5 px-1">
+                  {chatMessages.length === 0 && (
+                    <p className="text-xs text-muted-foreground/50 italic text-center pt-12">Say hi to your opponent!</p>
+                  )}
                   {chatMessages.map(msg => (
-                    <div key={msg.id} className={msg.user_id === user?.id ? "text-right" : "text-left"}>
-                      <span className={`inline-block px-2 py-1 rounded-lg ${msg.user_id === user?.id ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    <div key={msg.id} className={`flex ${msg.user_id === user?.id ? "justify-end" : "justify-start"}`}>
+                      <span className={`inline-block px-3 py-1.5 rounded-2xl text-xs max-w-[85%] ${
+                        msg.user_id === user?.id
+                          ? "bg-primary/20 text-primary rounded-br-sm"
+                          : "bg-muted/50 text-foreground rounded-bl-sm"
+                      }`}>
                         {msg.message}
                       </span>
                     </div>
                   ))}
                   <div ref={chatEndRef} />
                 </div>
-                <div className="flex gap-1">
-                  <Input value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Type…" className="h-8 text-xs"
+                <div className="flex gap-1.5">
+                  <Input value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Type a message…" className="h-9 text-xs rounded-xl"
                     onKeyDown={e => e.key === "Enter" && sendChat()} />
-                  <Button size="sm" variant="ghost" onClick={sendChat} className="h-8 w-8 p-0"><Send className="h-3 w-3" /></Button>
+                  <Button size="sm" variant="ghost" onClick={sendChat} className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10">
+                    <Send className="h-3.5 w-3.5 text-primary" />
+                  </Button>
                 </div>
               </div>
             )}

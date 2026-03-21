@@ -36,6 +36,7 @@ const Footer = () => (
                 { label: "vs Computer", href: "/play" },
                 { label: "Online Multiplayer", href: "/play/online" },
                 { label: "Tournaments", href: "/tournaments" },
+                { label: "Daily Challenge", href: "/daily-challenge" },
               ],
             },
             {
@@ -43,15 +44,18 @@ const Footer = () => (
               links: [
                 { label: "Courses", href: "/learn" },
                 { label: "Video Lessons", href: "/video-lessons" },
-                { label: "Leaderboard", href: "/leaderboard" },
+                { label: "Game Analysis", href: "/analysis" },
+                { label: "Opening Explorer", href: "/opening-explorer" },
+                { label: "Story Mode", href: "/story" },
               ],
             },
             {
               title: "Community",
               links: [
+                { label: "Leaderboard", href: "/leaderboard" },
+                { label: "Friends", href: "/friends" },
                 { label: "About", href: "/about" },
                 { label: "Contact", href: "/contact" },
-                { label: "Friends", href: "/friends" },
               ],
             },
           ].map((section) => (

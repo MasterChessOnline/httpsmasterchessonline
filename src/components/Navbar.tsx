@@ -1,16 +1,17 @@
-import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Award, LayoutDashboard, Crown, Brain } from "lucide-react";
+import { Menu, X, LogOut, User, Trophy, Users, Swords, GraduationCap, Award, LayoutDashboard, Crown, Brain, Wifi } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, auth: true },
   { label: "Play", href: "/play", icon: Swords },
+  { label: "Online", href: "/play/online", icon: Wifi },
   { label: "Tournaments", href: "/tournaments", icon: Trophy },
   { label: "Learn", href: "/learn", icon: GraduationCap },
-  { label: "Leaderboard", href: "/leaderboard", icon: Award },
   { label: "Analysis", href: "/analysis", icon: Brain },
 ];
 
