@@ -458,13 +458,14 @@ const PlayOnline = () => {
   const oppName = opponentProfile?.display_name || "Opponent";
   const oppRating = opponentProfile?.rating || 1200;
 
-  const oppColor = myColor === "w" ? "b" as const : "w" as const;
+  const isWhite = myColor === "w";
+  const oppColor = isWhite ? "b" as const : "w" as const;
   const topPlayer = boardFlipped
-    ? { name: myName, rating: myRating, isMe: true, time: myColor === "w" ? whiteTime : blackTime, color: myColor! }
-    : { name: oppName, rating: oppRating, isMe: false, time: myColor === "w" ? blackTime : whiteTime, color: oppColor };
+    ? { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: (myColor || "w") as "w" | "b" }
+    : { name: oppName, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor };
   const bottomPlayer = boardFlipped
-    ? { name: oppName, rating: oppRating, isMe: false, time: myColor === "w" ? blackTime : whiteTime, color: oppColor }
-    : { name: myName, rating: myRating, isMe: true, time: myColor === "w" ? whiteTime : blackTime, color: myColor! };
+    ? { name: oppName, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor }
+    : { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: (myColor || "w") as "w" | "b" };
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
