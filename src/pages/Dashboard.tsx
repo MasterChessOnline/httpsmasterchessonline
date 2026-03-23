@@ -8,25 +8,19 @@ import { useStoryProgress } from "@/hooks/use-story-progress";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { TOTAL_CHAPTERS } from "@/lib/story-data";
 import { COURSES } from "@/lib/courses-data";
+import { calculateXP } from "@/lib/gamification";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DailyChallenges from "@/components/DailyChallenges";
+import DailyMissions from "@/components/DailyMissions";
+import XPLevelBadge from "@/components/XPLevelBadge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
   Trophy, Swords, Flame, BookOpen, Bell,
-  TrendingUp, Calendar, Sparkles, Award, Users, Zap, Star
+  TrendingUp, Sparkles, Award, Users, Zap, Star, BarChart3
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-
-interface Notification {
-  id: string;
-  icon: typeof Bell;
-  title: string;
-  description: string;
-  time: string;
-  type: "tournament" | "lesson" | "streak" | "achievement";
-}
+import { motion } from "framer-motion";
 
 const Dashboard = () => {
   const { user, profile, loading } = useAuth();
@@ -43,22 +37,17 @@ const Dashboard = () => {
   const overallLearningPct = totalCourseLessons > 0 ? Math.round((totalCompleted / totalCourseLessons) * 100) : 0;
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/login");
-    }
+    if (!loading && !user) navigate("/login");
   }, [user, loading, navigate]);
 
   useEffect(() => {
     if (!user) return;
-
     supabase
       .from("tournament_registrations")
       .select("tournament_id, tournaments(name, starts_at, status, time_control_label)")
       .eq("user_id", user.id)
       .limit(5)
-      .then(({ data }) => {
-        setUpcomingTournaments(data || []);
-      });
+      .then(({ data }) => setUpcomingTournaments(data || []));
 
     supabase
       .from("online_games")
@@ -67,9 +56,7 @@ const Dashboard = () => {
       .eq("status", "finished")
       .order("created_at", { ascending: false })
       .limit(5)
-      .then(({ data }) => {
-        setRecentGames(data || []);
-      });
+      .then(({ data }) => setRecentGames(data || []));
   }, [user]);
 
   if (loading) {
@@ -78,9 +65,7 @@ const Dashboard = () => {
         <Navbar />
         <main className="container mx-auto px-6 pt-24 pb-16">
           <div className="max-w-5xl mx-auto space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-32 rounded-xl bg-muted/30 animate-pulse" />
-            ))}
+            {[1, 2, 3].map(i => <div key={i} className="h-32 rounded-xl bg-muted/30 animate-pulse" />)}
           </div>
         </main>
       </div>
@@ -89,142 +74,108 @@ const Dashboard = () => {
 
   if (!user || !profile) return null;
 
-  const winRate = profile.games_played > 0
-    ? Math.round((profile.games_won / profile.games_played) * 100)
-    : 0;
-
-  const notifications: Notification[] = [
-    {
-      id: "1",
-      icon: Trophy,
-      title: "Daily Tournament Starting Soon",
-      description: "A new blitz tournament starts in 30 minutes. Join now!",
-      time: "30m",
-      type: "tournament",
-    },
-    {
-      id: "2",
-      icon: Flame,
-      title: learningStreak.current_streak > 0 ? `${learningStreak.current_streak}-day learning streak!` : "Start your streak today!",
-      description: learningStreak.current_streak > 0
-        ? "Complete a lesson today to extend your streak."
-        : "Start learning to build your training streak.",
-      time: "Today",
-      type: "streak",
-    },
-    {
-      id: "3",
-      icon: BookOpen,
-      title: "New Lesson Available",
-      description: "DailyChess_12 posted a new opening guide on YouTube.",
-      time: "2h",
-      type: "lesson",
-    },
-  ];
+  const winRate = profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
+  const xp = calculateXP(profile, {
+    lessonsCompleted: totalCompleted,
+    streakDays: learningStreak.current_streak,
+    storyChapters: storyCompleted,
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-6 pt-24 pb-16">
+      <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
         <div className="max-w-5xl mx-auto space-y-6">
-          {/* Welcome header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="font-display text-3xl font-bold text-foreground">
-                Welcome back, <span className="text-gradient-gold">{profile.display_name || "Player"}</span>
-              </h1>
-              <p className="text-muted-foreground mt-1">Here's your chess journey at a glance.</p>
+          {/* Welcome + XP Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-4">
+              <XPLevelBadge xp={xp} size="lg" />
+              <div>
+                <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+                  Welcome, <span className="text-gradient-gold">{profile.display_name || "Player"}</span>
+                </h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {xp.toLocaleString()} XP earned · Keep playing to level up!
+                </p>
+              </div>
             </div>
             <div className="flex gap-2 flex-wrap">
               <Link to="/play">
-                <Button size="sm">
-                  <Swords className="mr-2 h-4 w-4" /> Play Now
-                </Button>
+                <Button size="sm"><Swords className="mr-2 h-4 w-4" /> Play Now</Button>
               </Link>
-              <Link to="/learn">
-                <Button size="sm" variant="outline">
-                  <BookOpen className="mr-2 h-4 w-4" /> Continue Training
-                </Button>
+              <Link to="/leaderboard">
+                <Button size="sm" variant="outline"><BarChart3 className="mr-2 h-4 w-4" /> Leaderboard</Button>
               </Link>
-              {recentGames.length > 0 && (
-                <Link to="/play">
-                  <Button size="sm" variant="outline">
-                    <Zap className="mr-2 h-4 w-4" /> Play Again
-                  </Button>
-                </Link>
-              )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Active tournament banner */}
           {activeTournament && (
-            <div className="rounded-xl border border-primary/30 bg-primary/10 p-4 flex items-center justify-between">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-xl border border-primary/30 bg-primary/10 p-4 flex items-center justify-between"
+            >
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-primary/20 p-2.5">
-                  <Trophy className="h-5 w-5 text-primary" />
-                </div>
+                <div className="rounded-lg bg-primary/20 p-2.5"><Trophy className="h-5 w-5 text-primary" /></div>
                 <div>
                   <p className="text-sm font-semibold text-foreground">{activeTournament.tournament_name}</p>
                   <p className="text-xs text-muted-foreground">
                     {activeTournament.tournament_status === "active"
                       ? `🔴 Live · Round ${activeTournament.current_round}/${activeTournament.total_rounds}`
-                      : `Starting soon`}
-                    {" · "}{activeTournament.time_control_label}
+                      : "Starting soon"} · {activeTournament.time_control_label}
                   </p>
                 </div>
               </div>
               <Button size="sm" onClick={() => navigate(`/tournaments/${activeTournament.tournament_id}`)}>
                 <Zap className="h-3 w-3 mr-1" /> Go to Lobby
               </Button>
-            </div>
+            </motion.div>
           )}
 
           {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
-              { label: "ELO Rating", value: profile.rating, icon: TrendingUp, color: "text-primary" },
-              { label: "Games Played", value: profile.games_played, icon: Swords, color: "text-primary" },
-              { label: "Win Rate", value: `${winRate}%`, icon: Trophy, color: "text-primary" },
-              { label: "Learning Streak", value: learningStreak.current_streak, icon: Flame, color: "text-primary" },
-            ].map(stat => (
-              <div key={stat.label} className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-4 text-center">
-                <stat.icon className={`h-5 w-5 mx-auto mb-2 ${stat.color}`} />
-                <p className="font-mono text-2xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{stat.label}</p>
-              </div>
+              { label: "ELO Rating", value: profile.rating, icon: TrendingUp },
+              { label: "Games", value: profile.games_played, icon: Swords },
+              { label: "Win Rate", value: `${winRate}%`, icon: Trophy },
+              { label: "Streak", value: learningStreak.current_streak, icon: Flame },
+              { label: "Total XP", value: xp.toLocaleString(), icon: Sparkles },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-3 sm:p-4 text-center"
+              >
+                <stat.icon className="h-4 w-4 sm:h-5 sm:w-5 mx-auto mb-1.5 text-primary" />
+                <p className="font-mono text-lg sm:text-xl font-bold text-foreground">{stat.value}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{stat.label}</p>
+              </motion.div>
             ))}
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Left column - Main content */}
+            {/* Left column */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Progress tracking */}
-              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" /> Progress Tracking
+              {/* Quick Improve */}
+              <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 p-5">
+                <h2 className="font-display text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" /> Quick Improve
                 </h2>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-muted-foreground">Games to next milestone</span>
-                      <span className="text-foreground font-medium">{profile.games_played} / {Math.ceil((profile.games_played + 1) / 10) * 10}</span>
-                    </div>
-                    <Progress value={(profile.games_played % 10) * 10} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-muted-foreground">Learning streak</span>
-                      <span className="text-foreground font-medium">{learningStreak.current_streak} / 7 days</span>
-                    </div>
-                    <Progress value={Math.min((learningStreak.current_streak / 7) * 100, 100)} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-muted-foreground">ELO progress</span>
-                      <span className="text-foreground font-medium">{profile.rating} / {Math.ceil(profile.rating / 100) * 100 + 100}</span>
-                    </div>
-                    <Progress value={((profile.rating % 100) / 100) * 100} className="h-2" />
-                  </div>
+                <p className="text-sm text-muted-foreground mb-4">1 lesson + 1 quick game = sharper skills in 10 min.</p>
+                <div className="flex gap-2">
+                  <Link to="/learn" className="flex-1">
+                    <Button size="sm" variant="outline" className="w-full"><BookOpen className="mr-2 h-4 w-4" /> 1 Lesson</Button>
+                  </Link>
+                  <Link to="/play" className="flex-1">
+                    <Button size="sm" className="w-full"><Swords className="mr-2 h-4 w-4" /> 1 Quick Game</Button>
+                  </Link>
                 </div>
               </div>
 
@@ -234,14 +185,11 @@ const Dashboard = () => {
                   <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
                     <Swords className="h-5 w-5 text-primary" /> Recent Games
                   </h2>
-                  {recentGames.length > 0 && (
-                    <Link to="/history" className="text-xs text-primary hover:underline">View All →</Link>
-                  )}
+                  {recentGames.length > 0 && <Link to="/history" className="text-xs text-primary hover:underline">View All →</Link>}
                 </div>
                 {recentGames.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-6">
-                    No games yet.{" "}
-                    <Link to="/play/online" className="text-primary hover:underline">Play your first game!</Link>
+                    No games yet. <Link to="/play/online" className="text-primary hover:underline">Play your first game!</Link>
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -257,7 +205,10 @@ const Dashboard = () => {
                             </span>
                             <span className="text-sm text-foreground">{isWhite ? "White" : "Black"} · {g.time_control_label}</span>
                           </div>
-                          <span className="text-xs text-muted-foreground">{new Date(g.created_at).toLocaleDateString()}</span>
+                          <div className="text-right">
+                            <span className="text-xs text-primary font-semibold">+{won ? 25 : drew ? 10 : 10} XP</span>
+                            <p className="text-[10px] text-muted-foreground">{new Date(g.created_at).toLocaleDateString()}</p>
+                          </div>
                         </div>
                       );
                     })}
@@ -265,113 +216,44 @@ const Dashboard = () => {
                 )}
               </div>
 
-              {/* Learning Progress */}
-              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-primary" /> Learning Progress
-                </h2>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-muted-foreground">Courses Completion</span>
-                      <span className="font-mono text-primary font-bold">{totalCompleted}/{totalCourseLessons}</span>
-                    </div>
-                    <Progress value={overallLearningPct} className="h-2.5" />
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Flame className="h-3 w-3 text-orange-500" /> {learningStreak.current_streak} day streak
-                    </span>
-                    <span>{overallLearningPct}% complete</span>
-                  </div>
-                  <Link to="/learn">
-                    <Button size="sm" className="w-full">
-                      <BookOpen className="mr-2 h-4 w-4" /> {totalCompleted > 0 ? "Continue Learning" : "Start Learning"}
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Story Mode progress */}
-              <div className="rounded-xl border border-primary/20 bg-primary/5 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-primary" /> Story Mode
-                </h2>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-muted-foreground">Adventure Progress</span>
-                      <span className="font-mono text-primary font-bold">{storyCompleted}/{TOTAL_CHAPTERS}</span>
-                    </div>
-                    <Progress value={storyPct} className="h-2.5" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" /> {storyStars} stars earned
-                    </span>
-                    <span className="text-xs text-muted-foreground">{storyPct}% complete</span>
-                  </div>
-                  <Link to="/story">
-                    <Button size="sm" className="w-full">
-                      <Swords className="mr-2 h-4 w-4" /> {storyCompleted > 0 ? "Continue Adventure" : "Start Adventure"}
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Quick Improve - 1 lesson + 1 game */}
-              <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" /> Quick Improve
-                </h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Complete 1 mini lesson + play 1 quick game to sharpen your skills in under 10 minutes.
-                </p>
-                <div className="flex gap-2">
-                  <Link to="/learn" className="flex-1">
-                    <Button size="sm" variant="outline" className="w-full">
-                      <BookOpen className="mr-2 h-4 w-4" /> 1 Lesson
-                    </Button>
-                  </Link>
-                  <Link to="/play" className="flex-1">
-                    <Button size="sm" className="w-full">
-                      <Swords className="mr-2 h-4 w-4" /> 1 Quick Game
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* AI Analysis CTA */}
-              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" /> Game Analysis
-                </h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Analyze any game with Stockfish engine. Find mistakes, blunders, and learn the best moves. Explore opening theory with real game statistics.
-                </p>
-                <div className="flex gap-2">
-                  <Link to="/analysis">
-                    <Button size="sm">
-                      <TrendingUp className="mr-2 h-4 w-4" /> Open Analysis Board
-                    </Button>
-                  </Link>
-                  <Link to="/play">
-                    <Button size="sm" variant="outline">
-                      <Swords className="mr-2 h-4 w-4" /> Play vs Bot
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Upcoming tournaments */}
+              {/* Progress tracking */}
               <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
                 <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-primary" /> Upcoming Tournaments
+                  <TrendingUp className="h-5 w-5 text-primary" /> Progress
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-muted-foreground">Courses</span>
+                      <span className="font-mono text-primary font-bold">{totalCompleted}/{totalCourseLessons}</span>
+                    </div>
+                    <Progress value={overallLearningPct} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-muted-foreground">Story Mode</span>
+                      <span className="font-mono text-primary font-bold">{storyCompleted}/{TOTAL_CHAPTERS}</span>
+                    </div>
+                    <Progress value={storyPct} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-muted-foreground">ELO → {Math.ceil(profile.rating / 100) * 100 + 100}</span>
+                      <span className="font-mono text-primary font-bold">{profile.rating}</span>
+                    </div>
+                    <Progress value={((profile.rating % 100) / 100) * 100} className="h-2" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tournaments */}
+              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
+                <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-primary" /> Tournaments
                 </h2>
                 {upcomingTournaments.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-6">
-                    No tournaments registered.{" "}
-                    <Link to="/tournaments" className="text-primary hover:underline">Browse tournaments</Link>
+                    No tournaments. <Link to="/tournaments" className="text-primary hover:underline">Browse tournaments</Link>
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -381,12 +263,7 @@ const Dashboard = () => {
                           <p className="text-sm font-medium text-foreground">{reg.tournaments?.name}</p>
                           <p className="text-xs text-muted-foreground">{reg.tournaments?.time_control_label}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">
-                            {reg.tournaments?.starts_at ? new Date(reg.tournaments.starts_at).toLocaleDateString() : "TBD"}
-                          </p>
-                          <span className="text-[10px] uppercase tracking-wider text-primary font-semibold">{reg.tournaments?.status}</span>
-                        </div>
+                        <span className="text-[10px] uppercase tracking-wider text-primary font-semibold">{reg.tournaments?.status}</span>
                       </div>
                     ))}
                   </div>
@@ -394,62 +271,34 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Right column - Sidebar */}
+            {/* Right column */}
             <div className="space-y-6">
-              {/* Notifications */}
+              {/* Daily Missions */}
+              <DailyMissions />
+
+              {/* Quick Actions */}
               <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-primary" /> Notifications
-                </h2>
-                <div className="space-y-3">
-                  {notifications.map(n => (
-                    <div key={n.id} className="flex gap-3 p-3 rounded-lg bg-muted/20 border border-border/30">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <n.icon className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">{n.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground shrink-0">{n.time}</span>
-                    </div>
+                <h2 className="font-display text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
+                <div className="space-y-2">
+                  {[
+                    { to: "/learn", icon: BookOpen, label: "Browse Lessons" },
+                    { to: "/tournaments", icon: Trophy, label: "Join Tournament" },
+                    { to: "/achievements", icon: Award, label: "Achievements" },
+                    { to: "/friends", icon: Users, label: "Friends" },
+                    { to: `/profile/${user.id}`, icon: TrendingUp, label: "View Profile" },
+                    { to: "/analysis", icon: Sparkles, label: "Analyze Game" },
+                    { to: "/leaderboard", icon: BarChart3, label: "Leaderboard" },
+                  ].map(a => (
+                    <Link to={a.to} key={a.label} className="block">
+                      <Button variant="outline" className="w-full justify-start">
+                        <a.icon className="mr-2 h-4 w-4 text-primary" /> {a.label}
+                      </Button>
+                    </Link>
                   ))}
                 </div>
               </div>
 
-              {/* Quick actions */}
-              <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-5">
-                <h2 className="font-display text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
-                <div className="space-y-2">
-                  <Link to="/learn" className="block">
-                    <Button variant="outline" className="w-full justify-start">
-                      <BookOpen className="mr-2 h-4 w-4 text-primary" /> Browse Lessons
-                    </Button>
-                  </Link>
-                  <Link to="/tournaments" className="block">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Trophy className="mr-2 h-4 w-4 text-primary" /> Join Tournament
-                    </Button>
-                  </Link>
-                  <Link to="/achievements" className="block">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Award className="mr-2 h-4 w-4 text-primary" /> View Achievements
-                    </Button>
-                  </Link>
-                  <Link to="/friends" className="block">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Users className="mr-2 h-4 w-4 text-primary" /> Friends
-                    </Button>
-                  </Link>
-                  <Link to={`/profile/${user.id}`} className="block">
-                    <Button variant="outline" className="w-full justify-start">
-                      <TrendingUp className="mr-2 h-4 w-4 text-primary" /> View Profile
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Daily Challenges */}
+              {/* Daily Challenges (puzzles) */}
               <DailyChallenges />
             </div>
           </div>
