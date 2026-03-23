@@ -79,6 +79,9 @@ function AnimatedRoutes() {
           <Route path="/rating-calculator" element={<RatingCalculator />} />
           <Route path="/tools" element={<ChessTools />} />
           <Route path="/piece-values" element={<PieceValues />} />
+          <Route path="/skill-tree" element={<SkillTree />} />
+          <Route path="/challenge" element={<Challenge />} />
+          <Route path="/stats" element={<Stats />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
