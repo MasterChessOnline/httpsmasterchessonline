@@ -39,6 +39,9 @@ import Analysis from "./pages/Analysis";
 import RatingCalculator from "./pages/RatingCalculator";
 import ChessTools from "./pages/ChessTools";
 import PieceValues from "./pages/PieceValues";
+import SkillTree from "./pages/SkillTree";
+import Challenge from "./pages/Challenge";
+import Stats from "./pages/Stats";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +79,9 @@ function AnimatedRoutes() {
           <Route path="/rating-calculator" element={<RatingCalculator />} />
           <Route path="/tools" element={<ChessTools />} />
           <Route path="/piece-values" element={<PieceValues />} />
+          <Route path="/skill-tree" element={<SkillTree />} />
+          <Route path="/challenge" element={<Challenge />} />
+          <Route path="/stats" element={<Stats />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />

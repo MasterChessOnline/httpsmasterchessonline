@@ -45,6 +45,15 @@ const TOOLS = [
     ],
   },
   {
+    category: "Improve",
+    items: [
+      { title: "Skill Tree", desc: "Unlock skills across Tactics, Strategy, Openings & Endgames", icon: Target, href: "/skill-tree", color: "text-purple-400", bg: "bg-purple-500/10" },
+      { title: "Advanced Stats", desc: "Deep analytics: win rate by color, time control, streaks", icon: BarChart3, href: "/stats", color: "text-blue-400", bg: "bg-blue-500/10" },
+      { title: "1v1 Challenge", desc: "Challenge anyone with a shareable link", icon: Swords, href: "/challenge", color: "text-red-400", bg: "bg-red-500/10" },
+      { title: "Piece Values", desc: "Learn relative piece values", icon: Crown, href: "/piece-values", color: "text-primary", bg: "bg-primary/10" },
+    ],
+  },
+  {
     category: "Community",
     items: [
       { title: "Leaderboard", desc: "See top-rated players", icon: Crown, href: "/leaderboard", color: "text-primary", bg: "bg-primary/10" },
