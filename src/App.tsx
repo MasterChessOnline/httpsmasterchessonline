@@ -39,6 +39,9 @@ import Analysis from "./pages/Analysis";
 import RatingCalculator from "./pages/RatingCalculator";
 import ChessTools from "./pages/ChessTools";
 import PieceValues from "./pages/PieceValues";
+import SkillTree from "./pages/SkillTree";
+import Challenge from "./pages/Challenge";
+import Stats from "./pages/Stats";
 
 const queryClient = new QueryClient();
 
