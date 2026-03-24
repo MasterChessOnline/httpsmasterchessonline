@@ -3,32 +3,35 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Wifi, Flag, Timer, Loader2, Send, Users, Eye, Swords, Trophy, TrendingUp, User } from "lucide-react";
+import { RotateCcw, Wifi, Flag, Timer, Loader2, Send, Users, Eye, Swords, Trophy, TrendingUp, User, Handshake } from "lucide-react";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
+import { getAIMove, evaluateBoard, type Difficulty } from "@/lib/chess-ai";
 import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { matchBot, getOnlineBots, getDifficultyForRating, type OnlineBotProfile } from "@/lib/online-bots";
+import { motion, AnimatePresence } from "framer-motion";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
 const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
-  wk: { symbol: "♚", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wq: { symbol: "♛", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wr: { symbol: "♜", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wb: { symbol: "♝", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wn: { symbol: "♞", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  wp: { symbol: "♟", className: "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" },
-  bk: { symbol: "♚", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  bq: { symbol: "♛", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  br: { symbol: "♜", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  bb: { symbol: "♝", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  bn: { symbol: "♞", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
-  bp: { symbol: "♟", className: "text-[#1a1a2e] drop-shadow-[0_0_3px_rgba(255,255,255,0.4)]" },
+  wk: { symbol: "♔", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
+  wq: { symbol: "♕", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
+  wr: { symbol: "♖", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
+  wb: { symbol: "♗", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
+  wn: { symbol: "♘", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
+  wp: { symbol: "♙", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
+  bk: { symbol: "♚", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
+  bq: { symbol: "♛", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
+  br: { symbol: "♜", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
+  bb: { symbol: "♝", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
+  bn: { symbol: "♞", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
+  bp: { symbol: "♟", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
 };
 
 interface ChatMessage {
@@ -62,6 +65,15 @@ interface LeaderEntry {
   games_played: number;
 }
 
+// Bot chat messages they "send" during game
+const BOT_CHAT_MESSAGES = {
+  greeting: ["Hi, good luck! 🙂", "gl hf!", "Let's have a good game!", "Hey! Ready? ♟️"],
+  onCheck: ["Nice check!", "Ooh, careful!", "Good move!"],
+  onCapture: ["Didn't see that coming", "Interesting exchange", "Hmm..."],
+  onWin: ["gg wp!", "Good game! 🤝", "Thanks for the game!"],
+  onLose: ["Well played! gg", "You're strong! gg", "gg, nice game!"],
+};
+
 const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -82,16 +94,38 @@ const PlayOnline = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number; avatar_url: string | null } | null>(null);
 
+  // Bot game state
+  const [botOpponent, setBotOpponent] = useState<OnlineBotProfile | null>(null);
+  const [isBotGame, setIsBotGame] = useState(false);
+  const [botGameStarted, setBotGameStarted] = useState(false);
+  const [botMyColor, setBotMyColor] = useState<"w" | "b">("w");
+  const [botThinking, setBotThinking] = useState(false);
+  const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const positionHistory = useRef<string[]>([]);
+  const [drawAgreed, setDrawAgreed] = useState(false);
+
   // Live stats
   const [activePlayers, setActivePlayers] = useState(0);
   const [liveGames, setLiveGames] = useState<LiveGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<LeaderEntry[]>([]);
+  const [displayBots, setDisplayBots] = useState<OnlineBotProfile[]>([]);
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
   const [whiteTime, setWhiteTime] = useState(tc.seconds);
   const [blackTime, setBlackTime] = useState(tc.seconds);
   const [gameStarted, setGameStarted] = useState(false);
+
+  // Refresh display bots periodically
+  useEffect(() => {
+    setDisplayBots(getOnlineBots(6));
+    const interval = setInterval(() => setDisplayBots(getOnlineBots(6)), 20000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const effectiveStatus = isBotGame ? (botGameStarted ? "playing" : "idle") : onlineStatus;
+  const effectiveMyColor = isBotGame ? botMyColor : myColor;
+  const effectiveBoardFlipped = effectiveMyColor === "b";
 
   const opponentId = onlineGame
     ? myColor === "w" ? onlineGame.black_player_id : onlineGame.white_player_id
@@ -104,52 +138,155 @@ const PlayOnline = () => {
     });
   }, [opponentId]);
 
-  // Fetch live stats (active players, live games, leaderboard)
+  // Fetch live stats
   useEffect(() => {
-    if (onlineStatus !== "idle") return;
-
+    if (effectiveStatus !== "idle") return;
     const fetchStats = async () => {
-      // Count active games
       const { data: games } = await supabase
         .from("online_games")
         .select("id, white_player_id, black_player_id, time_control_label, fen, turn")
-        .eq("status", "active")
-        .limit(20);
-      
+        .eq("status", "active").limit(20);
       if (games) {
         setLiveGames(games as LiveGame[]);
         const playerIds = new Set<string>();
         games.forEach(g => { playerIds.add(g.white_player_id); playerIds.add(g.black_player_id); });
-        setActivePlayers(playerIds.size);
+        // Add fake bot count
+        setActivePlayers(playerIds.size + Math.floor(Math.random() * 8) + 12);
+      } else {
+        setActivePlayers(Math.floor(Math.random() * 8) + 12);
       }
-
-      // Top 10 leaderboard
       const { data: leaders } = await supabase
-        .from("profiles")
-        .select("user_id, display_name, rating, games_won, games_played")
-        .order("rating", { ascending: false })
-        .limit(10);
+        .from("profiles").select("user_id, display_name, rating, games_won, games_played")
+        .order("rating", { ascending: false }).limit(10);
       if (leaders) setTopPlayers(leaders as LeaderEntry[]);
     };
-
     fetchStats();
     const interval = setInterval(fetchStats, 15000);
     return () => clearInterval(interval);
-  }, [onlineStatus]);
+  }, [effectiveStatus]);
 
   const game = gameRef.current;
-  const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
+  const isGameOver = isBotGame
+    ? (game.isGameOver() || !!timeoutWinner || drawAgreed)
+    : (game.isGameOver() || !!timeoutWinner || onlineStatus === "finished");
 
-  // Subscribe to chat
+  // Auto-match with bot after 8 seconds of searching
+  useEffect(() => {
+    if (onlineStatus === "searching") {
+      searchTimerRef.current = setTimeout(() => {
+        // Cancel real search and start bot game
+        cancelSearch();
+        startBotGame();
+      }, 8000);
+      return () => {
+        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+      };
+    }
+  }, [onlineStatus]);
+
+  const startBotGame = () => {
+    const playerRating = profile?.rating || 1200;
+    const bot = matchBot(playerRating);
+    const myColor = Math.random() > 0.5 ? "w" : "b";
+
+    setBotOpponent(bot);
+    setBotMyColor(myColor as "w" | "b");
+    setIsBotGame(true);
+    setBotGameStarted(true);
+    gameRef.current = new Chess();
+    setSelectedSquare(null);
+    setLegalMoves([]);
+    setMoveHistory([]);
+    setWhiteTime(tc.seconds);
+    setBlackTime(tc.seconds);
+    setGameStarted(true);
+    setTimeoutWinner(null);
+    setDrawAgreed(false);
+    positionHistory.current = [];
+    playChessSound("start");
+
+    // Bot sends greeting
+    setTimeout(() => {
+      const greetings = BOT_CHAT_MESSAGES.greeting;
+      addBotChatMessage(greetings[Math.floor(Math.random() * greetings.length)], bot);
+    }, 1500);
+  };
+
+  const addBotChatMessage = (message: string, bot: OnlineBotProfile) => {
+    setChatMessages(prev => [...prev, {
+      id: `bot-${Date.now()}-${Math.random()}`,
+      user_id: bot.id,
+      message,
+      created_at: new Date().toISOString(),
+    }]);
+  };
+
+  // Bot makes moves
+  useEffect(() => {
+    if (!isBotGame || !botGameStarted || !botOpponent || isGameOver) return;
+    const botColor = botMyColor === "w" ? "b" : "w";
+    if (game.turn() !== botColor) return;
+
+    setBotThinking(true);
+    // Simulate realistic "thinking" time
+    const thinkTime = 800 + Math.random() * 2500;
+    const timeout = setTimeout(() => {
+      const difficulty = getDifficultyForRating(botOpponent.rating);
+      const moveStr = getAIMove(game, difficulty);
+      if (moveStr) {
+        const move = game.move(moveStr);
+        if (move) {
+          setMoveHistory(prev => [...prev, move.san]);
+          setGameStarted(true);
+
+          // Track position
+          const posKey = game.fen().split(" ").slice(0, 4).join(" ");
+          positionHistory.current.push(posKey);
+
+          // Increment
+          if (!unlimited && tc.increment > 0) {
+            if (botColor === "w") setWhiteTime(p => p + tc.increment);
+            else setBlackTime(p => p + tc.increment);
+          }
+
+          // Check draw conditions
+          const posCount = positionHistory.current.filter(p => p === posKey).length;
+          if (posCount >= 3 || game.isDraw() || game.isStalemate() || game.isInsufficientMaterial()) {
+            setDrawAgreed(true);
+            playChessSound("gameOver");
+          } else if (game.isCheckmate()) {
+            playChessSound("gameOver");
+            const msgs = BOT_CHAT_MESSAGES.onWin;
+            setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 1000);
+          } else if (game.isCheck()) {
+            playChessSound("check");
+            if (Math.random() < 0.2) {
+              const msgs = BOT_CHAT_MESSAGES.onCheck;
+              setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 800);
+            }
+          } else if (move.captured) {
+            playChessSound("capture");
+            if (Math.random() < 0.15) {
+              const msgs = BOT_CHAT_MESSAGES.onCapture;
+              setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 800);
+            }
+          } else {
+            playChessSound("move");
+          }
+        }
+      }
+      setBotThinking(false);
+    }, thinkTime);
+    return () => clearTimeout(timeout);
+  }, [game.fen(), isBotGame, botGameStarted, botOpponent, isGameOver]);
+
+  // Subscribe to chat for real games
   useEffect(() => {
     if (!onlineGame || onlineStatus !== "playing") return;
-    
-    // Load existing messages
     supabase.from("game_messages").select("*").eq("game_id", onlineGame.id)
       .order("created_at", { ascending: true }).then(({ data }) => {
         if (data) setChatMessages(data as ChatMessage[]);
       });
-
     const channel = supabase.channel(`chat-${onlineGame.id}`)
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "game_messages",
@@ -157,21 +294,39 @@ const PlayOnline = () => {
       }, (payload) => {
         setChatMessages(prev => [...prev, payload.new as ChatMessage]);
       }).subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [onlineGame?.id, onlineStatus]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
 
   const sendChat = async () => {
-    if (!chatInput.trim() || !onlineGame || !user) return;
+    if (!chatInput.trim() || !user) return;
+    if (isBotGame && botOpponent) {
+      // Add player message
+      setChatMessages(prev => [...prev, {
+        id: `me-${Date.now()}`,
+        user_id: user.id,
+        message: chatInput.trim(),
+        created_at: new Date().toISOString(),
+      }]);
+      setChatInput("");
+      // Bot responds sometimes
+      if (Math.random() < 0.6) {
+        setTimeout(() => {
+          const responses = ["😊", "👍", "Nice!", "Thanks!", "Haha", "🤔", "Good luck!", "gg"];
+          addBotChatMessage(responses[Math.floor(Math.random() * responses.length)], botOpponent);
+        }, 1500 + Math.random() * 2000);
+      }
+      return;
+    }
+    if (!onlineGame) return;
     await supabase.from("game_messages").insert({
       game_id: onlineGame.id, user_id: user.id, message: chatInput.trim(),
     });
     setChatInput("");
   };
 
-  // Sync board when online game updates
+  // Sync board for real online games
   useEffect(() => {
     if (!onlineGame || onlineStatus !== "playing") return;
     if (onlineGame.fen !== game.fen()) {
@@ -181,15 +336,11 @@ const PlayOnline = () => {
       setLegalMoves([]);
       setGameStarted(true);
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
-      // Play sound for opponent's move (when FEN changed and it's now our turn)
       if (prevFen !== "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" && gameRef.current.turn() === myColor) {
         const g = gameRef.current;
-        if (g.isCheckmate() || g.isDraw() || g.isStalemate()) {
-          playChessSound("gameOver");
-        } else if (g.isCheck()) {
-          playChessSound("check");
-        } else {
-          // Check last move for capture by looking at SAN
+        if (g.isCheckmate() || g.isDraw() || g.isStalemate()) playChessSound("gameOver");
+        else if (g.isCheck()) playChessSound("check");
+        else {
           const moves = onlineGame.pgn?.split(" ").filter(Boolean) || [];
           const lastSan = moves[moves.length - 1] || "";
           playChessSound(lastSan.includes("x") ? "capture" : "move");
@@ -211,46 +362,68 @@ const PlayOnline = () => {
     }
   }, [onlineStatus]);
 
-  const boardFlipped = myColor === "b";
-  const displayFiles = boardFlipped ? [...FILES].reverse() : FILES;
-  const displayRanks = boardFlipped ? [...RANKS].reverse() : RANKS;
+  const displayFiles = effectiveBoardFlipped ? [...FILES].reverse() : FILES;
+  const displayRanks = effectiveBoardFlipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
-  const lastMove = onlineGame?.last_move_from && onlineGame?.last_move_to
-    ? { from: onlineGame.last_move_from, to: onlineGame.last_move_to } : null;
+  const lastMove = isBotGame
+    ? (moveHistory.length > 0 ? (() => {
+        // Reconstruct last move from game history
+        const hist = game.history({ verbose: true });
+        const last = hist[hist.length - 1];
+        return last ? { from: last.from, to: last.to } : null;
+      })() : null)
+    : (onlineGame?.last_move_from && onlineGame?.last_move_to
+      ? { from: onlineGame.last_move_from, to: onlineGame.last_move_to } : null);
 
   const handleTimeOut = useCallback((color: "w" | "b") => {
     const result = color === "w" ? "0-1" : "1-0";
     setTimeoutWinner(color === "w" ? "Black" : "White");
     playChessSound("gameOver");
-    if (onlineGame) endGame(result);
-  }, [onlineGame, endGame]);
+    if (onlineGame && !isBotGame) endGame(result);
+  }, [onlineGame, endGame, isBotGame]);
 
   const handleSquareClick = (square: Square) => {
-    if (isGameOver || onlineStatus !== "playing" || game.turn() !== myColor) return;
+    const currentMyColor = effectiveMyColor;
+    if (isGameOver || game.turn() !== currentMyColor) return;
+    if (!isBotGame && onlineStatus !== "playing") return;
 
     if (selectedSquare && legalMoves.includes(square)) {
       const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
       if (move) {
         setMoveHistory(prev => [...prev, move.san]);
         setGameStarted(true);
-        let wt = whiteTime, bt = blackTime;
-        if (!unlimited && onlineGame && onlineGame.increment > 0) {
-          if (move.color === "w") { wt += onlineGame.increment; setWhiteTime(wt); }
-          else { bt += onlineGame.increment; setBlackTime(bt); }
+
+        // Track position for bot games
+        if (isBotGame) {
+          const posKey = game.fen().split(" ").slice(0, 4).join(" ");
+          positionHistory.current.push(posKey);
         }
-        makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
-        // Sound effects
+
+        let wt = whiteTime, bt = blackTime;
+        const inc = isBotGame ? tc.increment : (onlineGame?.increment || 0);
+        if (!unlimited && inc > 0) {
+          if (move.color === "w") { wt += inc; setWhiteTime(wt); }
+          else { bt += inc; setBlackTime(bt); }
+        }
+
+        if (!isBotGame) {
+          makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
+        }
+
         if (game.isCheckmate() || game.isDraw() || game.isStalemate()) {
           playChessSound("gameOver");
-        } else if (game.isCheck()) {
-          playChessSound("check");
-        } else if (move.captured) {
-          playChessSound("capture");
-        } else {
-          playChessSound("move");
+          if (isBotGame && botOpponent) {
+            const msgs = BOT_CHAT_MESSAGES.onLose;
+            setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 1000);
+          }
+        } else if (game.isCheck()) playChessSound("check");
+        else if (move.captured) playChessSound("capture");
+        else playChessSound("move");
+
+        if (!isBotGame) {
+          if (game.isCheckmate()) endGame(game.turn() === "w" ? "0-1" : "1-0");
+          else if (game.isDraw() || game.isStalemate()) endGame("1/2-1/2");
         }
-        if (game.isCheckmate()) endGame(game.turn() === "w" ? "0-1" : "1-0");
-        else if (game.isDraw() || game.isStalemate()) endGame("1/2-1/2");
       }
       setSelectedSquare(null);
       setLegalMoves([]);
@@ -267,16 +440,75 @@ const PlayOnline = () => {
     }
   };
 
+  const handleResign = () => {
+    if (isBotGame) {
+      setTimeoutWinner(botMyColor === "w" ? "Black" : "White");
+      playChessSound("gameOver");
+      if (botOpponent) {
+        const msgs = BOT_CHAT_MESSAGES.onWin;
+        setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 800);
+      }
+    } else {
+      resign();
+    }
+  };
+
+  const handleDrawOffer = () => {
+    if (!isBotGame || !botOpponent || isGameOver) return;
+    // Bot decides based on eval
+    const eval_ = evaluateBoard(game);
+    const botColor = botMyColor === "w" ? "b" : "w";
+    const botAdvantage = botColor === "w" ? eval_ : -eval_;
+    if (Math.abs(eval_) < 150 || moveHistory.length > 50) {
+      setDrawAgreed(true);
+      playChessSound("gameOver");
+      addBotChatMessage("Okay, draw! gg 🤝", botOpponent);
+    } else {
+      addBotChatMessage(botAdvantage > 0 ? "No thanks, I think I'm better here 😅" : "Hmm, I'll keep playing! 💪", botOpponent);
+    }
+  };
+
+  const resetAll = () => {
+    if (isBotGame) {
+      setIsBotGame(false);
+      setBotGameStarted(false);
+      setBotOpponent(null);
+      setBotThinking(false);
+      setDrawAgreed(false);
+      positionHistory.current = [];
+    } else {
+      resetOnline();
+    }
+    gameRef.current = new Chess();
+    setSelectedSquare(null);
+    setLegalMoves([]);
+    setMoveHistory([]);
+    setChatMessages([]);
+    setTimeoutWinner(null);
+    setGameStarted(false);
+    setWhiteTime(tc.seconds);
+    setBlackTime(tc.seconds);
+  };
+
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
 
-  const statusText = onlineGame?.status === "finished"
-    ? onlineGame.result === "1-0" ? "White wins!" : onlineGame.result === "0-1" ? "Black wins!" : "Draw!"
-    : timeoutWinner ? `${timeoutWinner} wins on time!`
-    : game.isCheckmate() ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
-    : game.isDraw() ? "Draw!" : game.isStalemate() ? "Stalemate!"
-    : game.isCheck() ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
-    : onlineStatus === "playing" && game.turn() === myColor ? "Your turn"
-    : onlineStatus === "playing" ? "Opponent's turn" : "";
+  const statusText = isBotGame
+    ? (drawAgreed ? "Draw! 🤝"
+      : timeoutWinner ? `${timeoutWinner} wins on time!`
+      : game.isCheckmate() ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
+      : game.isStalemate() ? "Stalemate — Draw!"
+      : game.isDraw() ? "Draw!"
+      : game.isCheck() ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
+      : botThinking ? `${botOpponent?.displayName} is thinking...`
+      : game.turn() === botMyColor ? "Your turn" : `${botOpponent?.displayName}'s turn`)
+    : (onlineGame?.status === "finished"
+      ? onlineGame.result === "1-0" ? "White wins!" : onlineGame.result === "0-1" ? "Black wins!" : "Draw!"
+      : timeoutWinner ? `${timeoutWinner} wins on time!`
+      : game.isCheckmate() ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
+      : game.isDraw() ? "Draw!" : game.isStalemate() ? "Stalemate!"
+      : game.isCheck() ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
+      : onlineStatus === "playing" && game.turn() === myColor ? "Your turn"
+      : onlineStatus === "playing" ? "Opponent's turn" : "");
 
   if (authLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -297,7 +529,8 @@ const PlayOnline = () => {
     );
   }
 
-  if (onlineStatus === "idle" || onlineStatus === "searching") {
+  // LOBBY VIEW
+  if (effectiveStatus === "idle" || onlineStatus === "searching") {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -314,7 +547,7 @@ const PlayOnline = () => {
               <Users className="h-3.5 w-3.5" /> {activePlayers} online
             </span>
             <span className="flex items-center gap-1.5 text-muted-foreground">
-              <Swords className="h-3.5 w-3.5" /> {liveGames.length} games live
+              <Swords className="h-3.5 w-3.5" /> {liveGames.length + Math.floor(Math.random() * 3) + 2} games live
             </span>
           </div>
 
@@ -326,9 +559,28 @@ const PlayOnline = () => {
                 <TabsTrigger value="leaderboard"><Trophy className="h-3.5 w-3.5 mr-1" /> Leaderboard</TabsTrigger>
               </TabsList>
 
-              {/* FIND MATCH TAB */}
               <TabsContent value="play">
                 <div className="max-w-md mx-auto space-y-6">
+                  {/* Online players preview */}
+                  <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Users className="h-3 w-3" /> Players Online Now
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {displayBots.map(bot => (
+                        <div key={bot.id} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted/30 border border-border/30">
+                          <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                          <span className="text-xs font-medium text-foreground">{bot.displayName}</span>
+                          <span className="text-[10px] text-muted-foreground">{bot.countryFlag}</span>
+                          <span className="text-[10px] font-mono text-primary">{bot.rating}</span>
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-muted/20 border border-border/20">
+                        <span className="text-[10px] text-muted-foreground">+{activePlayers - displayBots.length} more</span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Time control */}
                   <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Timer className="h-3 w-3" /> Time Control</p>
@@ -353,9 +605,6 @@ const PlayOnline = () => {
                         </button>
                       ))}
                     </div>
-                    <p className="text-[10px] text-muted-foreground">
-                      {skillTier === "all" ? "Match with anyone" : `Rating ${SKILL_TIERS.find(t => t.key === skillTier)?.ratingRange[0]}–${SKILL_TIERS.find(t => t.key === skillTier)?.ratingRange[1]}`}
-                    </p>
                   </div>
 
                   {/* Player card */}
@@ -372,7 +621,8 @@ const PlayOnline = () => {
                         <Loader2 className="h-5 w-5 animate-spin" />
                         <span className="font-medium">Looking for an opponent…</span>
                       </div>
-                      <Button variant="outline" onClick={cancelSearch}>Cancel</Button>
+                      <p className="text-xs text-muted-foreground">Matching you with a player near your rating...</p>
+                      <Button variant="outline" onClick={() => { cancelSearch(); if (searchTimerRef.current) clearTimeout(searchTimerRef.current); }}>Cancel</Button>
                     </div>
                   ) : (
                     <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
@@ -382,7 +632,6 @@ const PlayOnline = () => {
                 </div>
               </TabsContent>
 
-              {/* SPECTATE TAB */}
               <TabsContent value="spectate">
                 <div className="max-w-2xl mx-auto">
                   {liveGames.length === 0 ? (
@@ -412,7 +661,6 @@ const PlayOnline = () => {
                 </div>
               </TabsContent>
 
-              {/* LEADERBOARD TAB */}
               <TabsContent value="leaderboard">
                 <div className="max-w-2xl mx-auto">
                   <div className="space-y-1.5">
@@ -453,19 +701,21 @@ const PlayOnline = () => {
     );
   }
 
+  // GAME VIEW
   const myName = profile?.display_name || profile?.username || "You";
   const myRating = profile?.rating || 1200;
-  const oppName = opponentProfile?.display_name || "Opponent";
-  const oppRating = opponentProfile?.rating || 1200;
+  const oppName = isBotGame ? (botOpponent?.displayName || "Opponent") : (opponentProfile?.display_name || "Opponent");
+  const oppRating = isBotGame ? (botOpponent?.rating || 1200) : (opponentProfile?.rating || 1200);
+  const oppFlag = isBotGame ? (botOpponent?.countryFlag || "") : "";
 
-  const isWhite = myColor === "w";
+  const isWhite = effectiveMyColor === "w";
   const oppColor = isWhite ? "b" as const : "w" as const;
-  const topPlayer = boardFlipped
-    ? { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: (myColor || "w") as "w" | "b" }
-    : { name: oppName, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor };
-  const bottomPlayer = boardFlipped
-    ? { name: oppName, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor }
-    : { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: (myColor || "w") as "w" | "b" };
+  const topPlayer = effectiveBoardFlipped
+    ? { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: effectiveMyColor as "w" | "b", flag: "" }
+    : { name: `${oppName} ${oppFlag}`, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor, flag: oppFlag };
+  const bottomPlayer = effectiveBoardFlipped
+    ? { name: `${oppName} ${oppFlag}`, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor, flag: oppFlag }
+    : { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: effectiveMyColor as "w" | "b", flag: "" };
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -475,6 +725,7 @@ const PlayOnline = () => {
 
   const PlayerBar = ({ player, isTop }: { player: typeof topPlayer; isTop: boolean }) => {
     const isActive = !isGameOver && gameStarted && game.turn() === player.color;
+    const isThinking = !player.isMe && isBotGame && botThinking && isActive;
     return (
       <div className={`flex items-center justify-between rounded-xl border px-4 py-2.5 transition-all duration-300 ${
         isActive ? "border-primary/50 bg-primary/5 shadow-[0_0_15px_hsl(var(--primary)/0.1)]" : "border-border/40 bg-card/60"
@@ -488,7 +739,14 @@ const PlayOnline = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className={`text-sm font-semibold ${player.isMe ? "text-primary" : "text-foreground"}`}>{player.name}</span>
-              {isActive && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
+              {isActive && !isThinking && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
+              {isThinking && (
+                <div className="flex gap-0.5">
+                  {[0, 1, 2].map(i => (
+                    <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
+                  ))}
+                </div>
+              )}
             </div>
             <span className="text-xs text-muted-foreground font-mono">{player.rating} ELO</span>
           </div>
@@ -544,7 +802,7 @@ const PlayOnline = () => {
                         aria-label={`${file}${rank}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : ""}`}
                         className={`aspect-square w-[12.5%] flex items-center justify-center select-none transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset relative
                           ${bgClass}
-                          ${isLegal || (game.turn() === myColor && !isGameOver) ? "cursor-pointer active:scale-95" : "cursor-default"}`}
+                          ${isLegal || (game.turn() === effectiveMyColor && !isGameOver) ? "cursor-pointer active:scale-95" : "cursor-default"}`}
                         onClick={() => handleSquareClick(square)} tabIndex={0}>
                         {isLegal && !piece && <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />}
                         {isLegal && pieceDisplay && <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />}
@@ -562,11 +820,20 @@ const PlayOnline = () => {
             <div className="flex items-center justify-between gap-2 pt-1">
               <p className="text-sm font-medium text-foreground">{statusText}</p>
               <div className="flex gap-2">
-                {onlineStatus === "playing" && !isGameOver && (
-                  <Button onClick={resign} variant="destructive" size="sm"><Flag className="mr-1.5 h-3.5 w-3.5" /> Resign</Button>
+                {(effectiveStatus === "playing" || (isBotGame && botGameStarted)) && !isGameOver && (
+                  <>
+                    {isBotGame && (
+                      <Button onClick={handleDrawOffer} variant="outline" size="sm">
+                        <Handshake className="mr-1.5 h-3.5 w-3.5" /> Draw
+                      </Button>
+                    )}
+                    <Button onClick={handleResign} variant="destructive" size="sm">
+                      <Flag className="mr-1.5 h-3.5 w-3.5" /> Resign
+                    </Button>
+                  </>
                 )}
                 {isGameOver && (
-                  <Button onClick={resetOnline} size="sm"><RotateCcw className="mr-1.5 h-3.5 w-3.5" /> New Game</Button>
+                  <Button onClick={resetAll} size="sm"><RotateCcw className="mr-1.5 h-3.5 w-3.5" /> New Game</Button>
                 )}
               </div>
             </div>
@@ -593,35 +860,33 @@ const PlayOnline = () => {
             </div>
 
             {/* Chat */}
-            {onlineGame && (
-              <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-4 space-y-3">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Game Chat</h3>
-                <div className="h-40 overflow-y-auto space-y-1.5 px-1">
-                  {chatMessages.length === 0 && (
-                    <p className="text-xs text-muted-foreground/50 italic text-center pt-12">Say hi to your opponent!</p>
-                  )}
-                  {chatMessages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.user_id === user?.id ? "justify-end" : "justify-start"}`}>
-                      <span className={`inline-block px-3 py-1.5 rounded-2xl text-xs max-w-[85%] ${
-                        msg.user_id === user?.id
-                          ? "bg-primary/20 text-primary rounded-br-sm"
-                          : "bg-muted/50 text-foreground rounded-bl-sm"
-                      }`}>
-                        {msg.message}
-                      </span>
-                    </div>
-                  ))}
-                  <div ref={chatEndRef} />
-                </div>
-                <div className="flex gap-1.5">
-                  <Input value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Type a message…" className="h-9 text-xs rounded-xl"
-                    onKeyDown={e => e.key === "Enter" && sendChat()} />
-                  <Button size="sm" variant="ghost" onClick={sendChat} className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10">
-                    <Send className="h-3.5 w-3.5 text-primary" />
-                  </Button>
-                </div>
+            <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-4 space-y-3">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Game Chat</h3>
+              <div className="h-40 overflow-y-auto space-y-1.5 px-1">
+                {chatMessages.length === 0 && (
+                  <p className="text-xs text-muted-foreground/50 italic text-center pt-12">Say hi to your opponent!</p>
+                )}
+                {chatMessages.map(msg => (
+                  <div key={msg.id} className={`flex ${msg.user_id === user?.id ? "justify-end" : "justify-start"}`}>
+                    <span className={`inline-block px-3 py-1.5 rounded-2xl text-xs max-w-[85%] ${
+                      msg.user_id === user?.id
+                        ? "bg-primary/20 text-primary rounded-br-sm"
+                        : "bg-muted/50 text-foreground rounded-bl-sm"
+                    }`}>
+                      {msg.message}
+                    </span>
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
               </div>
-            )}
+              <div className="flex gap-1.5">
+                <Input value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Type a message…" className="h-9 text-xs rounded-xl"
+                  onKeyDown={e => e.key === "Enter" && sendChat()} />
+                <Button size="sm" variant="ghost" onClick={sendChat} className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10">
+                  <Send className="h-3.5 w-3.5 text-primary" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </main>
