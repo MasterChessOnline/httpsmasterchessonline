@@ -10,14 +10,16 @@ import AnalysisPanel from "@/components/chess/AnalysisPanel";
 import GameSummary from "@/components/chess/GameSummary";
 import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
-import { getAIMove, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
+import { getAIMove, evaluateBoard, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
 import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, TrendingUp, Trophy, Target, BookOpen, Monitor, MonitorOff, Keyboard } from "lucide-react";
+import { Swords, TrendingUp, Trophy, Target, BookOpen, Monitor, MonitorOff, Keyboard, MessageCircle } from "lucide-react";
+import { BOT_PROFILES, getRandomBot, type BotProfile } from "@/lib/bot-profiles";
+import { motion, AnimatePresence } from "framer-motion";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -53,8 +55,13 @@ const Play = () => {
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [resignedBy, setResignedBy] = useState<"w" | "b" | null>(null);
   const [drawAgreed, setDrawAgreed] = useState(false);
+  const [drawReason, setDrawReason] = useState<string>("");
   const [streamerMode, setStreamerMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [currentBot, setCurrentBot] = useState<BotProfile>(() => getRandomBot("beginner"));
+  const [botMessage, setBotMessage] = useState<string>("");
+  const [drawOfferPending, setDrawOfferPending] = useState(false);
+  const [drawDeclined, setDrawDeclined] = useState(false);
   const gameRef = useRef(new Chess());
   const positionHistory = useRef<string[]>([]);
 
@@ -68,9 +75,20 @@ const Play = () => {
   const game = gameRef.current;
   const isGameOver = game.isGameOver() || !!timeoutWinner || !!resignedBy || drawAgreed;
   const aiColor = playerColor === "w" ? "b" : "w";
-  const currentLevel = AI_LEVELS.find((l) => l.value === difficulty)!;
 
   const updateState = () => setFen(game.fen());
+
+  // Show bot greeting on mount/bot change
+  useEffect(() => {
+    if (mode === "ai") {
+      showBotMessage(currentBot.taunts.greeting);
+    }
+  }, [currentBot.id, mode]);
+
+  const showBotMessage = (msg: string) => {
+    setBotMessage(msg);
+    setTimeout(() => setBotMessage(""), 4000);
+  };
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -88,17 +106,45 @@ const Play = () => {
     return () => window.removeEventListener("keydown", handler);
   }, [isGameOver, moveHistory.length]);
 
-  // Track positions for threefold repetition
-  const trackPosition = () => {
-    // Use FEN without move counters for position comparison
+  // Get position key for repetition tracking (FEN without move counters)
+  const getPositionKey = () => {
     const parts = game.fen().split(" ");
-    const posKey = parts.slice(0, 4).join(" ");
-    positionHistory.current.push(posKey);
-    // Check threefold repetition
+    return parts.slice(0, 4).join(" ");
+  };
+
+  // Check all draw conditions
+  const checkDrawConditions = (): { isDraw: boolean; reason: string } => {
+    // Threefold repetition
+    const posKey = getPositionKey();
     const count = positionHistory.current.filter(p => p === posKey).length;
-    if (count >= 3) {
+    if (count >= 3) return { isDraw: true, reason: "Remis trostrukim ponavljanjem pozicije" };
+
+    // Fifty-move rule (chess.js tracks half-move clock)
+    const halfMoves = parseInt(game.fen().split(" ")[4]);
+    if (halfMoves >= 100) return { isDraw: true, reason: "Remis pravilom 50 poteza" };
+
+    // Insufficient material
+    if (game.isInsufficientMaterial()) return { isDraw: true, reason: "Remis — nedovoljno materijala" };
+
+    // Stalemate
+    if (game.isStalemate()) return { isDraw: true, reason: "Pat — remis!" };
+
+    // Other draw
+    if (game.isDraw()) return { isDraw: true, reason: "Remis!" };
+
+    return { isDraw: false, reason: "" };
+  };
+
+  const trackPosition = () => {
+    const posKey = getPositionKey();
+    positionHistory.current.push(posKey);
+    
+    const drawCheck = checkDrawConditions();
+    if (drawCheck.isDraw) {
       setDrawAgreed(true);
+      setDrawReason(drawCheck.reason);
       playChessSound("gameOver");
+      if (mode === "ai") showBotMessage(currentBot.taunts.onDraw);
     }
   };
 
@@ -128,7 +174,7 @@ const Play = () => {
   useEffect(() => {
     if (mode !== "ai" || game.turn() !== aiColor || isGameOver) return;
     setAiThinking(true);
-    const thinkTime = currentLevel.depth >= 4 ? 800 : currentLevel.depth >= 3 ? 500 : 300;
+    const thinkTime = currentBot.rating >= 1600 ? 1000 : currentBot.rating >= 1000 ? 600 : 400;
     const timeout = setTimeout(() => {
       const aiMoveStr = getAIMove(game, difficulty);
       if (aiMoveStr) {
@@ -143,10 +189,20 @@ const Play = () => {
             else setBlackTime((p) => p + timeControl.increment);
           }
           updateState();
-          if (game.isCheckmate() || game.isDraw() || game.isStalemate()) playChessSound("gameOver");
-          else if (game.isCheck()) playChessSound("check");
-          else if (move.captured) playChessSound("capture");
-          else playChessSound("move");
+
+          // Bot reactions
+          if (game.isCheckmate()) {
+            playChessSound("gameOver");
+            showBotMessage(currentBot.taunts.onWin);
+          } else if (game.isCheck()) {
+            playChessSound("check");
+            showBotMessage(currentBot.taunts.onCheck);
+          } else if (move.captured) {
+            playChessSound("capture");
+            if (Math.random() < 0.3) showBotMessage(currentBot.taunts.onCapture);
+          } else {
+            playChessSound("move");
+          }
         }
       }
       setAiThinking(false);
@@ -173,13 +229,22 @@ const Play = () => {
         else setBlackTime((p) => p + timeControl.increment);
       }
       updateState();
-      if (game.isCheckmate() || game.isDraw() || game.isStalemate()) playChessSound("gameOver");
-      else if (game.isCheck()) playChessSound("check");
-      else if (move.captured) playChessSound("capture");
-      else playChessSound("move");
+
+      if (game.isCheckmate()) {
+        playChessSound("gameOver");
+        if (mode === "ai") showBotMessage(currentBot.taunts.onLose);
+      } else if (game.isCheck()) {
+        playChessSound("check");
+      } else if (move.captured) {
+        playChessSound("capture");
+      } else {
+        playChessSound("move");
+      }
     }
     setSelectedSquare(null);
     setLegalMoves([]);
+    setDrawOfferPending(false);
+    setDrawDeclined(false);
   };
 
   const handlePromotionSelect = (piece: PromotionPiece) => {
@@ -216,6 +281,7 @@ const Play = () => {
     if (isGameOver || moveHistory.length === 0) return;
     if (mode === "ai") {
       setResignedBy(playerColor);
+      showBotMessage(currentBot.taunts.onWin);
     } else {
       setResignedBy(game.turn());
     }
@@ -223,16 +289,38 @@ const Play = () => {
   };
 
   const handleOfferDraw = () => {
-    if (isGameOver || moveHistory.length < 2) return;
+    if (isGameOver || moveHistory.length < 2 || drawOfferPending) return;
+
     if (mode === "ai") {
-      // AI accepts draw if position is roughly equal (simplified: accept if move count > 40)
-      if (moveHistory.length > 40) {
-        setDrawAgreed(true);
-        playChessSound("gameOver");
-      }
+      setDrawOfferPending(true);
+      // AI decides based on evaluation and bot personality
+      setTimeout(() => {
+        const eval_ = evaluateBoard(game);
+        const aiAdvantage = aiColor === "w" ? eval_ : -eval_;
+        const movesPlayed = moveHistory.length;
+        
+        // Bot accepts draw if:
+        // 1. Position is roughly equal (within ±100 centipawns)
+        // 2. OR enough moves have been played past the bot's threshold
+        // 3. AND the bot isn't significantly winning
+        const isEqual = Math.abs(eval_) < 100;
+        const longGame = movesPlayed >= currentBot.drawAcceptThreshold;
+        const botWinning = aiAdvantage > 200;
+
+        if ((isEqual || longGame) && !botWinning) {
+          setDrawAgreed(true);
+          setDrawReason("Remis dogovorom");
+          showBotMessage(currentBot.taunts.onDrawOffer);
+          playChessSound("gameOver");
+        } else {
+          setDrawDeclined(true);
+          showBotMessage(currentBot.taunts.onDrawDecline);
+          setTimeout(() => setDrawOfferPending(false), 2000);
+        }
+      }, 1500);
     } else {
-      // In local mode, just agree immediately
       setDrawAgreed(true);
+      setDrawReason("Remis dogovorom");
       playChessSound("gameOver");
     }
   };
@@ -251,10 +339,15 @@ const Play = () => {
     setPendingPromotion(null);
     setResignedBy(null);
     setDrawAgreed(false);
+    setDrawReason("");
+    setDrawOfferPending(false);
+    setDrawDeclined(false);
     positionHistory.current = [];
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
     if (newMode) setMode(newMode);
+    // Pick a new random bot
+    setCurrentBot(getRandomBot(difficulty));
   };
 
   const changeTimeControl = (idx: number) => {
@@ -265,6 +358,9 @@ const Play = () => {
     setGameStarted(false);
     setResignedBy(null);
     setDrawAgreed(false);
+    setDrawReason("");
+    setDrawOfferPending(false);
+    setDrawDeclined(false);
     positionHistory.current = [];
     gameRef.current = new Chess();
     setFen("start");
@@ -278,6 +374,7 @@ const Play = () => {
 
   const changeDifficulty = (d: Difficulty) => {
     setDifficulty(d);
+    setCurrentBot(getRandomBot(d));
     resetGame();
   };
 
@@ -288,23 +385,31 @@ const Play = () => {
     }
   };
 
+  const selectBot = (bot: BotProfile) => {
+    setCurrentBot(bot);
+    setDifficulty(bot.difficulty);
+    resetGame();
+  };
+
   const boardFlipped = playerColor === "b";
   const isPlayerTurn = mode === "ai" ? game.turn() === playerColor : true;
 
   const statusText = resignedBy
-    ? `${resignedBy === "w" ? "White" : "Black"} resigned! ${resignedBy === "w" ? "Black" : "White"} wins!`
+    ? `${resignedBy === "w" ? "Beli" : "Crni"} je predao! ${resignedBy === "w" ? "Crni" : "Beli"} pobeđuje!`
     : drawAgreed
-    ? "Draw agreed!"
+    ? drawReason || "Remis!"
+    : drawOfferPending
+    ? (drawDeclined ? "Ponuda za remi odbijena!" : "Čekanje odgovora na ponudu za remi...")
     : timeoutWinner
-    ? `${timeoutWinner} wins on time!`
+    ? `${timeoutWinner} pobeđuje na vreme!`
     : game.isCheckmate()
-    ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
-    : game.isDraw() ? "Draw!"
-    : game.isStalemate() ? "Stalemate — Draw!"
+    ? `Šah-mat! ${game.turn() === "w" ? "Crni" : "Beli"} pobeđuje!`
+    : game.isStalemate() ? "Pat — Remis!"
+    : game.isDraw() ? "Remis!"
     : game.isCheck()
-    ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
-    : aiThinking ? "DailyChess_12 is thinking…"
-    : `${game.turn() === "w" ? "White" : "Black"} to move`;
+    ? `${game.turn() === "w" ? "Beli" : "Crni"} je u šahu!`
+    : aiThinking ? `${currentBot.name} razmišlja…`
+    : `${game.turn() === "w" ? "Beli" : "Crni"} na potezu`;
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
 
@@ -421,14 +526,40 @@ const Play = () => {
           <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
             {mode === "ai" ? (
               <>
-                You vs <span className="text-gradient-gold">DailyChess_12 Bot</span>
-                <span className="text-lg ml-2 text-muted-foreground">({currentLevel.rating} Elo)</span>
+                You vs <span className="text-gradient-gold">{currentBot.avatar} {currentBot.name}</span>
+                <span className="text-lg ml-2 text-muted-foreground">({currentBot.rating} Elo)</span>
               </>
             ) : (
               <>Play <span className="text-gradient-gold">Local</span></>
             )}
           </h1>
+          {mode === "ai" && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {currentBot.countryFlag} {currentBot.style} · {currentBot.bio}
+            </p>
+          )}
         </div>
+
+        {/* Bot message bubble */}
+        <AnimatePresence>
+          {botMessage && mode === "ai" && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              className="flex justify-center mb-4"
+            >
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-primary/30 shadow-lg max-w-md">
+                <span className="text-2xl">{currentBot.avatar}</span>
+                <div>
+                  <p className="text-xs font-semibold text-primary">{currentBot.name}</p>
+                  <p className="text-sm text-foreground">{botMessage}</p>
+                </div>
+                <MessageCircle className="w-4 h-4 text-primary/50 flex-shrink-0" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Stats bar */}
         {profile && (
@@ -450,6 +581,24 @@ const Play = () => {
         <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:justify-center">
           {/* Board column */}
           <div className="w-full max-w-[min(85vw,520px)] space-y-1.5">
+            {/* Opponent info bar (top) */}
+            {mode === "ai" && (
+              <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-card/50 border border-border/20">
+                <span className="text-xl">{currentBot.avatar}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-foreground truncate">{currentBot.name} {currentBot.countryFlag}</p>
+                  <p className="text-[10px] text-muted-foreground">{currentBot.rating} Elo</p>
+                </div>
+                {aiThinking && (
+                  <div className="flex gap-0.5">
+                    {[0, 1, 2].map(i => (
+                      <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <ChessClock
               whiteTime={whiteTime}
               blackTime={blackTime}
@@ -476,10 +625,50 @@ const Play = () => {
             />
 
             <CapturedPieces game={game} color={boardFlipped ? "b" : "w"} />
+
+            {/* Player info bar (bottom) */}
+            {mode === "ai" && profile && (
+              <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-card/50 border border-border/20">
+                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+                  {(profile.display_name || "P")[0].toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-foreground truncate">{profile.display_name || "You"}</p>
+                  <p className="text-[10px] text-muted-foreground">{profile.rating} Elo</p>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {playerColor === "w" ? "⬜ Beli" : "⬛ Crni"}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Controls column */}
           <div className="w-full lg:max-w-xs space-y-3">
+            {/* Bot selector */}
+            {mode === "ai" && (
+              <div className="rounded-xl border border-border/40 bg-card p-3 space-y-2">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Izaberi protivnika</p>
+                <div className="grid grid-cols-3 gap-1.5 max-h-48 overflow-y-auto">
+                  {BOT_PROFILES.map(bot => (
+                    <button
+                      key={bot.id}
+                      onClick={() => selectBot(bot)}
+                      className={`rounded-lg p-2 text-center transition-all border ${
+                        currentBot.id === bot.id
+                          ? "border-primary bg-primary/10 shadow-glow"
+                          : "border-border/40 bg-muted/20 hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="text-xl block">{bot.avatar}</span>
+                      <span className="text-[9px] font-bold block text-foreground leading-tight">{bot.name}</span>
+                      <span className="text-[8px] text-muted-foreground block">{bot.rating}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <GameControls
               mode={mode}
               difficulty={difficulty}
@@ -499,6 +688,24 @@ const Play = () => {
               onOfferDraw={handleOfferDraw}
               canResign={moveHistory.length > 0}
             />
+
+            {/* Draw offer status */}
+            {drawOfferPending && !drawAgreed && (
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-center">
+                {drawDeclined ? (
+                  <p className="text-sm font-medium text-destructive">❌ {currentBot.name} je odbio/la remi!</p>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="flex gap-0.5">
+                      {[0, 1, 2].map(i => (
+                        <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{currentBot.name} razmišlja o remiju...</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Game Summary Report */}
             {isGameOver && gameResult && moveHistory.length >= 4 && (
