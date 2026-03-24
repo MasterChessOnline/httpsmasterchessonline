@@ -6,9 +6,9 @@ const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
 const PIECE_UNICODE: Record<string, { symbol: string; white: boolean }> = {
-  wk: { symbol: "♚", white: true }, wq: { symbol: "♛", white: true },
-  wr: { symbol: "♜", white: true }, wb: { symbol: "♝", white: true },
-  wn: { symbol: "♞", white: true }, wp: { symbol: "♟", white: true },
+  wk: { symbol: "♔", white: true }, wq: { symbol: "♕", white: true },
+  wr: { symbol: "♖", white: true }, wb: { symbol: "♗", white: true },
+  wn: { symbol: "♘", white: true }, wp: { symbol: "♙", white: true },
   bk: { symbol: "♚", white: false }, bq: { symbol: "♛", white: false },
   br: { symbol: "♜", white: false }, bb: { symbol: "♝", white: false },
   bn: { symbol: "♞", white: false }, bp: { symbol: "♟", white: false },
@@ -107,8 +107,8 @@ export default function ChessBoard({
                         transition={{ type: "spring", stiffness: 500, damping: 25 }}
                         className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none ${
                           pd.white
-                            ? "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-                            : "text-[hsl(220,20%,12%)] drop-shadow-[0_0_3px_rgba(255,255,255,0.35)]"
+                            ? "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]"
+                            : "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
                         } ${isSelected ? "drop-shadow-[0_0_8px_hsl(43_80%_55%/0.5)]" : ""}`}
                       >
                         {pd.symbol}
