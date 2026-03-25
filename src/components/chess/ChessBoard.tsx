@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -13,6 +13,29 @@ const PIECE_UNICODE: Record<string, { symbol: string; white: boolean }> = {
   br: { symbol: "♜", white: false }, bb: { symbol: "♝", white: false },
   bn: { symbol: "♞", white: false }, bp: { symbol: "♟", white: false },
 };
+
+// Calculate the visual offset (in %) between two squares
+function getSlideOffset(
+  from: string,
+  to: string,
+  flipped: boolean
+): { x: string; y: string } {
+  const fromFile = FILES.indexOf(from[0]);
+  const fromRank = RANKS.indexOf(parseInt(from[1]));
+  const toFile = FILES.indexOf(to[0]);
+  const toRank = RANKS.indexOf(parseInt(to[1]));
+
+  let dx = fromFile - toFile;
+  let dy = fromRank - toRank;
+
+  if (flipped) {
+    dx = -dx;
+    dy = -dy;
+  }
+
+  // Each square is 100% of its own width/height
+  return { x: `${dx * 100}%`, y: `${dy * 100}%` };
+}
 
 interface ChessBoardProps {
   game: Chess;
@@ -34,6 +57,15 @@ export default function ChessBoard({
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
+
+  // Track a move counter to generate unique keys for slide animations
+  const moveCountRef = useRef(0);
+  const prevLastMoveRef = useRef<string | null>(null);
+  const lastMoveKey = lastMove ? `${lastMove.from}${lastMove.to}` : null;
+  if (lastMoveKey !== prevLastMoveRef.current) {
+    prevLastMoveRef.current = lastMoveKey;
+    if (lastMoveKey) moveCountRef.current++;
+  }
 
   return (
     <div className="w-full max-w-[min(90vw,520px)] mx-auto">
@@ -74,6 +106,10 @@ export default function ChessBoard({
                 const pieceKey = piece ? `${piece.color}${piece.type}` : null;
                 const pd = pieceKey ? PIECE_UNICODE[pieceKey] : null;
 
+                // Did this piece just arrive here via a move?
+                const justMoved = lastMove?.to === square && pd;
+                const slideOffset = justMoved ? getSlideOffset(lastMove.from, lastMove.to, flipped) : null;
+
                 let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
                 if (isPremove) bgClass = "bg-blue-500/30";
                 else if (isSelected) bgClass = "bg-primary/40";
@@ -85,7 +121,7 @@ export default function ChessBoard({
                     key={square}
                     role="gridcell"
                     aria-label={`${file}${rank}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : ""}`}
-                    className={`aspect-square w-[12.5%] flex items-center justify-center select-none transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset relative
+                    className={`aspect-square w-[12.5%] flex items-center justify-center select-none transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset relative overflow-visible
                       ${bgClass}
                       ${isSelected ? "shadow-[inset_0_0_16px_hsl(43_80%_55%/0.3)]" : ""}
                       ${isLegal || (isPlayerTurn && !isGameOver) ? "cursor-pointer active:scale-95" : "cursor-default"}
@@ -101,18 +137,27 @@ export default function ChessBoard({
                     {isLegal && pd && (
                       <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />
                     )}
-                    {/* Piece with animation */}
+                    {/* Piece with slide animation */}
                     {pd && (
                       <motion.span
-                        key={`${square}-${pieceKey}`}
-                        initial={isLastMv && lastMove?.to === square ? { scale: 1.15 } : false}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                        className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none ${
+                        key={slideOffset ? `slide-${moveCountRef.current}` : `${square}-${pieceKey}`}
+                        initial={
+                          slideOffset
+                            ? { x: slideOffset.x, y: slideOffset.y, scale: 1 }
+                            : false
+                        }
+                        animate={{ x: 0, y: 0, scale: 1 }}
+                        transition={
+                          slideOffset
+                            ? { type: "spring", stiffness: 300, damping: 24, mass: 0.8 }
+                            : { type: "spring", stiffness: 500, damping: 25 }
+                        }
+                        className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none z-10 ${
                           pd.white
                             ? "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]"
                             : "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
                         } ${isSelected ? "drop-shadow-[0_0_8px_hsl(43_80%_55%/0.5)]" : ""}`}
+                        style={{ position: "relative" }}
                       >
                         {pd.symbol}
                       </motion.span>
