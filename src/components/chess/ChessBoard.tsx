@@ -23,12 +23,13 @@ interface ChessBoardProps {
   isGameOver: boolean;
   isPlayerTurn: boolean;
   hintSquare?: Square | null;
+  premove?: { from: Square; to: Square } | null;
   onSquareClick: (square: Square) => void;
 }
 
 export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
-  isGameOver, isPlayerTurn, hintSquare, onSquareClick,
+  isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick,
 }: ChessBoardProps) {
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
@@ -69,13 +70,15 @@ export default function ChessBoard({
                 const isLegal = legalMoves.includes(square);
                 const isLastMv = lastMove && (lastMove.from === square || lastMove.to === square);
                 const isHint = hintSquare === square;
+                const isPremove = premove && (premove.from === square || premove.to === square);
                 const pieceKey = piece ? `${piece.color}${piece.type}` : null;
                 const pd = pieceKey ? PIECE_UNICODE[pieceKey] : null;
 
                 let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
-                if (isSelected) bgClass = "bg-primary/40";
+                if (isPremove) bgClass = "bg-blue-500/30";
+                else if (isSelected) bgClass = "bg-primary/40";
                 else if (isLastMv) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
-                else if (isHint) bgClass = "bg-blue-500/30";
+                else if (isHint) bgClass = "bg-accent/40";
 
                 return (
                   <button
