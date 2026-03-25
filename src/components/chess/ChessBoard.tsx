@@ -23,12 +23,13 @@ interface ChessBoardProps {
   isGameOver: boolean;
   isPlayerTurn: boolean;
   hintSquare?: Square | null;
+  premove?: { from: Square; to: Square } | null;
   onSquareClick: (square: Square) => void;
 }
 
 export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
-  isGameOver, isPlayerTurn, hintSquare, onSquareClick,
+  isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick,
 }: ChessBoardProps) {
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
