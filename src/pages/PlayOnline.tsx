@@ -110,6 +110,8 @@ const PlayOnline = () => {
   const [liveGames, setLiveGames] = useState<LiveGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<LeaderEntry[]>([]);
   const [displayBots, setDisplayBots] = useState<OnlineBotProfile[]>([]);
+  const [spectateGames, setSpectateGames] = useState<BotGame[]>([]);
+  const [spectatingGame, setSpectatingGame] = useState<BotGame | null>(null);
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
