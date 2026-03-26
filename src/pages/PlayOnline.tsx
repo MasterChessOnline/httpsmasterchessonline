@@ -75,6 +75,12 @@ const BOT_CHAT_MESSAGES = {
   onLose: ["Well played! gg", "You're strong! gg", "gg, nice game!"],
 };
 
+const formatTimeSpec = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+};
+
 const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
