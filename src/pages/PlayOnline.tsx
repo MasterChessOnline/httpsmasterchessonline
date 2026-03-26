@@ -126,6 +126,20 @@ const PlayOnline = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Start bot-vs-bot games engine for Spectate tab
+  useEffect(() => {
+    startBotGamesEngine();
+    const unsub = subscribeToBotGames(() => {
+      setSpectateGames(getBotGames());
+      // Update spectating game if watching one
+      setSpectatingGame(prev => {
+        if (!prev) return null;
+        return getBotGameById(prev.id) || null;
+      });
+    });
+    return unsub;
+  }, []);
+
   const effectiveStatus = isBotGame ? (botGameStarted ? "playing" : "idle") : onlineStatus;
   const effectiveMyColor = isBotGame ? botMyColor : myColor;
   const effectiveBoardFlipped = effectiveMyColor === "b";
