@@ -1,6 +1,7 @@
 import { Chess } from "chess.js";
 import { ONLINE_BOTS, type OnlineBotProfile } from "./online-bots";
-import { getAIMove, getDifficultyForRating } from "./chess-ai";
+import { getAIMove } from "./chess-ai";
+import { getDifficultyForRating } from "./online-bots";
 
 // Simulated bot-vs-bot games for the Spectate tab
 export interface BotGame {
