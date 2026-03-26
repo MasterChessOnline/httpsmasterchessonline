@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { matchBot, getOnlineBots, getDifficultyForRating, type OnlineBotProfile } from "@/lib/online-bots";
+import { startBotGamesEngine, subscribeToBotGames, getBotGames, getBotGameById, type BotGame } from "@/lib/bot-games";
 import { motion, AnimatePresence } from "framer-motion";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -74,6 +75,12 @@ const BOT_CHAT_MESSAGES = {
   onLose: ["Well played! gg", "You're strong! gg", "gg, nice game!"],
 };
 
+const formatTimeSpec = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+};
+
 const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -109,6 +116,8 @@ const PlayOnline = () => {
   const [liveGames, setLiveGames] = useState<LiveGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<LeaderEntry[]>([]);
   const [displayBots, setDisplayBots] = useState<OnlineBotProfile[]>([]);
+  const [spectateGames, setSpectateGames] = useState<BotGame[]>([]);
+  const [spectatingGame, setSpectatingGame] = useState<BotGame | null>(null);
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
@@ -121,6 +130,20 @@ const PlayOnline = () => {
     setDisplayBots(getOnlineBots(6));
     const interval = setInterval(() => setDisplayBots(getOnlineBots(6)), 20000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Start bot-vs-bot games engine for Spectate tab
+  useEffect(() => {
+    startBotGamesEngine();
+    const unsub = subscribeToBotGames(() => {
+      setSpectateGames(getBotGames());
+      // Update spectating game if watching one
+      setSpectatingGame(prev => {
+        if (!prev) return null;
+        return getBotGameById(prev.id) || null;
+      });
+    });
+    return unsub;
   }, []);
 
   const effectiveStatus = isBotGame ? (botGameStarted ? "playing" : "idle") : onlineStatus;
@@ -634,14 +657,62 @@ const PlayOnline = () => {
 
               <TabsContent value="spectate">
                 <div className="max-w-2xl mx-auto">
-                  {liveGames.length === 0 ? (
-                    <div className="text-center py-16">
-                      <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-muted-foreground">No live games right now. Check back soon!</p>
+                  {spectatingGame ? (
+                    <div className="space-y-4">
+                      <Button variant="ghost" size="sm" onClick={() => setSpectatingGame(null)}>
+                        ← Back to games
+                      </Button>
+                      {/* Mini spectate board */}
+                      <div className="rounded-xl border border-border/50 bg-card p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-foreground">{spectatingGame.black.countryFlag} {spectatingGame.black.displayName}</span>
+                            <span className="text-xs font-mono text-muted-foreground">{spectatingGame.black.rating}</span>
+                          </div>
+                          <span className="font-mono text-sm text-muted-foreground">{formatTimeSpec(spectatingGame.blackTime)}</span>
+                        </div>
+                        {/* Board */}
+                        <div className="grid grid-cols-8 aspect-square rounded-lg overflow-hidden border border-border/30">
+                          {RANKS.map((rank, ri) =>
+                            FILES.map((file, fi) => {
+                              const square = `${file}${rank}` as Square;
+                              const isLight = (ri + fi) % 2 === 0;
+                              const piece = spectatingGame.chess.board()[ri][fi];
+                              const pieceKey = piece ? `${piece.color}${piece.type}` : null;
+                              const pd = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
+                              return (
+                                <div key={square} className={`flex items-center justify-center ${isLight ? "bg-[hsl(35,30%,82%)]" : "bg-[hsl(145,32%,38%)]"}`}>
+                                  {pd && <span className={`text-[clamp(1rem,3.5vw,1.8rem)] leading-none select-none ${pd.className}`}>{pd.symbol}</span>}
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-foreground">{spectatingGame.white.countryFlag} {spectatingGame.white.displayName}</span>
+                            <span className="text-xs font-mono text-muted-foreground">{spectatingGame.white.rating}</span>
+                          </div>
+                          <span className="font-mono text-sm text-muted-foreground">{formatTimeSpec(spectatingGame.whiteTime)}</span>
+                        </div>
+                        <div className="text-center">
+                          {spectatingGame.finished ? (
+                            <span className="text-sm font-medium text-primary">{spectatingGame.result === "1-0" ? `${spectatingGame.white.displayName} wins!` : spectatingGame.result === "0-1" ? `${spectatingGame.black.displayName} wins!` : "Draw!"}</span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+                              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                              {spectatingGame.chess.turn() === "w" ? spectatingGame.white.displayName : spectatingGame.black.displayName} is thinking... · Move {spectatingGame.moveCount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground mb-4">{liveGames.length} game{liveGames.length !== 1 ? "s" : ""} in progress</p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {spectateGames.filter(g => !g.finished).length + liveGames.length} game{spectateGames.filter(g => !g.finished).length + liveGames.length !== 1 ? "s" : ""} in progress
+                      </p>
+                      {/* Real games */}
                       {liveGames.map(g => (
                         <div key={g.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-card p-4 hover:border-primary/30 transition-all">
                           <div className="flex items-center gap-3">
@@ -656,6 +727,28 @@ const PlayOnline = () => {
                           </Link>
                         </div>
                       ))}
+                      {/* Bot-vs-bot games */}
+                      {spectateGames.filter(g => !g.finished).map(g => (
+                        <div key={g.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-card p-4 hover:border-primary/30 transition-all cursor-pointer"
+                          onClick={() => setSpectatingGame(g)}>
+                          <div className="flex items-center gap-3">
+                            <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
+                            <div>
+                              <p className="text-sm font-medium text-foreground">
+                                {g.white.countryFlag} {g.white.displayName} <span className="text-muted-foreground text-xs">vs</span> {g.black.countryFlag} {g.black.displayName}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{g.timeControl} · Move {g.moveCount} · {g.chess.turn() === "w" ? "White" : "Black"} to move</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm"><Eye className="h-3.5 w-3.5 mr-1" /> Watch</Button>
+                        </div>
+                      ))}
+                      {liveGames.length === 0 && spectateGames.filter(g => !g.finished).length === 0 && (
+                        <div className="text-center py-16">
+                          <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-muted-foreground">No live games right now. Check back soon!</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
