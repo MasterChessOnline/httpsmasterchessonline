@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { matchBot, getOnlineBots, getDifficultyForRating, type OnlineBotProfile } from "@/lib/online-bots";
+import { startBotGamesEngine, subscribeToBotGames, getBotGames, getBotGameById, type BotGame } from "@/lib/bot-games";
 import { motion, AnimatePresence } from "framer-motion";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
