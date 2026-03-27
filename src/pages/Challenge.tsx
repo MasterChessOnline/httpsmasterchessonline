@@ -19,15 +19,15 @@ const Challenge = () => {
   const handleCopy = () => {
     navigator.clipboard.writeText(challengeUrl);
     setCopied(true);
-    toast({ title: "Link kopiran!", description: "Pošalji link prijatelju da te izazove!" });
+    toast({ title: "Link copied!", description: "Send the link to a friend to challenge them!" });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({
-        title: `${profile?.display_name || "Player"} te izaziva na šah!`,
-        text: `Možeš li me pobediti? Igramo ${selectedTime} partiju za ${xpWager} XP!`,
+        title: `${profile?.display_name || "Player"} challenges you to chess!`,
+        text: `Can you beat me? Let's play a ${selectedTime} game for ${xpWager} XP!`,
         url: challengeUrl,
       });
     } else {
