@@ -125,12 +125,7 @@ const PlayOnline = () => {
   const [blackTime, setBlackTime] = useState(tc.seconds);
   const [gameStarted, setGameStarted] = useState(false);
 
-  // Refresh display bots periodically
-  useEffect(() => {
-    setDisplayBots(getOnlineBots(6));
-    const interval = setInterval(() => setDisplayBots(getOnlineBots(6)), 20000);
-    return () => clearInterval(interval);
-  }, []);
+  // No fake bots displayed
 
   // Start bot-vs-bot games engine for Spectate tab
   useEffect(() => {
@@ -171,12 +166,11 @@ const PlayOnline = () => {
         .eq("status", "active").limit(20);
       if (games) {
         setLiveGames(games as LiveGame[]);
-        const playerIds = new Set<string>();
+      const playerIds = new Set<string>();
         games.forEach(g => { playerIds.add(g.white_player_id); playerIds.add(g.black_player_id); });
-        // Add fake bot count
-        setActivePlayers(playerIds.size + Math.floor(Math.random() * 8) + 12);
+        setActivePlayers(playerIds.size);
       } else {
-        setActivePlayers(Math.floor(Math.random() * 8) + 12);
+        setActivePlayers(0);
       }
       const { data: leaders } = await supabase
         .from("profiles").select("user_id, display_name, rating, games_won, games_played")
@@ -193,19 +187,7 @@ const PlayOnline = () => {
     ? (game.isGameOver() || !!timeoutWinner || drawAgreed)
     : (game.isGameOver() || !!timeoutWinner || onlineStatus === "finished");
 
-  // Auto-match with bot after 8 seconds of searching
-  useEffect(() => {
-    if (onlineStatus === "searching") {
-      searchTimerRef.current = setTimeout(() => {
-        // Cancel real search and start bot game
-        cancelSearch();
-        startBotGame();
-      }, 8000);
-      return () => {
-        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-      };
-    }
-  }, [onlineStatus]);
+  // No auto-match with hidden bots - user can choose "Play vs AI" explicitly
 
   const startBotGame = () => {
     const playerRating = profile?.rating || 1200;
@@ -561,7 +543,7 @@ const PlayOnline = () => {
           <h1 className="font-display text-4xl font-bold text-foreground text-center mb-2">
             Free <span className="text-gradient-gold">Online</span> Games
           </h1>
-          <p className="text-center text-muted-foreground mb-2">Play against real opponents — no Premium required</p>
+          <p className="text-center text-muted-foreground mb-2">Play against real opponents or AI — no Premium required</p>
 
           {/* Live stats bar */}
           <div className="flex items-center justify-center gap-6 mb-8 text-sm">
@@ -570,7 +552,7 @@ const PlayOnline = () => {
               <Users className="h-3.5 w-3.5" /> {activePlayers} online
             </span>
             <span className="flex items-center gap-1.5 text-muted-foreground">
-              <Swords className="h-3.5 w-3.5" /> {liveGames.length + Math.floor(Math.random() * 3) + 2} games live
+              <Swords className="h-3.5 w-3.5" /> {liveGames.length} games live
             </span>
           </div>
 
@@ -584,25 +566,15 @@ const PlayOnline = () => {
 
               <TabsContent value="play">
                 <div className="max-w-md mx-auto space-y-6">
-                  {/* Online players preview */}
-                  <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                      <Users className="h-3 w-3" /> Players Online Now
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {displayBots.map(bot => (
-                        <div key={bot.id} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted/30 border border-border/30">
-                          <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-xs font-medium text-foreground">{bot.displayName}</span>
-                          <span className="text-[10px] text-muted-foreground">{bot.countryFlag}</span>
-                          <span className="text-[10px] font-mono text-primary">{bot.rating}</span>
-                        </div>
-                      ))}
-                      <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-muted/20 border border-border/20">
-                        <span className="text-[10px] text-muted-foreground">+{activePlayers - displayBots.length} more</span>
-                      </div>
+                  {/* Real players online count */}
+                  {activePlayers > 0 && (
+                    <div className="rounded-lg border border-border/50 bg-card p-4">
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                        <Users className="h-3.5 w-3.5" /> {activePlayers} real players online
+                      </p>
                     </div>
-                  </div>
+                  )}
 
                   {/* Time control */}
                   <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
@@ -644,13 +616,23 @@ const PlayOnline = () => {
                         <Loader2 className="h-5 w-5 animate-spin" />
                         <span className="font-medium">Looking for an opponent…</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">Matching you with a player near your rating...</p>
-                      <Button variant="outline" onClick={() => { cancelSearch(); if (searchTimerRef.current) clearTimeout(searchTimerRef.current); }}>Cancel</Button>
+                      <p className="text-xs text-muted-foreground">Matching you with a real player near your rating...</p>
+                      <div className="flex flex-col gap-2">
+                        <Button variant="outline" onClick={cancelSearch}>Cancel Search</Button>
+                        <Button variant="secondary" onClick={() => { cancelSearch(); startBotGame(); }}>
+                          🤖 Play vs AI Instead
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
-                      <Wifi className="mr-2 h-5 w-5" /> Find Match
-                    </Button>
+                    <div className="space-y-3">
+                      <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
+                        <Wifi className="mr-2 h-5 w-5" /> Find Real Opponent
+                      </Button>
+                      <Button className="w-full" variant="outline" size="lg" onClick={startBotGame}>
+                        🤖 Play vs AI
+                      </Button>
+                    </div>
                   )}
                 </div>
               </TabsContent>
@@ -727,17 +709,17 @@ const PlayOnline = () => {
                           </Link>
                         </div>
                       ))}
-                      {/* Bot-vs-bot games */}
+                      {/* AI exhibition games */}
                       {spectateGames.filter(g => !g.finished).map(g => (
                         <div key={g.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-card p-4 hover:border-primary/30 transition-all cursor-pointer"
                           onClick={() => setSpectatingGame(g)}>
                           <div className="flex items-center gap-3">
-                            <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
+                            <div className="h-2.5 w-2.5 rounded-full bg-blue-500 animate-pulse" />
                             <div>
                               <p className="text-sm font-medium text-foreground">
-                                {g.white.countryFlag} {g.white.displayName} <span className="text-muted-foreground text-xs">vs</span> {g.black.countryFlag} {g.black.displayName}
+                                🤖 {g.white.countryFlag} {g.white.displayName} <span className="text-muted-foreground text-xs">vs</span> {g.black.countryFlag} {g.black.displayName}
                               </p>
-                              <p className="text-xs text-muted-foreground">{g.timeControl} · Move {g.moveCount} · {g.chess.turn() === "w" ? "White" : "Black"} to move</p>
+                              <p className="text-xs text-muted-foreground">AI Exhibition · {g.timeControl} · Move {g.moveCount}</p>
                             </div>
                           </div>
                           <Button variant="outline" size="sm"><Eye className="h-3.5 w-3.5 mr-1" /> Watch</Button>
@@ -797,7 +779,7 @@ const PlayOnline = () => {
   // GAME VIEW
   const myName = profile?.display_name || profile?.username || "You";
   const myRating = profile?.rating || 1200;
-  const oppName = isBotGame ? (botOpponent?.displayName || "Opponent") : (opponentProfile?.display_name || "Opponent");
+  const oppName = isBotGame ? (`🤖 ${botOpponent?.displayName || "AI"}`) : (opponentProfile?.display_name || "Opponent");
   const oppRating = isBotGame ? (botOpponent?.rating || 1200) : (opponentProfile?.rating || 1200);
   const oppFlag = isBotGame ? (botOpponent?.countryFlag || "") : "";
 
