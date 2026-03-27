@@ -543,7 +543,7 @@ const PlayOnline = () => {
           <h1 className="font-display text-4xl font-bold text-foreground text-center mb-2">
             Free <span className="text-gradient-gold">Online</span> Games
           </h1>
-          <p className="text-center text-muted-foreground mb-2">Play against real opponents — no Premium required</p>
+          <p className="text-center text-muted-foreground mb-2">Play against real opponents or AI — no Premium required</p>
 
           {/* Live stats bar */}
           <div className="flex items-center justify-center gap-6 mb-8 text-sm">
@@ -779,7 +779,7 @@ const PlayOnline = () => {
   // GAME VIEW
   const myName = profile?.display_name || profile?.username || "You";
   const myRating = profile?.rating || 1200;
-  const oppName = isBotGame ? (botOpponent?.displayName || "Opponent") : (opponentProfile?.display_name || "Opponent");
+  const oppName = isBotGame ? (`🤖 ${botOpponent?.displayName || "AI"}`) : (opponentProfile?.display_name || "Opponent");
   const oppRating = isBotGame ? (botOpponent?.rating || 1200) : (opponentProfile?.rating || 1200);
   const oppFlag = isBotGame ? (botOpponent?.countryFlag || "") : "";
 
