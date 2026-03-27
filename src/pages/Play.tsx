@@ -441,21 +441,21 @@ const Play = () => {
   const isPlayerTurn = mode === "ai" ? game.turn() === playerColor : true;
 
   const statusText = resignedBy
-    ? `${resignedBy === "w" ? "Beli" : "Crni"} je predao! ${resignedBy === "w" ? "Crni" : "Beli"} pobeđuje!`
+    ? `${resignedBy === "w" ? "White" : "Black"} resigned! ${resignedBy === "w" ? "Black" : "White"} wins!`
     : drawAgreed
-    ? drawReason || "Remis!"
+    ? drawReason || "Draw!"
     : drawOfferPending
-    ? (drawDeclined ? "Ponuda za remi odbijena!" : "Čekanje odgovora na ponudu za remi...")
+    ? (drawDeclined ? "Draw offer declined!" : "Waiting for draw response...")
     : timeoutWinner
-    ? `${timeoutWinner} pobeđuje na vreme!`
+    ? `${timeoutWinner} wins on time!`
     : game.isCheckmate()
-    ? `Šah-mat! ${game.turn() === "w" ? "Crni" : "Beli"} pobeđuje!`
-    : game.isStalemate() ? "Pat — Remis!"
-    : game.isDraw() ? "Remis!"
+    ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
+    : game.isStalemate() ? "Stalemate — Draw!"
+    : game.isDraw() ? "Draw!"
     : game.isCheck()
-    ? `${game.turn() === "w" ? "Beli" : "Crni"} je u šahu!`
-    : aiThinking ? `${currentBot.name} razmišlja…`
-    : `${game.turn() === "w" ? "Beli" : "Crni"} na potezu`;
+    ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
+    : aiThinking ? `${currentBot.name} is thinking…`
+    : `${game.turn() === "w" ? "White" : "Black"} to move`;
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
 
@@ -493,9 +493,9 @@ const Play = () => {
               <Swords className="w-3 h-3 mr-1" /> Play Chess
             </Badge>
             <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-2">
-              Izaberi <span className="text-gradient-gold">protivnika</span>
+              Choose your <span className="text-gradient-gold">opponent</span>
             </h1>
-            <p className="text-muted-foreground text-sm">Strana se dodeljuje automatski — kao pravi meč!</p>
+            <p className="text-muted-foreground text-sm">Side is assigned randomly — just like a real match!</p>
           </motion.div>
 
           {/* Time control selector */}
@@ -520,7 +520,7 @@ const Play = () => {
 
           {/* Difficulty selector */}
           <div className="mb-6 w-full max-w-md">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Težina</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Difficulty</p>
             <div className="flex justify-center gap-2">
               {AI_LEVELS.map(level => (
                 <button
@@ -873,7 +873,7 @@ const Play = () => {
                         <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
                       ))}
                     </div>
-                    <p className="text-sm text-muted-foreground">{currentBot.name} razmišlja o remiju...</p>
+                    <p className="text-sm text-muted-foreground">{currentBot.name} is considering the draw...</p>
                   </div>
                 )}
               </div>
