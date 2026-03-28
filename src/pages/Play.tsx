@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
 import CapturedPieces from "@/components/chess/CapturedPieces";
+import LiveCoach from "@/components/chess/LiveCoach";
 import GameControls from "@/components/chess/GameControls";
 import AnalysisPanel from "@/components/chess/AnalysisPanel";
 import GameSummary from "@/components/chess/GameSummary";
@@ -55,6 +56,8 @@ const Play = () => {
   const [botMessage, setBotMessage] = useState<string>("");
   const [drawOfferPending, setDrawOfferPending] = useState(false);
   const [mode4D, setMode4D] = useState(false);
+  const [liveCoachEnabled, setLiveCoachEnabled] = useState(true);
+  const [blunderFlash, setBlunderFlash] = useState(false);
   const [drawDeclined, setDrawDeclined] = useState(false);
   const gameRef = useRef(new Chess());
   const positionHistory = useRef<string[]>([]);
@@ -786,7 +789,7 @@ const Play = () => {
 
         <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:justify-center">
           {/* Board column */}
-          <div className="w-full max-w-[min(85vw,520px)] space-y-1.5">
+          <div className="w-full max-w-[min(85vw,520px)] space-y-1.5 relative">
             {/* Opponent bar (top) */}
             <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all ${
               game.turn() === aiColor && !isGameOver
@@ -814,6 +817,19 @@ const Play = () => {
 
             <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor} isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
             <CapturedPieces game={game} color={boardFlipped ? "w" : "b"} />
+
+            {/* Blunder flash overlay */}
+            <AnimatePresence>
+              {blunderFlash && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 rounded-lg bg-red-500/20 pointer-events-none z-20"
+                />
+              )}
+            </AnimatePresence>
 
             <ChessBoard4D enabled={mode4D}>
               <ChessBoard
@@ -853,6 +869,19 @@ const Play = () => {
 
           {/* Controls column */}
           <div className="w-full lg:max-w-xs space-y-3">
+            <LiveCoach
+              game={game}
+              fen={fen}
+              moveHistory={moveHistory}
+              playerColor={playerColor}
+              isGameOver={isGameOver}
+              enabled={liveCoachEnabled}
+              onToggle={() => setLiveCoachEnabled(prev => !prev)}
+              onBlunderFlash={() => {
+                setBlunderFlash(true);
+                setTimeout(() => setBlunderFlash(false), 600);
+              }}
+            />
             <GameControls
               mode={mode}
               difficulty={difficulty}
