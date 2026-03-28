@@ -789,7 +789,7 @@ const Play = () => {
 
         <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:justify-center">
           {/* Board column */}
-          <div className="w-full max-w-[min(85vw,520px)] space-y-1.5">
+          <div className="w-full max-w-[min(85vw,520px)] space-y-1.5 relative">
             {/* Opponent bar (top) */}
             <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all ${
               game.turn() === aiColor && !isGameOver
