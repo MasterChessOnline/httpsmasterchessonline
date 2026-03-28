@@ -16,7 +16,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap } from "lucide-react";
+import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers } from "lucide-react";
+import ChessBoard4D from "@/components/chess/ChessBoard4D";
 import { BOT_PROFILES, getRandomBot, type BotProfile } from "@/lib/bot-profiles";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -53,6 +54,7 @@ const Play = () => {
   const [currentBot, setCurrentBot] = useState<BotProfile>(() => getRandomBot("beginner"));
   const [botMessage, setBotMessage] = useState<string>("");
   const [drawOfferPending, setDrawOfferPending] = useState(false);
+  const [mode4D, setMode4D] = useState(false);
   const [drawDeclined, setDrawDeclined] = useState(false);
   const gameRef = useRef(new Chess());
   const positionHistory = useRef<string[]>([]);
@@ -739,6 +741,14 @@ const Play = () => {
               </TooltipTrigger>
               <TooltipContent>Streamer Mode (F)</TooltipContent>
             </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button onClick={() => setMode4D(prev => !prev)} className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-xs transition-all ${mode4D ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40" : "border-border/50 bg-card text-muted-foreground hover:text-primary hover:border-primary/30"}`}>
+                  <Layers className="w-3 h-3" /> 4D
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Toggle 4D Visual Mode</TooltipContent>
+            </Tooltip>
           </div>
           <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
             You vs <span className="text-gradient-gold">{currentBot.avatar} {currentBot.name}</span>
@@ -805,18 +815,20 @@ const Play = () => {
             <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor} isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
             <CapturedPieces game={game} color={boardFlipped ? "w" : "b"} />
 
-            <ChessBoard
-              game={game}
-              flipped={boardFlipped}
-              selectedSquare={selectedSquare}
-              legalMoves={legalMoves}
-              lastMove={lastMove}
-              isGameOver={isGameOver}
-              isPlayerTurn={isPlayerTurn}
-              hintSquare={hintSquare}
-              onSquareClick={handleSquareClick}
-              premove={premove}
-            />
+            <ChessBoard4D enabled={mode4D}>
+              <ChessBoard
+                game={game}
+                flipped={boardFlipped}
+                selectedSquare={selectedSquare}
+                legalMoves={legalMoves}
+                lastMove={lastMove}
+                isGameOver={isGameOver}
+                isPlayerTurn={isPlayerTurn}
+                hintSquare={hintSquare}
+                onSquareClick={handleSquareClick}
+                premove={premove}
+              />
+            </ChessBoard4D>
 
             <CapturedPieces game={game} color={boardFlipped ? "b" : "w"} />
 
