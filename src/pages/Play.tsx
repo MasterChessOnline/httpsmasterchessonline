@@ -818,6 +818,19 @@ const Play = () => {
             <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor} isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
             <CapturedPieces game={game} color={boardFlipped ? "w" : "b"} />
 
+            {/* Blunder flash overlay */}
+            <AnimatePresence>
+              {blunderFlash && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute inset-0 rounded-lg bg-red-500/20 pointer-events-none z-20"
+                />
+              )}
+            </AnimatePresence>
+
             <ChessBoard4D enabled={mode4D}>
               <ChessBoard
                 game={game}
