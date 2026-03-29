@@ -42,6 +42,7 @@ import PieceValues from "./pages/PieceValues";
 import SkillTree from "./pages/SkillTree";
 import Challenge from "./pages/Challenge";
 import Stats from "./pages/Stats";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ function AnimatedRoutes() {
           <Route path="/skill-tree" element={<SkillTree />} />
           <Route path="/challenge" element={<Challenge />} />
           <Route path="/stats" element={<Stats />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
