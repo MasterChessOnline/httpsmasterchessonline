@@ -176,7 +176,7 @@ const Profile = () => {
                   <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Joined {new Date(profileData.created_at).toLocaleDateString()}
                   </span>
-                  <Badge variant="outline" className={`${tier.color} text-[10px]`}>{tier.label}</Badge>
+                  <RankBadge rating={profileData.rating} size="sm" />
                 </div>
               </div>
             </div>
