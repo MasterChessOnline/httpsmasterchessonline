@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import RankBadge from "@/components/RankBadge";
+import { getRank as getRankFromLib } from "@/lib/ranks";
 import { Link } from "react-router-dom";
 
 interface ProfileData {
