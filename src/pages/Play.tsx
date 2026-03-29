@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
 import CapturedPieces from "@/components/chess/CapturedPieces";
-import LiveCoach from "@/components/chess/LiveCoach";
+// LiveCoach removed per user request
 import GameControls from "@/components/chess/GameControls";
 import AnalysisPanel from "@/components/chess/AnalysisPanel";
 import GameSummary from "@/components/chess/GameSummary";
@@ -56,7 +56,6 @@ const Play = () => {
   const [botMessage, setBotMessage] = useState<string>("");
   const [drawOfferPending, setDrawOfferPending] = useState(false);
   const [mode4D, setMode4D] = useState(false);
-  const [liveCoachEnabled, setLiveCoachEnabled] = useState(true);
   const [blunderFlash, setBlunderFlash] = useState(false);
   const [drawDeclined, setDrawDeclined] = useState(false);
   const gameRef = useRef(new Chess());
@@ -869,19 +868,10 @@ const Play = () => {
 
           {/* Controls column */}
           <div className="w-full lg:max-w-xs space-y-3">
-            <LiveCoach
-              game={game}
-              fen={fen}
-              moveHistory={moveHistory}
-              playerColor={playerColor}
-              isGameOver={isGameOver}
-              enabled={liveCoachEnabled}
-              onToggle={() => setLiveCoachEnabled(prev => !prev)}
-              onBlunderFlash={() => {
-                setBlunderFlash(true);
-                setTimeout(() => setBlunderFlash(false), 600);
-              }}
-            />
+            {/* Game status */}
+            <div className="rounded-xl border border-border/50 bg-card/60 p-3 text-center">
+              <p className="text-sm font-medium text-foreground">{statusText}</p>
+            </div>
             <GameControls
               mode={mode}
               difficulty={difficulty}

@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link as RouterLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { User, Trophy, Swords, TrendingUp, Calendar, Edit } from "lucide-react";
+import { User, Trophy, Swords, TrendingUp, Calendar, Edit, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
+import RankBadge from "@/components/RankBadge";
+import { getRank as getRankFromLib } from "@/lib/ranks";
+import { Link } from "react-router-dom";
 
 interface ProfileData {
   id: string;
@@ -126,15 +129,7 @@ const Profile = () => {
   const winRate = profileData.games_played > 0
     ? Math.round((profileData.games_won / profileData.games_played) * 100) : 0;
 
-  const getRatingTier = (rating: number) => {
-    if (rating >= 2000) return { label: "Master", color: "text-primary" };
-    if (rating >= 1600) return { label: "Expert", color: "text-primary" };
-    if (rating >= 1200) return { label: "Club", color: "text-accent-foreground" };
-    if (rating >= 800) return { label: "Casual", color: "text-muted-foreground" };
-    return { label: "Beginner", color: "text-muted-foreground" };
-  };
-
-  const tier = getRatingTier(profileData.rating);
+  const tier = getRankFromLib(profileData.rating);
   const earnedBadges = BADGES.filter(b => b.condition(profileData));
 
   return (
@@ -181,7 +176,7 @@ const Profile = () => {
                   <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Joined {new Date(profileData.created_at).toLocaleDateString()}
                   </span>
-                  <Badge variant="outline" className={`${tier.color} text-[10px]`}>{tier.label}</Badge>
+                  <RankBadge rating={profileData.rating} size="sm" />
                 </div>
               </div>
             </div>
