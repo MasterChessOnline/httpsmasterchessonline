@@ -30,17 +30,35 @@ export function useOnlineGame() {
   const [error, setError] = useState<string | null>(null);
   const queueEntryId = useRef<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const gameChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const eloUpdatedRef = useRef(false);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const myColor = game
     ? game.white_player_id === user?.id ? "w" : "b"
     : null;
 
+  // Clean up all channels
+  const cleanupChannels = useCallback(() => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+    if (gameChannelRef.current) {
+      supabase.removeChannel(gameChannelRef.current);
+      gameChannelRef.current = null;
+    }
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
   const subscribeToGame = useCallback((gameId: string) => {
-    if (channelRef.current) supabase.removeChannel(channelRef.current);
+    if (gameChannelRef.current) supabase.removeChannel(gameChannelRef.current);
 
     const channel = supabase
-      .channel(`online-game-${gameId}`)
+      .channel(`online-game-${gameId}-${Date.now()}`)
       .on("postgres_changes", {
         event: "UPDATE",
         schema: "public",
@@ -51,23 +69,74 @@ export function useOnlineGame() {
         setGame(updated);
         if (updated.status === "finished") {
           setStatus("finished");
-          // Update ELO ratings
           if (!eloUpdatedRef.current && updated.result) {
             eloUpdatedRef.current = true;
             supabase.rpc("update_elo_ratings", {
               p_white_id: updated.white_player_id,
               p_black_id: updated.black_player_id,
               p_result: updated.result,
-            }).then(() => {
-              refreshProfile();
-            });
+            }).then(() => refreshProfile());
           }
         }
       })
       .subscribe();
 
-    channelRef.current = channel;
+    gameChannelRef.current = channel;
+
+    // Also poll every 3s as backup for missed realtime events
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      const { data } = await supabase
+        .from("online_games")
+        .select("*")
+        .eq("id", gameId)
+        .single();
+      if (data) {
+        setGame(prev => {
+          // Only update if something changed
+          if (!prev || prev.fen !== data.fen || prev.status !== data.status ||
+              prev.white_time !== data.white_time || prev.black_time !== data.black_time) {
+            if (data.status === "finished" && prev?.status !== "finished") {
+              setStatus("finished");
+              if (!eloUpdatedRef.current && data.result) {
+                eloUpdatedRef.current = true;
+                supabase.rpc("update_elo_ratings", {
+                  p_white_id: data.white_player_id,
+                  p_black_id: data.black_player_id,
+                  p_result: data.result,
+                }).then(() => refreshProfile());
+              }
+            }
+            return data as OnlineGame;
+          }
+          return prev;
+        });
+      }
+    }, 3000);
   }, [refreshProfile]);
+
+  // Recover active game on mount
+  useEffect(() => {
+    if (!user) return;
+    const recoverGame = async () => {
+      const { data: activeGames } = await supabase
+        .from("online_games")
+        .select("*")
+        .eq("status", "active")
+        .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (activeGames && activeGames.length > 0) {
+        const activeGame = activeGames[0] as OnlineGame;
+        eloUpdatedRef.current = false;
+        setGame(activeGame);
+        setStatus("playing");
+        subscribeToGame(activeGame.id);
+      }
+    };
+    recoverGame();
+  }, [user, subscribeToGame]);
 
   const searchMatch = useCallback(async (timeControlIdx: number) => {
     if (!user || !profile) return;
@@ -76,6 +145,10 @@ export function useOnlineGame() {
 
     const tc = TIME_CONTROLS[timeControlIdx];
 
+    // First clean up any stale queue entries from this user
+    await supabase.from("matchmaking_queue").delete().eq("user_id", user.id);
+
+    // Look for an opponent in queue
     const { data: queueEntries } = await supabase
       .from("matchmaking_queue")
       .select("*")
@@ -86,6 +159,7 @@ export function useOnlineGame() {
 
     if (queueEntries && queueEntries.length > 0) {
       const opponent = queueEntries[0];
+      // Remove opponent from queue
       await supabase.from("matchmaking_queue").delete().eq("id", opponent.id);
 
       const iAmWhite = Math.random() > 0.5;
@@ -116,6 +190,7 @@ export function useOnlineGame() {
       setStatus("playing");
       subscribeToGame(newGame.id);
     } else {
+      // Join queue and wait
       const { data: entry, error: queueError } = await supabase
         .from("matchmaking_queue")
         .insert({
@@ -134,8 +209,9 @@ export function useOnlineGame() {
 
       queueEntryId.current = entry.id;
 
+      // Listen for game creation involving this user
       const queueChannel = supabase
-        .channel("matchmaking-listen")
+        .channel(`matchmaking-${user.id}-${Date.now()}`)
         .on("postgres_changes", {
           event: "INSERT",
           schema: "public",
@@ -148,7 +224,9 @@ export function useOnlineGame() {
             setStatus("playing");
             subscribeToGame(newGame.id);
             supabase.removeChannel(queueChannel);
+            channelRef.current = null;
 
+            // Clean queue entry
             if (queueEntryId.current) {
               await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
               queueEntryId.current = null;
@@ -158,6 +236,43 @@ export function useOnlineGame() {
         .subscribe();
 
       channelRef.current = queueChannel;
+
+      // Also poll for game creation as backup
+      const pollInterval = setInterval(async () => {
+        const { data: games } = await supabase
+          .from("online_games")
+          .select("*")
+          .eq("status", "active")
+          .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (games && games.length > 0) {
+          clearInterval(pollInterval);
+          const foundGame = games[0] as OnlineGame;
+          eloUpdatedRef.current = false;
+          setGame(foundGame);
+          setStatus("playing");
+          subscribeToGame(foundGame.id);
+
+          if (channelRef.current) {
+            supabase.removeChannel(channelRef.current);
+            channelRef.current = null;
+          }
+          if (queueEntryId.current) {
+            await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
+            queueEntryId.current = null;
+          }
+        }
+      }, 2000);
+
+      // Store poll ref for cleanup
+      const origCleanup = channelRef.current;
+      channelRef.current = queueChannel;
+      // Store poll interval cleanup in a separate mechanism
+      const origPoll = pollRef.current;
+      if (origPoll) clearInterval(origPoll);
+      pollRef.current = pollInterval;
     }
   }, [user, profile, subscribeToGame]);
 
@@ -166,12 +281,9 @@ export function useOnlineGame() {
       await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
       queueEntryId.current = null;
     }
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
+    cleanupChannels();
     setStatus("idle");
-  }, []);
+  }, [cleanupChannels]);
 
   const makeMove = useCallback(async (
     fen: string, san: string, from: string, to: string, turn: string, whiteTime: number, blackTime: number
@@ -189,8 +301,7 @@ export function useOnlineGame() {
   const endGame = useCallback(async (result: string) => {
     if (!game) return;
     await supabase.from("online_games").update({ status: "finished", result }).eq("id", game.id);
-    
-    // Also call ELO update directly for the player who ended the game
+
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
       await supabase.rpc("update_elo_ratings", {
@@ -208,24 +319,21 @@ export function useOnlineGame() {
   }, [game, myColor, endGame]);
 
   const reset = useCallback(() => {
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
+    cleanupChannels();
     setGame(null);
     setStatus("idle");
     setError(null);
     eloUpdatedRef.current = false;
-  }, []);
+  }, [cleanupChannels]);
 
   useEffect(() => {
     return () => {
-      if (channelRef.current) supabase.removeChannel(channelRef.current);
+      cleanupChannels();
       if (queueEntryId.current && user) {
         supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
       }
     };
-  }, [user]);
+  }, [user, cleanupChannels]);
 
   return { status, game, myColor, error, searchMatch, cancelSearch, makeMove, endGame, resign, reset };
 }
