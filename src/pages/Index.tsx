@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Wifi, Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3, Eye, Target, Shield, MessageCircle, Crown } from "lucide-react";
-import { getRankForRating } from "@/lib/ranks";
+import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 
 interface RecentGame {
@@ -132,7 +132,7 @@ const Index = () => {
                 <RankBadge rating={profile.rating} size="lg" />
                 <div>
                   <p className="font-display text-2xl font-bold text-foreground">{profile.rating} ELO</p>
-                  <p className="text-xs text-muted-foreground">{getRankForRating(profile.rating).name} · {profile.games_played} games played</p>
+                  <p className="text-xs text-muted-foreground">{getRank(profile.rating).label} · {profile.games_played} games played</p>
                 </div>
               </div>
               <div className="flex gap-6 sm:ml-auto text-center">
