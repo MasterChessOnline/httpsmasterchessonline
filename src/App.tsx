@@ -43,7 +43,9 @@ import SkillTree from "./pages/SkillTree";
 import Challenge from "./pages/Challenge";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
-
+import Chat from "./pages/Chat";
+import Clubs from "./pages/Clubs";
+import GameReview from "./pages/GameReview";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -84,6 +86,9 @@ function AnimatedRoutes() {
           <Route path="/challenge" element={<Challenge />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/clubs" element={<Clubs />} />
+          <Route path="/game-review" element={<GameReview />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
