@@ -1,32 +1,28 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Wifi, Flag, Timer, Loader2, Send, Users, Eye, Swords, Trophy, TrendingUp, User, Handshake } from "lucide-react";
+import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake } from "lucide-react";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
-import { getAIMove, evaluateBoard, type Difficulty } from "@/lib/chess-ai";
 import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { matchBot, getOnlineBots, getDifficultyForRating, type OnlineBotProfile } from "@/lib/online-bots";
-import { startBotGamesEngine, subscribeToBotGames, getBotGames, getBotGameById, type BotGame } from "@/lib/bot-games";
 import { motion, AnimatePresence } from "framer-motion";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
 const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
-  wk: { symbol: "♔", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
-  wq: { symbol: "♕", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
-  wr: { symbol: "♖", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
-  wb: { symbol: "♗", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
-  wn: { symbol: "♘", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
-  wp: { symbol: "♙", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]" },
+  wk: { symbol: "♔", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" },
+  wq: { symbol: "♕", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" },
+  wr: { symbol: "♖", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" },
+  wb: { symbol: "♗", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" },
+  wn: { symbol: "♘", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" },
+  wp: { symbol: "♙", className: "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" },
   bk: { symbol: "♚", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
   bq: { symbol: "♛", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
   br: { symbol: "♜", className: "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]" },
@@ -42,45 +38,6 @@ interface ChatMessage {
   created_at: string;
 }
 
-const SKILL_TIERS = [
-  { key: "all", label: "Any", ratingRange: [0, 9999] },
-  { key: "beginner", label: "Beginner", ratingRange: [0, 999] },
-  { key: "intermediate", label: "Intermediate", ratingRange: [1000, 1499] },
-  { key: "advanced", label: "Advanced", ratingRange: [1500, 9999] },
-] as const;
-
-interface LiveGame {
-  id: string;
-  white_player_id: string;
-  black_player_id: string;
-  time_control_label: string;
-  fen: string;
-  turn: string;
-}
-
-interface LeaderEntry {
-  user_id: string;
-  display_name: string | null;
-  rating: number;
-  games_won: number;
-  games_played: number;
-}
-
-// Bot chat messages they "send" during game
-const BOT_CHAT_MESSAGES = {
-  greeting: ["Hi, good luck! 🙂", "gl hf!", "Let's have a good game!", "Hey! Ready? ♟️"],
-  onCheck: ["Nice check!", "Ooh, careful!", "Good move!"],
-  onCapture: ["Didn't see that coming", "Interesting exchange", "Hmm..."],
-  onWin: ["gg wp!", "Good game! 🤝", "Thanks for the game!"],
-  onLose: ["Well played! gg", "You're strong! gg", "gg, nice game!"],
-};
-
-const formatTimeSpec = (seconds: number) => {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-};
-
 const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -94,30 +51,12 @@ const PlayOnline = () => {
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
   const [timeControlIdx, setTimeControlIdx] = useState(4);
-  const [skillTier, setSkillTier] = useState("all");
   const gameRef = useRef(new Chess());
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number; avatar_url: string | null } | null>(null);
-
-  // Bot game state
-  const [botOpponent, setBotOpponent] = useState<OnlineBotProfile | null>(null);
-  const [isBotGame, setIsBotGame] = useState(false);
-  const [botGameStarted, setBotGameStarted] = useState(false);
-  const [botMyColor, setBotMyColor] = useState<"w" | "b">("w");
-  const [botThinking, setBotThinking] = useState(false);
-  const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const positionHistory = useRef<string[]>([]);
-  const [drawAgreed, setDrawAgreed] = useState(false);
-
-  // Live stats
-  const [activePlayers, setActivePlayers] = useState(0);
-  const [liveGames, setLiveGames] = useState<LiveGame[]>([]);
-  const [topPlayers, setTopPlayers] = useState<LeaderEntry[]>([]);
-  const [displayBots, setDisplayBots] = useState<OnlineBotProfile[]>([]);
-  const [spectateGames, setSpectateGames] = useState<BotGame[]>([]);
-  const [spectatingGame, setSpectatingGame] = useState<BotGame | null>(null);
+  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number } | null>(null);
+  const [gameMode, setGameMode] = useState<"rated" | "casual">("rated");
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
@@ -125,213 +64,26 @@ const PlayOnline = () => {
   const [blackTime, setBlackTime] = useState(tc.seconds);
   const [gameStarted, setGameStarted] = useState(false);
 
-  // No fake bots displayed
+  const game = gameRef.current;
+  const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
+  const boardFlipped = myColor === "b";
 
-  // Start bot-vs-bot games engine for Spectate tab
-  useEffect(() => {
-    startBotGamesEngine();
-    const unsub = subscribeToBotGames(() => {
-      setSpectateGames(getBotGames());
-      // Update spectating game if watching one
-      setSpectatingGame(prev => {
-        if (!prev) return null;
-        return getBotGameById(prev.id) || null;
-      });
-    });
-    return unsub;
-  }, []);
-
-  const effectiveStatus = isBotGame ? (botGameStarted ? "playing" : "idle") : onlineStatus;
-  const effectiveMyColor = isBotGame ? botMyColor : myColor;
-  const effectiveBoardFlipped = effectiveMyColor === "b";
+  const displayFiles = boardFlipped ? [...FILES].reverse() : FILES;
+  const displayRanks = boardFlipped ? [...RANKS].reverse() : RANKS;
 
   const opponentId = onlineGame
     ? myColor === "w" ? onlineGame.black_player_id : onlineGame.white_player_id
     : null;
 
+  // Fetch opponent profile
   useEffect(() => {
     if (!opponentId) return;
-    supabase.from("profiles").select("display_name, rating, avatar_url").eq("user_id", opponentId).single().then(({ data }) => {
+    supabase.from("profiles").select("display_name, rating").eq("user_id", opponentId).single().then(({ data }) => {
       if (data) setOpponentProfile(data);
     });
   }, [opponentId]);
 
-  // Fetch live stats
-  useEffect(() => {
-    if (effectiveStatus !== "idle") return;
-    const fetchStats = async () => {
-      const { data: games } = await supabase
-        .from("online_games")
-        .select("id, white_player_id, black_player_id, time_control_label, fen, turn")
-        .eq("status", "active").limit(20);
-      if (games) {
-        setLiveGames(games as LiveGame[]);
-      const playerIds = new Set<string>();
-        games.forEach(g => { playerIds.add(g.white_player_id); playerIds.add(g.black_player_id); });
-        setActivePlayers(playerIds.size);
-      } else {
-        setActivePlayers(0);
-      }
-      const { data: leaders } = await supabase
-        .from("profiles").select("user_id, display_name, rating, games_won, games_played")
-        .order("rating", { ascending: false }).limit(10);
-      if (leaders) setTopPlayers(leaders as LeaderEntry[]);
-    };
-    fetchStats();
-    const interval = setInterval(fetchStats, 15000);
-    return () => clearInterval(interval);
-  }, [effectiveStatus]);
-
-  const game = gameRef.current;
-  const isGameOver = isBotGame
-    ? (game.isGameOver() || !!timeoutWinner || drawAgreed)
-    : (game.isGameOver() || !!timeoutWinner || onlineStatus === "finished");
-
-  // No auto-match with hidden bots - user can choose "Play vs AI" explicitly
-
-  const startBotGame = () => {
-    const playerRating = profile?.rating || 1200;
-    const bot = matchBot(playerRating);
-    const myColor = Math.random() > 0.5 ? "w" : "b";
-
-    setBotOpponent(bot);
-    setBotMyColor(myColor as "w" | "b");
-    setIsBotGame(true);
-    setBotGameStarted(true);
-    gameRef.current = new Chess();
-    setSelectedSquare(null);
-    setLegalMoves([]);
-    setMoveHistory([]);
-    setWhiteTime(tc.seconds);
-    setBlackTime(tc.seconds);
-    setGameStarted(true);
-    setTimeoutWinner(null);
-    setDrawAgreed(false);
-    positionHistory.current = [];
-    playChessSound("start");
-
-    // Bot sends greeting
-    setTimeout(() => {
-      const greetings = BOT_CHAT_MESSAGES.greeting;
-      addBotChatMessage(greetings[Math.floor(Math.random() * greetings.length)], bot);
-    }, 1500);
-  };
-
-  const addBotChatMessage = (message: string, bot: OnlineBotProfile) => {
-    setChatMessages(prev => [...prev, {
-      id: `bot-${Date.now()}-${Math.random()}`,
-      user_id: bot.id,
-      message,
-      created_at: new Date().toISOString(),
-    }]);
-  };
-
-  // Bot makes moves
-  useEffect(() => {
-    if (!isBotGame || !botGameStarted || !botOpponent || isGameOver) return;
-    const botColor = botMyColor === "w" ? "b" : "w";
-    if (game.turn() !== botColor) return;
-
-    setBotThinking(true);
-    // Simulate realistic "thinking" time
-    const thinkTime = 800 + Math.random() * 2500;
-    const timeout = setTimeout(() => {
-      const difficulty = getDifficultyForRating(botOpponent.rating);
-      const moveStr = getAIMove(game, difficulty);
-      if (moveStr) {
-        const move = game.move(moveStr);
-        if (move) {
-          setMoveHistory(prev => [...prev, move.san]);
-          setGameStarted(true);
-
-          // Track position
-          const posKey = game.fen().split(" ").slice(0, 4).join(" ");
-          positionHistory.current.push(posKey);
-
-          // Increment
-          if (!unlimited && tc.increment > 0) {
-            if (botColor === "w") setWhiteTime(p => p + tc.increment);
-            else setBlackTime(p => p + tc.increment);
-          }
-
-          // Check draw conditions
-          const posCount = positionHistory.current.filter(p => p === posKey).length;
-          if (posCount >= 3 || game.isDraw() || game.isStalemate() || game.isInsufficientMaterial()) {
-            setDrawAgreed(true);
-            playChessSound("gameOver");
-          } else if (game.isCheckmate()) {
-            playChessSound("gameOver");
-            const msgs = BOT_CHAT_MESSAGES.onWin;
-            setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 1000);
-          } else if (game.isCheck()) {
-            playChessSound("check");
-            if (Math.random() < 0.2) {
-              const msgs = BOT_CHAT_MESSAGES.onCheck;
-              setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 800);
-            }
-          } else if (move.captured) {
-            playChessSound("capture");
-            if (Math.random() < 0.15) {
-              const msgs = BOT_CHAT_MESSAGES.onCapture;
-              setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 800);
-            }
-          } else {
-            playChessSound("move");
-          }
-        }
-      }
-      setBotThinking(false);
-    }, thinkTime);
-    return () => clearTimeout(timeout);
-  }, [game.fen(), isBotGame, botGameStarted, botOpponent, isGameOver]);
-
-  // Subscribe to chat for real games
-  useEffect(() => {
-    if (!onlineGame || onlineStatus !== "playing") return;
-    supabase.from("game_messages").select("*").eq("game_id", onlineGame.id)
-      .order("created_at", { ascending: true }).then(({ data }) => {
-        if (data) setChatMessages(data as ChatMessage[]);
-      });
-    const channel = supabase.channel(`chat-${onlineGame.id}`)
-      .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "game_messages",
-        filter: `game_id=eq.${onlineGame.id}`,
-      }, (payload) => {
-        setChatMessages(prev => [...prev, payload.new as ChatMessage]);
-      }).subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [onlineGame?.id, onlineStatus]);
-
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
-
-  const sendChat = async () => {
-    if (!chatInput.trim() || !user) return;
-    if (isBotGame && botOpponent) {
-      // Add player message
-      setChatMessages(prev => [...prev, {
-        id: `me-${Date.now()}`,
-        user_id: user.id,
-        message: chatInput.trim(),
-        created_at: new Date().toISOString(),
-      }]);
-      setChatInput("");
-      // Bot responds sometimes
-      if (Math.random() < 0.6) {
-        setTimeout(() => {
-          const responses = ["😊", "👍", "Nice!", "Thanks!", "Haha", "🤔", "Good luck!", "gg"];
-          addBotChatMessage(responses[Math.floor(Math.random() * responses.length)], botOpponent);
-        }, 1500 + Math.random() * 2000);
-      }
-      return;
-    }
-    if (!onlineGame) return;
-    await supabase.from("game_messages").insert({
-      game_id: onlineGame.id, user_id: user.id, message: chatInput.trim(),
-    });
-    setChatInput("");
-  };
-
-  // Sync board for real online games
+  // Sync board from server state
   useEffect(() => {
     if (!onlineGame || onlineStatus !== "playing") return;
     if (onlineGame.fen !== game.fen()) {
@@ -341,6 +93,7 @@ const PlayOnline = () => {
       setLegalMoves([]);
       setGameStarted(true);
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
+      // Play sound for opponent's move
       if (prevFen !== "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" && gameRef.current.turn() === myColor) {
         const g = gameRef.current;
         if (g.isCheckmate() || g.isDraw() || g.isStalemate()) playChessSound("gameOver");
@@ -356,6 +109,7 @@ const PlayOnline = () => {
     setBlackTime(onlineGame.black_time);
   }, [onlineGame]);
 
+  // Initial game setup
   useEffect(() => {
     if (onlineGame && onlineStatus === "playing") {
       setWhiteTime(onlineGame.white_time);
@@ -367,30 +121,42 @@ const PlayOnline = () => {
     }
   }, [onlineStatus]);
 
-  const displayFiles = effectiveBoardFlipped ? [...FILES].reverse() : FILES;
-  const displayRanks = effectiveBoardFlipped ? [...RANKS].reverse() : RANKS;
-  const board = game.board();
-  const lastMove = isBotGame
-    ? (moveHistory.length > 0 ? (() => {
-        // Reconstruct last move from game history
-        const hist = game.history({ verbose: true });
-        const last = hist[hist.length - 1];
-        return last ? { from: last.from, to: last.to } : null;
-      })() : null)
-    : (onlineGame?.last_move_from && onlineGame?.last_move_to
-      ? { from: onlineGame.last_move_from, to: onlineGame.last_move_to } : null);
+  // Chat subscription
+  useEffect(() => {
+    if (!onlineGame || onlineStatus !== "playing") return;
+    supabase.from("game_messages").select("*").eq("game_id", onlineGame.id)
+      .order("created_at", { ascending: true }).then(({ data }) => {
+        if (data) setChatMessages(data as ChatMessage[]);
+      });
+    const channel = supabase.channel(`chat-${onlineGame.id}-${Date.now()}`)
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "game_messages",
+        filter: `game_id=eq.${onlineGame.id}`,
+      }, (payload) => {
+        setChatMessages(prev => [...prev, payload.new as ChatMessage]);
+      }).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [onlineGame?.id, onlineStatus]);
+
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
+
+  const sendChat = async () => {
+    if (!chatInput.trim() || !user || !onlineGame) return;
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: chatInput.trim(),
+    });
+    setChatInput("");
+  };
 
   const handleTimeOut = useCallback((color: "w" | "b") => {
     const result = color === "w" ? "0-1" : "1-0";
     setTimeoutWinner(color === "w" ? "Black" : "White");
     playChessSound("gameOver");
-    if (onlineGame && !isBotGame) endGame(result);
-  }, [onlineGame, endGame, isBotGame]);
+    if (onlineGame) endGame(result);
+  }, [onlineGame, endGame]);
 
   const handleSquareClick = (square: Square) => {
-    const currentMyColor = effectiveMyColor;
-    if (isGameOver || game.turn() !== currentMyColor) return;
-    if (!isBotGame && onlineStatus !== "playing") return;
+    if (isGameOver || game.turn() !== myColor || onlineStatus !== "playing") return;
 
     if (selectedSquare && legalMoves.includes(square)) {
       const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
@@ -398,36 +164,27 @@ const PlayOnline = () => {
         setMoveHistory(prev => [...prev, move.san]);
         setGameStarted(true);
 
-        // Track position for bot games
-        if (isBotGame) {
-          const posKey = game.fen().split(" ").slice(0, 4).join(" ");
-          positionHistory.current.push(posKey);
-        }
-
         let wt = whiteTime, bt = blackTime;
-        const inc = isBotGame ? tc.increment : (onlineGame?.increment || 0);
+        const inc = onlineGame?.increment || 0;
         if (!unlimited && inc > 0) {
           if (move.color === "w") { wt += inc; setWhiteTime(wt); }
           else { bt += inc; setBlackTime(bt); }
         }
 
-        if (!isBotGame) {
-          makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
-        }
+        makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
 
-        if (game.isCheckmate() || game.isDraw() || game.isStalemate()) {
+        if (game.isCheckmate()) {
+          endGame(game.turn() === "w" ? "0-1" : "1-0");
           playChessSound("gameOver");
-          if (isBotGame && botOpponent) {
-            const msgs = BOT_CHAT_MESSAGES.onLose;
-            setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 1000);
-          }
-        } else if (game.isCheck()) playChessSound("check");
-        else if (move.captured) playChessSound("capture");
-        else playChessSound("move");
-
-        if (!isBotGame) {
-          if (game.isCheckmate()) endGame(game.turn() === "w" ? "0-1" : "1-0");
-          else if (game.isDraw() || game.isStalemate()) endGame("1/2-1/2");
+        } else if (game.isDraw() || game.isStalemate()) {
+          endGame("1/2-1/2");
+          playChessSound("gameOver");
+        } else if (game.isCheck()) {
+          playChessSound("check");
+        } else if (move.captured) {
+          playChessSound("capture");
+        } else {
+          playChessSound("move");
         }
       }
       setSelectedSquare(null);
@@ -445,45 +202,8 @@ const PlayOnline = () => {
     }
   };
 
-  const handleResign = () => {
-    if (isBotGame) {
-      setTimeoutWinner(botMyColor === "w" ? "Black" : "White");
-      playChessSound("gameOver");
-      if (botOpponent) {
-        const msgs = BOT_CHAT_MESSAGES.onWin;
-        setTimeout(() => addBotChatMessage(msgs[Math.floor(Math.random() * msgs.length)], botOpponent), 800);
-      }
-    } else {
-      resign();
-    }
-  };
-
-  const handleDrawOffer = () => {
-    if (!isBotGame || !botOpponent || isGameOver) return;
-    // Bot decides based on eval
-    const eval_ = evaluateBoard(game);
-    const botColor = botMyColor === "w" ? "b" : "w";
-    const botAdvantage = botColor === "w" ? eval_ : -eval_;
-    if (Math.abs(eval_) < 150 || moveHistory.length > 50) {
-      setDrawAgreed(true);
-      playChessSound("gameOver");
-      addBotChatMessage("Okay, draw! gg 🤝", botOpponent);
-    } else {
-      addBotChatMessage(botAdvantage > 0 ? "No thanks, I think I'm better here 😅" : "Hmm, I'll keep playing! 💪", botOpponent);
-    }
-  };
-
   const resetAll = () => {
-    if (isBotGame) {
-      setIsBotGame(false);
-      setBotGameStarted(false);
-      setBotOpponent(null);
-      setBotThinking(false);
-      setDrawAgreed(false);
-      positionHistory.current = [];
-    } else {
-      resetOnline();
-    }
+    resetOnline();
     gameRef.current = new Chess();
     setSelectedSquare(null);
     setLegalMoves([]);
@@ -493,27 +213,21 @@ const PlayOnline = () => {
     setGameStarted(false);
     setWhiteTime(tc.seconds);
     setBlackTime(tc.seconds);
+    setOpponentProfile(null);
   };
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
+  const lastMove = onlineGame?.last_move_from && onlineGame?.last_move_to
+    ? { from: onlineGame.last_move_from, to: onlineGame.last_move_to } : null;
 
-  const statusText = isBotGame
-    ? (drawAgreed ? "Draw! 🤝"
-      : timeoutWinner ? `${timeoutWinner} wins on time!`
-      : game.isCheckmate() ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
-      : game.isStalemate() ? "Stalemate — Draw!"
-      : game.isDraw() ? "Draw!"
-      : game.isCheck() ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
-      : botThinking ? `${botOpponent?.displayName} is thinking...`
-      : game.turn() === botMyColor ? "Your turn" : `${botOpponent?.displayName}'s turn`)
-    : (onlineGame?.status === "finished"
-      ? onlineGame.result === "1-0" ? "White wins!" : onlineGame.result === "0-1" ? "Black wins!" : "Draw!"
-      : timeoutWinner ? `${timeoutWinner} wins on time!`
-      : game.isCheckmate() ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
-      : game.isDraw() ? "Draw!" : game.isStalemate() ? "Stalemate!"
-      : game.isCheck() ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
-      : onlineStatus === "playing" && game.turn() === myColor ? "Your turn"
-      : onlineStatus === "playing" ? "Opponent's turn" : "");
+  const statusText = onlineGame?.status === "finished"
+    ? onlineGame.result === "1-0" ? "White wins!" : onlineGame.result === "0-1" ? "Black wins!" : "Draw!"
+    : timeoutWinner ? `${timeoutWinner} wins on time!`
+    : game.isCheckmate() ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
+    : game.isDraw() ? "Draw!" : game.isStalemate() ? "Stalemate!"
+    : game.isCheck() ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
+    : onlineStatus === "playing" && game.turn() === myColor ? "Your turn"
+    : onlineStatus === "playing" ? "Opponent's turn" : "";
 
   if (authLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -527,248 +241,91 @@ const PlayOnline = () => {
           <Wifi className="h-16 w-16 text-primary mx-auto mb-4" />
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">Play Online</h1>
           <p className="text-muted-foreground mb-6">Log in to play against other players online.</p>
-          <Button onClick={() => navigate("/login")}>Log In</Button>
+          <Button onClick={() => navigate("/login")}>Log In to Play</Button>
         </main>
         <Footer />
       </div>
     );
   }
 
-  // LOBBY VIEW
-  if (effectiveStatus === "idle" || onlineStatus === "searching") {
+  // ── LOBBY ──
+  if (onlineStatus === "idle" || onlineStatus === "searching") {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="container mx-auto px-6 pt-24 pb-16">
-          <h1 className="font-display text-4xl font-bold text-foreground text-center mb-2">
-            Free <span className="text-gradient-gold">Online</span> Games
-          </h1>
-          <p className="text-center text-muted-foreground mb-2">Play against real opponents or AI — no Premium required</p>
+        <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+            <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-1">
+              Play <span className="text-gradient-gold">Online</span>
+            </h1>
+            <p className="text-sm text-muted-foreground">Find a real opponent and compete</p>
+          </motion.div>
 
-          {/* Live stats bar */}
-          <div className="flex items-center justify-center gap-6 mb-8 text-sm">
-            <span className="flex items-center gap-1.5 text-muted-foreground">
-              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <Users className="h-3.5 w-3.5" /> {activePlayers} online
-            </span>
-            <span className="flex items-center gap-1.5 text-muted-foreground">
-              <Swords className="h-3.5 w-3.5" /> {liveGames.length} games live
-            </span>
-          </div>
+          <div className="max-w-lg mx-auto space-y-5">
+            {/* Time Control */}
+            <div className="rounded-xl border border-border/50 bg-card/80 p-5 space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Timer className="h-3.5 w-3.5" /> Time Control
+              </p>
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                {TIME_CONTROLS.filter((_, i) => i < TIME_CONTROLS.length - 1).map((t, i) => (
+                  <button key={t.label} onClick={() => { setTimeControlIdx(i); setWhiteTime(TIME_CONTROLS[i].seconds); setBlackTime(TIME_CONTROLS[i].seconds); }}
+                    disabled={onlineStatus === "searching"}
+                    className={`rounded-lg px-2 py-2.5 text-center transition-all border text-xs font-medium ${timeControlIdx === i ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/20 text-muted-foreground hover:border-primary/30"} disabled:opacity-50`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2 text-[10px] text-muted-foreground justify-center">
+                <span className="px-2 py-0.5 rounded bg-muted/30">Bullet</span>
+                <span className="px-2 py-0.5 rounded bg-muted/30">Blitz</span>
+                <span className="px-2 py-0.5 rounded bg-muted/30">Rapid</span>
+                <span className="px-2 py-0.5 rounded bg-muted/30">Classical</span>
+              </div>
+            </div>
 
-          <div className="max-w-4xl mx-auto">
-            <Tabs defaultValue="play" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="play">Find Match</TabsTrigger>
-                <TabsTrigger value="spectate"><Eye className="h-3.5 w-3.5 mr-1" /> Spectate</TabsTrigger>
-                <TabsTrigger value="leaderboard"><Trophy className="h-3.5 w-3.5 mr-1" /> Leaderboard</TabsTrigger>
-              </TabsList>
+            {/* Game Mode */}
+            <div className="rounded-xl border border-border/50 bg-card/80 p-5 space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Game Mode</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setGameMode("rated")}
+                  className={`rounded-lg p-3 border text-sm font-medium transition-all ${gameMode === "rated" ? "border-primary bg-primary/10 text-primary" : "border-border/50 text-muted-foreground hover:border-primary/30"}`}>
+                  ⚔️ Rated
+                </button>
+                <button onClick={() => setGameMode("casual")}
+                  className={`rounded-lg p-3 border text-sm font-medium transition-all ${gameMode === "casual" ? "border-primary bg-primary/10 text-primary" : "border-border/50 text-muted-foreground hover:border-primary/30"}`}>
+                  🎮 Casual
+                </button>
+              </div>
+            </div>
 
-              <TabsContent value="play">
-                <div className="max-w-md mx-auto space-y-6">
-                  {/* Real players online count */}
-                  {activePlayers > 0 && (
-                    <div className="rounded-lg border border-border/50 bg-card p-4">
-                      <p className="text-sm text-muted-foreground flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                        <Users className="h-3.5 w-3.5" /> {activePlayers} real players online
-                      </p>
-                    </div>
-                  )}
+            {/* Player Card */}
+            <div className="rounded-xl border border-border/50 bg-card/80 p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{profile?.display_name || "Player"}</p>
+                <p className="text-xs text-muted-foreground">Rating: {profile?.rating || 1200} ELO</p>
+              </div>
+            </div>
 
-                  {/* Time control */}
-                  <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Timer className="h-3 w-3" /> Time Control</p>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
-                      {TIME_CONTROLS.filter((_, i) => i < TIME_CONTROLS.length - 1).map((t, i) => (
-                        <button key={t.label} onClick={() => setTimeControlIdx(i)} disabled={onlineStatus === "searching"}
-                          className={`rounded-lg px-1.5 py-2.5 text-center transition-all border text-xs font-medium ${timeControlIdx === i ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"} disabled:opacity-50`}>
-                          {t.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+            {onlineError && <p className="text-sm text-destructive text-center">{onlineError}</p>}
 
-                  {/* Skill tier */}
-                  <div className="rounded-lg border border-border/50 bg-card p-4 space-y-3">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Skill Level</p>
-                    <div className="grid grid-cols-4 gap-2">
-                      {SKILL_TIERS.map(tier => (
-                        <button key={tier.key} onClick={() => setSkillTier(tier.key)} disabled={onlineStatus === "searching"}
-                          className={`rounded-lg px-2 py-3 text-center transition-all border text-sm font-medium ${skillTier === tier.key ? "border-primary bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground hover:border-primary/30"} disabled:opacity-50`}>
-                          {tier.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Player card */}
-                  <div className="rounded-lg border border-border/50 bg-card p-4">
-                    <p className="text-sm text-muted-foreground">Playing as</p>
-                    <p className="font-display text-lg font-bold text-foreground">{profile?.display_name || profile?.username || "Player"}</p>
-                    <p className="text-xs text-muted-foreground">Rating: {profile?.rating || 1200}</p>
-                  </div>
-
-                  {onlineError && <p className="text-sm text-destructive text-center">{onlineError}</p>}
-                  {onlineStatus === "searching" ? (
-                    <div className="text-center space-y-4">
-                      <div className="flex items-center justify-center gap-2 text-primary">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span className="font-medium">Looking for an opponent…</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Matching you with a real player near your rating...</p>
-                      <div className="flex flex-col gap-2">
-                        <Button variant="outline" onClick={cancelSearch}>Cancel Search</Button>
-                        <Button variant="secondary" onClick={() => { cancelSearch(); startBotGame(); }}>
-                          🤖 Play vs AI Instead
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
-                        <Wifi className="mr-2 h-5 w-5" /> Find Real Opponent
-                      </Button>
-                      <Button className="w-full" variant="outline" size="lg" onClick={startBotGame}>
-                        🤖 Play vs AI
-                      </Button>
-                    </div>
-                  )}
+            {onlineStatus === "searching" ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-4 py-4">
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="font-medium">Searching for opponent…</span>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="spectate">
-                <div className="max-w-2xl mx-auto">
-                  {spectatingGame ? (
-                    <div className="space-y-4">
-                      <Button variant="ghost" size="sm" onClick={() => setSpectatingGame(null)}>
-                        ← Back to games
-                      </Button>
-                      {/* Mini spectate board */}
-                      <div className="rounded-xl border border-border/50 bg-card p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-foreground">{spectatingGame.black.countryFlag} {spectatingGame.black.displayName}</span>
-                            <span className="text-xs font-mono text-muted-foreground">{spectatingGame.black.rating}</span>
-                          </div>
-                          <span className="font-mono text-sm text-muted-foreground">{formatTimeSpec(spectatingGame.blackTime)}</span>
-                        </div>
-                        {/* Board */}
-                        <div className="grid grid-cols-8 aspect-square rounded-lg overflow-hidden border border-border/30">
-                          {RANKS.map((rank, ri) =>
-                            FILES.map((file, fi) => {
-                              const square = `${file}${rank}` as Square;
-                              const isLight = (ri + fi) % 2 === 0;
-                              const piece = spectatingGame.chess.board()[ri][fi];
-                              const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-                              const pd = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
-                              return (
-                                <div key={square} className={`flex items-center justify-center ${isLight ? "bg-[hsl(35,30%,82%)]" : "bg-[hsl(145,32%,38%)]"}`}>
-                                  {pd && <span className={`text-[clamp(1rem,3.5vw,1.8rem)] leading-none select-none ${pd.className}`}>{pd.symbol}</span>}
-                                </div>
-                              );
-                            })
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-foreground">{spectatingGame.white.countryFlag} {spectatingGame.white.displayName}</span>
-                            <span className="text-xs font-mono text-muted-foreground">{spectatingGame.white.rating}</span>
-                          </div>
-                          <span className="font-mono text-sm text-muted-foreground">{formatTimeSpec(spectatingGame.whiteTime)}</span>
-                        </div>
-                        <div className="text-center">
-                          {spectatingGame.finished ? (
-                            <span className="text-sm font-medium text-primary">{spectatingGame.result === "1-0" ? `${spectatingGame.white.displayName} wins!` : spectatingGame.result === "0-1" ? `${spectatingGame.black.displayName} wins!` : "Draw!"}</span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
-                              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                              {spectatingGame.chess.turn() === "w" ? spectatingGame.white.displayName : spectatingGame.black.displayName} is thinking... · Move {spectatingGame.moveCount}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {spectateGames.filter(g => !g.finished).length + liveGames.length} game{spectateGames.filter(g => !g.finished).length + liveGames.length !== 1 ? "s" : ""} in progress
-                      </p>
-                      {/* Real games */}
-                      {liveGames.map(g => (
-                        <div key={g.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-card p-4 hover:border-primary/30 transition-all">
-                          <div className="flex items-center gap-3">
-                            <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
-                            <div>
-                              <p className="text-sm font-medium text-foreground">{g.time_control_label} Game</p>
-                              <p className="text-xs text-muted-foreground">{g.turn === "w" ? "White" : "Black"} to move</p>
-                            </div>
-                          </div>
-                          <Link to={`/play/online?spectate=${g.id}`}>
-                            <Button variant="outline" size="sm"><Eye className="h-3.5 w-3.5 mr-1" /> Watch</Button>
-                          </Link>
-                        </div>
-                      ))}
-                      {/* AI exhibition games */}
-                      {spectateGames.filter(g => !g.finished).map(g => (
-                        <div key={g.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-card p-4 hover:border-primary/30 transition-all cursor-pointer"
-                          onClick={() => setSpectatingGame(g)}>
-                          <div className="flex items-center gap-3">
-                            <div className="h-2.5 w-2.5 rounded-full bg-blue-500 animate-pulse" />
-                            <div>
-                              <p className="text-sm font-medium text-foreground">
-                                🤖 {g.white.countryFlag} {g.white.displayName} <span className="text-muted-foreground text-xs">vs</span> {g.black.countryFlag} {g.black.displayName}
-                              </p>
-                              <p className="text-xs text-muted-foreground">AI Exhibition · {g.timeControl} · Move {g.moveCount}</p>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm"><Eye className="h-3.5 w-3.5 mr-1" /> Watch</Button>
-                        </div>
-                      ))}
-                      {liveGames.length === 0 && spectateGames.filter(g => !g.finished).length === 0 && (
-                        <div className="text-center py-16">
-                          <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                          <p className="text-muted-foreground">No live games right now. Check back soon!</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="leaderboard">
-                <div className="max-w-2xl mx-auto">
-                  <div className="space-y-1.5">
-                    {topPlayers.map((p, i) => {
-                      const winRate = p.games_played > 0 ? Math.round((p.games_won / p.games_played) * 100) : 0;
-                      const isMe = user?.id === p.user_id;
-                      return (
-                        <Link key={p.user_id} to={`/profile/${p.user_id}`}
-                          className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-primary/30 ${isMe ? "border-primary/30 bg-primary/5" : "border-border/50 bg-card"}`}>
-                          <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center shrink-0">
-                            {i < 3 ? <Trophy className={`h-4 w-4 ${i === 0 ? "text-primary" : "text-muted-foreground"}`} /> :
-                            <span className="text-xs font-bold text-muted-foreground">{i + 1}</span>}
-                          </div>
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <span className={`font-medium truncate ${isMe ? "text-primary" : "text-foreground"}`}>
-                              {p.display_name || "Anonymous"}{isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
-                            </span>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="font-mono text-lg font-bold text-primary">{p.rating}</p>
-                            <p className="text-[10px] text-muted-foreground">{p.games_played}G · {winRate}%W</p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                  <div className="text-center mt-6">
-                    <Link to="/leaderboard"><Button variant="outline" size="sm">View Full Leaderboard</Button></Link>
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+                <p className="text-xs text-muted-foreground">Looking for a player near your rating</p>
+                <Button variant="outline" onClick={cancelSearch} className="w-full">Cancel Search</Button>
+              </motion.div>
+            ) : (
+              <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
+                <Wifi className="mr-2 h-5 w-5" /> Find Opponent
+              </Button>
+            )}
           </div>
         </main>
         <Footer />
@@ -776,189 +333,155 @@ const PlayOnline = () => {
     );
   }
 
-  // GAME VIEW
-  const myName = profile?.display_name || profile?.username || "You";
-  const myRating = profile?.rating || 1200;
-  const oppName = isBotGame ? (`🤖 ${botOpponent?.displayName || "AI"}`) : (opponentProfile?.display_name || "Opponent");
-  const oppRating = isBotGame ? (botOpponent?.rating || 1200) : (opponentProfile?.rating || 1200);
-  const oppFlag = isBotGame ? (botOpponent?.countryFlag || "") : "";
-
-  const isWhite = effectiveMyColor === "w";
-  const oppColor = isWhite ? "b" as const : "w" as const;
-  const topPlayer = effectiveBoardFlipped
-    ? { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: effectiveMyColor as "w" | "b", flag: "" }
-    : { name: `${oppName} ${oppFlag}`, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor, flag: oppFlag };
-  const bottomPlayer = effectiveBoardFlipped
-    ? { name: `${oppName} ${oppFlag}`, rating: oppRating, isMe: false, time: isWhite ? blackTime : whiteTime, color: oppColor, flag: oppFlag }
-    : { name: myName, rating: myRating, isMe: true, time: isWhite ? whiteTime : blackTime, color: effectiveMyColor as "w" | "b", flag: "" };
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
-
-  const PlayerBar = ({ player, isTop }: { player: typeof topPlayer; isTop: boolean }) => {
-    const isActive = !isGameOver && gameStarted && game.turn() === player.color;
-    const isThinking = !player.isMe && isBotGame && botThinking && isActive;
-    return (
-      <div className={`flex items-center justify-between rounded-xl border px-4 py-2.5 transition-all duration-300 ${
-        isActive ? "border-primary/50 bg-primary/5 shadow-[0_0_15px_hsl(var(--primary)/0.1)]" : "border-border/40 bg-card/60"
-      }`}>
-        <div className="flex items-center gap-3">
-          <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold ${
-            player.color === "w" ? "bg-foreground text-background" : "bg-muted-foreground/20 text-foreground"
-          }`}>
-            {player.name.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className={`text-sm font-semibold ${player.isMe ? "text-primary" : "text-foreground"}`}>{player.name}</span>
-              {isActive && !isThinking && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
-              {isThinking && (
-                <div className="flex gap-0.5">
-                  {[0, 1, 2].map(i => (
-                    <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
-                  ))}
-                </div>
-              )}
-            </div>
-            <span className="text-xs text-muted-foreground font-mono">{player.rating} ELO</span>
-          </div>
-        </div>
-        {!unlimited && (
-          <div className={`font-mono text-xl font-bold px-3 py-1 rounded-lg ${
-            isActive ? "bg-primary/15 text-primary" : "bg-muted/30 text-muted-foreground"
-          } ${player.time <= 30 && isActive ? "text-red-400 animate-pulse" : ""}`}>
-            {formatTime(player.time)}
-          </div>
-        )}
-      </div>
-    );
-  };
-
+  // ── GAME VIEW ──
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 pt-20 pb-16">
-        <div className="flex flex-col items-center gap-4 lg:flex-row lg:items-start lg:justify-center lg:gap-6">
-          {/* Board column */}
-          <div className="w-full max-w-[min(90vw,520px)] space-y-2">
-            <PlayerBar player={topPlayer} isTop />
-
-            {!unlimited && (
-              <div className="sr-only">
-                <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor}
-                  isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
+      <main className="container mx-auto px-2 sm:px-6 pt-16 sm:pt-20 pb-16">
+        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-4">
+          {/* Board + Clocks */}
+          <div className="flex-1 space-y-2">
+            {/* Opponent info */}
+            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-full bg-muted/50 flex items-center justify-center text-xs">
+                  {boardFlipped ? "♔" : "♚"}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{opponentProfile?.display_name || "Opponent"}</p>
+                  <p className="text-[10px] text-muted-foreground">{opponentProfile?.rating || "?"} ELO</p>
+                </div>
               </div>
-            )}
+              {!unlimited && (
+                <span className={`font-mono text-lg font-bold ${(boardFlipped ? whiteTime : blackTime) <= 30 ? "text-destructive" : "text-foreground"}`}>
+                  {formatClock(boardFlipped ? whiteTime : blackTime)}
+                </span>
+              )}
+            </div>
 
-            <div className="rounded-xl overflow-hidden shadow-[0_0_30px_hsl(var(--primary)/0.08)] border border-border/30" role="grid" aria-label="Chess board">
-              {displayRanks.map((rank) => (
-                <div key={rank} className="flex" role="row">
-                  {displayFiles.map((file) => {
+            {/* Board */}
+            <div className="aspect-square w-full max-w-[560px] mx-auto">
+              <div className="grid grid-cols-8 w-full h-full rounded-lg overflow-hidden border border-border/30 shadow-lg">
+                {displayRanks.map((rank, ri) =>
+                  displayFiles.map((file, fi) => {
                     const square = `${file}${rank}` as Square;
-                    const origRi = RANKS.indexOf(rank);
-                    const origFi = FILES.indexOf(file);
-                    const isLight = (origRi + origFi) % 2 === 0;
-                    const piece = board[origRi][origFi];
+                    const isLight = (ri + fi) % 2 === 0;
+                    const piece = game.board()[boardFlipped ? 7 - ri : ri][boardFlipped ? 7 - fi : fi];
+                    const pieceKey = piece ? `${piece.color}${piece.type}` : null;
+                    const pd = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
                     const isSelected = selectedSquare === square;
                     const isLegal = legalMoves.includes(square);
                     const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
-                    const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-                    const pieceDisplay = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
-
-                    let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
-                    if (isSelected) bgClass = "bg-primary/40";
-                    else if (isLastMove) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
+                    const isKingInCheck = game.isCheck() && piece?.type === "k" && piece.color === game.turn();
 
                     return (
-                      <button key={square} role="gridcell"
-                        aria-label={`${file}${rank}${piece ? ` ${piece.color === "w" ? "White" : "Black"} ${piece.type}` : ""}`}
-                        className={`aspect-square w-[12.5%] flex items-center justify-center select-none transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset relative
-                          ${bgClass}
-                          ${isLegal || (game.turn() === effectiveMyColor && !isGameOver) ? "cursor-pointer active:scale-95" : "cursor-default"}`}
-                        onClick={() => handleSquareClick(square)} tabIndex={0}>
-                        {isLegal && !piece && <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />}
-                        {isLegal && pieceDisplay && <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />}
-                        {pieceDisplay && <span className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none ${pieceDisplay.className}`}>{pieceDisplay.symbol}</span>}
-                      </button>
+                      <div
+                        key={square}
+                        onClick={() => handleSquareClick(square)}
+                        className={`relative flex items-center justify-center cursor-pointer transition-colors
+                          ${isLight ? "bg-[hsl(35,30%,82%)]" : "bg-[hsl(145,32%,38%)]"}
+                          ${isSelected ? "ring-2 ring-inset ring-primary/70" : ""}
+                          ${isLastMove ? "bg-[hsl(50,80%,60%)]/40" : ""}
+                          ${isKingInCheck ? "bg-destructive/40" : ""}
+                        `}
+                      >
+                        {pd && (
+                          <span className={`text-[clamp(1.2rem,4vw,2.8rem)] leading-none select-none ${pd.className}`}>
+                            {pd.symbol}
+                          </span>
+                        )}
+                        {isLegal && !pd && <div className="absolute w-[25%] h-[25%] rounded-full bg-primary/30" />}
+                        {isLegal && pd && <div className="absolute inset-0 ring-2 ring-inset ring-primary/40 rounded-none" />}
+                        {fi === 0 && <span className="absolute top-0.5 left-0.5 text-[8px] text-muted-foreground/50 font-mono">{rank}</span>}
+                        {ri === 7 && <span className="absolute bottom-0.5 right-0.5 text-[8px] text-muted-foreground/50 font-mono">{file}</span>}
+                      </div>
                     );
-                  })}
-                </div>
-              ))}
-            </div>
-
-            <PlayerBar player={bottomPlayer} isTop={false} />
-
-            {/* Status + actions */}
-            <div className="flex items-center justify-between gap-2 pt-1">
-              <p className="text-sm font-medium text-foreground">{statusText}</p>
-              <div className="flex gap-2">
-                {(effectiveStatus === "playing" || (isBotGame && botGameStarted)) && !isGameOver && (
-                  <>
-                    {isBotGame && (
-                      <Button onClick={handleDrawOffer} variant="outline" size="sm">
-                        <Handshake className="mr-1.5 h-3.5 w-3.5" /> Draw
-                      </Button>
-                    )}
-                    <Button onClick={handleResign} variant="destructive" size="sm">
-                      <Flag className="mr-1.5 h-3.5 w-3.5" /> Resign
-                    </Button>
-                  </>
-                )}
-                {isGameOver && (
-                  <Button onClick={resetAll} size="sm"><RotateCcw className="mr-1.5 h-3.5 w-3.5" /> New Game</Button>
+                  })
                 )}
               </div>
             </div>
+
+            {/* Player info */}
+            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-xs">
+                  {boardFlipped ? "♚" : "♔"}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-primary">{profile?.display_name || "You"}</p>
+                  <p className="text-[10px] text-muted-foreground">{profile?.rating || 1200} ELO</p>
+                </div>
+              </div>
+              {!unlimited && (
+                <span className={`font-mono text-lg font-bold ${(boardFlipped ? blackTime : whiteTime) <= 30 ? "text-destructive" : "text-foreground"}`}>
+                  {formatClock(boardFlipped ? blackTime : whiteTime)}
+                </span>
+              )}
+            </div>
+
+            {/* Clock ticker (hidden) */}
+            <ChessClock
+              whiteTime={whiteTime} blackTime={blackTime}
+              activeColor={activeClockColor} isGameOver={isGameOver}
+              onTimeOut={handleTimeOut}
+              setWhiteTime={setWhiteTime} setBlackTime={setBlackTime}
+              unlimited={unlimited}
+            />
           </div>
 
-          {/* Side panel */}
-          <div className="w-full max-w-xs space-y-3 lg:mt-0">
-            {/* Move history */}
-            <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-4">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Moves</h3>
-              <div className="max-h-48 overflow-y-auto">
-                {moveHistory.length === 0 ? <p className="text-xs text-muted-foreground italic">Game starting…</p> : (
-                  <div className="grid grid-cols-[auto_1fr_1fr] gap-x-3 gap-y-1 text-sm">
-                    {moveHistory.map((move, i) => i % 2 === 0 ? (
-                      <div key={i} className="contents">
-                        <span className="text-muted-foreground/60 text-xs font-mono">{Math.floor(i / 2) + 1}.</span>
-                        <span className="text-foreground font-medium font-mono">{move}</span>
-                        <span className="text-muted-foreground font-mono">{moveHistory[i + 1] || ""}</span>
-                      </div>
-                    ) : null)}
-                  </div>
-                )}
+          {/* Sidebar: Status, Moves, Chat, Controls */}
+          <div className="w-full lg:w-80 space-y-3">
+            {/* Status */}
+            <div className={`rounded-xl border p-3 text-center text-sm font-medium ${isGameOver ? "border-primary/30 bg-primary/5 text-primary" : "border-border/50 bg-card/80 text-foreground"}`}>
+              {statusText}
+            </div>
+
+            {/* Move History */}
+            <div className="rounded-xl border border-border/50 bg-card/80 p-3 max-h-48 overflow-y-auto">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Moves</p>
+              <div className="flex flex-wrap gap-1">
+                {moveHistory.map((san, i) => (
+                  <span key={i} className="text-xs font-mono text-foreground">
+                    {i % 2 === 0 && <span className="text-muted-foreground mr-0.5">{Math.floor(i / 2) + 1}.</span>}
+                    {san}
+                  </span>
+                ))}
+                {moveHistory.length === 0 && <span className="text-xs text-muted-foreground">No moves yet</span>}
               </div>
             </div>
 
+            {/* Game Controls */}
+            {!isGameOver && onlineStatus === "playing" && (
+              <div className="flex gap-2">
+                <Button variant="destructive" size="sm" className="flex-1 gap-1" onClick={resign}>
+                  <Flag className="h-3.5 w-3.5" /> Resign
+                </Button>
+              </div>
+            )}
+
+            {isGameOver && (
+              <Button className="w-full" onClick={resetAll}>
+                <RotateCcw className="h-4 w-4 mr-2" /> New Game
+              </Button>
+            )}
+
             {/* Chat */}
-            <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-4 space-y-3">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Game Chat</h3>
-              <div className="h-40 overflow-y-auto space-y-1.5 px-1">
-                {chatMessages.length === 0 && (
-                  <p className="text-xs text-muted-foreground/50 italic text-center pt-12">Say hi to your opponent!</p>
-                )}
+            <div className="rounded-xl border border-border/50 bg-card/80 p-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Chat</p>
+              <div className="space-y-1 max-h-32 overflow-y-auto mb-2">
                 {chatMessages.map(msg => (
-                  <div key={msg.id} className={`flex ${msg.user_id === user?.id ? "justify-end" : "justify-start"}`}>
-                    <span className={`inline-block px-3 py-1.5 rounded-2xl text-xs max-w-[85%] ${
-                      msg.user_id === user?.id
-                        ? "bg-primary/20 text-primary rounded-br-sm"
-                        : "bg-muted/50 text-foreground rounded-bl-sm"
-                    }`}>
-                      {msg.message}
-                    </span>
+                  <div key={msg.id} className={`text-xs ${msg.user_id === user?.id ? "text-primary" : "text-foreground"}`}>
+                    <span className="font-medium">{msg.user_id === user?.id ? "You" : "Opponent"}:</span> {msg.message}
                   </div>
                 ))}
                 <div ref={chatEndRef} />
               </div>
               <div className="flex gap-1.5">
-                <Input value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Type a message…" className="h-9 text-xs rounded-xl"
-                  onKeyDown={e => e.key === "Enter" && sendChat()} />
-                <Button size="sm" variant="ghost" onClick={sendChat} className="h-9 w-9 p-0 rounded-xl hover:bg-primary/10">
-                  <Send className="h-3.5 w-3.5 text-primary" />
+                <Input value={chatInput} onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && sendChat()}
+                  placeholder="Type a message…" className="h-8 text-xs" />
+                <Button size="sm" variant="outline" onClick={sendChat} className="h-8 px-2">
+                  <Send className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
@@ -969,5 +492,12 @@ const PlayOnline = () => {
     </div>
   );
 };
+
+function formatClock(seconds: number): string {
+  if (seconds <= 0) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
 
 export default PlayOnline;
