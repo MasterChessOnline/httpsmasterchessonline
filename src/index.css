@@ -263,6 +263,8 @@ a, button, input, select, textarea {
   transition-duration: 200ms;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+.safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
