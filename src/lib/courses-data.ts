@@ -855,6 +855,7 @@ export const COURSES: Course[] = [
     level: "Intermediate",
     tier: "free",
     icon: "Crosshair",
+    category: "middlegame",
     lessons: [
       L("ac-1", "When to Attack", "Attack when you have a lead in development, better piece activity, or your opponent's king is unsafe. Without these factors, an attack will fail.", ["Development advantage", "Superior piece activity", "Unsafe enemy king"]),
       L("ac-2", "Attacking the Uncastled King", "If the opponent hasn't castled, open the center! Central files (d and e) become highways for your rooks to attack.", ["Open the center immediately", "d and e files are highways", "Prevent castling if possible"]),
