@@ -287,7 +287,7 @@ const Index = () => {
         {/* Performance Snapshot */}
         {user && profile && (
           <Section title="Your Performance" icon={BarChart3}>
-            <div className="rounded-xl glass-neon p-5 shimmer relative overflow-hidden">
+            <div className="rounded-xl glass-neon p-5 shimmer relative overflow-hidden inner-glow">
               <div className="relative flex flex-col sm:flex-row items-center gap-5">
                 <div className="flex items-center gap-4">
                   <RankBadge rating={profile.rating} size="lg" />
