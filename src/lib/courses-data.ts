@@ -897,6 +897,7 @@ export const COURSES: Course[] = [
     level: "Intermediate",
     tier: "free",
     icon: "Layout",
+    category: "middlegame",
     lessons: [
       L("dt-1", "When to Defend", "Defend when your opponent has the initiative, your king is under pressure, or you're behind in material. Recognition is the first step.", ["Recognize when you're defending", "Opponent has initiative", "King under pressure"]),
       L("dt-2", "Active vs Passive Defense", "Active defense involves counter-threats and counter-attacks. Passive defense just blocks threats. Active defense is almost always stronger.", ["Active defense = counter-threats", "Passive defense = blocking", "Active is stronger"]),
