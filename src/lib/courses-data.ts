@@ -347,6 +347,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Brain",
+    category: "strategy",
     lessons: [
       L("sm-1", "Prophylaxis", "Prevent the opponent's plans before improving your own position. Ask 'What does my opponent want?' before each move.", ["Ask what opponent wants", "Prevent before improving", "Key skill of world champions"], "r1bq1rk1/pp2bppp/2n1pn2/2pp4/2PP4/2NBPN2/PP3PPP/R1BQ1RK1 w - - 0 8"),
       L("sm-2", "Pawn Breaks", "A pawn break challenges the opponent's pawn structure. Timing is crucial — too early is premature, too late is too slow.", ["Timing is everything", "Opens lines for pieces", "Changes the pawn structure"], "r1bq1rk1/pp2bppp/2n1pn2/2ppP3/3P4/2NB1N2/PPP2PPP/R1BQ1RK1 w - - 0 8"),
