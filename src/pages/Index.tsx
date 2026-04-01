@@ -3,54 +3,43 @@ import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
-  Wifi, Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
-  Eye, Target, Shield, Crown, Zap, TrendingUp, Flame,
-  ChevronRight, Clock, Award, Star, Play, Brain
+  ArrowRight, Swords, Trophy, GraduationCap, Crown, Users,
+  Wifi, Heart, Monitor, Sparkles, ChevronRight
 } from "lucide-react";
-import { getRank } from "@/lib/ranks";
-import RankBadge from "@/components/RankBadge";
+import { useRef } from "react";
+import heroImage from "@/assets/hero-chess.jpg";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
-interface RecentGame {
-  id: string;
-  result: string | null;
-  time_control_label: string;
-  pgn: string;
-  created_at: string;
-  white_player_id: string;
-  black_player_id: string;
-}
-
-interface TopPlayer {
-  user_id: string;
-  display_name: string | null;
-  rating: number;
-  games_won: number;
-  games_played: number;
-}
+/* ── Floating Chess Pieces ── */
+const floatingPieces = [
+  { char: "♚", x: "8%", y: "20%", size: 64, delay: 0 },
+  { char: "♛", x: "88%", y: "15%", size: 52, delay: 0.5 },
+  { char: "♞", x: "12%", y: "75%", size: 44, delay: 1 },
+  { char: "♜", x: "85%", y: "70%", size: 48, delay: 1.5 },
+  { char: "♝", x: "50%", y: "10%", size: 36, delay: 2 },
+];
 
 /* ── Gold Particles ── */
-function GoldParticles() {
+function GoldParticles({ count = 20 }: { count?: number }) {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(25)].map((_, i) => (
+      {[...Array(count)].map((_, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
-            width: `${2 + Math.random() * 3}px`,
-            height: `${2 + Math.random() * 3}px`,
-            background: `radial-gradient(circle, hsl(43 90% ${50 + Math.random() * 20}% / ${0.4 + Math.random() * 0.3}), transparent)`,
+            width: `${1.5 + Math.random() * 2.5}px`,
+            height: `${1.5 + Math.random() * 2.5}px`,
+            background: `radial-gradient(circle, hsl(43 90% ${50 + Math.random() * 20}% / ${0.3 + Math.random() * 0.4}), transparent)`,
           }}
           animate={{
-            y: [0, -(20 + Math.random() * 30), 0],
-            opacity: [0.15, 0.6, 0.15],
-            scale: [0.7, 1.3, 0.7],
+            y: [0, -(15 + Math.random() * 25), 0],
+            opacity: [0.1, 0.5, 0.1],
+            scale: [0.8, 1.2, 0.8],
           }}
           transition={{
             duration: 4 + Math.random() * 5,
@@ -64,345 +53,363 @@ function GoldParticles() {
   );
 }
 
-/* ── Section Component ── */
-const Section = ({ title, icon: Icon, children, action, delay = 0 }: {
-  title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; delay?: number;
-}) => (
-  <motion.section
-    className="space-y-4"
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.5, delay }}
-  >
-    <div className="flex items-center justify-between">
-      <h2 className="font-display text-sm sm:text-base font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
-        <Icon className="h-4 w-4 text-primary" /> {title}
-      </h2>
-      {action}
-    </div>
-    {children}
-  </motion.section>
-);
+/* ── Stats Bar ── */
+const stats = [
+  { icon: Users, value: "2.4M+", label: "Active Players" },
+  { icon: Trophy, value: "Live", label: "Tournaments" },
+  { icon: Crown, value: "Real-time", label: "ELO Tracking" },
+];
+
+/* ── Feature Cards ── */
+const features = [
+  {
+    icon: Wifi,
+    title: "Play Online",
+    desc: "Challenge real opponents worldwide with ELO-based matchmaking.",
+    href: "/play/online",
+  },
+  {
+    icon: Monitor,
+    title: "Play vs Computer",
+    desc: "Practice against AI from beginner to grandmaster level.",
+    href: "/play",
+  },
+  {
+    icon: Trophy,
+    title: "Tournaments",
+    desc: "Compete in daily and weekly tournaments with live standings.",
+    href: "/tournaments",
+  },
+  {
+    icon: GraduationCap,
+    title: "Learn",
+    desc: "Interactive lessons, openings, and game analysis tools.",
+    href: "/learn",
+    badge: "Coming Soon",
+  },
+];
 
 const Index = () => {
-  const { user, profile } = useAuth();
-  const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
-  const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
-  const [activeTournaments, setActiveTournaments] = useState(0);
-  const [liveGamesCount, setLiveGamesCount] = useState(0);
-  const [winStreak, setWinStreak] = useState(0);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (user) {
-        const { data: games } = await supabase
-          .from("online_games")
-          .select("id, result, time_control_label, pgn, created_at, white_player_id, black_player_id")
-          .eq("status", "finished")
-          .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
-          .order("created_at", { ascending: false })
-          .limit(10);
-        if (games) {
-          setRecentGames(games);
-          let streak = 0;
-          for (const g of games) {
-            const isWhite = g.white_player_id === user.id;
-            const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
-            if (won) streak++;
-            else break;
-          }
-          setWinStreak(streak);
-        }
-      }
-
-      const { data: leaders } = await supabase.from("profiles")
-        .select("user_id, display_name, rating, games_won, games_played")
-        .order("rating", { ascending: false }).limit(5);
-      if (leaders) setTopPlayers(leaders);
-
-      const { count: tCount } = await supabase.from("tournaments")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["registering", "active"]);
-      setActiveTournaments(tCount || 0);
-
-      const { count: gCount } = await supabase.from("online_games")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "active");
-      setLiveGamesCount(gCount || 0);
-    };
-    fetchData();
-  }, [user]);
-
-  const winRate = profile && profile.games_played > 0
-    ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
+  const { user } = useAuth();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   return (
-    <div className="min-h-screen bg-background grid-bg relative">
+    <div className="min-h-screen bg-background relative">
       <Navbar />
 
-      {/* ── HERO — Gold 4D ── */}
-      <div className="relative pt-24 sm:pt-32 pb-16 px-4 overflow-hidden">
-        <GoldParticles />
+      {/* ════════════════════════════════════════════
+          HERO SECTION
+      ════════════════════════════════════════════ */}
+      <div ref={heroRef} className="relative min-h-[100svh] overflow-hidden">
+        {/* Background image with parallax */}
+        <motion.div className="absolute inset-0" style={{ y: imgY }}>
+          <motion.img
+            src={heroImage}
+            alt="Chess board"
+            className="h-[120%] w-full object-cover"
+            initial={{ scale: 1.2, filter: "brightness(0.25) saturate(0.8)" }}
+            animate={{ scale: 1.05, filter: "brightness(0.4) saturate(1)" }}
+            transition={{ duration: 3, ease: "easeOut" }}
+            loading="eager"
+          />
+        </motion.div>
 
-        {/* Gold ambient glow orbs */}
-        <div className="absolute top-1/4 left-1/3 w-80 h-80 rounded-full blur-[120px] pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(43 90% 55% / 0.08), transparent)' }} />
-        <div className="absolute top-1/2 right-1/4 w-60 h-60 rounded-full blur-[100px] pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(30 60% 40% / 0.06), transparent)' }} />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-40 rounded-full blur-[80px] pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(43 70% 65% / 0.05), transparent)' }} />
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/40" />
 
-        <div className="container mx-auto max-w-4xl text-center relative z-10">
+        {/* Floating chess pieces */}
+        {floatingPieces.map((p, i) => (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {/* Crown icon */}
-            <motion.div
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6"
-              style={{ background: 'linear-gradient(135deg, hsl(43 90% 55% / 0.15), hsl(30 60% 40% / 0.1))', border: '1px solid hsl(43 90% 55% / 0.2)' }}
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Crown className="h-8 w-8 text-primary" />
-            </motion.div>
-
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black mb-3 tracking-tight uppercase">
-              <span className="text-gradient-gold">Master</span>
-              <span className="text-foreground">Chess</span>
-              <span className="text-primary/50 text-2xl sm:text-3xl ml-2 align-super">4D</span>
-            </h1>
-            <p className="text-muted-foreground text-sm sm:text-lg max-w-md mx-auto mb-10 font-light tracking-wide">
-              Play beyond reality
-            </p>
-          </motion.div>
-
-          {/* Main CTA */}
-          <motion.div
+            key={i}
+            className="absolute text-primary/8 font-display select-none pointer-events-none"
+            style={{ left: p.x, top: p.y, fontSize: p.size }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            transition={{ delay: p.delay, duration: 1 }}
           >
-            <Link to="/play/online">
+            <motion.span
+              animate={{ y: [0, -12, 0], rotate: [0, 3, -3, 0] }}
+              transition={{ duration: 6 + Math.random() * 3, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
+            >
+              {p.char}
+            </motion.span>
+          </motion.div>
+        ))}
+
+        <GoldParticles count={15} />
+
+        {/* Hero content */}
+        <motion.div
+          className="relative z-10 container mx-auto flex min-h-[100svh] flex-col items-center justify-center px-6 text-center"
+          style={{ opacity: heroOpacity }}
+        >
+          {/* Badge */}
+          <motion.div
+            className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 backdrop-blur-md"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-semibold tracking-wide text-primary uppercase">Free to Play · No Ads</span>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            className="font-display text-4xl sm:text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            <span className="text-foreground">Your Next</span>
+            <br />
+            <span className="text-gradient-gold">Grandmaster</span>
+            <br />
+            <span className="text-foreground">Move Awaits</span>
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            className="mx-auto mt-6 max-w-lg text-base sm:text-lg text-muted-foreground/80 leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+          >
+            Play real opponents, join tournaments, track your rating, and improve
+            — all on one beautifully crafted platform.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            className="mt-10 flex flex-col items-center gap-3 w-full max-w-sm"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.2 }}
+          >
+            <Link to={user ? "/play/online" : "/signup"} className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl"
+                className="w-full sm:w-auto btn-neon bg-primary text-primary-foreground hover:bg-primary/90 px-10 py-6 text-base font-bold shadow-glow-lg group relative overflow-hidden rounded-xl"
               >
-                <Play className="h-5 w-5 mr-2" />
-                Enter Chess
+                <span className="relative z-10 flex items-center justify-center">
+                  Start Playing Free
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Button>
+            </Link>
+            <Link to="/play" className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto border-foreground/20 text-foreground hover:bg-foreground/5 px-8 py-5 text-base backdrop-blur-md rounded-xl"
+              >
+                <Swords className="mr-2 h-4 w-4" /> Play vs Computer
+              </Button>
+            </Link>
+            <Link to="/contact" className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto border-foreground/20 text-foreground hover:bg-foreground/5 px-8 py-5 text-base backdrop-blur-md rounded-xl"
+              >
+                <Heart className="mr-2 h-4 w-4" /> Support Us
               </Button>
             </Link>
           </motion.div>
 
-          {/* Quick Actions (3 max) */}
+          {/* Stats bar */}
           <motion.div
-            className="flex justify-center gap-4 mt-10"
-            initial={{ opacity: 0, y: 10 }}
+            className="mt-16 grid grid-cols-3 gap-4 sm:gap-8 w-full max-w-xl"
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ duration: 0.6, delay: 1.6 }}
           >
-            {[
-              { to: "/play", icon: Swords, label: "Play" },
-              { to: "/learn", icon: Brain, label: "Training" },
-              { to: "/analysis", icon: Eye, label: "Analysis" },
-            ].map(item => (
-              <Link key={item.to} to={item.to}
-                className="flex flex-col items-center gap-1.5 px-6 py-3 rounded-xl glass-neon hover:border-primary/30 transition-all group"
-              >
-                <item.icon className="h-5 w-5 text-primary group-hover:drop-shadow-[0_0_8px_hsl(43_90%_55%/0.5)] transition-all" />
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground">{item.label}</span>
-              </Link>
+            {stats.map(({ icon: Icon, value, label }) => (
+              <div key={label} className="text-center">
+                <div className="mx-auto mb-2 w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="font-display text-lg sm:text-xl font-bold text-foreground">
+                  <AnimatedCounter value={value} />
+                </div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest mt-0.5">{label}</div>
+              </div>
             ))}
           </motion.div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
-      <div className="container mx-auto px-4 pb-24 space-y-10 max-w-5xl">
+      {/* ════════════════════════════════════════════
+          FEATURES SECTION
+      ════════════════════════════════════════════ */}
+      <section className="relative py-24 sm:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
+        <GoldParticles count={10} />
 
-        {/* Performance Snapshot */}
-        {user && profile && (
-          <Section title="Your Performance" icon={BarChart3}>
-            <div className="rounded-xl glass-neon p-5">
-              <div className="flex flex-col sm:flex-row items-center gap-5">
-                <div className="flex items-center gap-4">
-                  <RankBadge rating={profile.rating} size="lg" />
-                  <div>
-                    <p className="font-display text-3xl font-bold text-primary">{profile.rating}</p>
-                    <p className="text-xs text-muted-foreground">{getRank(profile.rating).label} · ELO</p>
-                  </div>
-                </div>
-                <div className="flex gap-5 sm:ml-auto text-center">
-                  {[
-                    { v: profile.games_won, l: "Wins", c: "text-primary" },
-                    { v: profile.games_drawn, l: "Draws", c: "text-muted-foreground" },
-                    { v: profile.games_lost, l: "Losses", c: "text-destructive" },
-                    { v: `${winRate}%`, l: "Win Rate", c: "text-accent" },
-                  ].map(s => (
-                    <div key={s.l}>
-                      <p className={`font-mono text-xl font-bold ${s.c}`}>{s.v}</p>
-                      <p className="text-[10px] text-muted-foreground">{s.l}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Last 5 + streak */}
-              <div className="mt-4 flex items-center gap-3 flex-wrap">
-                <span className="text-xs text-muted-foreground">Last 5:</span>
-                <div className="flex gap-1">
-                  {recentGames.slice(0, 5).map(g => {
-                    const isWhite = g.white_player_id === user.id;
-                    const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
-                    const drew = g.result === "1/2-1/2";
-                    return (
-                      <span key={g.id} className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${won ? "bg-primary/20 text-primary" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}>
-                        {won ? "W" : drew ? "D" : "L"}
-                      </span>
-                    );
-                  })}
-                </div>
-                {winStreak > 0 && (
-                  <span className="flex items-center gap-1 text-xs font-medium text-primary">
-                    <Flame className="h-3.5 w-3.5" /> {winStreak} win streak
-                  </span>
-                )}
-              </div>
+        <div className="container mx-auto px-6 relative z-10">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-4 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5">
+              <Sparkles className="h-3 w-3" /> Features
             </div>
-          </Section>
-        )}
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
+              Everything to <span className="text-gradient-gold">Master Chess</span>
+            </h2>
+            <p className="mt-4 text-muted-foreground text-base sm:text-lg max-w-xl mx-auto">
+              Built by chess players, for chess players.
+            </p>
+          </motion.div>
 
-        {/* Trending Highlights */}
-        <Section title="Trending" icon={TrendingUp}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { icon: Eye, value: liveGamesCount, label: "Games Live", color: "text-primary" },
-              { icon: Crown, value: topPlayers.length > 0 ? topPlayers[0].rating : "—", label: "Top Rating", color: "text-accent" },
-              { icon: Trophy, value: activeTournaments, label: "Tournaments", color: "text-primary" },
-              { icon: Star, value: topPlayers.reduce((sum, p) => sum + p.games_played, 0), label: "Total Games", color: "text-accent" },
-            ].map(item => (
-              <div key={item.label} className="rounded-xl glass-neon p-4 text-center card-hover">
-                <item.icon className={`h-5 w-5 ${item.color} mx-auto mb-1.5`} />
-                <p className="font-mono text-lg font-bold text-foreground">{item.value}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{item.label}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl mx-auto">
+            {features.map(({ icon: Icon, title, desc, href, badge }, i) => (
+              <motion.div
+                key={title}
+                initial={{ opacity: 0, y: 30, scale: 0.97 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Link
+                  to={href}
+                  className="group relative block rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm p-6 h-full overflow-hidden hover:border-primary/30 transition-all duration-500 card-hover"
+                >
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-        {/* Quick Play Modes */}
-        <Section title="Quick Play" icon={Zap}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { to: "/play/online", icon: Wifi, label: "Play Online", sub: `${liveGamesCount} live` },
-              { to: "/play", icon: Swords, label: "Play vs AI", sub: "800-3000 ELO" },
-              { to: "/tournaments", icon: Trophy, label: "Tournaments", sub: `${activeTournaments} active` },
-              { to: "/friends", icon: Users, label: "Play Friend", sub: "Challenge" },
-            ].map(item => (
-              <Link key={item.to} to={item.to}
-                className="rounded-xl glass-neon p-5 text-center card-hover group">
-                <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(43_90%_55%/0.4)] transition-all" />
-                <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
-              </Link>
-            ))}
-          </div>
-        </Section>
+                  <div className="relative">
+                    <div className="flex items-center justify-between mb-4">
+                      <motion.div
+                        className="inline-flex rounded-xl p-3 bg-primary/10 group-hover:shadow-glow transition-all duration-300"
+                        whileHover={{ rotate: 12, scale: 1.15 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <Icon className="h-5 w-5 text-primary" />
+                      </motion.div>
+                      {badge && (
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-primary/15 text-primary border border-primary/20">
+                          {badge}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-display text-sm font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                      {title}
+                    </h3>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{desc}</p>
 
-        {/* Daily Focus */}
-        {user && (
-          <Section title="Daily Focus" icon={Target}>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { to: "/openings", icon: BookOpen, label: "Opening Practice", sub: "Master popular openings" },
-                { to: "/learn", icon: GraduationCap, label: "Lessons", sub: "Step-by-step training" },
-                { to: "/play", icon: Swords, label: "Practice vs Bot", sub: "Train against AI" },
-              ].map(item => (
-                <Link key={item.to} to={item.to} className="flex items-center gap-3 rounded-xl glass-neon p-4 card-hover group">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <item.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{item.label}</p>
-                    <p className="text-[10px] text-muted-foreground">{item.sub}</p>
+                    <div className="mt-4 flex items-center text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      Explore <ChevronRight className="h-3 w-3 ml-1" />
+                    </div>
                   </div>
                 </Link>
-              ))}
-            </div>
-          </Section>
-        )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        {/* Recent Games */}
-        {user && recentGames.length > 0 && (
-          <Section title="Recent Games" icon={Clock}
-            action={<Link to="/history" className="text-xs text-primary hover:underline flex items-center gap-0.5">View All <ChevronRight className="h-3 w-3" /></Link>}>
-            <div className="space-y-1.5">
-              {recentGames.slice(0, 5).map(g => {
-                const isWhite = g.white_player_id === user.id;
-                const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
-                const drew = g.result === "1/2-1/2";
-                const moveCount = g.pgn ? g.pgn.split(" ").filter(Boolean).length : 0;
-                return (
-                  <Link key={g.id} to="/history"
-                    className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover">
-                    <div className={`w-2 h-8 rounded-full ${won ? "bg-primary" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">
-                        {won ? "Victory" : drew ? "Draw" : "Defeat"} · {g.time_control_label}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">{moveCount} moves · {new Date(g.created_at).toLocaleDateString()}</p>
+      {/* ════════════════════════════════════════════
+          VISUAL SHOWCASE
+      ════════════════════════════════════════════ */}
+      <section className="relative py-24 sm:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-card/20 to-background" />
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
+            {/* Left: 3D chess scene */}
+            <motion.div
+              className="relative aspect-square max-w-md mx-auto lg:mx-0"
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+            >
+              <div className="absolute inset-0 rounded-3xl overflow-hidden border border-border/30">
+                <img
+                  src={heroImage}
+                  alt="Chess board showcase"
+                  className="w-full h-full object-cover brightness-[0.6] saturate-[1.1]"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30" />
+              </div>
+
+              {/* Floating gold accents */}
+              <motion.div
+                className="absolute -top-4 -right-4 w-20 h-20 rounded-2xl border border-primary/30 bg-primary/5 backdrop-blur-md flex items-center justify-center"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Crown className="h-8 w-8 text-primary" />
+              </motion.div>
+              <motion.div
+                className="absolute -bottom-3 -left-3 w-16 h-16 rounded-xl border border-primary/20 bg-primary/5 backdrop-blur-md flex items-center justify-center"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              >
+                <Trophy className="h-6 w-6 text-primary/70" />
+              </motion.div>
+            </motion.div>
+
+            {/* Right: Text */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+            >
+              <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-4 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5">
+                <Crown className="h-3 w-3" /> Premium Experience
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-4">
+                Designed for <span className="text-gradient-gold">Champions</span>
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                Every detail is crafted to deliver the ultimate chess experience.
+                From real-time ELO tracking to Stockfish-powered analysis,
+                MasterChess gives you everything you need to improve.
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  "Stockfish-powered game analysis",
+                  "ELO-based matchmaking in under 3 seconds",
+                  "Interactive lessons and opening trainers",
+                  "Daily tournaments with live leaderboards",
+                ].map((item, i) => (
+                  <motion.div
+                    key={item}
+                    className="flex items-center gap-3"
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 + i * 0.1 }}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                      <Sparkles className="h-3 w-3 text-primary" />
                     </div>
-                    <span className={`text-xs font-bold ${won ? "text-primary" : drew ? "text-muted-foreground" : "text-destructive"}`}>
-                      {g.result || "?"}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </Section>
-        )}
+                    <span className="text-sm text-foreground/80">{item}</span>
+                  </motion.div>
+                ))}
+              </div>
 
-        {/* Top Players */}
-        <Section title="Leaderboard" icon={Trophy}
-          action={<Link to="/leaderboard" className="text-xs text-primary hover:underline flex items-center gap-0.5">View All <ChevronRight className="h-3 w-3" /></Link>}>
-          <div className="space-y-1.5">
-            {topPlayers.map((p, i) => (
-              <Link key={p.user_id} to={`/profile/${p.user_id}`}
-                className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                  i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
-                  i === 1 ? "bg-muted text-foreground" :
-                  "bg-muted/30 text-muted-foreground"
-                }`}>
-                  {i === 0 ? <Crown className="h-4 w-4" /> : `#${i + 1}`}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{p.display_name || "Anonymous"}</p>
-                  <p className="text-[10px] text-muted-foreground">{p.games_played} games · {p.games_won} wins</p>
-                </div>
-                <span className="font-mono text-sm font-bold text-primary">{p.rating}</span>
+              <Link to={user ? "/play/online" : "/signup"} className="inline-block mt-8">
+                <Button className="btn-neon bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-5 font-bold rounded-xl group">
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
               </Link>
-            ))}
+            </motion.div>
           </div>
-        </Section>
-
-        {/* Navigation Hub */}
-        <Section title="Explore" icon={ChevronRight}>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[
-              { to: "/play/online", icon: Swords, label: "Play" },
-              { to: "/learn", icon: GraduationCap, label: "Learn" },
-              { to: "/leaderboard", icon: Award, label: "Leaderboard" },
-              { to: user ? `/profile/${user.id}` : "/login", icon: Users, label: "Profile" },
-              { to: "/settings", icon: Shield, label: "Settings" },
-            ].map(item => (
-              <Link key={item.to} to={item.to}
-                className="rounded-xl glass-neon p-4 text-center card-hover group">
-                <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
-                <p className="text-xs font-medium text-foreground">{item.label}</p>
-              </Link>
-            ))}
-          </div>
-        </Section>
-      </div>
+        </div>
+      </section>
 
       <Footer />
     </div>
