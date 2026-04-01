@@ -146,13 +146,17 @@
     box-shadow: 0 0 30px hsl(43 90% 55% / 0.35), 0 0 60px hsl(30 60% 40% / 0.15);
   }
 
-  /* Card hover */
+  /* Card hover — premium depth */
   .card-hover {
     @apply transition-all duration-300 ease-out;
+    will-change: transform, box-shadow;
   }
   .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 32px hsl(43 90% 55% / 0.1), 0 0 0 1px hsl(43 90% 55% / 0.1);
+    transform: translateY(-4px) scale(1.005);
+    box-shadow:
+      0 8px 32px hsl(43 90% 55% / 0.1),
+      0 0 0 1px hsl(43 90% 55% / 0.08),
+      0 20px 40px -10px hsl(30 8% 2% / 0.4);
   }
 
   /* Neon border glow — gold */
