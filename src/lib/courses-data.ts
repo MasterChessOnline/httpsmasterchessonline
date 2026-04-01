@@ -388,6 +388,7 @@ export const COURSES: Course[] = [
     level: "Intermediate",
     tier: "free",
     icon: "Crown",
+    category: "openings",
     lessons: [
       { id: "qg-1", title: "Queen's Gambit Basics", content: "The Queen's Gambit (1.d4 d5 2.c4) is one of the oldest and most respected openings. White offers a pawn for center control.", keyPoints: ["1.d4 d5 2.c4", "Not a true gambit", "Most classical opening"], fen: "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq c3 0 2",
         practiceLine: { playerColor: "w", moves: [{ move: "d4", explanation: "1.d4 — control the center." }, { move: "c4", explanation: "2.c4 — the Queen's Gambit!" }, { move: "Nc3", explanation: "3.Nc3 — develop, support the center." }], autoResponses: ["d5", "e6", "Nf6"], completionMessage: "You've played the Queen's Gambit!" } },
