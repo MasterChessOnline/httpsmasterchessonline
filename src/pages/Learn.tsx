@@ -718,17 +718,35 @@ const Learn = () => {
   }, [getCourseProgress]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grid-bg">
       <Navbar />
       <main className="container mx-auto px-4 sm:px-6 pt-24 pb-16">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground text-center mb-2">
-          Learn <span className="text-gradient-gold">Chess</span>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center mb-2 uppercase tracking-wider">
+          Learn <span className="text-gradient-neon">Chess</span>
         </h1>
         <p className="text-center text-muted-foreground mb-8 max-w-md mx-auto text-sm">
-          {view === "list" && "Structured courses with interactive chapters, videos, and AI feedback by DailyChess_12."}
+          {view === "list" && "Structured training from beginner to advanced."}
           {view === "course" && selectedCourse && `${selectedCourse.title} — ${selectedCourse.lessons.length} chapters`}
           {view === "lesson" && selectedCourse && `${selectedCourse.title} — Chapter ${lessonIdx + 1}`}
         </p>
+
+        {/* Video Lessons - Coming Soon */}
+        {view === "list" && (
+          <div className="mb-8 rounded-xl glass-neon p-5 opacity-60 cursor-not-allowed">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-muted/30 flex items-center justify-center">
+                <Lock className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  Video Lessons
+                  <span className="text-[10px] uppercase tracking-widest text-primary/60 font-display">Coming Soon</span>
+                </p>
+                <p className="text-xs text-muted-foreground">Video content will be available in a future update.</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {view === "list" && user && !loading && (
           <>
