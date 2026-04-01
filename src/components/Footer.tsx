@@ -55,7 +55,7 @@ const Footer = () => (
         ))}
       </div>
       <div className="border-t border-border/30 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-        <p className="text-[10px] text-muted-foreground">© {new Date().getFullYear()} MasterChess 4D. All rights reserved.</p>
+        <p className="text-[10px] text-muted-foreground">© {new Date().getFullYear()} MasterChess. All rights reserved.</p>
         <div className="flex gap-4">
           {[
             { label: "Privacy", href: "/privacy" },
