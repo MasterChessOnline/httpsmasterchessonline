@@ -9,8 +9,7 @@ const Footer = () => (
           <Link to="/" className="flex items-center gap-2 mb-3 group">
             <Crown className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform duration-300" />
             <span className="font-display text-sm font-bold text-foreground uppercase tracking-wider">
-              Master<span className="text-gradient-neon">Chess</span>
-              <span className="text-primary/40 text-[10px] ml-1">4D</span>
+              Master<span className="text-gradient-gold">Chess</span>
             </span>
           </Link>
           <p className="text-xs text-muted-foreground leading-relaxed">
