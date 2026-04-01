@@ -168,23 +168,35 @@ function CourseCard({ course, onClick, progress }: {
   const lvl = LEVEL_CONFIG[course.level];
 
   return (
-    <article
+    <motion.article
       onClick={onClick}
-      className="group relative rounded-xl border border-border/50 hover:border-primary/40 bg-card overflow-hidden transition-all cursor-pointer hover:shadow-glow"
+      className="group relative rounded-xl border border-border/50 hover:border-primary/40 bg-card overflow-hidden transition-all cursor-pointer"
+      whileHover={{ y: -4, boxShadow: "0 0 30px hsl(43 90% 55% / 0.1)" }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <div className="h-1 w-full bg-primary/50" />
 
       <div className="p-5">
         <div className="flex items-start gap-3 mb-3">
-          <div className={`rounded-lg ${lvl.bg} p-2.5 shrink-0`}>
+          <motion.div
+            className={`rounded-lg ${lvl.bg} p-2.5 shrink-0`}
+            whileHover={{ rotate: 10, scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 400 }}
+          >
             <Icon className={`h-5 w-5 ${lvl.color}`} />
-          </div>
+          </motion.div>
           <div className="flex-1 min-w-0">
             <h2 className="font-display text-base font-bold text-foreground leading-tight">{course.title}</h2>
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
               <span className="text-[10px] text-muted-foreground">{course.lessons.length} chapters</span>
+              {course.category && (
+                <>
+                  <span className="text-[10px] text-muted-foreground">·</span>
+                  <span className="text-[10px] text-muted-foreground capitalize">{course.category}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -199,7 +211,7 @@ function CourseCard({ course, onClick, progress }: {
           <Progress value={progress.percent} className="h-1.5" />
         </div>
 
-        <Button className="mt-4 w-full" size="sm">
+        <Button className="mt-4 w-full btn-neon" size="sm">
           {progress.completed > 0 ? (
             <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           ) : (
@@ -207,7 +219,7 @@ function CourseCard({ course, onClick, progress }: {
           )}
         </Button>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
