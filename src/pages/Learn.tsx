@@ -31,19 +31,12 @@ const LEVEL_CONFIG = {
 };
 
 
-/* ──── YouTube Embed ──── */
+/* ──── YouTube Embed (disabled - Coming Soon) ──── */
 function YouTubeEmbed({ videoUrl, title }: { videoUrl: string; title: string }) {
   return (
-    <div className="rounded-xl overflow-hidden border border-border/50">
-      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-        <iframe
-          className="absolute inset-0 w-full h-full"
-          src={videoUrl}
-          title={title}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
+    <div className="rounded-xl overflow-hidden border border-border/30 glass-neon p-8 text-center opacity-50">
+      <Lock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+      <p className="text-sm text-muted-foreground">Video coming soon</p>
     </div>
   );
 }
