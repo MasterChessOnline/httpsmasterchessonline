@@ -29,7 +29,7 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
-import Lessons from "./pages/Lessons";
+
 import TournamentLobby from "./pages/TournamentLobby";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
