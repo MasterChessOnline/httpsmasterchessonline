@@ -13,7 +13,7 @@ const Footer = () => (
             </span>
           </Link>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            The futuristic platform for chess players. Play beyond reality.
+            The premium platform for chess players. Play, learn, compete.
           </p>
         </div>
         {[
