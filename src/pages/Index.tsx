@@ -8,8 +8,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Wifi, Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
-  Eye, Target, Shield, MessageCircle, Crown, Zap, TrendingUp, Flame,
-  ChevronRight, Play, Clock, Award, Star
+  Eye, Target, Shield, Crown, Zap, TrendingUp, Flame,
+  ChevronRight, Clock, Award, Star, Play, Brain
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
@@ -32,19 +32,49 @@ interface TopPlayer {
   games_played: number;
 }
 
+/* ── Floating Particles ── */
+function Particles() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(20)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-primary/30"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            opacity: [0.2, 0.6, 0.2],
+            scale: [0.8, 1.2, 0.8],
+          }}
+          transition={{
+            duration: 4 + Math.random() * 4,
+            repeat: Infinity,
+            delay: Math.random() * 3,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ── Section Component ── */
 const Section = ({ title, icon: Icon, children, action, delay = 0 }: {
   title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; delay?: number;
 }) => (
   <motion.section
-    className="space-y-3"
+    className="space-y-4"
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.5, delay }}
   >
     <div className="flex items-center justify-between">
-      <h2 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
-        <Icon className="h-5 w-5 text-primary" /> {title}
+      <h2 className="font-display text-sm sm:text-base font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
+        <Icon className="h-4 w-4 text-primary" /> {title}
       </h2>
       {action}
     </div>
@@ -72,7 +102,6 @@ const Index = () => {
           .limit(10);
         if (games) {
           setRecentGames(games);
-          // Calculate win streak
           let streak = 0;
           for (const g of games) {
             const isWhite = g.white_player_id === user.id;
@@ -106,55 +135,79 @@ const Index = () => {
     ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grid-bg relative">
       <Navbar />
 
-      {/* Hero */}
-      <div className="pt-20 sm:pt-24 pb-6 px-4">
-        <div className="container mx-auto max-w-5xl text-center">
-          <motion.h1
-            className="font-display text-3xl sm:text-5xl font-bold text-foreground mb-2"
-            initial={{ opacity: 0, y: -20 }}
+      {/* ── 4D HERO ── */}
+      <div className="relative pt-24 sm:pt-28 pb-12 px-4 overflow-hidden">
+        <Particles />
+
+        {/* Ambient glow orbs */}
+        <div className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 right-1/4 w-48 h-48 rounded-full bg-secondary/5 blur-[80px] pointer-events-none" />
+
+        <div className="container mx-auto max-w-4xl text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-foreground mb-3 tracking-tight uppercase">
+              Master<span className="text-gradient-neon">Chess</span>
+              <span className="text-primary/40 text-2xl sm:text-3xl ml-2 align-super">4D</span>
+            </h1>
+            <p className="text-muted-foreground text-sm sm:text-lg max-w-md mx-auto mb-8 font-light tracking-wide">
+              Play beyond reality
+            </p>
+          </motion.div>
+
+          {/* Main CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
           >
-            Welcome to <span className="text-gradient-gold">MasterChess</span>
-          </motion.h1>
-          <motion.p
-            className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            <Link to="/play/online">
+              <Button
+                size="lg"
+                className="h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl"
+              >
+                <Play className="h-5 w-5 mr-2" />
+                Enter Chess
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* Quick Actions (max 3) */}
+          <motion.div
+            className="flex justify-center gap-4 mt-8"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
           >
-            Play, learn, and compete — your competitive chess platform
-          </motion.p>
+            {[
+              { to: "/play", icon: Swords, label: "Play" },
+              { to: "/learn", icon: Brain, label: "Training" },
+              { to: "/analysis", icon: Eye, label: "Analysis" },
+            ].map(item => (
+              <Link key={item.to} to={item.to}
+                className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl glass-neon hover:border-primary/30 transition-all group"
+              >
+                <item.icon className="h-5 w-5 text-primary group-hover:drop-shadow-[0_0_8px_hsl(210_100%_60%/0.4)] transition-all" />
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground">{item.label}</span>
+              </Link>
+            ))}
+          </motion.div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-12 space-y-10 max-w-5xl">
+      {/* ── MAIN CONTENT ── */}
+      <div className="container mx-auto px-4 pb-16 space-y-10 max-w-5xl">
 
-        {/* ── Quick Start Panel ── */}
-        <Section title="Quick Start" icon={Zap}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { to: "/play/online", icon: Wifi, label: "Play Online", sub: `${liveGamesCount} live`, color: "text-emerald-500" },
-              { to: "/play", icon: Swords, label: "Play vs Bot", sub: "AI Training", color: "text-blue-500" },
-              { to: "/tournaments", icon: Trophy, label: "Tournaments", sub: `${activeTournaments} active`, color: "text-amber-500" },
-              { to: "/friends", icon: Users, label: "Play Friend", sub: "Challenge", color: "text-purple-500" },
-            ].map(item => (
-              <Link key={item.to} to={item.to}
-                className="rounded-xl border border-border/40 bg-card/80 p-4 text-center hover:border-primary/30 hover:bg-card transition-all group">
-                <item.icon className={`h-7 w-7 ${item.color} mx-auto mb-2 group-hover:scale-110 transition-transform`} />
-                <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
-              </Link>
-            ))}
-          </div>
-        </Section>
-
-        {/* ── Performance Snapshot (logged in) ── */}
+        {/* Performance Snapshot */}
         {user && profile && (
           <Section title="Your Performance" icon={BarChart3}>
-            <div className="rounded-xl border border-border/40 bg-card/80 p-5">
+            <div className="rounded-xl glass-neon p-5">
               <div className="flex flex-col sm:flex-row items-center gap-5">
                 <div className="flex items-center gap-4">
                   <RankBadge rating={profile.rating} size="lg" />
@@ -164,25 +217,20 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="flex gap-5 sm:ml-auto text-center">
-                  <div>
-                    <p className="font-mono text-xl font-bold text-emerald-500">{profile.games_won}</p>
-                    <p className="text-[10px] text-muted-foreground">Wins</p>
-                  </div>
-                  <div>
-                    <p className="font-mono text-xl font-bold text-muted-foreground">{profile.games_drawn}</p>
-                    <p className="text-[10px] text-muted-foreground">Draws</p>
-                  </div>
-                  <div>
-                    <p className="font-mono text-xl font-bold text-destructive">{profile.games_lost}</p>
-                    <p className="text-[10px] text-muted-foreground">Losses</p>
-                  </div>
-                  <div>
-                    <p className="font-mono text-xl font-bold text-primary">{winRate}%</p>
-                    <p className="text-[10px] text-muted-foreground">Win Rate</p>
-                  </div>
+                  {[
+                    { v: profile.games_won, l: "Wins", c: "text-accent" },
+                    { v: profile.games_drawn, l: "Draws", c: "text-muted-foreground" },
+                    { v: profile.games_lost, l: "Losses", c: "text-destructive" },
+                    { v: `${winRate}%`, l: "Win Rate", c: "text-primary" },
+                  ].map(s => (
+                    <div key={s.l}>
+                      <p className={`font-mono text-xl font-bold ${s.c}`}>{s.v}</p>
+                      <p className="text-[10px] text-muted-foreground">{s.l}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-              {/* Last 5 results + streak */}
+              {/* Last 5 + streak */}
               <div className="mt-4 flex items-center gap-3 flex-wrap">
                 <span className="text-xs text-muted-foreground">Last 5:</span>
                 <div className="flex gap-1">
@@ -191,7 +239,7 @@ const Index = () => {
                     const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
                     const drew = g.result === "1/2-1/2";
                     return (
-                      <span key={g.id} className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${won ? "bg-emerald-500/20 text-emerald-500" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}>
+                      <span key={g.id} className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${won ? "bg-accent/20 text-accent" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}>
                         {won ? "W" : drew ? "D" : "L"}
                       </span>
                     );
@@ -207,74 +255,67 @@ const Index = () => {
           </Section>
         )}
 
-        {/* ── Trending Highlights ── */}
+        {/* Trending Highlights */}
         <Section title="Trending" icon={TrendingUp}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="rounded-xl border border-border/40 bg-card/80 p-4 text-center">
-              <Eye className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
-              <p className="font-mono text-lg font-bold text-foreground">{liveGamesCount}</p>
-              <p className="text-[10px] text-muted-foreground">Games Live</p>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-card/80 p-4 text-center">
-              <Users className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
-              <p className="font-mono text-lg font-bold text-foreground">{topPlayers.length > 0 ? topPlayers[0].rating : "—"}</p>
-              <p className="text-[10px] text-muted-foreground">Top Rating</p>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-card/80 p-4 text-center">
-              <Trophy className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
-              <p className="font-mono text-lg font-bold text-foreground">{activeTournaments}</p>
-              <p className="text-[10px] text-muted-foreground">Tournaments</p>
-            </div>
-            <div className="rounded-xl border border-border/40 bg-card/80 p-4 text-center">
-              <Star className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
-              <p className="font-mono text-lg font-bold text-foreground">{topPlayers.reduce((sum, p) => sum + p.games_played, 0)}</p>
-              <p className="text-[10px] text-muted-foreground">Total Games</p>
-            </div>
+            {[
+              { icon: Eye, value: liveGamesCount, label: "Games Live", color: "text-accent" },
+              { icon: Users, value: topPlayers.length > 0 ? topPlayers[0].rating : "—", label: "Top Rating", color: "text-primary" },
+              { icon: Trophy, value: activeTournaments, label: "Tournaments", color: "text-secondary" },
+              { icon: Star, value: topPlayers.reduce((sum, p) => sum + p.games_played, 0), label: "Total Games", color: "text-neon-pink" },
+            ].map(item => (
+              <div key={item.label} className="rounded-xl glass-neon p-4 text-center card-hover">
+                <item.icon className={`h-5 w-5 ${item.color} mx-auto mb-1.5`} />
+                <p className="font-mono text-lg font-bold text-foreground">{item.value}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{item.label}</p>
+              </div>
+            ))}
           </div>
         </Section>
 
-        {/* ── Daily Improvement ── */}
+        {/* Quick Play Modes */}
+        <Section title="Quick Play" icon={Zap}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { to: "/play/online", icon: Wifi, label: "Play Online", sub: `${liveGamesCount} live`, accent: "from-primary/20 to-primary/5" },
+              { to: "/play", icon: Swords, label: "Play vs AI", sub: "800-3000 ELO", accent: "from-secondary/20 to-secondary/5" },
+              { to: "/tournaments", icon: Trophy, label: "Tournaments", sub: `${activeTournaments} active`, accent: "from-accent/20 to-accent/5" },
+              { to: "/friends", icon: Users, label: "Play Friend", sub: "Challenge", accent: "from-neon-pink/20 to-neon-pink/5" },
+            ].map(item => (
+              <Link key={item.to} to={item.to}
+                className={`rounded-xl glass-neon bg-gradient-to-br ${item.accent} p-5 text-center card-hover group`}>
+                <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(210_100%_60%/0.4)] transition-all" />
+                <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
+              </Link>
+            ))}
+          </div>
+        </Section>
+
+        {/* Daily Focus */}
         {user && (
-          <Section title="Daily Improvement" icon={Target}>
+          <Section title="Daily Focus" icon={Target}>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <Link to="/openings" className="rounded-xl border border-border/40 bg-card/80 p-4 hover:border-primary/30 transition-all group">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                    <BookOpen className="h-4 w-4 text-blue-500" />
+              {[
+                { to: "/openings", icon: BookOpen, label: "Opening Practice", sub: "Master popular openings", color: "text-primary" },
+                { to: "/learn", icon: GraduationCap, label: "Lessons", sub: "Step-by-step training", color: "text-accent" },
+                { to: "/play", icon: Swords, label: "Practice vs Bot", sub: "Train against AI", color: "text-secondary" },
+              ].map(item => (
+                <Link key={item.to} to={item.to} className="flex items-center gap-3 rounded-xl glass-neon p-4 card-hover group">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <item.icon className={`h-5 w-5 ${item.color}`} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">Opening Practice</p>
-                    <p className="text-[10px] text-muted-foreground">Master popular openings</p>
+                    <p className="text-sm font-medium text-foreground">{item.label}</p>
+                    <p className="text-[10px] text-muted-foreground">{item.sub}</p>
                   </div>
-                </div>
-              </Link>
-              <Link to="/lessons" className="rounded-xl border border-border/40 bg-card/80 p-4 hover:border-primary/30 transition-all group">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                    <GraduationCap className="h-4 w-4 text-emerald-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Lessons</p>
-                    <p className="text-[10px] text-muted-foreground">Step-by-step training</p>
-                  </div>
-                </div>
-              </Link>
-              <Link to="/play" className="rounded-xl border border-border/40 bg-card/80 p-4 hover:border-primary/30 transition-all group">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                    <Swords className="h-4 w-4 text-amber-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Practice vs Bot</p>
-                    <p className="text-[10px] text-muted-foreground">Train against AI</p>
-                  </div>
-                </div>
-              </Link>
+                </Link>
+              ))}
             </div>
           </Section>
         )}
 
-        {/* ── Recent Games ── */}
+        {/* Recent Games */}
         {user && recentGames.length > 0 && (
           <Section title="Recent Games" icon={Clock}
             action={<Link to="/history" className="text-xs text-primary hover:underline flex items-center gap-0.5">View All <ChevronRight className="h-3 w-3" /></Link>}>
@@ -286,15 +327,15 @@ const Index = () => {
                 const moveCount = g.pgn ? g.pgn.split(" ").filter(Boolean).length : 0;
                 return (
                   <Link key={g.id} to="/history"
-                    className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/80 p-3 hover:border-primary/30 transition-all">
-                    <div className={`w-2 h-8 rounded-full ${won ? "bg-emerald-500" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
+                    className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover">
+                    <div className={`w-2 h-8 rounded-full ${won ? "bg-accent" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground">
                         {won ? "Victory" : drew ? "Draw" : "Defeat"} · {g.time_control_label}
                       </p>
                       <p className="text-[10px] text-muted-foreground">{moveCount} moves · {new Date(g.created_at).toLocaleDateString()}</p>
                     </div>
-                    <span className={`text-xs font-bold ${won ? "text-emerald-500" : drew ? "text-muted-foreground" : "text-destructive"}`}>
+                    <span className={`text-xs font-bold ${won ? "text-accent" : drew ? "text-muted-foreground" : "text-destructive"}`}>
                       {g.result || "?"}
                     </span>
                   </Link>
@@ -304,84 +345,47 @@ const Index = () => {
           </Section>
         )}
 
-        {/* ── Navigation Hub ── */}
+        {/* Top Players */}
+        <Section title="Leaderboard" icon={Trophy}
+          action={<Link to="/leaderboard" className="text-xs text-primary hover:underline flex items-center gap-0.5">View All <ChevronRight className="h-3 w-3" /></Link>}>
+          <div className="space-y-1.5">
+            {topPlayers.map((p, i) => (
+              <Link key={p.user_id} to={`/profile/${p.user_id}`}
+                className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                  i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
+                  i === 1 ? "bg-muted text-foreground" :
+                  i === 2 ? "bg-muted/50 text-muted-foreground" :
+                  "bg-muted/30 text-muted-foreground"
+                }`}>
+                  {i === 0 ? <Crown className="h-4 w-4" /> : `#${i + 1}`}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{p.display_name || "Anonymous"}</p>
+                  <p className="text-[10px] text-muted-foreground">{p.games_played} games · {p.games_won} wins</p>
+                </div>
+                <span className="font-mono text-sm font-bold text-primary">{p.rating}</span>
+              </Link>
+            ))}
+          </div>
+        </Section>
+
+        {/* Navigation Hub */}
         <Section title="Explore" icon={ChevronRight}>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
-              { to: "/play/online", icon: Wifi, label: "Play" },
+              { to: "/play/online", icon: Swords, label: "Play" },
               { to: "/learn", icon: GraduationCap, label: "Learn" },
               { to: "/leaderboard", icon: Award, label: "Leaderboard" },
               { to: user ? `/profile/${user.id}` : "/login", icon: Users, label: "Profile" },
               { to: "/settings", icon: Shield, label: "Settings" },
             ].map(item => (
               <Link key={item.to} to={item.to}
-                className="rounded-xl border border-border/40 bg-card/80 p-3 text-center hover:border-primary/30 transition-all group">
-                <item.icon className="h-5 w-5 text-primary mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                className="rounded-xl glass-neon p-4 text-center card-hover group">
+                <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
                 <p className="text-xs font-medium text-foreground">{item.label}</p>
               </Link>
             ))}
-          </div>
-        </Section>
-
-        {/* ── Learn & Community ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Section title="Learn" icon={GraduationCap}>
-            <div className="space-y-2">
-              {[
-                { to: "/lessons", icon: BookOpen, label: "Interactive Lessons", sub: "Step-by-step guided training" },
-                { to: "/openings", icon: Target, label: "Opening Trainer", sub: "Master popular openings" },
-                { to: "/learn", icon: GraduationCap, label: "All Courses", sub: "Beginner to Advanced" },
-              ].map(item => (
-                <Link key={item.to} to={item.to} className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/80 p-3 hover:border-primary/30 transition-all">
-                  <item.icon className="h-5 w-5 text-primary shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{item.label}</p>
-                    <p className="text-[10px] text-muted-foreground">{item.sub}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </Section>
-
-          <Section title="Community" icon={Users}>
-            <div className="space-y-2">
-              {[
-                { to: "/friends", icon: Users, label: "Friends", sub: "Add friends & challenge them" },
-                { to: "/chat", icon: MessageCircle, label: "Chat", sub: "Message your friends" },
-                { to: "/clubs", icon: Shield, label: "Clubs", sub: "Join chess communities" },
-              ].map(item => (
-                <Link key={item.to} to={item.to} className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/80 p-3 hover:border-primary/30 transition-all">
-                  <item.icon className="h-5 w-5 text-primary shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{item.label}</p>
-                    <p className="text-[10px] text-muted-foreground">{item.sub}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </Section>
-        </div>
-
-        {/* ── Top Players ── */}
-        <Section title="Leaderboard" icon={Trophy}
-          action={<Link to="/leaderboard" className="text-xs text-primary hover:underline flex items-center gap-0.5">Full Ranking <ChevronRight className="h-3 w-3" /></Link>}>
-          <div className="space-y-1.5">
-            {topPlayers.map((p, i) => {
-              const wr = p.games_played > 0 ? Math.round((p.games_won / p.games_played) * 100) : 0;
-              return (
-                <Link key={p.user_id} to={`/profile/${p.user_id}`}
-                  className="flex items-center gap-3 rounded-xl border border-border/40 bg-card/80 p-3 hover:border-primary/30 transition-all">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${i === 0 ? "bg-primary/15 text-primary" : "bg-muted/50 text-muted-foreground"}`}>
-                    {i === 0 ? <Crown className="h-3.5 w-3.5" /> : i + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{p.display_name || "Anonymous"}</p>
-                    <p className="text-[10px] text-muted-foreground">{p.games_played} games · {wr}% win rate</p>
-                  </div>
-                  <span className="font-mono text-sm font-bold text-primary">{p.rating}</span>
-                </Link>
-              );
-            })}
           </div>
         </Section>
       </div>

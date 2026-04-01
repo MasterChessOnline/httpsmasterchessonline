@@ -1,44 +1,40 @@
-import { Swords, GraduationCap, User, Home, Trophy, Wifi, Settings } from "lucide-react";
+import { Crown, Swords, GraduationCap, Trophy, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/", icon: Home },
-  { label: "Play", href: "/play", icon: Swords },
-  { label: "Online", href: "/play/online", icon: Wifi },
-  { label: "Learn", href: "/learn", icon: GraduationCap },
-  { label: "Rank", href: "/leaderboard", icon: Trophy },
+  { icon: Crown, label: "Home", href: "/" },
+  { icon: Swords, label: "Play", href: "/play" },
+  { icon: GraduationCap, label: "Learn", href: "/learn" },
+  { icon: Trophy, label: "Compete", href: "/tournaments" },
+  { icon: User, label: "Profile", href: "/profile" },
 ];
 
 const MobileBottomNav = () => {
   const location = useLocation();
   const { user } = useAuth();
 
-  const items = NAV_ITEMS.map((item) => {
-    if (item.label === "Profile" && user) {
-      return { ...item, href: `/profile/${user.id}` };
-    }
-    return item;
-  }).filter((item) => !(item as any).auth || user);
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-border/40 glass safe-bottom" role="navigation" aria-label="Mobile navigation">
-      <div className="flex items-center justify-around h-14 px-2">
-        {items.map(({ label, href, icon: Icon }) => {
-          const isActive = href === "/" ? location.pathname === "/" : location.pathname.startsWith(href);
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/30 safe-bottom" role="navigation" aria-label="Mobile navigation">
+      <div className="flex items-center justify-around h-14">
+        {NAV_ITEMS.map((item) => {
+          const href = item.href === "/profile" && user ? `/profile/${user.id}` : item.href;
+          const isActive = item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href);
           return (
-            <Link key={label} to={href} className="relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1">
+            <Link
+              key={item.label}
+              to={href}
+              className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all flex-1"
+            >
               <div className="relative">
                 {isActive && (
                   <motion.div layoutId="mobile-nav-indicator" className="absolute -inset-2 rounded-xl bg-primary/15"
                     transition={{ type: "spring", stiffness: 350, damping: 30 }} />
                 )}
-                <Icon className={`relative h-4.5 w-4.5 transition-colors duration-200 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                <item.icon className={`relative h-5 w-5 transition-colors duration-200 ${isActive ? "text-primary drop-shadow-[0_0_6px_hsl(210_100%_60%/0.5)]" : "text-muted-foreground"}`} />
               </div>
-              <span className={`text-[9px] font-medium transition-colors duration-200 ${isActive ? "text-primary" : "text-muted-foreground"}`}>
-                {label}
-              </span>
+              <span className={`text-[10px] font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>{item.label}</span>
             </Link>
           );
         })}

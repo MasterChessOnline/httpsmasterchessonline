@@ -141,7 +141,7 @@ const Leaderboard = () => {
   const sorted = getFiltered();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grid-bg">
       <Navbar />
       <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
         <motion.div
@@ -149,10 +149,10 @@ const Leaderboard = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-6"
         >
-          <h1 className="font-display text-4xl sm:text-5xl font-bold text-foreground mb-2">
-            <span className="text-gradient-gold">Leaderboard</span>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-2 uppercase tracking-wider">
+            <span className="text-gradient-neon">Leaderboard</span>
           </h1>
-          <p className="text-muted-foreground">Top players ranked by skill & dedication</p>
+          <p className="text-muted-foreground text-sm">Top players ranked by skill & dedication</p>
         </motion.div>
 
         {/* Filters + Sort */}
