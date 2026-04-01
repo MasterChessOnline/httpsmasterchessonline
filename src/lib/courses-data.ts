@@ -731,6 +731,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Crosshair",
+    category: "openings",
     lessons: [
       { id: "du-1", title: "Dutch Defense Basics", content: "The Dutch (1.d4 f5) is aggressive and unbalanced. Black stakes a kingside claim immediately.", keyPoints: ["1...f5 fights for e4 control", "Commits to kingside", "Risky but aggressive"], fen: "rnbqkbnr/ppppp1pp/8/5p2/3P4/8/PPP1PPPP/RNBQKBNR w KQkq f6 0 2",
         practiceLine: { startFen: "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1", playerColor: "b", moves: [{ move: "f5", explanation: "1...f5 — the Dutch!" }, { move: "Nf6", explanation: "2...Nf6" }, { move: "g6", explanation: "3...g6 — the Leningrad!" }, { move: "Bg7", explanation: "4...Bg7 — powerful bishop." }], autoResponses: ["c4", "Nc3", "g3", "Bg2"], completionMessage: "The Leningrad Dutch — aggressive and full of fight!" } },
