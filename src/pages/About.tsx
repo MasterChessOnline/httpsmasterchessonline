@@ -102,7 +102,7 @@ const About = () => (
           <h2 className="text-2xl font-bold font-display">Ready to improve your chess?</h2>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/play">
-              <Button size="lg">Play Now</Button>
+              <Button size="lg" className="btn-neon">Play Now</Button>
             </Link>
             <Link to="/learn">
               <Button size="lg" variant="outline">Start Learning</Button>
