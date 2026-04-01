@@ -9,8 +9,7 @@ const Footer = () => (
           <Link to="/" className="flex items-center gap-2 mb-3 group">
             <Crown className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform duration-300" />
             <span className="font-display text-sm font-bold text-foreground uppercase tracking-wider">
-              Master<span className="text-gradient-neon">Chess</span>
-              <span className="text-primary/40 text-[10px] ml-1">4D</span>
+              Master<span className="text-gradient-gold">Chess</span>
             </span>
           </Link>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -56,7 +55,7 @@ const Footer = () => (
         ))}
       </div>
       <div className="border-t border-border/30 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-        <p className="text-[10px] text-muted-foreground">© {new Date().getFullYear()} MasterChess 4D. All rights reserved.</p>
+        <p className="text-[10px] text-muted-foreground">© {new Date().getFullYear()} MasterChess. All rights reserved.</p>
         <div className="flex gap-4">
           {[
             { label: "Privacy", href: "/privacy" },
