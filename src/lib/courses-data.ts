@@ -433,6 +433,7 @@ export const COURSES: Course[] = [
     level: "Intermediate",
     tier: "free",
     icon: "BookOpen",
+    category: "openings",
     lessons: [
       { id: "rl-1", title: "Ruy Lopez Basics", content: "The Ruy Lopez (1.e4 e5 2.Nf3 Nc6 3.Bb5) puts pressure on the e5 defender, creating long-term tension.", keyPoints: ["3.Bb5 pressures the e5 defender", "Long-term strategic tension", "Played for centuries"], fen: "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
         practiceLine: { playerColor: "w", moves: [{ move: "e4", explanation: "1.e4" }, { move: "Nf3", explanation: "2.Nf3 — attack e5." }, { move: "Bb5", explanation: "3.Bb5 — the Ruy Lopez!" }, { move: "Ba4", explanation: "4.Ba4 — maintain the pin." }], autoResponses: ["e5", "Nc6", "a6", "Nf6"], completionMessage: "The Ruy Lopez — a timeless classical opening!" } },
