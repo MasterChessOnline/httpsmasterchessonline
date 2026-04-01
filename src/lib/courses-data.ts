@@ -774,6 +774,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Target",
+    category: "openings",
     lessons: [
       { id: "sd-1", title: "Open Sicilian: 2.Nf3 + 3.d4", content: "The Open Sicilian (1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4) is the main battleground. White gets open lines; Black gets the semi-open c-file and queenside play.", keyPoints: ["Most theoretical opening in chess", "White: open lines + kingside attack", "Black: c-file + queenside play"], fen: "rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
         practiceLine: { playerColor: "w", moves: [{ move: "e4", explanation: "1.e4" }, { move: "Nf3", explanation: "2.Nf3 — heading for the Open Sicilian." }, { move: "d4", explanation: "3.d4! Open the center." }, { move: "Nxd4", explanation: "4.Nxd4 — the Open Sicilian!" }], autoResponses: ["c5", "d6", "cxd4", "Nf6"], completionMessage: "The Open Sicilian — the most popular opening at all levels!" } },
