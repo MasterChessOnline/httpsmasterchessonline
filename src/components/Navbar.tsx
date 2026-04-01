@@ -22,64 +22,33 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    key: "home",
-    label: "Home",
-    icon: Crown,
-    items: [
-      { label: "Dashboard", href: "/", icon: Crown, desc: "Your chess hub" },
-      { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly" },
-      { label: "Featured Games", href: "/leaderboard", icon: Star, desc: "Top games today" },
-      { label: "Recent Games", href: "/history", icon: Clock, desc: "Your game history" },
-    ],
-  },
-  {
     key: "play",
     label: "Play",
     icon: Swords,
     items: [
       { label: "Play Online", href: "/play/online", icon: Wifi, desc: "Ranked & casual matches" },
       { label: "Play vs AI", href: "/play", icon: Brain, desc: "Multiple bot levels" },
-      { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Instant matchmaking" },
-      { label: "Custom Game", href: "/play", icon: Settings, desc: "Time, color, variants" },
       { label: "Game History", href: "/history", icon: Clock, desc: "Review past games" },
       { label: "Analysis Board", href: "/analysis", icon: Eye, desc: "Move review & mistakes" },
     ],
   },
   {
-    key: "learn",
-    label: "Learn",
-    icon: GraduationCap,
-    items: [
-      { label: "Training", href: "/learn", icon: GraduationCap, desc: "Beginner to advanced" },
-      { label: "Openings", href: "/openings", icon: BookOpen, desc: "Multiple opening styles" },
-      { label: "Endgames", href: "/lessons", icon: Target, desc: "Master the endgame" },
-      { label: "Strategy", href: "/lessons", icon: Brain, desc: "Middlegame tactics" },
-      { label: "Game Review", href: "/game-review", icon: Eye, desc: "Analyze your games" },
-      { label: "Mistake Analysis", href: "/analysis", icon: Shield, desc: "Find your weaknesses" },
-    ],
-  },
-  {
-    key: "compete",
-    label: "Compete",
+    key: "tournaments",
+    label: "Tournaments",
     icon: Trophy,
     items: [
-      { label: "Tournaments", href: "/tournaments", icon: Trophy, desc: "Blitz, Rapid, Daily" },
-      { label: "Leaderboard", href: "/leaderboard", icon: BarChart3, desc: "Global & friends" },
-      { label: "Weekly Rankings", href: "/leaderboard", icon: Flame, desc: "Performance growth" },
-      { label: "Live Events", href: "/tournaments", icon: Zap, desc: "Active tournaments" },
+      { label: "All Tournaments", href: "/tournaments", icon: Trophy, desc: "Blitz, Rapid, Daily" },
+      { label: "Leaderboard", href: "/leaderboard", icon: BarChart3, desc: "Global rankings" },
       { label: "Achievements", href: "/achievements", icon: Award, desc: "Unlock badges" },
     ],
   },
   {
-    key: "profile",
-    label: "Profile",
-    icon: User,
+    key: "leaderboard",
+    label: "Leaderboard",
+    icon: BarChart3,
     items: [
-      { label: "My Profile", href: "/profile", icon: User, desc: "Your stats & info", auth: true },
-      { label: "Statistics", href: "/stats", icon: BarChart3, desc: "Rating, win rate, accuracy" },
-      { label: "Match History", href: "/history", icon: Clock, desc: "All your games" },
-      { label: "Achievements", href: "/achievements", icon: Award, desc: "Badges & rewards" },
-      { label: "Settings", href: "/settings", icon: Settings, desc: "Theme, board, audio" },
+      { label: "Global Rankings", href: "/leaderboard", icon: BarChart3, desc: "Top players worldwide" },
+      { label: "Friends", href: "/friends", icon: Users, desc: "Challenge friends" },
     ],
   },
 ];
