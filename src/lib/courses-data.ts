@@ -936,6 +936,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Crown",
+    category: "endgame",
     lessons: [
       L("pe-1", "Opposition Fundamentals", "Direct opposition: kings face each other one square apart. The side NOT to move has the advantage. This is the most important endgame concept.", ["Side not to move has advantage", "Most important endgame concept", "Practice recognizing it"]),
       L("pe-2", "Distant Opposition", "Kings 3 or 5 squares apart on same rank/file/diagonal. The side to move can gain direct opposition by keeping the distance odd.", ["3 or 5 squares apart", "Maintain odd distance", "Leads to direct opposition"]),
