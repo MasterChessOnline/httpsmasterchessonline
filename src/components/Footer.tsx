@@ -1,96 +1,69 @@
-import { Crown, Youtube } from "lucide-react";
+import { Crown } from "lucide-react";
 import { Link } from "react-router-dom";
-import ScrollReveal from "@/components/ScrollReveal";
 
 const Footer = () => (
-  <footer className="border-t border-border/50 bg-card/80 backdrop-blur-sm py-16">
+  <footer className="border-t border-border/30 bg-card/40 backdrop-blur-sm py-12">
     <div className="container mx-auto px-6">
-      <ScrollReveal>
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 mb-10">
-          <div>
-            <Link to="/" className="flex items-center gap-2 mb-4 group">
-              <Crown className="h-5 w-5 text-primary group-hover:rotate-12 transition-transform duration-300" />
-              <span className="font-display text-lg font-bold text-foreground">
-                Master<span className="text-gradient-gold">Chess</span>Online
-              </span>
-            </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              The elegant platform for chess players worldwide. Play, learn, and compete.
-            </p>
-            <div className="flex items-center gap-3">
-              <a
-                href="https://www.youtube.com/@DailyChess_12"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Youtube className="h-4 w-4" />
-                DailyChess_12
-              </a>
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div>
+          <Link to="/" className="flex items-center gap-2 mb-3 group">
+            <Crown className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform duration-300" />
+            <span className="font-display text-sm font-bold text-foreground uppercase tracking-wider">
+              Master<span className="text-gradient-neon">Chess</span>
+              <span className="text-primary/40 text-[10px] ml-1">4D</span>
+            </span>
+          </Link>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            The futuristic platform for chess players. Play beyond reality.
+          </p>
+        </div>
+        {[
+          {
+            title: "Play",
+            links: [
+              { label: "Play Online", href: "/play/online" },
+              { label: "Play vs AI", href: "/play" },
+              { label: "Tournaments", href: "/tournaments" },
+            ],
+          },
+          {
+            title: "Learn",
+            links: [
+              { label: "Training", href: "/learn" },
+              { label: "Openings", href: "/openings" },
+              { label: "Analysis", href: "/analysis" },
+            ],
+          },
+          {
+            title: "Compete",
+            links: [
+              { label: "Leaderboard", href: "/leaderboard" },
+              { label: "Achievements", href: "/achievements" },
+              { label: "Friends", href: "/friends" },
+            ],
+          },
+        ].map((section) => (
+          <div key={section.title}>
+            <h4 className="font-display text-xs font-semibold text-foreground mb-3 uppercase tracking-widest">{section.title}</h4>
+            <div className="flex flex-col gap-2">
+              {section.links.map((link) => (
+                <Link key={link.href} to={link.href} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
+        ))}
+      </div>
+      <div className="border-t border-border/30 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <p className="text-[10px] text-muted-foreground">© {new Date().getFullYear()} MasterChess 4D. All rights reserved.</p>
+        <div className="flex gap-4">
           {[
-            {
-              title: "Play",
-              links: [
-                { label: "vs Computer", href: "/play" },
-                { label: "Online Multiplayer", href: "/play/online" },
-                { label: "Tournaments", href: "/tournaments" },
-                { label: "Daily Challenge", href: "/daily-challenge" },
-              ],
-            },
-            {
-              title: "Improve",
-              links: [
-                { label: "Courses", href: "/learn" },
-                { label: "Video Lessons", href: "/video-lessons" },
-                { label: "Game Analysis", href: "/analysis" },
-                { label: "Opening Explorer", href: "/opening-explorer" },
-                { label: "Story Mode", href: "/story" },
-                { label: "Rating Calculator", href: "/rating-calculator" },
-                { label: "Piece Values", href: "/piece-values" },
-                { label: "All Tools", href: "/tools" },
-              ],
-            },
-            {
-              title: "Community",
-              links: [
-                { label: "Leaderboard", href: "/leaderboard" },
-                { label: "Friends", href: "/friends" },
-                { label: "About", href: "/about" },
-                { label: "Contact", href: "/contact" },
-              ],
-            },
-          ].map((section) => (
-            <div key={section.title}>
-              <h4 className="font-display text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">{section.title}</h4>
-              <div className="flex flex-col gap-2.5">
-                {section.links.map((link) => (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary hover:translate-x-1 transition-all duration-200"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </ScrollReveal>
-      <div className="border-t border-border/50 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} MasterChessOnline. All rights reserved.
-        </p>
-        <div className="flex gap-6">
-          {[
-            { label: "About", href: "/about" },
-            { label: "Contact", href: "/contact" },
-            { label: "Privacy Policy", href: "/privacy" },
+            { label: "Privacy", href: "/privacy" },
             { label: "Terms", href: "/terms" },
+            { label: "Contact", href: "/contact" },
           ].map((link) => (
-            <Link key={link.href} to={link.href} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+            <Link key={link.href} to={link.href} className="text-[10px] text-muted-foreground hover:text-primary transition-colors">
               {link.label}
             </Link>
           ))}
