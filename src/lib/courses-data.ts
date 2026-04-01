@@ -816,6 +816,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Crown",
+    category: "openings",
     lessons: [
       { id: "ni-1", title: "Nimzo-Indian Basics", content: "The Nimzo-Indian (1.d4 Nf6 2.c4 e6 3.Nc3 Bb4) pins the knight and fights for e4 control. It's considered the most theoretically sound defense against 1.d4.", keyPoints: ["Bb4 pins the knight", "Fights for e4 control", "Most respected d4 defense"], fen: "rnbqk2r/pppp1ppp/4pn2/8/1bPP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 2 4",
         practiceLine: { startFen: "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1", playerColor: "b", moves: [{ move: "Nf6", explanation: "1...Nf6 — flexible development." }, { move: "e6", explanation: "2...e6 — prepare Bb4." }, { move: "Bb4", explanation: "3...Bb4 — the Nimzo-Indian! Pin the knight." }], autoResponses: ["c4", "Nc3", "Qc2"], completionMessage: "The Nimzo-Indian — the gold standard of d4 defenses!" } },
