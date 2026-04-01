@@ -38,14 +38,22 @@ const About = () => (
             { icon: Target, title: "Our Mission", desc: "Make chess education accessible to everyone — from absolute beginners to aspiring masters." },
             { icon: Users, title: "Community First", desc: "Free daily tournaments, an active leaderboard, and a supportive environment for players of all levels." },
             { icon: GraduationCap, title: "Learn by Doing", desc: "Interactive lessons, AI-powered analysis, and real-game practice — not just theory." },
-          ].map(({ icon: Icon, title, desc }) => (
-            <Card key={title} className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-6 space-y-3">
-                <Icon className="h-8 w-8 text-primary" />
-                <h3 className="font-display text-lg font-semibold text-foreground">{title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-              </CardContent>
-            </Card>
+          ].map(({ icon: Icon, title, desc }, i) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+            >
+              <Card className="border-border/50 bg-card/50 backdrop-blur-sm card-hover inner-glow h-full">
+                <CardContent className="p-6 space-y-3">
+                  <Icon className="h-8 w-8 text-primary" />
+                  <h3 className="font-display text-lg font-semibold text-foreground">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </section>
