@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
+        display: ['Orbitron', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
       },
       colors: {
@@ -51,13 +51,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        gold: {
-          DEFAULT: "hsl(var(--gold))",
-          light: "hsl(var(--gold-light))",
-        },
-        emerald: {
-          DEFAULT: "hsl(var(--emerald))",
-          light: "hsl(var(--emerald-light))",
+        neon: {
+          blue: "hsl(var(--neon-blue))",
+          purple: "hsl(var(--neon-purple))",
+          cyan: "hsl(var(--neon-cyan))",
+          pink: "hsl(var(--neon-pink))",
         },
         board: {
           light: "hsl(var(--board-light))",
@@ -95,12 +93,16 @@ export default {
           "100%": { opacity: "1", transform: "scale(1)" },
         },
         "glow-pulse": {
-          "0%, 100%": { boxShadow: "0 0 20px hsl(43 80% 55% / 0.1)" },
-          "50%": { boxShadow: "0 0 40px hsl(43 80% 55% / 0.25)" },
+          "0%, 100%": { boxShadow: "0 0 20px hsl(210 100% 60% / 0.1)" },
+          "50%": { boxShadow: "0 0 40px hsl(210 100% 60% / 0.3)" },
         },
         "float": {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-6px)" },
+        },
+        "orbit": {
+          "0%": { transform: "rotate(0deg) translateX(120px) rotate(0deg)" },
+          "100%": { transform: "rotate(360deg) translateX(120px) rotate(-360deg)" },
         },
       },
       animation: {
@@ -112,6 +114,7 @@ export default {
         "scale-in": "scale-in 0.4s ease-out forwards",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
         "float": "float 4s ease-in-out infinite",
+        "orbit": "orbit 20s linear infinite",
       },
     },
   },
