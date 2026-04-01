@@ -76,14 +76,21 @@ const About = () => (
               { icon: Trophy, title: "Competitive Practice", desc: "Theory alone doesn't make you stronger. Our free daily and weekly tournaments give you the arena to test what you've learned under real time pressure." },
               { icon: Youtube, title: "Video Deep-Dives", desc: "The DailyChess_12 YouTube channel features game breakdowns, opening guides, and endgame technique — all explained in plain language with interactive board examples." },
               { icon: Target, title: "AI-Powered Feedback", desc: "After every game, our AI analyzes your moves, identifies blunders and missed tactics, and gives you a personalized improvement plan — so you always know what to work on next." },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex gap-4 p-4 rounded-xl border border-border/50 bg-card/30">
+            ].map(({ icon: Icon, title, desc }, i) => (
+              <motion.div
+                key={title}
+                className="flex gap-4 p-4 rounded-xl border border-border/50 bg-card/30 card-hover"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08, duration: 0.5 }}
+              >
                 <Icon className="h-6 w-6 text-primary shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">{title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
