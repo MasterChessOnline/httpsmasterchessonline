@@ -602,6 +602,7 @@ export const COURSES: Course[] = [
     level: "Beginner",
     tier: "free",
     icon: "BookOpen",
+    category: "openings",
     lessons: [
       { id: "ls-1", title: "London System Setup", content: "The London (1.d4, 2.Bf4, 3.e3, 4.Nf3, 5.Bd3) is flexible and works against almost anything.", keyPoints: ["Bf4 before e3", "Works against nearly everything", "Safe, solid, easy"], fen: "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3",
         practiceLine: { playerColor: "w", moves: [{ move: "d4", explanation: "1.d4 — start the London." }, { move: "Bf4", explanation: "2.Bf4 — bishop BEFORE e3!" }, { move: "e3", explanation: "3.e3 — solidify." }, { move: "Nf3", explanation: "4.Nf3" }, { move: "Bd3", explanation: "5.Bd3 — London complete!" }], autoResponses: ["d5", "Nf6", "e6", "c5", "Nc6"], completionMessage: "London System — simple and effective!" } },
