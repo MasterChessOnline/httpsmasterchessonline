@@ -32,27 +32,30 @@ interface TopPlayer {
   games_played: number;
 }
 
-/* ── Floating Particles ── */
-function Particles() {
+/* ── Gold Particles ── */
+function GoldParticles() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(20)].map((_, i) => (
+      {[...Array(25)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-1 h-1 rounded-full bg-primary/30"
+          className="absolute rounded-full"
           style={{
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
+            width: `${2 + Math.random() * 3}px`,
+            height: `${2 + Math.random() * 3}px`,
+            background: `radial-gradient(circle, hsl(43 90% ${50 + Math.random() * 20}% / ${0.4 + Math.random() * 0.3}), transparent)`,
           }}
           animate={{
-            y: [0, -30, 0],
-            opacity: [0.2, 0.6, 0.2],
-            scale: [0.8, 1.2, 0.8],
+            y: [0, -(20 + Math.random() * 30), 0],
+            opacity: [0.15, 0.6, 0.15],
+            scale: [0.7, 1.3, 0.7],
           }}
           transition={{
-            duration: 4 + Math.random() * 4,
+            duration: 4 + Math.random() * 5,
             repeat: Infinity,
-            delay: Math.random() * 3,
+            delay: Math.random() * 4,
             ease: "easeInOut",
           }}
         />
@@ -138,13 +141,14 @@ const Index = () => {
     <div className="min-h-screen bg-background grid-bg relative">
       <Navbar />
 
-      {/* ── 4D HERO ── */}
-      <div className="relative pt-24 sm:pt-28 pb-12 px-4 overflow-hidden">
-        <Particles />
+      {/* ── HERO — Gold 4D ── */}
+      <div className="relative pt-24 sm:pt-32 pb-16 px-4 overflow-hidden">
+        <GoldParticles />
 
-        {/* Ambient glow orbs */}
-        <div className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
-        <div className="absolute top-1/2 right-1/4 w-48 h-48 rounded-full bg-secondary/5 blur-[80px] pointer-events-none" />
+        {/* Gold ambient glow orbs */}
+        <div className="absolute top-1/4 left-1/3 w-80 h-80 rounded-full blur-[120px] pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(43 90% 55% / 0.08), transparent)' }} />
+        <div className="absolute top-1/2 right-1/4 w-60 h-60 rounded-full blur-[100px] pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(30 60% 40% / 0.06), transparent)' }} />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-40 rounded-full blur-[80px] pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(43 70% 65% / 0.05), transparent)' }} />
 
         <div className="container mx-auto max-w-4xl text-center relative z-10">
           <motion.div
@@ -152,11 +156,22 @@ const Index = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-foreground mb-3 tracking-tight uppercase">
-              Master<span className="text-gradient-neon">Chess</span>
-              <span className="text-primary/40 text-2xl sm:text-3xl ml-2 align-super">4D</span>
+            {/* Crown icon */}
+            <motion.div
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6"
+              style={{ background: 'linear-gradient(135deg, hsl(43 90% 55% / 0.15), hsl(30 60% 40% / 0.1))', border: '1px solid hsl(43 90% 55% / 0.2)' }}
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Crown className="h-8 w-8 text-primary" />
+            </motion.div>
+
+            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black mb-3 tracking-tight uppercase">
+              <span className="text-gradient-gold">Master</span>
+              <span className="text-foreground">Chess</span>
+              <span className="text-primary/50 text-2xl sm:text-3xl ml-2 align-super">4D</span>
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-lg max-w-md mx-auto mb-8 font-light tracking-wide">
+            <p className="text-muted-foreground text-sm sm:text-lg max-w-md mx-auto mb-10 font-light tracking-wide">
               Play beyond reality
             </p>
           </motion.div>
@@ -170,7 +185,7 @@ const Index = () => {
             <Link to="/play/online">
               <Button
                 size="lg"
-                className="h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl"
+                className="h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl"
               >
                 <Play className="h-5 w-5 mr-2" />
                 Enter Chess
@@ -178,9 +193,9 @@ const Index = () => {
             </Link>
           </motion.div>
 
-          {/* Quick Actions (max 3) */}
+          {/* Quick Actions (3 max) */}
           <motion.div
-            className="flex justify-center gap-4 mt-8"
+            className="flex justify-center gap-4 mt-10"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -191,9 +206,9 @@ const Index = () => {
               { to: "/analysis", icon: Eye, label: "Analysis" },
             ].map(item => (
               <Link key={item.to} to={item.to}
-                className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl glass-neon hover:border-primary/30 transition-all group"
+                className="flex flex-col items-center gap-1.5 px-6 py-3 rounded-xl glass-neon hover:border-primary/30 transition-all group"
               >
-                <item.icon className="h-5 w-5 text-primary group-hover:drop-shadow-[0_0_8px_hsl(210_100%_60%/0.4)] transition-all" />
+                <item.icon className="h-5 w-5 text-primary group-hover:drop-shadow-[0_0_8px_hsl(43_90%_55%/0.5)] transition-all" />
                 <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground">{item.label}</span>
               </Link>
             ))}
@@ -202,7 +217,7 @@ const Index = () => {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="container mx-auto px-4 pb-16 space-y-10 max-w-5xl">
+      <div className="container mx-auto px-4 pb-24 space-y-10 max-w-5xl">
 
         {/* Performance Snapshot */}
         {user && profile && (
@@ -212,16 +227,16 @@ const Index = () => {
                 <div className="flex items-center gap-4">
                   <RankBadge rating={profile.rating} size="lg" />
                   <div>
-                    <p className="font-display text-3xl font-bold text-foreground">{profile.rating}</p>
+                    <p className="font-display text-3xl font-bold text-primary">{profile.rating}</p>
                     <p className="text-xs text-muted-foreground">{getRank(profile.rating).label} · ELO</p>
                   </div>
                 </div>
                 <div className="flex gap-5 sm:ml-auto text-center">
                   {[
-                    { v: profile.games_won, l: "Wins", c: "text-accent" },
+                    { v: profile.games_won, l: "Wins", c: "text-primary" },
                     { v: profile.games_drawn, l: "Draws", c: "text-muted-foreground" },
                     { v: profile.games_lost, l: "Losses", c: "text-destructive" },
-                    { v: `${winRate}%`, l: "Win Rate", c: "text-primary" },
+                    { v: `${winRate}%`, l: "Win Rate", c: "text-accent" },
                   ].map(s => (
                     <div key={s.l}>
                       <p className={`font-mono text-xl font-bold ${s.c}`}>{s.v}</p>
@@ -239,7 +254,7 @@ const Index = () => {
                     const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
                     const drew = g.result === "1/2-1/2";
                     return (
-                      <span key={g.id} className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${won ? "bg-accent/20 text-accent" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}>
+                      <span key={g.id} className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${won ? "bg-primary/20 text-primary" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}>
                         {won ? "W" : drew ? "D" : "L"}
                       </span>
                     );
@@ -259,10 +274,10 @@ const Index = () => {
         <Section title="Trending" icon={TrendingUp}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: Eye, value: liveGamesCount, label: "Games Live", color: "text-accent" },
-              { icon: Users, value: topPlayers.length > 0 ? topPlayers[0].rating : "—", label: "Top Rating", color: "text-primary" },
-              { icon: Trophy, value: activeTournaments, label: "Tournaments", color: "text-secondary" },
-              { icon: Star, value: topPlayers.reduce((sum, p) => sum + p.games_played, 0), label: "Total Games", color: "text-neon-pink" },
+              { icon: Eye, value: liveGamesCount, label: "Games Live", color: "text-primary" },
+              { icon: Crown, value: topPlayers.length > 0 ? topPlayers[0].rating : "—", label: "Top Rating", color: "text-accent" },
+              { icon: Trophy, value: activeTournaments, label: "Tournaments", color: "text-primary" },
+              { icon: Star, value: topPlayers.reduce((sum, p) => sum + p.games_played, 0), label: "Total Games", color: "text-accent" },
             ].map(item => (
               <div key={item.label} className="rounded-xl glass-neon p-4 text-center card-hover">
                 <item.icon className={`h-5 w-5 ${item.color} mx-auto mb-1.5`} />
@@ -277,14 +292,14 @@ const Index = () => {
         <Section title="Quick Play" icon={Zap}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { to: "/play/online", icon: Wifi, label: "Play Online", sub: `${liveGamesCount} live`, accent: "from-primary/20 to-primary/5" },
-              { to: "/play", icon: Swords, label: "Play vs AI", sub: "800-3000 ELO", accent: "from-secondary/20 to-secondary/5" },
-              { to: "/tournaments", icon: Trophy, label: "Tournaments", sub: `${activeTournaments} active`, accent: "from-accent/20 to-accent/5" },
-              { to: "/friends", icon: Users, label: "Play Friend", sub: "Challenge", accent: "from-neon-pink/20 to-neon-pink/5" },
+              { to: "/play/online", icon: Wifi, label: "Play Online", sub: `${liveGamesCount} live` },
+              { to: "/play", icon: Swords, label: "Play vs AI", sub: "800-3000 ELO" },
+              { to: "/tournaments", icon: Trophy, label: "Tournaments", sub: `${activeTournaments} active` },
+              { to: "/friends", icon: Users, label: "Play Friend", sub: "Challenge" },
             ].map(item => (
               <Link key={item.to} to={item.to}
-                className={`rounded-xl glass-neon bg-gradient-to-br ${item.accent} p-5 text-center card-hover group`}>
-                <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(210_100%_60%/0.4)] transition-all" />
+                className="rounded-xl glass-neon p-5 text-center card-hover group">
+                <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(43_90%_55%/0.4)] transition-all" />
                 <p className="text-sm font-semibold text-foreground">{item.label}</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
               </Link>
@@ -297,13 +312,13 @@ const Index = () => {
           <Section title="Daily Focus" icon={Target}>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                { to: "/openings", icon: BookOpen, label: "Opening Practice", sub: "Master popular openings", color: "text-primary" },
-                { to: "/learn", icon: GraduationCap, label: "Lessons", sub: "Step-by-step training", color: "text-accent" },
-                { to: "/play", icon: Swords, label: "Practice vs Bot", sub: "Train against AI", color: "text-secondary" },
+                { to: "/openings", icon: BookOpen, label: "Opening Practice", sub: "Master popular openings" },
+                { to: "/learn", icon: GraduationCap, label: "Lessons", sub: "Step-by-step training" },
+                { to: "/play", icon: Swords, label: "Practice vs Bot", sub: "Train against AI" },
               ].map(item => (
                 <Link key={item.to} to={item.to} className="flex items-center gap-3 rounded-xl glass-neon p-4 card-hover group">
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <item.icon className={`h-5 w-5 ${item.color}`} />
+                    <item.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">{item.label}</p>
@@ -328,14 +343,14 @@ const Index = () => {
                 return (
                   <Link key={g.id} to="/history"
                     className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover">
-                    <div className={`w-2 h-8 rounded-full ${won ? "bg-accent" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
+                    <div className={`w-2 h-8 rounded-full ${won ? "bg-primary" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground">
                         {won ? "Victory" : drew ? "Draw" : "Defeat"} · {g.time_control_label}
                       </p>
                       <p className="text-[10px] text-muted-foreground">{moveCount} moves · {new Date(g.created_at).toLocaleDateString()}</p>
                     </div>
-                    <span className={`text-xs font-bold ${won ? "text-accent" : drew ? "text-muted-foreground" : "text-destructive"}`}>
+                    <span className={`text-xs font-bold ${won ? "text-primary" : drew ? "text-muted-foreground" : "text-destructive"}`}>
                       {g.result || "?"}
                     </span>
                   </Link>
@@ -355,7 +370,6 @@ const Index = () => {
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                   i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
                   i === 1 ? "bg-muted text-foreground" :
-                  i === 2 ? "bg-muted/50 text-muted-foreground" :
                   "bg-muted/30 text-muted-foreground"
                 }`}>
                   {i === 0 ? <Crown className="h-4 w-4" /> : `#${i + 1}`}
