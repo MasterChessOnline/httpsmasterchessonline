@@ -250,7 +250,7 @@ const Index = () => {
             <Link to="/play/online">
               <Button
                 size="lg"
-                className="h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl shimmer relative overflow-hidden"
+                className="h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl shimmer relative overflow-hidden shadow-glow-lg"
               >
                 <Play className="h-5 w-5 mr-2" />
                 Enter Chess
@@ -287,7 +287,7 @@ const Index = () => {
         {/* Performance Snapshot */}
         {user && profile && (
           <Section title="Your Performance" icon={BarChart3}>
-            <div className="rounded-xl glass-neon p-5 shimmer relative overflow-hidden">
+            <div className="rounded-xl glass-neon p-5 shimmer relative overflow-hidden inner-glow">
               <div className="relative flex flex-col sm:flex-row items-center gap-5">
                 <div className="flex items-center gap-4">
                   <RankBadge rating={profile.rating} size="lg" />

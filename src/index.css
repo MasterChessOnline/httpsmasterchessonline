@@ -129,7 +129,10 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid hsl(43 90% 55% / 0.12);
-    box-shadow: 0 0 20px hsl(43 90% 55% / 0.04), inset 0 1px 0 hsl(43 90% 55% / 0.06);
+    box-shadow:
+      0 0 20px hsl(43 90% 55% / 0.04),
+      inset 0 1px 0 hsl(43 90% 55% / 0.06),
+      0 1px 3px hsl(30 8% 2% / 0.2);
   }
 
   .glass-border {
@@ -140,19 +143,30 @@
   .btn-neon {
     @apply transition-all duration-300 ease-out;
     box-shadow: 0 0 15px hsl(43 90% 55% / 0.2);
+    will-change: transform, box-shadow;
   }
   .btn-neon:hover {
-    transform: scale(1.04);
-    box-shadow: 0 0 30px hsl(43 90% 55% / 0.35), 0 0 60px hsl(30 60% 40% / 0.15);
+    transform: scale(1.03) translateY(-1px);
+    box-shadow:
+      0 0 25px hsl(43 90% 55% / 0.3),
+      0 0 50px hsl(30 60% 40% / 0.12),
+      0 4px 12px hsl(30 8% 2% / 0.3);
+  }
+  .btn-neon:active {
+    transform: scale(0.98);
   }
 
-  /* Card hover */
+  /* Card hover — premium depth */
   .card-hover {
     @apply transition-all duration-300 ease-out;
+    will-change: transform, box-shadow;
   }
   .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 32px hsl(43 90% 55% / 0.1), 0 0 0 1px hsl(43 90% 55% / 0.1);
+    transform: translateY(-4px) scale(1.005);
+    box-shadow:
+      0 8px 32px hsl(43 90% 55% / 0.1),
+      0 0 0 1px hsl(43 90% 55% / 0.08),
+      0 20px 40px -10px hsl(30 8% 2% / 0.4);
   }
 
   /* Neon border glow — gold */
@@ -229,11 +243,25 @@
       linear-gradient(90deg, hsl(43 90% 55% / 0.02) 1px, transparent 1px);
     background-size: 60px 60px;
   }
+  /* Premium inner light for cards */
+  .inner-glow {
+    box-shadow:
+      inset 0 1px 0 hsl(43 90% 55% / 0.08),
+      inset 0 -1px 0 hsl(30 8% 2% / 0.3),
+      0 1px 2px hsl(30 8% 2% / 0.2);
+  }
 }
 
-/* Smooth scroll */
+/* Smooth scroll + global transitions */
 html {
   scroll-behavior: smooth;
+}
+
+/* Smooth all interactive elements */
+a, button, input, select, textarea {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .safe-bottom {
