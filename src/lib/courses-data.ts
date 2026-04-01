@@ -645,6 +645,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Brain",
+    category: "openings",
     lessons: [
       { id: "en-1", title: "English Opening Basics", content: "The English (1.c4) controls d5 and is extremely flexible. It's a reversed Sicilian with an extra tempo.", keyPoints: ["1.c4 controls d5", "Extremely flexible", "Reversed Sicilian"], fen: "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1",
         practiceLine: { playerColor: "w", moves: [{ move: "c4", explanation: "1.c4 — the English!" }, { move: "Nc3", explanation: "2.Nc3 — reinforce d5." }, { move: "g3", explanation: "3.g3 — fianchetto." }, { move: "Bg2", explanation: "4.Bg2 — powerful bishop." }], autoResponses: ["e5", "Nf6", "Nc6", "Bb4"], completionMessage: "The English Opening!" } },
