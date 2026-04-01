@@ -1,4 +1,5 @@
 import { Crown, BookOpen, Users, Target, Youtube, Trophy, GraduationCap } from "lucide-react";
+import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
