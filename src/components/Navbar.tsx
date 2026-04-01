@@ -104,8 +104,7 @@ const Navbar = () => {
               <Crown className="h-4.5 w-4.5 text-primary" />
             </motion.div>
             <span className="font-display text-base font-bold tracking-wider text-foreground hidden sm:inline uppercase">
-              Master<span className="text-gradient-neon">Chess</span>
-              <span className="text-[10px] text-primary/60 ml-1 font-normal tracking-normal">4D</span>
+              Master<span className="text-gradient-gold">Chess</span>
             </span>
           </Link>
 
