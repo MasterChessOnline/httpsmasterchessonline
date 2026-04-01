@@ -7,12 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const About = () => (
-  <div className="min-h-screen bg-background flex flex-col">
+  <div className="min-h-screen bg-background grid-bg flex flex-col">
     <Navbar />
     <main className="flex-1">
       {/* Hero */}
       <section className="py-24 container mx-auto px-6">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
+        <motion.div
+          className="max-w-3xl mx-auto text-center space-y-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <Crown className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-primary">About Us</span>
@@ -23,7 +28,7 @@ const About = () => (
           <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
             MasterChessOnline is the home of <span className="font-semibold text-foreground">DailyChess_12</span> — a chess learning platform built by a passionate instructor who believes every player deserves access to quality lessons, free tournaments, and a welcoming community.
           </p>
-        </div>
+        </motion.div>
       </section>
 
       {/* Mission */}
