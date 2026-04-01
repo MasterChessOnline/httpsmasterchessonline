@@ -29,7 +29,7 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
-import Lessons from "./pages/Lessons";
+
 import TournamentLobby from "./pages/TournamentLobby";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
@@ -73,7 +73,7 @@ function AnimatedRoutes() {
           <Route path="/friends" element={<Friends />} />
           <Route path="/video-lessons" element={<VideoLessons />} />
           <Route path="/achievements" element={<Achievements />} />
-          <Route path="/lessons" element={<Lessons />} />
+          
           <Route path="/story" element={<StoryMode />} />
           <Route path="/openings" element={<OpeningTrainer />} />
           <Route path="/opening-explorer" element={<OpeningExplorer />} />

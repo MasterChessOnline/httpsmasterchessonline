@@ -347,6 +347,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Brain",
+    category: "strategy",
     lessons: [
       L("sm-1", "Prophylaxis", "Prevent the opponent's plans before improving your own position. Ask 'What does my opponent want?' before each move.", ["Ask what opponent wants", "Prevent before improving", "Key skill of world champions"], "r1bq1rk1/pp2bppp/2n1pn2/2pp4/2PP4/2NBPN2/PP3PPP/R1BQ1RK1 w - - 0 8"),
       L("sm-2", "Pawn Breaks", "A pawn break challenges the opponent's pawn structure. Timing is crucial — too early is premature, too late is too slow.", ["Timing is everything", "Opens lines for pieces", "Changes the pawn structure"], "r1bq1rk1/pp2bppp/2n1pn2/2ppP3/3P4/2NB1N2/PPP2PPP/R1BQ1RK1 w - - 0 8"),
@@ -387,6 +388,7 @@ export const COURSES: Course[] = [
     level: "Intermediate",
     tier: "free",
     icon: "Crown",
+    category: "openings",
     lessons: [
       { id: "qg-1", title: "Queen's Gambit Basics", content: "The Queen's Gambit (1.d4 d5 2.c4) is one of the oldest and most respected openings. White offers a pawn for center control.", keyPoints: ["1.d4 d5 2.c4", "Not a true gambit", "Most classical opening"], fen: "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq c3 0 2",
         practiceLine: { playerColor: "w", moves: [{ move: "d4", explanation: "1.d4 — control the center." }, { move: "c4", explanation: "2.c4 — the Queen's Gambit!" }, { move: "Nc3", explanation: "3.Nc3 — develop, support the center." }], autoResponses: ["d5", "e6", "Nf6"], completionMessage: "You've played the Queen's Gambit!" } },
@@ -431,6 +433,7 @@ export const COURSES: Course[] = [
     level: "Intermediate",
     tier: "free",
     icon: "BookOpen",
+    category: "openings",
     lessons: [
       { id: "rl-1", title: "Ruy Lopez Basics", content: "The Ruy Lopez (1.e4 e5 2.Nf3 Nc6 3.Bb5) puts pressure on the e5 defender, creating long-term tension.", keyPoints: ["3.Bb5 pressures the e5 defender", "Long-term strategic tension", "Played for centuries"], fen: "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
         practiceLine: { playerColor: "w", moves: [{ move: "e4", explanation: "1.e4" }, { move: "Nf3", explanation: "2.Nf3 — attack e5." }, { move: "Bb5", explanation: "3.Bb5 — the Ruy Lopez!" }, { move: "Ba4", explanation: "4.Ba4 — maintain the pin." }], autoResponses: ["e5", "Nc6", "a6", "Nf6"], completionMessage: "The Ruy Lopez — a timeless classical opening!" } },
@@ -599,6 +602,7 @@ export const COURSES: Course[] = [
     level: "Beginner",
     tier: "free",
     icon: "BookOpen",
+    category: "openings",
     lessons: [
       { id: "ls-1", title: "London System Setup", content: "The London (1.d4, 2.Bf4, 3.e3, 4.Nf3, 5.Bd3) is flexible and works against almost anything.", keyPoints: ["Bf4 before e3", "Works against nearly everything", "Safe, solid, easy"], fen: "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3",
         practiceLine: { playerColor: "w", moves: [{ move: "d4", explanation: "1.d4 — start the London." }, { move: "Bf4", explanation: "2.Bf4 — bishop BEFORE e3!" }, { move: "e3", explanation: "3.e3 — solidify." }, { move: "Nf3", explanation: "4.Nf3" }, { move: "Bd3", explanation: "5.Bd3 — London complete!" }], autoResponses: ["d5", "Nf6", "e6", "c5", "Nc6"], completionMessage: "London System — simple and effective!" } },
@@ -641,6 +645,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Brain",
+    category: "openings",
     lessons: [
       { id: "en-1", title: "English Opening Basics", content: "The English (1.c4) controls d5 and is extremely flexible. It's a reversed Sicilian with an extra tempo.", keyPoints: ["1.c4 controls d5", "Extremely flexible", "Reversed Sicilian"], fen: "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1",
         practiceLine: { playerColor: "w", moves: [{ move: "c4", explanation: "1.c4 — the English!" }, { move: "Nc3", explanation: "2.Nc3 — reinforce d5." }, { move: "g3", explanation: "3.g3 — fianchetto." }, { move: "Bg2", explanation: "4.Bg2 — powerful bishop." }], autoResponses: ["e5", "Nf6", "Nc6", "Bb4"], completionMessage: "The English Opening!" } },
@@ -683,6 +688,7 @@ export const COURSES: Course[] = [
     level: "Beginner",
     tier: "free",
     icon: "Crosshair",
+    category: "openings",
     lessons: [
       { id: "sc-1", title: "Scandinavian Basics", content: "The Scandinavian (1.e4 d5) immediately challenges White's center. After 2.exd5 Qxd5 3.Nc3, the queen moves but Black develops fast.", keyPoints: ["1...d5 challenges e4", "Queen comes out early", "Simple plans"], fen: "rnb1kbnr/ppp1pppp/8/3q4/8/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 3",
         practiceLine: { startFen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1", playerColor: "b", moves: [{ move: "d5", explanation: "1...d5 — the Scandinavian!" }, { move: "Qxd5", explanation: "2...Qxd5 — recapture." }, { move: "Qa5", explanation: "3...Qa5 — safe square." }, { move: "Nf6", explanation: "4...Nf6 — develop." }], autoResponses: ["exd5", "Nc3", "d4", "Nf3"], completionMessage: "The Scandinavian — direct and effective!" } },
@@ -725,6 +731,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Crosshair",
+    category: "openings",
     lessons: [
       { id: "du-1", title: "Dutch Defense Basics", content: "The Dutch (1.d4 f5) is aggressive and unbalanced. Black stakes a kingside claim immediately.", keyPoints: ["1...f5 fights for e4 control", "Commits to kingside", "Risky but aggressive"], fen: "rnbqkbnr/ppppp1pp/8/5p2/3P4/8/PPP1PPPP/RNBQKBNR w KQkq f6 0 2",
         practiceLine: { startFen: "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1", playerColor: "b", moves: [{ move: "f5", explanation: "1...f5 — the Dutch!" }, { move: "Nf6", explanation: "2...Nf6" }, { move: "g6", explanation: "3...g6 — the Leningrad!" }, { move: "Bg7", explanation: "4...Bg7 — powerful bishop." }], autoResponses: ["c4", "Nc3", "g3", "Bg2"], completionMessage: "The Leningrad Dutch — aggressive and full of fight!" } },
@@ -767,6 +774,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Target",
+    category: "openings",
     lessons: [
       { id: "sd-1", title: "Open Sicilian: 2.Nf3 + 3.d4", content: "The Open Sicilian (1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4) is the main battleground. White gets open lines; Black gets the semi-open c-file and queenside play.", keyPoints: ["Most theoretical opening in chess", "White: open lines + kingside attack", "Black: c-file + queenside play"], fen: "rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
         practiceLine: { playerColor: "w", moves: [{ move: "e4", explanation: "1.e4" }, { move: "Nf3", explanation: "2.Nf3 — heading for the Open Sicilian." }, { move: "d4", explanation: "3.d4! Open the center." }, { move: "Nxd4", explanation: "4.Nxd4 — the Open Sicilian!" }], autoResponses: ["c5", "d6", "cxd4", "Nf6"], completionMessage: "The Open Sicilian — the most popular opening at all levels!" } },
@@ -808,6 +816,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Crown",
+    category: "openings",
     lessons: [
       { id: "ni-1", title: "Nimzo-Indian Basics", content: "The Nimzo-Indian (1.d4 Nf6 2.c4 e6 3.Nc3 Bb4) pins the knight and fights for e4 control. It's considered the most theoretically sound defense against 1.d4.", keyPoints: ["Bb4 pins the knight", "Fights for e4 control", "Most respected d4 defense"], fen: "rnbqk2r/pppp1ppp/4pn2/8/1bPP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 2 4",
         practiceLine: { startFen: "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1", playerColor: "b", moves: [{ move: "Nf6", explanation: "1...Nf6 — flexible development." }, { move: "e6", explanation: "2...e6 — prepare Bb4." }, { move: "Bb4", explanation: "3...Bb4 — the Nimzo-Indian! Pin the knight." }], autoResponses: ["c4", "Nc3", "Qc2"], completionMessage: "The Nimzo-Indian — the gold standard of d4 defenses!" } },
@@ -849,6 +858,7 @@ export const COURSES: Course[] = [
     level: "Intermediate",
     tier: "free",
     icon: "Crosshair",
+    category: "middlegame",
     lessons: [
       L("ac-1", "When to Attack", "Attack when you have a lead in development, better piece activity, or your opponent's king is unsafe. Without these factors, an attack will fail.", ["Development advantage", "Superior piece activity", "Unsafe enemy king"]),
       L("ac-2", "Attacking the Uncastled King", "If the opponent hasn't castled, open the center! Central files (d and e) become highways for your rooks to attack.", ["Open the center immediately", "d and e files are highways", "Prevent castling if possible"]),
@@ -889,6 +899,7 @@ export const COURSES: Course[] = [
     level: "Intermediate",
     tier: "free",
     icon: "Layout",
+    category: "middlegame",
     lessons: [
       L("dt-1", "When to Defend", "Defend when your opponent has the initiative, your king is under pressure, or you're behind in material. Recognition is the first step.", ["Recognize when you're defending", "Opponent has initiative", "King under pressure"]),
       L("dt-2", "Active vs Passive Defense", "Active defense involves counter-threats and counter-attacks. Passive defense just blocks threats. Active defense is almost always stronger.", ["Active defense = counter-threats", "Passive defense = blocking", "Active is stronger"]),
@@ -929,6 +940,7 @@ export const COURSES: Course[] = [
     level: "Advanced",
     tier: "free",
     icon: "Crown",
+    category: "endgame",
     lessons: [
       L("pe-1", "Opposition Fundamentals", "Direct opposition: kings face each other one square apart. The side NOT to move has the advantage. This is the most important endgame concept.", ["Side not to move has advantage", "Most important endgame concept", "Practice recognizing it"]),
       L("pe-2", "Distant Opposition", "Kings 3 or 5 squares apart on same rank/file/diagonal. The side to move can gain direct opposition by keeping the distance odd.", ["3 or 5 squares apart", "Maintain odd distance", "Leads to direct opposition"]),
@@ -968,6 +980,7 @@ export const COURSES: Course[] = [
     description: "Master the mental game — focus, confidence, and competitive resilience.",
     level: "Beginner",
     tier: "free",
+    category: "strategy",
     icon: "Brain",
     lessons: [
       L("cp-1", "The Growth Mindset in Chess", "Talent is developed, not fixed. Every grandmaster started as a beginner. Embrace challenges and learn from losses — they're the best teachers.", ["Talent is developed", "Embrace challenges", "Losses are teachers"]),

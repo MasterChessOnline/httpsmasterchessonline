@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import {
   ArrowLeft, ChevronRight, CheckCircle2, Lock, Star,
   Bookmark, BookmarkCheck, Flame, Trophy, BarChart3,
   Play, Video, Sparkles, Lightbulb, ChevronDown, ChevronUp,
-  GraduationCap, Clock, Zap, Shield, Award,
+  GraduationCap, Clock, Zap, Shield, Award, Swords,
 } from "lucide-react";
 import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
@@ -167,23 +168,35 @@ function CourseCard({ course, onClick, progress }: {
   const lvl = LEVEL_CONFIG[course.level];
 
   return (
-    <article
+    <motion.article
       onClick={onClick}
-      className="group relative rounded-xl border border-border/50 hover:border-primary/40 bg-card overflow-hidden transition-all cursor-pointer hover:shadow-glow"
+      className="group relative rounded-xl border border-border/50 hover:border-primary/40 bg-card overflow-hidden transition-all cursor-pointer"
+      whileHover={{ y: -4, boxShadow: "0 0 30px hsl(43 90% 55% / 0.1)" }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <div className="h-1 w-full bg-primary/50" />
 
       <div className="p-5">
         <div className="flex items-start gap-3 mb-3">
-          <div className={`rounded-lg ${lvl.bg} p-2.5 shrink-0`}>
+          <motion.div
+            className={`rounded-lg ${lvl.bg} p-2.5 shrink-0`}
+            whileHover={{ rotate: 10, scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 400 }}
+          >
             <Icon className={`h-5 w-5 ${lvl.color}`} />
-          </div>
+          </motion.div>
           <div className="flex-1 min-w-0">
             <h2 className="font-display text-base font-bold text-foreground leading-tight">{course.title}</h2>
             <div className="flex items-center gap-2 mt-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
               <span className="text-[10px] text-muted-foreground">{course.lessons.length} chapters</span>
+              {course.category && (
+                <>
+                  <span className="text-[10px] text-muted-foreground">·</span>
+                  <span className="text-[10px] text-muted-foreground capitalize">{course.category}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -198,7 +211,7 @@ function CourseCard({ course, onClick, progress }: {
           <Progress value={progress.percent} className="h-1.5" />
         </div>
 
-        <Button className="mt-4 w-full" size="sm">
+        <Button className="mt-4 w-full btn-neon" size="sm">
           {progress.completed > 0 ? (
             <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           ) : (
@@ -206,7 +219,7 @@ function CourseCard({ course, onClick, progress }: {
           )}
         </Button>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
@@ -218,6 +231,7 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [showAdditional, setShowAdditional] = useState(false);
 
   const levels = [
@@ -227,14 +241,23 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
     { key: "Advanced", label: "Advanced", icon: Award },
   ];
 
+  const categories = [
+    { key: "all", label: "All Topics", icon: BookOpen },
+    { key: "openings", label: "Openings", icon: BookOpen },
+    { key: "middlegame", label: "Middlegames", icon: Swords },
+    { key: "endgame", label: "Endgames", icon: Target },
+    { key: "strategy", label: "Strategy", icon: Brain },
+    { key: "tactics", label: "Tactics", icon: Crosshair },
+  ];
+
   const coreCourses = COURSES.filter((c) => CORE_IDS.has(c.id));
   const additionalCourses = COURSES.filter((c) => {
     if (CORE_IDS.has(c.id)) return false;
     if (levelFilter !== "all" && c.level !== levelFilter) return false;
+    if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
     return true;
   });
 
-  // Total core lessons
   const totalCoreLessons = coreCourses.reduce((s, c) => s + c.lessons.length, 0);
 
   return (
@@ -244,6 +267,41 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
         <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs px-3 py-1">
           <Shield className="w-3 h-3 mr-1.5" /> All {COURSES.reduce((s, c) => s + c.lessons.length, 0)}+ lessons are 100% free
         </Badge>
+      </div>
+
+      {/* ── CATEGORY CARDS ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
+        {[
+          { key: "openings", label: "Openings", icon: BookOpen, desc: "Opening theory & repertoire", color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
+          { key: "middlegame", label: "Middlegames", icon: Swords, desc: "Plans, attacks & defense", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+          { key: "endgame", label: "Endgames", icon: Target, desc: "Technique & calculation", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+          { key: "strategy", label: "Strategy", icon: Brain, desc: "Positional mastery", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
+        ].map((cat, i) => {
+          const count = COURSES.filter(c => c.category === cat.key).reduce((s, c) => s + c.lessons.length, 0);
+          return (
+            <motion.button
+              key={cat.key}
+              onClick={() => {
+                setCategoryFilter(prev => prev === cat.key ? "all" : cat.key);
+                setShowAdditional(true);
+              }}
+              className={`relative rounded-xl border p-4 text-center transition-all group overflow-hidden ${
+                categoryFilter === cat.key
+                  ? `${cat.border} ${cat.bg} shadow-glow`
+                  : "border-border/50 bg-card hover:border-primary/30"
+              }`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08, duration: 0.5 }}
+              whileHover={{ y: -3, scale: 1.02 }}
+            >
+              <cat.icon className={`h-6 w-6 mx-auto mb-2 ${cat.color} group-hover:scale-110 transition-transform`} />
+              <p className="text-sm font-semibold text-foreground">{cat.label}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{count}+ lessons</p>
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* ── CORE CURRICULUM ── */}
@@ -279,41 +337,75 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
           <div className="h-px flex-1 bg-border/50" />
           <span className="flex items-center gap-1.5 font-medium shrink-0">
             {showAdditional ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            {showAdditional ? "Hide" : "Show"} Additional Deep-Dive Courses ({additionalCourses.length})
+            {showAdditional ? "Hide" : "Show"} Deep-Dive Courses ({additionalCourses.length})
           </span>
           <div className="h-px flex-1 bg-border/50" />
         </button>
 
         {showAdditional && (
           <>
-            {/* Level filter */}
-            <div className="flex justify-center gap-2 flex-wrap mb-8">
-              {levels.map(({ key, label, icon: LvlIcon }) => (
-                <button
-                  key={key}
-                  onClick={() => setLevelFilter(key)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all border ${
-                    levelFilter === key
-                      ? "border-primary bg-primary/10 text-primary shadow-glow"
-                      : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-                  }`}
-                >
-                  <LvlIcon className="w-3.5 h-3.5" />
-                  {label}
-                </button>
-              ))}
+            {/* Filters row */}
+            <div className="flex flex-col sm:flex-row justify-center gap-3 flex-wrap mb-8">
+              {/* Level filter */}
+              <div className="flex justify-center gap-2 flex-wrap">
+                {levels.map(({ key, label, icon: LvlIcon }) => (
+                  <button
+                    key={key}
+                    onClick={() => setLevelFilter(key)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-all border ${
+                      levelFilter === key
+                        ? "border-primary bg-primary/10 text-primary shadow-glow"
+                        : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                    }`}
+                  >
+                    <LvlIcon className="w-3.5 h-3.5" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {/* Category filter */}
+              <div className="flex justify-center gap-2 flex-wrap">
+                {categories.map(({ key, label, icon: CatIcon }) => (
+                  <button
+                    key={key}
+                    onClick={() => setCategoryFilter(key)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-all border ${
+                      categoryFilter === key
+                        ? "border-accent bg-accent/10 text-accent shadow-glow"
+                        : "border-border/50 bg-card text-muted-foreground hover:border-accent/30 hover:text-foreground"
+                    }`}
+                  >
+                    <CatIcon className="w-3.5 h-3.5" />
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {additionalCourses.map((course) => (
-                <CourseCard
+              {additionalCourses.map((course, i) => (
+                <motion.div
                   key={course.id}
-                  course={course}
-                  onClick={() => onSelectCourse(course)}
-                  progress={getCourseProgress(course.id, course.lessons.length)}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.04, duration: 0.4 }}
+                >
+                  <CourseCard
+                    course={course}
+                    onClick={() => onSelectCourse(course)}
+                    progress={getCourseProgress(course.id, course.lessons.length)}
+                  />
+                </motion.div>
               ))}
             </div>
+
+            {additionalCourses.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No courses match your filters.</p>
+              </div>
+            )}
           </>
         )}
       </div>
