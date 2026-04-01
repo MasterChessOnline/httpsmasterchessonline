@@ -20,7 +20,7 @@ const About = () => (
             Master<span className="text-gradient-gold">Chess</span>Online
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            MasterChessOnline is the home of <span className="font-semibold text-foreground">DailyChess_12</span> — a chess learning platform built by a passionate instructor who believes every player deserves access to quality coaching, free tournaments, and a welcoming community.
+            MasterChessOnline is the home of <span className="font-semibold text-foreground">DailyChess_12</span> — a chess learning platform built by a passionate instructor who believes every player deserves access to quality lessons, free tournaments, and a welcoming community.
           </p>
         </div>
       </section>
