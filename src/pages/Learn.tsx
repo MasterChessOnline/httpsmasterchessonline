@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import {
   ArrowLeft, ChevronRight, CheckCircle2, Lock, Star,
   Bookmark, BookmarkCheck, Flame, Trophy, BarChart3,
   Play, Video, Sparkles, Lightbulb, ChevronDown, ChevronUp,
-  GraduationCap, Clock, Zap, Shield, Award,
+  GraduationCap, Clock, Zap, Shield, Award, Swords,
 } from "lucide-react";
 import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
