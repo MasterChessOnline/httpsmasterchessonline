@@ -51,11 +51,11 @@ const NAV_SECTIONS: NavSection[] = [
     icon: GraduationCap,
     items: [
       { label: "Training", href: "/learn", icon: GraduationCap, desc: "Beginner to advanced" },
-      { label: "Openings", href: "/openings", icon: BookOpen, desc: "Multiple opening styles" },
-      { label: "Endgames", href: "/lessons", icon: Target, desc: "Master the endgame" },
-      { label: "Strategy", href: "/lessons", icon: Brain, desc: "Middlegame tactics" },
+      { label: "Openings", href: "/learn", icon: BookOpen, desc: "Master opening systems" },
+      { label: "Middlegames", href: "/learn", icon: Swords, desc: "Plans & combinations" },
+      { label: "Endgames", href: "/learn", icon: Target, desc: "Technique & calculation" },
+      { label: "Strategy", href: "/learn", icon: Brain, desc: "Positional mastery" },
       { label: "Game Review", href: "/game-review", icon: Eye, desc: "Analyze your games" },
-      { label: "Mistake Analysis", href: "/analysis", icon: Shield, desc: "Find your weaknesses" },
     ],
   },
   {

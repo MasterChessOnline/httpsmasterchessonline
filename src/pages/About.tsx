@@ -83,8 +83,8 @@ const About = () => (
             <Link to="/play">
               <Button size="lg">Play Now</Button>
             </Link>
-            <Link to="/contact">
-              <Button size="lg" variant="outline">Book a Lesson</Button>
+            <Link to="/learn">
+              <Button size="lg" variant="outline">Start Learning</Button>
             </Link>
             <a href="https://www.youtube.com/@DailyChess_12" target="_blank" rel="noopener noreferrer">
               <Button size="lg" variant="outline" className="gap-2">

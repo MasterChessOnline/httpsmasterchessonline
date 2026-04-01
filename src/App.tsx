@@ -73,7 +73,7 @@ function AnimatedRoutes() {
           <Route path="/friends" element={<Friends />} />
           <Route path="/video-lessons" element={<VideoLessons />} />
           <Route path="/achievements" element={<Achievements />} />
-          <Route path="/lessons" element={<Lessons />} />
+          
           <Route path="/story" element={<StoryMode />} />
           <Route path="/openings" element={<OpeningTrainer />} />
           <Route path="/opening-explorer" element={<OpeningExplorer />} />
