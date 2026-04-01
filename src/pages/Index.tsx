@@ -250,7 +250,7 @@ const Index = () => {
             <Link to="/play/online">
               <Button
                 size="lg"
-                className="h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl shimmer relative overflow-hidden"
+                className="h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl shimmer relative overflow-hidden shadow-glow-lg"
               >
                 <Play className="h-5 w-5 mr-2" />
                 Enter Chess
