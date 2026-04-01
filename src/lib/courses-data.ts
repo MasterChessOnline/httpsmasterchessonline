@@ -978,6 +978,7 @@ export const COURSES: Course[] = [
     description: "Master the mental game — focus, confidence, and competitive resilience.",
     level: "Beginner",
     tier: "free",
+    category: "strategy",
     icon: "Brain",
     lessons: [
       L("cp-1", "The Growth Mindset in Chess", "Talent is developed, not fixed. Every grandmaster started as a beginner. Embrace challenges and learn from losses — they're the best teachers.", ["Talent is developed", "Embrace challenges", "Losses are teachers"]),
