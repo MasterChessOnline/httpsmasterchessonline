@@ -477,7 +477,7 @@ const Index = () => {
                 transition={{ delay: i * 0.05, duration: 0.4 }}
               >
                 <Link to={`/profile/${p.user_id}`}
-                  className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover group">
+                  className="flex items-center gap-3 rounded-xl glass-elevated p-3 group depth-card">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                     i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
                     i === 1 ? "bg-muted text-foreground" :
