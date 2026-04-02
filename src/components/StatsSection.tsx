@@ -1,6 +1,7 @@
 import { Users, Gamepad2, Brain, TrendingUp, Flame, Globe, Swords, Shield } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import textureBg from "@/assets/texture-dark-luxury.jpg";
 
 const stats = [
   { icon: Globe, label: "Countries", value: 120, suffix: "+", color: "from-primary/20 to-primary/5" },
