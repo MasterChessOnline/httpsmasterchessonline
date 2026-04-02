@@ -177,7 +177,7 @@ const Index = () => {
     ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background grid-bg relative">
+    <div className="min-h-screen bg-background grid-bg relative grain-texture">
       <Navbar />
 
       {/* ── HERO — Premium Gold with 3D elements ── */}
