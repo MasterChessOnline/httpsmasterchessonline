@@ -80,8 +80,10 @@ const cardVariants = {
 
 const FeaturesSection = () => {
   return (
-    <section className="relative py-28 overflow-hidden section-depth">
-      <div className="absolute inset-0 bg-gradient-to-b from-card/50 via-background to-background" />
+    <section className="relative py-28 overflow-hidden section-depth grain-texture">
+      {/* Cinematic chess board background */}
+      <img src={chessBoardBg} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" loading="lazy" style={{ opacity: 0.04, filter: "brightness(0.4) saturate(0.6)" }} />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
       {/* Ambient glow orbs */}
       <motion.div
         className="absolute top-0 left-1/4 w-96 h-96 rounded-full pointer-events-none"
