@@ -38,8 +38,10 @@ const reasons = [
 
 const WhyChooseUsSection = () => {
   return (
-    <section className="relative py-28 overflow-hidden section-depth">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
+    <section className="relative py-28 overflow-hidden section-depth grain-texture">
+      {/* Chess pieces background */}
+      <img src={chessPiecesBg} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" loading="lazy" style={{ opacity: 0.05, filter: "brightness(0.3) saturate(0.5)" }} />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
       {/* Ambient glow */}
       <motion.div
         className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full pointer-events-none"
