@@ -254,9 +254,10 @@ const PlayOnline = () => {
   // ── LOBBY ──
   if (onlineStatus === "idle" || onlineStatus === "searching") {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
+        <DynamicBackground />
         <Navbar />
-        <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
+        <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16 relative z-10">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
             <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-1">
               Play <span className="text-gradient-gold">Online</span>
@@ -265,6 +266,17 @@ const PlayOnline = () => {
           </motion.div>
 
           <div className="max-w-lg mx-auto space-y-5">
+            {/* Quick Start */}
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full">
+              <button
+                onClick={() => searchMatch(timeControlIdx)}
+                disabled={onlineStatus === "searching"}
+                className="w-full rounded-xl bg-primary text-primary-foreground py-4 text-lg font-bold shadow-glow hover:shadow-glow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Zap className="w-5 h-5" /> Play Now — Instant Match
+              </button>
+            </motion.div>
+
             {/* Time Control */}
             <div className="rounded-xl border border-border/50 bg-card/80 p-5 space-y-3">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -329,6 +341,13 @@ const PlayOnline = () => {
                 <Wifi className="mr-2 h-5 w-5" /> Find Opponent
               </Button>
             )}
+
+            {/* Spectate link */}
+            <Link to="/spectate" className="block">
+              <button className="w-full rounded-xl border border-border/50 bg-card/80 p-3 text-sm text-muted-foreground hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center gap-2">
+                <Eye className="w-4 h-4" /> Watch Live Games
+              </button>
+            </Link>
           </div>
         </main>
         <Footer />
