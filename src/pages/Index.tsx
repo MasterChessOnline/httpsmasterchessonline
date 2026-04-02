@@ -385,8 +385,8 @@ const Index = () => {
                 transition={{ delay: i * 0.08, duration: 0.5 }}
               >
                 <Link to={item.to}
-                  className="rounded-xl glass-neon p-5 text-center card-hover group block neon-border">
-                  <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(43_90%_55%/0.4)] transition-all" />
+                  className="rounded-xl glass-elevated p-5 text-center group block depth-card light-sweep gold-edge">
+                  <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(43_90%_55%/0.5)] transition-all" />
                   <p className="text-sm font-semibold text-foreground">{item.label}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
                 </Link>
