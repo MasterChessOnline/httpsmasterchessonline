@@ -287,7 +287,7 @@ const Index = () => {
         {/* Performance Snapshot */}
         {user && profile && (
           <Section title="Your Performance" icon={BarChart3}>
-            <div className="rounded-xl glass-neon p-5 shimmer relative overflow-hidden inner-glow">
+            <div className="rounded-xl glass-elevated p-5 relative overflow-hidden inner-glow light-sweep ambient-reflect">
               <div className="relative flex flex-col sm:flex-row items-center gap-5">
                 <div className="flex items-center gap-4">
                   <RankBadge rating={profile.rating} size="lg" />
@@ -351,7 +351,7 @@ const Index = () => {
             ].map((item, i) => (
               <motion.div
                 key={item.label}
-                className="rounded-xl glass-neon p-4 text-center card-hover group shimmer relative overflow-hidden"
+                className="rounded-xl glass-elevated p-4 text-center group relative overflow-hidden depth-card light-sweep"
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
@@ -385,8 +385,8 @@ const Index = () => {
                 transition={{ delay: i * 0.08, duration: 0.5 }}
               >
                 <Link to={item.to}
-                  className="rounded-xl glass-neon p-5 text-center card-hover group block neon-border">
-                  <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(43_90%_55%/0.4)] transition-all" />
+                  className="rounded-xl glass-elevated p-5 text-center group block depth-card light-sweep gold-edge">
+                  <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(43_90%_55%/0.5)] transition-all" />
                   <p className="text-sm font-semibold text-foreground">{item.label}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
                 </Link>
@@ -411,7 +411,7 @@ const Index = () => {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1, duration: 0.5 }}
                 >
-                  <Link to={item.to} className="flex items-center gap-3 rounded-xl glass-neon p-4 card-hover group neon-border">
+                  <Link to={item.to} className="flex items-center gap-3 rounded-xl glass-elevated p-4 group depth-card gold-edge">
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:shadow-glow transition-shadow duration-300">
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
@@ -445,7 +445,7 @@ const Index = () => {
                     transition={{ delay: i * 0.05, duration: 0.4 }}
                   >
                     <Link to="/history"
-                      className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover group">
+                      className="flex items-center gap-3 rounded-xl glass-elevated p-3 group depth-card">
                       <div className={`w-2 h-8 rounded-full ${won ? "bg-primary" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
@@ -477,7 +477,7 @@ const Index = () => {
                 transition={{ delay: i * 0.05, duration: 0.4 }}
               >
                 <Link to={`/profile/${p.user_id}`}
-                  className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover group">
+                  className="flex items-center gap-3 rounded-xl glass-elevated p-3 group depth-card">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                     i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
                     i === 1 ? "bg-muted text-foreground" :
@@ -514,8 +514,8 @@ const Index = () => {
                 transition={{ delay: i * 0.06, duration: 0.4 }}
               >
                 <Link to={item.to}
-                  className="rounded-xl glass-neon p-4 text-center card-hover group block neon-border">
-                  <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_hsl(43_90%_55%/0.4)] transition-all" />
+                  className="rounded-xl glass-elevated p-4 text-center group block depth-card light-sweep gold-edge">
+                  <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_hsl(43_90%_55%/0.5)] transition-all" />
                   <p className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">{item.label}</p>
                 </Link>
               </motion.div>

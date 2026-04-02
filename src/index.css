@@ -250,6 +250,95 @@
       inset 0 -1px 0 hsl(30 8% 2% / 0.3),
       0 1px 2px hsl(30 8% 2% / 0.2);
   }
+
+  /* ── 3D Depth System ── */
+  .depth-card {
+    @apply transition-all duration-500 ease-out;
+    transform: perspective(800px) rotateX(0deg) rotateY(0deg);
+    will-change: transform, box-shadow;
+  }
+  .depth-card:hover {
+    transform: perspective(800px) rotateX(1deg) translateY(-6px);
+    box-shadow:
+      0 20px 60px -15px hsl(30 8% 2% / 0.6),
+      0 0 0 1px hsl(43 90% 55% / 0.06),
+      0 0 30px hsl(43 90% 55% / 0.04);
+  }
+
+  /* Cinematic light sweep on cards */
+  .light-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+  .light-sweep::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(43 90% 55% / 0.04),
+      hsl(43 90% 55% / 0.08),
+      hsl(43 90% 55% / 0.04),
+      transparent
+    );
+    transform: skewX(-15deg);
+    transition: left 0.8s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .light-sweep:hover::before {
+    left: 130%;
+  }
+
+  /* Gold edge highlight */
+  .gold-edge {
+    position: relative;
+  }
+  .gold-edge::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(43 90% 55% / 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .gold-edge:hover::after {
+    opacity: 1;
+  }
+
+  /* Elevated glass — premium depth */
+  .glass-elevated {
+    background: hsl(30 10% 7% / 0.7);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid hsl(43 90% 55% / 0.06);
+    box-shadow:
+      0 8px 32px hsl(30 8% 2% / 0.4),
+      0 0 0 1px hsl(43 90% 55% / 0.04),
+      inset 0 1px 0 hsl(43 90% 55% / 0.06);
+  }
+
+  /* Ambient reflection — subtle top highlight */
+  .ambient-reflect {
+    position: relative;
+  }
+  .ambient-reflect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(43 90% 55% / 0.15), transparent);
+    z-index: 1;
+  }
 }
 
 /* Smooth scroll + global transitions */
@@ -311,4 +400,35 @@ a, button, input, select, textarea {
   10% { opacity: 1; }
   90% { opacity: 1; }
   100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+/* ── Cinematic ambient light — gentle moving radial ── */
+@keyframes ambient-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.04; }
+  33% { transform: translate(30px, -20px) scale(1.1); opacity: 0.07; }
+  66% { transform: translate(-20px, 15px) scale(0.95); opacity: 0.05; }
+}
+.ambient-light {
+  animation: ambient-drift 15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 3D section perspective wrapper */
+.perspective-section {
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
+/* Depth shadow for sections */
+.section-depth {
+  position: relative;
+}
+.section-depth::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(43 90% 55% / 0.08), transparent);
 }

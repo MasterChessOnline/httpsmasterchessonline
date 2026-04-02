@@ -1,13 +1,19 @@
 import { Crown } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const Footer = () => (
-  <footer className="border-t border-border/30 bg-card/40 backdrop-blur-sm py-12">
-    <div className="container mx-auto px-6">
+  <footer className="relative border-t border-border/30 bg-card/40 backdrop-blur-sm py-12 overflow-hidden">
+    {/* Subtle ambient glow */}
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, hsl(43 90% 55% / 0.02), transparent 70%)" }} />
+    {/* Gold edge line */}
+    <div className="absolute top-0 left-10% right-10% h-px" style={{ background: "linear-gradient(90deg, transparent, hsl(43 90% 55% / 0.1), transparent)" }} />
+
+    <div className="container mx-auto px-6 relative">
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <div>
           <Link to="/" className="flex items-center gap-2 mb-3 group">
-            <Crown className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform duration-300" />
+            <Crown className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform duration-300" style={{ filter: "drop-shadow(0 0 6px hsl(43 90% 55% / 0.3))" }} />
             <span className="font-display text-sm font-bold text-foreground uppercase tracking-wider">
               Master<span className="text-gradient-gold">Chess</span>
             </span>

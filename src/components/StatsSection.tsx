@@ -16,7 +16,6 @@ const AnimatedNumber = ({ value, suffix }: { value: number; suffix: string }) =>
 
   useEffect(() => {
     if (!isInView) return;
-    let start = 0;
     const duration = 2000;
     const startTime = performance.now();
     const animate = (now: number) => {
@@ -38,9 +37,10 @@ const AnimatedNumber = ({ value, suffix }: { value: number; suffix: string }) =>
 
 const StatsSection = () => {
   return (
-    <section className="relative border-t border-border/50 py-20 overflow-hidden">
+    <section className="relative py-20 overflow-hidden section-depth">
       <div className="absolute inset-0 bg-gradient-to-b from-card/50 to-background" />
 
+      {/* Animated gold line */}
       <motion.div
         className="absolute top-0 left-0 right-0 h-px"
         style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent)" }}
@@ -55,12 +55,12 @@ const StatsSection = () => {
           {stats.map(({ icon: Icon, label, value, suffix, color }, i) => (
             <motion.div
               key={label}
-              className="relative rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md p-6 text-center glass-border group overflow-hidden"
+              className="relative rounded-2xl glass-elevated p-6 text-center group overflow-hidden depth-card light-sweep ambient-reflect"
               initial={{ opacity: 0, y: 30, scale: 0.95 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -6, borderColor: "hsl(43 80% 55% / 0.3)" }}
+              whileHover={{ y: -6 }}
             >
               {/* Gradient bg on hover */}
               <div className={`absolute inset-0 rounded-2xl bg-gradient-to-b ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
@@ -73,7 +73,7 @@ const StatsSection = () => {
                 >
                   <Icon className="h-5 w-5 text-primary" />
                 </motion.div>
-                <div className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-1">
+                <div className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-1" style={{ textShadow: "0 0 20px hsl(43 90% 55% / 0.08)" }}>
                   <AnimatedNumber value={value} suffix={suffix} />
                 </div>
                 <div className="text-[11px] text-muted-foreground uppercase tracking-widest">{label}</div>

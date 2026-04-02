@@ -5,9 +5,14 @@ import ScrollReveal from "@/components/ScrollReveal";
 
 const YouTubeSection = () => {
   return (
-    <section className="relative border-t border-border/50 py-28 overflow-hidden">
+    <section className="relative py-28 overflow-hidden section-depth">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
-      <div className="absolute top-1/2 right-0 w-96 h-96 rounded-full bg-red-500/3 blur-[120px] pointer-events-none" />
+      <motion.div
+        className="absolute top-1/2 right-0 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, hsl(0 70% 50% / 0.03), transparent 70%)" }}
+        animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
 
       <div className="container mx-auto px-6 relative">
         <ScrollReveal>
@@ -30,7 +35,7 @@ const YouTubeSection = () => {
             <ScrollReveal direction="left">
               <div className="relative group">
                 <div className="absolute -inset-3 rounded-2xl bg-red-500/5 blur-xl group-hover:bg-red-500/10 transition-all duration-500" />
-                <div className="relative rounded-2xl overflow-hidden border border-border/50 shadow-card aspect-video">
+                <div className="relative rounded-2xl overflow-hidden glass-elevated shadow-card aspect-video depth-card">
                   <iframe
                     src="https://www.youtube.com/embed?listType=user_uploads&list=DailyChess_12"
                     title="DailyChess_12 YouTube Channel"
@@ -45,7 +50,7 @@ const YouTubeSection = () => {
 
             <ScrollReveal direction="right" delay={0.15}>
               <div className="text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 mb-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 mb-6 backdrop-blur-md">
                   <Youtube className="h-4 w-4 text-red-500" />
                   <span className="text-sm font-semibold text-red-400">DailyChess_12</span>
                 </div>
@@ -58,16 +63,23 @@ const YouTubeSection = () => {
                 <ul className="space-y-2 mb-8 text-sm text-muted-foreground">
                   {["Opening guides & repertoire building", "Tactical puzzles & pattern recognition", "Game analysis & endgame technique"].map((item) => (
                     <li key={item} className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary" style={{ boxShadow: "0 0 6px hsl(43 90% 55% / 0.4)" }} />
                       {item}
                     </li>
                   ))}
                 </ul>
                 <a href="https://www.youtube.com/@DailyChess_12" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="bg-red-600 hover:bg-red-700 hover:scale-105 text-white font-semibold group transition-transform duration-200">
-                    <Youtube className="mr-2 h-5 w-5" />
-                    Visit the YouTube Channel
-                    <ExternalLink className="ml-2 h-4 w-4 opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <Button size="lg" className="bg-red-600 hover:bg-red-700 hover:scale-105 text-white font-semibold group transition-transform duration-200 relative overflow-hidden">
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                      animate={{ x: ["-100%", "100%"] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+                    />
+                    <span className="relative z-10 flex items-center">
+                      <Youtube className="mr-2 h-5 w-5" />
+                      Visit the YouTube Channel
+                      <ExternalLink className="ml-2 h-4 w-4 opacity-60 group-hover:opacity-100 transition-opacity" />
+                    </span>
                   </Button>
                 </a>
               </div>
