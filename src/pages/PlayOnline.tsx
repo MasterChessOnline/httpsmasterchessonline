@@ -540,6 +540,9 @@ const PlayOnline = () => {
                 <Button variant="destructive" size="sm" className="flex-1 gap-1" onClick={resign}>
                   <Flag className="h-3.5 w-3.5" /> Resign
                 </Button>
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => setFocusMode(true)}>
+                  <Eye className="h-3.5 w-3.5" /> Focus
+                </Button>
               </div>
             )}
 
