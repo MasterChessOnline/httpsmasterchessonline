@@ -1,6 +1,7 @@
 import { Zap, Sparkles, Smartphone, Shield, Clock, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
+import chessPiecesBg from "@/assets/chess-pieces-dramatic.jpg";
 
 const comparisons = [
   { feature: "Play Online", us: true, competitor1: true, competitor2: true },
