@@ -37,8 +37,15 @@ const reasons = [
 
 const WhyChooseUsSection = () => {
   return (
-    <section className="relative border-t border-border/50 py-28 overflow-hidden">
+    <section className="relative py-28 overflow-hidden section-depth">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/30 to-background" />
+      {/* Ambient glow */}
+      <motion.div
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, hsl(43 90% 55% / 0.03), transparent 70%)" }}
+        animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
 
       <div className="container mx-auto px-6 relative">
         <ScrollReveal>
@@ -57,7 +64,7 @@ const WhyChooseUsSection = () => {
 
         {/* Comparison Table */}
         <ScrollReveal>
-          <div className="max-w-3xl mx-auto mb-20 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md overflow-hidden">
+          <div className="max-w-3xl mx-auto mb-20 rounded-2xl glass-elevated overflow-hidden ambient-reflect">
             <div className="grid grid-cols-4 gap-0 text-center text-sm border-b border-border/50 bg-card/80">
               <div className="p-4 font-display font-semibold text-muted-foreground text-left">Feature</div>
               <div className="p-4 font-display font-bold text-gradient-gold">MasterChess</div>
@@ -74,15 +81,9 @@ const WhyChooseUsSection = () => {
                 transition={{ delay: i * 0.05 }}
               >
                 <div className="p-3 text-left text-muted-foreground">{feature}</div>
-                <div className="p-3">
-                  <span className="text-lg">{us ? "✅" : "❌"}</span>
-                </div>
-                <div className="p-3">
-                  <span className="text-lg">{competitor1 ? "✅" : "❌"}</span>
-                </div>
-                <div className="p-3">
-                  <span className="text-lg">{competitor2 ? "✅" : "❌"}</span>
-                </div>
+                <div className="p-3"><span className="text-lg">{us ? "✅" : "❌"}</span></div>
+                <div className="p-3"><span className="text-lg">{competitor1 ? "✅" : "❌"}</span></div>
+                <div className="p-3"><span className="text-lg">{competitor2 ? "✅" : "❌"}</span></div>
               </motion.div>
             ))}
           </div>
@@ -93,8 +94,8 @@ const WhyChooseUsSection = () => {
           {reasons.map(({ icon: Icon, title, description, stat, statLabel }, i) => (
             <ScrollReveal key={title} delay={i * 0.1}>
               <motion.div
-                className="relative rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md p-8 text-center h-full glass-border overflow-hidden group"
-                whileHover={{ y: -8, borderColor: "hsl(43 80% 55% / 0.3)" }}
+                className="relative rounded-2xl glass-elevated p-8 text-center h-full overflow-hidden group depth-card light-sweep ambient-reflect"
+                whileHover={{ y: -8 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -109,7 +110,7 @@ const WhyChooseUsSection = () => {
                   <h3 className="font-display text-lg font-bold text-foreground mb-2">{title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">{description}</p>
                   <div className="mt-4 pt-4 border-t border-border/30">
-                    <div className="text-2xl font-display font-bold text-gradient-gold">{stat}</div>
+                    <div className="text-2xl font-display font-bold text-gradient-gold" style={{ textShadow: "0 0 15px hsl(43 90% 55% / 0.1)" }}>{stat}</div>
                     <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{statLabel}</div>
                   </div>
                 </div>

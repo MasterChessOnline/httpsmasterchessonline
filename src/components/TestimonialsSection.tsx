@@ -1,74 +1,56 @@
 import { Star, Quote, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const testimonials = [
   {
-    name: "Alex M.",
-    rating: 5,
+    name: "Alex M.", rating: 5,
     text: "The lessons took me from 800 to 1400 ELO in just 3 months. The structured approach is exactly what I needed. Best chess platform I've ever used.",
-    level: "Intermediate",
-    elo: "+600 ELO",
-    country: "🇺🇸",
+    level: "Intermediate", elo: "+600 ELO", country: "🇺🇸",
   },
   {
-    name: "Sarah K.",
-    rating: 5,
+    name: "Sarah K.", rating: 5,
     text: "Being able to analyze my games with Stockfish for free changed everything. On other platforms I'd need premium for that.",
-    level: "Beginner",
-    elo: "+400 ELO",
-    country: "🇬🇧",
+    level: "Beginner", elo: "+400 ELO", country: "🇬🇧",
   },
   {
-    name: "James W.",
-    rating: 5,
+    name: "James W.", rating: 5,
     text: "The tournaments and daily training keep me coming back every day. My 60-day streak is proof this platform works.",
-    level: "Advanced",
-    elo: "+200 ELO",
-    country: "🇨🇦",
+    level: "Advanced", elo: "+200 ELO", country: "🇨🇦",
   },
   {
-    name: "Maria L.",
-    rating: 5,
+    name: "Maria L.", rating: 5,
     text: "I love the Story Mode! It makes learning chess feel like an adventure. My kids are hooked too.",
-    level: "Intermediate",
-    elo: "+350 ELO",
-    country: "🇪🇸",
+    level: "Intermediate", elo: "+350 ELO", country: "🇪🇸",
   },
   {
-    name: "Viktor S.",
-    rating: 5,
+    name: "Viktor S.", rating: 5,
     text: "Finally a chess platform that looks and feels modern. The dark theme with gold accents is gorgeous. Clean, no ads, just chess.",
-    level: "Advanced",
-    elo: "+150 ELO",
-    country: "🇷🇸",
+    level: "Advanced", elo: "+150 ELO", country: "🇷🇸",
   },
   {
-    name: "Chen W.",
-    rating: 4,
+    name: "Chen W.", rating: 4,
     text: "The opening trainer helped me build a solid repertoire. I went from losing in the first 10 moves to winning them.",
-    level: "Beginner",
-    elo: "+500 ELO",
-    country: "🇨🇳",
+    level: "Beginner", elo: "+500 ELO", country: "🇨🇳",
   },
 ];
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
+  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
 const TestimonialsSection = () => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
-    <section className="relative border-t border-border/50 py-28 overflow-hidden">
+    <section className="relative py-28 overflow-hidden section-depth">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/20 to-background" />
 
       <div className="container mx-auto px-6 relative">
@@ -84,9 +66,8 @@ const TestimonialsSection = () => {
               Join thousands of players improving their game every day
             </p>
             
-            {/* Average rating */}
             <motion.div
-              className="mt-6 inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-5 py-2"
+              className="mt-6 inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-5 py-2 backdrop-blur-md"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -113,7 +94,7 @@ const TestimonialsSection = () => {
             <motion.div
               key={i}
               variants={cardVariants}
-              className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-6 h-full overflow-hidden relative group hover:border-primary/20 transition-all duration-500"
+              className="rounded-2xl glass-elevated p-6 h-full overflow-hidden relative group depth-card light-sweep"
               onMouseEnter={() => setHoveredIdx(i)}
               onMouseLeave={() => setHoveredIdx(null)}
               whileHover={{ y: -4 }}
@@ -130,7 +111,6 @@ const TestimonialsSection = () => {
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-5">"{t.text}"</p>
 
-              {/* ELO gain badge */}
               <motion.div
                 className="inline-flex items-center gap-1.5 rounded-full bg-emerald/10 border border-emerald/20 px-3 py-1 mb-4"
                 whileHover={{ scale: 1.05 }}

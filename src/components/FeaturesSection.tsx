@@ -69,26 +69,37 @@ const features = [
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.97 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
+  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
 const FeaturesSection = () => {
   return (
-    <section className="relative border-t border-border/50 py-28 overflow-hidden noise-overlay">
+    <section className="relative py-28 overflow-hidden section-depth">
       <div className="absolute inset-0 bg-gradient-to-b from-card/50 via-background to-background" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full bg-primary/3 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full bg-accent/3 blur-[100px] pointer-events-none" />
+      {/* Ambient glow orbs */}
+      <motion.div
+        className="absolute top-0 left-1/4 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, hsl(43 90% 55% / 0.03), transparent 70%)" }}
+        animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, hsl(30 60% 40% / 0.03), transparent 70%)" }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+      />
 
       <div className="container mx-auto px-6 relative z-10">
         <ScrollReveal>
           <div className="mx-auto max-w-2xl text-center mb-16">
             <motion.div
-              className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-4 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5"
+              className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest text-primary uppercase mb-4 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 backdrop-blur-md"
               whileHover={{ scale: 1.05 }}
             >
               <Sparkles className="h-3 w-3" />
@@ -114,17 +125,12 @@ const FeaturesSection = () => {
             <motion.div key={title} variants={cardVariants}>
               <Link
                 to={href}
-                className="group relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-6 block h-full overflow-hidden hover:border-primary/30 transition-all duration-500"
+                className="group relative rounded-2xl glass-elevated p-6 block h-full overflow-hidden depth-card light-sweep gold-edge"
               >
                 {/* Gradient accent on hover */}
                 <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
-                
-                {/* Shimmer effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none"
-                />
 
-                <div className="relative">
+                <div className="relative z-[2]">
                   <div className="flex items-center justify-between mb-5">
                     <motion.div
                       className={`inline-flex rounded-xl p-3 ${accent} group-hover:shadow-glow transition-all duration-300`}
