@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import ClutchMoment from "@/components/ClutchMoment";
 
 interface GameSummaryProps {
   moveHistory: string[];
