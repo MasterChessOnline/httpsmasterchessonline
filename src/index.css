@@ -401,3 +401,34 @@ a, button, input, select, textarea {
   90% { opacity: 1; }
   100% { transform: translateY(-10vh) scale(1); opacity: 0; }
 }
+
+/* ── Cinematic ambient light — gentle moving radial ── */
+@keyframes ambient-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.04; }
+  33% { transform: translate(30px, -20px) scale(1.1); opacity: 0.07; }
+  66% { transform: translate(-20px, 15px) scale(0.95); opacity: 0.05; }
+}
+.ambient-light {
+  animation: ambient-drift 15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 3D section perspective wrapper */
+.perspective-section {
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
+/* Depth shadow for sections */
+.section-depth {
+  position: relative;
+}
+.section-depth::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(43 90% 55% / 0.08), transparent);
+}
