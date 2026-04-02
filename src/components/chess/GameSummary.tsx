@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import ClutchMoment from "@/components/ClutchMoment";
 
 interface GameSummaryProps {
   moveHistory: string[];
@@ -116,6 +117,9 @@ export default function GameSummary({ moveHistory, result, playerColor, difficul
           </div>
         ))}
       </div>
+
+      {/* Clutch Moment */}
+      <ClutchMoment moveHistory={moveHistory} playerColor={playerColor} show={true} />
 
       {/* Recommend lesson */}
       <Link to="/learn">

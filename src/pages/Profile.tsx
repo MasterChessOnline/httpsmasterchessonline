@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import RankBadge from "@/components/RankBadge";
 import { getRank as getRankFromLib } from "@/lib/ranks";
 import { Link } from "react-router-dom";
+import { analyzePersonality } from "@/lib/play-personality";
 
 interface ProfileData {
   id: string;
@@ -131,6 +132,7 @@ const Profile = () => {
 
   const tier = getRankFromLib(profileData.rating);
   const earnedBadges = BADGES.filter(b => b.condition(profileData));
+  const personality = analyzePersonality(profileData);
 
   return (
     <div className="min-h-screen bg-background">
@@ -200,6 +202,31 @@ const Profile = () => {
               </div>
             )}
           </motion.div>
+
+          {/* Play Personality */}
+          {profileData.games_played >= 1 && (
+            <motion.div
+              className="rounded-xl border border-border/50 bg-card/80 p-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl">
+                  {personality.icon}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-foreground">Play Style</h3>
+                    <Badge variant="outline" className={`text-[10px] ${personality.color}`}>
+                      {personality.style}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">{personality.description}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

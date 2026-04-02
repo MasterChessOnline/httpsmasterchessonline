@@ -46,6 +46,7 @@ import Settings from "./pages/Settings";
 import Chat from "./pages/Chat";
 import Clubs from "./pages/Clubs";
 import GameReview from "./pages/GameReview";
+import Spectate from "./pages/Spectate";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -89,6 +90,7 @@ function AnimatedRoutes() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/clubs" element={<Clubs />} />
           <Route path="/game-review" element={<GameReview />} />
+          <Route path="/spectate" element={<Spectate />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
