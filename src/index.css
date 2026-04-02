@@ -305,6 +305,11 @@
     50% { transform: translateX(60%) rotate(2deg); }
   }
 
+  @keyframes sweepHeader {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+  }
+
   /* Grid background — gold tinted */
   .grid-bg {
     background-image:
