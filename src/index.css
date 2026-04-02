@@ -225,7 +225,7 @@
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
 
-  /* Noise overlay */
+  /* Noise overlay — film grain texture */
   .noise-overlay::before {
     content: '';
     position: absolute;
@@ -234,6 +234,75 @@
     opacity: 0.4;
     pointer-events: none;
     z-index: 1;
+  }
+
+  /* Fine grain texture — subtle matte surface */
+  .grain-texture {
+    position: relative;
+  }
+  .grain-texture::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.015'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: overlay;
+  }
+
+  /* Textured section background — brushed dark surface */
+  .textured-bg {
+    position: relative;
+    overflow: hidden;
+  }
+  .textured-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+    filter: brightness(0.3) saturate(0.5);
+  }
+
+  /* Image section background with gradient overlay */
+  .image-section-bg {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Gold reflection shimmer — for premium elements */
+  .gold-reflection {
+    position: relative;
+    overflow: hidden;
+  }
+  .gold-reflection::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      hsl(43 90% 55% / 0.03) 42%,
+      hsl(43 90% 60% / 0.07) 44%,
+      hsl(43 90% 65% / 0.1) 46%,
+      hsl(43 90% 60% / 0.07) 48%,
+      hsl(43 90% 55% / 0.03) 50%,
+      transparent 52%
+    );
+    animation: gold-shimmer 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes gold-shimmer {
+    0%, 100% { transform: translateX(-60%) rotate(0deg); }
+    50% { transform: translateX(60%) rotate(2deg); }
   }
 
   /* Grid background — gold tinted */
