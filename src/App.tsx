@@ -46,6 +46,7 @@ import Settings from "./pages/Settings";
 import Chat from "./pages/Chat";
 import Clubs from "./pages/Clubs";
 import GameReview from "./pages/GameReview";
+import Spectate from "./pages/Spectate";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
