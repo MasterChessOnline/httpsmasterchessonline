@@ -445,7 +445,7 @@ const Index = () => {
                     transition={{ delay: i * 0.05, duration: 0.4 }}
                   >
                     <Link to="/history"
-                      className="flex items-center gap-3 rounded-xl glass-neon p-3 card-hover group">
+                      className="flex items-center gap-3 rounded-xl glass-elevated p-3 group depth-card">
                       <div className={`w-2 h-8 rounded-full ${won ? "bg-primary" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
