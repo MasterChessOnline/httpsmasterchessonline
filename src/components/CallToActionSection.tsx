@@ -3,14 +3,17 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import chessKingBg from "@/assets/chess-king-closeup.jpg";
 
 const CallToActionSection = () => {
   const { user } = useAuth();
 
   return (
-    <section className="relative py-28 overflow-hidden">
+    <section className="relative py-28 overflow-hidden grain-texture">
+      {/* King piece background image */}
+      <img src={chessKingBg} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" loading="lazy" style={{ opacity: 0.06, filter: "brightness(0.3) saturate(0.5)" }} />
       {/* Dramatic cinematic background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-card/50 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/80 to-background" />
       <div className="absolute inset-0 vignette pointer-events-none" />
       <motion.div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"

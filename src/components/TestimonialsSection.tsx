@@ -50,7 +50,7 @@ const TestimonialsSection = () => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
-    <section className="relative py-28 overflow-hidden section-depth">
+    <section className="relative py-28 overflow-hidden section-depth grain-texture">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-card/20 to-background" />
 
       <div className="container mx-auto px-6 relative">

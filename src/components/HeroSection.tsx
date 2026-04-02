@@ -2,7 +2,7 @@ import { ArrowRight, Zap, Trophy, Crown, Target, BookOpen, Sword, Users, Flame, 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import heroImage from "@/assets/hero-chess.jpg";
+import heroImage from "@/assets/chess-cinematic-board.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import AnimatedGradientBg from "@/components/AnimatedGradientBg";
 import { useRef, useState, useEffect } from "react";
@@ -147,7 +147,7 @@ const HeroSection = () => {
         <motion.div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center"
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.6 }}>
           <Link to={user ? "/play/online" : "/play"}>
-            <Button size="lg" className="btn-neon bg-primary text-primary-foreground hover:bg-primary/90 px-10 py-6 text-lg font-bold shadow-glow-lg group relative overflow-hidden shimmer">
+            <Button size="lg" className="btn-neon bg-primary text-primary-foreground hover:bg-primary/90 px-10 py-6 text-lg font-bold shadow-glow-lg group relative overflow-hidden shimmer gold-reflection">
               <span className="relative z-10 flex items-center">
                 <Wifi className="mr-2 h-5 w-5" /> Play Online
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

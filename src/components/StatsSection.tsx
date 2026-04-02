@@ -1,6 +1,7 @@
 import { Users, Gamepad2, Brain, TrendingUp, Flame, Globe, Swords, Shield } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import textureBg from "@/assets/texture-dark-luxury.jpg";
 
 const stats = [
   { icon: Globe, label: "Countries", value: 120, suffix: "+", color: "from-primary/20 to-primary/5" },
@@ -37,7 +38,9 @@ const AnimatedNumber = ({ value, suffix }: { value: number; suffix: string }) =>
 
 const StatsSection = () => {
   return (
-    <section className="relative py-20 overflow-hidden section-depth">
+    <section className="relative py-20 overflow-hidden section-depth grain-texture">
+      {/* Luxury texture background */}
+      <img src={textureBg} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" loading="lazy" style={{ opacity: 0.08, filter: "brightness(0.3) saturate(0.4)" }} />
       <div className="absolute inset-0 bg-gradient-to-b from-card/50 to-background" />
 
       {/* Animated gold line */}
