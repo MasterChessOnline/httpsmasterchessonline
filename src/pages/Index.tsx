@@ -411,7 +411,7 @@ const Index = () => {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1, duration: 0.5 }}
                 >
-                  <Link to={item.to} className="flex items-center gap-3 rounded-xl glass-neon p-4 card-hover group neon-border">
+                  <Link to={item.to} className="flex items-center gap-3 rounded-xl glass-elevated p-4 group depth-card gold-edge">
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:shadow-glow transition-shadow duration-300">
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
