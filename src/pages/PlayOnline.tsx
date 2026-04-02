@@ -3,7 +3,7 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake } from "lucide-react";
+import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake, Zap, Eye, MonitorOff } from "lucide-react";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
 import { playChessSound } from "@/lib/chess-sounds";
