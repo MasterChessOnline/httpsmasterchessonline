@@ -2,6 +2,7 @@ import { Swords, GraduationCap, Trophy, Gamepad2, Brain, BookOpen, ArrowRight, S
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
+import chessBoardBg from "@/assets/chess-cinematic-board.jpg";
 
 const features = [
   {
