@@ -132,6 +132,7 @@ const Profile = () => {
 
   const tier = getRankFromLib(profileData.rating);
   const earnedBadges = BADGES.filter(b => b.condition(profileData));
+  const personality = analyzePersonality(profileData);
 
   return (
     <div className="min-h-screen bg-background">
