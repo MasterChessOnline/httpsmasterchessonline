@@ -118,6 +118,9 @@ export default function GameSummary({ moveHistory, result, playerColor, difficul
         ))}
       </div>
 
+      {/* Clutch Moment */}
+      <ClutchMoment moveHistory={moveHistory} playerColor={playerColor} show={true} />
+
       {/* Recommend lesson */}
       <Link to="/learn">
         <Button size="sm" variant="outline" className="w-full">
