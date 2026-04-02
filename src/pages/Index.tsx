@@ -351,7 +351,7 @@ const Index = () => {
             ].map((item, i) => (
               <motion.div
                 key={item.label}
-                className="rounded-xl glass-neon p-4 text-center card-hover group shimmer relative overflow-hidden"
+                className="rounded-xl glass-elevated p-4 text-center group relative overflow-hidden depth-card light-sweep"
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
