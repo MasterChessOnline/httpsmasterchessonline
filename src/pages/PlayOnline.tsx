@@ -59,6 +59,7 @@ const PlayOnline = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number } | null>(null);
   const [gameMode, setGameMode] = useState<"rated" | "casual">("rated");
+  const [focusMode, setFocusMode] = useState(false);
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
