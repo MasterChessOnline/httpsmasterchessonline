@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import RankBadge from "@/components/RankBadge";
 import { getRank as getRankFromLib } from "@/lib/ranks";
 import { Link } from "react-router-dom";
+import { analyzePersonality } from "@/lib/play-personality";
 
 interface ProfileData {
   id: string;
