@@ -2,7 +2,7 @@ import { ArrowRight, Zap, Trophy, Crown, Target, BookOpen, Sword, Users, Flame, 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import heroImage from "@/assets/hero-chess.jpg";
+import heroImage from "@/assets/chess-cinematic-board.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import AnimatedGradientBg from "@/components/AnimatedGradientBg";
 import { useRef, useState, useEffect } from "react";
