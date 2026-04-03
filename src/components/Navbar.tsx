@@ -295,14 +295,14 @@ const Navbar = () => {
                           exit={{ opacity: 0, y: 4, scale: 0.98 }}
                           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                           className={`absolute top-full left-0 mt-2 rounded-xl overflow-hidden z-50 border border-primary/10 bg-card/95 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_0_1px_rgba(212,175,55,0.05),0_0_60px_-15px_rgba(212,175,55,0.1)] ${
-                            section.key === "learn" ? "w-80 max-h-[70vh] overflow-y-auto" : "w-72"
+                            section.wide ? "w-[340px] max-h-[70vh] overflow-y-auto" : "w-72"
                           }`}
                           onMouseEnter={() => handleMouseEnter(section.key)}
                           onMouseLeave={handleMouseLeave}
                         >
                           {/* Dropdown gold edge */}
                           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                          <div className={`p-1.5 ${section.wide ? "grid grid-cols-2 gap-x-1" : ""}`}>
+                          <div className="p-1.5">
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
@@ -313,34 +313,45 @@ const Navbar = () => {
                                     initial={{ opacity: 0, x: -8 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: idx * 0.02, duration: 0.2 }}
-                                    className={section.wide && item.separator ? "col-span-2" : section.wide ? "" : ""}
                                   >
                                     {item.separator && (
-                                      <div className="mx-3 my-1 h-px bg-border/30" />
+                                      <div className="mx-3 my-1.5 h-px bg-border/30" />
+                                    )}
+                                    {item.subheading && (
+                                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-3 pt-1.5 pb-0.5">{item.subheading}</p>
                                     )}
                                     <Link
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
                                       className={`relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item overflow-hidden ${
-                                        item.comingSoon
-                                          ? "bg-primary/[0.06] hover:bg-primary/10 border border-primary/10"
-                                          : itemActive ? "bg-primary/10 text-primary" : "hover:bg-primary/5 text-foreground"
+                                        item.highlight
+                                          ? "bg-primary/10 border border-primary/20 hover:bg-primary/15"
+                                          : item.comingSoon
+                                            ? "bg-primary/[0.06] hover:bg-primary/10 border border-primary/10"
+                                            : itemActive ? "bg-primary/10 text-primary" : "hover:bg-primary/5 text-foreground"
                                       }`}
                                       title={item.comingSoon ? "Lessons launching soon" : undefined}
                                     >
                                       {/* Item light sweep */}
                                       <span className="absolute inset-0 -translate-x-full group-hover/item:translate-x-full transition-transform duration-500 bg-gradient-to-r from-transparent via-primary/[0.05] to-transparent pointer-events-none" />
                                       <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 relative z-[1] ${
-                                        item.comingSoon
-                                          ? "bg-primary/15 shadow-[0_0_12px_rgba(212,175,55,0.15)]"
-                                          : itemActive ? "bg-primary/20 shadow-[0_0_12px_rgba(212,175,55,0.2)]" : "bg-muted/30 group-hover/item:bg-primary/10"
+                                        item.highlight
+                                          ? "bg-primary/20 shadow-[0_0_12px_rgba(212,175,55,0.2)]"
+                                          : item.comingSoon
+                                            ? "bg-primary/15 shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+                                            : itemActive ? "bg-primary/20 shadow-[0_0_12px_rgba(212,175,55,0.2)]" : "bg-muted/30 group-hover/item:bg-primary/10"
                                       }`}>
                                         <item.icon className={`h-3.5 w-3.5 transition-colors duration-200 ${
-                                          item.comingSoon ? "text-primary" : itemActive ? "text-primary" : "text-muted-foreground group-hover/item:text-primary"
+                                          item.highlight || item.comingSoon || itemActive ? "text-primary" : "text-muted-foreground group-hover/item:text-primary"
                                         }`} />
                                       </div>
                                       <div className="relative z-[1] flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                          <p className={`text-sm font-medium ${item.comingSoon ? "text-primary" : ""}`}>{item.label}</p>
+                                          <p className={`text-sm font-medium ${item.highlight || item.comingSoon ? "text-primary" : ""}`}>{item.label}</p>
+                                          {item.highlight && (
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-semibold tracking-wide uppercase">
+                                              ⚡
+                                            </span>
+                                          )}
                                           {item.comingSoon && (
                                             <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-semibold tracking-wide uppercase animate-pulse">
                                               Soon
