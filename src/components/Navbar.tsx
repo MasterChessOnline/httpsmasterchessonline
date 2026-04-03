@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Wifi, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Flame, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio, Video, Shield, Crosshair, FileText, History, Sparkles, Lock } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Wifi, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Flame, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio, Video, Shield, Crosshair, FileText, History, Sparkles, Lock, Palette, Volume2, TrendingUp, Plus, ListChecks, Medal } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
@@ -13,6 +13,8 @@ interface DropdownItem {
   auth?: boolean;
   comingSoon?: boolean;
   separator?: boolean;
+  highlight?: boolean;
+  subheading?: string;
 }
 
 interface NavSection {
@@ -20,6 +22,7 @@ interface NavSection {
   label: string;
   icon: React.ElementType;
   items: DropdownItem[];
+  wide?: boolean;
 }
 
 const NAV_SECTIONS: NavSection[] = [
@@ -28,27 +31,30 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Play",
     icon: Swords,
     items: [
-      { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly" },
+      { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly", highlight: true },
       { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Multiple AI difficulty levels" },
-      { label: "Custom Game", href: "/play", icon: Settings, desc: "Time, color & variants" },
-      { label: "Ongoing Games", href: "/play/online", icon: Gamepad2, desc: "Resume your matches" },
-      { label: "Rematch Last", href: "/play", icon: Swords, desc: "Challenge your last opponent" },
+      { label: "Custom Game", href: "/play", icon: Settings, desc: "Set your own rules" },
+      { label: "Bullet (1–2 min)", href: "/play/online", icon: Zap, desc: "Lightning fast games", separator: true, subheading: "Time Controls" },
+      { label: "Blitz (3–5 min)", href: "/play/online", icon: Clock, desc: "Quick tactical battles" },
+      { label: "Rapid (10+ min)", href: "/play/online", icon: Clock, desc: "Deep strategic play" },
+      { label: "Ongoing Games", href: "/play/online", icon: Gamepad2, desc: "Resume your matches", separator: true },
+      { label: "Rematch Last Opponent", href: "/play", icon: Swords, desc: "Challenge again" },
     ],
   },
   {
     key: "learn",
     label: "Learn",
     icon: GraduationCap,
+    wide: true,
     items: [
-      { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path" },
-      { label: "Basic Moves", href: "/learn", icon: BookOpen, desc: "Fundamentals & rules" },
+      { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path", subheading: "Fundamentals" },
+      { label: "Basic Moves", href: "/learn", icon: BookOpen, desc: "Rules & piece movement" },
       { label: "Openings", href: "/openings", icon: BookOpen, desc: "Master opening systems" },
       { label: "Endgames", href: "/learn", icon: Crown, desc: "Technique & calculation" },
-      { label: "Game Analysis", href: "/analysis", icon: BarChart3, desc: "Deep position analysis", separator: true },
-      { label: "Analyze Last Game", href: "/analysis", icon: Eye, desc: "Review your recent game" },
-      { label: "Import Game (PGN)", href: "/analysis", icon: FileText, desc: "Analyze any game" },
-      { label: "Attack Strategy", href: "/learn", icon: Zap, desc: "Aggressive play patterns", separator: true },
-      { label: "Defense Strategy", href: "/learn", icon: Shield, desc: "Solid defensive systems" },
+      { label: "Analyze Last Game", href: "/analysis", icon: Eye, desc: "Review your recent game", separator: true, subheading: "Game Analysis" },
+      { label: "Import PGN", href: "/analysis", icon: FileText, desc: "Analyze any game" },
+      { label: "Attack", href: "/learn", icon: Zap, desc: "Aggressive play patterns", separator: true, subheading: "Strategy Guides" },
+      { label: "Defense", href: "/learn", icon: Shield, desc: "Solid defensive systems" },
       { label: "Positioning", href: "/learn", icon: Crosshair, desc: "Piece placement mastery" },
       { label: "Video Lessons", href: "/video-lessons", icon: Video, desc: "Lessons launching soon", comingSoon: true, separator: true },
     ],
@@ -58,9 +64,11 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Tournaments",
     icon: Trophy,
     items: [
-      { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments" },
-      { label: "Create Tournament", href: "/tournaments", icon: Star, desc: "Host your own event" },
-      { label: "My Tournaments", href: "/tournaments", icon: Award, desc: "Your registrations" },
+      { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments", subheading: "Active Tournaments" },
+      { label: "Starting Soon", href: "/tournaments", icon: Clock, desc: "Upcoming events" },
+      { label: "Create Tournament", href: "/tournaments", icon: Plus, desc: "Host your own event", separator: true, subheading: "Create" },
+      { label: "Joined", href: "/tournaments", icon: ListChecks, desc: "Your active tournaments", separator: true, subheading: "My Tournaments" },
+      { label: "Created", href: "/tournaments", icon: Star, desc: "Tournaments you organized" },
     ],
   },
   {
@@ -68,10 +76,11 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Leaderboard",
     icon: BarChart3,
     items: [
-      { label: "Global Ranking", href: "/leaderboard", icon: Crown, desc: "Worldwide standings" },
-      { label: "Top 10", href: "/leaderboard", icon: Star, desc: "Elite players" },
-      { label: "Top 100", href: "/leaderboard", icon: Award, desc: "Top contenders" },
-      { label: "Bullet / Blitz / Rapid", href: "/leaderboard", icon: Clock, desc: "Rankings by time control" },
+      { label: "Top 10 Players", href: "/leaderboard", icon: Crown, desc: "The very best", subheading: "Global Ranking" },
+      { label: "Top 100 Players", href: "/leaderboard", icon: Medal, desc: "Elite contenders" },
+      { label: "Bullet", href: "/leaderboard", icon: Zap, desc: "1–2 min rankings", separator: true, subheading: "Rating Types" },
+      { label: "Blitz", href: "/leaderboard", icon: Clock, desc: "3–5 min rankings" },
+      { label: "Rapid", href: "/leaderboard", icon: Clock, desc: "10+ min rankings" },
     ],
   },
   {
@@ -79,9 +88,10 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Profile",
     icon: User,
     items: [
-      { label: "My Profile", href: "/profile", icon: User, desc: "Your stats & info", auth: true },
-      { label: "Match History", href: "/history", icon: History, desc: "All your past games" },
-      { label: "Settings", href: "/settings", icon: Settings, desc: "Theme, board, audio" },
+      { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true },
+      { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
+      { label: "Account Settings", href: "/settings", icon: Settings, desc: "Manage your account", separator: true, subheading: "Settings" },
+      { label: "Game Settings", href: "/settings", icon: Palette, desc: "Board theme & sound" },
     ],
   },
 ];
