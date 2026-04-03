@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Wifi, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Flame, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Wifi, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Flame, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio, Video, Shield, Crosshair, FileText, History, Sparkles, Lock } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
@@ -11,6 +11,8 @@ interface DropdownItem {
   icon: React.ElementType;
   desc: string;
   auth?: boolean;
+  comingSoon?: boolean;
+  separator?: boolean;
 }
 
 interface NavSection {
@@ -22,24 +24,15 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    key: "home",
-    label: "Home",
-    icon: Crown,
-    items: [
-      { label: "Dashboard", href: "/", icon: Crown, desc: "Your chess hub" },
-      { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly" },
-      { label: "Featured Games", href: "/leaderboard", icon: Star, desc: "Top games today" },
-      { label: "Recent Games", href: "/history", icon: Clock, desc: "Your game history" },
-    ],
-  },
-  {
     key: "play",
     label: "Play",
     icon: Swords,
     items: [
-      { label: "Play Online", href: "/play/online", icon: Wifi, desc: "Ranked & casual matches" },
-      { label: "Play vs Computer", href: "/play", icon: Brain, desc: "Multiple bot levels" },
-      { label: "Custom Game", href: "/play", icon: Settings, desc: "Time, color, variants" },
+      { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly" },
+      { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Multiple AI difficulty levels" },
+      { label: "Custom Game", href: "/play", icon: Settings, desc: "Time, color & variants" },
+      { label: "Ongoing Games", href: "/play/online", icon: Gamepad2, desc: "Resume your matches" },
+      { label: "Rematch Last", href: "/play", icon: Swords, desc: "Challenge your last opponent" },
     ],
   },
   {
@@ -47,20 +40,38 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Learn",
     icon: GraduationCap,
     items: [
-      { label: "Openings", href: "/learn", icon: BookOpen, desc: "Master opening systems" },
-      { label: "Strategy", href: "/learn", icon: Brain, desc: "Positional mastery" },
-      { label: "Middlegames", href: "/learn", icon: Swords, desc: "Plans & combinations" },
-      { label: "Endgames", href: "/learn", icon: Target, desc: "Technique & calculation" },
+      { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path" },
+      { label: "Basic Moves", href: "/learn", icon: BookOpen, desc: "Fundamentals & rules" },
+      { label: "Openings", href: "/openings", icon: BookOpen, desc: "Master opening systems" },
+      { label: "Endgames", href: "/learn", icon: Crown, desc: "Technique & calculation" },
+      { label: "Game Analysis", href: "/analysis", icon: BarChart3, desc: "Deep position analysis", separator: true },
+      { label: "Analyze Last Game", href: "/analysis", icon: Eye, desc: "Review your recent game" },
+      { label: "Import Game (PGN)", href: "/analysis", icon: FileText, desc: "Analyze any game" },
+      { label: "Attack Strategy", href: "/learn", icon: Zap, desc: "Aggressive play patterns", separator: true },
+      { label: "Defense Strategy", href: "/learn", icon: Shield, desc: "Solid defensive systems" },
+      { label: "Positioning", href: "/learn", icon: Crosshair, desc: "Piece placement mastery" },
+      { label: "Video Lessons", href: "/video-lessons", icon: Video, desc: "Lessons launching soon", comingSoon: true, separator: true },
     ],
   },
   {
-    key: "compete",
-    label: "Compete",
+    key: "tournaments",
+    label: "Tournaments",
     icon: Trophy,
     items: [
-      { label: "Tournaments", href: "/tournaments", icon: Trophy, desc: "Blitz, Rapid, Daily" },
-      { label: "Leaderboard", href: "/leaderboard", icon: BarChart3, desc: "Global & friends" },
-      { label: "Events", href: "/tournaments", icon: Flame, desc: "Live competitions" },
+      { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments" },
+      { label: "Create Tournament", href: "/tournaments", icon: Star, desc: "Host your own event" },
+      { label: "My Tournaments", href: "/tournaments", icon: Award, desc: "Your registrations" },
+    ],
+  },
+  {
+    key: "leaderboard",
+    label: "Leaderboard",
+    icon: BarChart3,
+    items: [
+      { label: "Global Ranking", href: "/leaderboard", icon: Crown, desc: "Worldwide standings" },
+      { label: "Top 10", href: "/leaderboard", icon: Star, desc: "Elite players" },
+      { label: "Top 100", href: "/leaderboard", icon: Award, desc: "Top contenders" },
+      { label: "Bullet / Blitz / Rapid", href: "/leaderboard", icon: Clock, desc: "Rankings by time control" },
     ],
   },
   {
@@ -69,8 +80,7 @@ const NAV_SECTIONS: NavSection[] = [
     icon: User,
     items: [
       { label: "My Profile", href: "/profile", icon: User, desc: "Your stats & info", auth: true },
-      { label: "Statistics", href: "/stats", icon: BarChart3, desc: "Rating, win rate, accuracy" },
-      { label: "Achievements", href: "/achievements", icon: Award, desc: "Badges & rewards" },
+      { label: "Match History", href: "/history", icon: History, desc: "All your past games" },
       { label: "Settings", href: "/settings", icon: Settings, desc: "Theme, board, audio" },
     ],
   },
@@ -274,7 +284,9 @@ const Navbar = () => {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 4, scale: 0.98 }}
                           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                          className="absolute top-full left-0 mt-2 w-72 rounded-xl overflow-hidden z-50 border border-primary/10 bg-card/95 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_0_1px_rgba(212,175,55,0.05),0_0_60px_-15px_rgba(212,175,55,0.1)]"
+                          className={`absolute top-full left-0 mt-2 rounded-xl overflow-hidden z-50 border border-primary/10 bg-card/95 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_0_1px_rgba(212,175,55,0.05),0_0_60px_-15px_rgba(212,175,55,0.1)] ${
+                            section.key === "learn" ? "w-80 max-h-[70vh] overflow-y-auto" : "w-72"
+                          }`}
                           onMouseEnter={() => handleMouseEnter(section.key)}
                           onMouseLeave={handleMouseLeave}
                         >
@@ -290,25 +302,45 @@ const Navbar = () => {
                                     key={item.label}
                                     initial={{ opacity: 0, x: -8 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: idx * 0.04, duration: 0.2 }}
+                                    transition={{ delay: idx * 0.03, duration: 0.2 }}
                                   >
+                                    {item.separator && (
+                                      <div className="mx-3 my-1 h-px bg-border/30" />
+                                    )}
                                     <Link
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                                      className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group/item overflow-hidden ${
-                                        itemActive ? "bg-primary/10 text-primary" : "hover:bg-primary/5 text-foreground"
+                                      className={`relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item overflow-hidden ${
+                                        item.comingSoon
+                                          ? "bg-primary/[0.06] hover:bg-primary/10 border border-primary/10"
+                                          : itemActive ? "bg-primary/10 text-primary" : "hover:bg-primary/5 text-foreground"
                                       }`}
+                                      title={item.comingSoon ? "Lessons launching soon" : undefined}
                                     >
                                       {/* Item light sweep */}
                                       <span className="absolute inset-0 -translate-x-full group-hover/item:translate-x-full transition-transform duration-500 bg-gradient-to-r from-transparent via-primary/[0.05] to-transparent pointer-events-none" />
-                                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 relative z-[1] ${
-                                        itemActive ? "bg-primary/20 shadow-[0_0_12px_rgba(212,175,55,0.2)]" : "bg-muted/30 group-hover/item:bg-primary/10"
+                                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 relative z-[1] ${
+                                        item.comingSoon
+                                          ? "bg-primary/15 shadow-[0_0_12px_rgba(212,175,55,0.15)]"
+                                          : itemActive ? "bg-primary/20 shadow-[0_0_12px_rgba(212,175,55,0.2)]" : "bg-muted/30 group-hover/item:bg-primary/10"
                                       }`}>
-                                        <item.icon className={`h-4 w-4 transition-colors duration-200 ${itemActive ? "text-primary" : "text-muted-foreground group-hover/item:text-primary"}`} />
+                                        <item.icon className={`h-3.5 w-3.5 transition-colors duration-200 ${
+                                          item.comingSoon ? "text-primary" : itemActive ? "text-primary" : "text-muted-foreground group-hover/item:text-primary"
+                                        }`} />
                                       </div>
-                                      <div className="relative z-[1]">
-                                        <p className="text-sm font-medium">{item.label}</p>
+                                      <div className="relative z-[1] flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <p className={`text-sm font-medium ${item.comingSoon ? "text-primary" : ""}`}>{item.label}</p>
+                                          {item.comingSoon && (
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-semibold tracking-wide uppercase animate-pulse">
+                                              Soon
+                                            </span>
+                                          )}
+                                        </div>
                                         <p className="text-[11px] text-muted-foreground">{item.desc}</p>
                                       </div>
+                                      {item.comingSoon && (
+                                        <Lock className="h-3 w-3 text-primary/50 relative z-[1]" />
+                                      )}
                                     </Link>
                                   </motion.div>
                                 );
