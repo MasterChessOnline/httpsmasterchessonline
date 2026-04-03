@@ -1,7 +1,7 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Wifi, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Flame, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio, Video, Shield, Crosshair, FileText, History, Sparkles, Lock, Palette, Volume2, TrendingUp, Plus, ListChecks, Medal } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio, Video, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
+import { Link, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -30,6 +30,7 @@ const NAV_SECTIONS: NavSection[] = [
     key: "play",
     label: "Play",
     icon: Swords,
+    wide: true,
     items: [
       { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly", highlight: true },
       { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Multiple AI difficulty levels" },
@@ -115,26 +116,26 @@ const LiveStatusBar = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-center gap-6 text-[10px] tracking-wide text-muted-foreground py-1">
-      <div className="flex items-center gap-1.5">
-        <span className="relative flex h-1.5 w-1.5">
+    <div className="flex items-center justify-center gap-8 text-[11px] tracking-wide text-muted-foreground py-1.5">
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
         </span>
-        <Users className="h-2.5 w-2.5" />
-        <span className="font-mono font-medium text-foreground/70">{onlinePlayers.toLocaleString()}</span>
+        <Users className="h-3 w-3" />
+        <span className="font-mono font-semibold text-foreground/80">{onlinePlayers.toLocaleString()}</span>
         <span className="hidden sm:inline">online</span>
       </div>
-      <div className="w-px h-2.5 bg-border/40" />
-      <div className="flex items-center gap-1.5">
-        <Gamepad2 className="h-2.5 w-2.5" />
-        <span className="font-mono font-medium text-foreground/70">{liveGames}</span>
+      <div className="w-px h-3 bg-border/40" />
+      <div className="flex items-center gap-2">
+        <Gamepad2 className="h-3 w-3" />
+        <span className="font-mono font-semibold text-foreground/80">{liveGames}</span>
         <span className="hidden sm:inline">live games</span>
       </div>
-      <div className="w-px h-2.5 bg-border/40 hidden sm:block" />
-      <div className="hidden sm:flex items-center gap-1.5">
-        <Radio className="h-2.5 w-2.5 text-primary/60" />
-        <span>Server: <span className="text-emerald-400 font-medium">Operational</span></span>
+      <div className="w-px h-3 bg-border/40 hidden sm:block" />
+      <div className="hidden sm:flex items-center gap-2">
+        <Radio className="h-3 w-3 text-primary/60" />
+        <span>Server: <span className="text-emerald-400 font-semibold">Operational</span></span>
       </div>
     </div>
   );
@@ -145,12 +146,12 @@ const Navbar = () => {
   const [shrunk, setShrunk] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
   const { user, profile, loading, signOut } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
   const searchRef = useRef<HTMLInputElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -192,7 +193,7 @@ const Navbar = () => {
   };
 
   const handleMouseLeave = () => {
-    dropdownTimeout.current = setTimeout(() => setActiveDropdown(null), 200);
+    dropdownTimeout.current = setTimeout(() => setActiveDropdown(null), 250);
   };
 
   const unreadCount = MOCK_NOTIFICATIONS.filter(n => !n.read).length;
@@ -202,16 +203,16 @@ const Navbar = () => {
       <div
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "shadow-[0_4px_30px_rgba(0,0,0,0.4),0_1px_3px_rgba(0,0,0,0.3)]"
+            ? "shadow-[0_4px_24px_rgba(0,0,0,0.35)]"
             : ""
         }`}
       >
         {/* Main nav bar */}
         <motion.nav
-          className={`relative border-b transition-all duration-500 overflow-hidden ${
+          className={`relative border-b transition-all duration-500 ${
             scrolled
-              ? "bg-background/80 backdrop-blur-2xl border-primary/8"
-              : "bg-background/40 backdrop-blur-xl border-transparent"
+              ? "bg-background/85 backdrop-blur-2xl border-border/20"
+              : "bg-background/50 backdrop-blur-xl border-transparent"
           }`}
           initial={{ y: -80 }}
           animate={{ y: 0 }}
@@ -219,36 +220,27 @@ const Navbar = () => {
           role="navigation"
           aria-label="Main navigation"
         >
-          {/* Light sweep on the entire header */}
-          <div className="absolute inset-0 pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-500">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/[0.03] to-transparent translate-x-[-100%] animate-[sweepHeader_4s_ease-in-out_infinite]" />
-          </div>
-
           <div
-            className={`container mx-auto flex items-center justify-between px-4 transition-all duration-500 ${
-              shrunk ? "h-12" : "h-16"
+            className={`container mx-auto flex items-center justify-between px-5 transition-all duration-500 ${
+              shrunk ? "h-14" : "h-16"
             }`}
           >
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group shrink-0" aria-label="MasterChess home">
+            <Link to="/" className="flex items-center gap-3 group shrink-0" aria-label="MasterChess home">
               <motion.div
-                className={`rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:border-primary/40 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] transition-all duration-300 ${
-                  shrunk ? "w-7 h-7" : "w-9 h-9"
-                }`}
-                whileHover={{ rotate: 15, scale: 1.1 }}
+                className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:border-primary/40 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] transition-all duration-300"
+                whileHover={{ rotate: 12, scale: 1.08 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Crown className={`text-primary transition-all duration-300 ${shrunk ? "h-3.5 w-3.5" : "h-4.5 w-4.5"}`} />
+                <Crown className="h-5 w-5 text-primary" />
               </motion.div>
-              <span className={`font-display font-bold tracking-wider text-foreground hidden sm:inline uppercase transition-all duration-300 ${
-                shrunk ? "text-sm" : "text-base"
-              }`}>
+              <span className="font-display font-bold tracking-wider text-foreground hidden sm:inline uppercase text-base">
                 Master<span className="text-gradient-gold">Chess</span>
               </span>
             </Link>
 
             {/* Desktop nav */}
-            <div className="hidden md:flex items-center gap-0.5 mx-6">
+            <div className="hidden lg:flex items-center gap-1 mx-8">
               {NAV_SECTIONS.map((section) => {
                 const isActive = section.items.some(item =>
                   item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
@@ -261,110 +253,110 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden ${
+                      className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group ${
                         isActive || activeDropdown === section.key
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                          ? "text-primary bg-primary/8"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
                       }`}
                     >
-                      {/* Light sweep on hover */}
-                      <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-primary/[0.08] to-transparent pointer-events-none" />
+                      <section.icon className="h-4 w-4" />
+                      <span>{section.label}</span>
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`} />
 
-                      <section.icon className="h-4 w-4 relative z-[1]" />
-                      <span className="relative z-[1]">{section.label}</span>
-                      <ChevronDown className={`h-3 w-3 transition-transform duration-300 relative z-[1] ${activeDropdown === section.key ? "rotate-180" : ""}`} />
-
-                      {/* Active indicator underline */}
-                      <motion.span
-                        className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-gradient-to-r from-primary/60 via-primary to-primary/60"
-                        initial={false}
-                        animate={{
-                          scaleX: isActive ? 1 : activeDropdown === section.key ? 0.6 : 0,
-                          opacity: isActive || activeDropdown === section.key ? 1 : 0,
-                        }}
-                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ originX: 0.5 }}
-                      />
+                      {/* Active underline */}
+                      {isActive && (
+                        <motion.span
+                          layoutId="nav-active"
+                          className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-primary"
+                          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        />
+                      )}
                     </button>
 
                     <AnimatePresence>
                       {activeDropdown === section.key && (
                         <motion.div
-                          initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                          initial={{ opacity: 0, y: 10, scale: 0.97 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                          className={`absolute top-full left-0 mt-2 rounded-xl overflow-hidden z-50 border border-primary/10 bg-card/95 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_0_1px_rgba(212,175,55,0.05),0_0_60px_-15px_rgba(212,175,55,0.1)] ${
-                            section.wide ? "w-[340px] max-h-[70vh] overflow-y-auto" : "w-72"
+                          exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                          className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 rounded-2xl z-50 border border-border/30 bg-card/98 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] ${
+                            section.wide ? "w-[380px]" : "w-[300px]"
                           }`}
                           onMouseEnter={() => handleMouseEnter(section.key)}
                           onMouseLeave={handleMouseLeave}
                         >
-                          {/* Dropdown gold edge */}
-                          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                          <div className="p-1.5">
+                          {/* Top accent line */}
+                          <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+
+                          <div className="p-2.5 max-h-[75vh] overflow-y-auto">
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
                                 const itemActive = item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href);
                                 return (
-                                  <motion.div
-                                    key={item.label}
-                                    initial={{ opacity: 0, x: -8 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: idx * 0.02, duration: 0.2 }}
-                                  >
-                                    {item.separator && (
-                                      <div className="mx-3 my-1.5 h-px bg-border/30" />
+                                  <div key={item.label}>
+                                    {item.separator && idx > 0 && (
+                                      <div className="mx-3 my-2 h-px bg-border/20" />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold px-3 pt-1.5 pb-0.5">{item.subheading}</p>
+                                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 font-bold px-3.5 pt-2 pb-1">
+                                        {item.subheading}
+                                      </p>
                                     )}
                                     <Link
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                                      className={`relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item overflow-hidden ${
+                                      className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group/item ${
                                         item.highlight
-                                          ? "bg-primary/10 border border-primary/20 hover:bg-primary/15"
+                                          ? "bg-primary/10 border border-primary/15 hover:bg-primary/15 hover:border-primary/25"
                                           : item.comingSoon
-                                            ? "bg-primary/[0.06] hover:bg-primary/10 border border-primary/10"
-                                            : itemActive ? "bg-primary/10 text-primary" : "hover:bg-primary/5 text-foreground"
+                                            ? "bg-muted/20 hover:bg-muted/30 border border-border/20"
+                                            : itemActive
+                                              ? "bg-primary/10 text-primary"
+                                              : "hover:bg-muted/20"
                                       }`}
                                       title={item.comingSoon ? "Lessons launching soon" : undefined}
                                     >
-                                      {/* Item light sweep */}
-                                      <span className="absolute inset-0 -translate-x-full group-hover/item:translate-x-full transition-transform duration-500 bg-gradient-to-r from-transparent via-primary/[0.05] to-transparent pointer-events-none" />
-                                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 relative z-[1] ${
+                                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
                                         item.highlight
-                                          ? "bg-primary/20 shadow-[0_0_12px_rgba(212,175,55,0.2)]"
+                                          ? "bg-primary/20"
                                           : item.comingSoon
-                                            ? "bg-primary/15 shadow-[0_0_12px_rgba(212,175,55,0.15)]"
-                                            : itemActive ? "bg-primary/20 shadow-[0_0_12px_rgba(212,175,55,0.2)]" : "bg-muted/30 group-hover/item:bg-primary/10"
+                                            ? "bg-primary/10"
+                                            : itemActive
+                                              ? "bg-primary/15"
+                                              : "bg-muted/30 group-hover/item:bg-primary/10"
                                       }`}>
-                                        <item.icon className={`h-3.5 w-3.5 transition-colors duration-200 ${
-                                          item.highlight || item.comingSoon || itemActive ? "text-primary" : "text-muted-foreground group-hover/item:text-primary"
+                                        <item.icon className={`h-4 w-4 transition-colors duration-200 ${
+                                          item.highlight || item.comingSoon || itemActive
+                                            ? "text-primary"
+                                            : "text-muted-foreground group-hover/item:text-primary"
                                         }`} />
                                       </div>
-                                      <div className="relative z-[1] flex-1 min-w-0">
+                                      <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                          <p className={`text-sm font-medium ${item.highlight || item.comingSoon ? "text-primary" : ""}`}>{item.label}</p>
+                                          <p className={`text-[13px] font-medium leading-tight ${
+                                            item.highlight ? "text-primary" : item.comingSoon ? "text-foreground/70" : "text-foreground"
+                                          }`}>
+                                            {item.label}
+                                          </p>
                                           {item.highlight && (
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-semibold tracking-wide uppercase">
-                                              ⚡
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/25 text-primary font-bold">
+                                              ⚡ GO
                                             </span>
                                           )}
                                           {item.comingSoon && (
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-semibold tracking-wide uppercase animate-pulse">
-                                              Soon
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-bold tracking-wide animate-pulse">
+                                              SOON
                                             </span>
                                           )}
                                         </div>
-                                        <p className="text-[11px] text-muted-foreground">{item.desc}</p>
+                                        <p className="text-[11px] text-muted-foreground/70 leading-tight mt-0.5">{item.desc}</p>
                                       </div>
                                       {item.comingSoon && (
-                                        <Lock className="h-3 w-3 text-primary/50 relative z-[1]" />
+                                        <Lock className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                                       )}
                                     </Link>
-                                  </motion.div>
+                                  </div>
                                 );
                               })}
                           </div>
@@ -377,17 +369,17 @@ const Navbar = () => {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {/* Search */}
-              <div className="hidden md:flex items-center">
+              <div className="hidden lg:flex items-center">
                 <AnimatePresence>
                   {searchOpen && (
                     <motion.div
                       initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 180, opacity: 1 }}
+                      animate={{ width: 200, opacity: 1 }}
                       exit={{ width: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                      className="overflow-hidden"
+                      className="overflow-hidden mr-1"
                     >
                       <input
                         ref={searchRef}
@@ -395,30 +387,30 @@ const Navbar = () => {
                         onChange={e => setSearchQuery(e.target.value)}
                         onKeyDown={e => { if (e.key === "Escape") setSearchOpen(false); }}
                         placeholder="Search..."
-                        className="h-8 w-full bg-muted/30 border border-border/50 rounded-lg px-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 focus:shadow-[0_0_12px_rgba(212,175,55,0.1)] transition-all duration-300"
+                        className="h-9 w-full bg-muted/20 border border-border/40 rounded-lg px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-all duration-300"
                       />
                     </motion.div>
                   )}
                 </AnimatePresence>
                 <button
                   onClick={() => setSearchOpen(!searchOpen)}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200"
+                  className="p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
                   aria-label="Search"
                 >
-                  <Search className="h-4 w-4" />
+                  <Search className="h-4.5 w-4.5" />
                 </button>
               </div>
 
               {/* Notifications */}
-              <div ref={notifRef} className="relative hidden md:block">
+              <div ref={notifRef} className="relative hidden lg:block">
                 <button
                   onClick={() => setNotifOpen(!notifOpen)}
-                  className="relative p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-200"
+                  className="relative p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
                   aria-label="Notifications"
                 >
-                  <Bell className="h-4 w-4" />
+                  <Bell className="h-4.5 w-4.5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center animate-pulse">
+                    <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center animate-pulse">
                       {unreadCount}
                     </span>
                   )}
@@ -431,27 +423,27 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.97 }}
                       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute top-full right-0 mt-2 w-80 rounded-xl overflow-hidden z-50 border border-primary/10 bg-card/95 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+                      className="absolute top-full right-0 mt-3 w-80 rounded-2xl overflow-hidden z-50 border border-border/30 bg-card/98 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
                     >
-                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                      <div className="p-3 border-b border-border/30">
+                      <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                      <div className="px-4 py-3 border-b border-border/20">
                         <h4 className="text-sm font-semibold text-foreground">Notifications</h4>
                       </div>
-                      <div className="p-1.5 max-h-64 overflow-y-auto">
+                      <div className="p-2 max-h-72 overflow-y-auto">
                         {MOCK_NOTIFICATIONS.map((notif, idx) => (
                           <motion.div
                             key={notif.id}
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.05 }}
-                            className={`flex items-start gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer hover:bg-primary/5 ${
+                            className={`flex items-start gap-3 px-3.5 py-3 rounded-xl transition-colors cursor-pointer hover:bg-muted/20 ${
                               !notif.read ? "bg-primary/5" : ""
                             }`}
                           >
-                            <div className={`mt-0.5 h-2 w-2 rounded-full shrink-0 ${!notif.read ? "bg-primary" : "bg-muted"}`} />
+                            <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${!notif.read ? "bg-primary" : "bg-muted"}`} />
                             <div className="min-w-0">
-                              <p className="text-xs text-foreground">{notif.text}</p>
-                              <p className="text-[10px] text-muted-foreground mt-0.5">{notif.time}</p>
+                              <p className="text-[13px] text-foreground leading-snug">{notif.text}</p>
+                              <p className="text-[11px] text-muted-foreground mt-1">{notif.time}</p>
                             </div>
                           </motion.div>
                         ))}
@@ -462,14 +454,12 @@ const Navbar = () => {
               </div>
 
               {/* Play Now button */}
-              <Link to="/play" className="hidden md:block">
+              <Link to="/play" className="hidden lg:block">
                 <Button
                   size="sm"
-                  className={`relative bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-xs px-4 shadow-glow overflow-hidden group transition-all duration-300 ${
-                    shrunk ? "h-7" : "h-8"
-                  }`}
+                  className="relative bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-sm px-5 h-9 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.35)] overflow-hidden group transition-all duration-300"
                 >
-                  <Play className="h-3.5 w-3.5 mr-1 fill-current" />
+                  <Play className="h-4 w-4 mr-1.5 fill-current" />
                   Play Now
                   <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 </Button>
@@ -477,43 +467,47 @@ const Navbar = () => {
 
               {/* User area */}
               {loading ? (
-                <div className="h-8 w-20 bg-muted/30 rounded-lg animate-pulse" />
+                <div className="h-9 w-24 bg-muted/20 rounded-xl animate-pulse" />
               ) : user ? (
                 <>
                   <Link
                     to={`/profile/${user.id}`}
-                    className="flex items-center gap-2 rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm px-3 py-1.5 hover:border-primary/30 hover:shadow-[0_0_15px_rgba(212,175,55,0.08)] transition-all duration-300"
+                    className="flex items-center gap-2.5 rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-3.5 py-2 hover:border-primary/30 hover:bg-card/70 transition-all duration-300"
                   >
                     <div className="relative">
-                      <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="h-3.5 w-3.5 text-primary" />
+                      <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="h-4 w-4 text-primary" />
                       </div>
                       <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
                     </div>
-                    <span className="text-xs font-medium text-foreground max-w-[80px] truncate hidden sm:inline">
+                    <span className="text-sm font-medium text-foreground max-w-[80px] truncate hidden sm:inline">
                       {profile?.display_name || profile?.username || "Player"}
                     </span>
-                    {profile && <span className="font-mono text-[11px] text-primary font-bold">{profile.rating}</span>}
+                    {profile && <span className="font-mono text-xs text-primary font-bold">{profile.rating}</span>}
                   </Link>
-                  <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-8 w-8 hidden md:flex" aria-label="Sign out">
+                  <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden lg:flex" aria-label="Sign out">
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </>
               ) : (
-                <>
+                <div className="hidden lg:flex items-center gap-2">
                   <Link to="/login">
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-xs h-8">Sign In</Button>
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm h-9 px-4">
+                      Sign In
+                    </Button>
                   </Link>
                   <Link to="/signup">
-                    <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-glow text-xs h-8 btn-neon">Sign Up</Button>
+                    <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_rgba(212,175,55,0.2)] text-sm h-9 px-5">
+                      Sign Up
+                    </Button>
                   </Link>
-                </>
+                </div>
               )}
 
               {/* Mobile hamburger */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-muted/30 text-foreground transition-colors"
+                className="lg:hidden p-2.5 rounded-lg hover:bg-muted/20 text-foreground transition-colors"
               >
                 {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
@@ -529,73 +523,118 @@ const Navbar = () => {
               : "bg-background/30 backdrop-blur-lg border-transparent"
           } ${shrunk ? "h-0 overflow-hidden opacity-0" : "opacity-100"}`}
         >
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-5">
             <LiveStatusBar />
           </div>
         </div>
       </div>
 
-      {/* Spacer to prevent content from going under the fixed header */}
-      <div className={`transition-all duration-500 ${shrunk ? "h-12" : "h-[calc(4rem+1.5rem)]"}`} />
+      {/* Spacer */}
+      <div className={`transition-all duration-500 ${shrunk ? "h-14" : "h-[calc(4rem+2rem)]"}`} />
 
       {/* Mobile full-screen overlay */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl overflow-y-auto pt-20 pb-8 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-xl overflow-y-auto pt-20 pb-24 px-5"
           >
-            <div className="space-y-6 max-w-md mx-auto">
+            <div className="max-w-lg mx-auto space-y-5">
               {/* Mobile Play Now */}
               <Link to="/play" onClick={() => setMobileOpen(false)}>
-                <Button className="w-full bg-primary text-primary-foreground font-semibold shadow-glow btn-neon h-11">
-                  <Play className="h-4 w-4 mr-2 fill-current" />
+                <Button className="w-full bg-primary text-primary-foreground font-bold shadow-[0_0_20px_rgba(212,175,55,0.25)] h-12 text-base">
+                  <Play className="h-5 w-5 mr-2 fill-current" />
                   Play Now
                 </Button>
               </Link>
 
               {NAV_SECTIONS.map((section) => (
-                <div key={section.key}>
-                  <h3 className="font-display text-xs uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
-                    <section.icon className="h-3.5 w-3.5" />
-                    {section.label}
-                  </h3>
-                  <div className="space-y-1">
-                    {section.items
-                      .filter(item => !item.auth || user)
-                      .map((item) => (
-                        <Link
-                          key={item.label}
-                          to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                          onClick={() => setMobileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/30 transition-all"
-                        >
-                          <item.icon className="h-5 w-5 text-primary/70" />
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{item.label}</p>
-                            <p className="text-[11px] text-muted-foreground">{item.desc}</p>
-                          </div>
-                        </Link>
-                      ))}
-                  </div>
+                <div key={section.key} className="border border-border/20 rounded-2xl overflow-hidden bg-card/30">
+                  <button
+                    onClick={() => setMobileExpanded(mobileExpanded === section.key ? null : section.key)}
+                    className="w-full flex items-center justify-between px-5 py-4 text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <section.icon className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-semibold text-sm text-foreground">{section.label}</span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${
+                      mobileExpanded === section.key ? "rotate-180" : ""
+                    }`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {mobileExpanded === section.key && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-3 pb-3 space-y-0.5">
+                          {section.items
+                            .filter(item => !item.auth || user)
+                            .map((item) => (
+                              <div key={item.label}>
+                                {item.subheading && (
+                                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 font-bold px-3 pt-3 pb-1">
+                                    {item.subheading}
+                                  </p>
+                                )}
+                                <Link
+                                  to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
+                                  onClick={() => setMobileOpen(false)}
+                                  className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all ${
+                                    item.highlight
+                                      ? "bg-primary/10 border border-primary/15"
+                                      : "hover:bg-muted/20"
+                                  }`}
+                                >
+                                  <item.icon className={`h-5 w-5 shrink-0 ${
+                                    item.highlight || item.comingSoon ? "text-primary" : "text-muted-foreground"
+                                  }`} />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-sm font-medium text-foreground">{item.label}</p>
+                                      {item.comingSoon && (
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-bold">SOON</span>
+                                      )}
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground/70 mt-0.5">{item.desc}</p>
+                                  </div>
+                                </Link>
+                              </div>
+                            ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               ))}
 
               {user ? (
-                <button onClick={() => { signOut(); setMobileOpen(false); }} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-destructive/10 transition-all w-full text-left">
-                  <LogOut className="h-5 w-5 text-destructive/70" />
-                  <span className="text-sm font-medium text-destructive">Sign Out</span>
+                <button
+                  onClick={() => { signOut(); setMobileOpen(false); }}
+                  className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 transition-all w-full text-left"
+                >
+                  <LogOut className="h-5 w-5 text-destructive" />
+                  <span className="text-sm font-semibold text-destructive">Sign Out</span>
                 </button>
               ) : (
-                <div className="space-y-2 pt-4 border-t border-border/30">
+                <div className="space-y-3 pt-2">
                   <Link to="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full">Sign In</Button>
+                    <Button variant="outline" className="w-full h-12 text-base font-medium border-border/30">Sign In</Button>
                   </Link>
                   <Link to="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full btn-neon">Sign Up</Button>
+                    <Button className="w-full h-12 text-base font-bold bg-primary text-primary-foreground shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+                      Sign Up
+                    </Button>
                   </Link>
                 </div>
               )}
