@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Wifi, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Flame, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Wifi, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Flame, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio, Video, Shield, Crosshair, FileText, History, Sparkles, Lock } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
