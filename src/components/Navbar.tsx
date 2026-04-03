@@ -23,6 +23,8 @@ interface NavSection {
   icon: React.ElementType;
   items: DropdownItem[];
   wide?: boolean;
+  accent: string; // HSL color string
+  accentRgb: string; // for rgba shadows
 }
 
 const NAV_SECTIONS: NavSection[] = [
@@ -31,6 +33,8 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Play",
     icon: Swords,
     wide: true,
+    accent: "217 91% 65%",
+    accentRgb: "77,163,255",
     items: [
       { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly", highlight: true },
       { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Multiple AI difficulty levels" },
@@ -47,6 +51,8 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Learn",
     icon: GraduationCap,
     wide: true,
+    accent: "271 91% 65%",
+    accentRgb: "168,85,247",
     items: [
       { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path", subheading: "Fundamentals" },
       { label: "Basic Moves", href: "/learn", icon: BookOpen, desc: "Rules & piece movement" },
@@ -64,6 +70,8 @@ const NAV_SECTIONS: NavSection[] = [
     key: "tournaments",
     label: "Tournaments",
     icon: Trophy,
+    accent: "38 92% 50%",
+    accentRgb: "245,158,11",
     items: [
       { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments", subheading: "Active Tournaments" },
       { label: "Starting Soon", href: "/tournaments", icon: Clock, desc: "Upcoming events" },
@@ -76,6 +84,8 @@ const NAV_SECTIONS: NavSection[] = [
     key: "leaderboard",
     label: "Leaderboard",
     icon: BarChart3,
+    accent: "142 71% 45%",
+    accentRgb: "34,197,94",
     items: [
       { label: "Top 10 Players", href: "/leaderboard", icon: Crown, desc: "The very best", subheading: "Global Ranking" },
       { label: "Top 100 Players", href: "/leaderboard", icon: Medal, desc: "Elite contenders" },
@@ -88,6 +98,8 @@ const NAV_SECTIONS: NavSection[] = [
     key: "profile",
     label: "Profile",
     icon: User,
+    accent: "350 89% 60%",
+    accentRgb: "244,63,94",
     items: [
       { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true },
       { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
@@ -207,12 +219,12 @@ const Navbar = () => {
             : ""
         }`}
       >
-        {/* Main nav bar */}
+        {/* Main nav bar — darker than homepage */}
         <motion.nav
           className={`relative border-b transition-all duration-500 ${
             scrolled
-              ? "bg-background/85 backdrop-blur-2xl border-border/20"
-              : "bg-background/50 backdrop-blur-xl border-transparent"
+              ? "bg-[hsl(220,15%,8%)/0.92] backdrop-blur-2xl border-border/20"
+              : "bg-[hsl(220,15%,6%)/0.85] backdrop-blur-xl border-border/10"
           }`}
           initial={{ y: -80 }}
           animate={{ y: 0 }}
@@ -245,6 +257,7 @@ const Navbar = () => {
                 const isActive = section.items.some(item =>
                   item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
                 );
+                const accentColor = `hsl(${section.accent})`;
                 return (
                   <div
                     key={section.key}
@@ -253,21 +266,25 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group ${
-                        isActive || activeDropdown === section.key
-                          ? "text-primary bg-primary/8"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
-                      }`}
+                      className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group`}
+                      style={{
+                        color: isActive || activeDropdown === section.key ? accentColor : undefined,
+                        backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
+                      }}
                     >
-                      <section.icon className="h-4 w-4" />
-                      <span>{section.label}</span>
-                      <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`} />
+                      <section.icon className="h-4 w-4" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
+                      <span className={!(isActive || activeDropdown === section.key) ? "text-muted-foreground group-hover:text-foreground" : ""}>{section.label}</span>
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
+                        style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined}
+                      />
 
-                      {/* Active underline */}
+                      {/* Active underline in accent color */}
                       {isActive && (
                         <motion.span
                           layoutId="nav-active"
-                          className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-primary"
+                          className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full"
+                          style={{ backgroundColor: accentColor }}
                           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                         />
                       )}
@@ -280,16 +297,39 @@ const Navbar = () => {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 6, scale: 0.98 }}
                           transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                          className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 rounded-2xl z-50 border border-border/30 bg-card/98 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] ${
+                          className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 rounded-2xl z-50 backdrop-blur-2xl ${
                             section.wide ? "w-[380px]" : "w-[300px]"
                           }`}
+                          style={{
+                            background: `linear-gradient(135deg, hsla(${section.accent} / 0.06) 0%, hsl(220 15% 10% / 0.97) 40%, hsl(220 15% 10% / 0.97) 100%)`,
+                            border: `1px solid hsla(${section.accent} / 0.2)`,
+                            boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 30px -5px rgba(${section.accentRgb},0.12), inset 0 1px 0 hsla(${section.accent} / 0.1)`,
+                          }}
                           onMouseEnter={() => handleMouseEnter(section.key)}
                           onMouseLeave={handleMouseLeave}
                         >
-                          {/* Top accent line */}
-                          <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                          {/* Top accent glow line */}
+                          <div
+                            className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
+                            style={{
+                              background: `linear-gradient(90deg, transparent 5%, hsla(${section.accent} / 0.6) 50%, transparent 95%)`,
+                            }}
+                          />
 
-                          <div className="p-2.5 max-h-[75vh] overflow-y-auto">
+                          {/* Section header */}
+                          <div className="px-4 pt-3.5 pb-2 flex items-center gap-2.5">
+                            <div
+                              className="w-7 h-7 rounded-lg flex items-center justify-center"
+                              style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}
+                            >
+                              <section.icon className="h-4 w-4" style={{ color: accentColor }} />
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: accentColor }}>
+                              {section.label}
+                            </span>
+                          </div>
+
+                          <div className="px-2 pb-2.5 max-h-[75vh] overflow-y-auto">
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
@@ -297,63 +337,97 @@ const Navbar = () => {
                                 return (
                                   <div key={item.label}>
                                     {item.separator && idx > 0 && (
-                                      <div className="mx-3 my-2 h-px bg-border/20" />
+                                      <div className="mx-3 my-2 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 font-bold px-3.5 pt-2 pb-1">
+                                      <p
+                                        className="text-[10px] uppercase tracking-[0.15em] font-bold px-3.5 pt-2 pb-1"
+                                        style={{ color: `hsla(${section.accent} / 0.5)` }}
+                                      >
                                         {item.subheading}
                                       </p>
                                     )}
                                     <Link
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                                      className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group/item ${
-                                        item.highlight
-                                          ? "bg-primary/10 border border-primary/15 hover:bg-primary/15 hover:border-primary/25"
-                                          : item.comingSoon
-                                            ? "bg-muted/20 hover:bg-muted/30 border border-border/20"
-                                            : itemActive
-                                              ? "bg-primary/10 text-primary"
-                                              : "hover:bg-muted/20"
-                                      }`}
+                                      className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group/item"
+                                      style={{
+                                        backgroundColor: item.highlight
+                                          ? `hsla(${section.accent} / 0.12)`
+                                          : itemActive
+                                            ? `hsla(${section.accent} / 0.08)`
+                                            : undefined,
+                                        border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
+                                      }}
                                       title={item.comingSoon ? "Lessons launching soon" : undefined}
+                                      onMouseEnter={(e) => {
+                                        if (!item.highlight) {
+                                          e.currentTarget.style.backgroundColor = `hsla(${section.accent} / 0.08)`;
+                                        }
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        if (!item.highlight && !itemActive) {
+                                          e.currentTarget.style.backgroundColor = "transparent";
+                                        }
+                                      }}
                                     >
-                                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
-                                        item.highlight
-                                          ? "bg-primary/20"
-                                          : item.comingSoon
-                                            ? "bg-primary/10"
-                                            : itemActive
-                                              ? "bg-primary/15"
-                                              : "bg-muted/30 group-hover/item:bg-primary/10"
-                                      }`}>
-                                        <item.icon className={`h-4 w-4 transition-colors duration-200 ${
-                                          item.highlight || item.comingSoon || itemActive
-                                            ? "text-primary"
-                                            : "text-muted-foreground group-hover/item:text-primary"
-                                        }`} />
+                                      <div
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200"
+                                        style={{
+                                          backgroundColor: item.highlight || itemActive
+                                            ? `hsla(${section.accent} / 0.2)`
+                                            : `hsla(${section.accent} / 0.08)`,
+                                        }}
+                                      >
+                                        <item.icon
+                                          className="h-4 w-4 transition-colors duration-200"
+                                          style={{
+                                            color: item.highlight || itemActive || item.comingSoon
+                                              ? accentColor
+                                              : `hsla(${section.accent} / 0.6)`,
+                                          }}
+                                        />
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                          <p className={`text-[13px] font-medium leading-tight ${
-                                            item.highlight ? "text-primary" : item.comingSoon ? "text-foreground/70" : "text-foreground"
-                                          }`}>
+                                          <p
+                                            className="text-[13px] font-medium leading-tight"
+                                            style={{
+                                              color: item.highlight
+                                                ? accentColor
+                                                : item.comingSoon
+                                                  ? "hsl(var(--foreground) / 0.6)"
+                                                  : "hsl(var(--foreground))",
+                                            }}
+                                          >
                                             {item.label}
                                           </p>
                                           {item.highlight && (
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/25 text-primary font-bold">
+                                            <span
+                                              className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                                              style={{
+                                                backgroundColor: `hsla(${section.accent} / 0.25)`,
+                                                color: accentColor,
+                                              }}
+                                            >
                                               ⚡ GO
                                             </span>
                                           )}
                                           {item.comingSoon && (
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-bold tracking-wide animate-pulse">
+                                            <span
+                                              className="text-[9px] px-1.5 py-0.5 rounded-full font-bold tracking-wide animate-pulse"
+                                              style={{
+                                                backgroundColor: `hsla(${section.accent} / 0.2)`,
+                                                color: accentColor,
+                                              }}
+                                            >
                                               SOON
                                             </span>
                                           )}
                                         </div>
-                                        <p className="text-[11px] text-muted-foreground/70 leading-tight mt-0.5">{item.desc}</p>
+                                        <p className="text-[11px] text-muted-foreground/60 leading-tight mt-0.5">{item.desc}</p>
                                       </div>
                                       {item.comingSoon && (
-                                        <Lock className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                                        <Lock className="h-3.5 w-3.5 shrink-0" style={{ color: `hsla(${section.accent} / 0.4)` }} />
                                       )}
                                     </Link>
                                   </div>
@@ -397,7 +471,7 @@ const Navbar = () => {
                   className="p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
                   aria-label="Search"
                 >
-                  <Search className="h-4.5 w-4.5" />
+                  <Search className="h-4 w-4" />
                 </button>
               </div>
 
@@ -408,7 +482,7 @@ const Navbar = () => {
                   className="relative p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
                   aria-label="Notifications"
                 >
-                  <Bell className="h-4.5 w-4.5" />
+                  <Bell className="h-4 w-4" />
                   {unreadCount > 0 && (
                     <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center animate-pulse">
                       {unreadCount}
@@ -423,7 +497,7 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.97 }}
                       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute top-full right-0 mt-3 w-80 rounded-2xl overflow-hidden z-50 border border-border/30 bg-card/98 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
+                      className="absolute top-full right-0 mt-3 w-80 rounded-2xl overflow-hidden z-50 border border-border/30 bg-[hsl(220,15%,10%)/0.98] backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
                     >
                       <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
                       <div className="px-4 py-3 border-b border-border/20">
@@ -519,8 +593,8 @@ const Navbar = () => {
         <div
           className={`border-b transition-all duration-500 ${
             scrolled
-              ? "bg-background/60 backdrop-blur-xl border-border/10"
-              : "bg-background/30 backdrop-blur-lg border-transparent"
+              ? "bg-[hsl(220,15%,6%)/0.8] backdrop-blur-xl border-border/10"
+              : "bg-[hsl(220,15%,5%)/0.6] backdrop-blur-lg border-border/5"
           } ${shrunk ? "h-0 overflow-hidden opacity-0" : "opacity-100"}`}
         >
           <div className="container mx-auto px-5">
@@ -540,9 +614,9 @@ const Navbar = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-xl overflow-y-auto pt-20 pb-24 px-5"
+            className="fixed inset-0 z-40 bg-[hsl(220,15%,5%)/0.98] backdrop-blur-xl overflow-y-auto pt-20 pb-24 px-5"
           >
-            <div className="max-w-lg mx-auto space-y-5">
+            <div className="max-w-lg mx-auto space-y-4">
               {/* Mobile Play Now */}
               <Link to="/play" onClick={() => setMobileOpen(false)}>
                 <Button className="w-full bg-primary text-primary-foreground font-bold shadow-[0_0_20px_rgba(212,175,55,0.25)] h-12 text-base">
@@ -551,72 +625,97 @@ const Navbar = () => {
                 </Button>
               </Link>
 
-              {NAV_SECTIONS.map((section) => (
-                <div key={section.key} className="border border-border/20 rounded-2xl overflow-hidden bg-card/30">
-                  <button
-                    onClick={() => setMobileExpanded(mobileExpanded === section.key ? null : section.key)}
-                    className="w-full flex items-center justify-between px-5 py-4 text-left"
+              {NAV_SECTIONS.map((section) => {
+                const accentColor = `hsl(${section.accent})`;
+                return (
+                  <div
+                    key={section.key}
+                    className="rounded-2xl overflow-hidden"
+                    style={{
+                      border: `1px solid hsla(${section.accent} / ${mobileExpanded === section.key ? 0.25 : 0.1})`,
+                      background: mobileExpanded === section.key
+                        ? `linear-gradient(135deg, hsla(${section.accent} / 0.08) 0%, hsl(220 15% 8% / 0.95) 50%)`
+                        : `hsl(220 15% 8% / 0.5)`,
+                    }}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <section.icon className="h-4 w-4 text-primary" />
-                      </div>
-                      <span className="font-semibold text-sm text-foreground">{section.label}</span>
-                    </div>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${
-                      mobileExpanded === section.key ? "rotate-180" : ""
-                    }`} />
-                  </button>
-
-                  <AnimatePresence>
-                    {mobileExpanded === section.key && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-3 pb-3 space-y-0.5">
-                          {section.items
-                            .filter(item => !item.auth || user)
-                            .map((item) => (
-                              <div key={item.label}>
-                                {item.subheading && (
-                                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 font-bold px-3 pt-3 pb-1">
-                                    {item.subheading}
-                                  </p>
-                                )}
-                                <Link
-                                  to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                                  onClick={() => setMobileOpen(false)}
-                                  className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all ${
-                                    item.highlight
-                                      ? "bg-primary/10 border border-primary/15"
-                                      : "hover:bg-muted/20"
-                                  }`}
-                                >
-                                  <item.icon className={`h-5 w-5 shrink-0 ${
-                                    item.highlight || item.comingSoon ? "text-primary" : "text-muted-foreground"
-                                  }`} />
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <p className="text-sm font-medium text-foreground">{item.label}</p>
-                                      {item.comingSoon && (
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-bold">SOON</span>
-                                      )}
-                                    </div>
-                                    <p className="text-[11px] text-muted-foreground/70 mt-0.5">{item.desc}</p>
-                                  </div>
-                                </Link>
-                              </div>
-                            ))}
+                    <button
+                      onClick={() => setMobileExpanded(mobileExpanded === section.key ? null : section.key)}
+                      className="w-full flex items-center justify-between px-5 py-4 text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}
+                        >
+                          <section.icon className="h-4 w-4" style={{ color: accentColor }} />
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
+                        <span className="font-semibold text-sm" style={{ color: accentColor }}>{section.label}</span>
+                      </div>
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform duration-300 ${mobileExpanded === section.key ? "rotate-180" : ""}`}
+                        style={{ color: `hsla(${section.accent} / 0.5)` }}
+                      />
+                    </button>
+
+                    <AnimatePresence>
+                      {mobileExpanded === section.key && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-3 pb-3 space-y-0.5">
+                            {section.items
+                              .filter(item => !item.auth || user)
+                              .map((item) => (
+                                <div key={item.label}>
+                                  {item.subheading && (
+                                    <p
+                                      className="text-[10px] uppercase tracking-[0.15em] font-bold px-3 pt-3 pb-1"
+                                      style={{ color: `hsla(${section.accent} / 0.45)` }}
+                                    >
+                                      {item.subheading}
+                                    </p>
+                                  )}
+                                  <Link
+                                    to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className="flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all active:scale-[0.98]"
+                                    style={{
+                                      backgroundColor: item.highlight ? `hsla(${section.accent} / 0.1)` : undefined,
+                                      border: item.highlight ? `1px solid hsla(${section.accent} / 0.15)` : "1px solid transparent",
+                                    }}
+                                  >
+                                    <item.icon
+                                      className="h-5 w-5 shrink-0"
+                                      style={{ color: item.highlight || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.5)` }}
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <p className="text-sm font-medium text-foreground">{item.label}</p>
+                                        {item.comingSoon && (
+                                          <span
+                                            className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                                            style={{ backgroundColor: `hsla(${section.accent} / 0.2)`, color: accentColor }}
+                                          >
+                                            SOON
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[11px] text-muted-foreground/60 mt-0.5">{item.desc}</p>
+                                    </div>
+                                  </Link>
+                                </div>
+                              ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
 
               {user ? (
                 <button
