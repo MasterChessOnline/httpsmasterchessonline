@@ -302,7 +302,7 @@ const Navbar = () => {
                         >
                           {/* Dropdown gold edge */}
                           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                          <div className="p-1.5">
+                          <div className={`p-1.5 ${section.wide ? "grid grid-cols-2 gap-x-1" : ""}`}>
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
@@ -312,7 +312,8 @@ const Navbar = () => {
                                     key={item.label}
                                     initial={{ opacity: 0, x: -8 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: idx * 0.03, duration: 0.2 }}
+                                    transition={{ delay: idx * 0.02, duration: 0.2 }}
+                                    className={section.wide && item.separator ? "col-span-2" : section.wide ? "" : ""}
                                   >
                                     {item.separator && (
                                       <div className="mx-3 my-1 h-px bg-border/30" />
