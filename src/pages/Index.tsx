@@ -395,6 +395,25 @@ const Index = () => {
           </div>
         </Section>
 
+        {/* Game Modes */}
+        <Section title="Game Modes" icon={Brain}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { to: "/guess-the-move", icon: Target, label: "Guess the Move", sub: "Find the best move in real positions", color: "text-green-400" },
+              { to: "/play-like-gm", icon: Crown, label: "Play Like a GM", sub: "Face legendary grandmaster styles", color: "text-purple-400" },
+              { to: "/community", icon: Users, label: "Community", sub: "Share moments & connect with players", color: "text-blue-400" },
+            ].map((item, i) => (
+              <motion.div key={item.to} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.5 }}>
+                <Link to={item.to} className="rounded-xl glass-elevated p-5 text-center group block depth-card light-sweep gold-edge">
+                  <item.icon className={`h-7 w-7 ${item.color} mx-auto mb-2 group-hover:scale-110 transition-all`} />
+                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </Section>
+
         {/* Daily Focus */}
         {user && (
           <Section title="Daily Focus" icon={Target}>
