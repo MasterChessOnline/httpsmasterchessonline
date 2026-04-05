@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
-  Wifi, Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
-  Eye, Target, Shield, Crown, Zap, TrendingUp, Flame,
-  ChevronRight, Clock, Award, Star, Play, Brain, Youtube, ExternalLink
+  Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
+  Eye, Target, Crown, Zap,
+  ChevronRight, Clock, Play, Brain, Youtube, ExternalLink,
+  Volume2, VolumeX, Sun, Moon, Sparkles
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
@@ -33,85 +34,23 @@ interface TopPlayer {
   games_played: number;
 }
 
-/* ── Gold Particles — enhanced with varied glow ── */
-function GoldParticles() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            width: `${2 + Math.random() * 3}px`,
-            height: `${2 + Math.random() * 3}px`,
-            background: `radial-gradient(circle, hsl(43 90% ${50 + Math.random() * 20}% / ${0.4 + Math.random() * 0.3}), transparent)`,
-          }}
-          animate={{
-            y: [0, -(20 + Math.random() * 30), 0],
-            opacity: [0.15, 0.6, 0.15],
-            scale: [0.7, 1.3, 0.7],
-          }}
-          transition={{
-            duration: 4 + Math.random() * 5,
-            repeat: Infinity,
-            delay: Math.random() * 4,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-/* ── Floating Chess Pieces — 3D background elements ── */
-function FloatingChessPieces() {
-  const pieces = [
-    { char: "♚", x: "5%", y: "15%", size: 72, delay: 0 },
-    { char: "♛", x: "90%", y: "10%", size: 56, delay: 0.8 },
-    { char: "♞", x: "8%", y: "70%", size: 48, delay: 1.2 },
-    { char: "♜", x: "88%", y: "65%", size: 52, delay: 1.6 },
-    { char: "♝", x: "45%", y: "8%", size: 40, delay: 2.0 },
-  ];
-  return (
-    <>
-      {pieces.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute text-primary/[0.07] select-none pointer-events-none"
-          style={{ left: p.x, top: p.y, fontSize: p.size, filter: "drop-shadow(0 0 20px hsl(43 90% 55% / 0.15))" }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: p.delay, duration: 1.2 }}
-        >
-          <motion.span
-            className="inline-block"
-            animate={{ y: [0, -14, 0], rotate: [0, 4, -4, 0] }}
-            transition={{ duration: 6 + Math.random() * 3, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
-          >
-            {p.char}
-          </motion.span>
-        </motion.div>
-      ))}
-    </>
-  );
-}
-
-/* ── Section Component — with scroll reveal ── */
-const Section = ({ title, icon: Icon, children, action, delay = 0 }: {
+/* ── Section Header — clear hierarchy ── */
+const SectionHeader = ({ title, icon: Icon, action, children, delay = 0 }: {
   title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; delay?: number;
 }) => (
   <motion.section
-    className="space-y-4"
+    className="space-y-5"
     initial={{ opacity: 0, y: 24 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
   >
     <div className="flex items-center justify-between">
-      <h2 className="font-display text-sm sm:text-base font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
-        <Icon className="h-4 w-4 text-primary" /> {title}
+      <h2 className="font-display text-base sm:text-lg font-bold text-foreground flex items-center gap-2.5 tracking-wide">
+        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+        {title}
       </h2>
       {action}
     </div>
@@ -119,12 +58,54 @@ const Section = ({ title, icon: Icon, children, action, delay = 0 }: {
   </motion.section>
 );
 
+/* ── User Preference Toggles ── */
+const PreferenceToggles = () => {
+  const [soundOn, setSoundOn] = useState(() => localStorage.getItem("chess-sound") !== "off");
+  const [animationsOn, setAnimationsOn] = useState(() => localStorage.getItem("chess-animations") !== "off");
+
+  const toggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
+    setter(value);
+    localStorage.setItem(key, value ? "on" : "off");
+  };
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <button
+        onClick={() => toggle("chess-sound", !soundOn, setSoundOn)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200 ${
+          soundOn
+            ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+            : "bg-muted/20 border-border/30 text-muted-foreground hover:bg-muted/30"
+        }`}
+        aria-label={soundOn ? "Mute sound" : "Enable sound"}
+      >
+        {soundOn ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+        Sound {soundOn ? "On" : "Off"}
+      </button>
+      <button
+        onClick={() => toggle("chess-animations", !animationsOn, setAnimationsOn)}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200 ${
+          animationsOn
+            ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+            : "bg-muted/20 border-border/30 text-muted-foreground hover:bg-muted/30"
+        }`}
+        aria-label={animationsOn ? "Disable animations" : "Enable animations"}
+      >
+        <Sparkles className="h-3.5 w-3.5" />
+        Animations {animationsOn ? "On" : "Off"}
+      </button>
+      <Link to="/settings" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border/30 bg-muted/20 text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all duration-200">
+        More Settings
+        <ChevronRight className="h-3 w-3" />
+      </Link>
+    </div>
+  );
+};
+
 const Index = () => {
   const { user, profile } = useAuth();
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
-  const [activeTournaments, setActiveTournaments] = useState(0);
-  const [liveGamesCount, setLiveGamesCount] = useState(0);
   const [winStreak, setWinStreak] = useState(0);
 
   const heroRef = useRef<HTMLDivElement>(null);
@@ -159,16 +140,6 @@ const Index = () => {
         .select("user_id, display_name, rating, games_won, games_played")
         .order("rating", { ascending: false }).limit(5);
       if (leaders) setTopPlayers(leaders);
-
-      const { count: tCount } = await supabase.from("tournaments")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["registering", "active"]);
-      setActiveTournaments(tCount || 0);
-
-      const { count: gCount } = await supabase.from("online_games")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "active");
-      setLiveGamesCount(gCount || 0);
     };
     fetchData();
   }, [user]);
@@ -177,72 +148,47 @@ const Index = () => {
     ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background grid-bg relative grain-texture">
+    <div className="min-h-screen bg-background relative">
       <Navbar />
 
-      {/* ── HERO — Premium Gold with 3D elements ── */}
-      <div ref={heroRef} className="relative pt-24 sm:pt-32 pb-16 px-4 overflow-hidden min-h-[50vh]">
-        {/* Parallax background image */}
+      {/* ── HERO ── */}
+      <div ref={heroRef} className="relative pt-16 sm:pt-24 pb-16 px-4 overflow-hidden min-h-[45vh]">
         <motion.div className="absolute inset-0" style={{ y: imgY }}>
           <img
             src={heroImage}
-            alt=""
+            alt="Chess board"
             className="absolute inset-0 w-full h-[120%] object-cover"
             style={{ filter: "brightness(0.15) saturate(0.7)" }}
             loading="eager"
           />
         </motion.div>
-
-        {/* Gradient overlays for depth */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/50 via-transparent to-background/50" />
 
-        {/* 3D floating chess pieces */}
-        <FloatingChessPieces />
-        <GoldParticles />
-
-        {/* Gold ambient glow orbs */}
-        <motion.div
-          className="absolute top-1/4 left-1/3 w-80 h-80 rounded-full blur-[120px] pointer-events-none"
-          style={{ background: 'radial-gradient(circle, hsl(43 90% 55% / 0.08), transparent)' }}
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute top-1/2 right-1/4 w-60 h-60 rounded-full blur-[100px] pointer-events-none"
-          style={{ background: 'radial-gradient(circle, hsl(30 60% 40% / 0.06), transparent)' }}
-          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-40 rounded-full blur-[80px] pointer-events-none" style={{ background: 'radial-gradient(circle, hsl(43 70% 65% / 0.05), transparent)' }} />
-
-        <motion.div className="container mx-auto max-w-4xl text-center relative z-10" style={{ opacity: heroOpacity }}>
+        <motion.div className="container mx-auto max-w-4xl text-center relative z-10 pt-8" style={{ opacity: heroOpacity }}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Crown icon with glow */}
             <motion.div
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6"
-              style={{ background: 'linear-gradient(135deg, hsl(43 90% 55% / 0.15), hsl(30 60% 40% / 0.1))', border: '1px solid hsl(43 90% 55% / 0.2)', boxShadow: '0 0 30px hsl(43 90% 55% / 0.1)' }}
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
+              style={{ background: 'linear-gradient(135deg, hsl(43 90% 55% / 0.15), hsl(30 60% 40% / 0.1))', border: '1px solid hsl(43 90% 55% / 0.2)' }}
             >
-              <Crown className="h-8 w-8 text-primary" />
+              <Crown className="h-7 w-7 text-primary" />
             </motion.div>
 
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black mb-3 tracking-tight uppercase">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-3 tracking-tight uppercase">
               <span className="text-gradient-gold">Master</span>
               <span className="text-foreground">Chess</span>
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-lg max-w-md mx-auto mb-10 font-light tracking-wide">
-              Your next grandmaster move awaits
+            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 font-light tracking-wide">
+              Play, learn, and compete — your next great game starts here
             </p>
           </motion.div>
 
-          {/* Main CTA with shine effect */}
+          {/* CTA Buttons */}
           <motion.div
+            className="flex flex-col sm:flex-row items-center justify-center gap-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
@@ -250,30 +196,40 @@ const Index = () => {
             <Link to="/play/online">
               <Button
                 size="lg"
-                className="h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 btn-neon animate-glow-pulse rounded-2xl shimmer relative overflow-hidden shadow-glow-lg"
+                className="h-12 px-8 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_40px_hsl(43_90%_55%/0.3)] transition-all duration-300"
               >
                 <Play className="h-5 w-5 mr-2" />
-                Enter Chess
+                Play Online
+              </Button>
+            </Link>
+            <Link to="/play">
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 px-8 text-base border-border/40 hover:bg-muted/20 rounded-xl transition-all duration-300"
+              >
+                <Swords className="h-5 w-5 mr-2" />
+                Play vs AI
               </Button>
             </Link>
           </motion.div>
 
           {/* Quick Actions */}
           <motion.div
-            className="flex justify-center gap-4 mt-10"
+            className="flex justify-center gap-3 sm:gap-4 mt-8"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
             {[
-              { to: "/play", icon: Swords, label: "Play" },
               { to: "/learn", icon: Brain, label: "Training" },
               { to: "/analysis", icon: Eye, label: "Analysis" },
+              { to: "/tournaments", icon: Trophy, label: "Compete" },
             ].map(item => (
               <Link key={item.to} to={item.to}
-                className="flex flex-col items-center gap-1.5 px-6 py-3 rounded-xl glass-neon hover:border-primary/30 transition-all group card-hover"
+                className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm hover:border-primary/30 hover:bg-card/50 transition-all duration-300 group"
               >
-                <item.icon className="h-5 w-5 text-primary group-hover:drop-shadow-[0_0_8px_hsl(43_90%_55%/0.5)] transition-all" />
+                <item.icon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                 <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.label}</span>
               </Link>
             ))}
@@ -282,13 +238,66 @@ const Index = () => {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="container mx-auto px-4 pb-24 space-y-10 max-w-5xl">
+      <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl">
+
+        {/* User Preferences */}
+        <motion.div
+          className="flex items-center justify-between flex-wrap gap-3"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+        >
+          <PreferenceToggles />
+        </motion.div>
+
+        {/* ─── Start Playing Section ─── */}
+        <SectionHeader title="Start Playing" icon={Swords}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Continue / New Game cards */}
+            <Link to="/play/online" className="group">
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 hover:border-primary/40 hover:bg-primary/10 transition-all duration-300 h-full">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center">
+                    <Play className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Play Online</h3>
+                    <p className="text-xs text-muted-foreground">Find an opponent instantly</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {["Bullet", "Blitz", "Rapid"].map(tc => (
+                    <span key={tc} className="text-[10px] px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">{tc}</span>
+                  ))}
+                </div>
+              </div>
+            </Link>
+            <Link to="/play" className="group">
+              <div className="rounded-xl border border-border/30 bg-card/50 p-6 hover:border-primary/30 hover:bg-card/70 transition-all duration-300 h-full">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-lg bg-muted/30 flex items-center justify-center">
+                    <Swords className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Play vs AI</h3>
+                    <p className="text-xs text-muted-foreground">Practice against bots (800–3000 ELO)</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {["Easy", "Medium", "Hard", "Master"].map(d => (
+                    <span key={d} className="text-[10px] px-2 py-1 rounded-md bg-muted/20 text-muted-foreground font-medium">{d}</span>
+                  ))}
+                </div>
+              </div>
+            </Link>
+          </div>
+        </SectionHeader>
 
         {/* Performance Snapshot */}
         {user && profile && (
-          <Section title="Your Performance" icon={BarChart3}>
-            <div className="rounded-xl glass-elevated p-5 relative overflow-hidden inner-glow light-sweep ambient-reflect">
-              <div className="relative flex flex-col sm:flex-row items-center gap-5">
+          <SectionHeader title="Your Performance" icon={BarChart3}>
+            <div className="rounded-xl border border-border/30 bg-card/50 p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-center gap-5">
                 <div className="flex items-center gap-4">
                   <RankBadge rating={profile.rating} size="lg" />
                   <div>
@@ -305,77 +314,49 @@ const Index = () => {
                   ].map(s => (
                     <div key={s.l}>
                       <p className={`font-mono text-xl font-bold ${s.c}`}>{s.v}</p>
-                      <p className="text-[10px] text-muted-foreground">{s.l}</p>
+                      <p className="text-[11px] text-muted-foreground">{s.l}</p>
                     </div>
                   ))}
                 </div>
               </div>
-              {/* Last 5 + streak */}
-              <div className="mt-4 flex items-center gap-3 flex-wrap relative">
-                <span className="text-xs text-muted-foreground">Last 5:</span>
-                <div className="flex gap-1">
-                  {recentGames.slice(0, 5).map(g => {
-                    const isWhite = g.white_player_id === user.id;
-                    const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
-                    const drew = g.result === "1/2-1/2";
-                    return (
-                      <motion.span
-                        key={g.id}
-                        className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${won ? "bg-primary/20 text-primary" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}
-                        whileHover={{ scale: 1.2 }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        {won ? "W" : drew ? "D" : "L"}
-                      </motion.span>
-                    );
-                  })}
+              {/* Last 5 results + streak */}
+              {recentGames.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border/20 flex items-center gap-3 flex-wrap">
+                  <span className="text-xs text-muted-foreground">Last 5:</span>
+                  <div className="flex gap-1.5">
+                    {recentGames.slice(0, 5).map(g => {
+                      const isWhite = g.white_player_id === user.id;
+                      const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
+                      const drew = g.result === "1/2-1/2";
+                      return (
+                        <span
+                          key={g.id}
+                          className={`w-7 h-7 rounded-md text-[11px] font-bold flex items-center justify-center ${won ? "bg-primary/20 text-primary" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}
+                        >
+                          {won ? "W" : drew ? "D" : "L"}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  {winStreak > 0 && (
+                    <span className="flex items-center gap-1 text-xs font-medium text-primary ml-auto">
+                      🔥 {winStreak} win streak
+                    </span>
+                  )}
                 </div>
-                {winStreak > 0 && (
-                  <span className="flex items-center gap-1 text-xs font-medium text-primary">
-                    <Flame className="h-3.5 w-3.5" /> {winStreak} win streak
-                  </span>
-                )}
-              </div>
+              )}
             </div>
-          </Section>
+          </SectionHeader>
         )}
 
-        {/* Trending Highlights */}
-        <Section title="Trending" icon={TrendingUp}>
+        {/* ─── Explore Modes ─── */}
+        <SectionHeader title="Explore" icon={Zap}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: Eye, value: liveGamesCount, label: "Games Live", color: "text-primary" },
-              { icon: Crown, value: topPlayers.length > 0 ? topPlayers[0].rating : "—", label: "Top Rating", color: "text-accent" },
-              { icon: Trophy, value: activeTournaments, label: "Tournaments", color: "text-primary" },
-              { icon: Star, value: topPlayers.reduce((sum, p) => sum + p.games_played, 0), label: "Total Games", color: "text-accent" },
-            ].map((item, i) => (
-              <motion.div
-                key={item.label}
-                className="rounded-xl glass-elevated p-4 text-center group relative overflow-hidden depth-card light-sweep"
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.5 }}
-                whileHover={{ y: -4 }}
-              >
-                <div className="relative">
-                  <item.icon className={`h-5 w-5 ${item.color} mx-auto mb-1.5 group-hover:drop-shadow-[0_0_8px_hsl(43_90%_55%/0.4)] transition-all`} />
-                  <p className="font-mono text-lg font-bold text-foreground">{item.value}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{item.label}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
-
-        {/* Quick Play Modes */}
-        <Section title="Quick Play" icon={Zap}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { to: "/play/online", icon: Wifi, label: "Play Online", sub: `${liveGamesCount} live` },
-              { to: "/play", icon: Swords, label: "Play vs AI", sub: "800-3000 ELO" },
-              { to: "/tournaments", icon: Trophy, label: "Tournaments", sub: `${activeTournaments} active` },
-              { to: "/friends", icon: Users, label: "Play Friend", sub: "Challenge" },
+              { to: "/tournaments", icon: Trophy, label: "Tournaments", desc: "Compete to win" },
+              { to: "/friends", icon: Users, label: "Play Friend", desc: "Challenge a friend" },
+              { to: "/guess-the-move", icon: Target, label: "Guess the Move", desc: "Find the best move" },
+              { to: "/play-like-gm", icon: Crown, label: "Play Like a GM", desc: "GM-style challenges" },
             ].map((item, i) => (
               <motion.div
                 key={item.to}
@@ -385,71 +366,50 @@ const Index = () => {
                 transition={{ delay: i * 0.08, duration: 0.5 }}
               >
                 <Link to={item.to}
-                  className="rounded-xl glass-elevated p-5 text-center group block depth-card light-sweep gold-edge">
-                  <item.icon className="h-7 w-7 text-primary mx-auto mb-2 group-hover:scale-110 group-hover:drop-shadow-[0_0_10px_hsl(43_90%_55%/0.5)] transition-all" />
-                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
+                  className="rounded-xl border border-border/30 bg-card/50 p-4 sm:p-5 text-center group block hover:border-primary/30 hover:bg-card/70 transition-all duration-300">
+                  <item.icon className="h-6 w-6 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <p className="text-sm font-semibold text-foreground mb-0.5">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">{item.desc}</p>
                 </Link>
               </motion.div>
             ))}
           </div>
-        </Section>
+        </SectionHeader>
 
-        {/* Game Modes */}
-        <Section title="Game Modes" icon={Brain}>
+        {/* ─── Learn & Improve ─── */}
+        <SectionHeader title="Learn & Improve" icon={GraduationCap}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { to: "/guess-the-move", icon: Target, label: "Guess the Move", sub: "Find the best move in real positions", color: "text-green-400" },
-              { to: "/play-like-gm", icon: Crown, label: "Play Like a GM", sub: "Face legendary grandmaster styles", color: "text-purple-400" },
-              { to: "/community", icon: Users, label: "Community", sub: "Share moments & connect with players", color: "text-blue-400" },
+              { to: "/openings", icon: BookOpen, label: "Opening Explorer", desc: "Master popular openings with move trees & stats" },
+              { to: "/learn", icon: GraduationCap, label: "Lessons", desc: "Step-by-step interactive training" },
+              { to: "/analysis", icon: Eye, label: "Game Analysis", desc: "Review & analyze your games with AI" },
             ].map((item, i) => (
-              <motion.div key={item.to} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.5 }}>
-                <Link to={item.to} className="rounded-xl glass-elevated p-5 text-center group block depth-card light-sweep gold-edge">
-                  <item.icon className={`h-7 w-7 ${item.color} mx-auto mb-2 group-hover:scale-110 transition-all`} />
-                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.sub}</p>
+              <motion.div
+                key={item.to}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+              >
+                <Link to={item.to} className="flex items-center gap-4 rounded-xl border border-border/30 bg-card/50 p-4 group hover:border-primary/30 hover:bg-card/70 transition-all duration-300">
+                  <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                    <item.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{item.label}</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">{item.desc}</p>
+                  </div>
                 </Link>
               </motion.div>
             ))}
           </div>
-        </Section>
-
-        {/* Daily Focus */}
-        {user && (
-          <Section title="Daily Focus" icon={Target}>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { to: "/openings", icon: BookOpen, label: "Opening Practice", sub: "Master popular openings" },
-                { to: "/learn", icon: GraduationCap, label: "Lessons", sub: "Step-by-step training" },
-                { to: "/play", icon: Swords, label: "Practice vs Bot", sub: "Train against AI" },
-              ].map((item, i) => (
-                <motion.div
-                  key={item.to}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.5 }}
-                >
-                  <Link to={item.to} className="flex items-center gap-3 rounded-xl glass-elevated p-4 group depth-card gold-edge">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:shadow-glow transition-shadow duration-300">
-                      <item.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{item.label}</p>
-                      <p className="text-[10px] text-muted-foreground">{item.sub}</p>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </Section>
-        )}
+        </SectionHeader>
 
         {/* Recent Games */}
         {user && recentGames.length > 0 && (
-          <Section title="Recent Games" icon={Clock}
-            action={<Link to="/history" className="text-xs text-primary hover:underline flex items-center gap-0.5">View All <ChevronRight className="h-3 w-3" /></Link>}>
-            <div className="space-y-1.5">
+          <SectionHeader title="Recent Games" icon={Clock}
+            action={<Link to="/history" className="text-xs text-primary hover:underline flex items-center gap-0.5 font-medium">View All <ChevronRight className="h-3 w-3" /></Link>}>
+            <div className="space-y-2">
               {recentGames.slice(0, 5).map((g, i) => {
                 const isWhite = g.white_player_id === user.id;
                 const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
@@ -464,13 +424,13 @@ const Index = () => {
                     transition={{ delay: i * 0.05, duration: 0.4 }}
                   >
                     <Link to="/history"
-                      className="flex items-center gap-3 rounded-xl glass-elevated p-3 group depth-card">
-                      <div className={`w-2 h-8 rounded-full ${won ? "bg-primary" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
+                      className="flex items-center gap-3 rounded-xl border border-border/20 bg-card/40 p-3.5 group hover:border-primary/20 hover:bg-card/60 transition-all duration-300">
+                      <div className={`w-2 h-8 rounded-full shrink-0 ${won ? "bg-primary" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                           {won ? "Victory" : drew ? "Draw" : "Defeat"} · {g.time_control_label}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">{moveCount} moves · {new Date(g.created_at).toLocaleDateString()}</p>
+                        <p className="text-[11px] text-muted-foreground">{moveCount} moves · {new Date(g.created_at).toLocaleDateString()}</p>
                       </div>
                       <span className={`text-xs font-bold ${won ? "text-primary" : drew ? "text-muted-foreground" : "text-destructive"}`}>
                         {g.result || "?"}
@@ -480,102 +440,94 @@ const Index = () => {
                 );
               })}
             </div>
-          </Section>
+          </SectionHeader>
         )}
 
         {/* Top Players */}
-        <Section title="Leaderboard" icon={Trophy}
-          action={<Link to="/leaderboard" className="text-xs text-primary hover:underline flex items-center gap-0.5">View All <ChevronRight className="h-3 w-3" /></Link>}>
-          <div className="space-y-1.5">
-            {topPlayers.map((p, i) => (
-              <motion.div
-                key={p.user_id}
-                initial={{ opacity: 0, x: -15 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05, duration: 0.4 }}
-              >
-                <Link to={`/profile/${p.user_id}`}
-                  className="flex items-center gap-3 rounded-xl glass-elevated p-3 group depth-card">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                    i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
-                    i === 1 ? "bg-muted text-foreground" :
-                    "bg-muted/30 text-muted-foreground"
-                  }`}>
-                    {i === 0 ? <Crown className="h-4 w-4" /> : `#${i + 1}`}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{p.display_name || "Anonymous"}</p>
-                    <p className="text-[10px] text-muted-foreground">{p.games_played} games · {p.games_won} wins</p>
-                  </div>
-                  <span className="font-mono text-sm font-bold text-primary">{p.rating}</span>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </Section>
+        {topPlayers.length > 0 && (
+          <SectionHeader title="Leaderboard" icon={Trophy}
+            action={<Link to="/leaderboard" className="text-xs text-primary hover:underline flex items-center gap-0.5 font-medium">View All <ChevronRight className="h-3 w-3" /></Link>}>
+            <div className="space-y-2">
+              {topPlayers.map((p, i) => (
+                <motion.div
+                  key={p.user_id}
+                  initial={{ opacity: 0, x: -15 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05, duration: 0.4 }}
+                >
+                  <Link to={`/profile/${p.user_id}`}
+                    className="flex items-center gap-3 rounded-xl border border-border/20 bg-card/40 p-3.5 group hover:border-primary/20 hover:bg-card/60 transition-all duration-300">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                      i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
+                      i === 1 ? "bg-muted text-foreground" :
+                      "bg-muted/30 text-muted-foreground"
+                    }`}>
+                      {i === 0 ? <Crown className="h-4 w-4" /> : `#${i + 1}`}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{p.display_name || "Anonymous"}</p>
+                      <p className="text-[11px] text-muted-foreground">{p.games_played} games · {p.games_won} wins</p>
+                    </div>
+                    <span className="font-mono text-sm font-bold text-primary">{p.rating}</span>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </SectionHeader>
+        )}
 
         {/* YouTube Section */}
-        <Section title="YouTube" icon={Youtube}>
-          <motion.div
-            className="rounded-xl relative overflow-hidden"
-            style={{ background: "linear-gradient(135deg, hsl(0 70% 15% / 0.4), hsl(0 50% 10% / 0.6))", border: "1px solid hsl(0 70% 40% / 0.25)" }}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/40 to-transparent" />
-            <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
-              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/15 border border-red-500/25 shrink-0">
-                <Youtube className="h-8 w-8 text-red-400" />
+        <SectionHeader title="YouTube" icon={Youtube}>
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-center gap-5">
+              <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-red-500/15 border border-red-500/25 shrink-0">
+                <Youtube className="h-7 w-7 text-red-400" />
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <h3 className="font-display text-lg font-bold text-foreground mb-1">
                   Watch DailyChess on YouTube
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                  Amazing chess content — openings, tactics, game analysis & more. Subscribe for free lessons!
+                  Amazing chess content — openings, tactics, game analysis & more.
                 </p>
                 <a href="https://www.youtube.com/@DailyChess_12" target="_blank" rel="noopener noreferrer">
-                  <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold group relative overflow-hidden">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold transition-all duration-300 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]">
                     <Youtube className="h-4 w-4 mr-2" />
                     Subscribe to DailyChess
-                    <ExternalLink className="h-3.5 w-3.5 ml-2 opacity-60 group-hover:opacity-100 transition-opacity" />
-                    <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    <ExternalLink className="h-3.5 w-3.5 ml-2 opacity-60" />
                   </Button>
                 </a>
               </div>
             </div>
-          </motion.div>
-        </Section>
+          </div>
+        </SectionHeader>
 
-        {/* Navigation Hub */}
-        <Section title="Explore" icon={ChevronRight}>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {/* Quick Links */}
+        <SectionHeader title="Quick Links" icon={ChevronRight}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { to: "/play/online", icon: Swords, label: "Play" },
-              { to: "/learn", icon: GraduationCap, label: "Learn" },
-              { to: "/leaderboard", icon: Award, label: "Leaderboard" },
-              { to: user ? `/profile/${user.id}` : "/login", icon: Users, label: "Profile" },
-              { to: "/settings", icon: Shield, label: "Settings" },
+              { to: "/community", icon: Users, label: "Community" },
+              { to: "/leaderboard", icon: BarChart3, label: "Leaderboard" },
+              { to: user ? `/profile/${user.id}` : "/login", icon: Crown, label: "Profile" },
+              { to: "/settings", icon: Zap, label: "Settings" },
             ].map((item, i) => (
               <motion.div
-                key={item.to}
+                key={item.label}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06, duration: 0.4 }}
               >
                 <Link to={item.to}
-                  className="rounded-xl glass-elevated p-4 text-center group block depth-card light-sweep gold-edge">
-                  <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_hsl(43_90%_55%/0.5)] transition-all" />
+                  className="rounded-xl border border-border/20 bg-card/40 p-4 text-center group block hover:border-primary/20 hover:bg-card/60 transition-all duration-300">
+                  <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
                   <p className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">{item.label}</p>
                 </Link>
               </motion.div>
             ))}
           </div>
-        </Section>
+        </SectionHeader>
       </div>
 
       <Footer />
