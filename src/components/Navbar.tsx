@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Radio, Video, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Youtube } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Video, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Youtube } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,8 +23,8 @@ interface NavSection {
   icon: React.ElementType;
   items: DropdownItem[];
   wide?: boolean;
-  accent: string; // HSL color string
-  accentRgb: string; // for rgba shadows
+  accent: string;
+  accentRgb: string;
 }
 
 const NAV_SECTIONS: NavSection[] = [
@@ -43,7 +43,6 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Blitz (3–5 min)", href: "/play/online", icon: Clock, desc: "Quick tactical battles" },
       { label: "Rapid (10+ min)", href: "/play/online", icon: Clock, desc: "Deep strategic play" },
       { label: "Ongoing Games", href: "/play/online", icon: Gamepad2, desc: "Resume your matches", separator: true },
-      { label: "Rematch Last Opponent", href: "/play", icon: Swords, desc: "Challenge again" },
     ],
   },
   {
@@ -55,14 +54,10 @@ const NAV_SECTIONS: NavSection[] = [
     accentRgb: "168,85,247",
     items: [
       { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path", subheading: "Fundamentals" },
-      { label: "Basic Moves", href: "/learn", icon: BookOpen, desc: "Rules & piece movement" },
       { label: "Openings", href: "/openings", icon: BookOpen, desc: "Master opening systems" },
       { label: "Endgames", href: "/learn", icon: Crown, desc: "Technique & calculation" },
-      { label: "Analyze Last Game", href: "/analysis", icon: Eye, desc: "Review your recent game", separator: true, subheading: "Game Analysis" },
+      { label: "Analyze Game", href: "/analysis", icon: Eye, desc: "Review your recent game", separator: true, subheading: "Analysis" },
       { label: "Import PGN", href: "/analysis", icon: FileText, desc: "Analyze any game" },
-      { label: "Attack", href: "/learn", icon: Zap, desc: "Aggressive play patterns", separator: true, subheading: "Strategy Guides" },
-      { label: "Defense", href: "/learn", icon: Shield, desc: "Solid defensive systems" },
-      { label: "Positioning", href: "/learn", icon: Crosshair, desc: "Piece placement mastery" },
       { label: "Video Lessons", href: "/video-lessons", icon: Video, desc: "Lessons launching soon", comingSoon: true, separator: true },
     ],
   },
@@ -73,11 +68,10 @@ const NAV_SECTIONS: NavSection[] = [
     accent: "38 92% 50%",
     accentRgb: "245,158,11",
     items: [
-      { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments", subheading: "Active Tournaments" },
+      { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments", subheading: "Active" },
       { label: "Starting Soon", href: "/tournaments", icon: Clock, desc: "Upcoming events" },
-      { label: "Create Tournament", href: "/tournaments", icon: Plus, desc: "Host your own event", separator: true, subheading: "Create" },
-      { label: "Joined", href: "/tournaments", icon: ListChecks, desc: "Your active tournaments", separator: true, subheading: "My Tournaments" },
-      { label: "Created", href: "/tournaments", icon: Star, desc: "Tournaments you organized" },
+      { label: "Create Tournament", href: "/tournaments", icon: Plus, desc: "Host your own event", separator: true, subheading: "Organize" },
+      { label: "My Tournaments", href: "/tournaments", icon: ListChecks, desc: "Your active tournaments", separator: true },
     ],
   },
   {
@@ -87,9 +81,8 @@ const NAV_SECTIONS: NavSection[] = [
     accent: "142 71% 45%",
     accentRgb: "34,197,94",
     items: [
-      { label: "Top 10 Players", href: "/leaderboard", icon: Crown, desc: "The very best", subheading: "Global Ranking" },
-      { label: "Top 100 Players", href: "/leaderboard", icon: Medal, desc: "Elite contenders" },
-      { label: "Bullet", href: "/leaderboard", icon: Zap, desc: "1–2 min rankings", separator: true, subheading: "Rating Types" },
+      { label: "Top Players", href: "/leaderboard", icon: Crown, desc: "Global ranking", subheading: "Rankings" },
+      { label: "Bullet", href: "/leaderboard", icon: Zap, desc: "1–2 min rankings", separator: true, subheading: "By Format" },
       { label: "Blitz", href: "/leaderboard", icon: Clock, desc: "3–5 min rankings" },
       { label: "Rapid", href: "/leaderboard", icon: Clock, desc: "10+ min rankings" },
     ],
@@ -103,55 +96,10 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true },
       { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
-      { label: "Account Settings", href: "/settings", icon: Settings, desc: "Manage your account", separator: true, subheading: "Settings" },
-      { label: "Game Settings", href: "/settings", icon: Palette, desc: "Board theme & sound" },
+      { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true },
     ],
   },
 ];
-
-const MOCK_NOTIFICATIONS = [
-  { id: 1, text: "You won against GrandMaster42!", time: "2m ago", read: false },
-  { id: 2, text: "Daily tournament starts in 30 min", time: "15m ago", read: false },
-  { id: 3, text: "New opening course available", time: "1h ago", read: true },
-];
-
-const LiveStatusBar = () => {
-  const [onlinePlayers, setOnlinePlayers] = useState(2847);
-  const [liveGames, setLiveGames] = useState(312);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setOnlinePlayers(prev => prev + Math.floor(Math.random() * 11) - 5);
-      setLiveGames(prev => Math.max(100, prev + Math.floor(Math.random() * 7) - 3));
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="flex items-center justify-center gap-8 text-[11px] tracking-wide text-muted-foreground py-1.5">
-      <div className="flex items-center gap-2">
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-        </span>
-        <Users className="h-3 w-3" />
-        <span className="font-mono font-semibold text-foreground/80">{onlinePlayers.toLocaleString()}</span>
-        <span className="hidden sm:inline">online</span>
-      </div>
-      <div className="w-px h-3 bg-border/40" />
-      <div className="flex items-center gap-2">
-        <Gamepad2 className="h-3 w-3" />
-        <span className="font-mono font-semibold text-foreground/80">{liveGames}</span>
-        <span className="hidden sm:inline">live games</span>
-      </div>
-      <div className="w-px h-3 bg-border/40 hidden sm:block" />
-      <div className="hidden sm:flex items-center gap-2">
-        <Radio className="h-3 w-3 text-primary/60" />
-        <span>Server: <span className="text-emerald-400 font-semibold">Operational</span></span>
-      </div>
-    </div>
-  );
-};
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -161,12 +109,10 @@ const Navbar = () => {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [notifOpen, setNotifOpen] = useState(false);
   const { user, profile, loading, signOut } = useAuth();
   const location = useLocation();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
   const searchRef = useRef<HTMLInputElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -182,22 +128,11 @@ const Navbar = () => {
     setActiveDropdown(null);
     setMobileOpen(false);
     setSearchOpen(false);
-    setNotifOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
-      }
-    };
-    if (notifOpen) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [notifOpen]);
 
   const handleMouseEnter = (key: string) => {
     if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
@@ -208,18 +143,13 @@ const Navbar = () => {
     dropdownTimeout.current = setTimeout(() => setActiveDropdown(null), 250);
   };
 
-  const unreadCount = MOCK_NOTIFICATIONS.filter(n => !n.read).length;
-
   return (
     <>
       <div
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? "shadow-[0_4px_24px_rgba(0,0,0,0.35)]"
-            : ""
+          scrolled ? "shadow-[0_4px_24px_rgba(0,0,0,0.35)]" : ""
         }`}
       >
-        {/* Main nav bar — darker than homepage */}
         <motion.nav
           className={`relative border-b transition-all duration-500 ${
             scrolled
@@ -266,7 +196,7 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group`}
+                      className="relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group"
                       style={{
                         color: isActive || activeDropdown === section.key ? accentColor : undefined,
                         backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
@@ -278,8 +208,6 @@ const Navbar = () => {
                         className={`h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
                         style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined}
                       />
-
-                      {/* Active underline in accent color */}
                       {isActive && (
                         <motion.span
                           layoutId="nav-active"
@@ -308,27 +236,16 @@ const Navbar = () => {
                           onMouseEnter={() => handleMouseEnter(section.key)}
                           onMouseLeave={handleMouseLeave}
                         >
-                          {/* Top accent glow line */}
                           <div
                             className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
-                            style={{
-                              background: `linear-gradient(90deg, transparent 5%, hsla(${section.accent} / 0.6) 50%, transparent 95%)`,
-                            }}
+                            style={{ background: `linear-gradient(90deg, transparent 5%, hsla(${section.accent} / 0.6) 50%, transparent 95%)` }}
                           />
-
-                          {/* Section header */}
                           <div className="px-4 pt-3.5 pb-2 flex items-center gap-2.5">
-                            <div
-                              className="w-7 h-7 rounded-lg flex items-center justify-center"
-                              style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}
-                            >
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}>
                               <section.icon className="h-4 w-4" style={{ color: accentColor }} />
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: accentColor }}>
-                              {section.label}
-                            </span>
+                            <span className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: accentColor }}>{section.label}</span>
                           </div>
-
                           <div className="px-2 pb-2.5 max-h-[75vh] overflow-y-auto">
                             {section.items
                               .filter(item => !item.auth || user)
@@ -340,10 +257,7 @@ const Navbar = () => {
                                       <div className="mx-3 my-2 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p
-                                        className="text-[10px] uppercase tracking-[0.15em] font-bold px-3.5 pt-2 pb-1"
-                                        style={{ color: `hsla(${section.accent} / 0.5)` }}
-                                      >
+                                      <p className="text-[10px] uppercase tracking-[0.15em] font-bold px-3.5 pt-2 pb-1" style={{ color: `hsla(${section.accent} / 0.5)` }}>
                                         {item.subheading}
                                       </p>
                                     )}
@@ -351,84 +265,37 @@ const Navbar = () => {
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
                                       className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group/item"
                                       style={{
-                                        backgroundColor: item.highlight
-                                          ? `hsla(${section.accent} / 0.12)`
-                                          : itemActive
-                                            ? `hsla(${section.accent} / 0.08)`
-                                            : undefined,
+                                        backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.accent} / 0.08)` : undefined,
                                         border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
                                       }}
-                                      title={item.comingSoon ? "Lessons launching soon" : undefined}
                                       onMouseEnter={(e) => {
-                                        if (!item.highlight) {
-                                          e.currentTarget.style.backgroundColor = `hsla(${section.accent} / 0.08)`;
-                                        }
+                                        if (!item.highlight) e.currentTarget.style.backgroundColor = `hsla(${section.accent} / 0.08)`;
                                       }}
                                       onMouseLeave={(e) => {
-                                        if (!item.highlight && !itemActive) {
-                                          e.currentTarget.style.backgroundColor = "transparent";
-                                        }
+                                        if (!item.highlight && !itemActive) e.currentTarget.style.backgroundColor = "transparent";
                                       }}
                                     >
                                       <div
                                         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200"
-                                        style={{
-                                          backgroundColor: item.highlight || itemActive
-                                            ? `hsla(${section.accent} / 0.2)`
-                                            : `hsla(${section.accent} / 0.08)`,
-                                        }}
+                                        style={{ backgroundColor: item.highlight || itemActive ? `hsla(${section.accent} / 0.2)` : `hsla(${section.accent} / 0.08)` }}
                                       >
-                                        <item.icon
-                                          className="h-4 w-4 transition-colors duration-200"
-                                          style={{
-                                            color: item.highlight || itemActive || item.comingSoon
-                                              ? accentColor
-                                              : `hsla(${section.accent} / 0.6)`,
-                                          }}
-                                        />
+                                        <item.icon className="h-4 w-4 transition-colors duration-200" style={{ color: item.highlight || itemActive || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.6)` }} />
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                          <p
-                                            className="text-[13px] font-medium leading-tight"
-                                            style={{
-                                              color: item.highlight
-                                                ? accentColor
-                                                : item.comingSoon
-                                                  ? "hsl(var(--foreground) / 0.6)"
-                                                  : "hsl(var(--foreground))",
-                                            }}
-                                          >
+                                          <p className="text-[13px] font-medium leading-tight" style={{ color: item.highlight ? accentColor : item.comingSoon ? "hsl(var(--foreground) / 0.6)" : "hsl(var(--foreground))" }}>
                                             {item.label}
                                           </p>
                                           {item.highlight && (
-                                            <span
-                                              className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                                              style={{
-                                                backgroundColor: `hsla(${section.accent} / 0.25)`,
-                                                color: accentColor,
-                                              }}
-                                            >
-                                              ⚡ GO
-                                            </span>
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ backgroundColor: `hsla(${section.accent} / 0.25)`, color: accentColor }}>⚡ GO</span>
                                           )}
                                           {item.comingSoon && (
-                                            <span
-                                              className="text-[9px] px-1.5 py-0.5 rounded-full font-bold tracking-wide animate-pulse"
-                                              style={{
-                                                backgroundColor: `hsla(${section.accent} / 0.2)`,
-                                                color: accentColor,
-                                              }}
-                                            >
-                                              SOON
-                                            </span>
+                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold tracking-wide" style={{ backgroundColor: `hsla(${section.accent} / 0.2)`, color: accentColor }}>SOON</span>
                                           )}
                                         </div>
                                         <p className="text-[11px] text-muted-foreground/60 leading-tight mt-0.5">{item.desc}</p>
                                       </div>
-                                      {item.comingSoon && (
-                                        <Lock className="h-3.5 w-3.5 shrink-0" style={{ color: `hsla(${section.accent} / 0.4)` }} />
-                                      )}
+                                      {item.comingSoon && <Lock className="h-3.5 w-3.5 shrink-0" style={{ color: `hsla(${section.accent} / 0.4)` }} />}
                                     </Link>
                                   </div>
                                 );
@@ -475,58 +342,6 @@ const Navbar = () => {
                 </button>
               </div>
 
-              {/* Notifications */}
-              <div ref={notifRef} className="relative hidden lg:block">
-                <button
-                  onClick={() => setNotifOpen(!notifOpen)}
-                  className="relative p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
-                  aria-label="Notifications"
-                >
-                  <Bell className="h-4 w-4" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center animate-pulse">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-
-                <AnimatePresence>
-                  {notifOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute top-full right-0 mt-3 w-80 rounded-2xl overflow-hidden z-50 border border-border/30 bg-[hsl(220,15%,10%)/0.98] backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
-                    >
-                      <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                      <div className="px-4 py-3 border-b border-border/20">
-                        <h4 className="text-sm font-semibold text-foreground">Notifications</h4>
-                      </div>
-                      <div className="p-2 max-h-72 overflow-y-auto">
-                        {MOCK_NOTIFICATIONS.map((notif, idx) => (
-                          <motion.div
-                            key={notif.id}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.05 }}
-                            className={`flex items-start gap-3 px-3.5 py-3 rounded-xl transition-colors cursor-pointer hover:bg-muted/20 ${
-                              !notif.read ? "bg-primary/5" : ""
-                            }`}
-                          >
-                            <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${!notif.read ? "bg-primary" : "bg-muted"}`} />
-                            <div className="min-w-0">
-                              <p className="text-[13px] text-foreground leading-snug">{notif.text}</p>
-                              <p className="text-[11px] text-muted-foreground mt-1">{notif.time}</p>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
               {/* YouTube button */}
               <a href="https://www.youtube.com/@DailyChess_12" target="_blank" rel="noopener noreferrer" className="hidden lg:block">
                 <Button
@@ -565,7 +380,6 @@ const Navbar = () => {
                       <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
                       </div>
-                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-card" />
                     </div>
                     <span className="text-sm font-medium text-foreground max-w-[80px] truncate hidden sm:inline">
                       {profile?.display_name || profile?.username || "Player"}
@@ -579,14 +393,10 @@ const Navbar = () => {
               ) : (
                 <div className="hidden lg:flex items-center gap-2">
                   <Link to="/login">
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm h-9 px-4">
-                      Sign In
-                    </Button>
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm h-9 px-4">Sign In</Button>
                   </Link>
                   <Link to="/signup">
-                    <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_rgba(212,175,55,0.2)] text-sm h-9 px-5">
-                      Sign Up
-                    </Button>
+                    <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_rgba(212,175,55,0.2)] text-sm h-9 px-5">Sign Up</Button>
                   </Link>
                 </div>
               )}
@@ -601,23 +411,10 @@ const Navbar = () => {
             </div>
           </div>
         </motion.nav>
-
-        {/* Live status bar */}
-        <div
-          className={`border-b transition-all duration-500 ${
-            scrolled
-              ? "bg-[hsl(220,15%,6%)/0.8] backdrop-blur-xl border-border/10"
-              : "bg-[hsl(220,15%,5%)/0.6] backdrop-blur-lg border-border/5"
-          } ${shrunk ? "h-0 overflow-hidden opacity-0" : "opacity-100"}`}
-        >
-          <div className="container mx-auto px-5">
-            <LiveStatusBar />
-          </div>
-        </div>
       </div>
 
       {/* Spacer */}
-      <div className={`transition-all duration-500 ${shrunk ? "h-14" : "h-[calc(4rem+2rem)]"}`} />
+      <div className={`transition-all duration-500 ${shrunk ? "h-14" : "h-16"}`} />
 
       {/* Mobile full-screen overlay */}
       <AnimatePresence>
@@ -656,18 +453,12 @@ const Navbar = () => {
                       className="w-full flex items-center justify-between px-5 py-4 text-left"
                     >
                       <div className="flex items-center gap-3">
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}
-                        >
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}>
                           <section.icon className="h-4 w-4" style={{ color: accentColor }} />
                         </div>
                         <span className="font-semibold text-sm" style={{ color: accentColor }}>{section.label}</span>
                       </div>
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform duration-300 ${mobileExpanded === section.key ? "rotate-180" : ""}`}
-                        style={{ color: `hsla(${section.accent} / 0.5)` }}
-                      />
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${mobileExpanded === section.key ? "rotate-180" : ""}`} style={{ color: `hsla(${section.accent} / 0.5)` }} />
                     </button>
 
                     <AnimatePresence>
@@ -685,10 +476,7 @@ const Navbar = () => {
                               .map((item) => (
                                 <div key={item.label}>
                                   {item.subheading && (
-                                    <p
-                                      className="text-[10px] uppercase tracking-[0.15em] font-bold px-3 pt-3 pb-1"
-                                      style={{ color: `hsla(${section.accent} / 0.45)` }}
-                                    >
+                                    <p className="text-[10px] uppercase tracking-[0.15em] font-bold px-3 pt-3 pb-1" style={{ color: `hsla(${section.accent} / 0.45)` }}>
                                       {item.subheading}
                                     </p>
                                   )}
@@ -701,20 +489,12 @@ const Navbar = () => {
                                       border: item.highlight ? `1px solid hsla(${section.accent} / 0.15)` : "1px solid transparent",
                                     }}
                                   >
-                                    <item.icon
-                                      className="h-5 w-5 shrink-0"
-                                      style={{ color: item.highlight || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.5)` }}
-                                    />
+                                    <item.icon className="h-5 w-5 shrink-0" style={{ color: item.highlight || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.5)` }} />
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2">
                                         <p className="text-sm font-medium text-foreground">{item.label}</p>
                                         {item.comingSoon && (
-                                          <span
-                                            className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                                            style={{ backgroundColor: `hsla(${section.accent} / 0.2)`, color: accentColor }}
-                                          >
-                                            SOON
-                                          </span>
+                                          <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ backgroundColor: `hsla(${section.accent} / 0.2)`, color: accentColor }}>SOON</span>
                                         )}
                                       </div>
                                       <p className="text-[11px] text-muted-foreground/60 mt-0.5">{item.desc}</p>
@@ -744,9 +524,7 @@ const Navbar = () => {
                     <Button variant="outline" className="w-full h-12 text-base font-medium border-border/30">Sign In</Button>
                   </Link>
                   <Link to="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full h-12 text-base font-bold bg-primary text-primary-foreground shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-                      Sign Up
-                    </Button>
+                    <Button className="w-full h-12 text-base font-bold bg-primary text-primary-foreground shadow-[0_0_20px_rgba(212,175,55,0.2)]">Sign Up</Button>
                   </Link>
                 </div>
               )}
