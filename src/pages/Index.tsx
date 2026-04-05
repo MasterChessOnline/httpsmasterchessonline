@@ -9,7 +9,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Wifi, Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
   Eye, Target, Shield, Crown, Zap, TrendingUp, Flame,
-  ChevronRight, Clock, Award, Star, Play, Brain
+  ChevronRight, Clock, Award, Star, Play, Brain, Youtube, ExternalLink
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
@@ -494,6 +494,41 @@ const Index = () => {
               </motion.div>
             ))}
           </div>
+        </Section>
+
+        {/* YouTube Section */}
+        <Section title="YouTube" icon={Youtube}>
+          <motion.div
+            className="rounded-xl relative overflow-hidden"
+            style={{ background: "linear-gradient(135deg, hsl(0 70% 15% / 0.4), hsl(0 50% 10% / 0.6))", border: "1px solid hsl(0 70% 40% / 0.25)" }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-500/40 to-transparent" />
+            <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/15 border border-red-500/25 shrink-0">
+                <Youtube className="h-8 w-8 text-red-400" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="font-display text-lg font-bold text-foreground mb-1">
+                  Watch DailyChess on YouTube
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Amazing chess content — openings, tactics, game analysis & more. Subscribe for free lessons!
+                </p>
+                <a href="https://www.youtube.com/@DailyChess_12" target="_blank" rel="noopener noreferrer">
+                  <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold group relative overflow-hidden">
+                    <Youtube className="h-4 w-4 mr-2" />
+                    Subscribe to DailyChess
+                    <ExternalLink className="h-3.5 w-3.5 ml-2 opacity-60 group-hover:opacity-100 transition-opacity" />
+                    <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </motion.div>
         </Section>
 
         {/* Navigation Hub */}
