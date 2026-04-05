@@ -180,7 +180,7 @@ export default function Community() {
                         {post.profile?.display_name || "Player"}
                       </Link>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        {rank && <span>{rank.badge} {rank.name}</span>}
+                        {rank && <span>{rank.icon} {rank.label}</span>}
                         <span>·</span>
                         <span>{timeAgo(post.created_at)}</span>
                       </div>
@@ -235,7 +235,7 @@ export default function Community() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">{p.display_name || "Player"}</div>
-                        <div className="text-[10px] text-muted-foreground">{rank.badge} {p.rating} ELO</div>
+                        <div className="text-[10px] text-muted-foreground">{rank.icon} {p.rating} ELO</div>
                       </div>
                     </Link>
                   );
