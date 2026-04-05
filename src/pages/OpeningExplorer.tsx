@@ -13,9 +13,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Brain, BookOpen, RotateCcw, ChevronLeft, ChevronRight,
   ChevronsLeft, ChevronsRight, Zap, Star, BarChart3, FlipVertical,
-  Globe, Database, Trophy, Loader2
+  Globe, Database, Trophy, Loader2, Filter, Swords, Shield, Play, Search
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 // ── Types ──
 interface EngineLineInfo {
@@ -57,6 +58,8 @@ export default function OpeningExplorer() {
   const [flipped, setFlipped] = useState(false);
   const [depth, setDepth] = useState([16]);
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
+  const [styleFilter, setStyleFilter] = useState<"all" | "aggressive" | "defensive" | "beginner" | "high-winrate">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Stockfish state
   const [engineReady, setEngineReady] = useState(false);
@@ -189,13 +192,46 @@ export default function OpeningExplorer() {
       <Navbar />
       <div className="container mx-auto px-3 py-4 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <BookOpen className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold">Opening Explorer</h1>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <BookOpen className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold">Opening Explorer</h1>
+            {explorerData?.opening && (
+              <Badge variant="outline">{explorerData.opening.eco} · {explorerData.opening.name}</Badge>
+            )}
+            {analyzing && <Brain className="w-4 h-4 text-primary animate-pulse" />}
+          </div>
           {explorerData?.opening && (
-            <Badge variant="outline">{explorerData.opening.eco} · {explorerData.opening.name}</Badge>
+            <Link to="/play">
+              <Button size="sm" className="gap-1.5">
+                <Play className="w-4 h-4" /> Play this Opening
+              </Button>
+            </Link>
           )}
-          {analyzing && <Brain className="w-4 h-4 text-primary animate-pulse" />}
+        </div>
+
+        {/* Search + Filters */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search openings..."
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-1 focus:ring-primary" />
+          </div>
+          <div className="flex gap-1">
+            {([
+              { key: "all", label: "All", icon: Globe },
+              { key: "aggressive", label: "Aggressive", icon: Swords },
+              { key: "defensive", label: "Defensive", icon: Shield },
+              { key: "beginner", label: "Beginner", icon: Star },
+              { key: "high-winrate", label: "High Win%", icon: Trophy },
+            ] as const).map(f => (
+              <button key={f.key} onClick={() => setStyleFilter(f.key)}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${styleFilter === f.key ? "bg-primary text-primary-foreground" : "bg-muted/30 text-muted-foreground hover:text-foreground border border-border"}`}>
+                <f.icon className="w-3 h-3" /> {f.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-4">
