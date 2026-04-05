@@ -152,11 +152,16 @@ export default function ChessBoard({
                             ? { type: "spring", stiffness: 300, damping: 24, mass: 0.8 }
                             : { type: "spring", stiffness: 500, damping: 25 }
                         }
-                        className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none z-10 ${
+                        whileHover={
+                          isPlayerTurn && !isGameOver
+                            ? { scale: 1.15, y: -3, filter: pd.white ? "drop-shadow(0 0 12px rgba(255,215,0,0.6))" : "drop-shadow(0 0 12px rgba(100,180,255,0.5))", transition: { duration: 0.15 } }
+                            : undefined
+                        }
+                        className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none z-10 cursor-pointer ${
                           pd.white
                             ? "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] [text-shadow:_0_0_2px_rgba(255,255,255,0.5)]"
                             : "text-[hsl(220,15%,8%)] drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
-                        } ${isSelected ? "drop-shadow-[0_0_8px_hsl(43_80%_55%/0.5)]" : ""}`}
+                        } ${isSelected ? "drop-shadow-[0_0_10px_hsl(43_80%_55%/0.6)] scale-110" : ""}`}
                         style={{ position: "relative" }}
                       >
                         {pd.symbol}
