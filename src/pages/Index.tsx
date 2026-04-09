@@ -15,6 +15,7 @@ import {
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
+import WatchAndImprove from "@/components/WatchAndImprove";
 
 interface RecentGame {
   id: string;
@@ -477,31 +478,8 @@ const Index = () => {
           </SectionHeader>
         )}
 
-        {/* YouTube Section */}
-        <SectionHeader title="YouTube" icon={Youtube}>
-          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row items-center gap-5">
-              <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-red-500/15 border border-red-500/25 shrink-0">
-                <Youtube className="h-7 w-7 text-red-400" />
-              </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h3 className="font-display text-lg font-bold text-foreground mb-1">
-                  Watch DailyChess on YouTube
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                  Amazing chess content — openings, tactics, game analysis & more.
-                </p>
-                <a href="https://www.youtube.com/@DailyChess_12" target="_blank" rel="noopener noreferrer">
-                  <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold transition-all duration-300 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]">
-                    <Youtube className="h-4 w-4 mr-2" />
-                    Subscribe to DailyChess
-                    <ExternalLink className="h-3.5 w-3.5 ml-2 opacity-60" />
-                  </Button>
-                </a>
-              </div>
-            </div>
-          </div>
-        </SectionHeader>
+        {/* Watch & Improve — YouTube Video Section */}
+        <WatchAndImprove />
 
         {/* Quick Links */}
         <SectionHeader title="Quick Links" icon={ChevronRight}>
