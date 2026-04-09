@@ -15,6 +15,7 @@ import {
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
+import WatchAndImprove from "@/components/WatchAndImprove";
 
 interface RecentGame {
   id: string;
