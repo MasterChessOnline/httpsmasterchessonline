@@ -10,12 +10,14 @@ import {
   Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
   Eye, Target, Crown, Zap,
   ChevronRight, Clock, Play, Brain, Youtube, ExternalLink,
-  Volume2, VolumeX, Sun, Moon, Sparkles
+  Volume2, VolumeX, Sparkles
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
 import WatchAndImprove from "@/components/WatchAndImprove";
+import ParallaxCard from "@/components/ParallaxCard";
+import DynamicBackground from "@/components/DynamicBackground";
 
 interface RecentGame {
   id: string;
@@ -73,7 +75,7 @@ const PreferenceToggles = () => {
     <div className="flex items-center gap-2 flex-wrap">
       <button
         onClick={() => toggle("chess-sound", !soundOn, setSoundOn)}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200 ${
+        className={`ripple-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200 ${
           soundOn
             ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
             : "bg-muted/20 border-border/30 text-muted-foreground hover:bg-muted/30"
@@ -85,7 +87,7 @@ const PreferenceToggles = () => {
       </button>
       <button
         onClick={() => toggle("chess-animations", !animationsOn, setAnimationsOn)}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200 ${
+        className={`ripple-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200 ${
           animationsOn
             ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
             : "bg-muted/20 border-border/30 text-muted-foreground hover:bg-muted/30"
@@ -113,6 +115,7 @@ const Index = () => {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -150,11 +153,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
+      <DynamicBackground />
       <Navbar />
 
-      {/* ── HERO ── */}
+      {/* ── HERO with parallax + 4D depth ── */}
       <div ref={heroRef} className="relative pt-16 sm:pt-24 pb-16 px-4 overflow-hidden min-h-[45vh]">
-        <motion.div className="absolute inset-0" style={{ y: imgY }}>
+        <motion.div className="absolute inset-0" style={{ y: imgY, scale: heroScale }}>
           <img
             src={heroImage}
             alt="Chess board"
@@ -164,16 +168,19 @@ const Index = () => {
           />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
+        {/* Scan-line futuristic overlay */}
+        <div className="absolute inset-0 scan-line pointer-events-none" />
 
         <motion.div className="container mx-auto max-w-4xl text-center relative z-10 pt-8" style={{ opacity: heroOpacity }}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             <motion.div
-              className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
+              className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5 animate-glow-pulse"
               style={{ background: 'linear-gradient(135deg, hsl(43 90% 55% / 0.15), hsl(30 60% 40% / 0.1))', border: '1px solid hsl(43 90% 55% / 0.2)' }}
+              whileHover={{ scale: 1.1, rotate: 5 }}
             >
               <Crown className="h-7 w-7 text-primary" />
             </motion.div>
@@ -187,7 +194,7 @@ const Index = () => {
             </p>
           </motion.div>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons with ripple + glow */}
           <motion.div
             className="flex flex-col sm:flex-row items-center justify-center gap-3"
             initial={{ opacity: 0, y: 20 }}
@@ -195,27 +202,31 @@ const Index = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
           >
             <Link to="/play/online">
-              <Button
-                size="lg"
-                className="h-12 px-8 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_40px_hsl(43_90%_55%/0.3)] transition-all duration-300"
-              >
-                <Play className="h-5 w-5 mr-2" />
-                Play Online
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                <Button
+                  size="lg"
+                  className="ripple-btn h-12 px-8 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_40px_hsl(43_90%_55%/0.4)] transition-all duration-300"
+                >
+                  <Play className="h-5 w-5 mr-2" />
+                  Play Online
+                </Button>
+              </motion.div>
             </Link>
             <Link to="/play">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-12 px-8 text-base border-border/40 hover:bg-muted/20 rounded-xl transition-all duration-300"
-              >
-                <Swords className="h-5 w-5 mr-2" />
-                Play vs AI
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="ripple-btn h-12 px-8 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
+                >
+                  <Swords className="h-5 w-5 mr-2" />
+                  Play vs AI
+                </Button>
+              </motion.div>
             </Link>
           </motion.div>
 
-          {/* Quick Actions */}
+          {/* Quick Actions with hover lift */}
           <motion.div
             className="flex justify-center gap-3 sm:gap-4 mt-8"
             initial={{ opacity: 0, y: 10 }}
@@ -227,11 +238,16 @@ const Index = () => {
               { to: "/analysis", icon: Eye, label: "Analysis" },
               { to: "/tournaments", icon: Trophy, label: "Compete" },
             ].map(item => (
-              <Link key={item.to} to={item.to}
-                className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm hover:border-primary/30 hover:bg-card/50 transition-all duration-300 group"
-              >
-                <item.icon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.label}</span>
+              <Link key={item.to} to={item.to}>
+                <motion.div
+                  className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border border-border/20 glass-4d group"
+                  whileHover={{ y: -4, scale: 1.05 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <item.icon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.label}</span>
+                </motion.div>
               </Link>
             ))}
           </motion.div>
@@ -239,7 +255,7 @@ const Index = () => {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl">
+      <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
 
         {/* User Preferences */}
         <motion.div
@@ -251,45 +267,54 @@ const Index = () => {
           <PreferenceToggles />
         </motion.div>
 
-        {/* ─── Start Playing Section ─── */}
+        {/* ─── Start Playing Section — Parallax Cards ─── */}
         <SectionHeader title="Start Playing" icon={Swords}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Continue / New Game cards */}
             <Link to="/play/online" className="group">
-              <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 hover:border-primary/40 hover:bg-primary/10 transition-all duration-300 h-full">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center">
-                    <Play className="h-5 w-5 text-primary" />
+              <ParallaxCard className="rounded-xl" glowColor="hsl(43 90% 55% / 0.15)">
+                <div className="rounded-xl border border-primary/20 glass-4d p-6 hover:border-primary/40 transition-all duration-300 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <motion.div
+                      className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center"
+                      whileHover={{ rotate: 10, scale: 1.1 }}
+                    >
+                      <Play className="h-5 w-5 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-base font-semibold text-foreground">Play Online</h3>
+                      <p className="text-xs text-muted-foreground">Find an opponent instantly</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Play Online</h3>
-                    <p className="text-xs text-muted-foreground">Find an opponent instantly</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {["Bullet", "Blitz", "Rapid"].map(tc => (
+                      <span key={tc} className="text-[10px] px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">{tc}</span>
+                    ))}
                   </div>
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  {["Bullet", "Blitz", "Rapid"].map(tc => (
-                    <span key={tc} className="text-[10px] px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">{tc}</span>
-                  ))}
-                </div>
-              </div>
+              </ParallaxCard>
             </Link>
             <Link to="/play" className="group">
-              <div className="rounded-xl border border-border/30 bg-card/50 p-6 hover:border-primary/30 hover:bg-card/70 transition-all duration-300 h-full">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-10 w-10 rounded-lg bg-muted/30 flex items-center justify-center">
-                    <Swords className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <ParallaxCard className="rounded-xl" glowColor="hsl(30 60% 40% / 0.12)">
+                <div className="rounded-xl border border-border/30 glass-4d p-6 hover:border-primary/30 transition-all duration-300 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <motion.div
+                      className="h-10 w-10 rounded-lg bg-muted/30 flex items-center justify-center"
+                      whileHover={{ rotate: -10, scale: 1.1 }}
+                    >
+                      <Swords className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-base font-semibold text-foreground">Play vs AI</h3>
+                      <p className="text-xs text-muted-foreground">Practice against bots (800–3000 ELO)</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">Play vs AI</h3>
-                    <p className="text-xs text-muted-foreground">Practice against bots (800–3000 ELO)</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {["Easy", "Medium", "Hard", "Master"].map(d => (
+                      <span key={d} className="text-[10px] px-2 py-1 rounded-md bg-muted/20 text-muted-foreground font-medium">{d}</span>
+                    ))}
                   </div>
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  {["Easy", "Medium", "Hard", "Master"].map(d => (
-                    <span key={d} className="text-[10px] px-2 py-1 rounded-md bg-muted/20 text-muted-foreground font-medium">{d}</span>
-                  ))}
-                </div>
-              </div>
+              </ParallaxCard>
             </Link>
           </div>
         </SectionHeader>
@@ -297,60 +322,62 @@ const Index = () => {
         {/* Performance Snapshot */}
         {user && profile && (
           <SectionHeader title="Your Performance" icon={BarChart3}>
-            <div className="rounded-xl border border-border/30 bg-card/50 p-5 sm:p-6">
-              <div className="flex flex-col sm:flex-row items-center gap-5">
-                <div className="flex items-center gap-4">
-                  <RankBadge rating={profile.rating} size="lg" />
-                  <div>
-                    <p className="font-display text-3xl font-bold text-primary">{profile.rating}</p>
-                    <p className="text-xs text-muted-foreground">{getRank(profile.rating).label} · ELO</p>
-                  </div>
-                </div>
-                <div className="flex gap-5 sm:ml-auto text-center">
-                  {[
-                    { v: profile.games_won, l: "Wins", c: "text-primary" },
-                    { v: profile.games_drawn, l: "Draws", c: "text-muted-foreground" },
-                    { v: profile.games_lost, l: "Losses", c: "text-destructive" },
-                    { v: `${winRate}%`, l: "Win Rate", c: "text-accent" },
-                  ].map(s => (
-                    <div key={s.l}>
-                      <p className={`font-mono text-xl font-bold ${s.c}`}>{s.v}</p>
-                      <p className="text-[11px] text-muted-foreground">{s.l}</p>
+            <ParallaxCard className="rounded-xl" intensity={4} glowColor="hsl(43 90% 55% / 0.08)">
+              <div className="rounded-xl border border-border/30 glass-4d p-5 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-center gap-5">
+                  <div className="flex items-center gap-4">
+                    <RankBadge rating={profile.rating} size="lg" />
+                    <div>
+                      <p className="font-display text-3xl font-bold text-primary">{profile.rating}</p>
+                      <p className="text-xs text-muted-foreground">{getRank(profile.rating).label} · ELO</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-              {/* Last 5 results + streak */}
-              {recentGames.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-border/20 flex items-center gap-3 flex-wrap">
-                  <span className="text-xs text-muted-foreground">Last 5:</span>
-                  <div className="flex gap-1.5">
-                    {recentGames.slice(0, 5).map(g => {
-                      const isWhite = g.white_player_id === user.id;
-                      const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
-                      const drew = g.result === "1/2-1/2";
-                      return (
-                        <span
-                          key={g.id}
-                          className={`w-7 h-7 rounded-md text-[11px] font-bold flex items-center justify-center ${won ? "bg-primary/20 text-primary" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}
-                        >
-                          {won ? "W" : drew ? "D" : "L"}
-                        </span>
-                      );
-                    })}
                   </div>
-                  {winStreak > 0 && (
-                    <span className="flex items-center gap-1 text-xs font-medium text-primary ml-auto">
-                      🔥 {winStreak} win streak
-                    </span>
-                  )}
+                  <div className="flex gap-5 sm:ml-auto text-center">
+                    {[
+                      { v: profile.games_won, l: "Wins", c: "text-primary" },
+                      { v: profile.games_drawn, l: "Draws", c: "text-muted-foreground" },
+                      { v: profile.games_lost, l: "Losses", c: "text-destructive" },
+                      { v: `${winRate}%`, l: "Win Rate", c: "text-accent" },
+                    ].map(s => (
+                      <div key={s.l}>
+                        <p className={`font-mono text-xl font-bold ${s.c}`}>{s.v}</p>
+                        <p className="text-[11px] text-muted-foreground">{s.l}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
+                {recentGames.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-border/20 flex items-center gap-3 flex-wrap">
+                    <span className="text-xs text-muted-foreground">Last 5:</span>
+                    <div className="flex gap-1.5">
+                      {recentGames.slice(0, 5).map(g => {
+                        const isWhite = g.white_player_id === user.id;
+                        const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
+                        const drew = g.result === "1/2-1/2";
+                        return (
+                          <motion.span
+                            key={g.id}
+                            whileHover={{ scale: 1.2, y: -2 }}
+                            className={`w-7 h-7 rounded-md text-[11px] font-bold flex items-center justify-center cursor-default ${won ? "bg-primary/20 text-primary" : drew ? "bg-muted text-muted-foreground" : "bg-destructive/20 text-destructive"}`}
+                          >
+                            {won ? "W" : drew ? "D" : "L"}
+                          </motion.span>
+                        );
+                      })}
+                    </div>
+                    {winStreak > 0 && (
+                      <span className="flex items-center gap-1 text-xs font-medium text-primary ml-auto">
+                        🔥 {winStreak} win streak
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </ParallaxCard>
           </SectionHeader>
         )}
 
-        {/* ─── Explore Modes ─── */}
+        {/* ─── Explore Modes — interactive cards ─── */}
         <SectionHeader title="Explore" icon={Zap}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
@@ -366,11 +393,17 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08, duration: 0.5 }}
               >
-                <Link to={item.to}
-                  className="rounded-xl border border-border/30 bg-card/50 p-4 sm:p-5 text-center group block hover:border-primary/30 hover:bg-card/70 transition-all duration-300">
-                  <item.icon className="h-6 w-6 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                  <p className="text-sm font-semibold text-foreground mb-0.5">{item.label}</p>
-                  <p className="text-[11px] text-muted-foreground leading-tight">{item.desc}</p>
+                <Link to={item.to}>
+                  <motion.div
+                    className="rounded-xl border border-border/30 glass-4d p-4 sm:p-5 text-center group block hover:border-primary/30 transition-all duration-300"
+                    whileHover={{ y: -6, scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <item.icon className="h-6 w-6 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                    <p className="text-sm font-semibold text-foreground mb-0.5">{item.label}</p>
+                    <p className="text-[11px] text-muted-foreground leading-tight">{item.desc}</p>
+                  </motion.div>
                 </Link>
               </motion.div>
             ))}
@@ -392,14 +425,23 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.5 }}
               >
-                <Link to={item.to} className="flex items-center gap-4 rounded-xl border border-border/30 bg-card/50 p-4 group hover:border-primary/30 hover:bg-card/70 transition-all duration-300">
-                  <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
-                    <item.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{item.label}</p>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">{item.desc}</p>
-                  </div>
+                <Link to={item.to}>
+                  <motion.div
+                    className="flex items-center gap-4 rounded-xl border border-border/30 glass-4d p-4 group transition-all duration-300 hover:border-primary/30"
+                    whileHover={{ x: 6, scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  >
+                    <motion.div
+                      className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors"
+                      whileHover={{ rotate: 8 }}
+                    >
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </motion.div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{item.label}</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">{item.desc}</p>
+                    </div>
+                  </motion.div>
                 </Link>
               </motion.div>
             ))}
@@ -424,18 +466,23 @@ const Index = () => {
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.05, duration: 0.4 }}
                   >
-                    <Link to="/history"
-                      className="flex items-center gap-3 rounded-xl border border-border/20 bg-card/40 p-3.5 group hover:border-primary/20 hover:bg-card/60 transition-all duration-300">
-                      <div className={`w-2 h-8 rounded-full shrink-0 ${won ? "bg-primary" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                          {won ? "Victory" : drew ? "Draw" : "Defeat"} · {g.time_control_label}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">{moveCount} moves · {new Date(g.created_at).toLocaleDateString()}</p>
-                      </div>
-                      <span className={`text-xs font-bold ${won ? "text-primary" : drew ? "text-muted-foreground" : "text-destructive"}`}>
-                        {g.result || "?"}
-                      </span>
+                    <Link to="/history">
+                      <motion.div
+                        className="flex items-center gap-3 rounded-xl border border-border/20 glass-4d p-3.5 group transition-all duration-300 hover:border-primary/20"
+                        whileHover={{ x: 4 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                      >
+                        <div className={`w-2 h-8 rounded-full shrink-0 ${won ? "bg-primary" : drew ? "bg-muted-foreground/30" : "bg-destructive/60"}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                            {won ? "Victory" : drew ? "Draw" : "Defeat"} · {g.time_control_label}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">{moveCount} moves · {new Date(g.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <span className={`text-xs font-bold ${won ? "text-primary" : drew ? "text-muted-foreground" : "text-destructive"}`}>
+                          {g.result || "?"}
+                        </span>
+                      </motion.div>
                     </Link>
                   </motion.div>
                 );
@@ -457,20 +504,25 @@ const Index = () => {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05, duration: 0.4 }}
                 >
-                  <Link to={`/profile/${p.user_id}`}
-                    className="flex items-center gap-3 rounded-xl border border-border/20 bg-card/40 p-3.5 group hover:border-primary/20 hover:bg-card/60 transition-all duration-300">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                      i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
-                      i === 1 ? "bg-muted text-foreground" :
-                      "bg-muted/30 text-muted-foreground"
-                    }`}>
-                      {i === 0 ? <Crown className="h-4 w-4" /> : `#${i + 1}`}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{p.display_name || "Anonymous"}</p>
-                      <p className="text-[11px] text-muted-foreground">{p.games_played} games · {p.games_won} wins</p>
-                    </div>
-                    <span className="font-mono text-sm font-bold text-primary">{p.rating}</span>
+                  <Link to={`/profile/${p.user_id}`}>
+                    <motion.div
+                      className="flex items-center gap-3 rounded-xl border border-border/20 glass-4d p-3.5 group transition-all duration-300 hover:border-primary/20"
+                      whileHover={{ x: 4 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                        i === 0 ? "bg-primary/20 text-primary border border-primary/30" :
+                        i === 1 ? "bg-muted text-foreground" :
+                        "bg-muted/30 text-muted-foreground"
+                      }`}>
+                        {i === 0 ? <Crown className="h-4 w-4" /> : `#${i + 1}`}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{p.display_name || "Anonymous"}</p>
+                        <p className="text-[11px] text-muted-foreground">{p.games_played} games · {p.games_won} wins</p>
+                      </div>
+                      <span className="font-mono text-sm font-bold text-primary">{p.rating}</span>
+                    </motion.div>
                   </Link>
                 </motion.div>
               ))}
@@ -478,7 +530,7 @@ const Index = () => {
           </SectionHeader>
         )}
 
-        {/* Watch & Improve — YouTube Video Section */}
+        {/* Watch & Improve */}
         <WatchAndImprove />
 
         {/* Quick Links */}
@@ -497,10 +549,16 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06, duration: 0.4 }}
               >
-                <Link to={item.to}
-                  className="rounded-xl border border-border/20 bg-card/40 p-4 text-center group block hover:border-primary/20 hover:bg-card/60 transition-all duration-300">
-                  <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
-                  <p className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">{item.label}</p>
+                <Link to={item.to}>
+                  <motion.div
+                    className="rounded-xl border border-border/20 glass-4d p-4 text-center group block transition-all duration-300 hover:border-primary/20"
+                    whileHover={{ y: -4, scale: 1.05 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
+                    <p className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">{item.label}</p>
+                  </motion.div>
                 </Link>
               </motion.div>
             ))}
