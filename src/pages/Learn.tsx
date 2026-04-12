@@ -414,7 +414,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
     return { completed, premiumLocked: false, sequentialLocked, locked: sequentialLocked };
   };
 
-  const hasVideo = (id: string) => !!LESSON_VIDEOS[id];
+  const hasVideo = (_id: string) => false;
   const hasExercise = (id: string) => !!(LESSON_MOVES[id] || course.lessons.find(l => l.id === id)?.fen || course.lessons.find(l => l.id === id)?.practiceLine);
 
   // Find next uncompleted lesson
@@ -599,7 +599,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
   const totalLessons = course.lessons.length;
   const completed = isCompletedFn(lesson.id);
   const bookmarked = isBookmarkedFn(lesson.id);
-  const videoUrl = LESSON_VIDEOS[lesson.id];
+  const videoUrl = null;
 
   const lessonData = LESSON_MOVES[lesson.id];
   const variations: LessonVariation[] = useMemo(() => {
