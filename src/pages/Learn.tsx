@@ -815,22 +815,22 @@ const Learn = () => {
           {view === "lesson" && selectedCourse && `${selectedCourse.title} — Chapter ${lessonIdx + 1}`}
         </p>
 
-        {/* Video Lessons - Coming Soon */}
+        {/* Coming Soon */}
         {view === "list" && (
-          <div className="mb-8 rounded-xl glass-neon p-5 opacity-60 cursor-not-allowed">
+          <Link to="/coming-soon" className="block mb-8 rounded-xl glass-neon p-5 opacity-70 hover:opacity-90 transition-opacity">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-muted/30 flex items-center justify-center">
-                <Lock className="h-5 w-5 text-muted-foreground" />
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  Video Lessons
+                  New Features
                   <span className="text-[10px] uppercase tracking-widest text-primary/60 font-display">Coming Soon</span>
                 </p>
-                <p className="text-xs text-muted-foreground">Video content will be available in a future update.</p>
+                <p className="text-xs text-muted-foreground">Exciting new content is on the way.</p>
               </div>
             </div>
-          </div>
+          </Link>
         )}
 
         {view === "list" && user && !loading && (

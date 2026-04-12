@@ -58,7 +58,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Endgames", href: "/learn", icon: Crown, desc: "Technique & calculation" },
       { label: "Analyze Game", href: "/analysis", icon: Eye, desc: "Review your recent game", separator: true, subheading: "Analysis" },
       { label: "Import PGN", href: "/analysis", icon: FileText, desc: "Analyze any game" },
-      { label: "Video Lessons", href: "/video-lessons", icon: Video, desc: "Lessons launching soon", comingSoon: true, separator: true },
+      { label: "Coming Soon", href: "/coming-soon", icon: Sparkles, desc: "New features on the way", comingSoon: true, separator: true },
     ],
   },
   {

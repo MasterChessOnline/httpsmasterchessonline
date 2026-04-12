@@ -31,7 +31,7 @@ const TOOLS = [
     category: "Learn",
     items: [
       { title: "Courses", desc: "50+ structured lessons from beginner to advanced", icon: GraduationCap, href: "/learn", color: "text-green-400", bg: "bg-green-500/10" },
-      { title: "Video Lessons", desc: "Curated video content for every level", icon: Video, href: "/video-lessons", color: "text-red-400", bg: "bg-red-500/10" },
+      { title: "Coming Soon", desc: "New features are on the way", icon: Clock, href: "/coming-soon", color: "text-yellow-400", bg: "bg-yellow-500/10" },
       { title: "Opening Trainer", desc: "Practice your opening repertoire", icon: BookOpen, href: "/openings", color: "text-blue-400", bg: "bg-blue-500/10" },
       { title: "Story Mode", desc: "14-chapter chess adventure", icon: Flame, href: "/story", color: "text-orange-400", bg: "bg-orange-500/10" },
     ],
