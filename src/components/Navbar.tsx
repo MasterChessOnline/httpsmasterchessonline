@@ -342,18 +342,6 @@ const Navbar = () => {
                 </button>
               </div>
 
-              {/* YouTube button */}
-              <a href="https://www.youtube.com/@DailyChess_12" target="_blank" rel="noopener noreferrer" className="hidden lg:block">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="relative font-semibold text-sm px-4 h-9 border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/60 overflow-hidden group transition-all duration-300"
-                >
-                  <Youtube className="h-4 w-4 mr-1.5" />
-                  Subscribe
-                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-red-400/10 to-transparent" />
-                </Button>
-              </a>
 
               {/* Play Now button */}
               <Link to="/play" className="hidden lg:block">
