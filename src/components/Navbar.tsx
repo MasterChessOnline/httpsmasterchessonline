@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Video, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Youtube } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Youtube } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -58,7 +58,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Endgames", href: "/learn", icon: Crown, desc: "Technique & calculation" },
       { label: "Analyze Game", href: "/analysis", icon: Eye, desc: "Review your recent game", separator: true, subheading: "Analysis" },
       { label: "Import PGN", href: "/analysis", icon: FileText, desc: "Analyze any game" },
-      { label: "Video Lessons", href: "/video-lessons", icon: Video, desc: "Lessons launching soon", comingSoon: true, separator: true },
+      { label: "Coming Soon", href: "/coming-soon", icon: Sparkles, desc: "New features on the way", comingSoon: true, separator: true },
     ],
   },
   {

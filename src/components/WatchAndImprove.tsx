@@ -121,8 +121,8 @@ const WatchAndImprove = () => {
           </div>
           Watch & Improve
         </h2>
-        <Link to="/video-lessons" className="text-xs text-red-400 hover:underline flex items-center gap-0.5 font-medium">
-          All Videos <ChevronRight className="h-3 w-3" />
+        <Link to="/coming-soon" className="text-xs text-red-400 hover:underline flex items-center gap-0.5 font-medium">
+          More <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
 
@@ -226,10 +226,10 @@ const WatchAndImprove = () => {
                   <ExternalLink className="h-3.5 w-3.5 ml-2 opacity-60" />
                 </Button>
               </a>
-              <Link to="/video-lessons">
+              <Link to="/coming-soon">
                 <Button variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/40">
                   <Play className="h-4 w-4 mr-2" />
-                  Watch More Videos
+                  Explore More
                 </Button>
               </Link>
             </div>

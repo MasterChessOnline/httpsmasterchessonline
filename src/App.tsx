@@ -22,7 +22,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
-import VideoLessons from "./pages/VideoLessons";
+import ComingSoon from "./pages/ComingSoon";
 import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
@@ -77,7 +77,7 @@ function AnimatedRoutes() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/friends" element={<Friends />} />
-          <Route path="/video-lessons" element={<VideoLessons />} />
+          <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path="/achievements" element={<Achievements />} />
           
           <Route path="/story" element={<StoryMode />} />
