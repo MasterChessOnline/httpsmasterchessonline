@@ -9,13 +9,13 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
   Eye, Target, Crown, Zap,
-  ChevronRight, Clock, Play, Brain, Youtube, ExternalLink,
+  ChevronRight, Clock, Play, Brain,
   Volume2, VolumeX, Sparkles
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
-import WatchAndImprove from "@/components/WatchAndImprove";
+
 import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
 
@@ -530,8 +530,6 @@ const Index = () => {
           </SectionHeader>
         )}
 
-        {/* Watch & Improve */}
-        <WatchAndImprove />
 
         {/* Quick Links */}
         <SectionHeader title="Quick Links" icon={ChevronRight}>

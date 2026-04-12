@@ -1,4 +1,4 @@
-import { Crown, BookOpen, Users, Target, Youtube, Trophy, GraduationCap } from "lucide-react";
+import { Crown, BookOpen, Users, Target, Trophy, GraduationCap, Brain } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -74,7 +74,7 @@ const About = () => (
             {[
               { icon: BookOpen, title: "Pattern Recognition", desc: "Every lesson starts with real-game positions. You learn to spot tactical and strategic patterns that repeat across all levels of play — from club games to grandmaster battles." },
               { icon: Trophy, title: "Competitive Practice", desc: "Theory alone doesn't make you stronger. Our free daily and weekly tournaments give you the arena to test what you've learned under real time pressure." },
-              { icon: Youtube, title: "Video Deep-Dives", desc: "The DailyChess_12 YouTube channel features game breakdowns, opening guides, and endgame technique — all explained in plain language with interactive board examples." },
+              { icon: Brain, title: "Deep Analysis", desc: "The DailyChess_12 method features game breakdowns, opening guides, and endgame technique — explained in plain language with interactive board examples." },
               { icon: Target, title: "AI-Powered Feedback", desc: "After every game, our AI analyzes your moves, identifies blunders and missed tactics, and gives you a personalized improvement plan — so you always know what to work on next." },
             ].map(({ icon: Icon, title, desc }, i) => (
               <motion.div
@@ -107,11 +107,11 @@ const About = () => (
             <Link to="/learn">
               <Button size="lg" variant="outline">Start Learning</Button>
             </Link>
-            <a href="https://www.youtube.com/@DailyChess_12" target="_blank" rel="noopener noreferrer">
+            <Link to="/community">
               <Button size="lg" variant="outline" className="gap-2">
-                <Youtube className="h-4 w-4" /> YouTube
+                <Users className="h-4 w-4" /> Community
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </section>

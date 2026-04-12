@@ -32,15 +32,7 @@ const LEVEL_CONFIG = {
 };
 
 
-/* ──── YouTube Embed (disabled - Coming Soon) ──── */
-function YouTubeEmbed({ videoUrl, title }: { videoUrl: string; title: string }) {
-  return (
-    <div className="rounded-xl overflow-hidden border border-border/30 glass-neon p-8 text-center opacity-50">
-      <Lock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-      <p className="text-sm text-muted-foreground">Video coming soon</p>
-    </div>
-  );
-}
+
 
 /* ──── Stats Dashboard ──── */
 function StatsDashboard({ streak, totalCourses, completedCourses }: {
@@ -145,18 +137,8 @@ function AIFeedbackPanel({ lesson }: { lesson: Lesson }) {
   );
 }
 
-/* ──── DailyChess_12 Video Map ──── */
-const LESSON_VIDEOS: Record<string, string> = {
-  "of-1": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "of-2": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "of-3": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "of-4": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "of-5": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "tp-1": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "tp-2": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "tp-3": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "tp-4": "https://www.youtube.com/embed/dQw4w9WgXcQ",
-};
+
+
 
 /* ──── Course Card ──── */
 function CourseCard({ course, onClick, progress }: {
@@ -432,7 +414,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
     return { completed, premiumLocked: false, sequentialLocked, locked: sequentialLocked };
   };
 
-  const hasVideo = (id: string) => !!LESSON_VIDEOS[id];
+  const hasVideo = (_id: string) => false;
   const hasExercise = (id: string) => !!(LESSON_MOVES[id] || course.lessons.find(l => l.id === id)?.fen || course.lessons.find(l => l.id === id)?.practiceLine);
 
   // Find next uncompleted lesson
@@ -617,7 +599,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
   const totalLessons = course.lessons.length;
   const completed = isCompletedFn(lesson.id);
   const bookmarked = isBookmarkedFn(lesson.id);
-  const videoUrl = LESSON_VIDEOS[lesson.id];
+  const videoUrl = null;
 
   const lessonData = LESSON_MOVES[lesson.id];
   const variations: LessonVariation[] = useMemo(() => {
@@ -678,16 +660,8 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
         )}
       </div>
 
-      {/* Video embed */}
-      {showVideo && videoUrl && (
-        <div className="mb-6 animate-in slide-in-from-top-2 duration-200">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-            <Video className="w-3.5 h-3.5 text-primary" />
-            <span className="font-medium">DailyChess_12 Video Lesson</span>
-          </div>
-          <YouTubeEmbed videoUrl={videoUrl} title={lesson.title} />
-        </div>
-      )}
+
+
 
       {/* Lesson content */}
       <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
