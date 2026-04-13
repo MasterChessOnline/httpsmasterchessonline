@@ -38,7 +38,8 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly", highlight: true },
       { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Multiple AI difficulty levels" },
-      { label: "Custom Game", href: "/play", icon: Settings, desc: "Set your own rules" },
+      { label: "Challenge Modes", href: "/challenge-modes", icon: Flame, desc: "Win in 10, No Castling & more" },
+      { label: "Arena Mode", href: "/arena", icon: Trophy, desc: "Time-based tournament arena" },
       { label: "Bullet (1–2 min)", href: "/play/online", icon: Zap, desc: "Lightning fast games", separator: true, subheading: "Time Controls" },
       { label: "Blitz (3–5 min)", href: "/play/online", icon: Clock, desc: "Quick tactical battles" },
       { label: "Rapid (10+ min)", href: "/play/online", icon: Clock, desc: "Deep strategic play" },
