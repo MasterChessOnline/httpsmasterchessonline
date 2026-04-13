@@ -1,4 +1,4 @@
-import { ArrowRight, Zap, Trophy, Crown, Target, BookOpen, Sword, Users, Flame, Wifi, BarChart3, GraduationCap, Shield, Swords } from "lucide-react";
+import { ArrowRight, Zap, Trophy, Crown, Target, BookOpen, Sword, Users, Flame, Wifi, BarChart3, GraduationCap, Shield, Swords, Radio } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -6,6 +6,7 @@ import heroImage from "@/assets/chess-cinematic-board.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import AnimatedGradientBg from "@/components/AnimatedGradientBg";
 import { useRef, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const FloatingPiece = ({ piece, delay, x, y, size }: { piece: string; delay: number; x: string; y: string; size: number }) => (
   <motion.div
@@ -54,7 +55,41 @@ const LiveTicker = () => {
   );
 };
 
+const LiveStreamBadge = () => {
+  const [isLive, setIsLive] = useState(false);
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const { data } = await supabase.functions.invoke("youtube-live-check");
+        if (data) setIsLive(!!data.isLive);
+      } catch {}
+    };
+    check();
+    const interval = setInterval(check, 60000);
+    return () => clearInterval(interval);
+  }, []);
+  if (!isLive) return null;
+  return (
+    <Link to="/live">
+      <motion.div
+        className="flex items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/15 px-3 py-1 backdrop-blur-sm cursor-pointer hover:bg-destructive/25 transition-colors"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive" />
+        </span>
+        <Radio className="w-3 h-3 text-destructive" />
+        <span className="text-[10px] font-bold text-destructive uppercase tracking-wider">Live Now</span>
+      </motion.div>
+    </Link>
+  );
+};
+
 const headlines = ["Master", "Dominate", "Conquer", "Elevate"];
+
 
 const HeroSection = () => {
   const { user } = useAuth();
@@ -109,8 +144,9 @@ const HeroSection = () => {
       />
 
       <motion.div className="relative z-10 container mx-auto flex min-h-[100svh] flex-col items-center justify-center px-6 text-center" style={{ opacity, scale }}>
-        <motion.div className="mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }}>
+        <motion.div className="mb-6 flex items-center gap-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }}>
           <LiveTicker />
+          <LiveStreamBadge />
         </motion.div>
 
         <motion.div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 backdrop-blur-md glass-border"
