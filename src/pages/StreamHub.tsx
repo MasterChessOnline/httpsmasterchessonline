@@ -45,6 +45,7 @@ export default function StreamHub() {
   const [isLive, setIsLive] = useState(false);
   const [liveVideoId, setLiveVideoId] = useState<string | null>(null);
   const [viewerCount, setViewerCount] = useState(0);
+  const [recentVideos, setRecentVideos] = useState<{ id: string; title: string; thumbnail: string; publishedAt: string }[]>([]);
 
   // Reactions
   const [reactions, setReactions] = useState<FloatingReaction[]>([]);
