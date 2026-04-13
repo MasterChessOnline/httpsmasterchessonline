@@ -652,6 +652,141 @@ export type Database = {
         }
         Relationships: []
       }
+      stream_chat_messages: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          is_highlighted: boolean
+          message: string
+          role: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          is_highlighted?: boolean
+          message: string
+          role?: string
+          user_id: string
+          username?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          is_highlighted?: boolean
+          message?: string
+          role?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      stream_donations: {
+        Row: {
+          alert_shown: boolean
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          message: string | null
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          alert_shown?: boolean
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          message?: string | null
+          user_id?: string | null
+          username?: string
+        }
+        Update: {
+          alert_shown?: boolean
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          message?: string | null
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      stream_queue: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          game_mode: string
+          id: string
+          priority: number
+          role: string
+          status: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          game_mode?: string
+          id?: string
+          priority?: number
+          role?: string
+          status?: string
+          user_id: string
+          username?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          game_mode?: string
+          id?: string
+          priority?: number
+          role?: string
+          status?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      stream_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          status: string
+          stripe_subscription_id: string | null
+          tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          tier?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tournament_chat_messages: {
         Row: {
           created_at: string
