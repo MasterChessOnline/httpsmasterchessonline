@@ -22,7 +22,7 @@ import DonationAlert from "@/components/stream/DonationAlert";
 import type { DonationAlertData } from "@/components/stream/DonationAlert";
 
 const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@DailyChess_12";
-const YOUTUBE_CHANNEL_ID = "UCweCc7bSMX5J4jEH7HFImng";
+const YOUTUBE_CHANNEL_ID = "UC8W92XBMdu20Z0tKBbwsaWA";
 
 const QUICK_REACTIONS = ["🔥", "😂", "👏", "❤️", "😮", "💪", "♟️", "👑"];
 
