@@ -154,9 +154,12 @@ export default function StreamHub() {
     setVotedPoll(true);
   };
 
+  const latestVideoId = recentVideos.length > 0 ? recentVideos[0].id : null;
   const embedUrl = isLive && liveVideoId
     ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=0`
-    : `https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}`;
+    : latestVideoId
+      ? `https://www.youtube.com/embed/${latestVideoId}`
+      : null;
 
   return (
     <div className="min-h-screen bg-background relative">
