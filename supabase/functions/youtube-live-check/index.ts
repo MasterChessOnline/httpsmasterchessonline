@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const YOUTUBE_CHANNEL_ID = "UCweCc7bSMX5J4jEH7HFImng"; // DailyChess_12 — update if needed
+const YOUTUBE_CHANNEL_ID = "UC8W92XBMdu20Z0tKBbwsaWA"; // @DailyChess_12
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
