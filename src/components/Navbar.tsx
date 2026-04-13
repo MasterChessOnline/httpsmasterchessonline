@@ -89,6 +89,18 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    key: "live",
+    label: "Live",
+    icon: Radio,
+    accent: "0 84% 60%",
+    accentRgb: "239,68,68",
+    items: [
+      { label: "Stream Hub", href: "/live", icon: Radio, desc: "Watch & play vs streamer", highlight: true },
+      { label: "Spectate Games", href: "/spectate", icon: Eye, desc: "Watch live matches" },
+      { label: "Community", href: "/community", icon: Users, desc: "Posts & chess moments", separator: true },
+    ],
+  },
+  {
     key: "profile",
     label: "Profile",
     icon: User,
