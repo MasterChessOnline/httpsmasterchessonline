@@ -52,9 +52,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import GuessTheMove from "./pages/GuessTheMove";
 import PlayLikeGM from "./pages/PlayLikeGM";
 import Community from "./pages/Community";
-import ChallengeModes from "./pages/ChallengeModes";
 import StreamHub from "./pages/StreamHub";
-import ArenaMode from "./pages/ArenaMode";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -104,9 +102,7 @@ function AnimatedRoutes() {
           <Route path="/guess-the-move" element={<GuessTheMove />} />
           <Route path="/play-like-gm" element={<PlayLikeGM />} />
           <Route path="/community" element={<Community />} />
-          <Route path="/challenge-modes" element={<ChallengeModes />} />
           <Route path="/live" element={<StreamHub />} />
-          <Route path="/arena" element={<ArenaMode />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
