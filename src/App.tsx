@@ -52,6 +52,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import GuessTheMove from "./pages/GuessTheMove";
 import PlayLikeGM from "./pages/PlayLikeGM";
 import Community from "./pages/Community";
+import StreamHub from "./pages/StreamHub";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
