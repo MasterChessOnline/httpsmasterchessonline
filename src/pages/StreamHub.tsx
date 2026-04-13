@@ -78,6 +78,7 @@ export default function StreamHub() {
           setIsLive(data.isLive);
           if (data.videoId) setLiveVideoId(data.videoId);
           if (data.viewerCount) setViewerCount(data.viewerCount);
+          if (data.recentVideos) setRecentVideos(data.recentVideos);
         }
       } catch {}
     };
