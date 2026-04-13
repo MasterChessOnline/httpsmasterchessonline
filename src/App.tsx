@@ -102,6 +102,7 @@ function AnimatedRoutes() {
           <Route path="/guess-the-move" element={<GuessTheMove />} />
           <Route path="/play-like-gm" element={<PlayLikeGM />} />
           <Route path="/community" element={<Community />} />
+          <Route path="/live" element={<StreamHub />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
