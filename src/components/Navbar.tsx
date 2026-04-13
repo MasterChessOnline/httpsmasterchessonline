@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Radio, Flame, Ban, Shuffle, Sword, MessageCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,7 +38,8 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly", highlight: true },
       { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Multiple AI difficulty levels" },
-      { label: "Custom Game", href: "/play", icon: Settings, desc: "Set your own rules" },
+      { label: "Challenge Modes", href: "/challenge-modes", icon: Flame, desc: "Win in 10, No Castling & more" },
+      { label: "Arena Mode", href: "/arena", icon: Trophy, desc: "Time-based tournament arena" },
       { label: "Bullet (1–2 min)", href: "/play/online", icon: Zap, desc: "Lightning fast games", separator: true, subheading: "Time Controls" },
       { label: "Blitz (3–5 min)", href: "/play/online", icon: Clock, desc: "Quick tactical battles" },
       { label: "Rapid (10+ min)", href: "/play/online", icon: Clock, desc: "Deep strategic play" },
@@ -85,6 +86,18 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Bullet", href: "/leaderboard", icon: Zap, desc: "1–2 min rankings", separator: true, subheading: "By Format" },
       { label: "Blitz", href: "/leaderboard", icon: Clock, desc: "3–5 min rankings" },
       { label: "Rapid", href: "/leaderboard", icon: Clock, desc: "10+ min rankings" },
+    ],
+  },
+  {
+    key: "live",
+    label: "Live",
+    icon: Radio,
+    accent: "0 84% 60%",
+    accentRgb: "239,68,68",
+    items: [
+      { label: "Stream Hub", href: "/live", icon: Radio, desc: "Watch & play vs streamer", highlight: true },
+      { label: "Spectate Games", href: "/spectate", icon: Eye, desc: "Watch live matches" },
+      { label: "Community", href: "/community", icon: Users, desc: "Posts & chess moments", separator: true },
     ],
   },
   {
