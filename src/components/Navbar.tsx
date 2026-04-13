@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Radio } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -85,6 +85,18 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Bullet", href: "/leaderboard", icon: Zap, desc: "1–2 min rankings", separator: true, subheading: "By Format" },
       { label: "Blitz", href: "/leaderboard", icon: Clock, desc: "3–5 min rankings" },
       { label: "Rapid", href: "/leaderboard", icon: Clock, desc: "10+ min rankings" },
+    ],
+  },
+  {
+    key: "live",
+    label: "Live",
+    icon: Radio,
+    accent: "0 84% 60%",
+    accentRgb: "239,68,68",
+    items: [
+      { label: "Stream Hub", href: "/live", icon: Radio, desc: "Watch DailyChess_12 live", highlight: true },
+      { label: "Spectate Games", href: "/spectate", icon: Eye, desc: "Watch player matches" },
+      { label: "Community", href: "/community", icon: Users, desc: "Posts & chess moments", separator: true },
     ],
   },
   {
