@@ -154,7 +154,7 @@ export default function StreamHub() {
 
   const embedUrl = isLive && liveVideoId
     ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=0`
-    : `https://www.youtube.com/embed?listType=user_uploads&list=DailyChess_12`;
+    : `https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}`;
 
   return (
     <div className="min-h-screen bg-background relative">
