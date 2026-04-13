@@ -1,4 +1,4 @@
-import { ArrowRight, Zap, Trophy, Crown, Target, BookOpen, Sword, Users, Flame, Wifi, BarChart3, GraduationCap, Shield, Swords } from "lucide-react";
+import { ArrowRight, Zap, Trophy, Crown, Target, BookOpen, Sword, Users, Flame, Wifi, BarChart3, GraduationCap, Shield, Swords, Radio } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -6,6 +6,7 @@ import heroImage from "@/assets/chess-cinematic-board.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import AnimatedGradientBg from "@/components/AnimatedGradientBg";
 import { useRef, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const FloatingPiece = ({ piece, delay, x, y, size }: { piece: string; delay: number; x: string; y: string; size: number }) => (
   <motion.div
