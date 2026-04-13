@@ -55,7 +55,40 @@ const LiveTicker = () => {
   );
 };
 
-const headlines = ["Master", "Dominate", "Conquer", "Elevate"];
+const LiveStreamBadge = () => {
+  const [isLive, setIsLive] = useState(false);
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const { data } = await supabase.functions.invoke("youtube-live-check");
+        if (data) setIsLive(!!data.isLive);
+      } catch {}
+    };
+    check();
+    const interval = setInterval(check, 60000);
+    return () => clearInterval(interval);
+  }, []);
+  if (!isLive) return null;
+  return (
+    <Link to="/live">
+      <motion.div
+        className="flex items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/15 px-3 py-1 backdrop-blur-sm cursor-pointer hover:bg-destructive/25 transition-colors"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive" />
+        </span>
+        <Radio className="w-3 h-3 text-destructive" />
+        <span className="text-[10px] font-bold text-destructive uppercase tracking-wider">Live Now</span>
+      </motion.div>
+    </Link>
+  );
+};
+
+
 
 const HeroSection = () => {
   const { user } = useAuth();
