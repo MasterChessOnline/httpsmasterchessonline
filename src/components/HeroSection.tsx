@@ -88,6 +88,7 @@ const LiveStreamBadge = () => {
   );
 };
 
+const headlines = ["Master", "Dominate", "Conquer", "Elevate"];
 
 
 const HeroSection = () => {
