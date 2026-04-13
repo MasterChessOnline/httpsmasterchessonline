@@ -45,6 +45,7 @@ export default function StreamHub() {
   const [isLive, setIsLive] = useState(false);
   const [liveVideoId, setLiveVideoId] = useState<string | null>(null);
   const [viewerCount, setViewerCount] = useState(0);
+  const [recentVideos, setRecentVideos] = useState<{ id: string; title: string; thumbnail: string; publishedAt: string }[]>([]);
 
   // Reactions
   const [reactions, setReactions] = useState<FloatingReaction[]>([]);
@@ -77,6 +78,7 @@ export default function StreamHub() {
           setIsLive(data.isLive);
           if (data.videoId) setLiveVideoId(data.videoId);
           if (data.viewerCount) setViewerCount(data.viewerCount);
+          if (data.recentVideos) setRecentVideos(data.recentVideos);
         }
       } catch {}
     };
@@ -152,9 +154,12 @@ export default function StreamHub() {
     setVotedPoll(true);
   };
 
+  const latestVideoId = recentVideos.length > 0 ? recentVideos[0].id : null;
   const embedUrl = isLive && liveVideoId
     ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=0`
-    : `https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}`;
+    : latestVideoId
+      ? `https://www.youtube.com/embed/${latestVideoId}`
+      : null;
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -229,13 +234,21 @@ export default function StreamHub() {
               className="rounded-2xl overflow-hidden border border-border/40 bg-black relative"
             >
               <div className="aspect-video">
-                <iframe
-                  src={embedUrl}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="DailyChess_12 Stream"
-                />
+                {embedUrl ? (
+                  <iframe
+                    src={embedUrl}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="DailyChess_12 Stream"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-muted/20">
+                    <Radio className="w-10 h-10 text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground font-medium">Stream is offline</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">Check back when DailyChess_12 goes live</p>
+                  </div>
+                )}
               </div>
               {/* Floating reactions */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -258,15 +271,54 @@ export default function StreamHub() {
               {/* Overlays */}
               <div className="absolute top-3 left-3 flex items-center gap-2">
                 {isLive && (
-                  <Badge className="bg-red-600 text-white border-0 text-[10px] font-bold animate-pulse">
+                  <Badge className="bg-destructive text-destructive-foreground border-0 text-[10px] font-bold animate-pulse">
                     🔴 LIVE
                   </Badge>
                 )}
-                <Badge className="bg-black/70 text-white border-0 text-[10px]">
-                  <Users className="w-3 h-3 mr-1" /> {viewerCount} viewers
-                </Badge>
+                {isLive && (
+                  <Badge className="bg-black/70 text-white border-0 text-[10px]">
+                    <Users className="w-3 h-3 mr-1" /> {viewerCount} viewers
+                  </Badge>
+                )}
+                {!isLive && embedUrl && (
+                  <Badge className="bg-muted/80 text-muted-foreground border-0 text-[10px]">
+                    📺 Latest Upload
+                  </Badge>
+                )}
               </div>
             </motion.div>
+
+            {/* Recent Videos Grid (when offline) */}
+            {!isLive && recentVideos.length > 1 && (
+              <div>
+                <h3 className="text-sm font-bold text-foreground mb-2">📹 Recent Videos</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {recentVideos.slice(1, 7).map(v => (
+                    <button
+                      key={v.id}
+                      onClick={() => setLiveVideoId(null)}
+                      className="group relative rounded-lg overflow-hidden border border-border/30 hover:border-primary/40 transition-colors"
+                    >
+                      <a href={`https://www.youtube.com/embed/${v.id}`} onClick={(e) => {
+                        e.preventDefault();
+                        // Update embed to this video
+                        setRecentVideos(prev => {
+                          const clicked = prev.find(rv => rv.id === v.id);
+                          if (!clicked) return prev;
+                          return [clicked, ...prev.filter(rv => rv.id !== v.id)];
+                        });
+                      }}>
+                        <img src={v.thumbnail} alt={v.title} className="w-full aspect-video object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground p-1.5 line-clamp-2 leading-tight">{v.title}</p>
+                      </a>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Reactions bar */}
             <div className="flex items-center gap-2 flex-wrap">
