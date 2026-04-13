@@ -110,8 +110,9 @@ const HeroSection = () => {
       />
 
       <motion.div className="relative z-10 container mx-auto flex min-h-[100svh] flex-col items-center justify-center px-6 text-center" style={{ opacity, scale }}>
-        <motion.div className="mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }}>
+        <motion.div className="mb-6 flex items-center gap-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.5 }}>
           <LiveTicker />
+          <LiveStreamBadge />
         </motion.div>
 
         <motion.div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 backdrop-blur-md glass-border"
