@@ -195,7 +195,7 @@ export default function StreamHub() {
             DailyChess<span className="text-gradient-gold">_12</span> Live
           </h1>
           <p className="text-sm text-muted-foreground mb-3">
-            Watch, chat, donate & challenge the streamer
+            My live streams & videos — watch, chat & support
           </p>
           <div className="flex items-center justify-center gap-3">
             <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
@@ -288,12 +288,12 @@ export default function StreamHub() {
               </div>
             </motion.div>
 
-            {/* Recent Videos Grid (when offline) */}
-            {!isLive && recentVideos.length > 1 && (
+            {/* My Videos Grid */}
+            {recentVideos.length > 0 && (
               <div>
-                <h3 className="text-sm font-bold text-foreground mb-2">📹 Recent Videos</h3>
+                <h3 className="text-sm font-bold text-foreground mb-2">📹 My Videos</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {recentVideos.slice(1, 7).map(v => (
+                  {recentVideos.map(v => (
                     <button
                       key={v.id}
                       onClick={() => setLiveVideoId(null)}
