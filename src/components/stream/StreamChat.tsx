@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import DonorRankBadge from "./DonorRankBadge";
 
 interface ChatMsg {
   id: string;
@@ -35,9 +36,10 @@ export default function StreamChat() {
   const [slowMode, setSlowMode] = useState(true);
   const [lastSent, setLastSent] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [donorTotals, setDonorTotals] = useState<Record<string, number>>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load recent messages
+  // Load recent messages + donor totals
   useEffect(() => {
     const loadMessages = async () => {
       const { data } = await supabase
@@ -47,7 +49,20 @@ export default function StreamChat() {
         .limit(100);
       if (data) setMessages(data as ChatMsg[]);
     };
+
+    const loadDonorTotals = async () => {
+      const { data } = await supabase
+        .from("stream_donations")
+        .select("username, amount");
+      if (data) {
+        const totals: Record<string, number> = {};
+        data.forEach(d => { totals[d.username] = (totals[d.username] || 0) + d.amount; });
+        setDonorTotals(totals);
+      }
+    };
+
     loadMessages();
+    loadDonorTotals();
 
     // Subscribe to realtime
     const channel = supabase
@@ -74,6 +89,17 @@ export default function StreamChat() {
             osc.stop(ctx.currentTime + 0.1);
           } catch {}
         }
+      })
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "stream_donations",
+      }, (payload) => {
+        const d = payload.new as any;
+        setDonorTotals(prev => ({
+          ...prev,
+          [d.username]: (prev[d.username] || 0) + d.amount,
+        }));
       })
       .subscribe();
 
@@ -133,6 +159,8 @@ export default function StreamChat() {
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {messages.map(msg => {
           const badge = ROLE_BADGES[msg.role];
+          const userDonorTotal = donorTotals[msg.username] || 0;
+          const isDonor = userDonorTotal >= 100; // $1+
           return (
             <motion.div
               key={msg.id}
@@ -140,11 +168,18 @@ export default function StreamChat() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.1 }}
               className={`flex items-start gap-1.5 text-[11px] ${
-                msg.is_highlighted ? "bg-primary/10 rounded px-1.5 py-1 border border-primary/20" : ""
+                msg.is_highlighted
+                  ? "bg-primary/10 rounded px-1.5 py-1 border border-primary/20"
+                  : isDonor
+                    ? "bg-yellow-500/5 rounded px-1.5 py-0.5 border border-yellow-500/10"
+                    : ""
               }`}
             >
               {badge && <span className="shrink-0">{badge.label}</span>}
-              <span className={`font-bold shrink-0 ${badge ? badge.color : "text-primary/80"}`}>
+              {userDonorTotal > 0 && <DonorRankBadge totalCents={userDonorTotal} size="sm" />}
+              <span className={`font-bold shrink-0 ${
+                isDonor ? "text-yellow-400" : badge ? badge.color : "text-primary/80"
+              }`}>
                 {msg.username}:
               </span>
               <span className="text-foreground/70 break-words">{msg.message}</span>
