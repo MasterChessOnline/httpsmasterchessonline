@@ -186,8 +186,8 @@ export default function StreamHub() {
         >
           <div className="flex items-center justify-center gap-2 mb-3">
             {isLive && (
-              <Badge className="bg-red-500 text-white border-0 text-xs animate-pulse">
-                <Radio className="w-3 h-3 mr-1" /> LIVE
+              <Badge className="bg-red-500 text-white border-0 text-xs animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.6),0_0_30px_rgba(239,68,68,0.3)]">
+                <Radio className="w-3 h-3 mr-1" /> LIVE NOW
               </Badge>
             )}
             <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
@@ -273,9 +273,9 @@ export default function StreamHub() {
               </div>
               {/* Overlays */}
               <div className="absolute top-3 left-3 flex items-center gap-2">
-                {isLive && (
-                  <Badge className="bg-destructive text-destructive-foreground border-0 text-[10px] font-bold animate-pulse">
-                    🔴 LIVE
+              {isLive && (
+                  <Badge className="bg-red-600 text-white border-0 text-[10px] font-bold animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.7)]">
+                    🔴 LIVE NOW
                   </Badge>
                 )}
                 {isLive && (
@@ -407,10 +407,13 @@ export default function StreamHub() {
             {/* Donation Panel */}
             <Card className="border-primary/20 bg-gradient-to-b from-primary/5 to-transparent backdrop-blur-sm">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-1">
                   <Heart className="w-4 h-4 text-red-400" />
                   <h3 className="font-display text-sm font-bold text-foreground">Support the Stream</h3>
                 </div>
+                <p className="text-[9px] text-muted-foreground mb-3">
+                  $1→ shoutout · $5→ highlight · $10→ play vs streamer · $20→ game analysis
+                </p>
                 {/* Micro-donation buttons */}
                 <div className="grid grid-cols-4 gap-1.5 mb-2">
                   {[0.5, 1, 2, 5].map(amt => (
