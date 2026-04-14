@@ -20,6 +20,9 @@ import StreamQueue from "@/components/stream/StreamQueue";
 import SubscriptionTiers from "@/components/stream/SubscriptionTiers";
 import DonationAlert from "@/components/stream/DonationAlert";
 import type { DonationAlertData } from "@/components/stream/DonationAlert";
+import DonationGoalBar from "@/components/stream/DonationGoalBar";
+import RecentDonationsFeed from "@/components/stream/RecentDonationsFeed";
+import SponsorAMove from "@/components/stream/SponsorAMove";
 
 const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@DailyChess_12";
 const YOUTUBE_CHANNEL_ID = "UC8W92XBMdu20Z0tKBbwsaWA";
@@ -124,8 +127,8 @@ export default function StreamHub() {
   // Donation
   const handleDonate = async () => {
     const amount = parseFloat(donationAmount);
-    if (!amount || amount < 1) {
-      toast({ title: "Minimum donation is $1", variant: "destructive" });
+    if (!amount || amount < 0.5) {
+      toast({ title: "Minimum donation is $0.50", variant: "destructive" });
       return;
     }
 
@@ -337,14 +340,19 @@ export default function StreamHub() {
 
             {/* Tabs: Queue / Poll / Subscribe */}
             <Tabs defaultValue="queue" className="w-full">
-              <TabsList className="w-full grid grid-cols-3 bg-muted/20">
+              <TabsList className="w-full grid grid-cols-4 bg-muted/20">
                 <TabsTrigger value="queue" className="text-xs">⚔️ Queue</TabsTrigger>
+                <TabsTrigger value="sponsor" className="text-xs">♟️ Sponsor</TabsTrigger>
                 <TabsTrigger value="poll" className="text-xs">📊 Poll</TabsTrigger>
-                <TabsTrigger value="subscribe" className="text-xs">👑 Subscribe</TabsTrigger>
+                <TabsTrigger value="subscribe" className="text-xs">👑 Sub</TabsTrigger>
               </TabsList>
 
               <TabsContent value="queue">
                 <StreamQueue />
+              </TabsContent>
+
+              <TabsContent value="sponsor">
+                <SponsorAMove />
               </TabsContent>
 
               <TabsContent value="poll">
@@ -393,6 +401,9 @@ export default function StreamHub() {
               <StreamChat />
             </div>
 
+            {/* Donation Goal Bar */}
+            <DonationGoalBar />
+
             {/* Donation Panel */}
             <Card className="border-primary/20 bg-gradient-to-b from-primary/5 to-transparent backdrop-blur-sm">
               <CardContent className="p-4">
@@ -400,22 +411,28 @@ export default function StreamHub() {
                   <Heart className="w-4 h-4 text-red-400" />
                   <h3 className="font-display text-sm font-bold text-foreground">Support the Stream</h3>
                 </div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  {[5, 10, 25, 50].map(amt => (
+                {/* Micro-donation buttons */}
+                <div className="grid grid-cols-4 gap-1.5 mb-2">
+                  {[0.5, 1, 2, 5].map(amt => (
                     <Button
                       key={amt}
                       size="sm"
                       variant={donationAmount === String(amt) ? "default" : "outline"}
                       onClick={() => setDonationAmount(String(amt))}
-                      className="text-xs h-7 flex-1"
+                      className={`text-xs h-8 ${
+                        donationAmount === String(amt)
+                          ? "shadow-[0_0_10px_rgba(var(--primary),0.3)]"
+                          : "hover:shadow-[0_0_8px_rgba(var(--primary),0.15)]"
+                      }`}
                     >
-                      ${amt}
+                      ${amt < 1 ? amt.toFixed(2) : amt}
                     </Button>
                   ))}
                 </div>
                 <Input
                   type="number"
-                  min="1"
+                  min="0.5"
+                  step="0.5"
                   value={donationAmount}
                   onChange={e => setDonationAmount(e.target.value)}
                   placeholder="Custom amount ($)"
@@ -424,20 +441,18 @@ export default function StreamHub() {
                 <Input
                   value={donationMessage}
                   onChange={e => setDonationMessage(e.target.value)}
-                  placeholder="Add a message (optional, max 120 chars)"
+                  placeholder="Message (shows on stream! 🔊 $2+ = TTS)"
                   className="h-8 text-xs bg-muted/20 border-border/30 mb-3"
                   maxLength={120}
                 />
-                <Button onClick={handleDonate} className="w-full text-xs h-9">
-                  <DollarSign className="w-3.5 h-3.5 mr-1" /> Donate 💰
+                <Button onClick={handleDonate} className="w-full text-xs h-9 group">
+                  <DollarSign className="w-3.5 h-3.5 mr-1 group-hover:animate-pulse" /> Donate 💰
                 </Button>
-                {ttsEnabled && (
-                  <p className="text-[9px] text-muted-foreground mt-1.5 text-center">
-                    🔊 Donations $2+ will be read aloud via TTS
-                  </p>
-                )}
               </CardContent>
             </Card>
+
+            {/* Recent Donations Feed */}
+            <RecentDonationsFeed />
           </div>
         </div>
       </main>
