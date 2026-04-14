@@ -20,6 +20,9 @@ import StreamQueue from "@/components/stream/StreamQueue";
 import SubscriptionTiers from "@/components/stream/SubscriptionTiers";
 import DonationAlert from "@/components/stream/DonationAlert";
 import type { DonationAlertData } from "@/components/stream/DonationAlert";
+import DonationGoalBar from "@/components/stream/DonationGoalBar";
+import RecentDonationsFeed from "@/components/stream/RecentDonationsFeed";
+import SponsorAMove from "@/components/stream/SponsorAMove";
 
 const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@DailyChess_12";
 const YOUTUBE_CHANNEL_ID = "UC8W92XBMdu20Z0tKBbwsaWA";
