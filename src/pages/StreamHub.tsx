@@ -127,8 +127,8 @@ export default function StreamHub() {
   // Donation
   const handleDonate = async () => {
     const amount = parseFloat(donationAmount);
-    if (!amount || amount < 1) {
-      toast({ title: "Minimum donation is $1", variant: "destructive" });
+    if (!amount || amount < 0.5) {
+      toast({ title: "Minimum donation is $0.50", variant: "destructive" });
       return;
     }
 
@@ -340,14 +340,19 @@ export default function StreamHub() {
 
             {/* Tabs: Queue / Poll / Subscribe */}
             <Tabs defaultValue="queue" className="w-full">
-              <TabsList className="w-full grid grid-cols-3 bg-muted/20">
+              <TabsList className="w-full grid grid-cols-4 bg-muted/20">
                 <TabsTrigger value="queue" className="text-xs">⚔️ Queue</TabsTrigger>
+                <TabsTrigger value="sponsor" className="text-xs">♟️ Sponsor</TabsTrigger>
                 <TabsTrigger value="poll" className="text-xs">📊 Poll</TabsTrigger>
-                <TabsTrigger value="subscribe" className="text-xs">👑 Subscribe</TabsTrigger>
+                <TabsTrigger value="subscribe" className="text-xs">👑 Sub</TabsTrigger>
               </TabsList>
 
               <TabsContent value="queue">
                 <StreamQueue />
+              </TabsContent>
+
+              <TabsContent value="sponsor">
+                <SponsorAMove />
               </TabsContent>
 
               <TabsContent value="poll">
