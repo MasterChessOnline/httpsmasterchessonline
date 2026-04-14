@@ -47,14 +47,10 @@ import Chat from "./pages/Chat";
 import Clubs from "./pages/Clubs";
 import GameReview from "./pages/GameReview";
 import Spectate from "./pages/Spectate";
-import Donate from "./pages/Donate";
-import PaymentSuccess from "./pages/PaymentSuccess";
 import GuessTheMove from "./pages/GuessTheMove";
 import PlayLikeGM from "./pages/PlayLikeGM";
 import Community from "./pages/Community";
 import StreamHub from "./pages/StreamHub";
-import DonationStats from "./pages/DonationStats";
-import StreamOverlay from "./pages/StreamOverlay";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -99,14 +95,10 @@ function AnimatedRoutes() {
           <Route path="/clubs" element={<Clubs />} />
           <Route path="/game-review" element={<GameReview />} />
           <Route path="/spectate" element={<Spectate />} />
-          <Route path="/donate" element={<Donate />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/guess-the-move" element={<GuessTheMove />} />
           <Route path="/play-like-gm" element={<PlayLikeGM />} />
           <Route path="/community" element={<Community />} />
           <Route path="/live" element={<StreamHub />} />
-          <Route path="/donation-stats" element={<DonationStats />} />
-          <Route path="/overlay" element={<StreamOverlay />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DynamicBackground from "@/components/DynamicBackground";
@@ -6,23 +6,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Radio, Users, ExternalLink, DollarSign, Play, Heart,
-  Volume2, VolumeX, Crown, BarChart3
+  Radio, Users, ExternalLink, Play,
+  Volume2, VolumeX, BarChart3
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import StreamChat from "@/components/stream/StreamChat";
 import StreamQueue from "@/components/stream/StreamQueue";
-import SubscriptionTiers from "@/components/stream/SubscriptionTiers";
-import DonationAlert from "@/components/stream/DonationAlert";
-import type { DonationAlertData } from "@/components/stream/DonationAlert";
-import DonationGoalBar from "@/components/stream/DonationGoalBar";
-import RecentDonationsFeed from "@/components/stream/RecentDonationsFeed";
-import SponsorAMove from "@/components/stream/SponsorAMove";
 
 const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@DailyChess_12";
 const YOUTUBE_CHANNEL_ID = "UC8W92XBMdu20Z0tKBbwsaWA";
@@ -42,7 +34,6 @@ interface PollOption {
 
 export default function StreamHub() {
   const { user, profile } = useAuth();
-  const { toast } = useToast();
 
   // Stream state
   const [isLive, setIsLive] = useState(false);
@@ -53,14 +44,8 @@ export default function StreamHub() {
   // Reactions
   const [reactions, setReactions] = useState<FloatingReaction[]>([]);
 
-  // Donation
-  const [donationAmount, setDonationAmount] = useState("");
-  const [donationMessage, setDonationMessage] = useState("");
-
-  // Alerts
-  const [alertQueue, setAlertQueue] = useState<DonationAlertData[]>([]);
+  // Sound
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [ttsEnabled, setTtsEnabled] = useState(true);
 
   // Poll
   const [pollOptions, setPollOptions] = useState<PollOption[]>([
@@ -90,64 +75,12 @@ export default function StreamHub() {
     return () => clearInterval(interval);
   }, []);
 
-  // Subscribe to donation alerts via realtime
-  useEffect(() => {
-    const channel = supabase
-      .channel("stream-donations-alerts")
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "stream_donations",
-      }, (payload) => {
-        const d = payload.new as any;
-        setAlertQueue(prev => [...prev, {
-          id: d.id,
-          username: d.username,
-          amount: d.amount,
-          message: d.message,
-          type: "donation",
-        }]);
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, []);
-
-  const handleAlertShown = useCallback((id: string) => {
-    setAlertQueue(prev => prev.filter(a => a.id !== id));
-  }, []);
-
   // Send reaction
   const sendReaction = (emoji: string) => {
     const id = `r${Date.now()}${Math.random()}`;
     const x = 10 + Math.random() * 80;
     setReactions(prev => [...prev, { id, emoji, x }]);
     setTimeout(() => setReactions(prev => prev.filter(r => r.id !== id)), 3000);
-  };
-
-  // Donation
-  const handleDonate = async () => {
-    const amount = parseFloat(donationAmount);
-    if (!amount || amount < 0.5) {
-      toast({ title: "Minimum donation is $0.50", variant: "destructive" });
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.functions.invoke("create-payment", {
-        body: {
-          amount: Math.round(amount * 100),
-          item_type: "stream_donation",
-          message: donationMessage,
-        },
-      });
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      } else if (error) {
-        toast({ title: "Payment error", variant: "destructive" });
-      }
-    } catch {
-      toast({ title: "Payment error", variant: "destructive" });
-    }
   };
 
   // Vote
@@ -168,14 +101,6 @@ export default function StreamHub() {
     <div className="min-h-screen bg-background relative">
       <DynamicBackground />
       <Navbar />
-
-      {/* Donation Alert Overlay */}
-      <DonationAlert
-        alerts={alertQueue}
-        onAlertShown={handleAlertShown}
-        soundEnabled={soundEnabled}
-        ttsEnabled={ttsEnabled}
-      />
 
       <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16 relative z-10">
         {/* Header */}
@@ -198,7 +123,7 @@ export default function StreamHub() {
             DailyChess<span className="text-gradient-gold">_12</span> Live
           </h1>
           <p className="text-sm text-muted-foreground mb-3">
-            My live streams & videos — watch, chat & support
+            Watch live streams & videos — chat with the community
           </p>
           <div className="flex items-center justify-center gap-3">
             <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
@@ -214,14 +139,6 @@ export default function StreamHub() {
             >
               {soundEnabled ? <Volume2 className="w-3.5 h-3.5 mr-1" /> : <VolumeX className="w-3.5 h-3.5 mr-1" />}
               Sound
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setTtsEnabled(!ttsEnabled)}
-              className="text-xs text-muted-foreground"
-            >
-              TTS {ttsEnabled ? "ON" : "OFF"}
             </Button>
           </div>
         </motion.div>
@@ -338,21 +255,15 @@ export default function StreamHub() {
               ))}
             </div>
 
-            {/* Tabs: Queue / Poll / Subscribe */}
+            {/* Tabs: Queue / Poll */}
             <Tabs defaultValue="queue" className="w-full">
-              <TabsList className="w-full grid grid-cols-4 bg-muted/20">
+              <TabsList className="w-full grid grid-cols-2 bg-muted/20">
                 <TabsTrigger value="queue" className="text-xs">⚔️ Queue</TabsTrigger>
-                <TabsTrigger value="sponsor" className="text-xs">♟️ Sponsor</TabsTrigger>
                 <TabsTrigger value="poll" className="text-xs">📊 Poll</TabsTrigger>
-                <TabsTrigger value="subscribe" className="text-xs">👑 Sub</TabsTrigger>
               </TabsList>
 
               <TabsContent value="queue">
                 <StreamQueue />
-              </TabsContent>
-
-              <TabsContent value="sponsor">
-                <SponsorAMove />
               </TabsContent>
 
               <TabsContent value="poll">
@@ -388,74 +299,12 @@ export default function StreamHub() {
                   </CardContent>
                 </Card>
               </TabsContent>
-
-              <TabsContent value="subscribe">
-                <SubscriptionTiers />
-              </TabsContent>
             </Tabs>
           </div>
 
-          {/* Right: Chat + Donate */}
-          <div className="flex flex-col gap-4 lg:min-h-[700px]">
-            <div className="flex-1">
-              <StreamChat />
-            </div>
-
-            {/* Donation Goal Bar */}
-            <DonationGoalBar />
-
-            {/* Donation Panel */}
-            <Card className="border-primary/20 bg-gradient-to-b from-primary/5 to-transparent backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Heart className="w-4 h-4 text-red-400" />
-                  <h3 className="font-display text-sm font-bold text-foreground">Support the Stream</h3>
-                </div>
-                <p className="text-[9px] text-muted-foreground mb-3">
-                  $1→ shoutout · $5→ highlight · $10→ play vs streamer · $20→ game analysis
-                </p>
-                {/* Micro-donation buttons */}
-                <div className="grid grid-cols-4 gap-1.5 mb-2">
-                  {[0.5, 1, 2, 5].map(amt => (
-                    <Button
-                      key={amt}
-                      size="sm"
-                      variant={donationAmount === String(amt) ? "default" : "outline"}
-                      onClick={() => setDonationAmount(String(amt))}
-                      className={`text-xs h-8 ${
-                        donationAmount === String(amt)
-                          ? "shadow-[0_0_10px_rgba(var(--primary),0.3)]"
-                          : "hover:shadow-[0_0_8px_rgba(var(--primary),0.15)]"
-                      }`}
-                    >
-                      ${amt < 1 ? amt.toFixed(2) : amt}
-                    </Button>
-                  ))}
-                </div>
-                <Input
-                  type="number"
-                  min="0.5"
-                  step="0.5"
-                  value={donationAmount}
-                  onChange={e => setDonationAmount(e.target.value)}
-                  placeholder="Custom amount ($)"
-                  className="h-8 text-xs bg-muted/20 border-border/30 mb-2"
-                />
-                <Input
-                  value={donationMessage}
-                  onChange={e => setDonationMessage(e.target.value)}
-                  placeholder="Message (shows on stream! 🔊 $2+ = TTS)"
-                  className="h-8 text-xs bg-muted/20 border-border/30 mb-3"
-                  maxLength={120}
-                />
-                <Button onClick={handleDonate} className="w-full text-xs h-9 group">
-                  <DollarSign className="w-3.5 h-3.5 mr-1 group-hover:animate-pulse" /> Donate 💰
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Recent Donations Feed */}
-            <RecentDonationsFeed />
+          {/* Right: Chat */}
+          <div className="flex flex-col lg:min-h-[700px]">
+            <StreamChat />
           </div>
         </div>
       </main>

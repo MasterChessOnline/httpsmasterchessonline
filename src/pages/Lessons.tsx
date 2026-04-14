@@ -1,14 +1,11 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Swords, Target, Clock, User, Loader2, Check, Star } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { BookOpen, Swords, Target, Clock, User, Check, Star } from "lucide-react";
 import { MARKETPLACE_LESSONS, type MarketplaceLesson } from "@/lib/lessons-marketplace-data";
 
 const LEVEL_STYLES: Record<string, string> = {
@@ -26,33 +23,16 @@ const ICON_MAP: Record<string, typeof BookOpen> = {
 const LessonCard = ({ lesson }: { lesson: MarketplaceLesson }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   const Icon = ICON_MAP[lesson.icon] || BookOpen;
 
-  const handlePurchase = async () => {
+  const handleClick = () => {
     if (!user) {
       navigate("/login");
       return;
     }
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-payment", {
-        body: {
-          amount: Math.round(lesson.price * 100),
-          currency: "usd",
-          itemType: "lesson",
-          itemId: lesson.id,
-          returnUrl: window.location.origin,
-        },
-      });
-      if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
-    } catch {
-      toast({ title: "Error", description: "Could not start checkout. Please try again.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
+    // Coming soon - booking system
+    alert("Booking system coming soon! Please contact us directly.");
   };
 
   return (
@@ -116,8 +96,8 @@ const LessonCard = ({ lesson }: { lesson: MarketplaceLesson }) => {
               {lesson.duration}
             </div>
           </div>
-          <Button onClick={handlePurchase} disabled={loading} className="px-5">
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+          <Button onClick={handleClick} className="px-5">
+            <Check className="w-4 h-4 mr-2" />
             Book Lesson
           </Button>
         </div>
@@ -148,8 +128,8 @@ const Lessons = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
           {[
             { step: "1", title: "Choose a lesson", desc: "Pick the topic that fits your goals" },
-            { step: "2", title: "Complete payment", desc: "Secure checkout via Stripe" },
-            { step: "3", title: "Get scheduled", desc: "We'll reach out to book your session" },
+            { step: "2", title: "Contact us", desc: "Reach out to schedule your session" },
+            { step: "3", title: "Start learning", desc: "Get personalized coaching and improve" },
           ].map((s) => (
             <div key={s.step} className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border/30">
               <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 text-sm font-bold text-primary">

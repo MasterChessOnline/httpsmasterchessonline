@@ -8,7 +8,6 @@ const sections = [
   { title: "Acceptance of Terms", text: "By using MasterChessOnline, you agree to these terms. If you do not agree, please do not use the platform." },
   { title: "Accounts", text: "You are responsible for maintaining the security of your account. One account per person is allowed. We reserve the right to suspend accounts that violate fair play policies." },
   { title: "Fair Play", text: "Using chess engines or external assistance during rated games or tournaments is strictly prohibited and may result in permanent ban." },
-  { title: "Payments & Refunds", text: "Premium memberships and donations are non-refundable unless required by law. Tournament entry fees may be refunded if the tournament is cancelled." },
   { title: "Content", text: "All lessons, courses, and content are the intellectual property of DailyChess_12 / MasterChessOnline and may not be redistributed without permission." },
   { title: "Contact", text: "" },
 ];

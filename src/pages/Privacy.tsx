@@ -6,8 +6,7 @@ import ScrollReveal from "@/components/ScrollReveal";
 
 const sections = [
   { title: "Information We Collect", text: "We collect information you provide when creating an account (email, display name) and gameplay data (ratings, game history) to deliver and improve our services." },
-  { title: "How We Use Your Information", text: "Your data is used to provide chess games, track progress, maintain leaderboards, and process payments. We never sell your personal information to third parties." },
-  { title: "Payments", text: "Payments are processed securely through Stripe. We do not store your credit card information on our servers." },
+  { title: "How We Use Your Information", text: "Your data is used to provide chess games, track progress, maintain leaderboards, and improve our platform. We never sell your personal information to third parties." },
   { title: "Cookies", text: "We use essential cookies for authentication and session management. No third-party tracking cookies are used." },
   { title: "Contact", text: 'For privacy-related questions, please reach out via our Contact page.' },
 ];
