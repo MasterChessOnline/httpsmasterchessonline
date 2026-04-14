@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import DonorRankBadge from "./DonorRankBadge";
+
 
 interface ChatMsg {
   id: string;

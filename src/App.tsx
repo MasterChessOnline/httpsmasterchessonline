@@ -47,8 +47,6 @@ import Chat from "./pages/Chat";
 import Clubs from "./pages/Clubs";
 import GameReview from "./pages/GameReview";
 import Spectate from "./pages/Spectate";
-import Donate from "./pages/Donate";
-import PaymentSuccess from "./pages/PaymentSuccess";
 import GuessTheMove from "./pages/GuessTheMove";
 import PlayLikeGM from "./pages/PlayLikeGM";
 import Community from "./pages/Community";
@@ -97,8 +95,6 @@ function AnimatedRoutes() {
           <Route path="/clubs" element={<Clubs />} />
           <Route path="/game-review" element={<GameReview />} />
           <Route path="/spectate" element={<Spectate />} />
-          <Route path="/donate" element={<Donate />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/guess-the-move" element={<GuessTheMove />} />
           <Route path="/play-like-gm" element={<PlayLikeGM />} />
           <Route path="/community" element={<Community />} />
