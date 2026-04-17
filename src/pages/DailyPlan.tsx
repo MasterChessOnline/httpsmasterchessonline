@@ -248,7 +248,12 @@ export default function DailyPlan() {
 }
 
 function StatTile({ icon: Icon, label, value, accent }: { icon: typeof Flame; label: string; value: string; accent: string }) {
-  const colorClass = accent === "primary" ? "text-primary" : `text-${accent}`;
+  const colorMap: Record<string, string> = {
+    primary: "text-primary",
+    "emerald-500": "text-emerald-400",
+    "orange-500": "text-orange-400",
+  };
+  const colorClass = colorMap[accent] ?? "text-primary";
   return (
     <Card className="glass-4d border-border/40 p-4">
       <div className="flex items-center gap-2 mb-1">
