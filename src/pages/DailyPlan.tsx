@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { COURSES } from "@/lib/courses-data";
-import { calculateXP } from "@/lib/gamification";
+import { calculateXP, getLevelFromXP } from "@/lib/gamification";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
@@ -71,13 +71,11 @@ export default function DailyPlan() {
     0
   );
 
-  const xpInfo = profile ? calculateXP(profile, {
+  const xp = profile ? calculateXP(profile, {
     lessonsCompleted: totalCompletedLessons,
     streakDays: streak.current_streak,
-    storyChaptersCompleted: 0,
-    tournamentsPlayed: 0,
-    achievementsEarned: 0,
-  }) : null;
+  }) : 0;
+  const xpInfo = getLevelFromXP(xp);
 
   const tasks: PlanTask[] = useMemo(() => [
     {
@@ -157,7 +155,7 @@ export default function DailyPlan() {
           <StatTile icon={CheckCircle2} label="Today" value={`${completed}/${tasks.length}`} accent="emerald-500" />
           <StatTile icon={Flame} label="Streak" value={`${streak.current_streak}d`} accent="orange-500" />
           <StatTile icon={Sparkles} label="XP today" value={`+${totalXP}`} accent="primary" />
-          <StatTile icon={Trophy} label="Level" value={`${xpInfo?.level ?? 1}`} accent="primary" />
+          <StatTile icon={Trophy} label="Level" value={`${xpInfo.level}`} accent="primary" />
         </div>
 
         {/* Progress */}
