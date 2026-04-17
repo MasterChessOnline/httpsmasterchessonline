@@ -53,7 +53,10 @@ const NAV_SECTIONS: NavSection[] = [
     accent: "271 91% 65%",
     accentRgb: "168,85,247",
     items: [
-      { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path", subheading: "Fundamentals" },
+      { label: "Daily Training Plan", href: "/daily-plan", icon: Sparkles, desc: "Your personalized daily tasks", highlight: true, subheading: "Improve" },
+      { label: "AI Coach", href: "/coach", icon: Brain, desc: "Ask the AI chess coach anything" },
+      { label: "Opening Repertoire", href: "/repertoire", icon: BookOpen, desc: "Build your personal repertoire" },
+      { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path", separator: true, subheading: "Fundamentals" },
       { label: "Openings", href: "/openings", icon: BookOpen, desc: "Master opening systems" },
       { label: "Endgames", href: "/learn", icon: Crown, desc: "Technique & calculation" },
       { label: "Analyze Game", href: "/analysis", icon: Eye, desc: "Review your recent game", separator: true, subheading: "Analysis" },
