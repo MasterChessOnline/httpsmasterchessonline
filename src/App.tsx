@@ -51,6 +51,9 @@ import GuessTheMove from "./pages/GuessTheMove";
 import PlayLikeGM from "./pages/PlayLikeGM";
 import Community from "./pages/Community";
 import StreamHub from "./pages/StreamHub";
+import Coach from "./pages/Coach";
+import DailyPlan from "./pages/DailyPlan";
+import Repertoire from "./pages/Repertoire";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -99,6 +102,9 @@ function AnimatedRoutes() {
           <Route path="/play-like-gm" element={<PlayLikeGM />} />
           <Route path="/community" element={<Community />} />
           <Route path="/live" element={<StreamHub />} />
+          <Route path="/coach" element={<Coach />} />
+          <Route path="/daily-plan" element={<DailyPlan />} />
+          <Route path="/repertoire" element={<Repertoire />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
