@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { TIME_CONTROLS } from "@/components/ChessClock";
+import { calculateRatingChange, logOnlineRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 
 export type OnlineGameStatus = "idle" | "searching" | "playing" | "finished";
 
@@ -28,6 +29,7 @@ export function useOnlineGame() {
   const [status, setStatus] = useState<OnlineGameStatus>("idle");
   const [game, setGame] = useState<OnlineGame | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ratingResult, setRatingResult] = useState<RatingCalcResult | null>(null);
   const queueEntryId = useRef<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -37,6 +39,52 @@ export function useOnlineGame() {
   const myColor = game
     ? game.white_player_id === user?.id ? "w" : "b"
     : null;
+
+  // Helper: apply elo + log rating history + compute the user's RatingCalcResult
+  const applyEloAndLog = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string }) => {
+    if (!user) return;
+    // Snapshot opponent + my old rating BEFORE the RPC mutates them
+    const isWhite = g.white_player_id === user.id;
+    const opponentId = isWhite ? g.black_player_id : g.white_player_id;
+    const [{ data: meBefore }, { data: oppBefore }] = await Promise.all([
+      supabase.from("profiles").select("rating, games_played").eq("user_id", user.id).maybeSingle(),
+      supabase.from("profiles").select("rating, display_name, username").eq("user_id", opponentId).maybeSingle(),
+    ]);
+    const myOld = (meBefore as any)?.rating ?? 1200;
+    const oppRating = (oppBefore as any)?.rating ?? 1200;
+    const myGames = (meBefore as any)?.games_played ?? 0;
+    const oppLabel = (oppBefore as any)?.display_name ?? (oppBefore as any)?.username ?? "Player";
+
+    await supabase.rpc("update_elo_ratings", {
+      p_white_id: g.white_player_id,
+      p_black_id: g.black_player_id,
+      p_result: g.result,
+    });
+
+    const myResult: "win" | "loss" | "draw" =
+      g.result === "1/2-1/2" ? "draw"
+      : (g.result === "1-0" && isWhite) || (g.result === "0-1" && !isWhite) ? "win"
+      : "loss";
+
+    const calc = calculateRatingChange({
+      playerRating: myOld,
+      opponentRating: oppRating,
+      result: myResult,
+      gamesPlayed: myGames,
+    });
+    setRatingResult(calc);
+
+    await logOnlineRatingChange({
+      userId: user.id,
+      oldRating: myOld,
+      newRating: calc.newRating,
+      opponentRating: oppRating,
+      opponentLabel: oppLabel,
+      result: myResult,
+    });
+    await refreshProfile();
+  }, [user, refreshProfile]);
+
 
   // Clean up all channels
   const cleanupChannels = useCallback(() => {
@@ -71,11 +119,11 @@ export function useOnlineGame() {
           setStatus("finished");
           if (!eloUpdatedRef.current && updated.result) {
             eloUpdatedRef.current = true;
-            supabase.rpc("update_elo_ratings", {
-              p_white_id: updated.white_player_id,
-              p_black_id: updated.black_player_id,
-              p_result: updated.result,
-            }).then(() => refreshProfile());
+            applyEloAndLog({
+              white_player_id: updated.white_player_id,
+              black_player_id: updated.black_player_id,
+              result: updated.result,
+            });
           }
         }
       })
@@ -100,11 +148,11 @@ export function useOnlineGame() {
               setStatus("finished");
               if (!eloUpdatedRef.current && data.result) {
                 eloUpdatedRef.current = true;
-                supabase.rpc("update_elo_ratings", {
-                  p_white_id: data.white_player_id,
-                  p_black_id: data.black_player_id,
-                  p_result: data.result,
-                }).then(() => refreshProfile());
+                applyEloAndLog({
+                  white_player_id: data.white_player_id,
+                  black_player_id: data.black_player_id,
+                  result: data.result,
+                });
               }
             }
             return data as OnlineGame;
@@ -304,14 +352,13 @@ export function useOnlineGame() {
 
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
-      await supabase.rpc("update_elo_ratings", {
-        p_white_id: game.white_player_id,
-        p_black_id: game.black_player_id,
-        p_result: result,
+      await applyEloAndLog({
+        white_player_id: game.white_player_id,
+        black_player_id: game.black_player_id,
+        result,
       });
-      refreshProfile();
     }
-  }, [game, refreshProfile]);
+  }, [game, applyEloAndLog]);
 
   const resign = useCallback(async () => {
     if (!game || !myColor) return;
@@ -335,5 +382,5 @@ export function useOnlineGame() {
     };
   }, [user, cleanupChannels]);
 
-  return { status, game, myColor, error, searchMatch, cancelSearch, makeMove, endGame, resign, reset };
+  return { status, game, myColor, error, ratingResult, searchMatch, cancelSearch, makeMove, endGame, resign, reset };
 }

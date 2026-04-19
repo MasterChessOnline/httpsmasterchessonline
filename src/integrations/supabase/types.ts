@@ -500,6 +500,11 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          bot_games_drawn: number
+          bot_games_lost: number
+          bot_games_played: number
+          bot_games_won: number
+          bot_rating: number
           created_at: string
           display_name: string | null
           favorite_openings: string[] | null
@@ -518,6 +523,11 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          bot_games_drawn?: number
+          bot_games_lost?: number
+          bot_games_played?: number
+          bot_games_won?: number
+          bot_rating?: number
           created_at?: string
           display_name?: string | null
           favorite_openings?: string[] | null
@@ -536,6 +546,11 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          bot_games_drawn?: number
+          bot_games_lost?: number
+          bot_games_played?: number
+          bot_games_won?: number
+          bot_rating?: number
           created_at?: string
           display_name?: string | null
           favorite_openings?: string[] | null
@@ -618,6 +633,45 @@ export type Database = {
           puzzle_index?: number
           solved?: boolean
           time_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rating_history: {
+        Row: {
+          created_at: string
+          id: string
+          new_rating: number
+          old_rating: number
+          opponent_label: string | null
+          opponent_rating: number | null
+          rating_change: number
+          rating_type: string
+          result: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          new_rating: number
+          old_rating: number
+          opponent_label?: string | null
+          opponent_rating?: number | null
+          rating_change: number
+          rating_type?: string
+          result: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          new_rating?: number
+          old_rating?: number
+          opponent_label?: string | null
+          opponent_rating?: number | null
+          rating_change?: number
+          rating_type?: string
+          result?: string
           user_id?: string
         }
         Relationships: []

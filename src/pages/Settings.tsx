@@ -119,6 +119,10 @@ const Settings = () => {
   const [notifGameReminder, setNotifGameReminder] = useState(settings.notifGameReminder ?? true);
   // Default time control
   const [defaultTimeControl, setDefaultTimeControl] = useState<"bullet" | "blitz" | "rapid">(settings.defaultTimeControl ?? "blitz");
+  // Rating display
+  const [showRatingChange, setShowRatingChange] = useState<boolean>(settings.showRatingChange ?? true);
+  const [showExpectedScore, setShowExpectedScore] = useState<boolean>(settings.showExpectedScore ?? true);
+  const [ratingAnimation, setRatingAnimation] = useState<boolean>(settings.ratingAnimation ?? true);
 
   useEffect(() => { if (profile) setDisplayName(profile.display_name || ""); }, [profile]);
 
@@ -200,6 +204,23 @@ const Settings = () => {
                   <Switch checked={item.value} onCheckedChange={v => toggle(item.key, v, item.setter)} />
                 </div>
               ))}
+            </div>
+
+            <div>
+              <h4 className="text-sm font-display font-semibold text-foreground mb-2 mt-2">Rating display</h4>
+              <p className="text-xs text-muted-foreground mb-3">Control how rating changes appear after each game.</p>
+              <div className="space-y-3">
+                {[
+                  { label: "Show rating change", desc: "Display +/- after every game", value: showRatingChange, key: "showRatingChange", setter: setShowRatingChange },
+                  { label: "Show expected score", desc: "Display win probability based on Elo", value: showExpectedScore, key: "showExpectedScore", setter: setShowExpectedScore },
+                  { label: "Rating animation", desc: "Smoothly animate the rating counter", value: ratingAnimation, key: "ratingAnimation", setter: setRatingAnimation },
+                ].map(item => (
+                  <div key={item.key} className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4">
+                    <div><p className="text-sm font-medium text-foreground">{item.label}</p><p className="text-xs text-muted-foreground">{item.desc}</p></div>
+                    <Switch checked={item.value} onCheckedChange={v => toggle(item.key, v, item.setter)} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );

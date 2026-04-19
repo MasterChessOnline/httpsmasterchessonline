@@ -21,6 +21,8 @@ import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, Mess
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
 import { BOT_PROFILES, getRandomBot, type BotProfile } from "@/lib/bot-profiles";
 import { motion, AnimatePresence } from "framer-motion";
+import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
+import RatingChange from "@/components/RatingChange";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -33,7 +35,7 @@ const PHASE_RECOMMENDATIONS = [
 ];
 
 const Play = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [fen, setFen] = useState("start");
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
@@ -67,6 +69,10 @@ const Play = () => {
 
   // --- NEW: Premove system ---
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
+
+  // --- Bot rating tracking ---
+  const [botRatingResult, setBotRatingResult] = useState<RatingCalcResult | null>(null);
+  const ratingAppliedRef = useRef(false);
 
   const [timeControlIdx, setTimeControlIdx] = useState(6);
   const timeControl = TIME_CONTROLS[timeControlIdx];
@@ -421,6 +427,8 @@ const Play = () => {
     setDrawOfferPending(false);
     setDrawDeclined(false);
     setPremove(null);
+    setBotRatingResult(null);
+    ratingAppliedRef.current = false;
     positionHistory.current = [];
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
@@ -474,6 +482,36 @@ const Play = () => {
     : null;
 
   const pgn = game.pgn();
+
+  // --- Apply bot rating change once when an AI game finishes ---
+  useEffect(() => {
+    if (!isGameOver || !gameResult || mode !== "ai" || !user || !profile) return;
+    if (ratingAppliedRef.current) return;
+    if (moveHistory.length < 4) return; // ignore instant resigns
+    ratingAppliedRef.current = true;
+
+    const playerWon =
+      (gameResult === "1-0" && playerColor === "w") ||
+      (gameResult === "0-1" && playerColor === "b");
+    const isDraw = gameResult === "1/2-1/2";
+    const result: "win" | "loss" | "draw" = isDraw ? "draw" : playerWon ? "win" : "loss";
+
+    const botRating = (AI_LEVELS.find(l => l.value === difficulty)?.rating) ?? 1200;
+    const currentBotRating = (profile as any).bot_rating ?? 1200;
+    const botGames = (profile as any).bot_games_played ?? 0;
+
+    applyBotRatingChange({
+      userId: user.id,
+      currentRating: currentBotRating,
+      botRating,
+      botLabel: currentBot.name,
+      gamesPlayed: botGames,
+      result,
+    }).then(calc => {
+      setBotRatingResult(calc);
+      refreshProfile();
+    }).catch(() => { ratingAppliedRef.current = false; });
+  }, [isGameOver, gameResult, mode, user, profile, difficulty, playerColor, currentBot.name, moveHistory.length, refreshProfile]);
 
   const getRecommendations = () => {
     if (!isGameOver || !gameResult) return [];
@@ -912,6 +950,9 @@ const Play = () => {
 
             {isGameOver && gameResult && moveHistory.length >= 4 && (
               <GameSummary moveHistory={moveHistory} result={gameResult} playerColor={playerColor} difficulty={difficulty} />
+            )}
+            {botRatingResult && mode === "ai" && (
+              <RatingChange result={botRatingResult} ratingType="bot" />
             )}
             {isGameOver && gameResult && pgn && mode === "ai" && (
               <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />

@@ -15,6 +15,8 @@ import { getRank as getRankFromLib } from "@/lib/ranks";
 import { Link } from "react-router-dom";
 import { analyzePersonality } from "@/lib/play-personality";
 
+import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
+
 interface ProfileData {
   id: string;
   user_id: string;
@@ -22,6 +24,11 @@ interface ProfileData {
   username: string | null;
   avatar_url: string | null;
   rating: number;
+  bot_rating?: number;
+  bot_games_played?: number;
+  bot_games_won?: number;
+  bot_games_lost?: number;
+  bot_games_drawn?: number;
   games_played: number;
   games_won: number;
   games_lost: number;
@@ -56,6 +63,8 @@ const Profile = () => {
   const [friendStatus, setFriendStatus] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
+  const [onlineHistory, setOnlineHistory] = useState<RatingPoint[]>([]);
+  const [botHistory, setBotHistory] = useState<RatingPoint[]>([]);
 
   const isOwnProfile = user?.id === userId;
 
@@ -75,6 +84,17 @@ const Profile = () => {
       .order("created_at", { ascending: false })
       .limit(20)
       .then(({ data }) => { setGames((data as GameHistory[]) || []); });
+
+    // Rating history (last 30 entries each)
+    supabase.from("rating_history" as any).select("*")
+      .eq("user_id", userId).eq("rating_type", "online")
+      .order("created_at", { ascending: false }).limit(30)
+      .then(({ data }) => setOnlineHistory(((data as any[]) || []).reverse() as RatingPoint[]));
+
+    supabase.from("rating_history" as any).select("*")
+      .eq("user_id", userId).eq("rating_type", "bot")
+      .order("created_at", { ascending: false }).limit(30)
+      .then(({ data }) => setBotHistory(((data as any[]) || []).reverse() as RatingPoint[]));
 
     if (user && user.id !== userId) {
       supabase.from("friendships").select("status")
@@ -183,10 +203,30 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Rating display */}
-            <div className="mt-4 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">ELO Rating</p>
-              <p className="font-mono text-4xl sm:text-5xl font-bold text-primary drop-shadow-glow">{profileData.rating}</p>
+            {/* Dual rating display */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Online Rating</p>
+                <p className="font-mono text-3xl font-bold text-primary drop-shadow-glow">{profileData.rating}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">vs real players</p>
+              </div>
+              <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Bot Rating</p>
+                <p className="font-mono text-3xl font-bold text-accent">{profileData.bot_rating ?? 1200}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">vs AI bots</p>
+              </div>
+            </div>
+
+            {/* Rating history graphs */}
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Online history</p>
+                <RatingHistoryGraph points={onlineHistory} color="hsl(var(--primary))" />
+              </div>
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Bot history</p>
+                <RatingHistoryGraph points={botHistory} color="hsl(var(--accent))" />
+              </div>
             </div>
 
             {/* Friend actions */}

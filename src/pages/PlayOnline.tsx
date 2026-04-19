@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake, Zap, Eye, MonitorOff } from "lucide-react";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
+import RatingChange from "@/components/RatingChange";
 import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -44,7 +45,7 @@ const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const {
-    status: onlineStatus, game: onlineGame, myColor, error: onlineError,
+    status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult,
     searchMatch, cancelSearch, makeMove, endGame, resign, reset: resetOnline,
   } = useOnlineGame();
 
@@ -544,6 +545,10 @@ const PlayOnline = () => {
                   <Eye className="h-3.5 w-3.5" /> Focus
                 </Button>
               </div>
+            )}
+
+            {isGameOver && ratingResult && (
+              <RatingChange result={ratingResult} ratingType="online" />
             )}
 
             {isGameOver && (

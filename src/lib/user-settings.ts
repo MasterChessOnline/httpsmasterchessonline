@@ -22,6 +22,10 @@ export interface ChessSettings {
   notifGameReminder?: boolean;
   // Play
   defaultTimeControl?: DefaultTimeControl;
+  // Rating display
+  showRatingChange?: boolean;
+  showExpectedScore?: boolean;
+  ratingAnimation?: boolean;
   // existing keys also live here (premoves, boardTheme, etc.)
   premoves?: boolean;
   boardTheme?: string;
