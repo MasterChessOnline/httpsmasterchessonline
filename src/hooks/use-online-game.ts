@@ -119,11 +119,11 @@ export function useOnlineGame() {
           setStatus("finished");
           if (!eloUpdatedRef.current && updated.result) {
             eloUpdatedRef.current = true;
-            supabase.rpc("update_elo_ratings", {
-              p_white_id: updated.white_player_id,
-              p_black_id: updated.black_player_id,
-              p_result: updated.result,
-            }).then(() => refreshProfile());
+            applyEloAndLog({
+              white_player_id: updated.white_player_id,
+              black_player_id: updated.black_player_id,
+              result: updated.result,
+            });
           }
         }
       })
@@ -148,11 +148,11 @@ export function useOnlineGame() {
               setStatus("finished");
               if (!eloUpdatedRef.current && data.result) {
                 eloUpdatedRef.current = true;
-                supabase.rpc("update_elo_ratings", {
-                  p_white_id: data.white_player_id,
-                  p_black_id: data.black_player_id,
-                  p_result: data.result,
-                }).then(() => refreshProfile());
+                applyEloAndLog({
+                  white_player_id: data.white_player_id,
+                  black_player_id: data.black_player_id,
+                  result: data.result,
+                });
               }
             }
             return data as OnlineGame;
@@ -352,14 +352,13 @@ export function useOnlineGame() {
 
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
-      await supabase.rpc("update_elo_ratings", {
-        p_white_id: game.white_player_id,
-        p_black_id: game.black_player_id,
-        p_result: result,
+      await applyEloAndLog({
+        white_player_id: game.white_player_id,
+        black_player_id: game.black_player_id,
+        result,
       });
-      refreshProfile();
     }
-  }, [game, refreshProfile]);
+  }, [game, applyEloAndLog]);
 
   const resign = useCallback(async () => {
     if (!game || !myColor) return;
