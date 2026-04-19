@@ -1,18 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { TrendingUp, Target, BarChart3, PieChart, Swords, Crown, BookOpen, Flame } from "lucide-react";
+import { TrendingUp, Target, BarChart3, PieChart, Swords, Crown, BookOpen, Flame, Dna, Lightbulb, Brain } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { computeChessDNA, type DNAGame } from "@/lib/chess-dna";
 
 const Stats = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const [recentGames, setRecentGames] = useState<any[]>([]);
+  const [recentGames, setRecentGames] = useState<DNAGame[]>([]);
 
   useEffect(() => {
     if (!loading && !user) navigate("/login");
@@ -22,13 +23,15 @@ const Stats = () => {
     if (!user) return;
     supabase
       .from("online_games")
-      .select("id, result, white_player_id, black_player_id, time_control_label, created_at")
+      .select("id, result, white_player_id, black_player_id, time_control_label, pgn, white_time, black_time, created_at")
       .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
       .eq("status", "finished")
       .order("created_at", { ascending: false })
       .limit(50)
-      .then(({ data }) => setRecentGames(data || []));
+      .then(({ data }) => setRecentGames((data as any) || []));
   }, [user]);
+
+  const dna = useMemo(() => user ? computeChessDNA(user.id, recentGames) : null, [user, recentGames]);
 
   if (loading || !profile) {
     return (
