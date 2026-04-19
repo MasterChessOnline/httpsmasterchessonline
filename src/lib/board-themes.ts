@@ -42,8 +42,8 @@ export interface PieceStyle {
 export const PIECE_STYLES: PieceStyle[] = [
   {
     key: "standard",
-    label: "Standard",
-    description: "Classic chess pieces",
+    label: "Classic Staunton",
+    description: "Traditional tournament look",
     render: { whiteFill: "#ffffff", blackFill: "hsl(220,15%,8%)", whiteStroke: "rgba(0,0,0,0.85)", fontWeight: 400 },
   },
   {
@@ -57,6 +57,18 @@ export const PIECE_STYLES: PieceStyle[] = [
     label: "Bold High-Contrast",
     description: "Heavy weight, easy to read",
     render: { whiteFill: "#ffffff", blackFill: "#000000", whiteStroke: "rgba(0,0,0,1)", blackStroke: "rgba(255,255,255,0.4)", fontWeight: 700 },
+  },
+  {
+    key: "glass",
+    label: "Glass",
+    description: "Translucent with subtle glow",
+    render: { whiteFill: "rgba(255,255,255,0.85)", blackFill: "rgba(20,20,30,0.85)", whiteStroke: "rgba(255,255,255,0.6)", blackStroke: "rgba(180,180,255,0.5)", glow: "rgba(180,200,255,0.45)", fontWeight: 400 },
+  },
+  {
+    key: "outline",
+    label: "Outline",
+    description: "Hollow pieces, max clarity",
+    render: { whiteFill: "transparent", blackFill: "transparent", whiteStroke: "rgba(255,255,255,1)", blackStroke: "rgba(0,0,0,1)", fontWeight: 600 },
   },
   {
     key: "neon",
@@ -75,6 +87,18 @@ export const PIECE_STYLES: PieceStyle[] = [
     label: "Monochrome",
     description: "Pure black on white",
     render: { whiteFill: "#e5e5e5", blackFill: "#0a0a0a", fontWeight: 400 },
+  },
+  {
+    key: "tournament",
+    label: "Tournament Pro",
+    description: "Crisp ivory & graphite",
+    render: { whiteFill: "#faf6ec", blackFill: "#2a2622", whiteStroke: "rgba(60,40,20,0.6)", blackStroke: "rgba(255,255,255,0.15)", fontWeight: 500 },
+  },
+  {
+    key: "cartoon",
+    label: "Cartoon",
+    description: "Playful rounded look",
+    render: { whiteFill: "#fff4d4", blackFill: "#3b2a4a", whiteStroke: "rgba(180,120,40,0.8)", blackStroke: "rgba(255,200,255,0.4)", fontWeight: 700 },
   },
 ];
 
