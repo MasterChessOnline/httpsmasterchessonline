@@ -85,6 +85,17 @@ const Profile = () => {
       .limit(20)
       .then(({ data }) => { setGames((data as GameHistory[]) || []); });
 
+    // Rating history (last 30 entries each)
+    supabase.from("rating_history" as any).select("*")
+      .eq("user_id", userId).eq("rating_type", "online")
+      .order("created_at", { ascending: false }).limit(30)
+      .then(({ data }) => setOnlineHistory(((data as any[]) || []).reverse() as RatingPoint[]));
+
+    supabase.from("rating_history" as any).select("*")
+      .eq("user_id", userId).eq("rating_type", "bot")
+      .order("created_at", { ascending: false }).limit(30)
+      .then(({ data }) => setBotHistory(((data as any[]) || []).reverse() as RatingPoint[]));
+
     if (user && user.id !== userId) {
       supabase.from("friendships").select("status")
         .or(`and(user_id.eq.${user.id},friend_id.eq.${userId}),and(user_id.eq.${userId},friend_id.eq.${user.id})`)
