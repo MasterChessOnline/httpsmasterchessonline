@@ -15,6 +15,8 @@ import { getRank as getRankFromLib } from "@/lib/ranks";
 import { Link } from "react-router-dom";
 import { analyzePersonality } from "@/lib/play-personality";
 
+import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
+
 interface ProfileData {
   id: string;
   user_id: string;
@@ -22,6 +24,11 @@ interface ProfileData {
   username: string | null;
   avatar_url: string | null;
   rating: number;
+  bot_rating?: number;
+  bot_games_played?: number;
+  bot_games_won?: number;
+  bot_games_lost?: number;
+  bot_games_drawn?: number;
   games_played: number;
   games_won: number;
   games_lost: number;
