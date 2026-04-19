@@ -373,7 +373,9 @@ const Play = () => {
 
   // --- "Play" button: start matchmaking flow ---
   const startMatchmaking = (bot?: BotProfile) => {
-    const selectedBot = bot || getRandomBot(difficulty);
+    const selectedBot = bot || (difficulty === "master"
+      ? BOT_PROFILES.find((candidate) => candidate.id === "aleksej-pavlovic") || getRandomBot(difficulty)
+      : getRandomBot(difficulty));
     setCurrentBot(selectedBot);
     if (bot) {
       setDifficulty(selectedBot.rating >= 2400 ? "master" : selectedBot.rating >= 2000 ? "expert" : selectedBot.rating >= 1500 ? "advanced" : selectedBot.rating >= 900 ? "intermediate" : "beginner");
@@ -454,7 +456,10 @@ const Play = () => {
       if (d === "expert") return b.rating >= 2000 && b.rating <= 2399;
       return b.rating >= 2400;
     });
-    if (candidateBots.length > 0) setCurrentBot(candidateBots[0]);
+    const preferredBot = d === "master"
+      ? candidateBots.find((candidate) => candidate.id === "aleksej-pavlovic")
+      : candidateBots[0];
+    if (preferredBot) setCurrentBot(preferredBot);
   };
 
   const boardFlipped = playerColor === "b";
@@ -667,7 +672,7 @@ const Play = () => {
   // ===================== MATCHUP SCREEN =====================
   if (gamePhase === "matchup") {
     const playerName = profile?.display_name || profile?.username || "You";
-    const playerRating = profile?.bot_rating || 1200;
+    const playerRating = (profile as any)?.bot_rating || 1200;
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center" style={{ fontFamily: "var(--font-body)" }}>
         <motion.div
