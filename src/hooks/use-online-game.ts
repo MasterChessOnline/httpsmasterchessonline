@@ -382,5 +382,5 @@ export function useOnlineGame() {
     };
   }, [user, cleanupChannels]);
 
-  return { status, game, myColor, error, searchMatch, cancelSearch, makeMove, endGame, resign, reset };
+  return { status, game, myColor, error, ratingResult, searchMatch, cancelSearch, makeMove, endGame, resign, reset };
 }
