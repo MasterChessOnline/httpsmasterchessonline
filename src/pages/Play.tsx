@@ -70,6 +70,10 @@ const Play = () => {
   // --- NEW: Premove system ---
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
 
+  // --- Bot rating tracking ---
+  const [botRatingResult, setBotRatingResult] = useState<RatingCalcResult | null>(null);
+  const ratingAppliedRef = useRef(false);
+
   const [timeControlIdx, setTimeControlIdx] = useState(6);
   const timeControl = TIME_CONTROLS[timeControlIdx];
   const unlimited = timeControl.seconds === 0;
