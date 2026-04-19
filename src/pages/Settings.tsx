@@ -198,45 +198,89 @@ const Settings = () => {
           </div>
         );
 
-      case "appearance":
+      case "appearance": {
+        const activeTheme = BOARD_THEMES.find(t => t.key === boardTheme) || BOARD_THEMES[0];
+        const activePiece = PIECE_STYLES.find(p => p.key === pieceStyle) || PIECE_STYLES[0];
         return (
           <div className="space-y-6">
-            <div><h3 className="text-lg font-display font-bold text-foreground mb-1">Appearance</h3><p className="text-sm text-muted-foreground">Board and piece visuals.</p></div>
-            <div className="space-y-4">
-              {/* Board Themes - 10 */}
-              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
-                <Label className="text-xs text-muted-foreground mb-3 block">Board Theme ({BOARD_THEMES.length})</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                  {BOARD_THEMES.map(t => (
-                    <button key={t.key} onClick={() => { setBoardTheme(t.key); saveSetting("boardTheme", t.key); toast.success(`Board: ${t.label}`); }}
-                      className={`rounded-lg p-2 border transition-all ${boardTheme === t.key ? "border-primary ring-2 ring-primary/30" : "border-border/50 hover:border-primary/30"}`}>
-                      <div className="grid grid-cols-4 gap-0 rounded overflow-hidden mb-1">
-                        {Array.from({ length: 16 }).map((_, i) => {
-                          const isLight = (Math.floor(i / 4) + i % 4) % 2 === 0;
-                          return <div key={i} className="aspect-square" style={{ backgroundColor: isLight ? t.light : t.dark }} />;
-                        })}
-                      </div>
-                      <p className="text-[9px] text-foreground font-medium text-center truncate">{t.label}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div>
+              <h3 className="text-lg font-display font-bold text-foreground mb-1">Board & Pieces</h3>
+              <p className="text-sm text-muted-foreground">Pick a board and piece set. Changes apply instantly across every game on MasterChess.</p>
+            </div>
 
-              {/* Piece Styles - 10 */}
-              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
-                <Label className="text-xs text-muted-foreground mb-3 block">Piece Style ({PIECE_STYLES.length})</Label>
-                <div className="flex flex-wrap gap-2">
-                  {PIECE_STYLES.map(ps => (
-                    <button key={ps} onClick={() => { setPieceStyle(ps); saveSetting("pieceStyle", ps); toast.success(`Pieces: ${ps}`); }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${pieceStyle === ps ? "border-primary bg-primary/15 text-primary" : "border-border/50 text-muted-foreground hover:border-primary/30"}`}>
-                      {ps}
-                    </button>
-                  ))}
-                </div>
+            {/* Live preview at the top so the user sees the change before scrolling */}
+            <LiveBoardPreview theme={activeTheme} piece={activePiece} />
+
+            {/* Board theme grid */}
+            <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-xs text-muted-foreground">Board theme</Label>
+                <span className="text-[10px] text-muted-foreground/60 font-mono">{BOARD_THEMES.length} options</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {BOARD_THEMES.map(t => (
+                  <BoardThemeCard
+                    key={t.key}
+                    theme={t}
+                    active={boardTheme === t.key}
+                    onSelect={() => {
+                      setBoardTheme(t.key);
+                      saveSetting("boardTheme", t.key);
+                      applyBoardTheme(t.key);
+                      toast.success(`Board: ${t.label}`);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Piece style grid */}
+            <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-xs text-muted-foreground">Piece style</Label>
+                <span className="text-[10px] text-muted-foreground/60 font-mono">{PIECE_STYLES.length} options</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {PIECE_STYLES.map(ps => (
+                  <PieceStyleCard
+                    key={ps.key}
+                    style={ps}
+                    active={pieceStyle === ps.key}
+                    onSelect={() => {
+                      setPieceStyle(ps.key);
+                      saveSetting("pieceStyle", ps.key);
+                      applyPieceStyle(ps.key);
+                      toast.success(`Pieces: ${ps.label}`);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Animation level */}
+            <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+              <Label className="text-xs text-muted-foreground mb-3 block">Animation level</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {ANIMATION_MODES.map(m => (
+                  <button
+                    key={m.key}
+                    onClick={() => { setAnimMode(m.key); saveSetting("animMode", m.key); toast.success(`Animations: ${m.label}`); }}
+                    className={`rounded-lg p-3 text-left transition-all border ${
+                      animMode === m.key
+                        ? "border-primary bg-primary/10"
+                        : "border-border/50 hover:border-primary/30"
+                    }`}
+                  >
+                    <p className="text-sm font-medium text-foreground">{m.label}</p>
+                    <p className="text-xs text-muted-foreground">{m.desc}</p>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         );
+      }
+
 
       case "audio":
         return (
