@@ -55,6 +55,8 @@ const Training = () => {
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [personalPositions, setPersonalPositions] = useState<TrainingPosition[]>([]);
   const [loadingPersonal, setLoadingPersonal] = useState(false);
+  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
+  const [legalMoves, setLegalMoves] = useState<Square[]>([]);
 
   useEffect(() => { if (!loading && !user) navigate("/login"); }, [user, loading, navigate]);
 
@@ -154,16 +156,50 @@ const Training = () => {
     setUserMove(null);
     setCorrect(null);
     setHintShown(false);
+    setSelectedSquare(null);
+    setLegalMoves([]);
     setPhase("playing");
   }
 
-  function handleMove(from: Square, to: Square): boolean {
-    if (!chess || !position || phase !== "playing") return false;
-    const piece = chess.get(from);
-    if (!piece) return false;
-    const promotion = piece.type === "p" && (to[1] === "8" || to[1] === "1") ? "q" : undefined;
-    const move = chess.move({ from, to, promotion });
-    if (!move) return false;
+  function handleSquareClick(square: Square) {
+    if (!chess || !position || phase !== "playing") return;
+    // If a square is already selected, attempt move
+    if (selectedSquare) {
+      if (legalMoves.includes(square)) {
+        const piece = chess.get(selectedSquare);
+        const promotion = piece?.type === "p" && (square[1] === "8" || square[1] === "1") ? "q" : undefined;
+        const move = chess.move({ from: selectedSquare, to: square, promotion });
+        if (move) {
+          const uci = selectedSquare + square + (promotion || "");
+          setUserMove(uci);
+          const acceptable = position.acceptable || [position.bestMove];
+          const ok = acceptable.includes(uci);
+          setCorrect(ok);
+          setScore(s => ({ correct: s.correct + (ok ? 1 : 0), total: s.total + 1 }));
+          setPhase("feedback");
+        }
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        return;
+      }
+      // Re-select if clicked own piece
+      const piece = chess.get(square);
+      if (piece && piece.color === chess.turn()) {
+        setSelectedSquare(square);
+        setLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+        return;
+      }
+      setSelectedSquare(null);
+      setLegalMoves([]);
+      return;
+    }
+    // First click: must be own piece
+    const piece = chess.get(square);
+    if (piece && piece.color === chess.turn()) {
+      setSelectedSquare(square);
+      setLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+    }
+  }
     const uci = from + to + (promotion || "");
     setUserMove(uci);
     const acceptable = position.acceptable || [position.bestMove];
