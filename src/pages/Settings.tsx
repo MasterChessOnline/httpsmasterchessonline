@@ -12,18 +12,20 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import {
   User, Palette, Volume2, Globe, Bell, Shield, Gamepad2,
-  LogOut, Check, ChevronRight, Settings2
+  LogOut, Check, ChevronRight, Settings2, Brain, Target as TargetIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import RankBadge from "@/components/RankBadge";
 
-type SettingsSection = "account" | "profile" | "gameplay" | "appearance" | "audio" | "language" | "notifications" | "privacy";
+type SettingsSection = "account" | "profile" | "gameplay" | "training" | "improvement" | "appearance" | "audio" | "language" | "notifications" | "privacy";
 
 const SECTIONS: { key: SettingsSection; label: string; icon: typeof User }[] = [
   { key: "account", label: "Account", icon: Shield },
   { key: "profile", label: "Profile", icon: User },
   { key: "gameplay", label: "Gameplay", icon: Gamepad2 },
+  { key: "training", label: "Training", icon: Brain },
+  { key: "improvement", label: "Improvement", icon: TargetIcon },
   { key: "appearance", label: "Appearance", icon: Palette },
   { key: "audio", label: "Audio", icon: Volume2 },
   { key: "language", label: "Language", icon: Globe },
@@ -107,6 +109,21 @@ const Settings = () => {
   const [historyPublic, setHistoryPublic] = useState(settings.historyPublic ?? true);
   const [friendRequests, setFriendRequests] = useState(settings.friendRequests ?? true);
   const [highlightMoves, setHighlightMoves] = useState(settings.highlightMoves ?? true);
+  // Training settings
+  const [coachStyle, setCoachStyle] = useState<"simple" | "detailed">(settings.coachStyle ?? "detailed");
+  const [analysisDepth, setAnalysisDepth] = useState<"fast" | "deep">(settings.analysisDepth ?? "fast");
+  const [autoAnalyze, setAutoAnalyze] = useState(settings.autoAnalyze ?? true);
+  // Improvement settings
+  const [focusArea, setFocusArea] = useState<"openings" | "tactics" | "endgames" | "balanced">(settings.focusArea ?? "balanced");
+  const [weaknessTracking, setWeaknessTracking] = useState(settings.weaknessTracking ?? true);
+  const [dailyGoalGames, setDailyGoalGames] = useState<number>(settings.dailyGoalGames ?? 3);
+  const [dailyGoalTrainings, setDailyGoalTrainings] = useState<number>(settings.dailyGoalTrainings ?? 2);
+  // Notifications additions
+  const [notifTilt, setNotifTilt] = useState(settings.notifTilt ?? true);
+  const [notifDaily, setNotifDaily] = useState(settings.notifDaily ?? true);
+  const [notifGameReminder, setNotifGameReminder] = useState(settings.notifGameReminder ?? true);
+  // Default time control
+  const [defaultTimeControl, setDefaultTimeControl] = useState<"bullet" | "blitz" | "rapid">(settings.defaultTimeControl ?? "blitz");
 
   useEffect(() => { if (profile) setDisplayName(profile.display_name || ""); }, [profile]);
 
@@ -275,6 +292,114 @@ const Settings = () => {
           </div>
         );
 
+      case "training":
+        return (
+          <div className="space-y-6">
+            <div><h3 className="text-lg font-display font-bold text-foreground mb-1">Training</h3><p className="text-sm text-muted-foreground">How the AI Coach explains things and how deep your analysis goes.</p></div>
+            <div className="space-y-4">
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <Label className="text-xs text-muted-foreground mb-3 block">AI Coach Style</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { key: "simple", label: "Simple", desc: "Short, plain-English tips" },
+                    { key: "detailed", label: "Detailed", desc: "Full 6-section breakdown" },
+                  ] as const).map(o => (
+                    <button key={o.key} onClick={() => { setCoachStyle(o.key); saveSetting("coachStyle", o.key); toast.success(`Coach: ${o.label}`); }}
+                      className={`rounded-lg p-3 text-left transition-all border ${coachStyle === o.key ? "border-primary bg-primary/10" : "border-border/50 hover:border-primary/30"}`}>
+                      <p className="text-sm font-medium text-foreground">{o.label}</p>
+                      <p className="text-xs text-muted-foreground">{o.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <Label className="text-xs text-muted-foreground mb-3 block">Analysis Depth</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { key: "fast", label: "Fast", desc: "Quick scan, key moments" },
+                    { key: "deep", label: "Deep", desc: "Move-by-move review" },
+                  ] as const).map(o => (
+                    <button key={o.key} onClick={() => { setAnalysisDepth(o.key); saveSetting("analysisDepth", o.key); toast.success(`Depth: ${o.label}`); }}
+                      className={`rounded-lg p-3 text-left transition-all border ${analysisDepth === o.key ? "border-primary bg-primary/10" : "border-border/50 hover:border-primary/30"}`}>
+                      <p className="text-sm font-medium text-foreground">{o.label}</p>
+                      <p className="text-xs text-muted-foreground">{o.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4">
+                <div><p className="text-sm font-medium text-foreground">Auto-analysis after game</p><p className="text-xs text-muted-foreground">Run a coach review when each game finishes</p></div>
+                <Switch checked={autoAnalyze} onCheckedChange={v => toggle("autoAnalyze", v, setAutoAnalyze)} />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "improvement":
+        return (
+          <div className="space-y-6">
+            <div><h3 className="text-lg font-display font-bold text-foreground mb-1">Improvement</h3><p className="text-sm text-muted-foreground">What MasterChess should focus on for your training plan.</p></div>
+            <div className="space-y-4">
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <Label className="text-xs text-muted-foreground mb-3 block">Focus Mode</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { key: "openings", label: "Openings", desc: "Repertoire & opening trainer" },
+                    { key: "tactics", label: "Tactics", desc: "Find-the-best-move drills" },
+                    { key: "endgames", label: "Endgames", desc: "Convert winning positions" },
+                    { key: "balanced", label: "Balanced", desc: "Mix of everything" },
+                  ] as const).map(o => (
+                    <button key={o.key} onClick={() => { setFocusArea(o.key); saveSetting("focusArea", o.key); toast.success(`Focus: ${o.label}`); }}
+                      className={`rounded-lg p-3 text-left transition-all border ${focusArea === o.key ? "border-primary bg-primary/10" : "border-border/50 hover:border-primary/30"}`}>
+                      <p className="text-sm font-medium text-foreground">{o.label}</p>
+                      <p className="text-xs text-muted-foreground">{o.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4">
+                <div><p className="text-sm font-medium text-foreground">Weakness tracking</p><p className="text-xs text-muted-foreground">Surface your most-lost openings and patterns in /stats</p></div>
+                <Switch checked={weaknessTracking} onCheckedChange={v => toggle("weaknessTracking", v, setWeaknessTracking)} />
+              </div>
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <Label className="text-xs text-muted-foreground mb-3 block">Daily goals</Label>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-foreground">Games per day</span>
+                      <span className="text-xs text-muted-foreground font-mono">{dailyGoalGames}</span>
+                    </div>
+                    <Slider value={[dailyGoalGames]} onValueChange={([v]) => { setDailyGoalGames(v); saveSetting("dailyGoalGames", v); }} min={1} max={10} step={1} />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-foreground">Training sessions per day</span>
+                      <span className="text-xs text-muted-foreground font-mono">{dailyGoalTrainings}</span>
+                    </div>
+                    <Slider value={[dailyGoalTrainings]} onValueChange={([v]) => { setDailyGoalTrainings(v); saveSetting("dailyGoalTrainings", v); }} min={1} max={10} step={1} />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <Label className="text-xs text-muted-foreground mb-3 block">Default time control</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { key: "bullet", label: "Bullet", desc: "1+0 / 2+1" },
+                    { key: "blitz", label: "Blitz", desc: "3+0 / 5+0" },
+                    { key: "rapid", label: "Rapid", desc: "10+0 / 15+10" },
+                  ] as const).map(o => (
+                    <button key={o.key} onClick={() => { setDefaultTimeControl(o.key); saveSetting("defaultTimeControl", o.key); toast.success(`Default: ${o.label}`); }}
+                      className={`rounded-lg p-3 text-left transition-all border ${defaultTimeControl === o.key ? "border-primary bg-primary/10" : "border-border/50 hover:border-primary/30"}`}>
+                      <p className="text-sm font-medium text-foreground">{o.label}</p>
+                      <p className="text-xs text-muted-foreground">{o.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
       case "notifications":
         return (
           <div className="space-y-6">
@@ -284,6 +409,9 @@ const Settings = () => {
                 { label: "Match Found", desc: "When a match is found", value: notifMatch, key: "notifMatch", setter: setNotifMatch },
                 { label: "Game Start", desc: "When a game begins", value: notifGame, key: "notifGame", setter: setNotifGame },
                 { label: "Friend Activity", desc: "Friend requests and activity", value: notifFriend, key: "notifFriend", setter: setNotifFriend },
+                { label: "Game reminders", desc: "Remind you when a scheduled game starts", value: notifGameReminder, key: "notifGameReminder", setter: setNotifGameReminder },
+                { label: "Daily challenge alerts", desc: "Notify when today's challenge resets", value: notifDaily, key: "notifDaily", setter: setNotifDaily },
+                { label: "Tilt warnings", desc: "Warn me when I'm losing badly so I can take a break", value: notifTilt, key: "notifTilt", setter: setNotifTilt },
               ].map(item => (
                 <div key={item.key} className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4">
                   <div><p className="text-sm font-medium text-foreground">{item.label}</p><p className="text-xs text-muted-foreground">{item.desc}</p></div>
