@@ -40,6 +40,52 @@ export function useOnlineGame() {
     ? game.white_player_id === user?.id ? "w" : "b"
     : null;
 
+  // Helper: apply elo + log rating history + compute the user's RatingCalcResult
+  const applyEloAndLog = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string }) => {
+    if (!user) return;
+    // Snapshot opponent + my old rating BEFORE the RPC mutates them
+    const isWhite = g.white_player_id === user.id;
+    const opponentId = isWhite ? g.black_player_id : g.white_player_id;
+    const [{ data: meBefore }, { data: oppBefore }] = await Promise.all([
+      supabase.from("profiles").select("rating, games_played").eq("user_id", user.id).maybeSingle(),
+      supabase.from("profiles").select("rating, display_name, username").eq("user_id", opponentId).maybeSingle(),
+    ]);
+    const myOld = (meBefore as any)?.rating ?? 1200;
+    const oppRating = (oppBefore as any)?.rating ?? 1200;
+    const myGames = (meBefore as any)?.games_played ?? 0;
+    const oppLabel = (oppBefore as any)?.display_name ?? (oppBefore as any)?.username ?? "Player";
+
+    await supabase.rpc("update_elo_ratings", {
+      p_white_id: g.white_player_id,
+      p_black_id: g.black_player_id,
+      p_result: g.result,
+    });
+
+    const myResult: "win" | "loss" | "draw" =
+      g.result === "1/2-1/2" ? "draw"
+      : (g.result === "1-0" && isWhite) || (g.result === "0-1" && !isWhite) ? "win"
+      : "loss";
+
+    const calc = calculateRatingChange({
+      playerRating: myOld,
+      opponentRating: oppRating,
+      result: myResult,
+      gamesPlayed: myGames,
+    });
+    setRatingResult(calc);
+
+    await logOnlineRatingChange({
+      userId: user.id,
+      oldRating: myOld,
+      newRating: calc.newRating,
+      opponentRating: oppRating,
+      opponentLabel: oppLabel,
+      result: myResult,
+    });
+    await refreshProfile();
+  }, [user, refreshProfile]);
+
+
   // Clean up all channels
   const cleanupChannels = useCallback(() => {
     if (channelRef.current) {
