@@ -82,8 +82,14 @@ const Settings = () => {
   const [moveConfirm, setMoveConfirm] = useState(settings.moveConfirm ?? false);
   const [flipBoard, setFlipBoard] = useState(settings.flipBoard ?? false);
   const [preMoveEnabled, setPreMoveEnabled] = useState(settings.preMoveEnabled ?? true);
-  const [boardTheme, setBoardTheme] = useState(settings.boardTheme ?? "classic");
-  const [pieceStyle, setPieceStyle] = useState(settings.pieceStyle ?? "Staunton Classic");
+  const [boardTheme, setBoardTheme] = useState(() => {
+    const saved = settings.boardTheme;
+    return BOARD_THEMES.find(t => t.key === saved) ? saved : "classic";
+  });
+  const [pieceStyle, setPieceStyle] = useState(() => {
+    const saved = settings.pieceStyle;
+    return PIECE_STYLES.find(p => p.key === saved) ? saved : "standard";
+  });
   const [moveSound, setMoveSound] = useState(settings.moveSound ?? true);
   const [captureSound, setCaptureSound] = useState(settings.captureSound ?? true);
   const [checkSound, setCheckSound] = useState(settings.checkSound ?? true);
