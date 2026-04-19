@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { TIME_CONTROLS } from "@/components/ChessClock";
+import { calculateRatingChange, logOnlineRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 
 export type OnlineGameStatus = "idle" | "searching" | "playing" | "finished";
 
