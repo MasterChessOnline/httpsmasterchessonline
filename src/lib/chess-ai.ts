@@ -213,7 +213,7 @@ function minimax(
   }
 }
 
-export type Difficulty = "beginner" | "intermediate" | "advanced";
+export type Difficulty = "beginner" | "intermediate" | "advanced" | "expert" | "master";
 
 export interface AILevel {
   value: Difficulty;
@@ -225,9 +225,11 @@ export interface AILevel {
 }
 
 export const AI_LEVELS: AILevel[] = [
-  { value: "beginner", label: "Beginner (600)", rating: 600, desc: "Makes simple mistakes — great for learning", depth: 2, mistakeChance: 0.35 },
-  { value: "intermediate", label: "Casual (1200)", rating: 1200, desc: "Casual player — solid but imperfect", depth: 3, mistakeChance: 0.1 },
-  { value: "advanced", label: "Strong (1800)", rating: 1800, desc: "Strong player — deep calculation", depth: 4, mistakeChance: 0.02 },
+  { value: "beginner",     label: "Beginner (600)", rating: 600,  desc: "Makes simple mistakes — great for learning", depth: 2, mistakeChance: 0.35 },
+  { value: "intermediate", label: "Casual (1200)",  rating: 1200, desc: "Casual player — solid but imperfect",        depth: 3, mistakeChance: 0.10 },
+  { value: "advanced",     label: "Strong (1800)",  rating: 1800, desc: "Strong player — deep calculation",           depth: 4, mistakeChance: 0.02 },
+  { value: "expert",       label: "Expert (2200)",  rating: 2200, desc: "Expert level — punishes every mistake",      depth: 5, mistakeChance: 0.005 },
+  { value: "master",       label: "Master (2600)",  rating: 2600, desc: "Master strength — near-perfect play",        depth: 6, mistakeChance: 0.001 },
 ];
 
 export function getAIMove(game: Chess, difficulty: Difficulty): string | null {
