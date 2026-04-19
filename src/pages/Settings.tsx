@@ -17,6 +17,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import RankBadge from "@/components/RankBadge";
+import { BOARD_THEMES, PIECE_STYLES, applyBoardTheme, applyPieceStyle } from "@/lib/board-themes";
+import BoardThemeCard from "@/components/settings/BoardThemeCard";
+import PieceStyleCard from "@/components/settings/PieceStyleCard";
+import LiveBoardPreview from "@/components/settings/LiveBoardPreview";
 
 type SettingsSection = "account" | "profile" | "gameplay" | "training" | "improvement" | "appearance" | "audio" | "language" | "notifications" | "privacy";
 
