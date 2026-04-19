@@ -672,6 +672,7 @@ const Play = () => {
   // ===================== MATCHUP SCREEN =====================
   if (gamePhase === "matchup") {
     const playerName = profile?.display_name || profile?.username || "You";
+    const playerInitial = (playerName && playerName.length > 0 ? playerName[0] : "P").toUpperCase();
     const playerRating = (profile as any)?.bot_rating || 1200;
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center" style={{ fontFamily: "var(--font-body)" }}>
