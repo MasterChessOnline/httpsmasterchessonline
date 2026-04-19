@@ -21,6 +21,8 @@ import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, Mess
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
 import { BOT_PROFILES, getRandomBot, type BotProfile } from "@/lib/bot-profiles";
 import { motion, AnimatePresence } from "framer-motion";
+import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
+import RatingChange from "@/components/RatingChange";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
