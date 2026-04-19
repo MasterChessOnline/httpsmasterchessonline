@@ -405,5 +405,3 @@ const Training = () => {
 };
 
 export default Training;
-
-export default Training;
