@@ -54,6 +54,8 @@ import StreamHub from "./pages/StreamHub";
 import Coach from "./pages/Coach";
 import DailyPlan from "./pages/DailyPlan";
 import Repertoire from "./pages/Repertoire";
+import Training from "./pages/Training";
+import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -105,6 +107,7 @@ function AnimatedRoutes() {
           <Route path="/coach" element={<Coach />} />
           <Route path="/daily-plan" element={<DailyPlan />} />
           <Route path="/repertoire" element={<Repertoire />} />
+          <Route path="/training" element={<Training />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
@@ -132,6 +135,7 @@ const App = () => (
             <div className="pb-16 md:pb-0">
               <AnimatedRoutes />
             </div>
+            <AntiTiltWatcher />
             <MobileBottomNav />
           </Suspense>
         </BrowserRouter>

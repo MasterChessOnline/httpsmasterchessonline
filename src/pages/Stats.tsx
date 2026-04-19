@@ -1,18 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
-import { TrendingUp, Target, BarChart3, PieChart, Swords, Crown, BookOpen, Flame } from "lucide-react";
+import { TrendingUp, Target, BarChart3, PieChart, Swords, Crown, BookOpen, Flame, Dna, Lightbulb, Brain } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { computeChessDNA, type DNAGame } from "@/lib/chess-dna";
 
 const Stats = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const [recentGames, setRecentGames] = useState<any[]>([]);
+  const [recentGames, setRecentGames] = useState<DNAGame[]>([]);
 
   useEffect(() => {
     if (!loading && !user) navigate("/login");
@@ -22,13 +23,15 @@ const Stats = () => {
     if (!user) return;
     supabase
       .from("online_games")
-      .select("id, result, white_player_id, black_player_id, time_control_label, created_at")
+      .select("id, result, white_player_id, black_player_id, time_control_label, pgn, white_time, black_time, created_at")
       .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
       .eq("status", "finished")
       .order("created_at", { ascending: false })
       .limit(50)
-      .then(({ data }) => setRecentGames(data || []));
+      .then(({ data }) => setRecentGames((data as any) || []));
   }, [user]);
+
+  const dna = useMemo(() => user ? computeChessDNA(user.id, recentGames) : null, [user, recentGames]);
 
   if (loading || !profile) {
     return (
@@ -148,7 +151,98 @@ const Stats = () => {
             ))}
           </div>
 
-          {/* Color performance */}
+          {/* Chess DNA */}
+          {dna && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 space-y-5"
+            >
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center border border-primary/30">
+                    <Dna className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Your Chess DNA</p>
+                    <h3 className="font-display text-xl font-bold text-foreground">
+                      Playstyle: <span className="text-primary">{dna.style}</span>
+                    </h3>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Confidence</p>
+                  <p className="font-mono text-lg font-bold text-foreground">{Math.round(dna.styleConfidence * 100)}%</p>
+                </div>
+              </div>
+
+              {/* Behavioral metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="rounded-lg border border-border/40 bg-card/60 p-3 text-center">
+                  <p className="font-mono text-lg font-bold text-foreground">{dna.totalGames}</p>
+                  <p className="text-[10px] text-muted-foreground">Games analyzed</p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-card/60 p-3 text-center">
+                  <p className="font-mono text-lg font-bold text-foreground">{dna.avgMovesPerGame}</p>
+                  <p className="text-[10px] text-muted-foreground">Avg moves/game</p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-card/60 p-3 text-center">
+                  <p className="font-mono text-lg font-bold text-orange-400">{dna.blunderProxyRate}%</p>
+                  <p className="text-[10px] text-muted-foreground">Early collapses</p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-card/60 p-3 text-center">
+                  <p className="font-mono text-lg font-bold text-red-400">{dna.timePressureLossRate}%</p>
+                  <p className="text-[10px] text-muted-foreground">Time-trouble losses</p>
+                </div>
+              </div>
+
+              {/* Insights */}
+              {dna.insights.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1.5">
+                    <Lightbulb className="h-3 w-3" /> Insights
+                  </p>
+                  {dna.insights.slice(0, 4).map((ins, i) => (
+                    <div key={i} className="rounded-lg border border-border/30 bg-muted/10 px-3 py-2 text-sm text-foreground">
+                      {ins}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Opening win rates */}
+              {dna.openings.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-1.5">
+                    <BookOpen className="h-3 w-3" /> Opening performance
+                  </p>
+                  {dna.openings.slice(0, 5).map(op => (
+                    <div key={op.name} className="flex items-center gap-3">
+                      <span className="text-xs text-foreground w-32 shrink-0 truncate">{op.name}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] text-muted-foreground">{op.games} games</span>
+                          <span className="text-[10px] font-bold text-foreground">{op.winRate}% win</span>
+                        </div>
+                        <Progress value={op.winRate} className="h-1.5" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <Link to="/training" className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full gap-2"><Brain className="h-3.5 w-3.5" /> Train weaknesses</Button>
+                </Link>
+                <Link to="/coach" className="flex-1">
+                  <Button size="sm" className="w-full gap-2"><Target className="h-3.5 w-3.5" /> Ask coach</Button>
+                </Link>
+              </div>
+            </motion.div>
+          )}
+
           <div className="rounded-xl border border-border/40 bg-card/80 p-5">
             <h3 className="font-display text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
               <PieChart className="h-4 w-4 text-primary" /> Win Rate by Color
