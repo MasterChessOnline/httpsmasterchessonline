@@ -200,15 +200,7 @@ const Training = () => {
       setLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
     }
   }
-    const uci = from + to + (promotion || "");
-    setUserMove(uci);
-    const acceptable = position.acceptable || [position.bestMove];
-    const ok = acceptable.includes(uci);
-    setCorrect(ok);
-    setScore(s => ({ correct: s.correct + (ok ? 1 : 0), total: s.total + 1 }));
-    setPhase("feedback");
-    return true;
-  }
+
 
   function handleTimeout() {
     if (phase !== "playing") return;
