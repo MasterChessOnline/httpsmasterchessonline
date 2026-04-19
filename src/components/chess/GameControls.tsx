@@ -32,6 +32,8 @@ const BOT_LEVELS: { value: Difficulty; label: string; rating: string; desc: stri
   { value: "beginner", label: "Beginner", rating: "600", desc: "Friendly practice, occasional blunders" },
   { value: "intermediate", label: "Intermediate", rating: "1200", desc: "Solid tactical awareness" },
   { value: "advanced", label: "Advanced", rating: "1800", desc: "Deep calculation, rarely blunders" },
+  { value: "expert", label: "Expert", rating: "2200", desc: "Expert strength — punishes mistakes hard" },
+  { value: "master", label: "Master", rating: "3000", desc: "Aleksej Pavlović tier — elite precision" },
 ];
 
 export default function GameControls({
@@ -66,11 +68,11 @@ export default function GameControls({
               <Bot className="w-3.5 h-3.5 text-primary" />
             </div>
             <div>
-              <p className="text-xs font-bold text-foreground">DailyChess_12 Bot</p>
-              <p className="text-[10px] text-muted-foreground">Choose difficulty</p>
+              <p className="text-xs font-bold text-foreground">Bot Strength</p>
+              <p className="text-[10px] text-muted-foreground">Choose rating tier</p>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-5 gap-1.5">
             {BOT_LEVELS.map((lvl) => (
               <button
                 key={lvl.value}
