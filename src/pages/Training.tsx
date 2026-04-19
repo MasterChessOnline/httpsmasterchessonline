@@ -322,10 +322,14 @@ const Training = () => {
                   </div>
                   <div className="rounded-xl overflow-hidden border border-border/40 shadow-2xl">
                     <ChessBoard
-                      chess={chess}
-                      onMove={phase === "playing" ? handleMove : () => false}
-                      orientation={position.side === "w" ? "white" : "black"}
-                      lastMove={lastMove}
+                      game={chess}
+                      flipped={position.side === "b"}
+                      selectedSquare={selectedSquare}
+                      legalMoves={legalMoves}
+                      lastMove={lastMove ? { from: lastMove.from, to: lastMove.to } : null}
+                      isGameOver={phase === "feedback"}
+                      isPlayerTurn={phase === "playing"}
+                      onSquareClick={handleSquareClick}
                     />
                   </div>
                 </div>
