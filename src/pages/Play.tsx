@@ -171,9 +171,9 @@ const Play = () => {
   useEffect(() => {
     if (mode !== "ai" || game.turn() !== aiColor || isGameOver || gamePhase !== "playing") return;
     setAiThinking(true);
-    // Fast bot moves — minimal delay, just enough to feel natural
-    const baseDelay = currentBot.rating >= 2400 ? 200 : currentBot.rating >= 1500 ? 140 : 80;
-    const jitter = Math.random() * 120 + 40;
+    // Super-fast bot moves with tiny jitter so they still feel alive
+    const baseDelay = currentBot.rating >= 3000 ? 60 : currentBot.rating >= 2400 ? 90 : currentBot.rating >= 1800 ? 110 : currentBot.rating >= 1200 ? 140 : 180;
+    const jitter = Math.random() * 40 + 10;
     const thinkTime = baseDelay + jitter;
 
     const timeout = setTimeout(() => {
@@ -373,11 +373,13 @@ const Play = () => {
 
   // --- "Play" button: start matchmaking flow ---
   const startMatchmaking = (bot?: BotProfile) => {
-    const selectedBot = bot || getRandomBot(difficulty);
+    const selectedBot = bot || (difficulty === "master"
+      ? BOT_PROFILES.find((candidate) => candidate.id === "aleksej-pavlovic") || getRandomBot(difficulty)
+      : getRandomBot(difficulty));
     setCurrentBot(selectedBot);
-    // Random side assignment
-    const color: PlayerColor = Math.random() > 0.5 ? "w" : "b";
-    setPlayerColor(color);
+    if (bot) {
+      setDifficulty(selectedBot.rating >= 2400 ? "master" : selectedBot.rating >= 2000 ? "expert" : selectedBot.rating >= 1500 ? "advanced" : selectedBot.rating >= 900 ? "intermediate" : "beginner");
+    }
     setGamePhase("searching");
     setSearchProgress(0);
   };
@@ -447,6 +449,17 @@ const Play = () => {
 
   const changeDifficulty = (d: Difficulty) => {
     setDifficulty(d);
+    const candidateBots = BOT_PROFILES.filter(b => {
+      if (d === "beginner") return b.rating <= 800;
+      if (d === "intermediate") return b.rating > 800 && b.rating <= 1400;
+      if (d === "advanced") return b.rating > 1400 && b.rating <= 1999;
+      if (d === "expert") return b.rating >= 2000 && b.rating <= 2399;
+      return b.rating >= 2400;
+    });
+    const preferredBot = d === "master"
+      ? candidateBots.find((candidate) => candidate.id === "aleksej-pavlovic")
+      : candidateBots[0];
+    if (preferredBot) setCurrentBot(preferredBot);
   };
 
   const boardFlipped = playerColor === "b";
@@ -496,7 +509,7 @@ const Play = () => {
     const isDraw = gameResult === "1/2-1/2";
     const result: "win" | "loss" | "draw" = isDraw ? "draw" : playerWon ? "win" : "loss";
 
-    const botRating = (AI_LEVELS.find(l => l.value === difficulty)?.rating) ?? 1200;
+    const botRating = currentBot.rating;
     const currentBotRating = (profile as any).bot_rating ?? 1200;
     const botGames = (profile as any).bot_games_played ?? 0;
 
@@ -537,7 +550,7 @@ const Play = () => {
             <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-2">
               Choose your <span className="text-gradient-gold">opponent</span>
             </h1>
-            <p className="text-muted-foreground text-sm">Side is assigned randomly — just like a real match!</p>
+            <p className="text-muted-foreground text-sm">Choose your side, pick any bot, and play by full chess rules.</p>
           </motion.div>
 
           {/* Time control selector */}
@@ -598,7 +611,9 @@ const Play = () => {
               {BOT_PROFILES.filter(b => {
                 if (difficulty === "beginner") return b.rating <= 800;
                 if (difficulty === "intermediate") return b.rating > 800 && b.rating <= 1400;
-                return b.rating > 1400;
+                if (difficulty === "advanced") return b.rating > 1400 && b.rating <= 1999;
+                if (difficulty === "expert") return b.rating >= 2000 && b.rating <= 2399;
+                return b.rating >= 2400;
               }).map(bot => (
                 <motion.button
                   key={bot.id}
@@ -657,7 +672,7 @@ const Play = () => {
   // ===================== MATCHUP SCREEN =====================
   if (gamePhase === "matchup") {
     const playerName = profile?.display_name || profile?.username || "You";
-    const playerRating = profile?.rating || 800;
+    const playerRating = (profile as any)?.bot_rating || 1200;
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center" style={{ fontFamily: "var(--font-body)" }}>
         <motion.div
@@ -919,10 +934,10 @@ const Play = () => {
               moveHistory={moveHistory}
               isGameOver={isGameOver}
               hintsEnabled={hintsEnabled}
-              onModeChange={() => {}}
-              onDifficultyChange={() => {}}
-              onColorChange={() => {}}
-              onTimeControlChange={() => {}}
+              onModeChange={setMode}
+              onDifficultyChange={changeDifficulty}
+              onColorChange={setPlayerColor}
+              onTimeControlChange={changeTimeControl}
               onNewGame={goToLobby}
               onToggleHints={() => setHintsEnabled(!hintsEnabled)}
               onResign={handleResign}
