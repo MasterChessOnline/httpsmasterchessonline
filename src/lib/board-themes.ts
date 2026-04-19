@@ -11,14 +11,17 @@ export interface BoardTheme {
 }
 
 export const BOARD_THEMES: BoardTheme[] = [
-  { key: "classic",  label: "Classic Wood",   description: "Warm tournament wood",     light: "33 45% 70%", dark: "25 38% 32%" },
-  { key: "green",    label: "Green Tournament", description: "Olympiad green felt",     light: "120 22% 80%", dark: "145 32% 36%" },
-  { key: "blue",     label: "Blue Modern",     description: "Cool deep ocean",          light: "210 38% 78%", dark: "210 45% 32%" },
-  { key: "minimal",  label: "Minimal Flat",    description: "Soft greys, clean lines",  light: "220 8% 88%", dark: "220 10% 38%" },
-  { key: "neon",     label: "Neon 3D",         description: "Cyber violet glow",        light: "280 50% 70%", dark: "265 60% 22%" },
-  { key: "gold",     label: "Black & Gold",    description: "MasterChess signature",    light: "43 60% 60%", dark: "0 0% 12%" },
-  { key: "marble",   label: "Marble",          description: "Polished stone",           light: "0 0% 90%", dark: "0 0% 55%" },
-  { key: "forest",   label: "Forest",          description: "Earth & moss",             light: "75 25% 70%", dark: "120 30% 22%" },
+  { key: "classic",   label: "Classic Wood",      description: "Warm tournament wood",         light: "33 45% 70%",  dark: "25 38% 32%" },
+  { key: "green",     label: "Green Tournament",  description: "Olympiad green felt",          light: "120 22% 80%", dark: "145 32% 36%" },
+  { key: "blue",      label: "Blue Modern",       description: "Cool deep ocean",              light: "210 38% 78%", dark: "210 45% 32%" },
+  { key: "dark",      label: "Dark Minimal",      description: "Pure dark, distraction-free",  light: "220 12% 28%", dark: "220 14% 12%" },
+  { key: "contrast",  label: "High Contrast",     description: "Maximum visibility",           light: "0 0% 100%",   dark: "0 0% 8%"     },
+  { key: "marble",    label: "Marble",            description: "Polished stone",               light: "0 0% 92%",    dark: "0 0% 48%"    },
+  { key: "neon",      label: "Neon Cyber",        description: "Violet bloom, modern UI",      light: "280 50% 70%", dark: "265 60% 22%" },
+  { key: "gold",      label: "Black & Gold",      description: "MasterChess signature",        light: "43 60% 60%",  dark: "0 0% 12%"    },
+  { key: "minimal",   label: "Flat Minimal",      description: "No texture, soft greys",       light: "220 8% 88%",  dark: "220 10% 38%" },
+  { key: "forest",    label: "Forest",            description: "Earth & moss",                 light: "75 25% 70%",  dark: "120 30% 22%" },
+  { key: "rose",      label: "Rose Quartz",       description: "Soft warm pink",               light: "350 60% 88%", dark: "345 30% 38%" },
 ];
 
 export interface PieceStyle {
@@ -39,8 +42,8 @@ export interface PieceStyle {
 export const PIECE_STYLES: PieceStyle[] = [
   {
     key: "standard",
-    label: "Standard",
-    description: "Classic chess pieces",
+    label: "Classic Staunton",
+    description: "Traditional tournament look",
     render: { whiteFill: "#ffffff", blackFill: "hsl(220,15%,8%)", whiteStroke: "rgba(0,0,0,0.85)", fontWeight: 400 },
   },
   {
@@ -54,6 +57,18 @@ export const PIECE_STYLES: PieceStyle[] = [
     label: "Bold High-Contrast",
     description: "Heavy weight, easy to read",
     render: { whiteFill: "#ffffff", blackFill: "#000000", whiteStroke: "rgba(0,0,0,1)", blackStroke: "rgba(255,255,255,0.4)", fontWeight: 700 },
+  },
+  {
+    key: "glass",
+    label: "Glass",
+    description: "Translucent with subtle glow",
+    render: { whiteFill: "rgba(255,255,255,0.85)", blackFill: "rgba(20,20,30,0.85)", whiteStroke: "rgba(255,255,255,0.6)", blackStroke: "rgba(180,180,255,0.5)", glow: "rgba(180,200,255,0.45)", fontWeight: 400 },
+  },
+  {
+    key: "outline",
+    label: "Outline",
+    description: "Hollow pieces, max clarity",
+    render: { whiteFill: "transparent", blackFill: "transparent", whiteStroke: "rgba(255,255,255,1)", blackStroke: "rgba(0,0,0,1)", fontWeight: 600 },
   },
   {
     key: "neon",
@@ -72,6 +87,18 @@ export const PIECE_STYLES: PieceStyle[] = [
     label: "Monochrome",
     description: "Pure black on white",
     render: { whiteFill: "#e5e5e5", blackFill: "#0a0a0a", fontWeight: 400 },
+  },
+  {
+    key: "tournament",
+    label: "Tournament Pro",
+    description: "Crisp ivory & graphite",
+    render: { whiteFill: "#faf6ec", blackFill: "#2a2622", whiteStroke: "rgba(60,40,20,0.6)", blackStroke: "rgba(255,255,255,0.15)", fontWeight: 500 },
+  },
+  {
+    key: "cartoon",
+    label: "Cartoon",
+    description: "Playful rounded look",
+    render: { whiteFill: "#fff4d4", blackFill: "#3b2a4a", whiteStroke: "rgba(180,120,40,0.8)", blackStroke: "rgba(255,200,255,0.4)", fontWeight: 700 },
   },
 ];
 
