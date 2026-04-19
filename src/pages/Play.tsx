@@ -332,7 +332,7 @@ const Play = () => {
   };
 
   const handleResign = () => {
-    if (isGameOver || moveHistory.length === 0) return;
+    if (isGameOver) return;
     if (mode === "ai") {
       setResignedBy(playerColor);
       showBotMessage(currentBot.taunts.onWin);
@@ -691,7 +691,7 @@ const Play = () => {
               className="text-center"
             >
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-2xl sm:text-3xl font-bold text-primary mx-auto mb-2">
-                {playerName[0].toUpperCase()}
+                {playerInitial}
               </div>
               <p className="text-sm font-bold text-foreground">{playerName}</p>
               <p className="text-xs text-muted-foreground">{playerRating} Elo</p>
@@ -908,11 +908,11 @@ const Play = () => {
                 : "bg-card/50 border-border/20"
             }`}>
               <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
-                {(profile?.display_name || "P")[0].toUpperCase()}
+                {((profile?.display_name || profile?.username || "P")[0] || "P").toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-foreground truncate">{profile?.display_name || "You"}</p>
-                <p className="text-[10px] text-muted-foreground">{profile?.rating || 800} Elo · {playerColor === "w" ? "⬜ White" : "⬛ Black"}</p>
+                <p className="text-xs font-bold text-foreground truncate">{profile?.display_name || profile?.username || "You"}</p>
+                <p className="text-[10px] text-muted-foreground">{(profile as any)?.bot_rating ?? 1200} Elo · {playerColor === "w" ? "⬜ White" : "⬛ Black"}</p>
               </div>
               {game.turn() === playerColor && !isGameOver && (
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -943,7 +943,7 @@ const Play = () => {
               onToggleHints={() => setHintsEnabled(!hintsEnabled)}
               onResign={handleResign}
               onOfferDraw={handleOfferDraw}
-              canResign={moveHistory.length > 0}
+              canResign={true}
             />
 
             {/* Draw offer status */}
