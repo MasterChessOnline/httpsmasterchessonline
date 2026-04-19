@@ -63,6 +63,8 @@ const Profile = () => {
   const [friendStatus, setFriendStatus] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
+  const [onlineHistory, setOnlineHistory] = useState<RatingPoint[]>([]);
+  const [botHistory, setBotHistory] = useState<RatingPoint[]>([]);
 
   const isOwnProfile = user?.id === userId;
 
