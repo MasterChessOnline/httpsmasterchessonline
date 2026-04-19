@@ -171,9 +171,9 @@ const Play = () => {
   useEffect(() => {
     if (mode !== "ai" || game.turn() !== aiColor || isGameOver || gamePhase !== "playing") return;
     setAiThinking(true);
-    // Realistic thinking delay based on rating
-    const baseDelay = currentBot.rating >= 1600 ? 1200 : currentBot.rating >= 1000 ? 800 : 500;
-    const jitter = Math.random() * 1500 + 300;
+    // Snappy thinking delay — feels alive but never sluggish
+    const baseDelay = currentBot.rating >= 2400 ? 450 : currentBot.rating >= 1800 ? 350 : currentBot.rating >= 1200 ? 250 : 180;
+    const jitter = Math.random() * 250 + 80;
     const thinkTime = baseDelay + jitter;
 
     const timeout = setTimeout(() => {
