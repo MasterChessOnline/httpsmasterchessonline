@@ -203,10 +203,30 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Rating display */}
-            <div className="mt-4 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">ELO Rating</p>
-              <p className="font-mono text-4xl sm:text-5xl font-bold text-primary drop-shadow-glow">{profileData.rating}</p>
+            {/* Dual rating display */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Online Rating</p>
+                <p className="font-mono text-3xl font-bold text-primary drop-shadow-glow">{profileData.rating}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">vs real players</p>
+              </div>
+              <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Bot Rating</p>
+                <p className="font-mono text-3xl font-bold text-accent">{profileData.bot_rating ?? 1200}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">vs AI bots</p>
+              </div>
+            </div>
+
+            {/* Rating history graphs */}
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Online history</p>
+                <RatingHistoryGraph points={onlineHistory} color="hsl(var(--primary))" />
+              </div>
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Bot history</p>
+                <RatingHistoryGraph points={botHistory} color="hsl(var(--accent))" />
+              </div>
             </div>
 
             {/* Friend actions */}
