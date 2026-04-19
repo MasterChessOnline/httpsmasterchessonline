@@ -37,23 +37,8 @@ const SECTIONS: { key: SettingsSection; label: string; icon: typeof User }[] = [
   { key: "privacy", label: "Privacy & Security", icon: Shield },
 ];
 
-const BOARD_THEMES = [
-  { key: "classic", label: "Classic Wood", light: "hsl(33,40%,60%)", dark: "hsl(25,35%,30%)" },
-  { key: "dark", label: "Dark Modern", light: "hsl(220,10%,50%)", dark: "hsl(220,15%,25%)" },
-  { key: "light", label: "Light Minimal", light: "hsl(40,20%,90%)", dark: "hsl(40,15%,70%)" },
-  { key: "green", label: "Green Tournament", light: "hsl(120,25%,75%)", dark: "hsl(145,32%,38%)" },
-  { key: "blue", label: "Blue Neon", light: "hsl(210,40%,70%)", dark: "hsl(210,45%,35%)" },
-  { key: "marble", label: "Marble", light: "hsl(0,0%,88%)", dark: "hsl(0,0%,58%)" },
-  { key: "glass", label: "Glass Effect", light: "hsl(200,30%,80%)", dark: "hsl(200,25%,45%)" },
-  { key: "gold", label: "Black & Gold", light: "hsl(43,60%,55%)", dark: "hsl(0,0%,12%)" },
-  { key: "cyber", label: "Cyber Neon", light: "hsl(280,40%,65%)", dark: "hsl(280,50%,20%)" },
-  { key: "cartoon", label: "Cartoon Style", light: "hsl(50,80%,75%)", dark: "hsl(30,60%,45%)" },
-];
+// Board themes & piece styles now live in src/lib/board-themes.ts
 
-const PIECE_STYLES = [
-  "Staunton Classic", "Flat Modern", "Wooden Carved", "Neon Glow", "Minimal Outline",
-  "Metallic Silver", "Golden Royal", "Pixel Style", "3D Realistic", "Fantasy Themed"
-];
 
 const LANGUAGES = [
   { code: "en", label: "English", flag: "🇬🇧" },
