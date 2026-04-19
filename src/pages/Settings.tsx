@@ -12,18 +12,20 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import {
   User, Palette, Volume2, Globe, Bell, Shield, Gamepad2,
-  LogOut, Check, ChevronRight, Settings2
+  LogOut, Check, ChevronRight, Settings2, Brain, Target as TargetIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import RankBadge from "@/components/RankBadge";
 
-type SettingsSection = "account" | "profile" | "gameplay" | "appearance" | "audio" | "language" | "notifications" | "privacy";
+type SettingsSection = "account" | "profile" | "gameplay" | "training" | "improvement" | "appearance" | "audio" | "language" | "notifications" | "privacy";
 
 const SECTIONS: { key: SettingsSection; label: string; icon: typeof User }[] = [
   { key: "account", label: "Account", icon: Shield },
   { key: "profile", label: "Profile", icon: User },
   { key: "gameplay", label: "Gameplay", icon: Gamepad2 },
+  { key: "training", label: "Training", icon: Brain },
+  { key: "improvement", label: "Improvement", icon: TargetIcon },
   { key: "appearance", label: "Appearance", icon: Palette },
   { key: "audio", label: "Audio", icon: Volume2 },
   { key: "language", label: "Language", icon: Globe },
@@ -107,6 +109,21 @@ const Settings = () => {
   const [historyPublic, setHistoryPublic] = useState(settings.historyPublic ?? true);
   const [friendRequests, setFriendRequests] = useState(settings.friendRequests ?? true);
   const [highlightMoves, setHighlightMoves] = useState(settings.highlightMoves ?? true);
+  // Training settings
+  const [coachStyle, setCoachStyle] = useState<"simple" | "detailed">(settings.coachStyle ?? "detailed");
+  const [analysisDepth, setAnalysisDepth] = useState<"fast" | "deep">(settings.analysisDepth ?? "fast");
+  const [autoAnalyze, setAutoAnalyze] = useState(settings.autoAnalyze ?? true);
+  // Improvement settings
+  const [focusArea, setFocusArea] = useState<"openings" | "tactics" | "endgames" | "balanced">(settings.focusArea ?? "balanced");
+  const [weaknessTracking, setWeaknessTracking] = useState(settings.weaknessTracking ?? true);
+  const [dailyGoalGames, setDailyGoalGames] = useState<number>(settings.dailyGoalGames ?? 3);
+  const [dailyGoalTrainings, setDailyGoalTrainings] = useState<number>(settings.dailyGoalTrainings ?? 2);
+  // Notifications additions
+  const [notifTilt, setNotifTilt] = useState(settings.notifTilt ?? true);
+  const [notifDaily, setNotifDaily] = useState(settings.notifDaily ?? true);
+  const [notifGameReminder, setNotifGameReminder] = useState(settings.notifGameReminder ?? true);
+  // Default time control
+  const [defaultTimeControl, setDefaultTimeControl] = useState<"bullet" | "blitz" | "rapid">(settings.defaultTimeControl ?? "blitz");
 
   useEffect(() => { if (profile) setDisplayName(profile.display_name || ""); }, [profile]);
 
