@@ -427,6 +427,8 @@ const Play = () => {
     setDrawOfferPending(false);
     setDrawDeclined(false);
     setPremove(null);
+    setBotRatingResult(null);
+    ratingAppliedRef.current = false;
     positionHistory.current = [];
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
