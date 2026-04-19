@@ -29,6 +29,7 @@ export function useOnlineGame() {
   const [status, setStatus] = useState<OnlineGameStatus>("idle");
   const [game, setGame] = useState<OnlineGame | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ratingResult, setRatingResult] = useState<RatingCalcResult | null>(null);
   const queueEntryId = useRef<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
