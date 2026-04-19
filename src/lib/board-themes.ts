@@ -11,14 +11,17 @@ export interface BoardTheme {
 }
 
 export const BOARD_THEMES: BoardTheme[] = [
-  { key: "classic",  label: "Classic Wood",   description: "Warm tournament wood",     light: "33 45% 70%", dark: "25 38% 32%" },
-  { key: "green",    label: "Green Tournament", description: "Olympiad green felt",     light: "120 22% 80%", dark: "145 32% 36%" },
-  { key: "blue",     label: "Blue Modern",     description: "Cool deep ocean",          light: "210 38% 78%", dark: "210 45% 32%" },
-  { key: "minimal",  label: "Minimal Flat",    description: "Soft greys, clean lines",  light: "220 8% 88%", dark: "220 10% 38%" },
-  { key: "neon",     label: "Neon 3D",         description: "Cyber violet glow",        light: "280 50% 70%", dark: "265 60% 22%" },
-  { key: "gold",     label: "Black & Gold",    description: "MasterChess signature",    light: "43 60% 60%", dark: "0 0% 12%" },
-  { key: "marble",   label: "Marble",          description: "Polished stone",           light: "0 0% 90%", dark: "0 0% 55%" },
-  { key: "forest",   label: "Forest",          description: "Earth & moss",             light: "75 25% 70%", dark: "120 30% 22%" },
+  { key: "classic",   label: "Classic Wood",      description: "Warm tournament wood",         light: "33 45% 70%",  dark: "25 38% 32%" },
+  { key: "green",     label: "Green Tournament",  description: "Olympiad green felt",          light: "120 22% 80%", dark: "145 32% 36%" },
+  { key: "blue",      label: "Blue Modern",       description: "Cool deep ocean",              light: "210 38% 78%", dark: "210 45% 32%" },
+  { key: "dark",      label: "Dark Minimal",      description: "Pure dark, distraction-free",  light: "220 12% 28%", dark: "220 14% 12%" },
+  { key: "contrast",  label: "High Contrast",     description: "Maximum visibility",           light: "0 0% 100%",   dark: "0 0% 8%"     },
+  { key: "marble",    label: "Marble",            description: "Polished stone",               light: "0 0% 92%",    dark: "0 0% 48%"    },
+  { key: "neon",      label: "Neon Cyber",        description: "Violet bloom, modern UI",      light: "280 50% 70%", dark: "265 60% 22%" },
+  { key: "gold",      label: "Black & Gold",      description: "MasterChess signature",        light: "43 60% 60%",  dark: "0 0% 12%"    },
+  { key: "minimal",   label: "Flat Minimal",      description: "No texture, soft greys",       light: "220 8% 88%",  dark: "220 10% 38%" },
+  { key: "forest",    label: "Forest",            description: "Earth & moss",                 light: "75 25% 70%",  dark: "120 30% 22%" },
+  { key: "rose",      label: "Rose Quartz",       description: "Soft warm pink",               light: "350 60% 88%", dark: "345 30% 38%" },
 ];
 
 export interface PieceStyle {
