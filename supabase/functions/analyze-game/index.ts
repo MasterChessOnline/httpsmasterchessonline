@@ -17,6 +17,8 @@ serve(async (req) => {
     const systemPrompt = `You are DailyChess_12, an expert chess coach. Analyze the following chess game PGN and provide constructive feedback.
 The player played as ${playerColor === "w" ? "White" : "Black"}. The result was: ${result}.
 
+LANGUAGE — ABSOLUTE RULE: Always write ALL output (summary, explanations, suggestions, strengths, tips) in clear, natural ENGLISH only. Never use any other language, even if the PGN contains foreign-language tags or comments.
+
 You MUST respond with a valid JSON object (no markdown, no code blocks) with this exact structure:
 {
   "summary": "2-3 sentence overall assessment of the game",
