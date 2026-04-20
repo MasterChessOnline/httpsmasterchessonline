@@ -25,6 +25,7 @@ interface GameControlsProps {
   onToggleHints: () => void;
   onResign?: () => void;
   onOfferDraw?: () => void;
+  canResign?: boolean;
   settingsLocked?: boolean;
 }
 
@@ -46,10 +47,10 @@ export default function GameControls({
     <div className="w-full lg:max-w-xs space-y-3">
       {/* Mode select */}
       <div className="flex gap-1.5">
-        <Button variant={mode === "ai" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => onModeChange("ai")}>
+        <Button variant={mode === "ai" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => onModeChange("ai")} disabled={settingsLocked}>
           <Bot className="mr-1.5 h-3.5 w-3.5" /> vs Bot
         </Button>
-        <Button variant={mode === "local" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => onModeChange("local")}>
+        <Button variant={mode === "local" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => onModeChange("local")} disabled={settingsLocked}>
           <Users className="mr-1.5 h-3.5 w-3.5" /> Local
         </Button>
         <Link to="/play/online" className="flex-1">
@@ -76,6 +77,7 @@ export default function GameControls({
               <button
                 key={lvl.value}
                 onClick={() => onDifficultyChange(lvl.value)}
+                disabled={settingsLocked}
                 className={`rounded-lg px-1 py-2 text-center transition-all border ${
                   difficulty === lvl.value
                     ? "border-primary bg-primary/10 text-primary shadow-glow"
