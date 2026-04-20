@@ -26,6 +26,7 @@ interface GameControlsProps {
   onResign?: () => void;
   onOfferDraw?: () => void;
   canResign?: boolean;
+  settingsLocked?: boolean;
 }
 
 const BOT_LEVELS = AI_LEVELS.map((level) => ({
@@ -40,16 +41,16 @@ export default function GameControls({
   statusText, moveHistory, isGameOver, hintsEnabled,
   onModeChange, onDifficultyChange, onColorChange,
   onTimeControlChange, onNewGame, onToggleHints,
-  onResign, onOfferDraw, canResign = false,
+  onResign, onOfferDraw, canResign = false, settingsLocked = false,
 }: GameControlsProps) {
   return (
     <div className="w-full lg:max-w-xs space-y-3">
       {/* Mode select */}
       <div className="flex gap-1.5">
-        <Button variant={mode === "ai" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => onModeChange("ai")}>
+        <Button variant={mode === "ai" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => onModeChange("ai")} disabled={settingsLocked}>
           <Bot className="mr-1.5 h-3.5 w-3.5" /> vs Bot
         </Button>
-        <Button variant={mode === "local" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => onModeChange("local")}>
+        <Button variant={mode === "local" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => onModeChange("local")} disabled={settingsLocked}>
           <Users className="mr-1.5 h-3.5 w-3.5" /> Local
         </Button>
         <Link to="/play/online" className="flex-1">
@@ -76,6 +77,7 @@ export default function GameControls({
               <button
                 key={lvl.value}
                 onClick={() => onDifficultyChange(lvl.value)}
+                disabled={settingsLocked}
                 className={`rounded-lg px-1 py-2 text-center transition-all border ${
                   difficulty === lvl.value
                     ? "border-primary bg-primary/10 text-primary shadow-glow"
@@ -103,6 +105,7 @@ export default function GameControls({
             <button
               key={tc.label}
               onClick={() => onTimeControlChange(i)}
+              disabled={settingsLocked}
               className={`rounded-lg px-1 py-1.5 text-center transition-all border text-[11px] font-medium ${
                 timeControlIdx === i
                   ? "border-primary bg-primary/10 text-primary"
@@ -124,6 +127,7 @@ export default function GameControls({
               <button
                 key={c}
                 onClick={() => onColorChange(c)}
+                disabled={settingsLocked}
                 className={`flex-1 rounded-lg px-2 py-2 text-center transition-all border ${
                   playerColor === c
                     ? "border-primary bg-primary/10 text-primary"

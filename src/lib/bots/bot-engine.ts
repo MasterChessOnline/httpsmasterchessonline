@@ -213,6 +213,58 @@ export function classifyCpLoss(cp: number): BotMoveDecision["quality"] {
   return "blunder";
 }
 
+export interface MoveQualityEstimate {
+  cpLoss: number;
+  quality: BotMoveDecision["quality"];
+  bestMove: string | null;
+  bestEval: number;
+  evalAfter: number;
+}
+
+export function estimateMoveQuality(
+  game: Chess,
+  moveInput: string | { from: string; to: string; promotion?: string },
+): MoveQualityEstimate {
+  const legalMoves = game.moves();
+  if (legalMoves.length === 0) {
+    return { cpLoss: 0, quality: "best", bestMove: null, bestEval: 0, evalAfter: 0 };
+  }
+
+  const movingColor = game.turn();
+  const sign = movingColor === "w" ? 1 : -1;
+  const scored = legalMoves.map((move) => {
+    game.move(move);
+    const evalAfter = evaluateBoard(game);
+    game.undo();
+    return { move, evalAfter };
+  });
+
+  const best = [...scored].sort((a, b) => (b.evalAfter - a.evalAfter) * sign)[0];
+
+  const probe = new Chess(game.fen());
+  const played = probe.move(moveInput as any);
+  if (!played) {
+    return {
+      cpLoss: 0,
+      quality: "best",
+      bestMove: best?.move ?? null,
+      bestEval: best?.evalAfter ?? 0,
+      evalAfter: best?.evalAfter ?? 0,
+    };
+  }
+
+  const evalAfter = evaluateBoard(probe);
+  const cpLoss = Math.max(0, ((best?.evalAfter ?? evalAfter) - evalAfter) * sign);
+
+  return {
+    cpLoss,
+    quality: classifyCpLoss(cpLoss),
+    bestMove: best?.move ?? null,
+    bestEval: best?.evalAfter ?? evalAfter,
+    evalAfter,
+  };
+}
+
 /* ---------- Adaptive "thinking time" ---------- */
 
 export interface ThinkTimeOpts {

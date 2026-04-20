@@ -20,7 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers } from "lucide-react";
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
 import { getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-profiles";
-import { getBotMove, getBotThinkMs, classifyCpLoss } from "@/lib/bots/bot-engine";
+import { getBotMove, getBotThinkMs, classifyCpLoss, estimateMoveQuality } from "@/lib/bots/bot-engine";
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 import RatingChange from "@/components/RatingChange";
@@ -260,17 +260,8 @@ const Play = () => {
     let playerCp = 0;
     if (mode === "ai") {
       try {
-        const sign = game.turn() === "w" ? 1 : -1;
-        const engineBest = getAIMove(game, "advanced");
-        if (engineBest) {
-          const probe = new Chess(game.fen());
-          probe.move(engineBest);
-          const bestEval = evaluateBoard(probe);
-          const probe2 = new Chess(game.fen());
-          probe2.move({ from, to, promotion });
-          const myEval = evaluateBoard(probe2);
-          playerCp = Math.max(0, (bestEval - myEval) * sign);
-        }
+        const estimate = estimateMoveQuality(game, { from, to, promotion });
+        playerCp = estimate.cpLoss;
       } catch { /* ignore — analysis is best-effort */ }
     }
 
@@ -970,6 +961,7 @@ const Play = () => {
               onResign={handleResign}
               onOfferDraw={handleOfferDraw}
               canResign={true}
+              settingsLocked={!isGameOver && moveHistory.length > 0}
             />
 
             {/* Draw offer status */}
