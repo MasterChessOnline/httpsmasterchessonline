@@ -229,7 +229,7 @@ export const AI_LEVELS: AILevel[] = [
   { value: "intermediate", label: "Casual (1200)",   rating: 1200, desc: "Casual player — solid but imperfect",        depth: 3, mistakeChance: 0.10 },
   { value: "advanced",     label: "Strong (1800)",   rating: 1800, desc: "Strong player — deep calculation",           depth: 4, mistakeChance: 0.02 },
   { value: "expert",       label: "Expert (2200)",   rating: 2200, desc: "Expert level — punishes every mistake",      depth: 5, mistakeChance: 0.005 },
-  { value: "master",       label: "Master (3000)",   rating: 3000, desc: "Aleksej Pavlović — elite precision",         depth: 6, mistakeChance: 0.001 },
+  { value: "master",       label: "Master (3000)",   rating: 3000, desc: "Miloš Moskovljević — elite precision",       depth: 6, mistakeChance: 0.001 },
 ];
 
 export function getAIMove(game: Chess, difficulty: Difficulty): string | null {
