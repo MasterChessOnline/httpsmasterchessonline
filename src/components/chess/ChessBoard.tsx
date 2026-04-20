@@ -212,6 +212,8 @@ export default function ChessBoard({
               })}
             </div>
           ))}
+          {/* Game-over / status overlay */}
+          {overlay}
         </div>
 
         {/* Rank labels right */}
