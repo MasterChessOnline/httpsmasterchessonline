@@ -25,7 +25,7 @@ interface GameControlsProps {
   onToggleHints: () => void;
   onResign?: () => void;
   onOfferDraw?: () => void;
-  canResign?: boolean;
+  settingsLocked?: boolean;
 }
 
 const BOT_LEVELS = AI_LEVELS.map((level) => ({
@@ -40,7 +40,7 @@ export default function GameControls({
   statusText, moveHistory, isGameOver, hintsEnabled,
   onModeChange, onDifficultyChange, onColorChange,
   onTimeControlChange, onNewGame, onToggleHints,
-  onResign, onOfferDraw, canResign = false,
+  onResign, onOfferDraw, canResign = false, settingsLocked = false,
 }: GameControlsProps) {
   return (
     <div className="w-full lg:max-w-xs space-y-3">
