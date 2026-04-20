@@ -1,4 +1,5 @@
 import { type Difficulty } from "../chess-ai";
+import type { Playstyle, OpeningRepertoire } from "./playstyles";
 
 export interface BotProfile {
   id: string;
@@ -7,6 +8,18 @@ export interface BotProfile {
   rating: number;
   difficulty: Difficulty;
   personality: string;
+  /** How the bot picks moves: aggressive, positional, etc. */
+  playstyle: Playstyle;
+  /** Preferred opening systems — bot will try to follow these. */
+  openings: OpeningRepertoire[];
+  /** 0..1 — chance the bot plays the engine-best move. Lower = more human. */
+  accuracy: number;
+  /** 0..1 — chance per move the bot blunders (drops material / misses tactic). */
+  blunderRate: number;
+  /** 0..1 — chance per move the bot makes a small inaccuracy. */
+  inaccuracyRate: number;
+  /** How many plies of opening theory the bot will follow before going its own way. */
+  bookDepth: number;
   country: string;
   countryFlag: string;
   style: string;
