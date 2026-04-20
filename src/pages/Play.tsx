@@ -656,7 +656,7 @@ const Play = () => {
 
           {/* Bot grid */}
           <div className="w-full max-w-lg">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-center">Ili izaberi protivnika</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-center">Or pick an opponent</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {getBotByDifficulty(difficulty).map(bot => (
                 <motion.button
