@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ChessCard from "@/components/ChessCard";
+import ChessCardView from "@/components/ChessCard";
 import ChessCardCompare from "@/components/ChessCardCompare";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useChessCard } from "@/hooks/use-chess-card";
 import { computeChessCard, type ChessCardProfile, type ChessCardGame } from "@/lib/chess-card";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Users, Sparkles, X } from "lucide-react";
+import { Search, Users, Sparkles, X, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface OpponentProfile {
@@ -29,7 +29,6 @@ const ChessCardPage = () => {
 
   const myCard = useChessCard(user?.id, profile?.rating);
 
-  // Compare mode
   const compareId = params.get("compare");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<OpponentProfile[]>([]);
@@ -38,7 +37,6 @@ const ChessCardPage = () => {
   const [opponentCard, setOpponentCard] = useState<ChessCardProfile | null>(null);
   const [opponentLoading, setOpponentLoading] = useState(false);
 
-  // Search players
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
       setSearchResults([]);
@@ -58,7 +56,6 @@ const ChessCardPage = () => {
     return () => clearTimeout(t);
   }, [searchQuery, user?.id]);
 
-  // Load opponent card when selected (or via URL)
   useEffect(() => {
     if (!compareId) {
       setOpponent(null);
@@ -96,22 +93,33 @@ const ChessCardPage = () => {
     setSearchResults([]);
   };
 
-  const clearCompare = () => {
-    setParams({});
-  };
+  const clearCompare = () => setParams({});
 
+  // Logged-out preview: show a sample card so the page is never empty
   if (!user) {
+    const sample = computeChessCard("preview", 1450, []);
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
         <Navbar />
-        <main className="container mx-auto px-4 pt-24 pb-16 text-center">
-          <Card className="max-w-md mx-auto p-8">
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2">Chess Card</h1>
-            <p className="text-sm text-muted-foreground mb-4">
-              Sign in to view your personalized Chess Card and compare with other players.
+        <main className="container mx-auto px-4 pt-24 pb-16">
+          <div className="text-center mb-8">
+            <Badge className="bg-primary/15 text-primary border-primary/30 text-xs mb-3">
+              <Sparkles className="w-3 h-3 mr-1" /> Personal Analytics
+            </Badge>
+            <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-2">
+              Your <span className="text-gradient-gold">Chess Card</span>
+            </h1>
+            <p className="text-muted-foreground text-sm max-w-xl mx-auto">
+              Sign in to unlock your personalised Chess Card and compare with any other MasterChess player.
             </p>
-            <Link to="/login"><Button>Sign In</Button></Link>
-          </Card>
+            <div className="flex justify-center gap-2 mt-4">
+              <Link to="/login"><Button variant="default">Sign In</Button></Link>
+              <Link to="/signup"><Button variant="outline">Create account</Button></Link>
+            </div>
+          </div>
+          <div className="max-w-3xl mx-auto opacity-60 pointer-events-none select-none">
+            <ChessCardView card={sample} playerName="Sample Player" />
+          </div>
         </main>
         <Footer />
       </div>
@@ -140,21 +148,25 @@ const ChessCardPage = () => {
           </p>
         </motion.div>
 
-        {/* Loading */}
         {myCard.loading && (
           <div className="max-w-3xl mx-auto h-96 rounded-2xl bg-muted/20 animate-pulse" />
         )}
 
-        {/* Single card view */}
+        {myCard.error && !myCard.loading && (
+          <Card className="max-w-md mx-auto p-6 text-center">
+            <BarChart3 className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Couldn't load your Chess Card: {myCard.error}</p>
+          </Card>
+        )}
+
         {!myCard.loading && myCard.card && !compareId && (
           <div className="max-w-3xl mx-auto space-y-6">
-            <ChessCard
+            <ChessCardView
               card={myCard.card}
               playerName={myName}
               avatarUrl={profile?.avatar_url}
             />
 
-            {/* Compare CTA */}
             <Card className="p-5 border-border/40">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-9 h-9 rounded-lg bg-accent/15 flex items-center justify-center">
@@ -205,7 +217,6 @@ const ChessCardPage = () => {
           </div>
         )}
 
-        {/* Compare view */}
         {!myCard.loading && myCard.card && compareId && (
           <div className="max-w-6xl mx-auto space-y-6">
             <div className="flex items-center justify-between gap-3">
@@ -228,13 +239,13 @@ const ChessCardPage = () => {
                   nameB={opponent.display_name || opponent.username || "Player"}
                 />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <ChessCard
+                  <ChessCardView
                     card={myCard.card}
                     playerName={myName}
                     avatarUrl={profile?.avatar_url}
                     compact
                   />
-                  <ChessCard
+                  <ChessCardView
                     card={opponentCard}
                     playerName={opponent.display_name || opponent.username || "Player"}
                     avatarUrl={opponent.avatar_url}

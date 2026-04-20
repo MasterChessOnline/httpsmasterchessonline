@@ -1,6 +1,14 @@
-// Chess Card analytics — derives a 7-skill profile (0-100 each) from a player's
-// online + bot games. Pure analytics — no engine required.
-// Categories: Opening • Middlegame • Endgame • Tactics • Positional • Time Management • Consistency
+/**
+ * Chess Card analytics engine.
+ *
+ * Computes 7 skill scores (0-100) from a player's recent games:
+ *  - opening, middlegame, endgame, tactics, positional, time, consistency
+ *
+ * Scores are derived from PGN move counts, time-control patterns, captures,
+ * castling, and result distribution. Pure deterministic (no engine eval) so
+ * it works for the human-only-play policy on MasterChess.
+ */
+import { Chess } from "chess.js";
 
 export type SkillKey =
   | "opening"
@@ -8,379 +16,335 @@ export type SkillKey =
   | "endgame"
   | "tactics"
   | "positional"
-  | "timeManagement"
+  | "time"
   | "consistency";
 
 export interface SkillScore {
   key: SkillKey;
   label: string;
-  score: number;       // 0-100
-  level: string;       // "Beginner" → "Grandmaster"
-  description: string; // short tooltip
-  icon: string;        // emoji icon
+  icon: string;
+  description: string;
+  score: number;          // 0..100
+  level: string;          // human label e.g. "Intermediate"
 }
 
 export interface ChessCardGame {
   white_player_id: string;
   black_player_id: string;
-  result: string | null;
+  result: string | null;          // "1-0" | "0-1" | "1/2-1/2" | null
   pgn: string | null;
-  time_control_label?: string | null;
-  white_time?: number;
-  black_time?: number;
+  time_control_label: string | null;
+  white_time?: number | null;
+  black_time?: number | null;
   created_at: string;
-  source?: "online" | "bot";
-  opponent_rating?: number;
+  source: "online" | "bot";
 }
 
 export interface ChessCardProfile {
-  totalGames: number;
+  userId: string;
   rating: number;
-  overallScore: number;
+  totalGames: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  overallScore: number;     // 0..100
   overallLevel: string;
   skills: SkillScore[];
+  topStrength: SkillKey | null;
+  topWeakness: SkillKey | null;
   summary: string;
-  topStrength: SkillKey;
-  topWeakness: SkillKey;
 }
 
-const LEVELS = [
-  { min: 0,  label: "Beginner" },
-  { min: 25, label: "Casual" },
-  { min: 45, label: "Club Player" },
-  { min: 60, label: "Advanced" },
-  { min: 75, label: "Expert" },
-  { min: 88, label: "Master" },
-  { min: 95, label: "Grandmaster" },
-];
+const SKILL_META: Record<SkillKey, { label: string; icon: string; description: string }> = {
+  opening:    { label: "Opening Play",    icon: "♘", description: "Knowledge & variety in the opening phase" },
+  middlegame: { label: "Middlegame",      icon: "⚔️", description: "Strategy, planning, and active play" },
+  endgame:    { label: "Endgame",         icon: "♚", description: "Technique and conversion in the endgame" },
+  tactics:    { label: "Tactics",         icon: "⚡", description: "Combinations, captures, and forcing play" },
+  positional: { label: "Positional Play", icon: "🏰", description: "Pawn structures, king safety, long-term play" },
+  time:       { label: "Time Management", icon: "⏱️", description: "How well you manage the clock" },
+  consistency:{ label: "Consistency",     icon: "📈", description: "Performance stability across games" },
+};
 
 function levelFor(score: number): string {
-  let label = LEVELS[0].label;
-  for (const l of LEVELS) if (score >= l.min) label = l.label;
-  return label;
+  if (score >= 90) return "Grandmaster";
+  if (score >= 80) return "Master";
+  if (score >= 70) return "Expert";
+  if (score >= 60) return "Advanced";
+  if (score >= 50) return "Intermediate";
+  if (score >= 35) return "Club Player";
+  if (score >= 20) return "Beginner+";
+  return "Beginner";
 }
 
-function clamp(n: number, min = 0, max = 100): number {
-  return Math.max(min, Math.min(max, Math.round(n)));
+function clamp(n: number, lo = 0, hi = 100): number {
+  return Math.max(lo, Math.min(hi, n));
 }
 
-function parseSanMoves(pgn: string | null): string[] {
-  if (!pgn) return [];
-  const body = pgn.replace(/\[[^\]]*\]/g, "").replace(/\{[^}]*\}/g, "");
-  const tokens = body.split(/\s+/).filter(Boolean);
-  return tokens.filter(t => !/^\d+\.+$/.test(t) && !/^(1-0|0-1|1\/2-1\/2|\*)$/.test(t));
+interface PgnMetrics {
+  plyCount: number;
+  reachedMiddlegame: boolean;
+  reachedEndgame: boolean;
+  endgameReached: boolean;
+  castled: boolean;
+  captures: number;
+  checks: number;
+  promotions: number;
+  uniqueOpeningSan: string;     // first 6 SAN moves joined
 }
 
-interface PerGameMetrics {
-  total: number;
-  ourMoves: number;
-  ourCaptures: number;
-  ourChecks: number;
-  ourPawnPushes: number;
-  ourPieceMoves: number;
-  ourCenterMoves: number;
-  ourCastled: boolean;
-  ourPromotions: number;
-  outcome: 1 | 0 | 0.5;       // win/loss/draw from player perspective
-  totalLen: number;
-  finalTime?: number;          // seconds remaining for player at end
-  startingTimeSec?: number;
-}
-
-const CENTER_FILES = new Set(["c", "d", "e", "f"]);
-
-function parseTimeControl(label?: string | null): number | undefined {
-  if (!label) return undefined;
-  const m = label.match(/^(\d+)/);
-  if (!m) return undefined;
-  return parseInt(m[1], 10) * 60;
-}
-
-function analyzeGame(userId: string, g: ChessCardGame): PerGameMetrics {
-  const isWhite = g.white_player_id === userId;
-  const moves = parseSanMoves(g.pgn);
-  const m: PerGameMetrics = {
-    total: 1,
-    ourMoves: 0,
-    ourCaptures: 0,
-    ourChecks: 0,
-    ourPawnPushes: 0,
-    ourPieceMoves: 0,
-    ourCenterMoves: 0,
-    ourCastled: false,
-    ourPromotions: 0,
-    outcome: g.result === "1/2-1/2" ? 0.5 : ((isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1")) ? 1 : 0,
-    totalLen: moves.length,
-    finalTime: isWhite ? g.white_time : g.black_time,
-    startingTimeSec: parseTimeControl(g.time_control_label),
+function analyzePgn(pgn: string | null): PgnMetrics {
+  const m: PgnMetrics = {
+    plyCount: 0,
+    reachedMiddlegame: false,
+    reachedEndgame: false,
+    endgameReached: false,
+    castled: false,
+    captures: 0,
+    checks: 0,
+    promotions: 0,
+    uniqueOpeningSan: "",
   };
+  if (!pgn) return m;
+  try {
+    const game = new Chess();
+    game.loadPgn(pgn);
+    const history = game.history({ verbose: true });
+    m.plyCount = history.length;
 
-  for (let i = 0; i < moves.length; i++) {
-    const ours = isWhite ? i % 2 === 0 : i % 2 === 1;
-    if (!ours) continue;
-    const mv = moves[i];
-    m.ourMoves++;
-    if (mv.includes("x")) m.ourCaptures++;
-    if (mv.includes("+") || mv.includes("#")) m.ourChecks++;
-    if (mv.includes("=")) m.ourPromotions++;
-    if (mv === "O-O" || mv === "O-O-O") { m.ourCastled = true; continue; }
-    // Pawn push: SAN starts with file letter and is not a capture
-    if (/^[a-h]/.test(mv) && !mv.includes("x")) {
-      m.ourPawnPushes++;
-      if (CENTER_FILES.has(mv[0])) m.ourCenterMoves++;
-    } else {
-      m.ourPieceMoves++;
-      // Piece destination square: last 2 chars usually = square (e.g. Nf3)
-      const destFile = mv.replace(/[+#]/g, "").slice(-2)[0];
-      if (CENTER_FILES.has(destFile)) m.ourCenterMoves++;
-    }
+    const openingSan: string[] = [];
+    let pieceCount = 32;
+
+    history.forEach((mv: any, idx: number) => {
+      if (idx < 6) openingSan.push(mv.san);
+      if (mv.flags.includes("c") || mv.flags.includes("e")) {
+        m.captures += 1;
+        pieceCount -= 1;
+      }
+      if (mv.san.includes("+") || mv.san.includes("#")) m.checks += 1;
+      if (mv.flags.includes("p")) m.promotions += 1;
+      if (mv.flags.includes("k") || mv.flags.includes("q")) m.castled = true;
+    });
+
+    m.uniqueOpeningSan = openingSan.join(" ");
+    m.reachedMiddlegame = m.plyCount >= 20;
+    m.reachedEndgame = m.plyCount >= 40 && pieceCount <= 14;
+    m.endgameReached = m.reachedEndgame;
+  } catch {
+    /* invalid pgn — leave zeros */
   }
-
   return m;
 }
 
-// ============================================================
-// Skill computations — each returns 0..100
-// ============================================================
-
-function scoreOpening(games: PerGameMetrics[], baselineRating: number): number {
-  if (games.length === 0) return ratingFloor(baselineRating);
-  // Reward: castling rate, central play in first 10 moves, surviving past move 15.
-  let castled = 0, centered = 0, survived = 0;
-  for (const g of games) {
-    if (g.ourCastled) castled++;
-    if (g.totalLen >= 15) survived++;
-    // We approximate "central opening play" via center-move rate scaled to first 10 plies
-    const earlyShare = g.ourMoves > 0 ? g.ourCenterMoves / g.ourMoves : 0;
-    if (earlyShare >= 0.4) centered++;
-  }
-  const castleRate = castled / games.length;
-  const centerRate = centered / games.length;
-  const survivalRate = survived / games.length;
-  const raw = castleRate * 35 + centerRate * 30 + survivalRate * 35;
-  return blend(raw, baselineRating);
+interface AggregateMetrics {
+  games: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  totalPly: number;
+  reachedMiddlegame: number;
+  reachedEndgame: number;
+  endgameWins: number;
+  castledGames: number;
+  totalCaptures: number;
+  totalChecks: number;
+  totalPromotions: number;
+  uniqueOpenings: Set<string>;
+  bulletGames: number;
+  blitzGames: number;
+  rapidGames: number;
+  classicalGames: number;
+  timeoutLosses: number;     // games lost on time
+  resultStream: number[];    // 1 / 0 / 0.5
 }
 
-function scoreMiddlegame(games: PerGameMetrics[], baselineRating: number): number {
-  if (games.length === 0) return ratingFloor(baselineRating);
-  // Reward sustained activity in moves 15-40: capture+check density and not crashing.
-  let activitySum = 0;
-  let reachedMid = 0;
-  for (const g of games) {
-    if (g.totalLen >= 20) reachedMid++;
-    const density = g.ourMoves > 0 ? (g.ourCaptures + g.ourChecks) / g.ourMoves : 0;
-    activitySum += Math.min(0.35, density); // cap so trades don't dominate
-  }
-  const activity = (activitySum / games.length) / 0.35; // 0..1
-  const reach = reachedMid / games.length;
-  const raw = activity * 50 + reach * 50;
-  return blend(raw, baselineRating);
-}
-
-function scoreEndgame(games: PerGameMetrics[], baselineRating: number): number {
-  if (games.length === 0) return ratingFloor(baselineRating);
-  // Reward: games reaching past move 40, conversion in long games, promotions.
-  let long = 0, convertedLong = 0, promotions = 0;
-  for (const g of games) {
-    if (g.totalLen >= 40) {
-      long++;
-      if (g.outcome === 1) convertedLong++;
-    }
-    if (g.ourPromotions > 0) promotions++;
-  }
-  const longRate = long / games.length;
-  const conversion = long > 0 ? convertedLong / long : 0;
-  const promoRate = promotions / games.length;
-  const raw = longRate * 35 + conversion * 50 + promoRate * 15;
-  return blend(raw, baselineRating);
-}
-
-function scoreTactics(games: PerGameMetrics[], baselineRating: number): number {
-  if (games.length === 0) return ratingFloor(baselineRating);
-  // Reward: high check + capture density, decisive results (not draws).
-  let checkSum = 0, captureSum = 0, decisive = 0;
-  for (const g of games) {
-    if (g.ourMoves === 0) continue;
-    checkSum += g.ourChecks / g.ourMoves;
-    captureSum += g.ourCaptures / g.ourMoves;
-    if (g.outcome !== 0.5) decisive++;
-  }
-  const checkRate = checkSum / games.length;     // typical 0.02-0.10
-  const captureRate = captureSum / games.length; // typical 0.10-0.25
-  const decisiveRate = decisive / games.length;
-  const raw = (checkRate / 0.10) * 40 + (captureRate / 0.22) * 35 + decisiveRate * 25;
-  return blend(raw, baselineRating);
-}
-
-function scorePositional(games: PerGameMetrics[], baselineRating: number): number {
-  if (games.length === 0) return ratingFloor(baselineRating);
-  // Reward: long games, low blunder-collapse rate, balanced piece vs pawn moves.
-  let long = 0, collapsed = 0, balanced = 0;
-  for (const g of games) {
-    if (g.totalLen >= 35) long++;
-    if (g.outcome === 0 && g.totalLen > 0 && g.totalLen < 25) collapsed++;
-    const piecesShare = g.ourMoves > 0 ? g.ourPieceMoves / g.ourMoves : 0;
-    if (piecesShare >= 0.45 && piecesShare <= 0.75) balanced++;
-  }
-  const longRate = long / games.length;
-  const stability = 1 - collapsed / games.length;
-  const balanceRate = balanced / games.length;
-  const raw = longRate * 35 + stability * 35 + balanceRate * 30;
-  return blend(raw, baselineRating);
-}
-
-function scoreTimeManagement(games: PerGameMetrics[], baselineRating: number): number {
-  const timed = games.filter(g => g.startingTimeSec && g.finalTime !== undefined);
-  if (timed.length === 0) return blend(60, baselineRating); // neutral baseline
-  let goodMgmt = 0, flagged = 0;
-  for (const g of timed) {
-    const remaining = g.finalTime ?? 0;
-    const start = g.startingTimeSec ?? 1;
-    const ratio = remaining / start;
-    if (ratio < 0.05) flagged++;
-    else if (ratio > 0.25) goodMgmt++;
-  }
-  const goodRate = goodMgmt / timed.length;
-  const flagRate = flagged / timed.length;
-  const raw = goodRate * 70 + (1 - flagRate) * 30;
-  return blend(raw, baselineRating);
-}
-
-function scoreConsistency(games: PerGameMetrics[], baselineRating: number): number {
-  if (games.length < 3) return blend(50, baselineRating);
-  // Reward: stable result distribution (not all losses), low result variance.
-  const results = games.map(g => g.outcome);
-  const mean = results.reduce((a, b) => a + b, 0) / results.length;
-  const variance = results.reduce((acc, r) => acc + (r - mean) ** 2, 0) / results.length;
-  // Variance ranges 0..0.25 — invert for stability score
-  const stability = 1 - Math.min(1, variance / 0.25);
-  const winShare = results.filter(r => r === 1).length / results.length;
-  const lossShare = results.filter(r => r === 0).length / results.length;
-  const balance = 1 - Math.abs(winShare - (1 - lossShare));
-  const raw = stability * 50 + winShare * 30 + balance * 20;
-  return blend(raw, baselineRating);
-}
-
-// ============================================================
-// Helpers
-// ============================================================
-
-function ratingFloor(rating: number): number {
-  // Map rating roughly to a score floor when no game data exists.
-  // 800 → 20, 1200 → 40, 1600 → 60, 2000 → 80, 2400+ → 95
-  return clamp(((rating - 600) / 1800) * 80 + 15);
-}
-
-function blend(rawScore: number, baselineRating: number): number {
-  // Blend behavior-derived score with rating-derived baseline so a 2000-rated
-  // player never gets "Beginner" labels just because their PGN sample is small.
-  const baseline = ratingFloor(baselineRating);
-  const blended = rawScore * 0.7 + baseline * 0.3;
-  return clamp(blended);
-}
-
-const SKILL_META: Record<SkillKey, { label: string; description: string; icon: string }> = {
-  opening:        { label: "Opening Play",     description: "Solid setups, central control, timely castling", icon: "♟" },
-  middlegame:     { label: "Middlegame",       description: "Plans, piece activity, pressure",                icon: "♞" },
-  endgame:        { label: "Endgame",          description: "Conversion, technique, precision",               icon: "♔" },
-  tactics:        { label: "Tactics",          description: "Combinations, threats, calculation",             icon: "⚡" },
-  positional:     { label: "Positional Play",  description: "Structure, space, long-term plans",              icon: "🏛" },
-  timeManagement: { label: "Time Management",  description: "Clock discipline under pressure",                icon: "⏱" },
-  consistency:    { label: "Consistency",      description: "Stable performance across games",                icon: "📈" },
-};
-
-// ============================================================
-// Main entry
-// ============================================================
-
-export function computeChessCard(
-  userId: string,
-  rating: number,
-  games: ChessCardGame[],
-): ChessCardProfile {
-  const metrics = games.map(g => analyzeGame(userId, g));
-
-  const scores: Record<SkillKey, number> = {
-    opening: scoreOpening(metrics, rating),
-    middlegame: scoreMiddlegame(metrics, rating),
-    endgame: scoreEndgame(metrics, rating),
-    tactics: scoreTactics(metrics, rating),
-    positional: scorePositional(metrics, rating),
-    timeManagement: scoreTimeManagement(metrics, rating),
-    consistency: scoreConsistency(metrics, rating),
+function aggregate(userId: string, games: ChessCardGame[]): AggregateMetrics {
+  const agg: AggregateMetrics = {
+    games: 0, wins: 0, losses: 0, draws: 0,
+    totalPly: 0, reachedMiddlegame: 0, reachedEndgame: 0, endgameWins: 0,
+    castledGames: 0, totalCaptures: 0, totalChecks: 0, totalPromotions: 0,
+    uniqueOpenings: new Set(),
+    bulletGames: 0, blitzGames: 0, rapidGames: 0, classicalGames: 0,
+    timeoutLosses: 0, resultStream: [],
   };
 
-  const skills: SkillScore[] = (Object.keys(scores) as SkillKey[]).map(key => ({
-    key,
-    label: SKILL_META[key].label,
-    description: SKILL_META[key].description,
-    icon: SKILL_META[key].icon,
-    score: scores[key],
-    level: levelFor(scores[key]),
+  games.forEach(g => {
+    const isWhite = g.white_player_id === userId;
+    const result = g.result ?? "";
+    const won = (isWhite && result === "1-0") || (!isWhite && result === "0-1");
+    const lost = (isWhite && result === "0-1") || (!isWhite && result === "1-0");
+    const draw = result === "1/2-1/2";
+    if (!won && !lost && !draw) return;
+
+    agg.games += 1;
+    if (won) { agg.wins += 1; agg.resultStream.push(1); }
+    else if (lost) { agg.losses += 1; agg.resultStream.push(0); }
+    else { agg.draws += 1; agg.resultStream.push(0.5); }
+
+    const myTime = isWhite ? g.white_time : g.black_time;
+    if (lost && typeof myTime === "number" && myTime <= 0) agg.timeoutLosses += 1;
+
+    const tc = (g.time_control_label || "").toLowerCase();
+    const base = parseInt(tc.split("+")[0] || "0", 10) || 0;
+    if (base <= 2) agg.bulletGames += 1;
+    else if (base <= 5) agg.blitzGames += 1;
+    else if (base <= 15) agg.rapidGames += 1;
+    else agg.classicalGames += 1;
+
+    const m = analyzePgn(g.pgn);
+    agg.totalPly += m.plyCount;
+    if (m.reachedMiddlegame) agg.reachedMiddlegame += 1;
+    if (m.reachedEndgame) {
+      agg.reachedEndgame += 1;
+      if (won) agg.endgameWins += 1;
+    }
+    if (m.castled) agg.castledGames += 1;
+    agg.totalCaptures += m.captures;
+    agg.totalChecks += m.checks;
+    agg.totalPromotions += m.promotions;
+    if (m.uniqueOpeningSan) agg.uniqueOpenings.add(m.uniqueOpeningSan);
+  });
+
+  return agg;
+}
+
+function ratingBoost(rating: number): number {
+  // Map rating 400..2400 → +0..+25 baseline boost so new players still see a reasonable card
+  const r = clamp(rating, 400, 2400);
+  return ((r - 400) / 2000) * 25;
+}
+
+function computeSkills(rating: number, agg: AggregateMetrics): SkillScore[] {
+  const base = 30 + ratingBoost(rating);    // 30..55 baseline
+  const games = Math.max(1, agg.games);
+  const winRate = agg.wins / games;
+  const drawRate = agg.draws / games;
+  const avgPly = agg.totalPly / games;
+
+  // OPENING: based on castling rate, opening variety, and not losing too quickly
+  const castleRate = agg.castledGames / games;
+  const openingVariety = clamp(agg.uniqueOpenings.size / Math.max(3, games / 4), 0, 1);
+  const fastLosses = agg.resultStream.filter((r, i) => r === 0).length;
+  const opening = clamp(
+    base + castleRate * 25 + openingVariety * 15 + (avgPly > 25 ? 8 : 0) - (fastLosses / games) * 10,
+  );
+
+  // MIDDLEGAME: based on games that reached middlegame and win rate there
+  const middleReachRate = agg.reachedMiddlegame / games;
+  const middlegame = clamp(base + middleReachRate * 25 + winRate * 20 + (agg.totalChecks / games) * 1.5);
+
+  // ENDGAME: based on endgame conversions
+  const endgameReachRate = agg.reachedEndgame / games;
+  const endgameConv = agg.reachedEndgame > 0 ? agg.endgameWins / agg.reachedEndgame : winRate;
+  const endgame = clamp(base + endgameReachRate * 20 + endgameConv * 30 + (agg.totalPromotions / games) * 5);
+
+  // TACTICS: captures + checks + decisive results (less drawish)
+  const capturesPerGame = agg.totalCaptures / games;
+  const checksPerGame = agg.totalChecks / games;
+  const decisiveRate = (agg.wins + agg.losses) / games;
+  const tactics = clamp(base + capturesPerGame * 1.4 + checksPerGame * 3 + decisiveRate * 12);
+
+  // POSITIONAL: longer games, lower captures-per-ply, draws (often positional)
+  const capturesPerPly = avgPly > 0 ? agg.totalCaptures / agg.totalPly : 0;
+  const positional = clamp(
+    base + (avgPly / 60) * 25 + drawRate * 15 + (1 - clamp(capturesPerPly * 100, 0, 100) / 100) * 10,
+  );
+
+  // TIME: penalty for timeout losses; bonus for surviving rapid/classical
+  const timeoutRate = agg.timeoutLosses / games;
+  const slowGameShare = (agg.rapidGames + agg.classicalGames) / games;
+  const time = clamp(base + 25 - timeoutRate * 50 + slowGameShare * 15);
+
+  // CONSISTENCY: variance of last results — lower variance = higher consistency
+  const last = agg.resultStream.slice(-15);
+  const meanR = last.length ? last.reduce((a, b) => a + b, 0) / last.length : winRate;
+  const variance = last.length
+    ? last.reduce((s, v) => s + (v - meanR) ** 2, 0) / last.length
+    : 0.25;
+  const consistency = clamp(base + (1 - variance * 4) * 30 + Math.min(games, 20));
+
+  const raw: Record<SkillKey, number> = {
+    opening: Math.round(opening),
+    middlegame: Math.round(middlegame),
+    endgame: Math.round(endgame),
+    tactics: Math.round(tactics),
+    positional: Math.round(positional),
+    time: Math.round(time),
+    consistency: Math.round(consistency),
+  };
+
+  return (Object.keys(raw) as SkillKey[]).map(k => ({
+    key: k,
+    label: SKILL_META[k].label,
+    icon: SKILL_META[k].icon,
+    description: SKILL_META[k].description,
+    score: raw[k],
+    level: levelFor(raw[k]),
   }));
+}
 
-  const overallScore = clamp(skills.reduce((acc, s) => acc + s.score, 0) / skills.length);
-  const overallLevel = levelFor(overallScore);
-
-  // Strongest / weakest
+function buildSummary(name: string, skills: SkillScore[], agg: AggregateMetrics, overall: number): string {
+  if (agg.games === 0) {
+    return "No rated games yet — play a few games to unlock your personalised Chess Card analytics.";
+  }
   const sorted = [...skills].sort((a, b) => b.score - a.score);
-  const topStrength = sorted[0].key;
-  const topWeakness = sorted[sorted.length - 1].key;
+  const top = sorted[0];
+  const weakest = sorted[sorted.length - 1];
 
-  const summary = buildSummary(skills, overallScore, games.length);
+  const styleParts: string[] = [];
+  if (top.key === "tactics" || top.key === "middlegame") styleParts.push("aggressive, tactical player");
+  else if (top.key === "positional" || top.key === "endgame") styleParts.push("calm, positional player");
+  else if (top.key === "opening") styleParts.push("well-prepared opening specialist");
+  else if (top.key === "time") styleParts.push("composed under the clock");
+  else styleParts.push("steady, well-rounded player");
 
+  const winRate = agg.games ? Math.round((agg.wins / agg.games) * 100) : 0;
+  const overallLabel = levelFor(overall).toLowerCase();
+
+  return `${name} is an ${overallLabel}-level ${styleParts[0]} with strong ${top.label.toLowerCase()} (${top.score}/100) but room to grow in ${weakest.label.toLowerCase()} (${weakest.score}/100). Across ${agg.games} games, win rate is ${winRate}%.`;
+}
+
+export function computeChessCard(userId: string, rating: number, games: ChessCardGame[]): ChessCardProfile {
+  const agg = aggregate(userId, games);
+  const skills = computeSkills(rating, agg);
+  const overallScore = Math.round(skills.reduce((s, k) => s + k.score, 0) / skills.length);
+  const sorted = [...skills].sort((a, b) => b.score - a.score);
+  const topStrength = agg.games > 0 ? sorted[0].key : null;
+  const topWeakness = agg.games >= 5 ? sorted[sorted.length - 1].key : null;
   return {
-    totalGames: games.length,
+    userId,
     rating,
+    totalGames: agg.games,
+    wins: agg.wins,
+    losses: agg.losses,
+    draws: agg.draws,
     overallScore,
-    overallLevel,
+    overallLevel: levelFor(overallScore),
     skills,
-    summary,
     topStrength,
     topWeakness,
+    summary: buildSummary("This player", skills, agg, overallScore),
   };
 }
 
-function buildSummary(skills: SkillScore[], overall: number, totalGames: number): string {
-  if (totalGames === 0) {
-    return "Play a few rated games to unlock your personalized Chess Card analysis.";
-  }
-  const map = new Map(skills.map(s => [s.key, s] as const));
-  const sorted = [...skills].sort((a, b) => b.score - a.score);
-  const best = sorted[0];
-  const worst = sorted[sorted.length - 1];
-
-  // Style detection
-  const tactics = map.get("tactics")!.score;
-  const positional = map.get("positional")!.score;
-  const endgame = map.get("endgame")!.score;
-  const time = map.get("timeManagement")!.score;
-  const consistency = map.get("consistency")!.score;
-
-  let style = "balanced";
-  if (tactics - positional > 12) style = "aggressive, tactically sharp";
-  else if (positional - tactics > 12) style = "patient, positional";
-  else if (endgame >= 70 && tactics < 65) style = "endgame-oriented";
-
-  const strength = `strong ${best.label.toLowerCase()}`;
-  const weakness = worst.score < 55 ? ` but weaker ${worst.label.toLowerCase()}` : "";
-  const clock = time < 50 ? " Clock management is a recurring leak — slow down in critical moments." : "";
-  const stab = consistency < 50 ? " Results swing too much from game to game." : "";
-
-  const tier = overall >= 75 ? "An advanced player" : overall >= 55 ? "A solid club-level player" : "A developing player";
-  return `${tier} with a ${style} profile — ${strength}${weakness}.${clock}${stab}`.trim();
+export interface CompareRow {
+  key: SkillKey;
+  label: string;
+  icon: string;
+  a: number;
+  b: number;
+  delta: number;       // a - b
 }
 
-export function compareCards(a: ChessCardProfile, b: ChessCardProfile) {
-  return a.skills.map((skillA, i) => {
-    const skillB = b.skills[i];
+export function compareCards(a: ChessCardProfile, b: ChessCardProfile): CompareRow[] {
+  return a.skills.map((sa, i) => {
+    const sb = b.skills[i];
     return {
-      key: skillA.key,
-      label: skillA.label,
-      icon: skillA.icon,
-      a: skillA.score,
-      b: skillB.score,
-      delta: skillA.score - skillB.score,
+      key: sa.key,
+      label: sa.label,
+      icon: sa.icon,
+      a: sa.score,
+      b: sb.score,
+      delta: sa.score - sb.score,
     };
   });
 }

@@ -2,14 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { computeChessCard, type ChessCardProfile, type ChessCardGame } from "@/lib/chess-card";
 
-interface ProfileLite {
-  user_id: string;
-  rating: number;
-}
-
 /**
  * Loads up to 50 most-recent finished online games for a user and computes
- * their Chess Card profile. Auto-refetches when userId changes.
+ * their Chess Card profile. Re-fetches when userId or rating changes.
  */
 export function useChessCard(userId: string | undefined, rating: number | undefined) {
   const [card, setCard] = useState<ChessCardProfile | null>(null);
@@ -52,13 +47,4 @@ export function useChessCard(userId: string | undefined, rating: number | undefi
   }, [userId, rating]);
 
   return { card, loading, error };
-}
-
-export async function loadProfileForCard(userId: string): Promise<ProfileLite | null> {
-  const { data } = await supabase
-    .from("profiles")
-    .select("user_id,rating,display_name,username,avatar_url")
-    .eq("user_id", userId)
-    .maybeSingle();
-  return data as any;
 }
