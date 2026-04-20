@@ -256,11 +256,37 @@ const Play = () => {
   };
 
   const executeMove = (from: Square, to: Square, promotion: PromotionPiece = "q") => {
+    // Pre-move analysis: how good was this move vs engine best?
+    let playerCp = 0;
+    if (mode === "ai") {
+      try {
+        const sign = game.turn() === "w" ? 1 : -1;
+        const engineBest = getAIMove(game, "advanced");
+        if (engineBest) {
+          const probe = new Chess(game.fen());
+          probe.move(engineBest);
+          const bestEval = evaluateBoard(probe);
+          const probe2 = new Chess(game.fen());
+          probe2.move({ from, to, promotion });
+          const myEval = evaluateBoard(probe2);
+          playerCp = Math.max(0, (bestEval - myEval) * sign);
+        }
+      } catch { /* ignore — analysis is best-effort */ }
+    }
+
     const move = game.move({ from, to, promotion });
     if (move) {
       setMoveHistory((prev) => [...prev, move.san]);
       setLastMove({ from: move.from, to: move.to });
       setGameStarted(true);
+      if (mode === "ai") {
+        const quality = classifyCpLoss(playerCp);
+        setPlayerMoveQuality(prev => [...prev, { cp: playerCp, quality }]);
+        if (quality === "blunder") {
+          setBlunderFlash(true);
+          setTimeout(() => setBlunderFlash(false), 350);
+        }
+      }
       trackPosition();
       if (!unlimited && timeControl.increment > 0) {
         if (move.color === "w") setWhiteTime((p) => p + timeControl.increment);
