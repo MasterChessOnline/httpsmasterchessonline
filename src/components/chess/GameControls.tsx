@@ -28,11 +28,12 @@ interface GameControlsProps {
   canResign?: boolean;
 }
 
-const BOT_LEVELS: { value: Difficulty; label: string; rating: string; desc: string }[] = [
-  { value: "beginner", label: "Beginner", rating: "600", desc: "Friendly practice, occasional blunders" },
-  { value: "intermediate", label: "Intermediate", rating: "1200", desc: "Solid tactical awareness" },
-  { value: "master", label: "Master", rating: "3000", desc: "Aleksej Pavlović tier — elite precision" },
-];
+const BOT_LEVELS = AI_LEVELS.map((level) => ({
+  value: level.value,
+  label: level.value === "master" ? "Master" : level.label.split(" ")[0],
+  rating: String(level.rating),
+  desc: level.desc,
+}));
 
 export default function GameControls({
   mode, difficulty, playerColor, timeControlIdx,
