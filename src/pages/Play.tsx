@@ -390,7 +390,7 @@ const Play = () => {
         const botWinning = aiAdvantage > 200;
         if ((isEqual || longGame) && !botWinning) {
           setDrawAgreed(true);
-          setDrawReason("Remis dogovorom");
+          setDrawReason("by agreement");
           showBotMessage(currentBot.taunts.onDrawOffer);
           playChessSound("gameOver");
         } else {
@@ -401,7 +401,7 @@ const Play = () => {
       }, 1500);
     } else {
       setDrawAgreed(true);
-      setDrawReason("Remis dogovorom");
+      setDrawReason("by agreement");
       playChessSound("gameOver");
     }
   };
