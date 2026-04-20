@@ -48,6 +48,20 @@ interface ChessBoardProps {
   hintSquare?: Square | null;
   premove?: { from: Square; to: Square } | null;
   onSquareClick: (square: Square) => void;
+  overlay?: React.ReactNode;
+}
+
+// Locate the square of the king of the given color
+function findKingSquare(board: ReturnType<Chess["board"]>, color: "w" | "b"): string | null {
+  for (let r = 0; r < 8; r++) {
+    for (let f = 0; f < 8; f++) {
+      const sq = board[r][f];
+      if (sq && sq.type === "k" && sq.color === color) {
+        return `${FILES[f]}${RANKS[r]}`;
+      }
+    }
+  }
+  return null;
 }
 
 export default function ChessBoard({
