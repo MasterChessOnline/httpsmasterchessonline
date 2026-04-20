@@ -121,6 +121,7 @@ export default function ChessBoard({
                 const isLastMv = lastMove && (lastMove.from === square || lastMove.to === square);
                 const isHint = hintSquare === square;
                 const isPremove = premove && (premove.from === square || premove.to === square);
+                const isCheckedKing = checkedKingSquare === square;
                 const pieceKey = piece ? `${piece.color}${piece.type}` : null;
                 const pd = pieceKey ? PIECE_UNICODE[pieceKey] : null;
 
