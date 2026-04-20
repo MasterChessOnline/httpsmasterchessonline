@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers } from "lucide-react";
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
-import { BOT_PROFILES, getRandomBot, type BotProfile } from "@/lib/bot-profiles";
+import { BOT_PROFILES, getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-profiles";
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 import RatingChange from "@/components/RatingChange";
@@ -54,7 +54,7 @@ const Play = () => {
   const [drawReason, setDrawReason] = useState<string>("");
   const [streamerMode, setStreamerMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [currentBot, setCurrentBot] = useState<BotProfile>(() => getRandomBot("beginner"));
+  const [currentBot, setCurrentBot] = useState<BotProfile>(() => getDefaultBot("beginner"));
   const [botMessage, setBotMessage] = useState<string>("");
   const [drawOfferPending, setDrawOfferPending] = useState(false);
   const [mode4D, setMode4D] = useState(false);
@@ -371,14 +371,11 @@ const Play = () => {
     }
   };
 
-  // --- "Play" button: start matchmaking flow ---
   const startMatchmaking = (bot?: BotProfile) => {
-    const selectedBot = bot || (difficulty === "master"
-      ? BOT_PROFILES.find((candidate) => candidate.id === "aleksej-pavlovic") || getRandomBot(difficulty)
-      : getRandomBot(difficulty));
+    const selectedBot = bot ?? getDefaultBot(difficulty);
     setCurrentBot(selectedBot);
     if (bot) {
-      setDifficulty(selectedBot.rating >= 2400 ? "master" : selectedBot.rating >= 2000 ? "expert" : selectedBot.rating >= 1500 ? "advanced" : selectedBot.rating >= 900 ? "intermediate" : "beginner");
+      setDifficulty(selectedBot.difficulty);
     }
     setGamePhase("searching");
     setSearchProgress(0);
@@ -449,17 +446,7 @@ const Play = () => {
 
   const changeDifficulty = (d: Difficulty) => {
     setDifficulty(d);
-    const candidateBots = BOT_PROFILES.filter(b => {
-      if (d === "beginner") return b.rating <= 800;
-      if (d === "intermediate") return b.rating > 800 && b.rating <= 1400;
-      if (d === "advanced") return b.rating > 1400 && b.rating <= 1999;
-      if (d === "expert") return b.rating >= 2000 && b.rating <= 2399;
-      return b.rating >= 2400;
-    });
-    const preferredBot = d === "master"
-      ? candidateBots.find((candidate) => candidate.id === "aleksej-pavlovic")
-      : candidateBots[0];
-    if (preferredBot) setCurrentBot(preferredBot);
+    setCurrentBot(getDefaultBot(d));
   };
 
   const boardFlipped = playerColor === "b";
@@ -608,13 +595,7 @@ const Play = () => {
           <div className="w-full max-w-lg">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-center">Ili izaberi protivnika</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-              {BOT_PROFILES.filter(b => {
-                if (difficulty === "beginner") return b.rating <= 800;
-                if (difficulty === "intermediate") return b.rating > 800 && b.rating <= 1400;
-                if (difficulty === "advanced") return b.rating > 1400 && b.rating <= 1999;
-                if (difficulty === "expert") return b.rating >= 2000 && b.rating <= 2399;
-                return b.rating >= 2400;
-              }).map(bot => (
+              {getBotByDifficulty(difficulty).map(bot => (
                 <motion.button
                   key={bot.id}
                   whileHover={{ scale: 1.05 }}
