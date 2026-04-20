@@ -48,15 +48,33 @@ interface ChessBoardProps {
   hintSquare?: Square | null;
   premove?: { from: Square; to: Square } | null;
   onSquareClick: (square: Square) => void;
+  overlay?: React.ReactNode;
+}
+
+// Locate the square of the king of the given color
+function findKingSquare(board: ReturnType<Chess["board"]>, color: "w" | "b"): string | null {
+  for (let r = 0; r < 8; r++) {
+    for (let f = 0; f < 8; f++) {
+      const sq = board[r][f];
+      if (sq && sq.type === "k" && sq.color === color) {
+        return `${FILES[f]}${RANKS[r]}`;
+      }
+    }
+  }
+  return null;
 }
 
 export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
-  isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick,
+  isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick, overlay,
 }: ChessBoardProps) {
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
+
+  // Subtle indicator: which king is currently in check?
+  const inCheck = game.inCheck();
+  const checkedKingSquare = inCheck ? findKingSquare(board, game.turn()) : null;
 
   // Track a move counter to generate unique keys for slide animations
   const moveCountRef = useRef(0);
@@ -86,7 +104,7 @@ export default function ChessBoard({
 
         {/* Board */}
         <div
-          className="flex-1 rounded-lg overflow-hidden shadow-card border border-border/30"
+          className="flex-1 rounded-lg overflow-hidden shadow-card border border-border/30 relative"
           role="grid"
           aria-label="Chess board"
         >
@@ -103,6 +121,7 @@ export default function ChessBoard({
                 const isLastMv = lastMove && (lastMove.from === square || lastMove.to === square);
                 const isHint = hintSquare === square;
                 const isPremove = premove && (premove.from === square || premove.to === square);
+                const isCheckedKing = checkedKingSquare === square;
                 const pieceKey = piece ? `${piece.color}${piece.type}` : null;
                 const pd = pieceKey ? PIECE_UNICODE[pieceKey] : null;
 
@@ -129,6 +148,17 @@ export default function ChessBoard({
                     onClick={() => onSquareClick(square)}
                     tabIndex={0}
                   >
+                    {/* Subtle check indicator on the king (warm amber radial — not red) */}
+                    {isCheckedKing && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 pointer-events-none rounded-sm"
+                        style={{
+                          background:
+                            "radial-gradient(circle, hsl(38 92% 55% / 0.45) 0%, hsl(38 92% 55% / 0.18) 45%, transparent 70%)",
+                        }}
+                      />
+                    )}
                     {/* Legal move dot */}
                     {isLegal && !piece && (
                       <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />
@@ -182,6 +212,8 @@ export default function ChessBoard({
               })}
             </div>
           ))}
+          {/* Game-over / status overlay */}
+          {overlay}
         </div>
 
         {/* Rank labels right */}

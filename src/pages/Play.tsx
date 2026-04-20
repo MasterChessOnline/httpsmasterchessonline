@@ -9,6 +9,7 @@ import CapturedPieces from "@/components/chess/CapturedPieces";
 import GameControls from "@/components/chess/GameControls";
 import AnalysisPanel from "@/components/chess/AnalysisPanel";
 import GameSummary from "@/components/chess/GameSummary";
+import GameOverOverlay from "@/components/chess/GameOverOverlay";
 import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { getAIMove, evaluateBoard, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
@@ -129,12 +130,12 @@ const Play = () => {
   const checkDrawConditions = (): { isDraw: boolean; reason: string } => {
     const posKey = getPositionKey();
     const count = positionHistory.current.filter(p => p === posKey).length;
-    if (count >= 3) return { isDraw: true, reason: "Remis trostrukim ponavljanjem pozicije" };
+    if (count >= 3) return { isDraw: true, reason: "by threefold repetition" };
     const halfMoves = parseInt(game.fen().split(" ")[4]);
-    if (halfMoves >= 100) return { isDraw: true, reason: "Remis pravilom 50 poteza" };
-    if (game.isInsufficientMaterial()) return { isDraw: true, reason: "Remis — nedovoljno materijala" };
-    if (game.isStalemate()) return { isDraw: true, reason: "Pat — remis!" };
-    if (game.isDraw()) return { isDraw: true, reason: "Remis!" };
+    if (halfMoves >= 100) return { isDraw: true, reason: "by 50-move rule" };
+    if (game.isInsufficientMaterial()) return { isDraw: true, reason: "by insufficient material" };
+    if (game.isStalemate()) return { isDraw: true, reason: "by stalemate" };
+    if (game.isDraw()) return { isDraw: true, reason: "" };
     return { isDraw: false, reason: "" };
   };
 
@@ -389,7 +390,7 @@ const Play = () => {
         const botWinning = aiAdvantage > 200;
         if ((isEqual || longGame) && !botWinning) {
           setDrawAgreed(true);
-          setDrawReason("Remis dogovorom");
+          setDrawReason("by agreement");
           showBotMessage(currentBot.taunts.onDrawOffer);
           playChessSound("gameOver");
         } else {
@@ -400,7 +401,7 @@ const Play = () => {
       }, 1500);
     } else {
       setDrawAgreed(true);
-      setDrawReason("Remis dogovorom");
+      setDrawReason("by agreement");
       playChessSound("gameOver");
     }
   };
@@ -517,6 +518,32 @@ const Play = () => {
     : timeoutWinner === "Black" ? "0-1"
     : null;
 
+  // --- Game-over overlay info (shown over the board) ---
+  const gameOverInfo: { type: "checkmate" | "draw" | "resign" | "timeout"; winner: "white" | "black" | null; reason?: string } | null = (() => {
+    if (!isGameOver) return null;
+    if (resignedBy) {
+      const winner = resignedBy === "w" ? "black" : "white";
+      return { type: "resign", winner, reason: `${resignedBy === "w" ? "White" : "Black"} resigned` };
+    }
+    if (timeoutWinner) {
+      return { type: "timeout", winner: timeoutWinner.toLowerCase() as "white" | "black", reason: "on time" };
+    }
+    if (game.isCheckmate()) {
+      const winner = game.turn() === "w" ? "black" : "white";
+      return { type: "checkmate", winner };
+    }
+    if (drawAgreed || game.isStalemate() || game.isDraw()) {
+      let reason = drawReason;
+      if (!reason) {
+        if (game.isStalemate()) reason = "by stalemate";
+        else if (game.isInsufficientMaterial()) reason = "by insufficient material";
+        else reason = "";
+      }
+      return { type: "draw", winner: null, reason };
+    }
+    return null;
+  })();
+
   const pgn = game.pgn();
 
   // --- Apply bot rating change once when an AI game finishes ---
@@ -578,7 +605,7 @@ const Play = () => {
 
           {/* Time control selector */}
           <div className="mb-6 w-full max-w-md">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Vreme</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Time</p>
             <div className="flex flex-wrap justify-center gap-1.5">
               {TIME_CONTROLS.map((tc, i) => (
                 <button
@@ -629,7 +656,7 @@ const Play = () => {
 
           {/* Bot grid */}
           <div className="w-full max-w-lg">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-center">Ili izaberi protivnika</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-center">Or pick an opponent</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {getBotByDifficulty(difficulty).map(bot => (
                 <motion.button
@@ -888,19 +915,6 @@ const Play = () => {
             <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor} isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
             <CapturedPieces game={game} color={boardFlipped ? "w" : "b"} />
 
-            {/* Blunder flash overlay */}
-            <AnimatePresence>
-              {blunderFlash && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute inset-0 rounded-lg bg-red-500/20 pointer-events-none z-20"
-                />
-              )}
-            </AnimatePresence>
-
             <ChessBoard4D enabled={mode4D}>
               <ChessBoard
                 game={game}
@@ -913,6 +927,13 @@ const Play = () => {
                 hintSquare={hintSquare}
                 onSquareClick={handleSquareClick}
                 premove={premove}
+                overlay={gameOverInfo ? (
+                  <GameOverOverlay
+                    type={gameOverInfo.type}
+                    winner={gameOverInfo.winner}
+                    reason={gameOverInfo.reason}
+                  />
+                ) : undefined}
               />
             </ChessBoard4D>
 
@@ -968,7 +989,7 @@ const Play = () => {
             {drawOfferPending && !drawAgreed && (
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-center">
                 {drawDeclined ? (
-                  <p className="text-sm font-medium text-destructive">❌ {currentBot.name} je odbio/la remi!</p>
+                  <p className="text-sm font-medium text-destructive">❌ {currentBot.name} declined the draw!</p>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
                     <div className="flex gap-0.5">
