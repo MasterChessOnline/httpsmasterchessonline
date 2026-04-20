@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers } from "lucide-react";
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
-import { BOT_PROFILES, getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-profiles";
+import { getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-profiles";
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 import RatingChange from "@/components/RatingChange";
