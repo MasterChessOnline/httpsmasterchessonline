@@ -55,6 +55,7 @@ import Coach from "./pages/Coach";
 import DailyPlan from "./pages/DailyPlan";
 import Repertoire from "./pages/Repertoire";
 import Training from "./pages/Training";
+import ChessCard from "./pages/ChessCard";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 const queryClient = new QueryClient();
 
@@ -108,6 +109,7 @@ function AnimatedRoutes() {
           <Route path="/daily-plan" element={<DailyPlan />} />
           <Route path="/repertoire" element={<Repertoire />} />
           <Route path="/training" element={<Training />} />
+          <Route path="/chess-card" element={<ChessCard />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
