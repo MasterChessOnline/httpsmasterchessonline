@@ -989,7 +989,7 @@ const Play = () => {
             {drawOfferPending && !drawAgreed && (
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-center">
                 {drawDeclined ? (
-                  <p className="text-sm font-medium text-destructive">❌ {currentBot.name} je odbio/la remi!</p>
+                  <p className="text-sm font-medium text-destructive">❌ {currentBot.name} declined the draw!</p>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
                     <div className="flex gap-0.5">
