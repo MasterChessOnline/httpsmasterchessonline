@@ -105,6 +105,7 @@ export default function GameControls({
             <button
               key={tc.label}
               onClick={() => onTimeControlChange(i)}
+              disabled={settingsLocked}
               className={`rounded-lg px-1 py-1.5 text-center transition-all border text-[11px] font-medium ${
                 timeControlIdx === i
                   ? "border-primary bg-primary/10 text-primary"
@@ -126,6 +127,7 @@ export default function GameControls({
               <button
                 key={c}
                 onClick={() => onColorChange(c)}
+                disabled={settingsLocked}
                 className={`flex-1 rounded-lg px-2 py-2 text-center transition-all border ${
                   playerColor === c
                     ? "border-primary bg-primary/10 text-primary"
