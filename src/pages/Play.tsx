@@ -991,7 +991,14 @@ const Play = () => {
             )}
 
             {isGameOver && gameResult && moveHistory.length >= 4 && (
-              <GameSummary moveHistory={moveHistory} result={gameResult} playerColor={playerColor} difficulty={difficulty} />
+              <GameSummary
+                moveHistory={moveHistory}
+                result={gameResult}
+                playerColor={playerColor}
+                difficulty={difficulty}
+                playerMoveQuality={mode === "ai" ? playerMoveQuality : undefined}
+                botName={mode === "ai" ? currentBot.name : undefined}
+              />
             )}
             {botRatingResult && mode === "ai" && (
               <RatingChange result={botRatingResult} ratingType="bot" />
