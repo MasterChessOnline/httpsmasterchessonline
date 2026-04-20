@@ -104,7 +104,7 @@ export default function ChessBoard({
 
         {/* Board */}
         <div
-          className="flex-1 rounded-lg overflow-hidden shadow-card border border-border/30"
+          className="flex-1 rounded-lg overflow-hidden shadow-card border border-border/30 relative"
           role="grid"
           aria-label="Chess board"
         >
