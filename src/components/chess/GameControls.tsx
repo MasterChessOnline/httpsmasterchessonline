@@ -31,8 +31,6 @@ interface GameControlsProps {
 const BOT_LEVELS: { value: Difficulty; label: string; rating: string; desc: string }[] = [
   { value: "beginner", label: "Beginner", rating: "600", desc: "Friendly practice, occasional blunders" },
   { value: "intermediate", label: "Intermediate", rating: "1200", desc: "Solid tactical awareness" },
-  { value: "advanced", label: "Advanced", rating: "1800", desc: "Deep calculation, rarely blunders" },
-  { value: "expert", label: "Expert", rating: "2200", desc: "Expert strength — punishes mistakes hard" },
   { value: "master", label: "Master", rating: "3000", desc: "Aleksej Pavlović tier — elite precision" },
 ];
 
