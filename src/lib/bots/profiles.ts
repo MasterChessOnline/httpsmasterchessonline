@@ -319,37 +319,6 @@ export const BOT_PROFILES: BotProfile[] = [
       onDrawDecline: "Practical chances remain.",
     },
   },
-  {
-    id: "milos-moskovljevic",
-    name: "Miloš Moskovljević",
-    avatar: "👑",
-    rating: 3000,
-    difficulty: "master",
-    personality: "elite",
-    playstyle: "universal",
-    openings: ["ruy-lopez", "queens-gambit", "sicilian", "english", "kings-indian"],
-    accuracy: 0.99,
-    blunderRate: 0.0005,
-    inaccuracyRate: 0.01,
-    bookDepth: 24,
-    country: "Serbia",
-    countryFlag: "🇷🇸",
-    style: "World-class precision — universal and relentless",
-    bio: "Serbian 3000-rated GM. The toughest opponent on the site.",
-    drawAcceptThreshold: 90,
-    resignThreshold: 450,
-    taunts: {
-      greeting: "Pokažite šta znate. 👑",
-      onCheck: "Šah. Precizno. 🎯",
-      onCapture: "Izračunato. 👑",
-      onBlunder: "Greška. Veoma retko. 😤",
-      onWin: "Pobeda. Kao i obično. 👑🏆",
-      onLose: "Izvanredna partija. Svaka čast. 🤝",
-      onDraw: "Dostojan remi. 👑🤝",
-      onDrawOffer: "Pozicija je ravna — prihvatam. 👑",
-      onDrawDecline: "Igram do kraja. 👑",
-    },
-  },
 ];
 
 const DEFAULT_BOT_IDS: Record<Difficulty, string> = {
@@ -357,7 +326,7 @@ const DEFAULT_BOT_IDS: Record<Difficulty, string> = {
   intermediate: "tactic-tanvi",
   advanced: "counter-kira",
   expert: "endgame-eito",
-  master: "milos-moskovljevic",
+  master: "gm-nova",
 };
 
 export function getBotByDifficulty(difficulty: Difficulty): BotProfile[] {
