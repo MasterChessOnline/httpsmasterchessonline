@@ -278,5 +278,14 @@ export function getAIMove(game: Chess, difficulty: Difficulty): string | null {
     }
   }
 
-  return bestMove;
+    return bestMove;
+  } catch (err) {
+    console.error("[chess-ai] getAIMove failed, falling back to random move", err);
+    try {
+      const fallback = game.moves();
+      return fallback.length > 0 ? fallback[Math.floor(Math.random() * fallback.length)] : null;
+    } catch {
+      return null;
+    }
+  }
 }
