@@ -111,6 +111,7 @@ const NAV_SECTIONS: NavSection[] = [
     accentRgb: "244,63,94",
     items: [
       { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true },
+      { label: "Chess Card", href: "/chess-card", icon: Sparkles, desc: "Your skill profile & compare", auth: true, highlight: true },
       { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
       { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true },
     ],
