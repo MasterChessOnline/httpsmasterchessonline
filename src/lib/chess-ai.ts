@@ -233,10 +233,12 @@ export const AI_LEVELS: AILevel[] = [
 ];
 
 export function getAIMove(game: Chess, difficulty: Difficulty): string | null {
-  const moves = game.moves();
-  if (moves.length === 0) return null;
+  try {
+    if (game.isGameOver()) return null;
+    const moves = game.moves();
+    if (!moves || moves.length === 0) return null;
 
-  const level = AI_LEVELS.find((l) => l.value === difficulty)!;
+    const level = AI_LEVELS.find((l) => l.value === difficulty) ?? AI_LEVELS[0];
 
   // Random mistake chance
   if (Math.random() < level.mistakeChance) {
@@ -276,5 +278,14 @@ export function getAIMove(game: Chess, difficulty: Difficulty): string | null {
     }
   }
 
-  return bestMove;
+    return bestMove;
+  } catch (err) {
+    console.error("[chess-ai] getAIMove failed, falling back to random move", err);
+    try {
+      const fallback = game.moves();
+      return fallback.length > 0 ? fallback[Math.floor(Math.random() * fallback.length)] : null;
+    } catch {
+      return null;
+    }
+  }
 }

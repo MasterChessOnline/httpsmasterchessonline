@@ -243,6 +243,33 @@ const Profile = () => {
             )}
           </motion.div>
 
+          {/* Chess Card CTA */}
+          <Link to={isOwnProfile ? "/chess-card" : `/chess-card?compare=${userId}`} className="block">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              whileHover={{ scale: 1.01 }}
+              className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-accent/5 p-4 cursor-pointer hover:shadow-glow transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-xl">
+                  ✨
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display text-sm font-bold text-foreground">Chess Card</h3>
+                    <Badge className="bg-primary/20 text-primary border-primary/30 text-[9px]">NEW</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {isOwnProfile ? "View your 7-skill profile and compare with other players" : "Compare Chess Cards head-to-head"}
+                  </p>
+                </div>
+                <span className="text-primary text-sm font-bold">→</span>
+              </div>
+            </motion.div>
+          </Link>
+
           {/* Play Personality */}
           {profileData.games_played >= 1 && (
             <motion.div
