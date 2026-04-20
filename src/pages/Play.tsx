@@ -605,7 +605,7 @@ const Play = () => {
 
           {/* Time control selector */}
           <div className="mb-6 w-full max-w-md">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Vreme</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Time</p>
             <div className="flex flex-wrap justify-center gap-1.5">
               {TIME_CONTROLS.map((tc, i) => (
                 <button
