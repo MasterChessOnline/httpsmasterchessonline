@@ -470,6 +470,8 @@ const Play = () => {
     setDrawDeclined(false);
     setPremove(null);
     setBotRatingResult(null);
+    setPlayerMoveQuality([]);
+    setBotMoveQuality([]);
     ratingAppliedRef.current = false;
     positionHistory.current = [];
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
