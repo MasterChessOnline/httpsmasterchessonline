@@ -129,12 +129,12 @@ const Play = () => {
   const checkDrawConditions = (): { isDraw: boolean; reason: string } => {
     const posKey = getPositionKey();
     const count = positionHistory.current.filter(p => p === posKey).length;
-    if (count >= 3) return { isDraw: true, reason: "Remis trostrukim ponavljanjem pozicije" };
+    if (count >= 3) return { isDraw: true, reason: "by threefold repetition" };
     const halfMoves = parseInt(game.fen().split(" ")[4]);
-    if (halfMoves >= 100) return { isDraw: true, reason: "Remis pravilom 50 poteza" };
-    if (game.isInsufficientMaterial()) return { isDraw: true, reason: "Remis — nedovoljno materijala" };
-    if (game.isStalemate()) return { isDraw: true, reason: "Pat — remis!" };
-    if (game.isDraw()) return { isDraw: true, reason: "Remis!" };
+    if (halfMoves >= 100) return { isDraw: true, reason: "by 50-move rule" };
+    if (game.isInsufficientMaterial()) return { isDraw: true, reason: "by insufficient material" };
+    if (game.isStalemate()) return { isDraw: true, reason: "by stalemate" };
+    if (game.isDraw()) return { isDraw: true, reason: "" };
     return { isDraw: false, reason: "" };
   };
 
