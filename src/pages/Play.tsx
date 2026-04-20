@@ -518,6 +518,32 @@ const Play = () => {
     : timeoutWinner === "Black" ? "0-1"
     : null;
 
+  // --- Game-over overlay info (shown over the board) ---
+  const gameOverInfo: { type: "checkmate" | "draw" | "resign" | "timeout"; winner: "white" | "black" | null; reason?: string } | null = (() => {
+    if (!isGameOver) return null;
+    if (resignedBy) {
+      const winner = resignedBy === "w" ? "black" : "white";
+      return { type: "resign", winner, reason: `${resignedBy === "w" ? "White" : "Black"} resigned` };
+    }
+    if (timeoutWinner) {
+      return { type: "timeout", winner: timeoutWinner.toLowerCase() as "white" | "black", reason: "on time" };
+    }
+    if (game.isCheckmate()) {
+      const winner = game.turn() === "w" ? "black" : "white";
+      return { type: "checkmate", winner };
+    }
+    if (drawAgreed || game.isStalemate() || game.isDraw()) {
+      let reason = drawReason;
+      if (!reason) {
+        if (game.isStalemate()) reason = "by stalemate";
+        else if (game.isInsufficientMaterial()) reason = "by insufficient material";
+        else reason = "";
+      }
+      return { type: "draw", winner: null, reason };
+    }
+    return null;
+  })();
+
   const pgn = game.pgn();
 
   // --- Apply bot rating change once when an AI game finishes ---
