@@ -148,6 +148,17 @@ export default function ChessBoard({
                     onClick={() => onSquareClick(square)}
                     tabIndex={0}
                   >
+                    {/* Subtle check indicator on the king (warm amber radial — not red) */}
+                    {isCheckedKing && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 pointer-events-none rounded-sm"
+                        style={{
+                          background:
+                            "radial-gradient(circle, hsl(38 92% 55% / 0.45) 0%, hsl(38 92% 55% / 0.18) 45%, transparent 70%)",
+                        }}
+                      />
+                    )}
                     {/* Legal move dot */}
                     {isLegal && !piece && (
                       <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />
