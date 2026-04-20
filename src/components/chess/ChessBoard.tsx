@@ -66,11 +66,15 @@ function findKingSquare(board: ReturnType<Chess["board"]>, color: "w" | "b"): st
 
 export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
-  isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick,
+  isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick, overlay,
 }: ChessBoardProps) {
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
+
+  // Subtle indicator: which king is currently in check?
+  const inCheck = game.inCheck();
+  const checkedKingSquare = inCheck ? findKingSquare(board, game.turn()) : null;
 
   // Track a move counter to generate unique keys for slide animations
   const moveCountRef = useRef(0);
