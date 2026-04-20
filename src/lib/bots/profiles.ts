@@ -1,4 +1,5 @@
 import { type Difficulty } from "../chess-ai";
+import type { Playstyle, OpeningRepertoire } from "./playstyles";
 
 export interface BotProfile {
   id: string;
@@ -7,6 +8,18 @@ export interface BotProfile {
   rating: number;
   difficulty: Difficulty;
   personality: string;
+  /** How the bot picks moves: aggressive, positional, etc. */
+  playstyle: Playstyle;
+  /** Preferred opening systems — bot will try to follow these. */
+  openings: OpeningRepertoire[];
+  /** 0..1 — chance the bot plays the engine-best move. Lower = more human. */
+  accuracy: number;
+  /** 0..1 — chance per move the bot blunders (drops material / misses tactic). */
+  blunderRate: number;
+  /** 0..1 — chance per move the bot makes a small inaccuracy. */
+  inaccuracyRate: number;
+  /** How many plies of opening theory the bot will follow before going its own way. */
+  bookDepth: number;
   country: string;
   countryFlag: string;
   style: string;
@@ -34,6 +47,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 500,
     difficulty: "beginner",
     personality: "friendly",
+    playstyle: "universal",
+    openings: ["italian", "scandinavian"],
+    accuracy: 0.45,
+    blunderRate: 0.18,
+    inaccuracyRate: 0.30,
+    bookDepth: 4,
     country: "Portugal",
     countryFlag: "🇵🇹",
     style: "Simple, cheerful play",
@@ -59,6 +78,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 800,
     difficulty: "beginner",
     personality: "curious",
+    playstyle: "gambit",
+    openings: ["kings-gambit", "italian", "scandinavian"],
+    accuracy: 0.55,
+    blunderRate: 0.13,
+    inaccuracyRate: 0.25,
+    bookDepth: 6,
     country: "Mexico",
     countryFlag: "🇲🇽",
     style: "Loves pushing pawns",
@@ -84,6 +109,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 1150,
     difficulty: "intermediate",
     personality: "sharp",
+    playstyle: "tactical",
+    openings: ["sicilian", "italian", "scandinavian"],
+    accuracy: 0.68,
+    blunderRate: 0.07,
+    inaccuracyRate: 0.18,
+    bookDepth: 8,
     country: "India",
     countryFlag: "🇮🇳",
     style: "Always hunting for forks and pins",
@@ -109,6 +140,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 1400,
     difficulty: "intermediate",
     personality: "positional",
+    playstyle: "positional",
+    openings: ["french", "london", "queens-gambit"],
+    accuracy: 0.74,
+    blunderRate: 0.05,
+    inaccuracyRate: 0.15,
+    bookDepth: 10,
     country: "France",
     countryFlag: "🇫🇷",
     style: "Smooth development, plays for squares",
@@ -134,6 +171,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 1700,
     difficulty: "advanced",
     personality: "resourceful",
+    playstyle: "defensive",
+    openings: ["caro-kann", "french", "kings-indian"],
+    accuracy: 0.82,
+    blunderRate: 0.025,
+    inaccuracyRate: 0.10,
+    bookDepth: 12,
     country: "Japan",
     countryFlag: "🇯🇵",
     style: "Defends, then strikes back",
@@ -159,6 +202,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 1950,
     difficulty: "advanced",
     personality: "solid",
+    playstyle: "defensive",
+    openings: ["caro-kann", "london", "queens-gambit"],
+    accuracy: 0.87,
+    blunderRate: 0.015,
+    inaccuracyRate: 0.08,
+    bookDepth: 14,
     country: "Germany",
     countryFlag: "🇩🇪",
     style: "Compact defense, accurate endgames",
@@ -184,6 +233,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 2200,
     difficulty: "expert",
     personality: "clinical",
+    playstyle: "positional",
+    openings: ["english", "queens-gambit", "ruy-lopez"],
+    accuracy: 0.92,
+    blunderRate: 0.008,
+    inaccuracyRate: 0.05,
+    bookDepth: 16,
     country: "South Korea",
     countryFlag: "🇰🇷",
     style: "Simplifies into winning endings",
@@ -209,6 +264,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 2350,
     difficulty: "expert",
     personality: "aggressive",
+    playstyle: "aggressive",
+    openings: ["sicilian", "kings-indian", "kings-gambit"],
+    accuracy: 0.93,
+    blunderRate: 0.006,
+    inaccuracyRate: 0.04,
+    bookDepth: 16,
     country: "Nigeria",
     countryFlag: "🇳🇬",
     style: "Initiative-heavy attacker",
@@ -234,6 +295,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 2650,
     difficulty: "master",
     personality: "universal",
+    playstyle: "universal",
+    openings: ["ruy-lopez", "queens-gambit", "english", "sicilian"],
+    accuracy: 0.96,
+    blunderRate: 0.002,
+    inaccuracyRate: 0.025,
+    bookDepth: 20,
     country: "Argentina",
     countryFlag: "🇦🇷",
     style: "Universal grandmaster play",
@@ -259,6 +326,12 @@ export const BOT_PROFILES: BotProfile[] = [
     rating: 3000,
     difficulty: "master",
     personality: "elite",
+    playstyle: "universal",
+    openings: ["ruy-lopez", "queens-gambit", "sicilian", "english", "kings-indian"],
+    accuracy: 0.99,
+    blunderRate: 0.0005,
+    inaccuracyRate: 0.01,
+    bookDepth: 24,
     country: "Serbia",
     countryFlag: "🇷🇸",
     style: "World-class precision — universal and relentless",

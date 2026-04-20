@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers } from "lucide-react";
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
 import { getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-profiles";
+import { getBotMove, getBotThinkMs, classifyCpLoss } from "@/lib/bots/bot-engine";
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 import RatingChange from "@/components/RatingChange";
@@ -73,6 +74,10 @@ const Play = () => {
   // --- Bot rating tracking ---
   const [botRatingResult, setBotRatingResult] = useState<RatingCalcResult | null>(null);
   const ratingAppliedRef = useRef(false);
+
+  // --- Per-move accuracy tracking (player + bot) ---
+  const [playerMoveQuality, setPlayerMoveQuality] = useState<Array<{ cp: number; quality: ReturnType<typeof classifyCpLoss> }>>([]);
+  const [botMoveQuality, setBotMoveQuality] = useState<Array<{ cp: number; quality: ReturnType<typeof classifyCpLoss> }>>([]);
 
   const [timeControlIdx, setTimeControlIdx] = useState(6);
   const timeControl = TIME_CONTROLS[timeControlIdx];
@@ -171,19 +176,26 @@ const Play = () => {
   useEffect(() => {
     if (mode !== "ai" || game.turn() !== aiColor || isGameOver || gamePhase !== "playing") return;
     setAiThinking(true);
-    // Super-fast bot moves with tiny jitter so they still feel alive
-    const baseDelay = currentBot.rating >= 3000 ? 60 : currentBot.rating >= 2400 ? 90 : currentBot.rating >= 1800 ? 110 : currentBot.rating >= 1200 ? 140 : 180;
-    const jitter = Math.random() * 40 + 10;
-    const thinkTime = baseDelay + jitter;
+
+    // Decide the move now (sync) — but display a realistic "think" delay
+    const decision = getBotMove(game, currentBot);
+    const critical = game.inCheck() || Math.abs(evaluateBoard(game)) > 200;
+    const thinkTime = getBotThinkMs(currentBot, {
+      baseSeconds: timeControl.seconds,
+      ply: moveHistory.length,
+      fromBook: decision.fromBook,
+      critical,
+    });
 
     const timeout = setTimeout(() => {
-      const aiMoveStr = getAIMove(game, difficulty);
+      const aiMoveStr = decision.move || getAIMove(game, difficulty);
       if (aiMoveStr) {
         const move = game.move(aiMoveStr);
         if (move) {
           setMoveHistory((prev) => [...prev, move.san]);
           setLastMove({ from: move.from, to: move.to });
           setGameStarted(true);
+          setBotMoveQuality(prev => [...prev, { cp: decision.cpLoss, quality: decision.quality }]);
           trackPosition();
           if (!unlimited && timeControl.increment > 0) {
             if (aiColor === "w") setWhiteTime((p) => p + timeControl.increment);
@@ -203,12 +215,17 @@ const Play = () => {
           } else {
             playChessSound("move");
           }
+
+          // Bot reacts to its own blunder occasionally
+          if (decision.quality === "blunder" && Math.random() < 0.5) {
+            setTimeout(() => showBotMessage(currentBot.taunts.onBlunder), 500);
+          }
         }
       }
       setAiThinking(false);
     }, thinkTime);
     return () => clearTimeout(timeout);
-  }, [fen, mode, difficulty, aiColor, isGameOver, gamePhase]);
+  }, [fen, mode, difficulty, aiColor, isGameOver, gamePhase, currentBot]);
 
   // --- Execute premove when it becomes player's turn ---
   useEffect(() => {
@@ -239,11 +256,37 @@ const Play = () => {
   };
 
   const executeMove = (from: Square, to: Square, promotion: PromotionPiece = "q") => {
+    // Pre-move analysis: how good was this move vs engine best?
+    let playerCp = 0;
+    if (mode === "ai") {
+      try {
+        const sign = game.turn() === "w" ? 1 : -1;
+        const engineBest = getAIMove(game, "advanced");
+        if (engineBest) {
+          const probe = new Chess(game.fen());
+          probe.move(engineBest);
+          const bestEval = evaluateBoard(probe);
+          const probe2 = new Chess(game.fen());
+          probe2.move({ from, to, promotion });
+          const myEval = evaluateBoard(probe2);
+          playerCp = Math.max(0, (bestEval - myEval) * sign);
+        }
+      } catch { /* ignore — analysis is best-effort */ }
+    }
+
     const move = game.move({ from, to, promotion });
     if (move) {
       setMoveHistory((prev) => [...prev, move.san]);
       setLastMove({ from: move.from, to: move.to });
       setGameStarted(true);
+      if (mode === "ai") {
+        const quality = classifyCpLoss(playerCp);
+        setPlayerMoveQuality(prev => [...prev, { cp: playerCp, quality }]);
+        if (quality === "blunder") {
+          setBlunderFlash(true);
+          setTimeout(() => setBlunderFlash(false), 350);
+        }
+      }
       trackPosition();
       if (!unlimited && timeControl.increment > 0) {
         if (move.color === "w") setWhiteTime((p) => p + timeControl.increment);
@@ -427,6 +470,8 @@ const Play = () => {
     setDrawDeclined(false);
     setPremove(null);
     setBotRatingResult(null);
+    setPlayerMoveQuality([]);
+    setBotMoveQuality([]);
     ratingAppliedRef.current = false;
     positionHistory.current = [];
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
@@ -946,7 +991,14 @@ const Play = () => {
             )}
 
             {isGameOver && gameResult && moveHistory.length >= 4 && (
-              <GameSummary moveHistory={moveHistory} result={gameResult} playerColor={playerColor} difficulty={difficulty} />
+              <GameSummary
+                moveHistory={moveHistory}
+                result={gameResult}
+                playerColor={playerColor}
+                difficulty={difficulty}
+                playerMoveQuality={mode === "ai" ? playerMoveQuality : undefined}
+                botName={mode === "ai" ? currentBot.name : undefined}
+              />
             )}
             {botRatingResult && mode === "ai" && (
               <RatingChange result={botRatingResult} ratingType="bot" />
