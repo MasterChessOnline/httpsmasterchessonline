@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Chess } from "chess.js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,10 +30,12 @@ export default function AnalysisPanel({ pgn, playerColor, result }: AnalysisPane
   const [replayIdx, setReplayIdx] = useState(0);
   const [isReplaying, setIsReplaying] = useState(false);
 
-  // Parse moves from PGN for replay
-  const replayGame = new Chess();
-  try { replayGame.loadPgn(pgn); } catch {}
-  const allMoves = replayGame.history();
+  // Parse moves from PGN for replay (memoized — avoids re-parsing on every render)
+  const allMoves = useMemo(() => {
+    const g = new Chess();
+    try { g.loadPgn(pgn); } catch { /* ignore */ }
+    return g.history();
+  }, [pgn]);
   const totalMoves = allMoves.length;
 
   // Get commentary for current move
@@ -75,7 +77,7 @@ export default function AnalysisPanel({ pgn, playerColor, result }: AnalysisPane
   };
 
   // Auto-replay effect via interval
-  useState(() => {
+  useEffect(() => {
     if (!isReplaying) return;
     const interval = setInterval(() => {
       setReplayIdx(prev => {
@@ -87,7 +89,7 @@ export default function AnalysisPanel({ pgn, playerColor, result }: AnalysisPane
       });
     }, 1200);
     return () => clearInterval(interval);
-  });
+  }, [isReplaying, totalMoves]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-400";
