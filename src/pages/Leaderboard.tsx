@@ -219,6 +219,37 @@ const Leaderboard = () => {
           </div>
         </div>
 
+        {/* MasterChess Title band filter */}
+        <div className="flex justify-center gap-1.5 flex-wrap mb-8">
+          <button
+            onClick={() => setTitleFilter("all")}
+            className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium border transition-all ${
+              titleFilter === "all"
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border/50 text-muted-foreground hover:border-primary/30"
+            }`}
+          >
+            <Filter className="h-3 w-3" /> All Titles
+          </button>
+          {titleBands.map((t) => {
+            const active = titleFilter === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTitleFilter(t.key)}
+                title={`${t.fullName} (${t.minRating}+)`}
+                className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold border transition-all ${
+                  active
+                    ? `${t.bgColor} ${t.color} ${t.borderColor} shadow-glow`
+                    : "border-border/50 text-muted-foreground hover:border-primary/30"
+                }`}
+              >
+                <span>{t.icon}</span> {t.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="max-w-2xl mx-auto">
           {loading ? (
             <div className="space-y-2">
