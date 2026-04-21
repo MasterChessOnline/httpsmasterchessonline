@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Crown, UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -37,6 +38,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [levelKey, setLevelKey] = useState<string>(DEFAULT_STARTING_LEVEL_KEY);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,11 +49,17 @@ const Signup = () => {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const startingLevel = getStartingLevel(levelKey);
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName || "Player" },
+        data: {
+          display_name: displayName || "Player",
+          starting_level: startingLevel.key,
+          starting_rating: startingLevel.rating,
+        },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -59,9 +67,24 @@ const Signup = () => {
     if (error) {
       setError(error.message);
       setLoading(false);
-    } else {
-      navigate("/dashboard");
+      return;
     }
+
+    // Seed the new profile with the chosen starting bot rating.
+    // The handle_new_user trigger creates the row with defaults; we bump it.
+    const newUserId = data.user?.id;
+    if (newUserId) {
+      await new Promise((r) => setTimeout(r, 400));
+      await supabase
+        .from("profiles")
+        .update({
+          bot_rating: startingLevel.rating,
+          bot_peak_rating: startingLevel.rating,
+        })
+        .eq("user_id", newUserId);
+    }
+
+    navigate("/dashboard");
   };
 
   const handleSocialLogin = async (provider: "google" | "apple") => {
