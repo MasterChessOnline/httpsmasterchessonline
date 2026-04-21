@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DropdownItem {
   label: string;
@@ -124,6 +125,9 @@ const Navbar = () => {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [onlineCount, setOnlineCount] = useState(0);
+  const [liveGames, setLiveGames] = useState(0);
+  const [activeTournaments, setActiveTournaments] = useState(0);
   const { user, profile, loading, signOut } = useAuth();
   const location = useLocation();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
@@ -149,6 +153,35 @@ const Navbar = () => {
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
 
+  // Live status data — real counts from backend, refreshed gently
+  useEffect(() => {
+    let cancelled = false;
+    const fetchStats = async () => {
+      try {
+        const [games, queue, tournaments] = await Promise.all([
+          supabase.from("online_games").select("id", { count: "exact", head: true }).eq("status", "active"),
+          supabase.from("matchmaking_queue").select("user_id", { count: "exact", head: true }),
+          supabase.from("tournaments").select("id", { count: "exact", head: true }).in("status", ["registration", "active", "in_progress"]),
+        ]);
+        if (cancelled) return;
+        const live = games.count ?? 0;
+        const waiting = queue.count ?? 0;
+        setLiveGames(live);
+        // Online ≈ players in active games (×2) + matchmaking queue
+        setOnlineCount(live * 2 + waiting);
+        setActiveTournaments(tournaments.count ?? 0);
+      } catch {
+        /* silent — keep last known values */
+      }
+    };
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
   const handleMouseEnter = (key: string) => {
     if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
     setActiveDropdown(key);
@@ -162,13 +195,15 @@ const Navbar = () => {
     <>
       <div
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? "shadow-[0_4px_24px_rgba(0,0,0,0.35)]" : ""
+          scrolled
+            ? "shadow-[0_8px_32px_-4px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)]"
+            : "shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
         }`}
       >
         <motion.nav
           className={`relative border-b transition-all duration-500 ${
             scrolled
-              ? "bg-[hsl(220,15%,8%)/0.92] backdrop-blur-2xl border-border/20"
+              ? "bg-[hsl(220,15%,7%)/0.75] backdrop-blur-[28px] backdrop-saturate-150 border-border/25"
               : "bg-[hsl(220,15%,6%)/0.85] backdrop-blur-xl border-border/10"
           }`}
           initial={{ y: -80 }}
@@ -211,24 +246,35 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className="relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group"
+                      className="relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden"
                       style={{
                         color: isActive || activeDropdown === section.key ? accentColor : undefined,
                         backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
                       }}
                     >
-                      <section.icon className="h-4 w-4" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
-                      <span className={!(isActive || activeDropdown === section.key) ? "text-muted-foreground group-hover:text-foreground" : ""}>{section.label}</span>
+                      {/* Subtle light sweep on hover */}
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-[900ms] ease-out"
+                        style={{
+                          background: `linear-gradient(110deg, transparent 30%, hsla(${section.accent} / 0.18) 50%, transparent 70%)`,
+                        }}
+                      />
+                      <section.icon className="relative h-4 w-4" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
+                      <span className={`relative ${!(isActive || activeDropdown === section.key) ? "text-muted-foreground group-hover:text-foreground" : ""}`}>{section.label}</span>
                       <ChevronDown
-                        className={`h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
+                        className={`relative h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
                         style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined}
                       />
                       {isActive && (
                         <motion.span
                           layoutId="nav-active"
-                          className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full"
-                          style={{ backgroundColor: accentColor }}
-                          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                          className="absolute -bottom-[1px] left-3 right-3 h-[2px] rounded-full"
+                          style={{
+                            background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
+                            boxShadow: `0 0 10px hsla(${section.accent} / 0.55)`,
+                          }}
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
                         />
                       )}
                     </button>
@@ -414,10 +460,51 @@ const Navbar = () => {
             </div>
           </div>
         </motion.nav>
+
+        {/* Thin live status bar */}
+        <AnimatePresence>
+          {!shrunk && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.3 }}
+              className="hidden md:block border-b border-border/10 bg-[hsl(220,15%,5%)/0.7] backdrop-blur-xl"
+            >
+              <div className="container mx-auto px-5 h-6 flex items-center justify-between text-[10.5px] font-medium tracking-wide">
+                <div className="flex items-center gap-5">
+                  <span className="flex items-center gap-1.5 text-muted-foreground/80">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    </span>
+                    <span className="text-foreground/85">{onlineCount.toLocaleString()}</span>
+                    <span className="text-muted-foreground/60">online</span>
+                  </span>
+                  <span className="hidden sm:flex items-center gap-1.5 text-muted-foreground/80">
+                    <Gamepad2 className="h-2.5 w-2.5 text-primary/70" />
+                    <span className="text-foreground/85">{liveGames.toLocaleString()}</span>
+                    <span className="text-muted-foreground/60">live games</span>
+                  </span>
+                  <span className="hidden md:flex items-center gap-1.5 text-muted-foreground/80">
+                    <Trophy className="h-2.5 w-2.5 text-amber-400/80" />
+                    <span className="text-foreground/85">{activeTournaments}</span>
+                    <span className="text-muted-foreground/60">tournaments</span>
+                  </span>
+                </div>
+                <Link to="/live" className="hidden sm:flex items-center gap-1.5 text-muted-foreground/70 hover:text-foreground transition-colors">
+                  <Radio className="h-2.5 w-2.5 text-rose-400" />
+                  <span>DailyChess_12 live</span>
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Spacer */}
-      <div className={`transition-all duration-500 ${shrunk ? "h-14" : "h-16"}`} />
+      <div className={`transition-all duration-500 ${shrunk ? "h-14" : "h-[88px]"}`} />
+
 
       {/* Mobile full-screen overlay */}
       <AnimatePresence>
