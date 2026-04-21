@@ -36,6 +36,10 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "top50" | "active">("all");
   const [sortBy, setSortBy] = useState<SortBy>("bot_rating");
+  const [titleFilter, setTitleFilter] = useState<string>("all");
+
+  // Only MC- prefixed titles count as official MasterChess title bands.
+  const titleBands = TITLES.filter((t) => t.key.startsWith("mc-"));
 
   useEffect(() => {
     supabase
