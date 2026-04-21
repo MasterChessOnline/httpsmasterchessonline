@@ -17,6 +17,7 @@ interface LeaderboardEntry {
   display_name: string | null;
   username: string | null;
   rating: number;
+  bot_rating?: number;
   games_played: number;
   games_won: number;
   games_drawn: number;
@@ -26,20 +27,20 @@ interface LeaderboardEntry {
   highest_title_key?: string | null;
 }
 
-type SortBy = "rating" | "xp" | "wins" | "winrate";
+type SortBy = "rating" | "bot_rating" | "xp" | "wins" | "winrate";
 
 const Leaderboard = () => {
   const { user } = useAuth();
   const [players, setPlayers] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "top50" | "active">("all");
-  const [sortBy, setSortBy] = useState<SortBy>("rating");
+  const [sortBy, setSortBy] = useState<SortBy>("bot_rating");
 
   useEffect(() => {
     supabase
       .from("profiles")
-      .select("id, user_id, display_name, username, rating, games_played, games_won, games_drawn, games_lost, country, country_flag, highest_title_key")
-      .order("rating", { ascending: false })
+      .select("id, user_id, display_name, username, rating, bot_rating, games_played, games_won, games_drawn, games_lost, country, country_flag, highest_title_key")
+      .order("bot_rating", { ascending: false })
       .limit(100)
       .then(({ data }) => {
         setPlayers((data as LeaderboardEntry[]) || []);
@@ -55,7 +56,9 @@ const Leaderboard = () => {
       if (sortBy === "xp") return getXP(b) - getXP(a);
       if (sortBy === "wins") return b.games_won - a.games_won;
       if (sortBy === "winrate") return getWinRate(b) - getWinRate(a);
-      return b.rating - a.rating;
+      if (sortBy === "rating") return b.rating - a.rating;
+      // default: bot_rating
+      return (b.bot_rating ?? 1200) - (a.bot_rating ?? 1200);
     });
   };
 
@@ -116,9 +119,9 @@ const Leaderboard = () => {
                   {player.display_name || "Anonymous"}
                 </p>
                 <p className={`font-mono font-bold ${rank === 1 ? "text-2xl text-primary drop-shadow-[0_0_8px_hsl(43_80%_55%/0.4)]" : "text-lg text-foreground"}`}>
-                  {player.rating}
+                  {sortBy === "rating" ? player.rating : (player.bot_rating ?? 1200)}
                 </p>
-                <p className="text-[10px] text-muted-foreground">{xp.toLocaleString()} XP</p>
+                <p className="text-[10px] text-muted-foreground">{xp.toLocaleString()} XP · {sortBy === "rating" ? "Online" : "Bot"}</p>
               </Link>
               <div className={`w-20 sm:w-24 ${height} rounded-t-xl mt-2 flex items-center justify-center ${
                 rank === 1 ? "bg-gradient-to-t from-primary/10 to-primary/25 border border-primary/30" :
@@ -183,7 +186,8 @@ const Leaderboard = () => {
           </div>
           <div className="flex justify-center gap-1.5 flex-wrap">
             {[
-              { key: "rating" as SortBy, label: "ELO", icon: TrendingUp },
+              { key: "bot_rating" as SortBy, label: "Bot ELO", icon: Crown },
+              { key: "rating" as SortBy, label: "Online", icon: TrendingUp },
               { key: "xp" as SortBy, label: "XP", icon: Flame },
               { key: "wins" as SortBy, label: "Wins", icon: Trophy },
               { key: "winrate" as SortBy, label: "Win%", icon: Swords },
@@ -241,7 +245,7 @@ const Leaderboard = () => {
                                 {player.display_name || player.username || "Anonymous"}
                                 {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
                               </span>
-                              <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={player.rating} size="xs" />
+                              <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={player.bot_rating ?? 1200} size="xs" />
                               {player.country_flag && (
                                 <span className="text-xs" title={findCountry(player.country)?.name ?? ""}>{player.country_flag}</span>
                               )}
@@ -256,7 +260,10 @@ const Leaderboard = () => {
                         </div>
                         <div className="text-right shrink-0">
                           <p className="font-mono text-lg font-bold text-primary group-hover:drop-shadow-[0_0_6px_hsl(43_80%_55%/0.3)]">
-                            {player.rating}
+                            {sortBy === "rating" ? player.rating : (player.bot_rating ?? 1200)}
+                          </p>
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                            {sortBy === "rating" ? "Online" : "Bot"}
                           </p>
                         </div>
                       </Link>

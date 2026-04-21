@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Crown, UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -37,6 +38,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [levelKey, setLevelKey] = useState<string>(DEFAULT_STARTING_LEVEL_KEY);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,11 +49,17 @@ const Signup = () => {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const startingLevel = getStartingLevel(levelKey);
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { display_name: displayName || "Player" },
+        data: {
+          display_name: displayName || "Player",
+          starting_level: startingLevel.key,
+          starting_rating: startingLevel.rating,
+        },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -59,9 +67,24 @@ const Signup = () => {
     if (error) {
       setError(error.message);
       setLoading(false);
-    } else {
-      navigate("/dashboard");
+      return;
     }
+
+    // Seed the new profile with the chosen starting bot rating.
+    // The handle_new_user trigger creates the row with defaults; we bump it.
+    const newUserId = data.user?.id;
+    if (newUserId) {
+      await new Promise((r) => setTimeout(r, 400));
+      await supabase
+        .from("profiles")
+        .update({
+          bot_rating: startingLevel.rating,
+          bot_peak_rating: startingLevel.rating,
+        })
+        .eq("user_id", newUserId);
+    }
+
+    navigate("/dashboard");
   };
 
   const handleSocialLogin = async (provider: "google" | "apple") => {
@@ -199,6 +222,46 @@ const Signup = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+            </div>
+
+            {/* Starting level picker */}
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Starting Level
+                <span className="ml-1 text-[10px] text-muted-foreground/70">(sets your bot rating)</span>
+              </Label>
+              <div className="grid grid-cols-5 gap-1.5">
+                {STARTING_LEVELS.map((lvl) => {
+                  const selected = levelKey === lvl.key;
+                  return (
+                    <button
+                      key={lvl.key}
+                      type="button"
+                      onClick={() => setLevelKey(lvl.key)}
+                      className={`group relative flex flex-col items-center justify-center rounded-lg border bg-muted/20 px-1.5 py-2 transition-all hover:scale-[1.03] ${
+                        selected
+                          ? `${lvl.borderColor} bg-primary/5 shadow-glow`
+                          : "border-border/40 hover:border-primary/30"
+                      }`}
+                      aria-pressed={selected}
+                      aria-label={`${lvl.label} — ${lvl.rating} rating`}
+                    >
+                      <span className={`text-base leading-none ${selected ? lvl.color : "opacity-70"}`}>
+                        {lvl.icon}
+                      </span>
+                      <span className={`mt-1 text-[9px] font-bold uppercase tracking-wider ${selected ? lvl.color : "text-muted-foreground"}`}>
+                        L{lvl.level}
+                      </span>
+                      <span className={`mt-0.5 font-mono text-[10px] font-semibold ${selected ? "text-foreground" : "text-muted-foreground"}`}>
+                        {lvl.rating}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center">
+                {getStartingLevel(levelKey).label} — {getStartingLevel(levelKey).description}
+              </p>
             </div>
 
             {error && (
