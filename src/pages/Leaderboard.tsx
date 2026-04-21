@@ -186,7 +186,8 @@ const Leaderboard = () => {
           </div>
           <div className="flex justify-center gap-1.5 flex-wrap">
             {[
-              { key: "rating" as SortBy, label: "ELO", icon: TrendingUp },
+              { key: "bot_rating" as SortBy, label: "Bot ELO", icon: Crown },
+              { key: "rating" as SortBy, label: "Online", icon: TrendingUp },
               { key: "xp" as SortBy, label: "XP", icon: Flame },
               { key: "wins" as SortBy, label: "Wins", icon: Trophy },
               { key: "winrate" as SortBy, label: "Win%", icon: Swords },
@@ -244,7 +245,7 @@ const Leaderboard = () => {
                                 {player.display_name || player.username || "Anonymous"}
                                 {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
                               </span>
-                              <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={player.rating} size="xs" />
+                              <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={player.bot_rating ?? 1200} size="xs" />
                               {player.country_flag && (
                                 <span className="text-xs" title={findCountry(player.country)?.name ?? ""}>{player.country_flag}</span>
                               )}
@@ -259,7 +260,10 @@ const Leaderboard = () => {
                         </div>
                         <div className="text-right shrink-0">
                           <p className="font-mono text-lg font-bold text-primary group-hover:drop-shadow-[0_0_6px_hsl(43_80%_55%/0.3)]">
-                            {player.rating}
+                            {sortBy === "rating" ? player.rating : (player.bot_rating ?? 1200)}
+                          </p>
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                            {sortBy === "rating" ? "Online" : "Bot"}
                           </p>
                         </div>
                       </Link>
