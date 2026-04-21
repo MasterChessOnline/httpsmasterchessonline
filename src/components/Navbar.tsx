@@ -162,13 +162,15 @@ const Navbar = () => {
     <>
       <div
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? "shadow-[0_4px_24px_rgba(0,0,0,0.35)]" : ""
+          scrolled
+            ? "shadow-[0_8px_32px_-4px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)]"
+            : "shadow-[0_2px_12px_rgba(0,0,0,0.2)]"
         }`}
       >
         <motion.nav
           className={`relative border-b transition-all duration-500 ${
             scrolled
-              ? "bg-[hsl(220,15%,8%)/0.92] backdrop-blur-2xl border-border/20"
+              ? "bg-[hsl(220,15%,7%)/0.75] backdrop-blur-[28px] backdrop-saturate-150 border-border/25"
               : "bg-[hsl(220,15%,6%)/0.85] backdrop-blur-xl border-border/10"
           }`}
           initial={{ y: -80 }}
