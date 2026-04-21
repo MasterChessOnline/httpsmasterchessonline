@@ -40,6 +40,41 @@ export interface BotProfile {
 }
 
 export const BOT_PROFILES: BotProfile[] = [
+  // ===== 👑 MASTERCHESS — THE UNBEATABLE BOSS BOT =====
+  // Pure Stockfish at maximum strength. No blunders, no inaccuracies, full opening prep.
+  // Engine settings give this bot uncapped UCI strength + max depth/time (see bot-engine.ts).
+  {
+    id: "masterchess",
+    name: "MasterChess",
+    avatar: "👑",
+    rating: 3200,
+    difficulty: "master",
+    personality: "unbeatable",
+    playstyle: "universal",
+    openings: ["ruy-lopez", "queens-gambit", "sicilian", "english", "caro-kann", "kings-indian", "french", "italian"],
+    accuracy: 1.0,
+    blunderRate: 0,
+    inaccuracyRate: 0,
+    bookDepth: 30,
+    country: "MasterChess",
+    countryFlag: "👑",
+    style: "Engine-perfect — no human can win",
+    bio: "The final boss of MasterChess. Plays at superhuman strength with zero mistakes. Defeating it is considered impossible.",
+    drawAcceptThreshold: 120,
+    resignThreshold: 50,
+    taunts: {
+      greeting: "I am MasterChess. Few have drawn. None have won. 👑",
+      onCheck: "Check. The end is already calculated.",
+      onCapture: "Every exchange is a step toward inevitability.",
+      onBlunder: "...this should not happen.",
+      onWin: "As foreseen. 👑",
+      onLose: "Impossible. You have made history.",
+      onDraw: "A rare and respectable result.",
+      onDrawOffer: "A draw against me is a victory. Accepted.",
+      onDrawDecline: "The position still favors precision.",
+    },
+  },
+
   {
     id: "rookie-rosa",
     name: "Rookie Rosa",

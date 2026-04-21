@@ -105,8 +105,13 @@ function settingsForRating(rating: number): EngineSettings {
   if (rating <= 2600) {
     return { useElo: true, uciElo: 2650, skillLevel: 20, depth: 14, moveTimeMs: 1200 };
   }
-  // GM Nova etc. — full strength, capped depth for snappy UX.
-  return { useElo: false, uciElo: 3000, skillLevel: 20, depth: 16, moveTimeMs: 1500 };
+  if (rating <= 2900) {
+    // Top GM / world-elite — full strength, capped depth for snappy UX.
+    return { useElo: false, uciElo: 3000, skillLevel: 20, depth: 16, moveTimeMs: 1500 };
+  }
+  // 👑 MasterChess and beyond — UNBEATABLE: max engine strength, deepest search,
+  // longest think time. No Elo cap, no skill dampener.
+  return { useElo: false, uciElo: 3200, skillLevel: 20, depth: 22, moveTimeMs: 3500 };
 }
 
 /* ---------- Opening book lookup ---------- */
