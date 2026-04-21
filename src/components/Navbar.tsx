@@ -124,6 +124,9 @@ const Navbar = () => {
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [onlineCount, setOnlineCount] = useState(0);
+  const [liveGames, setLiveGames] = useState(0);
+  const [activeTournaments, setActiveTournaments] = useState(0);
   const { user, profile, loading, signOut } = useAuth();
   const location = useLocation();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
