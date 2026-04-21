@@ -211,26 +211,27 @@ const Profile = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <TitleBadge titleKey={profileData.highest_title_key ?? getTitle(profileData.rating).key} size="sm" hideUnranked={false} />
+                  <TitleBadge titleKey={profileData.highest_title_key ?? getTitle(profileData.bot_rating ?? 1200).key} size="sm" hideUnranked={false} />
                   <RankBadge rating={profileData.rating} size="sm" />
                 </div>
               </div>
             </div>
 
-            {/* Title progress */}
+            {/* Title progress (driven by bot rating — the MasterChess title ladder) */}
             {(() => {
-              const next = getNextTitle(profileData.rating);
+              const botRating = profileData.bot_rating ?? 1200;
+              const next = getNextTitle(botRating);
               if (!next) return null;
-              const progress = getTitleProgress(profileData.rating);
+              const progress = getTitleProgress(botRating);
               return (
                 <div className="mt-4 rounded-xl border border-border/50 bg-muted/20 p-3">
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">Next title</span>
+                    <span className="text-muted-foreground">Next MasterChess title</span>
                     <span className={`font-bold ${next.color}`}>{next.icon} {next.label}</span>
                   </div>
                   <Progress value={progress} className="h-1.5" />
                   <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-                    {profileData.rating} / {next.minRating}
+                    {botRating} / {next.minRating} bot rating
                   </p>
                 </div>
               );
