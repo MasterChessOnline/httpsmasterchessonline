@@ -367,7 +367,7 @@ export const BOT_PROFILES: BotProfile[] = [
     difficulty: "beginner",
     personality: "curious",
     playstyle: "tactical",
-    openings: ["italian", "vienna"],
+    openings: ["italian", "scandinavian"],
     accuracy: 0.58, blunderRate: 0.12, inaccuracyRate: 0.24, bookDepth: 6,
     country: "Egypt", countryFlag: "🇪🇬",
     style: "Loves knight forks", bio: "Knights are the coolest piece, period.",
