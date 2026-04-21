@@ -25,6 +25,7 @@ import { getBotMove, getBotThinkMs, classifyCpLoss, estimateMoveQuality } from "
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 import RatingChange from "@/components/RatingChange";
+import TitleBadge from "@/components/TitleBadge";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
