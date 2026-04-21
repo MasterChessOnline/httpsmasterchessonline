@@ -178,54 +178,65 @@ const Play = () => {
     if (mode !== "ai" || game.turn() !== aiColor || isGameOver || gamePhase !== "playing") return;
     setAiThinking(true);
 
-    // Decide the move now (sync) — but display a realistic "think" delay
-    const decision = getBotMove(game, currentBot);
-    const critical = game.inCheck() || Math.abs(evaluateBoard(game)) > 200;
-    const thinkTime = getBotThinkMs(currentBot, {
-      baseSeconds: timeControl.seconds,
-      ply: moveHistory.length,
-      fromBook: decision.fromBook,
-      critical,
-    });
+    let cancelled = false;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
 
-    const timeout = setTimeout(() => {
-      const aiMoveStr = decision.move || getAIMove(game, difficulty);
-      if (aiMoveStr) {
-        const move = game.move(aiMoveStr);
-        if (move) {
-          setMoveHistory((prev) => [...prev, move.san]);
-          setLastMove({ from: move.from, to: move.to });
-          setGameStarted(true);
-          setBotMoveQuality(prev => [...prev, { cp: decision.cpLoss, quality: decision.quality }]);
-          trackPosition();
-          if (!unlimited && timeControl.increment > 0) {
-            if (aiColor === "w") setWhiteTime((p) => p + timeControl.increment);
-            else setBlackTime((p) => p + timeControl.increment);
-          }
-          updateState();
+    (async () => {
+      // Resolve the bot's move (Stockfish-backed, may be async)
+      const decision = await getBotMove(game, currentBot);
+      if (cancelled) return;
 
-          if (game.isCheckmate()) {
-            playChessSound("gameOver");
-            showBotMessage(currentBot.taunts.onWin);
-          } else if (game.isCheck()) {
-            playChessSound("check");
-            showBotMessage(currentBot.taunts.onCheck);
-          } else if (move.captured) {
-            playChessSound("capture");
-            if (Math.random() < 0.3) showBotMessage(currentBot.taunts.onCapture);
-          } else {
-            playChessSound("move");
-          }
+      const critical = game.inCheck() || Math.abs(evaluateBoard(game)) > 200;
+      const thinkTime = getBotThinkMs(currentBot, {
+        baseSeconds: timeControl.seconds,
+        ply: moveHistory.length,
+        fromBook: decision.fromBook,
+        critical,
+      });
 
-          // Bot reacts to its own blunder occasionally
-          if (decision.quality === "blunder" && Math.random() < 0.5) {
-            setTimeout(() => showBotMessage(currentBot.taunts.onBlunder), 500);
+      timeout = setTimeout(() => {
+        if (cancelled) return;
+        const aiMoveStr = decision.move || getAIMove(game, difficulty);
+        if (aiMoveStr) {
+          const move = game.move(aiMoveStr);
+          if (move) {
+            setMoveHistory((prev) => [...prev, move.san]);
+            setLastMove({ from: move.from, to: move.to });
+            setGameStarted(true);
+            setBotMoveQuality((prev) => [...prev, { cp: decision.cpLoss, quality: decision.quality }]);
+            trackPosition();
+            if (!unlimited && timeControl.increment > 0) {
+              if (aiColor === "w") setWhiteTime((p) => p + timeControl.increment);
+              else setBlackTime((p) => p + timeControl.increment);
+            }
+            updateState();
+
+            if (game.isCheckmate()) {
+              playChessSound("gameOver");
+              showBotMessage(currentBot.taunts.onWin);
+            } else if (game.isCheck()) {
+              playChessSound("check");
+              showBotMessage(currentBot.taunts.onCheck);
+            } else if (move.captured) {
+              playChessSound("capture");
+              if (Math.random() < 0.3) showBotMessage(currentBot.taunts.onCapture);
+            } else {
+              playChessSound("move");
+            }
+
+            if (decision.quality === "blunder" && Math.random() < 0.5) {
+              setTimeout(() => showBotMessage(currentBot.taunts.onBlunder), 500);
+            }
           }
         }
-      }
-      setAiThinking(false);
-    }, thinkTime);
-    return () => clearTimeout(timeout);
+        setAiThinking(false);
+      }, thinkTime);
+    })();
+
+    return () => {
+      cancelled = true;
+      if (timeout) clearTimeout(timeout);
+    };
   }, [fen, mode, difficulty, aiColor, isGameOver, gamePhase, currentBot]);
 
   // --- Execute premove when it becomes player's turn ---
