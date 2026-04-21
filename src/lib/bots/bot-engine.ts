@@ -454,21 +454,23 @@ export interface ThinkTimeOpts {
 }
 
 export function getBotThinkMs(bot: BotProfile, opts: ThinkTimeOpts): number {
-  if (opts.fromBook) return 250 + Math.random() * 250;
+  if (opts.fromBook) return 200 + Math.random() * 200;
 
-  // Stronger bots take longer on critical moves; everyone is snappy in bullet.
+  // Snappy UX: target most moves under ~2.5s, with a hard cap so no move ever
+  // exceeds ~6s of UI delay (engine search is also capped separately).
   const ratingFactor = Math.min(1, bot.rating / 2400);
-  let base = 400 + ratingFactor * 900; // 400ms .. ~1.3s
+  let base = 300 + ratingFactor * 700; // 300ms .. ~1.0s
 
-  if (opts.baseSeconds > 0 && opts.baseSeconds <= 180) base *= 0.45;
-  else if (opts.baseSeconds > 0 && opts.baseSeconds <= 600) base *= 0.7;
+  if (opts.baseSeconds > 0 && opts.baseSeconds <= 180) base *= 0.4;
+  else if (opts.baseSeconds > 0 && opts.baseSeconds <= 600) base *= 0.6;
 
-  if (opts.critical) base *= 1.7;
-  if (opts.ply < 12) base *= 0.7;
-  if (opts.ply > 40) base *= 1.2;
+  if (opts.critical) base *= 1.5;
+  if (opts.ply < 12) base *= 0.6;
+  if (opts.ply > 40) base *= 1.15;
 
-  const jitter = (Math.random() - 0.3) * 280;
-  return Math.max(220, Math.round(base + jitter));
+  const jitter = (Math.random() - 0.3) * 200;
+  // Hard cap at 6000ms so total bot reply (engine ~1.5s + delay) stays ≤ ~7–8s.
+  return Math.min(6000, Math.max(180, Math.round(base + jitter)));
 }
 
 /* ---------- Adaptive difficulty (light) ---------- */
