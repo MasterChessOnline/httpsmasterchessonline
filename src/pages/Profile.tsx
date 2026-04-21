@@ -11,7 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import RankBadge from "@/components/RankBadge";
+import TitleBadge from "@/components/TitleBadge";
 import { getRank as getRankFromLib } from "@/lib/ranks";
+import { getTitle, getNextTitle, getTitleProgress } from "@/lib/titles";
+import { findCountry } from "@/lib/countries";
 import { Link } from "react-router-dom";
 import { analyzePersonality } from "@/lib/play-personality";
 
@@ -34,6 +37,11 @@ interface ProfileData {
   games_lost: number;
   games_drawn: number;
   created_at: string;
+  country?: string | null;
+  country_flag?: string | null;
+  peak_rating?: number;
+  bot_peak_rating?: number;
+  highest_title_key?: string | null;
 }
 
 interface GameHistory {
@@ -195,25 +203,50 @@ const Profile = () => {
                   </div>
                 )}
                 <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  {profileData.country_flag && (
+                    <span className="text-xs text-muted-foreground">{profileData.country_flag} {findCountry(profileData.country)?.name ?? ""}</span>
+                  )}
                   <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Joined {new Date(profileData.created_at).toLocaleDateString()}
                   </span>
+                </div>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <TitleBadge titleKey={profileData.highest_title_key ?? getTitle(profileData.rating).key} size="sm" hideUnranked={false} />
                   <RankBadge rating={profileData.rating} size="sm" />
                 </div>
               </div>
             </div>
+
+            {/* Title progress */}
+            {(() => {
+              const next = getNextTitle(profileData.rating);
+              if (!next) return null;
+              const progress = getTitleProgress(profileData.rating);
+              return (
+                <div className="mt-4 rounded-xl border border-border/50 bg-muted/20 p-3">
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="text-muted-foreground">Next title</span>
+                    <span className={`font-bold ${next.color}`}>{next.icon} {next.label}</span>
+                  </div>
+                  <Progress value={progress} className="h-1.5" />
+                  <p className="text-[10px] text-muted-foreground text-center mt-1.5">
+                    {profileData.rating} / {next.minRating}
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* Dual rating display */}
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Online Rating</p>
                 <p className="font-mono text-3xl font-bold text-primary drop-shadow-glow">{profileData.rating}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">vs real players</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Peak {profileData.peak_rating ?? profileData.rating}</p>
               </div>
               <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Bot Rating</p>
                 <p className="font-mono text-3xl font-bold text-accent">{profileData.bot_rating ?? 1200}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">vs AI bots</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Peak {profileData.bot_peak_rating ?? profileData.bot_rating ?? 1200}</p>
               </div>
             </div>
 
