@@ -256,7 +256,11 @@ const Leaderboard = () => {
               {[...Array(5)].map((_, i) => <div key={i} className="h-16 rounded-xl bg-muted/30 animate-pulse" />)}
             </div>
           ) : sorted.length === 0 ? (
-            <p className="text-center text-muted-foreground py-12">No players yet. Be the first!</p>
+            <p className="text-center text-muted-foreground py-12">
+              {titleFilter !== "all"
+                ? "No players in this title band yet."
+                : "No players yet. Be the first!"}
+            </p>
           ) : (
             <>
               {renderPodium(sorted)}
