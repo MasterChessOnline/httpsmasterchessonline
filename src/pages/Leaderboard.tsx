@@ -34,7 +34,7 @@ const Leaderboard = () => {
   const [players, setPlayers] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "top50" | "active">("all");
-  const [sortBy, setSortBy] = useState<SortBy>("rating");
+  const [sortBy, setSortBy] = useState<SortBy>("bot_rating");
 
   useEffect(() => {
     supabase
