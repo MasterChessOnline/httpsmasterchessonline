@@ -25,6 +25,7 @@ import { getBotMove, getBotThinkMs, classifyCpLoss, estimateMoveQuality } from "
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 import RatingChange from "@/components/RatingChange";
+import TitleBadge from "@/components/TitleBadge";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -748,7 +749,10 @@ const Play = () => {
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-2xl sm:text-3xl font-bold text-primary mx-auto mb-2">
                 {playerInitial}
               </div>
-              <p className="text-sm font-bold text-foreground">{playerName}</p>
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                <p className="text-sm font-bold text-foreground">{playerName}</p>
+                <TitleBadge titleKey={(profile as any)?.highest_title_key} rating={playerRating} size="xs" />
+              </div>
               <p className="text-xs text-muted-foreground">{playerRating} Elo</p>
             </motion.div>
 
@@ -771,7 +775,10 @@ const Play = () => {
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-card border-2 border-border flex items-center justify-center text-3xl sm:text-4xl mx-auto mb-2">
                 {currentBot.avatar}
               </div>
-              <p className="text-sm font-bold text-foreground">{currentBot.name} {currentBot.countryFlag}</p>
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                <p className="text-sm font-bold text-foreground">{currentBot.name} {currentBot.countryFlag}</p>
+                <TitleBadge rating={currentBot.rating} size="xs" />
+              </div>
               <p className="text-xs text-muted-foreground">{currentBot.rating} Elo</p>
             </motion.div>
           </div>
@@ -906,7 +913,10 @@ const Play = () => {
             }`}>
               <span className="text-xl">{currentBot.avatar}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-foreground truncate">{currentBot.name} {currentBot.countryFlag}</p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="text-xs font-bold text-foreground truncate">{currentBot.name} {currentBot.countryFlag}</p>
+                  <TitleBadge rating={currentBot.rating} size="xs" />
+                </div>
                 <p className="text-[10px] text-muted-foreground">{currentBot.rating} Elo · {aiColor === "w" ? "⬜ White" : "⬛ Black"}</p>
               </div>
               {game.turn() === aiColor && !isGameOver && (
@@ -960,7 +970,10 @@ const Play = () => {
                 {((profile?.display_name || profile?.username || "P")[0] || "P").toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-foreground truncate">{profile?.display_name || profile?.username || "You"}</p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="text-xs font-bold text-foreground truncate">{profile?.display_name || profile?.username || "You"}</p>
+                  <TitleBadge titleKey={(profile as any)?.highest_title_key} rating={(profile as any)?.bot_rating ?? 1200} size="xs" />
+                </div>
                 <p className="text-[10px] text-muted-foreground">{(profile as any)?.bot_rating ?? 1200} Elo · {playerColor === "w" ? "⬜ White" : "⬛ Black"}</p>
               </div>
               {game.turn() === playerColor && !isGameOver && (

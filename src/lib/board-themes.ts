@@ -100,6 +100,18 @@ export const PIECE_STYLES: PieceStyle[] = [
     description: "Playful rounded look",
     render: { whiteFill: "#fff4d4", blackFill: "#3b2a4a", whiteStroke: "rgba(180,120,40,0.8)", blackStroke: "rgba(255,200,255,0.4)", fontWeight: 700 },
   },
+  {
+    key: "wood3d",
+    label: "3D Wood",
+    description: "Hand-carved tournament wood with depth",
+    render: { whiteFill: "#f3dcb4", blackFill: "#3a1f0f", whiteStroke: "rgba(110,70,30,0.9)", blackStroke: "rgba(255,200,140,0.35)", fontWeight: 600, glow: "rgba(120,70,20,0.35)" },
+  },
+  {
+    key: "fantasy",
+    label: "Fantasy",
+    description: "Mystical themed pieces with magical aura",
+    render: { whiteFill: "#e0f7ff", blackFill: "#2a0a3a", whiteStroke: "rgba(120,200,255,0.9)", blackStroke: "rgba(220,140,255,0.7)", fontWeight: 600, glow: "rgba(160,120,255,0.55)" },
+  },
 ];
 
 const STORAGE_KEY = "chess-settings";

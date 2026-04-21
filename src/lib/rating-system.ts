@@ -45,15 +45,26 @@ export function calculateRatingChange(input: RatingCalcInput): RatingCalcResult 
   const rawChange = k * (actualScore - expected) * difficultyMultiplier;
   let change = Math.round(rawChange);
 
-  // Guarantee a visible rating swing on every decisive result and on draws.
-  // Wins: at least +1. Losses: at least -1. Draws: lower-rated gains, higher-rated loses,
-  // and equal-rated draws still nudge by ±1 so the result feels meaningful.
+  // Guarantee a visible rating swing on every result.
+  // Wins: at least +1. Losses: at least -1.
   if (result === "win" && change < 1) change = 1;
   else if (result === "loss" && change > -1) change = -1;
-  else if (result === "draw" && change === 0) {
-    if (playerRating < opponentRating) change = 1;
-    else if (playerRating > opponentRating) change = -1;
-    else change = 1; // equal ratings — small bonus for holding the draw
+  else if (result === "draw") {
+    // Structured draw rules:
+    //   vs stronger opponent → small gain (+2 to +5)
+    //   vs equal opponent    → 0 to ±5 (whatever Elo computed)
+    //   vs weaker opponent   → small loss (-2 to -8)
+    const diff = opponentRating - playerRating;
+    if (diff >= 50) {
+      // Stronger opponent — clamp gain to +2..+5
+      change = Math.max(2, Math.min(5, change || 2));
+    } else if (diff <= -50) {
+      // Weaker opponent — clamp loss to -2..-8
+      change = Math.max(-8, Math.min(-2, change || -2));
+    } else {
+      // Roughly equal (within 50 Elo) — clamp to ±5
+      change = Math.max(-5, Math.min(5, change));
+    }
   }
 
   const newRating = Math.max(400, playerRating + change);
