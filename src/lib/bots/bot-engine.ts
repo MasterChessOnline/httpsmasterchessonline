@@ -77,36 +77,36 @@ interface EngineSettings {
 
 function settingsForRating(rating: number): EngineSettings {
   // Stockfish UCI_Elo supported range is roughly 1320..3190.
+  // Movetimes are kept tight so total bot reply (engine + UI delay) stays under ~6–8s.
   if (rating <= 600) {
-    return { useElo: true, uciElo: 1320, skillLevel: 0, depth: 4, moveTimeMs: 200 };
+    return { useElo: true, uciElo: 1320, skillLevel: 0, depth: 4, moveTimeMs: 150 };
   }
   if (rating <= 900) {
-    return { useElo: true, uciElo: 1320, skillLevel: 1, depth: 5, moveTimeMs: 250 };
+    return { useElo: true, uciElo: 1320, skillLevel: 1, depth: 5, moveTimeMs: 200 };
   }
   if (rating <= 1200) {
-    return { useElo: true, uciElo: 1400, skillLevel: 3, depth: 6, moveTimeMs: 350 };
+    return { useElo: true, uciElo: 1400, skillLevel: 3, depth: 6, moveTimeMs: 250 };
   }
   if (rating <= 1500) {
-    return { useElo: true, uciElo: 1600, skillLevel: 6, depth: 8, moveTimeMs: 500 };
+    return { useElo: true, uciElo: 1600, skillLevel: 6, depth: 7, moveTimeMs: 350 };
   }
   if (rating <= 1800) {
-    return { useElo: true, uciElo: 1850, skillLevel: 10, depth: 10, moveTimeMs: 700 };
+    return { useElo: true, uciElo: 1850, skillLevel: 10, depth: 9, moveTimeMs: 500 };
   }
   if (rating <= 2000) {
-    return { useElo: true, uciElo: 2050, skillLevel: 13, depth: 12, moveTimeMs: 900 };
+    return { useElo: true, uciElo: 2050, skillLevel: 13, depth: 10, moveTimeMs: 650 };
   }
   if (rating <= 2200) {
-    return { useElo: true, uciElo: 2250, skillLevel: 16, depth: 14, moveTimeMs: 1100 };
+    return { useElo: true, uciElo: 2250, skillLevel: 16, depth: 12, moveTimeMs: 800 };
   }
   if (rating <= 2400) {
-    return { useElo: true, uciElo: 2450, skillLevel: 18, depth: 16, moveTimeMs: 1400 };
+    return { useElo: true, uciElo: 2450, skillLevel: 18, depth: 13, moveTimeMs: 1000 };
   }
   if (rating <= 2600) {
-    // Strong master: still cap with UCI_Elo so it doesn't play 3500-level moves.
-    return { useElo: true, uciElo: 2650, skillLevel: 20, depth: 18, moveTimeMs: 1700 };
+    return { useElo: true, uciElo: 2650, skillLevel: 20, depth: 14, moveTimeMs: 1200 };
   }
   // GM Nova etc. — full strength, capped depth for snappy UX.
-  return { useElo: false, uciElo: 3000, skillLevel: 20, depth: 20, moveTimeMs: 2000 };
+  return { useElo: false, uciElo: 3000, skillLevel: 20, depth: 16, moveTimeMs: 1500 };
 }
 
 /* ---------- Opening book lookup ---------- */
