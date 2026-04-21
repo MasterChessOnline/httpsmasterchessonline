@@ -77,7 +77,8 @@ interface EngineSettings {
 
 function settingsForRating(rating: number): EngineSettings {
   // Stockfish UCI_Elo supported range is roughly 1320..3190.
-  // Movetimes are kept tight so total bot reply (engine + UI delay) stays under ~6–8s.
+  // Engine search is kept SHORT (≤1.2s) so the UI delay can do most of the
+  // 6–8s "thinking" without making the bot feel sluggish or lag the page.
   if (rating <= 600) {
     return { useElo: true, uciElo: 1320, skillLevel: 0, depth: 4, moveTimeMs: 150 };
   }
@@ -91,27 +92,27 @@ function settingsForRating(rating: number): EngineSettings {
     return { useElo: true, uciElo: 1600, skillLevel: 6, depth: 7, moveTimeMs: 350 };
   }
   if (rating <= 1800) {
-    return { useElo: true, uciElo: 1850, skillLevel: 10, depth: 9, moveTimeMs: 500 };
+    return { useElo: true, uciElo: 1850, skillLevel: 10, depth: 9, moveTimeMs: 450 };
   }
   if (rating <= 2000) {
-    return { useElo: true, uciElo: 2050, skillLevel: 13, depth: 10, moveTimeMs: 650 };
+    return { useElo: true, uciElo: 2050, skillLevel: 13, depth: 10, moveTimeMs: 550 };
   }
   if (rating <= 2200) {
-    return { useElo: true, uciElo: 2250, skillLevel: 16, depth: 12, moveTimeMs: 800 };
+    return { useElo: true, uciElo: 2250, skillLevel: 16, depth: 12, moveTimeMs: 700 };
   }
   if (rating <= 2400) {
-    return { useElo: true, uciElo: 2450, skillLevel: 18, depth: 13, moveTimeMs: 1000 };
+    return { useElo: true, uciElo: 2450, skillLevel: 18, depth: 13, moveTimeMs: 850 };
   }
   if (rating <= 2600) {
-    return { useElo: true, uciElo: 2650, skillLevel: 20, depth: 14, moveTimeMs: 1200 };
+    return { useElo: true, uciElo: 2650, skillLevel: 20, depth: 14, moveTimeMs: 1000 };
   }
   if (rating <= 2900) {
     // Top GM / world-elite — full strength, capped depth for snappy UX.
-    return { useElo: false, uciElo: 3000, skillLevel: 20, depth: 16, moveTimeMs: 1500 };
+    return { useElo: false, uciElo: 3000, skillLevel: 20, depth: 16, moveTimeMs: 1100 };
   }
-  // 👑 MasterChess and beyond — UNBEATABLE: max engine strength, deepest search,
-  // longest think time. No Elo cap, no skill dampener.
-  return { useElo: false, uciElo: 3200, skillLevel: 20, depth: 22, moveTimeMs: 3500 };
+  // 👑 MasterChess and beyond — UNBEATABLE: max engine strength.
+  // Engine time still capped so total reply stays within the 6–8s window.
+  return { useElo: false, uciElo: 3200, skillLevel: 20, depth: 20, moveTimeMs: 1200 };
 }
 
 /* ---------- Opening book lookup ---------- */
