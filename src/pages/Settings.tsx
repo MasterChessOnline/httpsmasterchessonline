@@ -17,6 +17,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import RankBadge from "@/components/RankBadge";
+import TitleBadge from "@/components/TitleBadge";
+import { COUNTRIES, findCountry } from "@/lib/countries";
 import { BOARD_THEMES, PIECE_STYLES, applyBoardTheme, applyPieceStyle } from "@/lib/board-themes";
 import BoardThemeCard from "@/components/settings/BoardThemeCard";
 import PieceStyleCard from "@/components/settings/PieceStyleCard";
@@ -177,9 +179,38 @@ const Settings = () => {
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">Rating</Label>
-                <div className="flex items-center gap-3 mt-1">
+                <Label className="text-xs text-muted-foreground">Country</Label>
+                <select
+                  className="mt-1 w-full rounded-lg border border-border/50 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
+                  value={(profile as any)?.country ?? ""}
+                  onChange={async (e) => {
+                    const code = e.target.value;
+                    const c = findCountry(code);
+                    if (!user) return;
+                    await supabase.from("profiles").update({
+                      country: c?.code ?? null,
+                      country_flag: c?.flag ?? null,
+                    } as any).eq("user_id", user.id);
+                    await refreshProfile();
+                    toast.success(c ? `Country set to ${c.name}` : "Country cleared");
+                  }}
+                >
+                  <option value="">— Not set —</option>
+                  {COUNTRIES.map(c => (
+                    <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
+                  ))}
+                </select>
+                {(profile as any)?.country_flag && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Showing as <span className="text-foreground font-medium">{(profile as any).country_flag} {findCountry((profile as any).country)?.name}</span>
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Rating &amp; Title</Label>
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
                   <span className="text-2xl font-mono font-bold text-primary">{profile?.rating || 400}</span>
+                  <TitleBadge titleKey={(profile as any)?.highest_title_key} rating={profile?.rating || 400} size="sm" hideUnranked={false} />
                   <RankBadge rating={profile?.rating || 400} showProgress />
                 </div>
               </div>

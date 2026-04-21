@@ -56,7 +56,9 @@ import DailyPlan from "./pages/DailyPlan";
 import Repertoire from "./pages/Repertoire";
 import Training from "./pages/Training";
 import ChessCard from "./pages/ChessCard";
+import BotProfile from "./pages/BotProfile";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
+import TitleUnlockGate from "@/components/TitleUnlockGate";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -110,6 +112,7 @@ function AnimatedRoutes() {
           <Route path="/repertoire" element={<Repertoire />} />
           <Route path="/training" element={<Training />} />
           <Route path="/chess-card" element={<ChessCard />} />
+          <Route path="/bot/:botId" element={<BotProfile />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
@@ -138,6 +141,7 @@ const App = () => (
               <AnimatedRoutes />
             </div>
             <AntiTiltWatcher />
+            <TitleUnlockGate />
             <MobileBottomNav />
           </Suspense>
         </BrowserRouter>

@@ -504,7 +504,10 @@ export type Database = {
           bot_games_lost: number
           bot_games_played: number
           bot_games_won: number
+          bot_peak_rating: number
           bot_rating: number
+          country: string | null
+          country_flag: string | null
           created_at: string
           display_name: string | null
           favorite_openings: string[] | null
@@ -514,7 +517,9 @@ export type Database = {
           games_lost: number
           games_played: number
           games_won: number
+          highest_title_key: string | null
           id: string
+          peak_rating: number
           rating: number
           updated_at: string
           user_id: string
@@ -527,7 +532,10 @@ export type Database = {
           bot_games_lost?: number
           bot_games_played?: number
           bot_games_won?: number
+          bot_peak_rating?: number
           bot_rating?: number
+          country?: string | null
+          country_flag?: string | null
           created_at?: string
           display_name?: string | null
           favorite_openings?: string[] | null
@@ -537,7 +545,9 @@ export type Database = {
           games_lost?: number
           games_played?: number
           games_won?: number
+          highest_title_key?: string | null
           id?: string
+          peak_rating?: number
           rating?: number
           updated_at?: string
           user_id: string
@@ -550,7 +560,10 @@ export type Database = {
           bot_games_lost?: number
           bot_games_played?: number
           bot_games_won?: number
+          bot_peak_rating?: number
           bot_rating?: number
+          country?: string | null
+          country_flag?: string | null
           created_at?: string
           display_name?: string | null
           favorite_openings?: string[] | null
@@ -560,7 +573,9 @@ export type Database = {
           games_lost?: number
           games_played?: number
           games_won?: number
+          highest_title_key?: string | null
           id?: string
+          peak_rating?: number
           rating?: number
           updated_at?: string
           user_id?: string
