@@ -282,10 +282,9 @@ function uciToSan(game: Chess, uci: string): string | null {
 /** Send Skill Level + (optional) UCI_LimitStrength / UCI_Elo to the engine. */
 function applyEngineSettings(s: EngineSettings) {
   const eng = getStockfishEngine();
-  // Workaround: stockfish-engine wrapper only exposes setSkillLevel publicly.
-  // We post raw UCI options for limit-strength / elo via the same channel.
-  // @ts-expect-error — accessing private send through a typed cast for option setting only.
-  const send = (cmd: string) => eng["send"]?.(cmd);
+  // The stockfish-engine wrapper only exposes setSkillLevel publicly.
+  // We post raw UCI options for limit-strength / elo via the same private channel.
+  const send = (cmd: string) => (eng as unknown as { send: (c: string) => void }).send?.(cmd);
 
   eng.setSkillLevel(s.skillLevel);
   if (s.useElo) {
