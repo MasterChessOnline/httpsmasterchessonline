@@ -460,23 +460,23 @@ export interface ThinkTimeOpts {
 }
 
 export function getBotThinkMs(bot: BotProfile, opts: ThinkTimeOpts): number {
-  if (opts.fromBook) return 200 + Math.random() * 200;
+  // Book moves are still instant — humans don't think on prep.
+  if (opts.fromBook) return 300 + Math.random() * 400;
 
-  // Snappy UX: target most moves under ~2.5s, with a hard cap so no move ever
-  // exceeds ~6s of UI delay (engine search is also capped separately).
-  const ratingFactor = Math.min(1, bot.rating / 2400);
-  let base = 300 + ratingFactor * 700; // 300ms .. ~1.0s
+  // Target window: every bot replies in 6–8 seconds total.
+  // Stronger bots lean toward the upper end, weaker bots toward the lower.
+  const ratingFactor = Math.min(1, Math.max(0, (bot.rating - 600) / 2200));
+  // 6000ms .. 8000ms based on rating
+  let base = 6000 + ratingFactor * 2000;
 
-  if (opts.baseSeconds > 0 && opts.baseSeconds <= 180) base *= 0.4;
-  else if (opts.baseSeconds > 0 && opts.baseSeconds <= 600) base *= 0.6;
+  // Critical positions push toward the top of the window.
+  if (opts.critical) base = Math.min(8000, base + 500);
+  // Opening phase: stay near the lower end of the window.
+  if (opts.ply < 8) base = Math.max(6000, base - 600);
 
-  if (opts.critical) base *= 1.5;
-  if (opts.ply < 12) base *= 0.6;
-  if (opts.ply > 40) base *= 1.15;
-
-  const jitter = (Math.random() - 0.3) * 200;
-  // Hard cap at 6000ms so total bot reply (engine ~1.5s + delay) stays ≤ ~7–8s.
-  return Math.min(6000, Math.max(180, Math.round(base + jitter)));
+  // Small natural jitter (±300ms) without leaving the 6–8s window.
+  const jitter = (Math.random() - 0.5) * 600;
+  return Math.min(8000, Math.max(6000, Math.round(base + jitter)));
 }
 
 /* ---------- Adaptive difficulty (light) ---------- */
