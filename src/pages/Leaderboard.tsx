@@ -119,9 +119,9 @@ const Leaderboard = () => {
                   {player.display_name || "Anonymous"}
                 </p>
                 <p className={`font-mono font-bold ${rank === 1 ? "text-2xl text-primary drop-shadow-[0_0_8px_hsl(43_80%_55%/0.4)]" : "text-lg text-foreground"}`}>
-                  {player.rating}
+                  {sortBy === "rating" ? player.rating : (player.bot_rating ?? 1200)}
                 </p>
-                <p className="text-[10px] text-muted-foreground">{xp.toLocaleString()} XP</p>
+                <p className="text-[10px] text-muted-foreground">{xp.toLocaleString()} XP · {sortBy === "rating" ? "Online" : "Bot"}</p>
               </Link>
               <div className={`w-20 sm:w-24 ${height} rounded-t-xl mt-2 flex items-center justify-center ${
                 rank === 1 ? "bg-gradient-to-t from-primary/10 to-primary/25 border border-primary/30" :
