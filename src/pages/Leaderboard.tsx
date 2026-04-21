@@ -148,6 +148,13 @@ const Leaderboard = () => {
     let filtered = players;
     if (filter === "top50") filtered = players.slice(0, 50);
     if (filter === "active") filtered = players.filter(p => p.games_played >= 5);
+    if (titleFilter !== "all") {
+      filtered = filtered.filter(p => {
+        // Use the player's stored highest title if available, otherwise derive from bot_rating.
+        const key = p.highest_title_key || getTitle(p.bot_rating ?? 1200).key;
+        return key === titleFilter;
+      });
+    }
     return getSorted(filtered);
   };
 
