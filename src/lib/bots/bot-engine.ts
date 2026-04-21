@@ -460,23 +460,23 @@ export interface ThinkTimeOpts {
 }
 
 export function getBotThinkMs(bot: BotProfile, opts: ThinkTimeOpts): number {
-  // Book moves are still instant — humans don't think on prep.
-  if (opts.fromBook) return 300 + Math.random() * 400;
+  // Book moves are nearly instant — humans don't think on prep.
+  if (opts.fromBook) return 150 + Math.random() * 250;
 
-  // Target window: every bot replies in 6–8 seconds total.
+  // Target window: every bot replies in ~1.2–2.8 seconds total.
   // Stronger bots lean toward the upper end, weaker bots toward the lower.
   const ratingFactor = Math.min(1, Math.max(0, (bot.rating - 600) / 2200));
-  // 6000ms .. 8000ms based on rating
-  let base = 6000 + ratingFactor * 2000;
+  // 1200ms .. 2800ms based on rating
+  let base = 1200 + ratingFactor * 1600;
 
   // Critical positions push toward the top of the window.
-  if (opts.critical) base = Math.min(8000, base + 500);
+  if (opts.critical) base = Math.min(2800, base + 300);
   // Opening phase: stay near the lower end of the window.
-  if (opts.ply < 8) base = Math.max(6000, base - 600);
+  if (opts.ply < 8) base = Math.max(1000, base - 400);
 
-  // Small natural jitter (±300ms) without leaving the 6–8s window.
-  const jitter = (Math.random() - 0.5) * 600;
-  return Math.min(8000, Math.max(6000, Math.round(base + jitter)));
+  // Small natural jitter (±200ms).
+  const jitter = (Math.random() - 0.5) * 400;
+  return Math.min(3000, Math.max(900, Math.round(base + jitter)));
 }
 
 /* ---------- Adaptive difficulty (light) ---------- */
