@@ -224,7 +224,46 @@ const Signup = () => {
               </div>
             </div>
 
-            {error && (
+            {/* Starting level picker */}
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Starting Level
+                <span className="ml-1 text-[10px] text-muted-foreground/70">(sets your bot rating)</span>
+              </Label>
+              <div className="grid grid-cols-5 gap-1.5">
+                {STARTING_LEVELS.map((lvl) => {
+                  const selected = levelKey === lvl.key;
+                  return (
+                    <button
+                      key={lvl.key}
+                      type="button"
+                      onClick={() => setLevelKey(lvl.key)}
+                      className={`group relative flex flex-col items-center justify-center rounded-lg border bg-muted/20 px-1.5 py-2 transition-all hover:scale-[1.03] ${
+                        selected
+                          ? `${lvl.borderColor} bg-primary/5 shadow-glow`
+                          : "border-border/40 hover:border-primary/30"
+                      }`}
+                      aria-pressed={selected}
+                      aria-label={`${lvl.label} — ${lvl.rating} rating`}
+                    >
+                      <span className={`text-base leading-none ${selected ? lvl.color : "opacity-70"}`}>
+                        {lvl.icon}
+                      </span>
+                      <span className={`mt-1 text-[9px] font-bold uppercase tracking-wider ${selected ? lvl.color : "text-muted-foreground"}`}>
+                        L{lvl.level}
+                      </span>
+                      <span className={`mt-0.5 font-mono text-[10px] font-semibold ${selected ? "text-foreground" : "text-muted-foreground"}`}>
+                        {lvl.rating}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center">
+                {getStartingLevel(levelKey).label} — {getStartingLevel(levelKey).description}
+              </p>
+            </div>
+
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
