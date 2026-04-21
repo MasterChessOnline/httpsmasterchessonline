@@ -153,6 +153,35 @@ const Navbar = () => {
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
 
+  // Live status data — real counts from backend, refreshed gently
+  useEffect(() => {
+    let cancelled = false;
+    const fetchStats = async () => {
+      try {
+        const [games, queue, tournaments] = await Promise.all([
+          supabase.from("online_games").select("id", { count: "exact", head: true }).eq("status", "active"),
+          supabase.from("matchmaking_queue").select("user_id", { count: "exact", head: true }),
+          supabase.from("tournaments").select("id", { count: "exact", head: true }).in("status", ["registration", "active", "in_progress"]),
+        ]);
+        if (cancelled) return;
+        const live = games.count ?? 0;
+        const waiting = queue.count ?? 0;
+        setLiveGames(live);
+        // Online ≈ players in active games (×2) + matchmaking queue
+        setOnlineCount(live * 2 + waiting);
+        setActiveTournaments(tournaments.count ?? 0);
+      } catch {
+        /* silent — keep last known values */
+      }
+    };
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
   const handleMouseEnter = (key: string) => {
     if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
     setActiveDropdown(key);
