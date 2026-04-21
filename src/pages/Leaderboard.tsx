@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { calculateXP, getLevelFromXP } from "@/lib/gamification";
 import XPLevelBadge from "@/components/XPLevelBadge";
+import TitleBadge from "@/components/TitleBadge";
+import { findCountry } from "@/lib/countries";
 
 interface LeaderboardEntry {
   id: string;
@@ -19,6 +21,9 @@ interface LeaderboardEntry {
   games_won: number;
   games_drawn: number;
   games_lost: number;
+  country?: string | null;
+  country_flag?: string | null;
+  highest_title_key?: string | null;
 }
 
 type SortBy = "rating" | "xp" | "wins" | "winrate";
@@ -33,7 +38,7 @@ const Leaderboard = () => {
   useEffect(() => {
     supabase
       .from("profiles")
-      .select("id, user_id, display_name, username, rating, games_played, games_won, games_drawn, games_lost")
+      .select("id, user_id, display_name, username, rating, games_played, games_won, games_drawn, games_lost, country, country_flag, highest_title_key")
       .order("rating", { ascending: false })
       .limit(100)
       .then(({ data }) => {
@@ -231,11 +236,15 @@ const Leaderboard = () => {
                         {getRankBadge(i)}
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <span className={`font-medium truncate text-sm ${isMe ? "text-primary" : "text-foreground"}`}>
                                 {player.display_name || player.username || "Anonymous"}
                                 {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
                               </span>
+                              <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={player.rating} size="xs" />
+                              {player.country_flag && (
+                                <span className="text-xs" title={findCountry(player.country)?.name ?? ""}>{player.country_flag}</span>
+                              )}
                               <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold shrink-0">
                                 Lv.{lvl.level}
                               </span>
