@@ -17,6 +17,7 @@ interface LeaderboardEntry {
   display_name: string | null;
   username: string | null;
   rating: number;
+  bot_rating?: number;
   games_played: number;
   games_won: number;
   games_drawn: number;
@@ -26,7 +27,7 @@ interface LeaderboardEntry {
   highest_title_key?: string | null;
 }
 
-type SortBy = "rating" | "xp" | "wins" | "winrate";
+type SortBy = "rating" | "bot_rating" | "xp" | "wins" | "winrate";
 
 const Leaderboard = () => {
   const { user } = useAuth();
@@ -38,8 +39,8 @@ const Leaderboard = () => {
   useEffect(() => {
     supabase
       .from("profiles")
-      .select("id, user_id, display_name, username, rating, games_played, games_won, games_drawn, games_lost, country, country_flag, highest_title_key")
-      .order("rating", { ascending: false })
+      .select("id, user_id, display_name, username, rating, bot_rating, games_played, games_won, games_drawn, games_lost, country, country_flag, highest_title_key")
+      .order("bot_rating", { ascending: false })
       .limit(100)
       .then(({ data }) => {
         setPlayers((data as LeaderboardEntry[]) || []);
@@ -55,7 +56,9 @@ const Leaderboard = () => {
       if (sortBy === "xp") return getXP(b) - getXP(a);
       if (sortBy === "wins") return b.games_won - a.games_won;
       if (sortBy === "winrate") return getWinRate(b) - getWinRate(a);
-      return b.rating - a.rating;
+      if (sortBy === "rating") return b.rating - a.rating;
+      // default: bot_rating
+      return (b.bot_rating ?? 1200) - (a.bot_rating ?? 1200);
     });
   };
 
