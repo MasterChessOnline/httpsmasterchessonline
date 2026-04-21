@@ -213,24 +213,35 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className="relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group"
+                      className="relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden"
                       style={{
                         color: isActive || activeDropdown === section.key ? accentColor : undefined,
                         backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
                       }}
                     >
-                      <section.icon className="h-4 w-4" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
-                      <span className={!(isActive || activeDropdown === section.key) ? "text-muted-foreground group-hover:text-foreground" : ""}>{section.label}</span>
+                      {/* Subtle light sweep on hover */}
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-[900ms] ease-out"
+                        style={{
+                          background: `linear-gradient(110deg, transparent 30%, hsla(${section.accent} / 0.18) 50%, transparent 70%)`,
+                        }}
+                      />
+                      <section.icon className="relative h-4 w-4" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
+                      <span className={`relative ${!(isActive || activeDropdown === section.key) ? "text-muted-foreground group-hover:text-foreground" : ""}`}>{section.label}</span>
                       <ChevronDown
-                        className={`h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
+                        className={`relative h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
                         style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined}
                       />
                       {isActive && (
                         <motion.span
                           layoutId="nav-active"
-                          className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full"
-                          style={{ backgroundColor: accentColor }}
-                          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                          className="absolute -bottom-[1px] left-3 right-3 h-[2px] rounded-full"
+                          style={{
+                            background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
+                            boxShadow: `0 0 10px hsla(${section.accent} / 0.55)`,
+                          }}
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
                         />
                       )}
                     </button>
