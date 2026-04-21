@@ -123,6 +123,9 @@ const Leaderboard = () => {
                 <p className={`text-sm font-semibold truncate max-w-[90px] ${rank === 1 ? "text-primary" : "text-foreground"}`}>
                   {player.display_name || "Anonymous"}
                 </p>
+                <div className="mt-0.5 mb-0.5">
+                  <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={player.bot_rating ?? 1200} size="xs" />
+                </div>
                 <p className={`font-mono font-bold ${rank === 1 ? "text-2xl text-primary drop-shadow-[0_0_8px_hsl(43_80%_55%/0.4)]" : "text-lg text-foreground"}`}>
                   {sortBy === "rating" ? player.rating : (player.bot_rating ?? 1200)}
                 </p>
