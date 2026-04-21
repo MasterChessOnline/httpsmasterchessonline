@@ -10,6 +10,7 @@ import { calculateXP, getLevelFromXP } from "@/lib/gamification";
 import XPLevelBadge from "@/components/XPLevelBadge";
 import TitleBadge from "@/components/TitleBadge";
 import { findCountry } from "@/lib/countries";
+import { TITLES, getTitle } from "@/lib/titles";
 
 interface LeaderboardEntry {
   id: string;
@@ -35,6 +36,10 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "top50" | "active">("all");
   const [sortBy, setSortBy] = useState<SortBy>("bot_rating");
+  const [titleFilter, setTitleFilter] = useState<string>("all");
+
+  // Only MC- prefixed titles count as official MasterChess title bands.
+  const titleBands = TITLES.filter((t) => t.key.startsWith("mc-"));
 
   useEffect(() => {
     supabase
@@ -143,6 +148,13 @@ const Leaderboard = () => {
     let filtered = players;
     if (filter === "top50") filtered = players.slice(0, 50);
     if (filter === "active") filtered = players.filter(p => p.games_played >= 5);
+    if (titleFilter !== "all") {
+      filtered = filtered.filter(p => {
+        // Use the player's stored highest title if available, otherwise derive from bot_rating.
+        const key = p.highest_title_key || getTitle(p.bot_rating ?? 1200).key;
+        return key === titleFilter;
+      });
+    }
     return getSorted(filtered);
   };
 
@@ -207,13 +219,48 @@ const Leaderboard = () => {
           </div>
         </div>
 
+        {/* MasterChess Title band filter */}
+        <div className="flex justify-center gap-1.5 flex-wrap mb-8">
+          <button
+            onClick={() => setTitleFilter("all")}
+            className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium border transition-all ${
+              titleFilter === "all"
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border/50 text-muted-foreground hover:border-primary/30"
+            }`}
+          >
+            <Filter className="h-3 w-3" /> All Titles
+          </button>
+          {titleBands.map((t) => {
+            const active = titleFilter === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTitleFilter(t.key)}
+                title={`${t.fullName} (${t.minRating}+)`}
+                className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold border transition-all ${
+                  active
+                    ? `${t.bgColor} ${t.color} ${t.borderColor} shadow-glow`
+                    : "border-border/50 text-muted-foreground hover:border-primary/30"
+                }`}
+              >
+                <span>{t.icon}</span> {t.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="max-w-2xl mx-auto">
           {loading ? (
             <div className="space-y-2">
               {[...Array(5)].map((_, i) => <div key={i} className="h-16 rounded-xl bg-muted/30 animate-pulse" />)}
             </div>
           ) : sorted.length === 0 ? (
-            <p className="text-center text-muted-foreground py-12">No players yet. Be the first!</p>
+            <p className="text-center text-muted-foreground py-12">
+              {titleFilter !== "all"
+                ? "No players in this title band yet."
+                : "No players yet. Be the first!"}
+            </p>
           ) : (
             <>
               {renderPodium(sorted)}
