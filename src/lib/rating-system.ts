@@ -43,7 +43,19 @@ export function calculateRatingChange(input: RatingCalcInput): RatingCalcResult 
   const actualScore = result === "win" ? 1 : result === "draw" ? 0.5 : 0;
   const k = getKFactor(playerRating, gamesPlayed);
   const rawChange = k * (actualScore - expected) * difficultyMultiplier;
-  const change = Math.round(rawChange);
+  let change = Math.round(rawChange);
+
+  // Guarantee a visible rating swing on every decisive result and on draws.
+  // Wins: at least +1. Losses: at least -1. Draws: lower-rated gains, higher-rated loses,
+  // and equal-rated draws still nudge by ±1 so the result feels meaningful.
+  if (result === "win" && change < 1) change = 1;
+  else if (result === "loss" && change > -1) change = -1;
+  else if (result === "draw" && change === 0) {
+    if (playerRating < opponentRating) change = 1;
+    else if (playerRating > opponentRating) change = -1;
+    else change = 1; // equal ratings — small bonus for holding the draw
+  }
+
   const newRating = Math.max(400, playerRating + change);
 
   let performanceLabel = "Expected result";
