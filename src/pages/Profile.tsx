@@ -17,6 +17,10 @@ import { getTitle, getNextTitle, getTitleProgress } from "@/lib/titles";
 import { findCountry } from "@/lib/countries";
 import { Link } from "react-router-dom";
 import { analyzePersonality } from "@/lib/play-personality";
+import StreakBadge from "@/components/StreakBadge";
+import SeasonBanner from "@/components/SeasonBanner";
+import BadgeGrid from "@/components/BadgeGrid";
+import { getStreakState, type StreakState } from "@/lib/progression";
 
 import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
 
@@ -73,6 +77,7 @@ const Profile = () => {
   const [editName, setEditName] = useState("");
   const [onlineHistory, setOnlineHistory] = useState<RatingPoint[]>([]);
   const [botHistory, setBotHistory] = useState<RatingPoint[]>([]);
+  const [streak, setStreak] = useState<StreakState | null>(null);
 
   const isOwnProfile = user?.id === userId;
 
@@ -103,6 +108,9 @@ const Profile = () => {
       .eq("user_id", userId).eq("rating_type", "bot")
       .order("created_at", { ascending: false }).limit(30)
       .then(({ data }) => setBotHistory(((data as any[]) || []).reverse() as RatingPoint[]));
+
+    // Fetch best streak (bot rating type = primary progression track)
+    getStreakState(userId, "bot").then(setStreak);
 
     if (user && user.id !== userId) {
       supabase.from("friendships").select("status")
