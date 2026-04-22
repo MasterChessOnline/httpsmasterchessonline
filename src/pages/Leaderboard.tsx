@@ -179,6 +179,10 @@ const Leaderboard = () => {
           <p className="text-muted-foreground text-sm">Top players ranked by skill & dedication</p>
         </motion.div>
 
+        <div className="max-w-2xl mx-auto mb-6">
+          <SeasonBanner />
+        </div>
+
         {/* Filters + Sort */}
         <div className="flex flex-col sm:flex-row justify-center gap-3 mb-8">
           <div className="flex justify-center gap-1.5 flex-wrap">
