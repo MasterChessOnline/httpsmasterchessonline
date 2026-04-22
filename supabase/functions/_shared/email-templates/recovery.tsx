@@ -8,8 +8,11 @@ import {
   Container,
   Head,
   Heading,
+  Hr,
   Html,
+  Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -18,27 +21,28 @@ interface RecoveryEmailProps {
   confirmationUrl: string
 }
 
-export const RecoveryEmail = ({
-  siteName,
-  confirmationUrl,
-}: RecoveryEmailProps) => (
+export const RecoveryEmail = ({ siteName, confirmationUrl }: RecoveryEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Reset your password for {siteName}</Preview>
+    <Preview>Reset your MasterChess password</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Reset your password</Heading>
-        <Text style={text}>
-          We received a request to reset your password for {siteName}. Click
-          the button below to choose a new password.
-        </Text>
-        <Button style={button} href={confirmationUrl}>
-          Reset Password
-        </Button>
-        <Text style={footer}>
-          If you didn't request a password reset, you can safely ignore this
-          email. Your password will not be changed.
-        </Text>
+        <Section style={card}>
+          <Text style={brand}>♟ MASTERCHESS</Text>
+          <Heading style={h1}>Reset Your Password</Heading>
+          <Text style={text}>Dear Player,</Text>
+          <Text style={text}>
+            We received a request to reset the password for your <strong style={gold}>{siteName}</strong> account. Click below to choose a new one.
+          </Text>
+          <Section style={buttonWrap}>
+            <Button style={button} href={confirmationUrl}>Reset Password</Button>
+          </Section>
+          <Text style={smallText}>Or paste this link into your browser:</Text>
+          <Text style={linkText}><Link href={confirmationUrl} style={link}>{confirmationUrl}</Link></Text>
+          <Hr style={hr} />
+          <Text style={footer}>If you didn't request this, you can safely ignore this email — your password will stay the same.</Text>
+          <Text style={footer}>— The MasterChess Team</Text>
+        </Section>
       </Container>
     </Body>
   </Html>
@@ -46,26 +50,17 @@ export const RecoveryEmail = ({
 
 export default RecoveryEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif", margin: 0, padding: '40px 0' }
+const container = { maxWidth: '560px', margin: '0 auto', padding: '0 16px' }
+const card = { backgroundColor: '#0B0A09', borderRadius: '12px', padding: '40px 32px', border: '1px solid #2A2520' }
+const brand = { fontFamily: "'Orbitron', Arial, sans-serif", fontSize: '14px', letterSpacing: '0.25em', color: '#E5B84A', margin: '0 0 24px', fontWeight: 700 as const }
+const h1 = { fontFamily: "'Orbitron', Arial, sans-serif", fontSize: '24px', fontWeight: 700 as const, color: '#F4EAD0', margin: '0 0 24px', lineHeight: '1.3' }
+const text = { fontSize: '15px', color: '#D9CFB8', lineHeight: '1.6', margin: '0 0 16px' }
+const gold = { color: '#E5B84A' }
+const buttonWrap = { textAlign: 'center' as const, margin: '32px 0' }
+const button = { backgroundColor: '#E5B84A', color: '#0B0A09', fontSize: '15px', fontWeight: 600 as const, borderRadius: '12px', padding: '14px 32px', textDecoration: 'none', display: 'inline-block' }
+const smallText = { fontSize: '13px', color: '#A89B7E', margin: '20px 0 4px' }
+const linkText = { fontSize: '12px', color: '#A89B7E', wordBreak: 'break-all' as const, margin: '0 0 16px' }
+const link = { color: '#E5B84A', textDecoration: 'underline' }
+const hr = { borderColor: '#2A2520', margin: '28px 0 20px' }
+const footer = { fontSize: '12px', color: '#A89B7E', margin: '6px 0', lineHeight: '1.5' }
