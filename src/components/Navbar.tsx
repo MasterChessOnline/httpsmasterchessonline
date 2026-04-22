@@ -282,13 +282,14 @@ const Navbar = () => {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 6, scale: 0.98 }}
                           transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                          className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 rounded-2xl z-50 backdrop-blur-2xl ${
+                          className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 rounded-2xl z-50 backdrop-blur-2xl overflow-hidden flex flex-col ${
                             section.wide ? "w-[380px]" : "w-[300px]"
                           }`}
                           style={{
-                            background: `linear-gradient(135deg, hsla(${section.accent} / 0.06) 0%, hsl(220 15% 10% / 0.97) 40%, hsl(220 15% 10% / 0.97) 100%)`,
-                            border: `1px solid hsla(${section.accent} / 0.2)`,
-                            boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 30px -5px rgba(${section.accentRgb},0.12), inset 0 1px 0 hsla(${section.accent} / 0.1)`,
+                            background: `linear-gradient(135deg, hsla(${section.accent} / 0.08) 0%, hsl(220 15% 9%) 35%, hsl(220 15% 9%) 100%)`,
+                            border: `1px solid hsla(${section.accent} / 0.25)`,
+                            boxShadow: `0 12px 40px rgba(0,0,0,0.6), 0 0 30px -5px rgba(${section.accentRgb},0.15), inset 0 1px 0 hsla(${section.accent} / 0.12)`,
+                            maxHeight: "min(560px, calc(100vh - 90px))",
                           }}
                           onMouseEnter={() => handleMouseEnter(section.key)}
                           onMouseLeave={handleMouseLeave}
@@ -297,13 +298,13 @@ const Navbar = () => {
                             className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
                             style={{ background: `linear-gradient(90deg, transparent 5%, hsla(${section.accent} / 0.6) 50%, transparent 95%)` }}
                           />
-                          <div className="px-4 pt-3.5 pb-2 flex items-center gap-2.5">
+                          <div className="px-4 pt-3.5 pb-2 flex items-center gap-2.5 shrink-0">
                             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}>
                               <section.icon className="h-4 w-4" style={{ color: accentColor }} />
                             </div>
                             <span className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: accentColor }}>{section.label}</span>
                           </div>
-                          <div className="px-2 pb-2.5 max-h-[75vh] overflow-y-auto">
+                          <div className="px-2 pb-2.5 flex-1 min-h-0 overflow-y-auto">
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
