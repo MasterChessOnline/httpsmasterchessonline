@@ -161,7 +161,6 @@ const Profile = () => {
     ? Math.round((profileData.games_won / profileData.games_played) * 100) : 0;
 
   const tier = getRankFromLib(profileData.rating);
-  const earnedBadges = BADGES.filter(b => b.condition(profileData));
   const personality = analyzePersonality(profileData);
 
   return (
