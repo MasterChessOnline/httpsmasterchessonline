@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { calculateXP, getLevelFromXP } from "@/lib/gamification";
 import XPLevelBadge from "@/components/XPLevelBadge";
 import TitleBadge from "@/components/TitleBadge";
+import SeasonBanner from "@/components/SeasonBanner";
 import { findCountry } from "@/lib/countries";
 import { TITLES, getTitle } from "@/lib/titles";
 
