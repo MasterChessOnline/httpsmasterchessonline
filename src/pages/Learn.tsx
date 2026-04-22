@@ -183,7 +183,7 @@ function CourseCard({ course, onClick, progress }: {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-4">{course.description}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed mb-4 break-words">{course.description}</p>
 
         <div className="space-y-1.5">
           <div className="flex justify-between text-[10px]">

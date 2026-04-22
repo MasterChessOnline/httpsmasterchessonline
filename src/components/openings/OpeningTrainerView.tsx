@@ -312,9 +312,9 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
             Back
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <span>{opening.icon}</span>
-              <span className="truncate">{opening.name}</span>
+            <h1 className="text-lg font-semibold text-foreground flex items-start gap-2 leading-snug">
+              <span className="shrink-0">{opening.icon}</span>
+              <span className="break-words">{opening.name}</span>
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -535,10 +535,10 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                         key={i}
                         variant="ghost"
                         size="sm"
-                        className="w-full justify-start text-xs truncate font-mono text-muted-foreground"
+                        className="w-full justify-start text-xs font-mono text-muted-foreground h-auto py-2 whitespace-normal text-left leading-snug break-words"
                         onClick={() => startTraining(path)}
                       >
-                        Line {i + 1}: {label.length > 40 ? label.slice(0, 40) + "…" : label}
+                        <span className="block w-full break-words">Line {i + 1}: {label}</span>
                       </Button>
                     );
                   })}
