@@ -579,3 +579,188 @@ a, button, input, select, textarea {
   z-index: 1;
 }
 
+/* ──────────────────────────────────────────────────────────
+   4D DEPTH SYSTEM — layered, floating, futuristic
+   ────────────────────────────────────────────────────────── */
+
+/* Smooth, elegant easing for all 4D motion */
+:root {
+  --ease-4d: cubic-bezier(0.22, 1, 0.36, 1);
+  --depth-shadow-sm:
+    0 2px 4px hsl(30 8% 2% / 0.25),
+    0 6px 14px hsl(30 8% 2% / 0.18),
+    0 0 0 1px hsl(43 90% 55% / 0.04);
+  --depth-shadow-md:
+    0 4px 8px hsl(30 8% 2% / 0.3),
+    0 16px 32px hsl(30 8% 2% / 0.35),
+    0 0 0 1px hsl(43 90% 55% / 0.06),
+    inset 0 1px 0 hsl(43 90% 55% / 0.05);
+  --depth-shadow-lg:
+    0 8px 16px hsl(30 8% 2% / 0.35),
+    0 32px 64px -8px hsl(30 8% 2% / 0.5),
+    0 0 0 1px hsl(43 90% 55% / 0.08),
+    0 0 40px hsl(43 90% 55% / 0.05),
+    inset 0 1px 0 hsl(43 90% 55% / 0.07);
+}
+
+/* Slow drift for ambient depth orbs (mid layer) */
+@keyframes depth-orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.97); }
+}
+.depth-orb-drift {
+  animation: depth-orb-drift 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Floating element — gentle vertical breathing */
+@keyframes depth-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -6px, 0); }
+}
+.depth-float {
+  animation: depth-float 6s var(--ease-4d) infinite;
+  will-change: transform;
+}
+.depth-float-slow {
+  animation: depth-float 9s var(--ease-4d) infinite;
+  will-change: transform;
+}
+
+/* Floating UI surface — elevated card with soft glow */
+.depth-surface {
+  background: linear-gradient(145deg, hsl(30 10% 10% / 0.85), hsl(30 10% 6% / 0.85));
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid hsl(43 90% 55% / 0.07);
+  border-radius: 16px;
+  box-shadow: var(--depth-shadow-md);
+  transition: transform 0.5s var(--ease-4d), box-shadow 0.5s var(--ease-4d);
+  will-change: transform, box-shadow;
+}
+.depth-surface:hover {
+  transform: translateY(-4px) scale(1.012);
+  box-shadow: var(--depth-shadow-lg);
+}
+
+.depth-surface-sm {
+  border-radius: 12px;
+  box-shadow: var(--depth-shadow-sm);
+  transition: transform 0.4s var(--ease-4d), box-shadow 0.4s var(--ease-4d);
+  will-change: transform, box-shadow;
+}
+.depth-surface-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--depth-shadow-md);
+}
+
+/* Soft cursor-driven glow on a surface */
+.depth-glow {
+  position: relative;
+  overflow: hidden;
+}
+.depth-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    400px circle at var(--mx, 50%) var(--my, 50%),
+    hsl(43 90% 55% / 0.08),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-4d);
+  pointer-events: none;
+  z-index: 1;
+}
+.depth-glow:hover::before { opacity: 1; }
+
+/* Press-into depth — buttons feel pushed inward */
+.depth-press {
+  transition: transform 0.25s var(--ease-4d), box-shadow 0.25s var(--ease-4d), filter 0.25s var(--ease-4d);
+  will-change: transform;
+}
+.depth-press:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 20px hsl(43 90% 55% / 0.15),
+    0 0 24px hsl(43 90% 55% / 0.08),
+    0 0 0 1px hsl(43 90% 55% / 0.12);
+  filter: brightness(1.05);
+}
+.depth-press:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    inset 0 2px 6px hsl(30 8% 2% / 0.5),
+    0 1px 2px hsl(30 8% 2% / 0.3);
+  filter: brightness(0.95);
+}
+
+/* 3D board tilt — very subtle, premium */
+.board-4d {
+  transform: perspective(1400px) rotateX(4deg) translateZ(0);
+  transform-style: preserve-3d;
+  transition: transform 0.8s var(--ease-4d), box-shadow 0.8s var(--ease-4d);
+  box-shadow:
+    0 24px 60px -20px hsl(30 8% 2% / 0.7),
+    0 8px 30px hsl(43 90% 55% / 0.06),
+    0 0 0 1px hsl(43 90% 55% / 0.08);
+  will-change: transform;
+}
+.board-4d:hover {
+  transform: perspective(1400px) rotateX(2deg) translateZ(8px);
+}
+
+/* Floating chess piece — gentle elevation above board */
+.piece-float {
+  filter: drop-shadow(0 4px 6px hsl(30 8% 2% / 0.45)) drop-shadow(0 1px 2px hsl(30 8% 2% / 0.3));
+  transition: transform 0.35s var(--ease-4d), filter 0.35s var(--ease-4d);
+  will-change: transform, filter;
+}
+.piece-float:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 8px 12px hsl(30 8% 2% / 0.55)) drop-shadow(0 0 6px hsl(43 90% 55% / 0.2));
+}
+
+/* Layer planes — explicit z-depth in space */
+.layer-bg    { position: relative; z-index: 0; }
+.layer-mid   { position: relative; z-index: 10; }
+.layer-front { position: relative; z-index: 20; }
+
+/* Gentle perspective wrapper */
+.depth-stage {
+  perspective: 1600px;
+  perspective-origin: 50% 40%;
+  transform-style: preserve-3d;
+}
+
+/* Reduced motion / weak devices — kill heavy 4D effects */
+@media (prefers-reduced-motion: reduce) {
+  .depth-float,
+  .depth-float-slow,
+  .depth-orb-drift,
+  .ambient-light,
+  .float-panel,
+  .gold-reflection::after,
+  .shimmer::after {
+    animation: none !important;
+  }
+  .depth-surface,
+  .depth-surface-sm,
+  .depth-press,
+  .board-4d,
+  .piece-float {
+    transition: none !important;
+  }
+  .depth-surface:hover,
+  .depth-surface-sm:hover,
+  .depth-press:hover,
+  .board-4d:hover,
+  .piece-float:hover {
+    transform: none !important;
+  }
+}
+
+

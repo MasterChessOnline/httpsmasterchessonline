@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import ChessLoadingScreen from "@/components/ChessLoadingScreen";
 import CursorGlow from "@/components/CursorGlow";
+import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -134,6 +135,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        <DepthLayers />
         <CursorGlow />
         <Toaster />
         <Sonner />
