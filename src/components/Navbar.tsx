@@ -79,7 +79,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     key: "leaderboard",
-    label: "Leaderboard",
+    label: "Ranks",
     icon: BarChart3,
     accent: "142 71% 45%",
     accentRgb: "34,197,94",
