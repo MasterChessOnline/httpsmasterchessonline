@@ -66,7 +66,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     key: "tournaments",
-    label: "Tournaments",
+    label: "Compete",
     icon: Trophy,
     accent: "38 92% 50%",
     accentRgb: "245,158,11",
