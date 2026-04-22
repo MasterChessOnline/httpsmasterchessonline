@@ -565,7 +565,7 @@ const Play = () => {
 
   const pgn = game.pgn();
 
-  // --- Apply bot rating change once when an AI game finishes ---
+  // --- Apply bot rating change + streak + badges once when an AI game finishes ---
   useEffect(() => {
     if (!isGameOver || !gameResult || mode !== "ai" || !user || !profile) return;
     if (ratingAppliedRef.current) return;
@@ -582,17 +582,47 @@ const Play = () => {
     const currentBotRating = (profile as any).bot_rating ?? 1200;
     const botGames = (profile as any).bot_games_played ?? 0;
 
-    applyBotRatingChange({
-      userId: user.id,
-      currentRating: currentBotRating,
-      botRating,
-      botLabel: currentBot.name,
-      gamesPlayed: botGames,
-      result,
-    }).then(calc => {
-      setBotRatingResult(calc);
-      refreshProfile();
-    }).catch(() => { ratingAppliedRef.current = false; });
+    (async () => {
+      try {
+        // 1. Read current streak BEFORE updating
+        const prevStreak = await getStreakState(user.id, "bot");
+        const projectedStreak = result === "win" ? prevStreak.current_streak + 1 : 0;
+        const streakBonus = getStreakBonus(projectedStreak, result);
+
+        // 2. Apply Elo with streak bonus + loss protection
+        const calc = await applyBotRatingChange({
+          userId: user.id,
+          currentRating: currentBotRating,
+          botRating,
+          botLabel: currentBot.name,
+          gamesPlayed: botGames,
+          result,
+          streakBonus,
+          lossStreak: prevStreak.loss_streak,
+        });
+        setBotRatingResult(calc);
+
+        // 3. Update streak state
+        const newStreak = await updateStreakState(user.id, "bot", result);
+        setStreakAfter(newStreak);
+
+        // 4. Evaluate & insert any newly-earned badges
+        const newBadges = await evaluateBadges({
+          userId: user.id,
+          rating: calc.newRating,
+          gamesPlayed: botGames + 1,
+          result,
+          playerRating: currentBotRating,
+          opponentRating: botRating,
+          currentStreak: newStreak.current_streak,
+        });
+        if (newBadges.length > 0) setUnlockedBadges(newBadges);
+
+        refreshProfile();
+      } catch {
+        ratingAppliedRef.current = false;
+      }
+    })();
   }, [isGameOver, gameResult, mode, user, profile, difficulty, playerColor, currentBot.name, moveHistory.length, refreshProfile]);
 
   const getRecommendations = () => {
