@@ -56,6 +56,45 @@ export type Database = {
         }
         Relationships: []
       }
+      badges_catalog: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          key: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+          tier: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          key: string
+          name: string
+          requirement_type: string
+          requirement_value?: number
+          tier?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          key?: string
+          name?: string
+          requirement_type?: string
+          requirement_value?: number
+          tier?: string
+        }
+        Relationships: []
+      }
       community_posts: {
         Row: {
           comments_count: number
@@ -501,6 +540,30 @@ export type Database = {
         }
         Relationships: []
       }
+      player_badges: {
+        Row: {
+          badge_key: string
+          context: Json | null
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_key: string
+          context?: Json | null
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_key?: string
+          context?: Json | null
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           content: string
@@ -775,6 +838,86 @@ export type Database = {
           rating_type?: string
           result?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      season_results: {
+        Row: {
+          created_at: string
+          final_rank: number
+          final_rating: number
+          games_played: number
+          games_won: number
+          id: string
+          peak_rating: number
+          rating_type: string
+          reward_tier: string | null
+          season_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          final_rank: number
+          final_rating: number
+          games_played?: number
+          games_won?: number
+          id?: string
+          peak_rating: number
+          rating_type?: string
+          reward_tier?: string | null
+          season_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          final_rank?: number
+          final_rating?: number
+          games_played?: number
+          games_won?: number
+          id?: string
+          peak_rating?: number
+          rating_type?: string
+          reward_tier?: string | null
+          season_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_results_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          name: string
+          season_number: number
+          starts_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          name: string
+          season_number: number
+          starts_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          name?: string
+          season_number?: number
+          starts_at?: string
+          status?: string
         }
         Relationships: []
       }
@@ -1248,6 +1391,39 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      win_streaks: {
+        Row: {
+          best_streak: number
+          current_streak: number
+          id: string
+          last_result: string | null
+          loss_streak: number
+          rating_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_streak?: number
+          current_streak?: number
+          id?: string
+          last_result?: string | null
+          loss_streak?: number
+          rating_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_streak?: number
+          current_streak?: number
+          id?: string
+          last_result?: string | null
+          loss_streak?: number
+          rating_type?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

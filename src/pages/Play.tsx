@@ -24,8 +24,11 @@ import { getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-pr
 import { getBotMove, getBotThinkMs, classifyCpLoss, estimateMoveQuality } from "@/lib/bots/bot-engine";
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
+import { getStreakBonus, getStreakState, updateStreakState, evaluateBadges, type BadgeRow, type StreakState } from "@/lib/progression";
 import RatingChange from "@/components/RatingChange";
 import TitleBadge from "@/components/TitleBadge";
+import StreakBadge from "@/components/StreakBadge";
+import BadgeUnlockToast from "@/components/BadgeUnlockToast";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -75,6 +78,8 @@ const Play = () => {
 
   // --- Bot rating tracking ---
   const [botRatingResult, setBotRatingResult] = useState<RatingCalcResult | null>(null);
+  const [streakAfter, setStreakAfter] = useState<StreakState | null>(null);
+  const [unlockedBadges, setUnlockedBadges] = useState<BadgeRow[]>([]);
   const ratingAppliedRef = useRef(false);
 
   // --- Per-move accuracy tracking (player + bot) ---
@@ -474,6 +479,8 @@ const Play = () => {
     setDrawDeclined(false);
     setPremove(null);
     setBotRatingResult(null);
+    setStreakAfter(null);
+    setUnlockedBadges([]);
     setPlayerMoveQuality([]);
     setBotMoveQuality([]);
     ratingAppliedRef.current = false;
@@ -558,7 +565,7 @@ const Play = () => {
 
   const pgn = game.pgn();
 
-  // --- Apply bot rating change once when an AI game finishes ---
+  // --- Apply bot rating change + streak + badges once when an AI game finishes ---
   useEffect(() => {
     if (!isGameOver || !gameResult || mode !== "ai" || !user || !profile) return;
     if (ratingAppliedRef.current) return;
@@ -575,17 +582,47 @@ const Play = () => {
     const currentBotRating = (profile as any).bot_rating ?? 1200;
     const botGames = (profile as any).bot_games_played ?? 0;
 
-    applyBotRatingChange({
-      userId: user.id,
-      currentRating: currentBotRating,
-      botRating,
-      botLabel: currentBot.name,
-      gamesPlayed: botGames,
-      result,
-    }).then(calc => {
-      setBotRatingResult(calc);
-      refreshProfile();
-    }).catch(() => { ratingAppliedRef.current = false; });
+    (async () => {
+      try {
+        // 1. Read current streak BEFORE updating
+        const prevStreak = await getStreakState(user.id, "bot");
+        const projectedStreak = result === "win" ? prevStreak.current_streak + 1 : 0;
+        const streakBonus = getStreakBonus(projectedStreak, result);
+
+        // 2. Apply Elo with streak bonus + loss protection
+        const calc = await applyBotRatingChange({
+          userId: user.id,
+          currentRating: currentBotRating,
+          botRating,
+          botLabel: currentBot.name,
+          gamesPlayed: botGames,
+          result,
+          streakBonus,
+          lossStreak: prevStreak.loss_streak,
+        });
+        setBotRatingResult(calc);
+
+        // 3. Update streak state
+        const newStreak = await updateStreakState(user.id, "bot", result);
+        setStreakAfter(newStreak);
+
+        // 4. Evaluate & insert any newly-earned badges
+        const newBadges = await evaluateBadges({
+          userId: user.id,
+          rating: calc.newRating,
+          gamesPlayed: botGames + 1,
+          result,
+          playerRating: currentBotRating,
+          opponentRating: botRating,
+          currentStreak: newStreak.current_streak,
+        });
+        if (newBadges.length > 0) setUnlockedBadges(newBadges);
+
+        refreshProfile();
+      } catch {
+        ratingAppliedRef.current = false;
+      }
+    })();
   }, [isGameOver, gameResult, mode, user, profile, difficulty, playerColor, currentBot.name, moveHistory.length, refreshProfile]);
 
   const getRecommendations = () => {
@@ -1039,6 +1076,20 @@ const Play = () => {
             )}
             {botRatingResult && mode === "ai" && (
               <RatingChange result={botRatingResult} ratingType="bot" />
+            )}
+            {streakAfter && streakAfter.current_streak >= 2 && mode === "ai" && (
+              <div className="rounded-xl border border-border/50 bg-card/70 backdrop-blur-sm p-3 flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Win Streak</p>
+                  <p className="text-sm text-foreground">
+                    On a roll — keep winning for streak bonuses!
+                  </p>
+                </div>
+                <StreakBadge streak={streakAfter.current_streak} best={streakAfter.best_streak} size="lg" />
+              </div>
+            )}
+            {unlockedBadges.length > 0 && mode === "ai" && (
+              <BadgeUnlockToast badges={unlockedBadges} onDismiss={() => setUnlockedBadges([])} />
             )}
             {isGameOver && gameResult && pgn && mode === "ai" && (
               <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />

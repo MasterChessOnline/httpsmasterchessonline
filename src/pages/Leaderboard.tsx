@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { calculateXP, getLevelFromXP } from "@/lib/gamification";
 import XPLevelBadge from "@/components/XPLevelBadge";
 import TitleBadge from "@/components/TitleBadge";
+import SeasonBanner from "@/components/SeasonBanner";
 import { findCountry } from "@/lib/countries";
 import { TITLES, getTitle } from "@/lib/titles";
 
@@ -177,6 +178,10 @@ const Leaderboard = () => {
           </h1>
           <p className="text-muted-foreground text-sm">Top players ranked by skill & dedication</p>
         </motion.div>
+
+        <div className="max-w-2xl mx-auto mb-6">
+          <SeasonBanner />
+        </div>
 
         {/* Filters + Sort */}
         <div className="flex flex-col sm:flex-row justify-center gap-3 mb-8">

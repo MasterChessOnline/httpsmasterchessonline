@@ -17,6 +17,10 @@ import { getTitle, getNextTitle, getTitleProgress } from "@/lib/titles";
 import { findCountry } from "@/lib/countries";
 import { Link } from "react-router-dom";
 import { analyzePersonality } from "@/lib/play-personality";
+import StreakBadge from "@/components/StreakBadge";
+import SeasonBanner from "@/components/SeasonBanner";
+import BadgeGrid from "@/components/BadgeGrid";
+import { getStreakState, type StreakState } from "@/lib/progression";
 
 import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
 
@@ -54,13 +58,7 @@ interface GameHistory {
   status: string;
 }
 
-const BADGES = [
-  { key: "beginner", label: "Beginner", icon: "🎯", condition: (p: ProfileData) => p.games_played >= 1 },
-  { key: "grinder", label: "Grinder", icon: "🔥", condition: (p: ProfileData) => p.games_played >= 50 },
-  { key: "winner", label: "Winner", icon: "🏆", condition: (p: ProfileData) => p.games_won >= 10 },
-  { key: "master", label: "Master", icon: "👑", condition: (p: ProfileData) => p.rating >= 1800 },
-  { key: "centurion", label: "Centurion", icon: "💯", condition: (p: ProfileData) => p.games_played >= 100 },
-];
+// Legacy local badge stub kept only for backward types — UI now uses BadgeGrid.
 
 const Profile = () => {
   const { userId } = useParams();
@@ -73,6 +71,7 @@ const Profile = () => {
   const [editName, setEditName] = useState("");
   const [onlineHistory, setOnlineHistory] = useState<RatingPoint[]>([]);
   const [botHistory, setBotHistory] = useState<RatingPoint[]>([]);
+  const [streak, setStreak] = useState<StreakState | null>(null);
 
   const isOwnProfile = user?.id === userId;
 
@@ -103,6 +102,9 @@ const Profile = () => {
       .eq("user_id", userId).eq("rating_type", "bot")
       .order("created_at", { ascending: false }).limit(30)
       .then(({ data }) => setBotHistory(((data as any[]) || []).reverse() as RatingPoint[]));
+
+    // Fetch best streak (bot rating type = primary progression track)
+    getStreakState(userId, "bot").then(setStreak);
 
     if (user && user.id !== userId) {
       supabase.from("friendships").select("status")
@@ -159,7 +161,6 @@ const Profile = () => {
     ? Math.round((profileData.games_won / profileData.games_played) * 100) : 0;
 
   const tier = getRankFromLib(profileData.rating);
-  const earnedBadges = BADGES.filter(b => b.condition(profileData));
   const personality = analyzePersonality(profileData);
 
   return (
@@ -213,6 +214,9 @@ const Profile = () => {
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                   <TitleBadge titleKey={profileData.highest_title_key ?? getTitle(profileData.bot_rating ?? 1200).key} size="sm" hideUnranked={false} />
                   <RankBadge rating={profileData.rating} size="sm" />
+                  {streak && (
+                    <StreakBadge streak={streak.current_streak} best={streak.best_streak} size="sm" showBest />
+                  )}
                 </div>
               </div>
             </div>
@@ -329,13 +333,16 @@ const Profile = () => {
             </motion.div>
           )}
 
+          {/* Season Banner */}
+          <SeasonBanner />
+
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Played", value: profileData.games_played, icon: Swords },
               { label: "Won", value: profileData.games_won, icon: Trophy },
               { label: "Win Rate", value: `${winRate}%`, icon: TrendingUp },
-              { label: "Drawn", value: profileData.games_drawn, icon: Swords },
+              { label: "Best Streak", value: streak?.best_streak ?? 0, icon: Trophy },
             ].map(stat => (
               <div key={stat.label} className="rounded-xl border border-border/50 bg-card/80 p-3 text-center">
                 <stat.icon className="h-4 w-4 mx-auto mb-1 text-primary" />
@@ -345,43 +352,14 @@ const Profile = () => {
             ))}
           </div>
 
-          {/* Badges */}
-          {earnedBadges.length > 0 && (
-            <div className="rounded-xl border border-border/50 bg-card/80 p-5">
-              <h3 className="font-display text-sm font-semibold text-foreground mb-3">Badges</h3>
-              <div className="flex flex-wrap gap-2">
-                {earnedBadges.map(b => (
-                  <Badge key={b.key} variant="outline" className="text-sm gap-1.5 px-3 py-1">
-                    {b.icon} {b.label}
-                  </Badge>
-                ))}
-              </div>
-              {/* Progress to next badges */}
-              <div className="mt-4 space-y-2">
-                {BADGES.filter(b => !b.condition(profileData)).slice(0, 2).map(b => {
-                  let progress = 0;
-                  let target = 0;
-                  let current = 0;
-                  if (b.key === "grinder") { current = profileData.games_played; target = 50; }
-                  else if (b.key === "winner") { current = profileData.games_won; target = 10; }
-                  else if (b.key === "master") { current = profileData.rating; target = 1800; }
-                  else if (b.key === "centurion") { current = profileData.games_played; target = 100; }
-                  else { current = profileData.games_played; target = 1; }
-                  progress = Math.min((current / target) * 100, 100);
-
-                  return (
-                    <div key={b.key}>
-                      <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                        <span>{b.icon} {b.label}</span>
-                        <span>{current}/{target}</span>
-                      </div>
-                      <Progress value={progress} className="h-1.5" />
-                    </div>
-                  );
-                })}
-              </div>
+          {/* Achievement Badges */}
+          <div className="rounded-xl border border-border/50 bg-card/80 p-5">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <h3 className="font-display text-sm font-semibold text-foreground">Achievement Badges</h3>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Earned through ranked play</p>
             </div>
-          )}
+            <BadgeGrid userId={userId!} />
+          </div>
 
           {/* Game History */}
           <div className="rounded-xl border border-border/50 bg-card/80 p-5">
