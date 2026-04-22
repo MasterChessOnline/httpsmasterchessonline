@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Trophy, Clock, Users, Swords, Timer, Crown, Send, Eye, MessageSquare,
-  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame,
+  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -42,7 +42,13 @@ const TournamentLobby = () => {
   const [joining, setJoining] = useState(false);
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState<"standings" | "rounds" | "chat">("standings");
+  const [dismissedBanners, setDismissedBanners] = useState<Record<string, number>>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const currentRound = tournament?.current_round ?? 0;
+  const isReadyDismissed = dismissedBanners.ready === currentRound;
+  const isCompleteDismissed = dismissedBanners.complete === currentRound;
+  const isByeDismissed = dismissedBanners.bye === currentRound;
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -189,35 +195,62 @@ const TournamentLobby = () => {
         </div>
 
         {/* Notification banner for active round */}
-        {isActive && myPairing && !myPairing.result && myPairing.game_id && (
-          <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 mb-6 flex items-center justify-between">
+        {isActive && myPairing && !myPairing.result && myPairing.game_id && !isReadyDismissed && (
+          <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 mb-6 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Zap className="h-5 w-5 text-primary" />
               <span className="text-sm font-medium text-foreground">
                 Round {tournament.current_round} — Your game is ready!
               </span>
             </div>
-            <Button size="sm" onClick={() => navigate(`/play/online?game=${myPairing.game_id}`)}>
-              Play Now <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button size="sm" onClick={() => navigate(`/play/online?game=${myPairing.game_id}`)}>
+                Play Now <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+              <button
+                onClick={() => setDismissedBanners(d => ({ ...d, ready: currentRound }))}
+                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
+                aria-label="Dismiss notification"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         )}
-        {isActive && myPairing && myPairing.result && (
-          <div className="rounded-lg border border-border/50 bg-card p-3 mb-6 flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" />
-            <span className="text-sm text-muted-foreground">
-              Round {tournament.current_round} complete — {
-                myPairing.result === "1-0" && myPairing.white_player_id === user?.id ? "You won! 🎉" :
-                myPairing.result === "0-1" && myPairing.black_player_id === user?.id ? "You won! 🎉" :
-                myPairing.result === "1/2-1/2" ? "Draw" : "You lost"
-              }. Waiting for other games to finish...
-            </span>
+        {isActive && myPairing && myPairing.result && !isCompleteDismissed && (
+          <div className="rounded-lg border border-border/50 bg-card p-3 mb-6 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-primary" />
+              <span className="text-sm text-muted-foreground">
+                Round {tournament.current_round} complete — {
+                  myPairing.result === "1-0" && myPairing.white_player_id === user?.id ? "You won! 🎉" :
+                  myPairing.result === "0-1" && myPairing.black_player_id === user?.id ? "You won! 🎉" :
+                  myPairing.result === "1/2-1/2" ? "Draw" : "You lost"
+                }. Waiting for other games to finish...
+              </span>
+            </div>
+            <button
+              onClick={() => setDismissedBanners(d => ({ ...d, complete: currentRound }))}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors shrink-0"
+              aria-label="Dismiss notification"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
-        {isActive && !myPairing && isRegistered && (
-          <div className="rounded-lg border border-border/50 bg-card p-3 mb-6 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">You have a bye this round. Waiting for next round...</span>
+        {isActive && !myPairing && isRegistered && !isByeDismissed && (
+          <div className="rounded-lg border border-border/50 bg-card p-3 mb-6 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">You have a bye this round. Waiting for next round...</span>
+            </div>
+            <button
+              onClick={() => setDismissedBanners(d => ({ ...d, bye: currentRound }))}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors shrink-0"
+              aria-label="Dismiss notification"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
 
