@@ -79,7 +79,9 @@ export function calculateRatingChange(input: RatingCalcInput): RatingCalcResult 
   return { oldRating: playerRating, newRating, change, expected, actualScore, performanceLabel, k };
 }
 
-/** Apply a bot-game result: updates profiles.bot_rating + bot stats and logs to rating_history. */
+/** Apply a bot-game result: updates profiles.bot_rating + bot stats and logs to rating_history.
+ *  Optionally factors in streak bonus (extra Elo for win streaks) and rating protection
+ *  (reduced loss on losing streaks). Caller passes pre-fetched streak counters. */
 export async function applyBotRatingChange(opts: {
   userId: string;
   currentRating: number;
@@ -87,6 +89,8 @@ export async function applyBotRatingChange(opts: {
   botLabel: string;
   gamesPlayed: number;
   result: GameResult;
+  streakBonus?: number;       // extra rating points for win-streak milestones
+  lossStreak?: number;        // current consecutive losses (for protection calc)
 }): Promise<RatingCalcResult> {
   const calc = calculateRatingChange({
     playerRating: opts.currentRating,
@@ -97,9 +101,27 @@ export async function applyBotRatingChange(opts: {
     difficultyMultiplier: opts.result === "win" && opts.botRating > opts.currentRating ? 1.1 : 1,
   });
 
+  // Apply optional streak bonus (wins) and rating protection (losses).
+  let adjustedChange = calc.change;
+  if (opts.result === "win" && opts.streakBonus && opts.streakBonus > 0) {
+    adjustedChange += opts.streakBonus;
+  }
+  if (opts.result === "loss" && opts.lossStreak && opts.lossStreak >= 3) {
+    const reductionPct = Math.min(0.5, (opts.lossStreak - 2) * 0.075 + 0.075);
+    const protectedChange = Math.round(adjustedChange * (1 - reductionPct));
+    adjustedChange = Math.min(-1, protectedChange);
+  }
+
+  const adjustedNew = Math.max(400, opts.currentRating + adjustedChange);
+  const finalCalc: RatingCalcResult = {
+    ...calc,
+    change: adjustedChange,
+    newRating: adjustedNew,
+  };
+
   // Update profile counters
   const updates: Record<string, any> = {
-    bot_rating: calc.newRating,
+    bot_rating: finalCalc.newRating,
     bot_games_played: opts.gamesPlayed + 1,
   };
   if (opts.result === "win") updates.bot_games_won = (await getBotStat(opts.userId, "bot_games_won")) + 1;
@@ -111,15 +133,15 @@ export async function applyBotRatingChange(opts: {
   await supabase.from("rating_history" as any).insert({
     user_id: opts.userId,
     rating_type: "bot",
-    old_rating: calc.oldRating,
-    new_rating: calc.newRating,
-    rating_change: calc.change,
+    old_rating: finalCalc.oldRating,
+    new_rating: finalCalc.newRating,
+    rating_change: finalCalc.change,
     opponent_rating: opts.botRating,
     opponent_label: opts.botLabel,
     result: opts.result,
   });
 
-  return calc;
+  return finalCalc;
 }
 
 /** Log an online-game rating change to history (online rating itself is updated by the DB function update_elo_ratings). */
