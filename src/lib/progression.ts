@@ -57,7 +57,7 @@ export async function getStreakState(
     .eq("rating_type", ratingType)
     .maybeSingle();
   if (!data) return { current_streak: 0, best_streak: 0, loss_streak: 0, last_result: null };
-  return data as StreakState;
+  return data as unknown as StreakState;
 }
 
 export async function updateStreakState(
