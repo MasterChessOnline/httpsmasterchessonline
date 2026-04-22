@@ -479,6 +479,8 @@ const Play = () => {
     setDrawDeclined(false);
     setPremove(null);
     setBotRatingResult(null);
+    setStreakAfter(null);
+    setUnlockedBadges([]);
     setPlayerMoveQuality([]);
     setBotMoveQuality([]);
     ratingAppliedRef.current = false;
