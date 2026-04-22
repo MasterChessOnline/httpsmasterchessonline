@@ -24,8 +24,11 @@ import { getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-pr
 import { getBotMove, getBotThinkMs, classifyCpLoss, estimateMoveQuality } from "@/lib/bots/bot-engine";
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
+import { getStreakBonus, getStreakState, updateStreakState, evaluateBadges, type BadgeRow, type StreakState } from "@/lib/progression";
 import RatingChange from "@/components/RatingChange";
 import TitleBadge from "@/components/TitleBadge";
+import StreakBadge from "@/components/StreakBadge";
+import BadgeUnlockToast from "@/components/BadgeUnlockToast";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -75,6 +78,8 @@ const Play = () => {
 
   // --- Bot rating tracking ---
   const [botRatingResult, setBotRatingResult] = useState<RatingCalcResult | null>(null);
+  const [streakAfter, setStreakAfter] = useState<StreakState | null>(null);
+  const [unlockedBadges, setUnlockedBadges] = useState<BadgeRow[]>([]);
   const ratingAppliedRef = useRef(false);
 
   // --- Per-move accuracy tracking (player + bot) ---
