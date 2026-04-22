@@ -1077,6 +1077,20 @@ const Play = () => {
             {botRatingResult && mode === "ai" && (
               <RatingChange result={botRatingResult} ratingType="bot" />
             )}
+            {streakAfter && streakAfter.current_streak >= 2 && mode === "ai" && (
+              <div className="rounded-xl border border-border/50 bg-card/70 backdrop-blur-sm p-3 flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Win Streak</p>
+                  <p className="text-sm text-foreground">
+                    On a roll — keep winning for streak bonuses!
+                  </p>
+                </div>
+                <StreakBadge streak={streakAfter.current_streak} best={streakAfter.best_streak} size="lg" />
+              </div>
+            )}
+            {unlockedBadges.length > 0 && mode === "ai" && (
+              <BadgeUnlockToast badges={unlockedBadges} onDismiss={() => setUnlockedBadges([])} />
+            )}
             {isGameOver && gameResult && pgn && mode === "ai" && (
               <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />
             )}
