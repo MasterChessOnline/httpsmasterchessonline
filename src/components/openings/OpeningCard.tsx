@@ -61,8 +61,8 @@ export default function OpeningCard({
         </div>
       </div>
 
-      {/* Description */}
-      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+      {/* Description — fully visible, wraps as needed */}
+      <p className="text-xs text-muted-foreground leading-relaxed mb-3 break-words">
         {opening.description}
       </p>
 

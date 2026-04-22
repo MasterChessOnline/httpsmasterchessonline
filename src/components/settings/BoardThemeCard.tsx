@@ -47,10 +47,10 @@ export default function BoardThemeCard({ theme, active, onSelect }: Props) {
         })}
       </div>
 
-      <p className={`text-xs font-semibold leading-tight ${active ? "text-primary" : "text-foreground"}`}>
+      <p className={`text-xs font-semibold leading-snug break-words ${active ? "text-primary" : "text-foreground"}`}>
         {theme.label}
       </p>
-      <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug truncate">
+      <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug break-words">
         {theme.description}
       </p>
     </button>

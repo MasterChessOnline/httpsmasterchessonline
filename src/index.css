@@ -71,6 +71,16 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     letter-spacing: 0.02em;
+    /* Visibility rule: headings & subheadings must always be fully readable */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+  }
+
+  /* Subheadings & paragraph copy — never overflow horizontally */
+  p, label, .subheading {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 }
 

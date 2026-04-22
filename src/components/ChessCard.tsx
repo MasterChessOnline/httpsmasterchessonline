@@ -44,12 +44,12 @@ function SkillRow({
       {/* hover glow */}
       <div className={`absolute inset-0 bg-gradient-to-r ${c.bar} opacity-0 group-hover:opacity-[0.04] transition-opacity pointer-events-none`} />
 
-      <div className="relative flex items-center justify-between mb-2 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xl leading-none" aria-hidden>{icon}</span>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{label}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{description}</p>
+      <div className="relative flex items-start justify-between mb-2 gap-2">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
+          <span className="text-xl leading-none shrink-0 mt-0.5" aria-hidden>{icon}</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground leading-snug break-words">{label}</p>
+            <p className="text-[10px] text-muted-foreground leading-snug mt-0.5 break-words">{description}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">

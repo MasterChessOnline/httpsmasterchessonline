@@ -208,9 +208,9 @@ export default function Coach() {
                         <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
                           <p.icon className="w-4 h-4 text-primary" />
                         </div>
-                        <div>
-                          <p className="font-medium text-sm leading-tight">{p.label}</p>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.prompt}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm leading-snug break-words">{p.label}</p>
+                          <p className="text-xs text-muted-foreground mt-1 leading-snug break-words">{p.prompt}</p>
                         </div>
                       </div>
                     </button>

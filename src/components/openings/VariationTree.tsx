@@ -138,7 +138,7 @@ function VariationNode({
           <motion.span
             initial={{ opacity: 0, x: -4 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-xs text-muted-foreground ml-1 max-w-[200px] truncate"
+            className="text-xs text-muted-foreground ml-1 leading-snug break-words flex-1 min-w-0"
           >
             {node.explanation}
           </motion.span>

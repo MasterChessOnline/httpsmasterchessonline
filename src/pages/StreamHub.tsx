@@ -232,7 +232,7 @@ export default function StreamHub() {
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <Play className="w-6 h-6 text-white" />
                         </div>
-                        <p className="text-[10px] text-muted-foreground p-1.5 line-clamp-2 leading-tight">{v.title}</p>
+                        <p className="text-[10px] text-muted-foreground p-1.5 leading-snug break-words">{v.title}</p>
                       </a>
                     </button>
                   ))}
