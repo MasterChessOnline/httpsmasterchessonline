@@ -61,6 +61,7 @@ import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
+import Titles from "./pages/Titles";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -80,6 +81,7 @@ function AnimatedRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/play" element={<Play />} />
           <Route path="/play/online" element={<PlayOnline />} />
+          <Route path="/play/titles" element={<Titles />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
