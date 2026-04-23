@@ -158,7 +158,7 @@ const Titles = () => {
             Title Ladder · {mode === "online" ? "Online Play" : "Vs Bots"}
           </h2>
 
-          {TITLES.filter((t) => t.key !== "unranked").map((title, idx) => {
+          {titlesForMode.filter((t) => t.key !== "unranked").map((title, idx) => {
             const earned = currentRating >= title.minRating;
             const isCurrent = title.key === currentTitle.key;
             return (
