@@ -127,21 +127,20 @@ export const TITLES: ChessTitle[] = [
 ];
 
 /**
- * Bot-mode title thresholds — higher than online because bot ratings
- * inflate faster (no human variance, infinite replay). To earn a title vs bots,
- * you need a noticeably bigger rating segment.
+ * Bot-mode title overrides — separate names + higher thresholds.
+ * Online keeps the FIDE-style names; bot mode uses "AI Arena" themed names.
  */
-export const BOT_TITLE_OFFSETS: Record<string, number> = {
-  unranked: 0,
-  soldier: 100,            // 1000 → 1100
-  "tactical-fighter": 100, // 1400 → 1500
-  "position-master": 150,  // 1700 → 1850
-  "mc-cm": 150,            // 1800 → 1950
-  "mc-fm": 150,            // 2000 → 2150
-  "mc-im": 200,            // 2200 → 2400
-  "mc-gm": 200,            // 2400 → 2600
-  "mc-super-gm": 200,      // 2600 → 2800
-  "mc-legend": 200,        // 2800 → 3000
+export const BOT_TITLE_OVERRIDES: Record<string, { label: string; fullName: string; offset: number }> = {
+  unranked:           { label: "Rookie",          fullName: "Bot Arena Rookie",            offset: 0 },
+  soldier:            { label: "Bot Hunter",      fullName: "Bot Hunter",                  offset: 100 },
+  "tactical-fighter": { label: "Circuit Breaker", fullName: "Circuit Breaker",             offset: 100 },
+  "position-master":  { label: "Engine Tamer",    fullName: "Engine Tamer",                offset: 150 },
+  "mc-cm":            { label: "AI Apprentice",   fullName: "AI Arena Apprentice",         offset: 150 },
+  "mc-fm":            { label: "AI Specialist",   fullName: "AI Arena Specialist",         offset: 150 },
+  "mc-im":            { label: "Silicon Slayer",  fullName: "Silicon Slayer",              offset: 200 },
+  "mc-gm":            { label: "Bot Crusher",     fullName: "Bot Arena Grandmaster",       offset: 200 },
+  "mc-super-gm":      { label: "Mainframe King",  fullName: "Mainframe King",              offset: 200 },
+  "mc-legend":        { label: "Singularity",     fullName: "Singularity — Bot Conqueror", offset: 200 },
 };
 
 export type RatingMode = "online" | "bot";
@@ -149,13 +148,21 @@ export type RatingMode = "online" | "bot";
 /** Get the threshold for a title in a given mode. */
 export function getThreshold(title: ChessTitle, mode: RatingMode = "online"): number {
   if (mode === "online") return title.minRating;
-  return title.minRating + (BOT_TITLE_OFFSETS[title.key] ?? 0);
+  return title.minRating + (BOT_TITLE_OVERRIDES[title.key]?.offset ?? 0);
 }
 
-/** TITLES list with thresholds resolved for the requested mode. */
+/** TITLES list with thresholds + names resolved for the requested mode. */
 export function getTitlesForMode(mode: RatingMode = "online"): ChessTitle[] {
   if (mode === "online") return TITLES;
-  return TITLES.map((t) => ({ ...t, minRating: getThreshold(t, "bot") }));
+  return TITLES.map((t) => {
+    const o = BOT_TITLE_OVERRIDES[t.key];
+    return {
+      ...t,
+      label: o?.label ?? t.label,
+      fullName: o?.fullName ?? t.fullName,
+      minRating: t.minRating + (o?.offset ?? 0),
+    };
+  });
 }
 
 /** Highest title earned for a given rating (or current peak). */
