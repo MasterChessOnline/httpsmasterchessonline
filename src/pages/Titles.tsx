@@ -18,7 +18,8 @@ const Titles = () => {
 
   const currentRating = useMemo(() => {
     if (!profile) return 0;
-    return mode === "online" ? profile.rating ?? 0 : profile.bot_rating ?? 0;
+    const p = profile as unknown as { rating?: number; bot_rating?: number };
+    return mode === "online" ? p.rating ?? 0 : p.bot_rating ?? 0;
   }, [mode, profile]);
 
   const currentTitle = getTitle(currentRating);
