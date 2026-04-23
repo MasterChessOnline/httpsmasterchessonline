@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { User, UserPlus, Check, X, Loader2, Swords, Circle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import GameInviteDialog from "@/components/GameInviteDialog";
 
 interface FriendRow {
   id: string;
@@ -25,6 +26,7 @@ const Friends = () => {
   const [friendships, setFriendships] = useState<FriendRow[]>([]);
   const [profiles, setProfiles] = useState<ProfileMap>({});
   const [loading, setLoading] = useState(true);
+  const [inviteTarget, setInviteTarget] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -125,11 +127,13 @@ const Friends = () => {
                       {getName(otherId)}
                     </Link>
                     <span className="font-mono text-sm text-primary">{profiles[otherId]?.rating || 1200}</span>
-                    <Link to="/play">
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-primary hover:bg-primary/10">
-                        <Swords className="h-3 w-3 mr-1" /> Challenge
-                      </Button>
-                    </Link>
+                    <Button
+                      size="sm" variant="ghost"
+                      onClick={() => setInviteTarget({ id: otherId, name: getName(otherId) })}
+                      className="h-7 text-xs text-primary hover:bg-primary/10"
+                    >
+                      <Swords className="h-3 w-3 mr-1" /> Challenge
+                    </Button>
                   </div>
                 );
               })
@@ -152,6 +156,14 @@ const Friends = () => {
         </div>
       </main>
       <Footer />
+      {inviteTarget && (
+        <GameInviteDialog
+          open={!!inviteTarget}
+          onOpenChange={(v) => !v && setInviteTarget(null)}
+          recipientId={inviteTarget.id}
+          recipientName={inviteTarget.name}
+        />
+      )}
     </div>
   );
 };
