@@ -294,7 +294,7 @@ const Navbar = () => {
                           onMouseLeave={handleMouseLeave}
                         >
                           <div
-                            className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-2.5 shrink-0 rounded-t-2xl"
+                            className="px-4 pt-4 pb-3 flex items-center gap-2.5 shrink-0 rounded-t-2xl"
                             style={{
                               background: `linear-gradient(180deg, hsl(220 15% 9%) 0%, hsl(220 15% 9% / 0.96) 100%)`,
                               borderBottom: `1px solid hsla(${section.accent} / 0.2)`,
@@ -308,7 +308,7 @@ const Navbar = () => {
                               {section.label}
                             </span>
                           </div>
-                          <div className="px-2 pb-2.5 flex-1 min-h-0 overflow-y-auto">
+                          <div className="px-2 pb-2.5">
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
