@@ -294,21 +294,21 @@ const Navbar = () => {
                           onMouseLeave={handleMouseLeave}
                         >
                           <div
-                            className="px-4 pt-4 pb-3 flex items-center gap-2.5 shrink-0 rounded-t-2xl"
+                            className="px-3 pt-3 pb-2 flex items-center gap-2 shrink-0 rounded-t-2xl"
                             style={{
                               background: `linear-gradient(180deg, hsl(220 15% 9%) 0%, hsl(220 15% 9% / 0.96) 100%)`,
                               borderBottom: `1px solid hsla(${section.accent} / 0.2)`,
                               boxShadow: `0 2px 0 hsla(${section.accent} / 0.35)`,
                             }}
                           >
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `hsla(${section.accent} / 0.18)`, border: `1px solid hsla(${section.accent} / 0.3)` }}>
-                              <section.icon className="h-4 w-4" style={{ color: accentColor }} />
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `hsla(${section.accent} / 0.18)`, border: `1px solid hsla(${section.accent} / 0.3)` }}>
+                              <section.icon className="h-3.5 w-3.5" style={{ color: accentColor }} />
                             </div>
-                            <span className="text-sm font-bold uppercase tracking-[0.18em] leading-none whitespace-nowrap" style={{ color: accentColor, textShadow: `0 0 12px hsla(${section.accent} / 0.4)` }}>
+                            <span className="text-xs font-bold uppercase tracking-[0.15em] leading-none whitespace-nowrap" style={{ color: accentColor, textShadow: `0 0 12px hsla(${section.accent} / 0.4)` }}>
                               {section.label}
                             </span>
                           </div>
-                          <div className="px-2 pb-2.5">
+                          <div className="px-1.5 pb-1.5">
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
@@ -316,18 +316,18 @@ const Navbar = () => {
                                 return (
                                   <div key={item.label}>
                                     {item.separator && idx > 0 && (
-                                      <div className="mx-3 my-2 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
+                                      <div className="mx-2 my-1.5 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[10px] uppercase tracking-[0.15em] font-bold px-3.5 pt-2 pb-1" style={{ color: `hsla(${section.accent} / 0.5)` }}>
+                                      <p className="text-[9px] uppercase tracking-[0.12em] font-bold px-3 pt-1.5 pb-0.5" style={{ color: `hsla(${section.accent} / 0.5)` }}>
                                         {item.subheading}
                                       </p>
                                     )}
                                     <Link
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                                      className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group/item"
+                                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item"
                                       style={{
-                                        backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.accent} / 0.08)` : undefined,
+                                        backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.acgot} / 0.08)` : undefined,
                                         border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
                                       }}
                                       onMouseEnter={(e) => {
@@ -338,31 +338,34 @@ const Navbar = () => {
                                       }}
                                     >
                                       <div
-                                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200"
+                                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200"
                                         style={{ backgroundColor: item.highlight || itemActive ? `hsla(${section.accent} / 0.2)` : `hsla(${section.accent} / 0.08)` }}
                                       >
-                                        <item.icon className="h-4 w-4 transition-colors duration-200" style={{ color: item.highlight || itemActive || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.6)` }} />
+                                        <item.icon className="h-3.5 w-3.5 transition-colors duration-200" style={{ color: item.highlight || itemActive || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.6)` }} />
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                          <p className="text-[13px] font-medium leading-tight" style={{ color: item.highlight ? accentColor : item.comingSoon ? "hsl(var(--foreground) / 0.6)" : "hsl(var(--foreground))" }}>
+                                          <p className="text-xs font-medium leading-tight" style={{ color: item.highlight ? accentColor : item.comingSoon ? "hsl(var(--foreground) / 0.6)" : "hsl(var(--foreground))" }}>
                                             {item.label}
                                           </p>
                                           {item.highlight && (
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ backgroundColor: `hsla(${section.accent} / 0.25)`, color: accentColor }}>⚡ GO</span>
+                                            <span className="text-[8px] px-1 py-0.5 rounded-full font-bold" style={{ backgroundColor: `hsla(${section.accent} / 0.25)`, color: accentColor }}>GO</span>
                                           )}
                                           {item.comingSoon && (
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold tracking-wide" style={{ backgroundColor: `hsla(${section.accent} / 0.2)`, color: accentColor }}>SOON</span>
+                                            <span className="text-[8px] px-1 py-0.5 rounded-full font-bold tracking-wide" style={{ backgroundColor: `hsla(${section.accent} / 0.2)`, color: accentColor }}>SOON</span>
                                           )}
                                         </div>
-                                        <p className="text-[11px] text-muted-foreground/60 leading-tight mt-0.5">{item.desc}</p>
+                                        <p className="text-[10px] text-muted-foreground/60 leading-tight mt-0.5">{item.desc}</p>
                                       </div>
-                                      {item.comingSoon && <Lock className="h-3.5 w-3.5 shrink-0" style={{ color: `hsla(${section.accent} / 0.4)` }} />}
+                                      {item.comingSoon && <Lock className="h-3 w-3 shrink-0" style={{ color: `hsla(${section.accent} / 0.4)` }} />}
                                     </Link>
                                   </div>
                                 );
                               })}
                           </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                         </motion.div>
                       )}
                     </AnimatePresence>
