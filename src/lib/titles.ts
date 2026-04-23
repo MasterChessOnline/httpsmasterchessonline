@@ -133,15 +133,15 @@ export const TITLES: ChessTitle[] = [
  */
 export const BOT_TITLE_OFFSETS: Record<string, number> = {
   unranked: 0,
-  soldier: 200,            // 1000 → 1200
-  "tactical-fighter": 300, // 1400 → 1700
-  "position-master": 400,  // 1700 → 2100
-  "mc-cm": 400,            // 1800 → 2200
-  "mc-fm": 500,            // 2000 → 2500
-  "mc-im": 500,            // 2200 → 2700
-  "mc-gm": 600,            // 2400 → 3000
-  "mc-super-gm": 600,      // 2600 → 3200
-  "mc-legend": 700,        // 2800 → 3500
+  soldier: 100,            // 1000 → 1100
+  "tactical-fighter": 100, // 1400 → 1500
+  "position-master": 150,  // 1700 → 1850
+  "mc-cm": 150,            // 1800 → 1950
+  "mc-fm": 150,            // 2000 → 2150
+  "mc-im": 200,            // 2200 → 2400
+  "mc-gm": 200,            // 2400 → 2600
+  "mc-super-gm": 200,      // 2600 → 2800
+  "mc-legend": 200,        // 2800 → 3000
 };
 
 export type RatingMode = "online" | "bot";
