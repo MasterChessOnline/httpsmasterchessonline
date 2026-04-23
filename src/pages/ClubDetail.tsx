@@ -55,7 +55,7 @@ const ClubDetail = () => {
       const { data: c } = await supabase.from("clubs" as any).select("*").eq("id", clubId).maybeSingle();
       if (!mounted) return;
       if (!c) { setLoading(false); return; }
-      setClub(c as Club);
+      setClub((c as unknown) as Club);
 
       const { data: mem } = await supabase
         .from("club_members" as any)
@@ -89,7 +89,7 @@ const ClubDetail = () => {
         .order("created_at", { ascending: true })
         .limit(200);
       if (!mounted) return;
-      const rows = (data as ClubMsg[]) || [];
+      const rows = ((data as unknown) as ClubMsg[]) || [];
       // Hydrate sender info
       const ids = Array.from(new Set(rows.map(r => r.user_id)));
       const { data: profs } = ids.length

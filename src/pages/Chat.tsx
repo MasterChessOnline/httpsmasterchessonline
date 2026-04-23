@@ -86,7 +86,7 @@ const Chat = () => {
         .order("created_at", { ascending: true })
         .limit(200);
       if (!mounted) return;
-      setMessages((data as DM[]) || []);
+      setMessages(((data as unknown) as DM[]) || []);
 
       // Mark unread from this friend as read
       await supabase

@@ -40,7 +40,7 @@ const Clubs = () => {
       .from("clubs" as any)
       .select("*")
       .order("member_count", { ascending: false });
-    setClubs((cl as Club[]) || []);
+    setClubs(((cl as unknown) as Club[]) || []);
 
     if (user) {
       const { data: mine } = await supabase
