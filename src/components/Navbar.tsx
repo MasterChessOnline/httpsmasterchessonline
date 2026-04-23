@@ -295,14 +295,19 @@ const Navbar = () => {
                           onMouseLeave={handleMouseLeave}
                         >
                           <div
-                            className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
-                            style={{ background: `linear-gradient(90deg, transparent 5%, hsla(${section.accent} / 0.6) 50%, transparent 95%)` }}
-                          />
-                          <div className="px-4 pt-3.5 pb-2 flex items-center gap-2.5 shrink-0">
-                            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}>
+                            className="sticky top-0 z-10 px-4 pt-4 pb-3 flex items-center gap-2.5 shrink-0 rounded-t-2xl"
+                            style={{
+                              background: `linear-gradient(180deg, hsl(220 15% 9%) 0%, hsl(220 15% 9% / 0.96) 100%)`,
+                              borderBottom: `1px solid hsla(${section.accent} / 0.2)`,
+                              boxShadow: `0 2px 0 hsla(${section.accent} / 0.35)`,
+                            }}
+                          >
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `hsla(${section.accent} / 0.18)`, border: `1px solid hsla(${section.accent} / 0.3)` }}>
                               <section.icon className="h-4 w-4" style={{ color: accentColor }} />
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: accentColor }}>{section.label}</span>
+                            <span className="text-sm font-bold uppercase tracking-[0.18em] leading-none whitespace-nowrap" style={{ color: accentColor, textShadow: `0 0 12px hsla(${section.accent} / 0.4)` }}>
+                              {section.label}
+                            </span>
                           </div>
                           <div className="px-2 pb-2.5 flex-1 min-h-0 overflow-y-auto">
                             {section.items
