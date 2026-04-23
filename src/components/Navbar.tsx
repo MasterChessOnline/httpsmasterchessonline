@@ -107,8 +107,8 @@ const NAV_SECTIONS: NavSection[] = [
     key: "profile",
     label: "Profile",
     icon: User,
-    accent: "350 89% 60%",
-    accentRgb: "244,63,94",
+    accent: "190 95% 55%",
+    accentRgb: "34,211,238",
     items: [
       { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true },
       { label: "Chess Card", href: "/chess-card", icon: Sparkles, desc: "Your skill profile & compare", auth: true, highlight: true },
