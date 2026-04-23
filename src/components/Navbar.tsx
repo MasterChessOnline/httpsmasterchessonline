@@ -188,7 +188,7 @@ const Navbar = () => {
   };
 
   const handleMouseLeave = () => {
-    dropdownTimeout.current = setTimeout(() => setActiveDropdown(null), 250);
+    dropdownTimeout.current = setTimeout(() => setActiveDropdown(null), 420);
   };
 
   return (
