@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { TITLES, getTitle, getNextTitle } from "@/lib/titles";
+import { getTitle, getNextTitle, getTitlesForMode } from "@/lib/titles";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bot, Globe, Lock, Check, Trophy, Crown, Sparkles, ArrowLeft } from "lucide-react";
 
@@ -22,9 +22,10 @@ const Titles = () => {
     return mode === "online" ? p.rating ?? 0 : p.bot_rating ?? 0;
   }, [mode, profile]);
 
-  const currentTitle = getTitle(currentRating);
-  const nextTitle = getNextTitle(currentRating);
+  const currentTitle = getTitle(currentRating, mode);
+  const nextTitle = getNextTitle(currentRating, mode);
   const ratingToNext = nextTitle ? Math.max(0, nextTitle.minRating - currentRating) : 0;
+  const titlesForMode = useMemo(() => getTitlesForMode(mode), [mode]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -157,7 +158,7 @@ const Titles = () => {
             Title Ladder · {mode === "online" ? "Online Play" : "Vs Bots"}
           </h2>
 
-          {TITLES.filter((t) => t.key !== "unranked").map((title, idx) => {
+          {titlesForMode.filter((t) => t.key !== "unranked").map((title, idx) => {
             const earned = currentRating >= title.minRating;
             const isCurrent = title.key === currentTitle.key;
             return (

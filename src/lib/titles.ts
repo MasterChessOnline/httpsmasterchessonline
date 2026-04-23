@@ -126,26 +126,60 @@ export const TITLES: ChessTitle[] = [
   },
 ];
 
+/**
+ * Bot-mode title thresholds — higher than online because bot ratings
+ * inflate faster (no human variance, infinite replay). To earn a title vs bots,
+ * you need a noticeably bigger rating segment.
+ */
+export const BOT_TITLE_OFFSETS: Record<string, number> = {
+  unranked: 0,
+  soldier: 200,            // 1000 → 1200
+  "tactical-fighter": 300, // 1400 → 1700
+  "position-master": 400,  // 1700 → 2100
+  "mc-cm": 400,            // 1800 → 2200
+  "mc-fm": 500,            // 2000 → 2500
+  "mc-im": 500,            // 2200 → 2700
+  "mc-gm": 600,            // 2400 → 3000
+  "mc-super-gm": 600,      // 2600 → 3200
+  "mc-legend": 700,        // 2800 → 3500
+};
+
+export type RatingMode = "online" | "bot";
+
+/** Get the threshold for a title in a given mode. */
+export function getThreshold(title: ChessTitle, mode: RatingMode = "online"): number {
+  if (mode === "online") return title.minRating;
+  return title.minRating + (BOT_TITLE_OFFSETS[title.key] ?? 0);
+}
+
+/** TITLES list with thresholds resolved for the requested mode. */
+export function getTitlesForMode(mode: RatingMode = "online"): ChessTitle[] {
+  if (mode === "online") return TITLES;
+  return TITLES.map((t) => ({ ...t, minRating: getThreshold(t, "bot") }));
+}
+
 /** Highest title earned for a given rating (or current peak). */
-export function getTitle(rating: number): ChessTitle {
-  let earned: ChessTitle = TITLES[0];
-  for (const t of TITLES) {
+export function getTitle(rating: number, mode: RatingMode = "online"): ChessTitle {
+  const list = getTitlesForMode(mode);
+  let earned: ChessTitle = list[0];
+  for (const t of list) {
     if (rating >= t.minRating) earned = t;
   }
   return earned;
 }
 
 /** Title that comes after the one currently held (for progress display). */
-export function getNextTitle(rating: number): ChessTitle | null {
-  const current = getTitle(rating);
-  const idx = TITLES.indexOf(current);
-  return idx < TITLES.length - 1 ? TITLES[idx + 1] : null;
+export function getNextTitle(rating: number, mode: RatingMode = "online"): ChessTitle | null {
+  const list = getTitlesForMode(mode);
+  const current = getTitle(rating, mode);
+  const idx = list.findIndex((t) => t.key === current.key);
+  return idx >= 0 && idx < list.length - 1 ? list[idx + 1] : null;
 }
 
 /** Progress (0..100) toward the next title. */
-export function getTitleProgress(rating: number): number {
-  const current = getTitle(rating);
-  const next = getNextTitle(rating);
+export function getTitleProgress(rating: number, mode: RatingMode = "online"): number {
+  const current = getTitle(rating, mode);
+  const next = getNextTitle(rating, mode);
   if (!next) return 100;
   const span = next.minRating - current.minRating;
   if (span <= 0) return 100;
