@@ -327,7 +327,7 @@ const Navbar = () => {
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
                                       className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item"
                                       style={{
-                                        backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.acgot} / 0.08)` : undefined,
+                                        backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.accent} / 0.08)` : undefined,
                                         border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
                                       }}
                                       onMouseEnter={(e) => {
