@@ -642,7 +642,7 @@ const Play = () => {
       <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
         <Navbar />
         <main className="container mx-auto px-4 pt-24 pb-16 flex flex-col items-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">
             <Badge className="bg-primary/20 text-primary border-primary/30 text-xs mb-3">
               <Swords className="w-3 h-3 mr-1" /> Play Chess
             </Badge>
@@ -651,6 +651,19 @@ const Play = () => {
             </h1>
             <p className="text-muted-foreground text-sm">Choose your side, pick any bot, and play by full chess rules.</p>
           </motion.div>
+
+          {/* Titles shortcut */}
+          <Link to="/play/titles" className="mb-8 group">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent backdrop-blur-sm hover:border-primary/50 transition-all"
+            >
+              <Trophy className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-foreground">View Titles & Rating Thresholds</span>
+              <span className="text-[10px] uppercase tracking-wider text-primary font-bold border border-primary/30 px-2 py-0.5 rounded-full">Bot · Online</span>
+            </motion.div>
+          </Link>
 
           {/* Time control selector */}
           <div className="mb-6 w-full max-w-md">
