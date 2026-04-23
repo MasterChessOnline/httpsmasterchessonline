@@ -474,27 +474,7 @@ const Navbar = () => {
               transition={{ duration: 0.3 }}
               className="hidden md:block border-b border-border/10 bg-[hsl(220,15%,5%)/0.7] backdrop-blur-xl"
             >
-              <div className="container mx-auto px-5 h-6 flex items-center justify-between text-[10.5px] font-medium tracking-wide">
-                <div className="flex items-center gap-5">
-                  <span className="flex items-center gap-1.5 text-muted-foreground/80">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    </span>
-                    <span className="text-foreground/85">{onlineCount.toLocaleString()}</span>
-                    <span className="text-muted-foreground/60">online</span>
-                  </span>
-                  <span className="hidden sm:flex items-center gap-1.5 text-muted-foreground/80">
-                    <Gamepad2 className="h-2.5 w-2.5 text-primary/70" />
-                    <span className="text-foreground/85">{liveGames.toLocaleString()}</span>
-                    <span className="text-muted-foreground/60">live games</span>
-                  </span>
-                  <span className="hidden md:flex items-center gap-1.5 text-muted-foreground/80">
-                    <Trophy className="h-2.5 w-2.5 text-amber-400/80" />
-                    <span className="text-foreground/85">{activeTournaments}</span>
-                    <span className="text-muted-foreground/60">tournaments</span>
-                  </span>
-                </div>
+              <div className="container mx-auto px-5 h-6 flex items-center justify-end text-[10.5px] font-medium tracking-wide">
                 <Link to="/live" className="hidden sm:flex items-center gap-1.5 text-muted-foreground/70 hover:text-foreground transition-colors">
                   <Radio className="h-2.5 w-2.5 text-rose-400" />
                   <span>DailyChess_12 live</span>
