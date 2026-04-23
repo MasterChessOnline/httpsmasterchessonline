@@ -95,6 +95,109 @@ export type Database = {
         }
         Relationships: []
       }
+      club_members: {
+        Row: {
+          club_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_messages: {
+        Row: {
+          club_id: string
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_messages_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clubs: {
+        Row: {
+          avg_rating: number
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_public: boolean
+          member_count: number
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          avg_rating?: number
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_public?: boolean
+          member_count?: number
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          avg_rating?: number
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_public?: boolean
+          member_count?: number
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       community_posts: {
         Row: {
           comments_count: number
@@ -166,6 +269,33 @@ export type Database = {
           id?: string
           message?: string
           name?: string
+        }
+        Relationships: []
+      }
+      direct_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
@@ -334,6 +464,54 @@ export type Database = {
           id?: string
           status?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      game_invites: {
+        Row: {
+          created_at: string
+          expires_at: string
+          game_id: string | null
+          id: string
+          is_rated: boolean
+          message: string | null
+          recipient_id: string
+          responded_at: string | null
+          sender_id: string
+          status: string
+          time_control_increment: number
+          time_control_label: string
+          time_control_seconds: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          game_id?: string | null
+          id?: string
+          is_rated?: boolean
+          message?: string | null
+          recipient_id: string
+          responded_at?: string | null
+          sender_id: string
+          status?: string
+          time_control_increment?: number
+          time_control_label?: string
+          time_control_seconds?: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          game_id?: string | null
+          id?: string
+          is_rated?: boolean
+          message?: string | null
+          recipient_id?: string
+          responded_at?: string | null
+          sender_id?: string
+          status?: string
+          time_control_increment?: number
+          time_control_label?: string
+          time_control_seconds?: number
         }
         Relationships: []
       }
@@ -1433,6 +1611,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1441,11 +1620,16 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_club_role: { Args: { _club: string; _user: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_club_member: {
+        Args: { _club: string; _user: string }
         Returns: boolean
       }
       move_to_dlq: {

@@ -46,6 +46,7 @@ import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 import Chat from "./pages/Chat";
 import Clubs from "./pages/Clubs";
+import ClubDetail from "./pages/ClubDetail";
 import GameReview from "./pages/GameReview";
 import Spectate from "./pages/Spectate";
 import GuessTheMove from "./pages/GuessTheMove";
@@ -61,6 +62,7 @@ import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
+import GameInviteListener from "@/components/GameInviteListener";
 import Titles from "./pages/Titles";
 const queryClient = new QueryClient();
 
@@ -105,6 +107,7 @@ function AnimatedRoutes() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/clubs" element={<Clubs />} />
+          <Route path="/clubs/:id" element={<ClubDetail />} />
           <Route path="/game-review" element={<GameReview />} />
           <Route path="/spectate" element={<Spectate />} />
           <Route path="/guess-the-move" element={<GuessTheMove />} />
@@ -148,6 +151,7 @@ const App = () => (
             </div>
             <AntiTiltWatcher />
             <TitleUnlockGate />
+            <GameInviteListener />
             <MobileBottomNav />
           </Suspense>
         </BrowserRouter>
