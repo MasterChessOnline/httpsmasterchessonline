@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { TITLES, getTitle, getNextTitle } from "@/lib/titles";
+import { getTitle, getNextTitle, getTitlesForMode } from "@/lib/titles";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bot, Globe, Lock, Check, Trophy, Crown, Sparkles, ArrowLeft } from "lucide-react";
 
