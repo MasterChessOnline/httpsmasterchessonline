@@ -84,14 +84,19 @@ for (const lesson of todo) {
     continue;
   }
   const startFen = lesson.fen || pos.fen;
-  const validMoves = validate(startFen, pos.moves);
-  // If validation fails for FEN provided by lesson but pos has its own, fall back
-  if (validMoves.length < pos.moves.length && pos.fen !== startFen) {
+  let validMoves = validate(startFen, pos.moves);
+  let usedFen = startFen;
+  // If start FEN is invalid or moves don't all play, fall back to library FEN
+  if ((validMoves === null || validMoves.length < pos.moves.length) && pos.fen !== startFen) {
     const v2 = validate(pos.fen, pos.moves);
-    allEntries.push({ lesson, startFen: pos.fen, moves: v2, source });
-  } else {
-    allEntries.push({ lesson, startFen, moves: validMoves, source });
+    if (v2 !== null) { validMoves = v2; usedFen = pos.fen; }
   }
+  if (validMoves === null) {
+    // Both FENs failed; use starting position
+    validMoves = [];
+    usedFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  }
+  allEntries.push({ lesson, startFen: usedFen, moves: validMoves, source });
   if (source === 'matched') stats.matched++;
   else stats.fallback++;
 }
