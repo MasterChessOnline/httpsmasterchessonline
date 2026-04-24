@@ -295,9 +295,11 @@ const ClubDetail = () => {
               <div className="space-y-1.5">
                 {members.map(m => (
                   <div key={m.user_id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/30 transition-colors">
-                    <div className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-xs font-bold overflow-hidden">
-                      {m.avatar_url ? <img src={m.avatar_url} className="h-full w-full object-cover" alt="" /> : (m.display_name || "?")[0]?.toUpperCase()}
-                    </div>
+                    <UserAvatar
+                      userId={m.user_id}
+                      fallbackName={m.display_name || "?"}
+                      className="h-8 w-8 text-xs"
+                    />
                     <Link to={`/profile/${m.user_id}`} className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground hover:text-primary truncate">{m.display_name || m.username || "Player"}</p>
                       <p className="text-[10px] text-muted-foreground font-mono">{m.rating} ELO</p>
