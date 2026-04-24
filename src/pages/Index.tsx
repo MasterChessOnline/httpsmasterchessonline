@@ -107,6 +107,101 @@ const PreferenceToggles = () => {
   );
 };
 
+/* ── HERO BOARD — large, clean, the heart of the homepage ── */
+const HERO_PIECES: Record<string, string> = {
+  K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
+  k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
+};
+const HERO_INITIAL = [
+  ["r","n","b","q","k","b","n","r"],
+  ["p","p","p","p","p","p","p","p"],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["P","P","P","P","P","P","P","P"],
+  ["R","N","B","Q","K","B","N","R"],
+];
+// Italian Game opening — calm, classic
+const HERO_MOVES = [
+  { from: [6,4], to: [4,4] }, // e4
+  { from: [1,4], to: [3,4] }, // e5
+  { from: [7,6], to: [5,5] }, // Nf3
+  { from: [0,1], to: [2,2] }, // Nc6
+  { from: [7,5], to: [4,2] }, // Bc4
+  { from: [0,6], to: [2,5] }, // Nf6
+];
+
+const HeroBoard = () => {
+  const [board, setBoard] = useState(HERO_INITIAL);
+  const [moveIdx, setMoveIdx] = useState(0);
+  const [lastMove, setLastMove] = useState<{ from: number[]; to: number[] } | null>(null);
+
+  useEffect(() => {
+    if (moveIdx >= HERO_MOVES.length) {
+      const reset = setTimeout(() => {
+        setBoard(HERO_INITIAL);
+        setLastMove(null);
+        setMoveIdx(0);
+      }, 4000);
+      return () => clearTimeout(reset);
+    }
+    const timeout = setTimeout(() => {
+      const move = HERO_MOVES[moveIdx];
+      setBoard(prev => {
+        const next = prev.map(row => [...row]);
+        next[move.to[0]][move.to[1]] = next[move.from[0]][move.from[1]];
+        next[move.from[0]][move.from[1]] = "";
+        return next;
+      });
+      setLastMove(move);
+      setMoveIdx(i => i + 1);
+    }, moveIdx === 0 ? 1200 : 1400);
+    return () => clearTimeout(timeout);
+  }, [moveIdx]);
+
+  return (
+    <div className="grid grid-cols-8 w-full h-full">
+      {board.flatMap((row, r) =>
+        row.map((piece, c) => {
+          const isLight = (r + c) % 2 === 0;
+          const isLastFrom = lastMove?.from[0] === r && lastMove?.from[1] === c;
+          const isLastTo = lastMove?.to[0] === r && lastMove?.to[1] === c;
+          return (
+            <div
+              key={`${r}-${c}`}
+              className={`relative aspect-square flex items-center justify-center select-none ${
+                isLight ? "bg-board-light" : "bg-board-dark"
+              }`}
+            >
+              {(isLastFrom || isLastTo) && (
+                <motion.div
+                  className="absolute inset-0 bg-primary/25"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.25 }}
+                />
+              )}
+              {piece && (
+                <motion.span
+                  key={`${piece}-${r}-${c}`}
+                  className="relative z-10 text-3xl sm:text-4xl md:text-5xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                  layout
+                >
+                  {HERO_PIECES[piece]}
+                </motion.span>
+              )}
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+};
+
 const Index = () => {
   const { user, profile } = useAuth();
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
@@ -159,123 +254,156 @@ const Index = () => {
       <DynamicBackground />
       <Navbar />
 
-      {/* ── HERO with parallax + 4D depth ── */}
-      <div ref={heroRef} className="relative pt-16 sm:pt-24 pb-16 px-4 overflow-hidden min-h-[45vh]">
-        <motion.div className="absolute inset-0" style={{ y: imgY, scale: heroScale }}>
+      {/* ── HERO — chessboard-centered, minimal & spacious ── */}
+      <div ref={heroRef} className="relative pt-20 sm:pt-28 pb-20 px-6 overflow-hidden">
+        {/* Subtle ambient backdrop — supports the board, never competes */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{ y: imgY, scale: heroScale, opacity: 0.35 }}
+        >
           <img
             src={heroImage}
-            alt="Chess board"
-            className="absolute inset-0 w-full h-[120%] object-cover"
-            style={{ filter: "brightness(0.15) saturate(0.7)" }}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ filter: "brightness(0.08) saturate(0.4) blur(2px)" }}
             loading="eager"
           />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
-        {/* Scan-line futuristic overlay */}
-        <div className="absolute inset-0 scan-line pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/85 to-background pointer-events-none" />
+        {/* Soft golden glow behind the board */}
+        <div className="absolute top-1/2 right-[15%] -translate-y-1/2 w-[520px] h-[520px] rounded-full bg-primary/[0.06] blur-[140px] pointer-events-none hidden lg:block" />
 
-        <motion.div className="container mx-auto max-w-4xl text-center relative z-10 pt-8" style={{ opacity: heroOpacity }}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          >
+        <motion.div
+          className="container mx-auto max-w-6xl relative z-10"
+          style={{ opacity: heroOpacity }}
+        >
+          <div className="grid lg:grid-cols-[1fr_1.05fr] gap-12 lg:gap-20 items-center">
+
+            {/* LEFT — text & CTAs (clean, lots of breathing room) */}
             <motion.div
-              className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5 animate-glow-pulse"
-              style={{ background: 'linear-gradient(135deg, hsl(43 90% 55% / 0.15), hsl(30 60% 40% / 0.1))', border: '1px solid hsl(43 90% 55% / 0.2)' }}
-              whileHover={{ scale: 1.1, rotate: 5 }}
+              className="text-center lg:text-left order-2 lg:order-1"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Crown className="h-7 w-7 text-primary" />
+              <motion.div
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 mb-6"
+                whileHover={{ scale: 1.03 }}
+              >
+                <Crown className="h-3.5 w-3.5 text-primary" />
+                <span className="text-[11px] font-medium tracking-wider uppercase text-primary/90">
+                  MasterChess
+                </span>
+              </motion.div>
+
+              <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold mb-5 tracking-tight leading-[1.05]">
+                <span className="block text-foreground">Where every</span>
+                <span className="block text-gradient-gold">move matters.</span>
+              </h1>
+              <p className="text-muted-foreground text-base sm:text-lg max-w-md mx-auto lg:mx-0 mb-10 font-light leading-relaxed">
+                A calm, modern home for chess — play, learn, and compete on a board built for long, comfortable games.
+              </p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                className="flex flex-col sm:flex-row items-center lg:items-start lg:justify-start justify-center gap-3"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.6 }}
+              >
+                <Link to="/play/online">
+                  <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                    <Button
+                      size="lg"
+                      className="h-12 px-8 text-sm font-semibold tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 rounded-full shadow-glow-lg transition-all duration-300"
+                    >
+                      <Play className="h-4 w-4 mr-2" />
+                      Play Online
+                    </Button>
+                  </motion.div>
+                </Link>
+                <Link to="/play">
+                  <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                    <Button
+                      size="lg"
+                      variant="ghost"
+                      className="h-12 px-8 text-sm font-semibold tracking-wide text-foreground hover:bg-muted/30 rounded-full transition-all duration-300"
+                    >
+                      <Swords className="h-4 w-4 mr-2" />
+                      Play vs AI
+                    </Button>
+                  </motion.div>
+                </Link>
+              </motion.div>
+
+              {/* Quick links — subtle text row */}
+              <motion.div
+                className="flex justify-center lg:justify-start gap-6 mt-10"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+              >
+                {[
+                  { to: "/learn", icon: Brain, label: "Training" },
+                  { to: "/analysis", icon: Eye, label: "Analysis" },
+                  { to: "/tournaments", icon: Trophy, label: "Compete" },
+                ].map(item => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="group inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <item.icon className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                    {item.label}
+                  </Link>
+                ))}
+              </motion.div>
+
+              {/* Invite friends — masterchess.live */}
+              <motion.div
+                className="mt-8 flex justify-center lg:justify-start"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.65 }}
+              >
+                <button
+                  onClick={() => setInviteOpen(true)}
+                  className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-primary/25 bg-primary/[0.04] hover:bg-primary/10 hover:border-primary/50 transition-all"
+                  aria-label="Invite friends to masterchess.live"
+                >
+                  <Crown className="h-3.5 w-3.5 text-primary group-hover:rotate-6 transition-transform" />
+                  <span className="text-xs font-medium tracking-wide text-foreground">
+                    Invite friends
+                  </span>
+                  <span className="text-xs font-mono text-primary/80">
+                    masterchess.live
+                  </span>
+                </button>
+              </motion.div>
             </motion.div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-3 tracking-tight uppercase">
-              <span className="text-gradient-gold">Master</span>
-              <span className="text-foreground">Chess</span>
-            </h1>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 font-light tracking-wide">
-              Play, learn, and compete — your next great game starts here
-            </p>
-          </motion.div>
-
-          {/* CTA Buttons with ripple + glow */}
-          <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <Link to="/play/online">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-                <Button
-                  size="lg"
-                  className="ripple-btn h-12 px-8 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_40px_hsl(43_90%_55%/0.4)] transition-all duration-300"
-                >
-                  <Play className="h-5 w-5 mr-2" />
-                  Play Online
-                </Button>
-              </motion.div>
-            </Link>
-            <Link to="/play">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="ripple-btn h-12 px-8 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
-                >
-                  <Swords className="h-5 w-5 mr-2" />
-                  Play vs AI
-                </Button>
-              </motion.div>
-            </Link>
-          </motion.div>
-
-          {/* Quick Actions with hover lift */}
-          <motion.div
-            className="flex justify-center gap-3 sm:gap-4 mt-8"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            {[
-              { to: "/learn", icon: Brain, label: "Training" },
-              { to: "/analysis", icon: Eye, label: "Analysis" },
-              { to: "/tournaments", icon: Trophy, label: "Compete" },
-            ].map(item => (
-              <Link key={item.to} to={item.to}>
-                <motion.div
-                  className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border border-border/20 glass-4d group"
-                  whileHover={{ y: -4, scale: 1.05 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
-                  <item.icon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.label}</span>
-                </motion.div>
-              </Link>
-            ))}
-          </motion.div>
-
-          {/* Invite friends — masterchess.live */}
-          <motion.div
-            className="mt-8 flex justify-center"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <button
-              onClick={() => setInviteOpen(true)}
-              className="group inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 hover:from-primary/20 hover:to-primary/20 hover:border-primary/60 backdrop-blur-md transition-all shadow-glow"
-              aria-label="Invite friends to masterchess.live"
+            {/* RIGHT — the chessboard, the heart of the page */}
+            <motion.div
+              className="order-1 lg:order-2 flex justify-center lg:justify-end"
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             >
-              <Crown className="h-4 w-4 text-primary group-hover:scale-110 group-hover:rotate-6 transition-transform" />
-              <span className="text-xs sm:text-sm font-display uppercase tracking-widest text-foreground">
-                Invite friends
-              </span>
-              <span className="hidden sm:inline text-xs font-mono text-primary/90">
-                masterchess.live
-              </span>
-            </button>
-          </motion.div>
+              <div className="relative w-full max-w-[480px] aspect-square">
+                {/* Soft halo */}
+                <div className="absolute -inset-6 rounded-[2rem] bg-primary/[0.08] blur-3xl" />
+                {/* Board frame */}
+                <motion.div
+                  className="relative h-full w-full rounded-2xl overflow-hidden border border-border/40 shadow-[0_30px_80px_-20px_hsl(0_0%_0%/0.6)] bg-card/60 backdrop-blur-sm"
+                  whileHover={{ y: -4 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                >
+                  <HeroBoard />
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
 
