@@ -220,11 +220,11 @@ const Chat = () => {
             {selectedFriend ? (
               <>
                 <div className="px-4 py-3 border-b border-border/30 flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary overflow-hidden">
-                    {selectedFriend.avatar_url
-                      ? <img src={selectedFriend.avatar_url} alt="" className="h-full w-full object-cover" />
-                      : (selectedFriend.display_name || selectedFriend.username || "?")[0].toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    userId={selectedFriend.user_id}
+                    fallbackName={selectedFriend.display_name || selectedFriend.username || "?"}
+                    className="h-8 w-8 text-sm"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">
                       {selectedFriend.display_name || selectedFriend.username || "Player"}
