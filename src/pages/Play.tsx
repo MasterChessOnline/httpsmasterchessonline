@@ -827,7 +827,7 @@ const Play = () => {
               </div>
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 <p className="text-sm font-bold text-foreground">{currentBot.name} {currentBot.countryFlag}</p>
-                <TitleBadge rating={currentBot.rating} size="xs" />
+                <TitleBadge rating={currentBot.rating} mode="bot" size="xs" />
               </div>
               <p className="text-xs text-muted-foreground">{currentBot.rating} Elo</p>
             </motion.div>
