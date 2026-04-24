@@ -78,6 +78,10 @@ const Settings = () => {
   const [section, setSection] = useState<SettingsSection>("profile");
 
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
+  const [bio, setBio] = useState((profile as any)?.bio || "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>((profile as any)?.avatar_url || null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const settings = getSettings();
