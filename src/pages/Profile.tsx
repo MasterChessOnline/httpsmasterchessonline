@@ -24,6 +24,8 @@ import BadgeGrid from "@/components/BadgeGrid";
 import { getStreakState, type StreakState } from "@/lib/progression";
 
 import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
+import UserAvatar from "@/components/UserAvatar";
+import { primeUserProfile } from "@/hooks/use-user-avatar";
 
 interface ProfileData {
   id: string;
@@ -162,11 +164,13 @@ const Profile = () => {
 
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() } as any)
         .eq("user_id", user.id);
       if (updateError) throw updateError;
 
       setProfileData({ ...profileData, avatar_url: publicUrl });
+      // Push the new avatar to the global cache so all <UserAvatar /> instances refresh.
+      primeUserProfile({ user_id: user.id, avatar_url: publicUrl, updated_at: new Date().toISOString() });
       refreshProfile();
       toast.success("Profile photo updated! 🎉");
     } catch (err: any) {
@@ -224,13 +228,11 @@ const Profile = () => {
           >
             <div className="flex items-center gap-4">
               <div className="relative shrink-0 group">
-                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shadow-glow overflow-hidden">
-                  {profileData.avatar_url ? (
-                    <img src={profileData.avatar_url} alt={profileData.display_name || "Player"} className="h-full w-full object-cover" />
-                  ) : (
-                    <User className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-                  )}
-                </div>
+                <UserAvatar
+                  userId={profileData.user_id}
+                  fallbackName={profileData.display_name || "Player"}
+                  className="h-16 w-16 sm:h-20 sm:w-20 border-2 border-primary/30 shadow-glow"
+                />
                 {isOwnProfile && (
                   <>
                     <input
