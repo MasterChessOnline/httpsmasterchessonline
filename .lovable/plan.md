@@ -1,137 +1,204 @@
 
-# Plan: TOP 3 fičera koje preporučujem (BEZ puzzle-a)
+# MasterChess — Design Perfection Plan
 
-Pošto je sajt već ogroman i kompleksan, preporučujem **fokusiran paket od 3 fičera** umesto svih 15 odjednom. Ovo su tri koja po mom mišljenju daju **maksimalan efekat** (zadržavanje korisnika + viralnost) uz **minimalan rizik** lomljenja postojećeg koda.
+Cilj: zadržati prepoznatljivi **Gold & Black 4D** identitet, ali ga podići u ligu **Linear / Arc / Apple / Vercel** — manje "gaming reklama", više "premium product".
 
-Niti jedan od ovih ne dira tvoja postojeća pravila (bez puzzle-a, bez AI analize u ljudskim partijama, samo DailyChess_12 YouTube sadržaj).
-
----
-
-## 🏆 FIČER #1 — Daily Streak Rewards + Daily Missions
-
-**Zašto:** Ovo je #1 razlog zašto se ljudi svaki dan vraćaju na chess.com i Duolingo. Trenutno tvoj sajt nema ništa što "zove" igrača da dođe sutra.
-
-**Šta dobijaš:**
-- "Login streak" brojač na homepage-u (🔥 7 dana zaredom)
-- Sistem od 3 dnevne misije koje se resetuju u ponoć:
-  - "Odigraj 3 partije"
-  - "Pobedi protiv bota"
-  - "Pogledaj 1 lekciju iz /learn"
-- Nagrade: XP boost, badge-evi, otključavanje board tema
-- Vizuelni "claim reward" modal sa konfetama kad ispuniš misiju
-- Streak insurance: 1 "freeze" dnevno da ne izgubiš streak ako preskočiš dan
-
-**Gde se dodaje:**
-- Nova kartica na `/` (homepage dashboard) — Daily Missions widget
-- Nova stranica `/missions` (pun pregled + istorija)
-- Notifikacija u headeru kad nova misija postane dostupna
+Ovaj plan je organizovan po fazama. Svaka faza je zasebna iteracija (može se pauzirati između).
 
 ---
 
-## 🏆 FIČER #2 — Replay Highlights (Share-to-TikTok/Instagram)
+## FAZA 1 — Visual Foundation (osnova svega)
 
-**Zašto:** Ovo je **besplatan organic marketing**. Svaki put kad neko podeli highlight, sajt dobija reklamu. Niko od konkurencije nema ovo dobro odrađeno.
+### 1.1 Slojevita dark paleta
+Trenutno: jedna skoro-crna boja svuda → ravno, bez dubine.
 
-**Šta dobijaš:**
-- Posle završene partije → dugme "Create Highlight"
-- Automatski detektuje **3 najbolja momenta** iz partije:
-  - Najveća promena u materijalu (capture queen, fork)
-  - Mat ili matni napad
-  - Spektakularna žrtva (sacrifice)
-- Generiše animirani video/GIF (9:16 format za TikTok/Reels):
-  - Tvoj brand watermark u uglu
-  - Imena igrača + rating
-  - Animacija poslednjeg poteza
-  - "Play on MasterChess" CTA na kraju
-- Download dugme + direct share na Twitter/X, Instagram, TikTok
-- Galerija highlight-a na profilu (`/profile/:id` → nova kartica "Highlights")
+Promena u `src/index.css`:
+```
+--background:   24 10% 5%   (page — najtamnija)
+--card:         28 9%  8%   (kartica — uzdiže se)
+--popover:      30 10% 11%  (najsvetlija — najbliža korisniku)
+--muted:        28 8%  14%
+--border:       38 15% 16%  (suptilnije, manje gold-tinted)
+```
+Rezultat: dubina bez dodatnih shadow-a.
 
-**Gde se dodaje:**
-- Novi modal/screen na kraju partije
-- `/profile/:id` → nova kartica "Highlights"
+### 1.2 Smanjenje glow-a za 30–40%
+- `--shadow-neon` opacity sa 0.15 → 0.08
+- `--shadow-neon-lg` opacity sa 0.2 → 0.12
+- `.btn-neon` glow samo na hover/focus, ne u idle stanju
+- `.glass-neon` border opacity 0.12 → 0.06
+- `.shimmer` animacija samo na hero/featured elementima, ne globalno
 
----
+Rezultat: gold ostaje signature, ali kao **akcenat**, ne kao default stanje.
 
-## 🏆 FIČER #3 — Rivalry System (Head-to-Head)
+### 1.3 Tipografska hijerarhija
+- H1, H2 → ostaju Orbitron (signature)
+- H3, H4 → menjaju u Inter Bold (čitljivije)
+- Brojevi (rating, ELO, timer, statistike) → dodajemo **JetBrains Mono** kao `--font-mono`
+- Body line-height sa 1.5 → 1.6 (bolji ritam čitanja)
 
-**Zašto:** Stvara **lične priče**. "Moram da pobedim Marka, vodi me 3-2." Ovo drži ljude da igraju 10x duže nego anonimni matchmaking.
-
-**Šta dobijaš:**
-- Automatski detektuje "rival" — bilo ko sa kim si igrao 3+ partije
-- Kartica na profilu: "Top 5 rivala"
-  - Win/Loss/Draw record
-  - Trend (poslednjih 5 partija — zelene/crvene tačke)
-  - "Challenge to rematch" dugme
-- Kad ti rival dođe online → notifikacija: "Marko je online. Revanš?"
-- Posle pobede protiv rivala: posebna animacija + bonus XP
-- "Rivalry Stats" mini-stranica (`/rivals`):
-  - Sve istorijske partije
-  - Grafikon ko vodi kroz vreme
-  - Najduži win streak protiv svakog rivala
-
-**Gde se dodaje:**
-- `/profile/:id` → nova kartica "Rivals"
-- Nova stranica `/rivals`
-- Notifikacija u headeru kad rival dođe online
+### 1.4 Border radius konzistentnost
+- Cards: `rounded-xl` (12px) svuda
+- Buttons: `rounded-lg` (10px)
+- Inputs: `rounded-lg`
+- Pill badges: `rounded-full`
 
 ---
 
-## ❌ Šta NE radim u ovoj iteraciji (i zašto)
+## FAZA 2 — Command Palette (⌘K)
 
-| Ideja | Razlog odlaganja |
-|-------|------------------|
-| Battle Pass | Velik posao (30+ rewarda, sezonski sistem) — radimo posle ako #1 uspe |
-| Arena Royale | Potpuno novi game mode, rizik od bagova u matchmaking-u |
-| Voice Chat | WebRTC kompleksnost, moderation problemi |
-| Trash Talk pack | Mala vrednost vs trud |
-| Push Notifs | Treba PWA setup, kompleksno |
-| Email Digest | Već imaš email infra, ali nije prioritet bez prvih 3 |
-| Chess Variants (960, KOTH) | Nije fokus za sticanje korisnika |
-| Trophy Room | Već imaš badge sistem, marginalan dodatak |
-| Clan Wars | Već imaš klubove — proširenje za posle |
-| Voice Coach | AI eksperiment, nepouzdano |
+Najveći UX win za sajt sa 51 stranicom.
 
----
+- Globalni shortcut: `Cmd/Ctrl + K`
+- Iskače centrirani modal (glass-4d, blur backdrop)
+- Fuzzy search kroz:
+  - Sve stranice (Play, Learn, Profile, Settings, …)
+  - Brze akcije ("Start bullet game", "Open Sicilian", "View leaderboard")
+  - Korisnike (search po nicku)
+  - Bot personalities
+- Keyboard navigacija (↑↓ Enter Esc)
+- Recent searches sačuvane u localStorage
+- "?" tooltip u navbar-u koji podseća na shortcut
 
-## 🛠️ Tehnički detalji (za znalce)
-
-**Nove tabele:**
-- `daily_missions` — definicije misija (admin-managed)
-- `user_mission_progress` — koliko si ispunio za današnji dan
-- `user_streaks` — login streak counter, freeze used
-- `game_highlights` — sačuvani highlight-i (game_id, timestamps_json, video_url)
-- `rivalries` — auto-generated view ili tabela (user_a, user_b, w/l/d, last_played)
-
-**Nove edge funkcije:**
-- `daily-missions-reset` (cron, ponoć) — reset progress
-- `generate-highlight` — primi game PGN + vrati video URL (koristi serverless renderer ili client-side canvas → mp4)
-- `detect-rivals` — periodično računa rival listu
-
-**Nove rute:**
-- `/missions`
-- `/rivals`
-
-**Postojeće stranice koje se diraju:**
-- `/` (homepage) — dodati Missions + Streak widget
-- `/profile/:id` — dodati "Highlights" + "Rivals" kartice
-- Game end screen — dodati "Create Highlight" dugme
-- Header — notification bell
-
-**Storage:**
-- Novi bucket `highlights` (public) — za .mp4/.gif fajlove
+Komponenta: `src/components/CommandPalette.tsx` (koristi `cmdk` lib).
 
 ---
 
-## 📅 Redosled implementacije
+## FAZA 3 — Homepage Bento Grid
 
-1. **Daily Streak + Missions** prvo (najjednostavniji, najveći retention impact)
-2. **Rivalry System** drugi (srednje kompleksan, koristi postojeće online_games podatke)
-3. **Replay Highlights** poslednji (najkompleksniji jer treba video generation)
+Trenutno: vertikalni stack sekcija → liči na blog.
+Posle: **Bento dashboard** kao moderne premium app (Linear, Arc, Things 3).
 
-Svaki fičer ide u zasebnoj iteraciji da možemo testirati pre nego što krenemo na sledeći.
+Layout (12-col grid, desktop):
+
+```text
+┌─────────────────┬───────────┬───────────┐
+│  HERO / Quick   │  Streak   │   Live    │
+│  Play (6 col)   │  (3 col)  │  Stream   │
+│                 │           │  (3 col)  │
+├──────┬──────────┼───────────┴───────────┤
+│ Last │  Daily   │   Top Rival (today)   │
+│ Game │ Missions │      (6 col)          │
+│ (3)  │   (3)    │                       │
+├──────┴──────────┼───────────────────────┤
+│   Leaderboard   │  Continue Lesson      │
+│   Snapshot      │  (6 col)              │
+│   (6 col)       │                       │
+└─────────────────┴───────────────────────┘
+```
+
+- Svaka kartica: `glass-neon`, hover lift, klik vodi na full page
+- Mobile: sve karte stack-uju (jedna ispod druge)
+- Sve karte su **prave podatke driven** (nema fake brojeva — poštujemo postojeću politiku)
 
 ---
 
-## ✅ Šta dalje?
+## FAZA 4 — Page Transitions & Micro-interactions
 
-Ako odobriš ovaj plan, krećem od **Fičera #1 (Daily Streak + Missions)**. Ako želiš drugačiji redosled ili da izbacimo/dodamo nešto, reci sad.
+### 4.1 Page transitions
+- Wrapper u `App.tsx` sa Framer Motion `AnimatePresence`
+- Transition: `fade + 8px slide up`, 250ms, ease-out
+- Daje SPA feel (kao Linear, Notion)
+
+### 4.2 Button refinements
+- Inner gradient: suptilan top-to-bottom (1% lighter → 1% darker)
+- 1px gold top-edge highlight (samo na primary CTA)
+- Ripple efekt ostaje, ali tiše (opacity 0.15 umesto 0.3)
+- Active state: scale(0.97) + 50ms
+
+### 4.3 Input/Form refinements
+- Focus state: animirani gold underline (kao Stripe checkout)
+- Floating label pattern za auth/signup forme
+- Validation: ikona checkmark/X sa scale-in animacijom
+
+### 4.4 Loading states
+- Generic spinner → **rotirajući chess piece** (king ili knight SVG, 360° loop)
+- Skeleton loaders: shimmer u gold tonu (umesto sivog)
+- Empty states: kratka poruka + suggestion button (npr. "No games yet → Play your first game")
+
+---
+
+## FAZA 5 — Navigation Refinement
+
+### 5.1 Navbar polish
+- Visina: konzistentna 64px (umesto trenutne shrinking)
+- Active state: gold underline ispod stavke (umesto background fill)
+- Dropdown panels: smanjiti padding, bolji vertical rhythm
+- Search ikona → otvara Command Palette (umesto posebnog search-a)
+
+### 5.2 Footer redesign
+- 3-kolona: Product / Community / Legal
+- Mini logo + tagline
+- Social linkovi (YouTube, Discord, X)
+- Suptilan top border sa gold gradient
+
+---
+
+## FAZA 6 — Brand Touches
+
+### 6.1 Logo system
+- Animirani crown logo u navbar-u (suptilan shimmer svakih 8s)
+- Loading screen: centriran logo + thin progress ring
+
+### 6.2 Iconography konzistentnost
+- Sve lucide ikone: `strokeWidth={1.5}` (umesto default 2)
+- Custom chess piece ikone (king, queen, knight) za chess-specific akcije
+- Veličine: 16px (inline), 20px (buttons), 24px (cards), 32px (hero)
+
+### 6.3 Color accent system po sekciji
+Ostaje postojeći (Play=blue, Learn=purple, Compete=gold, Community=green) ali:
+- Smanjiti zasićenost za 20%
+- Koristi se samo na badges, active states, accent borders — ne na pozadinama
+
+---
+
+## Tehnički detalji (za implementaciju)
+
+**Fajlovi koji se menjaju:**
+- `src/index.css` — paleta, glow tokens, tipografija, radius
+- `tailwind.config.ts` — `fontFamily.mono`, color tokens
+- `src/App.tsx` — `AnimatePresence` wrapper, CommandPalette mount
+- `src/pages/Index.tsx` — Bento grid layout
+- `src/components/Navbar.tsx` — active state, search → Cmd+K
+- `src/components/Footer.tsx` — 3-kolona redesign
+- `src/components/ui/button.tsx` — inner gradient + edge highlight
+- `src/components/ui/input.tsx` — focus underline
+
+**Nove komponente:**
+- `src/components/CommandPalette.tsx`
+- `src/components/PageTransition.tsx`
+- `src/components/ChessLoader.tsx` (rotirajući piece)
+- `src/components/EmptyState.tsx` (reusable)
+
+**Nova zavisnost:**
+- `cmdk` (za Command Palette — već u shadcn)
+
+**Šta se NE menja:**
+- Gold & Black brand identitet
+- Orbitron za H1/H2
+- 4D parallax / cursor glow
+- Glassmorphism filozofija
+- Sva postojeća funkcionalnost (samo vizuelno polish)
+
+---
+
+## Predloženi redosled iteracija
+
+| Iter | Sadržaj | Zašto |
+|------|---------|-------|
+| **1** | FAZA 1 + FAZA 2 | Najveća vizuelna promena + UX win za 51 stranicu |
+| **2** | FAZA 3 (Bento) | Homepage je prva stvar koju nove posetioci vide |
+| **3** | FAZA 4 (transitions + micro) | Polishing — pretvara "dobro" u "premium" |
+| **4** | FAZA 5 + 6 | Final brand touches |
+
+---
+
+## Pitanje pre starta
+
+Da li želiš:
+
+**A)** Sve faze redom (4 iteracije, najtemeljitije)
+**B)** Samo Iteracija 1 (FAZA 1+2 — najveći ROI, vidiš odmah razliku)
+**C)** Custom kombinacija — reci koje faze biraš
+
+Preporučujem **B** — krenemo sa fundamentom + Command Palette. Ako se svidi, nastavljamo na Bento i dalje.
