@@ -19,7 +19,12 @@ const LIBRARY = {
 };
 
 function validate(startFen, moves) {
-  const chess = new Chess(startFen);
+  let chess;
+  try {
+    chess = new Chess(startFen);
+  } catch (e) {
+    return null;
+  }
   const valid = [];
   for (const [san, expl] of moves) {
     try {
