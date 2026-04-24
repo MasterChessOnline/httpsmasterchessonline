@@ -1,0 +1,1130 @@
+[
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-14",
+    "lessonTitle": "KID Pawn Structures After d5"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-15",
+    "lessonTitle": "The Kingside Attack: f5-f4-g5-g4"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-16",
+    "lessonTitle": "White's Queenside Play: c5"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-17",
+    "lessonTitle": "Knight Maneuvers in the KID"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-18",
+    "lessonTitle": "The g4 Sacrifice"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-19",
+    "lessonTitle": "Defense as White: Key Resources"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-20",
+    "lessonTitle": "KID Exchange Sacrifices"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-21",
+    "lessonTitle": "The Benoni Connection"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-22",
+    "lessonTitle": "The Grünfeld Connection"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-23",
+    "lessonTitle": "Famous KID Game: Kasparov vs Topalov 1999"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-24",
+    "lessonTitle": "Famous KID Game: Fischer's Games"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-25",
+    "lessonTitle": "KID Endgames"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-26",
+    "lessonTitle": "Anti-KID Systems"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-27",
+    "lessonTitle": "The KID vs c4 Only (English)"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-28",
+    "lessonTitle": "Typical Middlegame Sacrifices"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-29",
+    "lessonTitle": "When the KID Goes Wrong"
+  },
+  {
+    "course": "kings-indian",
+    "courseTitle": "The King's Indian Defense",
+    "lessonId": "ki-30",
+    "lessonTitle": "Building a KID Repertoire"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-8",
+    "lessonTitle": "Classical: Nf6 vs Nd7 Move Order"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-9",
+    "lessonTitle": "Classical: Short Variation Deep Dive"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-10",
+    "lessonTitle": "Advance: ...Bf5 Main Line Tabiya"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-11",
+    "lessonTitle": "Advance: Bayonet Attack (g4!?)"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-12",
+    "lessonTitle": "The ...c5 Break — The Caro's Universal Cure"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-13",
+    "lessonTitle": "Caro-Kann Move Order vs 1.d4"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-14",
+    "lessonTitle": "Panov: IQP Strategy for Both Sides"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-15",
+    "lessonTitle": "Caro-Kann Endgames — Black's Specialty"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-16",
+    "lessonTitle": "Model: Karpov's Caro-Kann Mastery"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-17",
+    "lessonTitle": "Model: Anand's Dynamic Caro-Kann"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-18",
+    "lessonTitle": "Gurgenidze System (3.Nc3 g6)"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-19",
+    "lessonTitle": "Classical: ...Nf6 5.Nxf6+ exf6"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-20",
+    "lessonTitle": "Tartakower Variation (3.e5 Bf5 4.Nc3)"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-21",
+    "lessonTitle": "Bronstein-Larsen (4...Nf6 5.Nxf6+ gxf6)"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-22",
+    "lessonTitle": "Handling the h4-h5 Push"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-23",
+    "lessonTitle": "Caro-Kann Development Order"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-24",
+    "lessonTitle": "Caro-Kann Pawn Structures"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-25",
+    "lessonTitle": "Caro-Kann: Black's Kingside Attack"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-26",
+    "lessonTitle": "Caro-Kann: Queenside Expansion"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-27",
+    "lessonTitle": "Anti-Caro Systems (2.Nc3, 2.d3, 2.c4)"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-28",
+    "lessonTitle": "Caro-Kann Tactical Traps"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-29",
+    "lessonTitle": "Caro-Kann in Speed Chess"
+  },
+  {
+    "course": "caro-kann",
+    "courseTitle": "The Caro-Kann Defense",
+    "lessonId": "ck-30",
+    "lessonTitle": "Building a Complete Caro Repertoire"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-5",
+    "lessonTitle": "London: When to Play h3"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-6",
+    "lessonTitle": "London: The Bh2 Retreat"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-8",
+    "lessonTitle": "London: The Qc2 Maneuver"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-9",
+    "lessonTitle": "London: Handling ...Bf5"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-10",
+    "lessonTitle": "London: The Jobava London (Nc3 London)"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-11",
+    "lessonTitle": "London: Handling the Queen's Indian"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-12",
+    "lessonTitle": "London: Handling the Grünfeld"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-13",
+    "lessonTitle": "London: Handling the Dutch"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-14",
+    "lessonTitle": "London: Kingside Attack Plans"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-15",
+    "lessonTitle": "London: Queenside Play"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-16",
+    "lessonTitle": "London: Rook Lifts"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-17",
+    "lessonTitle": "London: The e5 Advance"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-18",
+    "lessonTitle": "London: Exchange Strategies"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-19",
+    "lessonTitle": "London: Endgame Advantages"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-20",
+    "lessonTitle": "London: Common Mistakes"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-21",
+    "lessonTitle": "London: The Anti-London (...c5 + ...Qb6)"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-22",
+    "lessonTitle": "London: Quick Development Plan"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-23",
+    "lessonTitle": "London: When to Deviate"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-24",
+    "lessonTitle": "London: Famous Practitioners"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-25",
+    "lessonTitle": "London: vs Slav Setups"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-26",
+    "lessonTitle": "London: The Bf4-g3 Hybrid"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-27",
+    "lessonTitle": "London: Pawn Structures to Know"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-28",
+    "lessonTitle": "London: Time Management"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-29",
+    "lessonTitle": "London: Rapid & Blitz Tips"
+  },
+  {
+    "course": "london-system",
+    "courseTitle": "The London System",
+    "lessonId": "ls-30",
+    "lessonTitle": "London: Building a Complete Repertoire"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-4",
+    "lessonTitle": "English: Four Knights Variation"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-5",
+    "lessonTitle": "English: The Botvinnik System"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-6",
+    "lessonTitle": "English: Against the King's Indian"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-7",
+    "lessonTitle": "English: Against the Slav Setup"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-8",
+    "lessonTitle": "English: The Hedgehog Structure"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-10",
+    "lessonTitle": "English: g3 + Bg2 Plans"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-11",
+    "lessonTitle": "English: The d4 Break"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-12",
+    "lessonTitle": "English: The b3 Fianchetto"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-13",
+    "lessonTitle": "English: Handling ...d5"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-14",
+    "lessonTitle": "English: The Keres System"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-16",
+    "lessonTitle": "English: Transposition Knowledge"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-17",
+    "lessonTitle": "English: Pawn Structures"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-18",
+    "lessonTitle": "English: Middlegame Plans for White"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-19",
+    "lessonTitle": "English: The Kramnik System"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-20",
+    "lessonTitle": "English: Ultra-Modern Approaches"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-21",
+    "lessonTitle": "English: Endgame Tendencies"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-22",
+    "lessonTitle": "English: The Reversed Dragon"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-23",
+    "lessonTitle": "English: Common Mistakes"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-24",
+    "lessonTitle": "English: Model Game: Kasparov"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-25",
+    "lessonTitle": "English: Model Game: Kramnik"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-26",
+    "lessonTitle": "English: Against 1...Nf6 2...e6"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-27",
+    "lessonTitle": "English: Against 1...b6"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-28",
+    "lessonTitle": "English: Speed Chess Tips"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-29",
+    "lessonTitle": "English: Preparing Against the English (Black)"
+  },
+  {
+    "course": "english-opening",
+    "courseTitle": "The English Opening",
+    "lessonId": "en-30",
+    "lessonTitle": "English: Complete Repertoire"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-5",
+    "lessonTitle": "Qa5 Line: Strategic Plans"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-6",
+    "lessonTitle": "Qd6 Variation Deep Dive"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-7",
+    "lessonTitle": "Qd8 Retreat with Fianchetto"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-8",
+    "lessonTitle": "Modern: 2...Nf6 3.d4 Nxd5 Setup"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-9",
+    "lessonTitle": "Icelandic Gambit (2...Nf6 3.d4 Bg4)"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-10",
+    "lessonTitle": "Bf5 BEFORE e6 — The Golden Rule"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-11",
+    "lessonTitle": "Standard Development Order"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-12",
+    "lessonTitle": "When White Plays d4-d5 (Closing Center)"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-13",
+    "lessonTitle": "Queenside Castling in the Qd6 Line"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-14",
+    "lessonTitle": "The ...c5 Break — Universal Plan"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-15",
+    "lessonTitle": "Scandinavian Endgames"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-16",
+    "lessonTitle": "Tactical Resources for Black"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-17",
+    "lessonTitle": "Scandinavian in Blitz/Rapid"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-18",
+    "lessonTitle": "Middlegame Plans Summary"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-19",
+    "lessonTitle": "Model Games — Larsen and Nepomniachtchi"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-20",
+    "lessonTitle": "Scandinavian Ideas vs 1.d4"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-21",
+    "lessonTitle": "Portuguese Gambit (2...Nf6 3.d4 Bg4)"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-22",
+    "lessonTitle": "Handling 2.Nc3 (Avoiding Capture)"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-23",
+    "lessonTitle": "Handling 3.Nf3 (No Nc3)"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-24",
+    "lessonTitle": "Pawn Structures"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-25",
+    "lessonTitle": "Piece Exchanges"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-26",
+    "lessonTitle": "Recovering from Passivity"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-27",
+    "lessonTitle": "Move Order Subtleties"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-28",
+    "lessonTitle": "Practical Statistics & Results"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-29",
+    "lessonTitle": "Improvement Roadmap"
+  },
+  {
+    "course": "scandinavian-defense",
+    "courseTitle": "The Scandinavian Defense",
+    "lessonId": "sc-30",
+    "lessonTitle": "Complete Repertoire Summary"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-4",
+    "lessonTitle": "The Classical Dutch"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-5",
+    "lessonTitle": "Dutch: Anti-Dutch 2.Bg5"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-6",
+    "lessonTitle": "Dutch: The Staunton Gambit (2.e4)"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-8",
+    "lessonTitle": "Leningrad: Typical Plans"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-9",
+    "lessonTitle": "Leningrad: The f4 Push"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-10",
+    "lessonTitle": "Stonewall: The Knight Route to e4"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-11",
+    "lessonTitle": "Stonewall: Solving the Bad Bishop"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-13",
+    "lessonTitle": "Dutch: Handling the Fianchetto (g3)"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-14",
+    "lessonTitle": "Dutch: Handling c4+d4+e4"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-15",
+    "lessonTitle": "Dutch: The King Safety Issue"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-16",
+    "lessonTitle": "Dutch: Middlegame Attack Plans"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-17",
+    "lessonTitle": "Dutch: Queenside Play"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-18",
+    "lessonTitle": "Dutch: Endgame Considerations"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-19",
+    "lessonTitle": "Dutch: Famous Game: Botvinnik's Stonewall"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-20",
+    "lessonTitle": "Dutch: Famous Game: Nakamura's Leningrad"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-21",
+    "lessonTitle": "Dutch: The Hopton Attack (2.Bg5)"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-22",
+    "lessonTitle": "Dutch: Exchange Sacrifices"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-23",
+    "lessonTitle": "Dutch: The Ne4 Outpost"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-24",
+    "lessonTitle": "Dutch: Pawn Structures to Know"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-25",
+    "lessonTitle": "Dutch: When the Dutch Goes Wrong"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-26",
+    "lessonTitle": "Dutch: Against the English (1.c4 f5)"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-27",
+    "lessonTitle": "Dutch: Against the Reti (1.Nf3)"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-28",
+    "lessonTitle": "Dutch: Common Mistakes"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-29",
+    "lessonTitle": "Dutch: Rapid & Blitz Tips"
+  },
+  {
+    "course": "dutch-defense",
+    "courseTitle": "The Dutch Defense",
+    "lessonId": "du-30",
+    "lessonTitle": "Dutch: Building Your Repertoire"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-7",
+    "lessonTitle": "The Kalashnikov Variation"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-8",
+    "lessonTitle": "The Taimanov Variation"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-9",
+    "lessonTitle": "The Kan (Paulsen) Variation"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-10",
+    "lessonTitle": "The Accelerated Dragon"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-11",
+    "lessonTitle": "The Grand Prix Attack (2.f4)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-12",
+    "lessonTitle": "The Alapin (2.c3)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-13",
+    "lessonTitle": "The Closed Sicilian (2.Nc3)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-14",
+    "lessonTitle": "The Moscow Variation (3.Bb5+)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-15",
+    "lessonTitle": "The Rossolimo (2...Nc6 3.Bb5)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-16",
+    "lessonTitle": "Najdorf: 6.Bg5 (The Sharp Line)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-17",
+    "lessonTitle": "Najdorf: 6.Be2 (Solid Approach)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-18",
+    "lessonTitle": "Najdorf: 6.Be3 (English Attack)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-19",
+    "lessonTitle": "Najdorf: 6.f3 (Modern Main Line)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-20",
+    "lessonTitle": "Dragon: Yugoslav Attack Deep Dive"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-21",
+    "lessonTitle": "Dragon: Classical (6.Be2)"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-22",
+    "lessonTitle": "Sicilian: Typical Pawn Structures"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-23",
+    "lessonTitle": "Sicilian: The d5 Break"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-24",
+    "lessonTitle": "Sicilian: Exchange Sacrifices on c3"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-25",
+    "lessonTitle": "Sicilian: Queenside Play Strategies"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-26",
+    "lessonTitle": "Sicilian: Kingside Defense"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-27",
+    "lessonTitle": "Sicilian: Model Game — Fischer"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-28",
+    "lessonTitle": "Sicilian: Model Game — Kasparov"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-29",
+    "lessonTitle": "Sicilian: Anti-Sicilian Overview"
+  },
+  {
+    "course": "sicilian-deep-dive",
+    "courseTitle": "The Sicilian Defense: Deep Dive",
+    "lessonId": "sd-30",
+    "lessonTitle": "Sicilian: Building Your Repertoire"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-8",
+    "lessonTitle": "The Fischer Variation (4.e3 b6)"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-9",
+    "lessonTitle": "Nimzo: Doubled Pawns — Strengths"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-10",
+    "lessonTitle": "Nimzo: Doubled Pawns — Weaknesses"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-11",
+    "lessonTitle": "Nimzo: The e4 Break for White"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-12",
+    "lessonTitle": "Nimzo: Black's ...c5 Break"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-13",
+    "lessonTitle": "Nimzo: Black's ...d5 Systems"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-14",
+    "lessonTitle": "Nimzo: When to Exchange on c3"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-15",
+    "lessonTitle": "Nimzo: The Bishop Retreat (...Ba5 or ...Be7)"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-16",
+    "lessonTitle": "Nimzo: Middlegame Plans for White"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-17",
+    "lessonTitle": "Nimzo: Middlegame Plans for Black"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-18",
+    "lessonTitle": "Nimzo: The 4.Qc2 Mainline Deep Dive"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-19",
+    "lessonTitle": "Nimzo: Pawn Structures"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-20",
+    "lessonTitle": "Nimzo: Endgame Characteristics"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-21",
+    "lessonTitle": "Nimzo: Model Game — Capablanca"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-22",
+    "lessonTitle": "Nimzo: Model Game — Karpov"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-23",
+    "lessonTitle": "Nimzo: The 4.f3 Variation"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-24",
+    "lessonTitle": "Nimzo: The 4.Bd2 System"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-25",
+    "lessonTitle": "Nimzo: Transpositions to QGD/Catalan"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-26",
+    "lessonTitle": "Nimzo: Anti-Nimzo (3.Nf3)"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-27",
+    "lessonTitle": "Nimzo: The Bogo-Indian Connection"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-28",
+    "lessonTitle": "Nimzo: Common Mistakes"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-29",
+    "lessonTitle": "Nimzo: Speed Chess Considerations"
+  },
+  {
+    "course": "nimzo-indian",
+    "courseTitle": "The Nimzo-Indian Defense",
+    "lessonId": "ni-30",
+    "lessonTitle": "Nimzo: Complete Repertoire"
+  }
+]
