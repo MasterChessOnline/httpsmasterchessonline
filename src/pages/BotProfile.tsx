@@ -53,9 +53,9 @@ export default function BotProfile() {
 
   const stats = botSeededStats(bot);
   const winRatePct = Math.round((stats.wins / stats.games) * 100);
-  const title = getTitle(bot.rating);
-  const nextTitle = getNextTitle(bot.rating);
-  const progress = getTitleProgress(bot.rating);
+  const title = getTitle(bot.rating, "bot");
+  const nextTitle = getNextTitle(bot.rating, "bot");
+  const progress = getTitleProgress(bot.rating, "bot");
   const rank = getRank(bot.rating);
 
   return (
@@ -88,7 +88,7 @@ export default function BotProfile() {
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap mt-1.5">
-                  <TitleBadge rating={bot.rating} size="sm" hideUnranked={false} />
+                  <TitleBadge rating={bot.rating} mode="bot" size="sm" hideUnranked={false} />
                   <RankBadge rating={bot.rating} size="sm" />
                   <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
                     {bot.countryFlag} {bot.country}
