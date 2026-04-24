@@ -1022,7 +1022,7 @@ const Play = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <p className="text-xs font-bold text-foreground truncate">{profile?.display_name || profile?.username || "You"}</p>
-                  <TitleBadge titleKey={(profile as any)?.highest_title_key} rating={(profile as any)?.bot_rating ?? 1200} size="xs" />
+                  <TitleBadge rating={(profile as any)?.bot_rating ?? 1200} mode="bot" size="xs" />
                 </div>
                 <p className="text-[10px] text-muted-foreground">{(profile as any)?.bot_rating ?? 1200} Elo · {playerColor === "w" ? "⬜ White" : "⬛ Black"}</p>
               </div>
