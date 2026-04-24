@@ -57,7 +57,7 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
     return fens;
   }, [baseFen, moves]);
 
-  const [mode, setMode] = useState<BoardMode>("guided");
+  const [mode, setMode] = useState<BoardMode>(hasMoves ? "guided" : "explore");
   const [moveIndex, setMoveIndex] = useState(0);
   const totalMoves = positions.length - 1;
 
@@ -78,12 +78,12 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   // Reset when lesson changes
   useEffect(() => {
     setMoveIndex(0);
-    setMode("guided");
+    setMode(hasMoves ? "guided" : "explore");
     setExploreChess(new Chess(baseFen));
     setExploreSelected(null);
     setExploreLegalMoves([]);
     resetPractice();
-  }, [baseFen, moves]);
+  }, [baseFen, moves, hasMoves]);
 
   const resetPractice = useCallback(() => {
     setPracticeIndex(0);
