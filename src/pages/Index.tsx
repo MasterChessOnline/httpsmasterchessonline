@@ -18,6 +18,8 @@ import heroImage from "@/assets/hero-chess.jpg";
 
 import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
+import DailyMissions from "@/components/DailyMissions";
+import { Target } from "lucide-react";
 
 interface RecentGame {
   id: string;
