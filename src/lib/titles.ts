@@ -127,20 +127,20 @@ export const TITLES: ChessTitle[] = [
 ];
 
 /**
- * Bot-mode title overrides — separate names + higher thresholds.
- * Online keeps the FIDE-style names; bot mode uses "AI Arena" themed names.
+ * Bot-mode title overrides — same FIDE-style names as online, but higher rating thresholds
+ * because beating bots is generally easier than beating rated humans.
  */
-export const BOT_TITLE_OVERRIDES: Record<string, { label: string; fullName: string; offset: number }> = {
-  unranked:           { label: "Rookie",          fullName: "Bot Arena Rookie",            offset: 0 },
-  soldier:            { label: "Bot Hunter",      fullName: "Bot Hunter",                  offset: 100 },
-  "tactical-fighter": { label: "Circuit Breaker", fullName: "Circuit Breaker",             offset: 100 },
-  "position-master":  { label: "Engine Tamer",    fullName: "Engine Tamer",                offset: 150 },
-  "mc-cm":            { label: "AI Apprentice",   fullName: "AI Arena Apprentice",         offset: 150 },
-  "mc-fm":            { label: "AI Specialist",   fullName: "AI Arena Specialist",         offset: 150 },
-  "mc-im":            { label: "Silicon Slayer",  fullName: "Silicon Slayer",              offset: 200 },
-  "mc-gm":            { label: "Bot Crusher",     fullName: "Bot Arena Grandmaster",       offset: 200 },
-  "mc-super-gm":      { label: "Mainframe King",  fullName: "Mainframe King",              offset: 200 },
-  "mc-legend":        { label: "Singularity",     fullName: "Singularity — Bot Conqueror", offset: 200 },
+export const BOT_TITLE_OVERRIDES: Record<string, { label?: string; fullName?: string; offset: number }> = {
+  unranked:           { offset: 0 },
+  soldier:            { offset: 100 },
+  "tactical-fighter": { offset: 100 },
+  "position-master":  { offset: 150 },
+  "mc-cm":            { offset: 150 },
+  "mc-fm":            { offset: 150 },
+  "mc-im":            { offset: 200 },
+  "mc-gm":            { offset: 200 },
+  "mc-super-gm":      { offset: 200 },
+  "mc-legend":        { offset: 200 },
 };
 
 export type RatingMode = "online" | "bot";
