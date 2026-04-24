@@ -1,204 +1,119 @@
 
-# MasterChess — Design Perfection Plan
+# Interactive Boards for Every Lesson — Plan
 
-Cilj: zadržati prepoznatljivi **Gold & Black 4D** identitet, ali ga podići u ligu **Linear / Arc / Apple / Vercel** — manje "gaming reklama", više "premium product".
+Cilj: **Svaka lekcija u Learn sekciji** dobija interaktivnu tablu (`InteractiveBoard`) sa primerom koji je **direktno povezan sa temom** te lekcije.
+- Endgame lekcija → endgame pozicija (npr. K+P vs K za "King + Pawn")
+- Opening lekcija → konkretne opening linije sa varijacijama
+- Tactics lekcija → primer pozicije sa fork/pin/skewer-om
+- Strategy/middlegame → karakteristična pozicija (slabi pioni, otvorene linije...)
+- Basics → demonstracija samog pravila/koncepta
 
-Ovaj plan je organizovan po fazama. Svaka faza je zasebna iteracija (može se pauzirati između).
+## Trenutno stanje
 
----
+- **625 lekcija ukupno** u 31 kursu (`src/lib/courses-data.ts`)
+- **Samo 95 (15%)** trenutno ima board u `LESSON_MOVES` (`src/lib/lesson-moves.ts`)
+- **530 lekcija fali board** — uključujući celokupne kurseve poput `core-beginner`, `core-intermediate`, `core-advanced`, `strategy-masterclass`, svi opening deep-dives (London, English, Caro-Kann, Sicilian itd.)
 
-## FAZA 1 — Visual Foundation (osnova svega)
+Detaljni gap (top deficiti):
+- Beginner / Intermediate / Advanced core kursevi: 0/50 imaju tablu
+- Strategy: 5/106
+- Openings: 25/173 (Sicilian Deep Dive, Caro-Kann, London, English, Nimzo, Scandinavian, Dutch — svi 0)
+- Endgame: 8/80
+- Middlegame: 4/80
+- Tactics: 38/78 (najbolja pokrivenost)
 
-### 1.1 Slojevita dark paleta
-Trenutno: jedna skoro-crna boja svuda → ravno, bez dubine.
+## Šta će biti urađeno
 
-Promena u `src/index.css`:
-```
---background:   24 10% 5%   (page — najtamnija)
---card:         28 9%  8%   (kartica — uzdiže se)
---popover:      30 10% 11%  (najsvetlija — najbliža korisniku)
---muted:        28 8%  14%
---border:       38 15% 16%  (suptilnije, manje gold-tinted)
-```
-Rezultat: dubina bez dodatnih shadow-a.
+### 1. Generisanje board entries za svih 530 nepokrivenih lekcija
+Za svaku lekciju biće dodan `LESSON_MOVES[lessonId]` zapis sa:
+- **`startFen`** (po potrebi) — startna pozicija relevantna za temu
+- **`moves`** — niz od 4–10 poteza sa edukativnim objašnjenjima
+- **`variations`** (za opening lekcije) — više linija ako postoji glavna teorija
 
-### 1.2 Smanjenje glow-a za 30–40%
-- `--shadow-neon` opacity sa 0.15 → 0.08
-- `--shadow-neon-lg` opacity sa 0.2 → 0.12
-- `.btn-neon` glow samo na hover/focus, ne u idle stanju
-- `.glass-neon` border opacity 0.12 → 0.06
-- `.shimmer` animacija samo na hero/featured elementima, ne globalno
+### 2. Strategija po kategoriji
 
-Rezultat: gold ostaje signature, ali kao **akcenat**, ne kao default stanje.
+**OPENINGS (148 nepokrivenih)** — najveći prioritet, korisnik ovo eksplicitno traži.
+Svaka opening lekcija dobija glavne linije te varijacije.
+Primer: "Sicilian Najdorf — 6.Be3 English Attack" → board počinje sa Najdorf pozicijom, igra se 6.Be3 e6 7.f3 b5 8.Qd2... sa objašnjenjima.
 
-### 1.3 Tipografska hijerarhija
-- H1, H2 → ostaju Orbitron (signature)
-- H3, H4 → menjaju u Inter Bold (čitljivije)
-- Brojevi (rating, ELO, timer, statistike) → dodajemo **JetBrains Mono** kao `--font-mono`
-- Body line-height sa 1.5 → 1.6 (bolji ritam čitanja)
+**ENDGAMES (72 nepokrivenih)** — drugi prioritet.
+Svaka lekcija počinje sa relevantnom endgame pozicijom (FEN sa malo figura), korak po korak demonstracija tehnike.
+Primer: "Lucena Position" → klasičan Lucena FEN, sekvenca poteza koja vodi do pobede.
 
-### 1.4 Border radius konzistentnost
-- Cards: `rounded-xl` (12px) svuda
-- Buttons: `rounded-lg` (10px)
-- Inputs: `rounded-lg`
-- Pill badges: `rounded-full`
+**BASICS (38 nepokrivenih)** — beginner core.
+Demonstracije: kako se pomera figura, šta je šah, šta je rokada, opozicija itd.
 
----
+**TACTICS (40 nepokrivenih)** — pozicije sa konkretnim taktikama.
+Primer: "Removing the Defender" → pozicija gde je odbrana figura ključ, demonstracija kako se ona ukloni.
 
-## FAZA 2 — Command Palette (⌘K)
+**STRATEGY (101 nepokrivenih) i MIDDLEGAME (76 nepokrivenih)**.
+Karakteristične pozicije iz partija velikana koje ilustruju koncept (slabi pioni, izolovani pion, manjinski napad, prostorna prednost).
 
-Najveći UX win za sajt sa 51 stranicom.
+### 3. Tehnička realizacija
 
-- Globalni shortcut: `Cmd/Ctrl + K`
-- Iskače centrirani modal (glass-4d, blur backdrop)
-- Fuzzy search kroz:
-  - Sve stranice (Play, Learn, Profile, Settings, …)
-  - Brze akcije ("Start bullet game", "Open Sicilian", "View leaderboard")
-  - Korisnike (search po nicku)
-  - Bot personalities
-- Keyboard navigacija (↑↓ Enter Esc)
-- Recent searches sačuvane u localStorage
-- "?" tooltip u navbar-u koji podseća na shortcut
+Pošto je 530 lekcija previše za ručno pisanje u jednoj iteraciji (~25,000 linija koda), radimo ovako:
 
-Komponenta: `src/components/CommandPalette.tsx` (koristi `cmdk` lib).
+**Pristup: Generator script + ručna kuracija ključnih lekcija**
 
----
+a) **Skripta `scripts/generate-lesson-boards.ts`** koja:
+   - Čita sve lekcije iz `courses-data.ts`
+   - Za svaku lekciju koja **fali** u `LESSON_MOVES`, generiše entry koristeći:
+     - **Opening lekcije** → ECO knjiga sa standardnim linijama (lokalna mapa naziv → SAN sekvenca)
+     - **Endgame lekcije** → katalog kanonskih FEN pozicija (Lucena, Philidor, Vančura, K+P opozicija, K+R vs K, K+B+N vs K, itd.)
+     - **Basics/Tactics/Strategy** → smart matching po ključnim rečima u naslovu/sadržaju lekcije ka biblioteci od ~80 reference pozicija
 
-## FAZA 3 — Homepage Bento Grid
+b) **Output** se generiše direktno u `src/lib/lesson-moves.ts` (append novih entries).
 
-Trenutno: vertikalni stack sekcija → liči na blog.
-Posle: **Bento dashboard** kao moderne premium app (Linear, Arc, Things 3).
+c) **Validacija**: skripta proverava da li je svaka SAN sekvenca legalna preko `chess.js` pre upisivanja. Nelegalni potezi se preskaču i loguju za ručni pregled.
 
-Layout (12-col grid, desktop):
+d) **Ručna kuracija** najbitnijih 30–50 lekcija (najpopularniji openings: Sicilian Najdorf, Caro-Kann main lines, London, Italian Giuoco) — gde generator nije dovoljan, pišu se direktno sa varijacijama.
 
-```text
-┌─────────────────┬───────────┬───────────┐
-│  HERO / Quick   │  Streak   │   Live    │
-│  Play (6 col)   │  (3 col)  │  Stream   │
-│                 │           │  (3 col)  │
-├──────┬──────────┼───────────┴───────────┤
-│ Last │  Daily   │   Top Rival (today)   │
-│ Game │ Missions │      (6 col)          │
-│ (3)  │   (3)    │                       │
-├──────┴──────────┼───────────────────────┤
-│   Leaderboard   │  Continue Lesson      │
-│   Snapshot      │  (6 col)              │
-│   (6 col)       │                       │
-└─────────────────┴───────────────────────┘
-```
+### 4. UI promene (Learn.tsx)
 
-- Svaka kartica: `glass-neon`, hover lift, klik vodi na full page
-- Mobile: sve karte stack-uju (jedna ispod druge)
-- Sve karte su **prave podatke driven** (nema fake brojeva — poštujemo postojeću politiku)
+Vrlo male — InteractiveBoard se već renderuje uslovno. Posle ovoga, **svaka** lekcija će imati board.
+
+- **Default mode = "explore"** za lekcije bez sekvence poteza (slobodno pomeranje figura iz date pozicije) — već postoji u InteractiveBoard.
+- **"guided" mode** ostaje za lekcije sa sekvencom (klikneš ▶ i prolaziš potez po potez sa objašnjenjima).
+- Dodaje se mali **"Free Explore" toggle** ako korisnik želi da pomera figure umesto da samo gleda demonstraciju.
+
+### 5. Šta ostaje na korisniku
+
+Zbog obima (530 lekcija), preporučujem **fazni rollout**:
+
+| Faza | Sadržaj | Lekcije |
+|------|---------|---------|
+| **1** | Svi opening kursevi (Sicilian, Caro-Kann, London, English, Nimzo, French, Scandinavian, Dutch, KID) | ~148 |
+| **2** | Svi endgame kursevi (rook, pawn, mastery) | ~72 |
+| **3** | Core curriculum (beginner / intermediate / advanced) | ~50 |
+| **4** | Tactics + Strategy + Middlegame ostatak | ~260 |
+
+Svaka faza je jedna iteracija. Posle svake, sajt se može testirati pre sledeće.
 
 ---
 
-## FAZA 4 — Page Transitions & Micro-interactions
-
-### 4.1 Page transitions
-- Wrapper u `App.tsx` sa Framer Motion `AnimatePresence`
-- Transition: `fade + 8px slide up`, 250ms, ease-out
-- Daje SPA feel (kao Linear, Notion)
-
-### 4.2 Button refinements
-- Inner gradient: suptilan top-to-bottom (1% lighter → 1% darker)
-- 1px gold top-edge highlight (samo na primary CTA)
-- Ripple efekt ostaje, ali tiše (opacity 0.15 umesto 0.3)
-- Active state: scale(0.97) + 50ms
-
-### 4.3 Input/Form refinements
-- Focus state: animirani gold underline (kao Stripe checkout)
-- Floating label pattern za auth/signup forme
-- Validation: ikona checkmark/X sa scale-in animacijom
-
-### 4.4 Loading states
-- Generic spinner → **rotirajući chess piece** (king ili knight SVG, 360° loop)
-- Skeleton loaders: shimmer u gold tonu (umesto sivog)
-- Empty states: kratka poruka + suggestion button (npr. "No games yet → Play your first game")
-
----
-
-## FAZA 5 — Navigation Refinement
-
-### 5.1 Navbar polish
-- Visina: konzistentna 64px (umesto trenutne shrinking)
-- Active state: gold underline ispod stavke (umesto background fill)
-- Dropdown panels: smanjiti padding, bolji vertical rhythm
-- Search ikona → otvara Command Palette (umesto posebnog search-a)
-
-### 5.2 Footer redesign
-- 3-kolona: Product / Community / Legal
-- Mini logo + tagline
-- Social linkovi (YouTube, Discord, X)
-- Suptilan top border sa gold gradient
-
----
-
-## FAZA 6 — Brand Touches
-
-### 6.1 Logo system
-- Animirani crown logo u navbar-u (suptilan shimmer svakih 8s)
-- Loading screen: centriran logo + thin progress ring
-
-### 6.2 Iconography konzistentnost
-- Sve lucide ikone: `strokeWidth={1.5}` (umesto default 2)
-- Custom chess piece ikone (king, queen, knight) za chess-specific akcije
-- Veličine: 16px (inline), 20px (buttons), 24px (cards), 32px (hero)
-
-### 6.3 Color accent system po sekciji
-Ostaje postojeći (Play=blue, Learn=purple, Compete=gold, Community=green) ali:
-- Smanjiti zasićenost za 20%
-- Koristi se samo na badges, active states, accent borders — ne na pozadinama
-
----
-
-## Tehnički detalji (za implementaciju)
+## Tehnički detalji
 
 **Fajlovi koji se menjaju:**
-- `src/index.css` — paleta, glow tokens, tipografija, radius
-- `tailwind.config.ts` — `fontFamily.mono`, color tokens
-- `src/App.tsx` — `AnimatePresence` wrapper, CommandPalette mount
-- `src/pages/Index.tsx` — Bento grid layout
-- `src/components/Navbar.tsx` — active state, search → Cmd+K
-- `src/components/Footer.tsx` — 3-kolona redesign
-- `src/components/ui/button.tsx` — inner gradient + edge highlight
-- `src/components/ui/input.tsx` — focus underline
+- `src/lib/lesson-moves.ts` — masivno proširenje (sa ~95 na 625 entries)
+- `src/components/learn/InteractiveBoard.tsx` — sitno: default mode "explore" za lekcije bez sekvence; "Free Explore" toggle
+- `src/pages/Learn.tsx` — uklanja se uslovno renderovanje board-a (sad uvek se prikazuje)
 
-**Nove komponente:**
-- `src/components/CommandPalette.tsx`
-- `src/components/PageTransition.tsx`
-- `src/components/ChessLoader.tsx` (rotirajući piece)
-- `src/components/EmptyState.tsx` (reusable)
+**Novi fajlovi:**
+- `scripts/generate-lesson-boards.ts` — generator (jednokratno se pokreće, output ide u lesson-moves.ts)
+- `src/lib/board-positions-library.ts` — katalog kanonskih FEN pozicija (Lucena, Philidor, opening main lines, klasični middlegame primeri)
 
-**Nova zavisnost:**
-- `cmdk` (za Command Palette — već u shadcn)
+**Bez novih dependency-ja** — koristimo postojeći `chess.js` i `react-chessboard`/custom board.
 
-**Šta se NE menja:**
-- Gold & Black brand identitet
-- Orbitron za H1/H2
-- 4D parallax / cursor glow
-- Glassmorphism filozofija
-- Sva postojeća funkcionalnost (samo vizuelno polish)
-
----
-
-## Predloženi redosled iteracija
-
-| Iter | Sadržaj | Zašto |
-|------|---------|-------|
-| **1** | FAZA 1 + FAZA 2 | Najveća vizuelna promena + UX win za 51 stranicu |
-| **2** | FAZA 3 (Bento) | Homepage je prva stvar koju nove posetioci vide |
-| **3** | FAZA 4 (transitions + micro) | Polishing — pretvara "dobro" u "premium" |
-| **4** | FAZA 5 + 6 | Final brand touches |
+**Validacija:** generator validira sve SAN sekvence pre nego što ih ubaci. Lekcije gde generator ne uspe da napravi smislen board su markirane i izlistane na kraju za ručnu reviziju.
 
 ---
 
 ## Pitanje pre starta
 
-Da li želiš:
+**A)** Idemo sa FAZA 1 (Openings — najbitnije, korisnik ovo eksplicitno traži). 148 lekcija dobija punu opening teoriju sa varijacijama.
 
-**A)** Sve faze redom (4 iteracije, najtemeljitije)
-**B)** Samo Iteracija 1 (FAZA 1+2 — najveći ROI, vidiš odmah razliku)
-**C)** Custom kombinacija — reci koje faze biraš
+**B)** Idemo redom kroz sve 4 faze u jednoj iteraciji (rizik: jedna velika izmena, više šanse za greške).
 
-Preporučujem **B** — krenemo sa fundamentom + Command Palette. Ako se svidi, nastavljamo na Bento i dalje.
+**C)** Custom — biraš koje kategorije prve.
+
+**Preporuka: A** — Openings su najveća korist (korisnik je to spomenuo prvo: "pogotovo za opening"), 148 lekcija, jedna iteracija, sajt ostaje stabilan.
