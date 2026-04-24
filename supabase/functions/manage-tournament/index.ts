@@ -396,10 +396,25 @@ async function awardStreakBadges(supabase: any, userId: string, streak: number, 
   }
 }
 
-// ===================== SWISS PAIRING =====================
+// ===================== SWISS PAIRING (no-rematch + color balance) =====================
+type Player = { user_id: string; rating_at_join: number; score: number | null };
+
+function pairKey(a: string, b: string) {
+  return a < b ? `${a}|${b}` : `${b}|${a}`;
+}
+
+/**
+ * Swiss pairing with:
+ *   - score-group preference (closest scores paired)
+ *   - no-rematch: skip pairs already in `playedPairs`
+ *   - color balance: prefer the player who has played White less often as White
+ *   - alternating fallback if no rematch-free pair is found in a group
+ */
 function generateSwissPairings(
-  players: Array<{ user_id: string; rating_at_join: number; score: number | null }>,
-  round: number
+  players: Player[],
+  round: number,
+  playedPairs: Set<string> = new Set(),
+  colorCounts: Map<string, { whites: number; blacks: number }> = new Map(),
 ) {
   const sorted = [...players].sort((a, b) => {
     const scoreDiff = (Number(b.score) || 0) - (Number(a.score) || 0);
@@ -410,22 +425,56 @@ function generateSwissPairings(
   const pairings: Array<{ white: string; black: string }> = [];
   const paired = new Set<string>();
 
+  const pickColor = (a: string, b: string): { white: string; black: string } => {
+    const ca = colorCounts.get(a) ?? { whites: 0, blacks: 0 };
+    const cb = colorCounts.get(b) ?? { whites: 0, blacks: 0 };
+    // Player with fewer whites gets white. Tie-break: alternate by round.
+    const aWhitesAdvantage = ca.whites - ca.blacks;
+    const bWhitesAdvantage = cb.whites - cb.blacks;
+    if (aWhitesAdvantage < bWhitesAdvantage) return { white: a, black: b };
+    if (bWhitesAdvantage < aWhitesAdvantage) return { white: b, black: a };
+    return round % 2 === 0 ? { white: a, black: b } : { white: b, black: a };
+  };
+
   for (let i = 0; i < sorted.length; i++) {
     if (paired.has(sorted[i].user_id)) continue;
+
+    // First pass: find an opponent we haven't already played
+    let partnerIdx = -1;
     for (let j = i + 1; j < sorted.length; j++) {
       if (paired.has(sorted[j].user_id)) continue;
-      const whiteFirst = (i + round) % 2 === 0;
-      pairings.push({
-        white: whiteFirst ? sorted[i].user_id : sorted[j].user_id,
-        black: whiteFirst ? sorted[j].user_id : sorted[i].user_id,
-      });
-      paired.add(sorted[i].user_id);
-      paired.add(sorted[j].user_id);
-      break;
+      if (!playedPairs.has(pairKey(sorted[i].user_id, sorted[j].user_id))) {
+        partnerIdx = j;
+        break;
+      }
     }
+    // Fallback: accept a rematch with the next available player rather than leaving someone out
+    if (partnerIdx === -1) {
+      for (let j = i + 1; j < sorted.length; j++) {
+        if (!paired.has(sorted[j].user_id)) { partnerIdx = j; break; }
+      }
+    }
+    if (partnerIdx === -1) continue;
+
+    const a = sorted[i].user_id;
+    const b = sorted[partnerIdx].user_id;
+    pairings.push(pickColor(a, b));
+    paired.add(a);
+    paired.add(b);
   }
 
   return pairings;
+}
+
+// ===================== ARENA PAIRING =====================
+// Arena: players are paired instantly with the closest available opponent by score,
+// preferring opponents they have NOT just played. There are no fixed rounds.
+function generateArenaPairings(
+  available: Player[],
+  playedPairs: Set<string>,
+  colorCounts: Map<string, { whites: number; blacks: number }>,
+) {
+  return generateSwissPairings(available, 1, playedPairs, colorCounts);
 }
 
 async function generateNextRound(supabase: any, tournamentId: string, nextRound: number) {
