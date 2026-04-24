@@ -223,12 +223,6 @@ const Tournaments = () => {
   const filtered = dbTournaments.filter(t => {
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
-    if (skillFilter !== "all") {
-      // Map skill tier to time control ranges as a proxy
-      const tcSec = parseInt(t.time_control_label.split("+")[0]) * 60 || 300;
-      if (skillFilter === "beginner" && tcSec < 180) return false; // beginners skip bullet
-      if (skillFilter === "advanced" && tcSec > 600) return false; // advanced skip classical
-    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       if (!t.name.toLowerCase().includes(q) && !t.time_control_label.toLowerCase().includes(q)) return false;
