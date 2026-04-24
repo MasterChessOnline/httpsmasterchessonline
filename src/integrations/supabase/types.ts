@@ -1480,61 +1480,85 @@ export type Database = {
       }
       tournaments: {
         Row: {
+          anti_cheat_level: string
+          auto_started: boolean
           category: string
           created_at: string
+          created_by: string | null
           current_round: number
           description: string
           entry_fee: number
           format: string
           id: string
+          is_rated: boolean
           max_players: number
           name: string
+          registration_deadline: string | null
           round_started_at: string | null
+          start_time_locked: boolean
           starts_at: string
           status: string
           time_control_increment: number
           time_control_label: string
           time_control_seconds: number
           total_rounds: number
+          tournament_type: string
           updated_at: string
+          visibility: string
         }
         Insert: {
+          anti_cheat_level?: string
+          auto_started?: boolean
           category?: string
           created_at?: string
+          created_by?: string | null
           current_round?: number
           description?: string
           entry_fee?: number
           format?: string
           id?: string
+          is_rated?: boolean
           max_players?: number
           name: string
+          registration_deadline?: string | null
           round_started_at?: string | null
+          start_time_locked?: boolean
           starts_at?: string
           status?: string
           time_control_increment?: number
           time_control_label?: string
           time_control_seconds?: number
           total_rounds?: number
+          tournament_type?: string
           updated_at?: string
+          visibility?: string
         }
         Update: {
+          anti_cheat_level?: string
+          auto_started?: boolean
           category?: string
           created_at?: string
+          created_by?: string | null
           current_round?: number
           description?: string
           entry_fee?: number
           format?: string
           id?: string
+          is_rated?: boolean
           max_players?: number
           name?: string
+          registration_deadline?: string | null
           round_started_at?: string | null
+          start_time_locked?: boolean
           starts_at?: string
           status?: string
           time_control_increment?: number
           time_control_label?: string
           time_control_seconds?: number
           total_rounds?: number
+          tournament_type?: string
           updated_at?: string
+          visibility?: string
         }
         Relationships: []
       }
@@ -1735,6 +1759,7 @@ export type Database = {
     }
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
