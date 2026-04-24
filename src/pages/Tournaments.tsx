@@ -18,6 +18,7 @@ import { useStreak } from "@/hooks/use-streak";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
 import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import Countdown from "@/components/Countdown";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
