@@ -240,7 +240,7 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   };
 
   const resetExplore = () => {
-    setExploreChess(new Chess(currentFen));
+    setExploreChess(new Chess(baseFen));
     setExploreSelected(null);
     setExploreLegalMoves([]);
   };
