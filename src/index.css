@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,32 +6,33 @@
 
 @layer base {
   :root {
-    --background: 30 8% 4%;
-    --foreground: 40 30% 92%;
+    /* Layered dark palette — depth without extra shadows */
+    --background: 24 10% 5%;
+    --foreground: 40 25% 94%;
 
-    --card: 30 10% 8%;
-    --card-foreground: 40 30% 92%;
+    --card: 28 9% 8%;
+    --card-foreground: 40 25% 94%;
 
-    --popover: 30 10% 8%;
-    --popover-foreground: 40 30% 92%;
+    --popover: 30 10% 11%;
+    --popover-foreground: 40 25% 94%;
 
     --primary: 43 90% 55%;
     --primary-foreground: 30 8% 4%;
 
-    --secondary: 30 50% 30%;
-    --secondary-foreground: 40 30% 92%;
+    --secondary: 30 40% 28%;
+    --secondary-foreground: 40 25% 94%;
 
-    --muted: 30 10% 13%;
-    --muted-foreground: 35 15% 45%;
+    --muted: 28 8% 14%;
+    --muted-foreground: 35 12% 55%;
 
     --accent: 43 80% 48%;
     --accent-foreground: 30 8% 4%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 35 12% 14%;
-    --input: 35 12% 14%;
+    --border: 38 10% 15%;
+    --input: 38 10% 15%;
     --ring: 43 90% 55%;
 
     --radius: 0.75rem;
@@ -46,15 +47,17 @@
 
     --font-display: 'Orbitron', sans-serif;
     --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --gradient-hero: linear-gradient(180deg, hsl(30 8% 4% / 0.2) 0%, hsl(30 8% 4% / 0.98) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(24 10% 5% / 0.2) 0%, hsl(24 10% 5% / 0.98) 100%);
     --gradient-neon: linear-gradient(135deg, hsl(43 90% 55%), hsl(30 60% 40%));
     --gradient-cyan: linear-gradient(135deg, hsl(43 70% 65%), hsl(43 90% 55%));
-    --gradient-card: linear-gradient(145deg, hsl(30 10% 10%), hsl(30 10% 6%));
-    --shadow-neon: 0 0 30px hsl(43 90% 55% / 0.15);
-    --shadow-neon-lg: 0 0 60px hsl(43 90% 55% / 0.2);
-    --shadow-card: 0 4px 24px hsl(30 8% 2% / 0.5);
-    --shadow-glow-purple: 0 0 40px hsl(30 60% 40% / 0.15);
+    --gradient-card: linear-gradient(145deg, hsl(28 9% 10%), hsl(28 9% 6%));
+    /* Reduced glow — gold as accent, not default */
+    --shadow-neon: 0 0 24px hsl(43 90% 55% / 0.08);
+    --shadow-neon-lg: 0 0 48px hsl(43 90% 55% / 0.12);
+    --shadow-card: 0 4px 24px hsl(24 10% 2% / 0.5);
+    --shadow-glow-purple: 0 0 40px hsl(30 60% 40% / 0.1);
   }
 }
 
@@ -66,15 +69,35 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  /* H1/H2 keep signature Orbitron, H3+ switch to Inter for readability */
+  h1, h2 {
     font-family: var(--font-display);
     letter-spacing: 0.02em;
-    /* Visibility rule: headings & subheadings must always be fully readable */
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
+  }
+  h3, h4, h5, h6 {
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  /* Mono font for numeric data — ratings, ELO, timers, stats */
+  .font-mono,
+  [data-numeric="true"],
+  .stat-number,
+  .timer-display {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
 
   /* Subheadings & paragraph copy — never overflow horizontally */
