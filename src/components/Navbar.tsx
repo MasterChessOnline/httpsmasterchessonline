@@ -314,7 +314,7 @@ const Navbar = () => {
                                       <div className="mx-2 my-1.5 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[8px] uppercase tracking-[0.1em] font-bold px-3 pt-1 pb-0.5" style={{ color: `hsla(${section.accent} / 0.5)` }}>
+                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-2 pb-1" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
                                         {item.subheading}
                                       </p>
                                     )}
