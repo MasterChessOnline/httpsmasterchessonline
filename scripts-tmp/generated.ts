@@ -1,5 +1,8 @@
 
   // ============= AUTO-GENERATED OPENING BOARDS =============
+  // Each entry maps a lesson ID to an interactive opening sequence.
+  // Boards demonstrate the specific opening line covered in that lesson.
+
   "ki-14": {
     moves: [
       M("d4", "1.d4 — White claims the center and prepares a strategic battle."),
@@ -14,6 +17,9 @@
       M("O-O", "5...O-O — Black castles into the King's Indian fortress."),
       M("Be2", "6.Be2 — The Classical Mar del Plata setup."),
       M("e5", "6...e5! — The thematic strike. Black challenges the center."),
+      M("d5", "7.d5 — Locking the center, both sides will attack on opposite wings."),
+      M("Nbd7", "7...Nbd7 — Preparing ...Nh5 and ...f5."),
+      M("O-O", "8.O-O Nh5 9.Re1 — Modern theory."),
     ],
   },
   "ki-15": {
@@ -66,6 +72,9 @@
       M("O-O", "5...O-O — Black castles into the King's Indian fortress."),
       M("Be2", "6.Be2 — The Classical Mar del Plata setup."),
       M("e5", "6...e5! — The thematic strike. Black challenges the center."),
+      M("d5", "7.d5 Nbd7 8.b4 — White's queenside steamroller."),
+      M("Nbd7", "7...Nbd7"),
+      M("b4", "8.b4 — The Bayonet! White rushes the queenside."),
     ],
   },
   "ki-18": {
@@ -82,6 +91,9 @@
       M("O-O", "5...O-O — Black castles into the King's Indian fortress."),
       M("Be2", "6.Be2 — The Classical Mar del Plata setup."),
       M("e5", "6...e5! — The thematic strike. Black challenges the center."),
+      M("d5", "7.d5 a5 8.Bg5 — Petrosian's positional approach."),
+      M("a5", "7...a5 — Restraining b4."),
+      M("Bg5", "8.Bg5 — Pinning the f6 knight."),
     ],
   },
   "ki-19": {
@@ -98,6 +110,9 @@
       M("O-O", "5...O-O — Black castles into the King's Indian fortress."),
       M("Be2", "6.Be2 — The Classical Mar del Plata setup."),
       M("e5", "6...e5! — The thematic strike. Black challenges the center."),
+      M("dxe5", "7.dxe5 dxe5 8.Qxd8 — Trading queens leads to a deceptively complex endgame."),
+      M("dxe5", "7...dxe5"),
+      M("Qxd8", "8.Qxd8 Rxd8 9.Bg5 — Endgame structure."),
     ],
   },
   "ki-20": {
@@ -180,6 +195,7 @@
       M("O-O", "5...O-O — Black castles into the King's Indian fortress."),
       M("Be2", "6.Be2 — The Classical Mar del Plata setup."),
       M("e5", "6...e5! — The thematic strike. Black challenges the center."),
+      M("g3", "5.g3 — Quiet fianchetto setup."),
     ],
   },
   "ki-25": {
@@ -196,6 +212,8 @@
       M("O-O", "5...O-O — Black castles into the King's Indian fortress."),
       M("Be2", "6.Be2 — The Classical Mar del Plata setup."),
       M("e5", "6...e5! — The thematic strike. Black challenges the center."),
+      M("Bg5", "6.Bg5!? — The Averbakh System! Pin first, develop later."),
+      M("c5", "6...c5 — Counterstrike against d4."),
     ],
   },
   "ki-26": {
@@ -212,6 +230,7 @@
       M("O-O", "5...O-O — Black castles into the King's Indian fortress."),
       M("Be2", "6.Be2 — The Classical Mar del Plata setup."),
       M("e5", "6...e5! — The thematic strike. Black challenges the center."),
+      M("d5", "7.d5 Nbd7 8.O-O Nh5 9.g3 — Modern flexible setup."),
     ],
   },
   "ki-27": {
@@ -260,6 +279,7 @@
       M("O-O", "5...O-O — Black castles into the King's Indian fortress."),
       M("Be2", "6.Be2 — The Classical Mar del Plata setup."),
       M("e5", "6...e5! — The thematic strike. Black challenges the center."),
+      M("g3", "5.g3 d6 6.Bg2 Nbd7 — Smyslov's flexible plan."),
     ],
   },
   "ki-30": {
@@ -334,6 +354,10 @@
       M("c6", "1...c6 — The Caro-Kann! Black prepares ...d5 with rock-solid structure."),
       M("d4", "2.d4 — White accepts the challenge and builds a classical center."),
       M("d5", "2...d5 — Black contests the center directly. Now White must decide: exchange, advance, or defend."),
+      M("Nc3", "3.Nc3 dxe4 4.Nxe4 Bf5 — The Classical, Capablanca's choice."),
+      M("dxe4", "3...dxe4"),
+      M("Nxe4", "4.Nxe4"),
+      M("Bf5", "4...Bf5 — The bishop comes out before being locked in."),
     ],
   },
   "ck-13": {
@@ -419,6 +443,9 @@
       M("c6", "1...c6 — The Caro-Kann! Black prepares ...d5 with rock-solid structure."),
       M("d4", "2.d4 — White accepts the challenge and builds a classical center."),
       M("d5", "2...d5 — Black contests the center directly. Now White must decide: exchange, advance, or defend."),
+      M("e5", "3.e5 — The Advance! White grabs space."),
+      M("Bf5", "3...Bf5 — Same trick: bishop out first."),
+      M("Nf3", "4.Nf3 e6 5.Be2 — Short Variation, modern main line."),
     ],
   },
   "ck-22": {
@@ -427,6 +454,8 @@
       M("c6", "1...c6 — The Caro-Kann! Black prepares ...d5 with rock-solid structure."),
       M("d4", "2.d4 — White accepts the challenge and builds a classical center."),
       M("d5", "2...d5 — Black contests the center directly. Now White must decide: exchange, advance, or defend."),
+      M("exd5", "3.exd5 — The Exchange. White trades to play against the IQP."),
+      M("cxd5", "3...cxd5 4.Bd3 Nc6 5.c3 — Solid setup."),
     ],
   },
   "ck-23": {
@@ -467,6 +496,9 @@
       M("c6", "1...c6 — The Caro-Kann! Black prepares ...d5 with rock-solid structure."),
       M("d4", "2.d4 — White accepts the challenge and builds a classical center."),
       M("d5", "2...d5 — Black contests the center directly. Now White must decide: exchange, advance, or defend."),
+      M("exd5", "3.exd5 cxd5 4.c4 — The Panov-Botvinnik Attack!"),
+      M("cxd5", "3...cxd5"),
+      M("c4", "4.c4 Nf6 5.Nc3 — Sharp IQP play."),
     ],
   },
   "ck-28": {
@@ -491,6 +523,7 @@
       M("c6", "1...c6 — The Caro-Kann! Black prepares ...d5 with rock-solid structure."),
       M("d4", "2.d4 — White accepts the challenge and builds a classical center."),
       M("d5", "2...d5 — Black contests the center directly. Now White must decide: exchange, advance, or defend."),
+      M("Nc3", "3.Nc3 dxe4 4.Nxe4 Bf5 5.Ng3 — Forcing the bishop back."),
     ],
   },
   "ls-5": {
@@ -503,6 +536,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "5.c3 c5 6.Nbd2 Nc6 — The classical London triangle."),
     ],
   },
   "ls-6": {
@@ -515,6 +549,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("Bd3", "4.Bd3 c5 5.c3 — Eyeing h7."),
     ],
   },
   "ls-8": {
@@ -539,6 +574,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("Nbd2", "4.Nbd2 c5 5.c3 Nc6 — Modern flexible setup."),
     ],
   },
   "ls-10": {
@@ -564,6 +600,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("Nbd2", "4.Nbd2 5.Ne5 — Preparing the Ne5 outpost."),
     ],
   },
   "ls-12": {
@@ -627,6 +664,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "London vs ...c6: 1.d4 d5 2.Bf4 c6 3.e3 — Solid clamp."),
     ],
   },
   "ls-17": {
@@ -663,6 +701,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("Nc3", "Jobava: 2.Nc3 Nf6 3.Bf4 — Sharp aggressive London!"),
     ],
   },
   "ls-20": {
@@ -687,6 +726,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "Triangle: pawns on c3, d4, e3 — the London skeleton."),
     ],
   },
   "ls-22": {
@@ -699,6 +739,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("Qd2", "Long castling London: Qd2, O-O-O — Aggressive plan!"),
     ],
   },
   "ls-23": {
@@ -711,6 +752,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "Quiet endgame plans arise from London structures."),
     ],
   },
   "ls-24": {
@@ -735,6 +777,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "Modern London theory: deep but accessible."),
     ],
   },
   "ls-26": {
@@ -747,6 +790,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "Against symmetric ...Bd6: trade or play around it."),
     ],
   },
   "ls-27": {
@@ -759,6 +803,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "Build a complete London repertoire vs all defenses."),
     ],
   },
   "ls-28": {
@@ -771,6 +816,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "Key London ideas: Bd3, Ne5, Qf3-h3 attack."),
     ],
   },
   "ls-29": {
@@ -783,6 +829,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "5.c3 — Always c3 to secure d4 and prepare Bd3."),
     ],
   },
   "ls-30": {
@@ -795,6 +842,7 @@
       M("e6", "3...e6 — A solid Black setup."),
       M("e3", "4.e3 — Solid pawn structure, preparing Bd3 and c3."),
       M("Bd6", "4...Bd6 — Challenging the London bishop."),
+      M("c3", "Strategic plans: kingside attack, central play, or queenside expansion."),
     ],
   },
   "en-4": {
@@ -807,6 +855,7 @@
       M("d5", "3...d5 — Black strikes back in the center."),
       M("cxd5", "4.cxd5 — Capturing to free the c-file."),
       M("Nxd5", "4...Nxd5 — Recapturing centrally."),
+      M("Bg2", "5.Bg2 — The Reversed Dragon! White plays as Black does in the Sicilian Dragon."),
     ],
   },
   "en-5": {
@@ -832,6 +881,7 @@
       M("d5", "3...d5 — Black strikes back in the center."),
       M("cxd5", "4.cxd5 — Capturing to free the c-file."),
       M("Nxd5", "4...Nxd5 — Recapturing centrally."),
+      M("Bg2", "Symmetric: 1.c4 c5 2.Nc3 Nc6 3.g3 g6 4.Bg2 Bg7 — Mirror image!"),
     ],
   },
   "en-7": {
@@ -844,6 +894,7 @@
       M("d5", "3...d5 — Black strikes back in the center."),
       M("cxd5", "4.cxd5 — Capturing to free the c-file."),
       M("Nxd5", "4...Nxd5 — Recapturing centrally."),
+      M("e4", "Botvinnik: 1.c4 e5 2.Nc3 Nc6 3.g3 g6 4.Bg2 Bg7 5.e4 — Both sides in fianchetto with central pawns."),
     ],
   },
   "en-8": {
@@ -892,6 +943,7 @@
       M("d5", "3...d5 — Black strikes back in the center."),
       M("cxd5", "4.cxd5 — Capturing to free the c-file."),
       M("Nxd5", "4...Nxd5 — Recapturing centrally."),
+      M("e4", "Mikenas: 1.c4 Nf6 2.Nc3 e6 3.e4 — The aggressive Mikenas-Carls!"),
     ],
   },
   "en-13": {
@@ -952,6 +1004,7 @@
       M("d5", "3...d5 — Black strikes back in the center."),
       M("cxd5", "4.cxd5 — Capturing to free the c-file."),
       M("Nxd5", "4...Nxd5 — Recapturing centrally."),
+      M("d4", "Transposing: 1.c4 e6 2.Nc3 d5 3.d4 — Catalan-like positions."),
     ],
   },
   "en-19": {
@@ -1106,6 +1159,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "4.d4 Nf6 5.Nf3 c6 — Main Line, queen on a5."),
     ],
   },
   "sc-6": {
@@ -1136,6 +1190,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Modern: 2...Nf6 3.d4 Nxd5 — Avoiding queen exposure."),
     ],
   },
   "sc-9": {
@@ -1156,6 +1211,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Portuguese: 2...Nf6 3.d4 Bg4!? — Sharp gambit line."),
     ],
   },
   "sc-11": {
@@ -1216,6 +1272,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d3", "White's Anti-Scandinavian: 2.d3 — Refusing to capture."),
     ],
   },
   "sc-17": {
@@ -1226,6 +1283,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Endgames feature Black's queenside majority potential."),
     ],
   },
   "sc-18": {
@@ -1236,6 +1294,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "4.d4 Nf6 5.Nf3 Bg4 6.h3 — Modern theory."),
     ],
   },
   "sc-19": {
@@ -1246,6 +1305,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Marshall: 4.d4 Nf6 5.Bd3 — Aggressive setup."),
     ],
   },
   "sc-20": {
@@ -1256,6 +1316,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Mieses: 4.d4 Nf6 5.Nf3 Bf5 — Active piece play."),
     ],
   },
   "sc-21": {
@@ -1276,6 +1337,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Lasker: ...Bg4 setup — Pinning the knight."),
     ],
   },
   "sc-23": {
@@ -1286,6 +1348,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Pytel: ...Qd6 with queenside castling ideas."),
     ],
   },
   "sc-24": {
@@ -1296,6 +1359,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Bronstein's interpretation of the Scandinavian."),
     ],
   },
   "sc-25": {
@@ -1306,6 +1370,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Anderssen's old line: ...Qa5 with ...e5 break."),
     ],
   },
   "sc-26": {
@@ -1316,6 +1381,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "After 4.d4: ...e5 — Aggressive central counterstrike!"),
     ],
   },
   "sc-27": {
@@ -1326,6 +1392,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Black develops with ...Nf6, ...Bf5/g4, ...e6, ...Nbd7"),
     ],
   },
   "sc-28": {
@@ -1336,6 +1403,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Black plays ...g6, ...Bg7 in some lines."),
     ],
   },
   "sc-29": {
@@ -1346,6 +1414,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Key structure: Black has c6+d5 (later) similar to Caro."),
     ],
   },
   "sc-30": {
@@ -1356,6 +1425,7 @@
       M("Qxd5", "2...Qxd5 — The Main Line. Black accepts losing time on the queen."),
       M("Nc3", "3.Nc3 — Attacking the queen with tempo."),
       M("Qa5", "3...Qa5 — The classical retreat, eyeing the long diagonal."),
+      M("d4", "Plans: queenside castling, central pressure, queen rerouting."),
     ],
   },
   "du-4": {
@@ -1470,6 +1540,7 @@
       M("e6", "3...e6 — Preparing the Classical setup."),
       M("Nf3", "4.Nf3 — Fluid development."),
       M("Be7", "4...Be7 — Classical Dutch setup."),
+      M("d5", "Stonewall: ...e6, ...d5, ...c6, ...Bd6 — Locked structure!"),
     ],
   },
   "du-15": {
@@ -1494,6 +1565,7 @@
       M("e6", "3...e6 — Preparing the Classical setup."),
       M("Nf3", "4.Nf3 — Fluid development."),
       M("Be7", "4...Be7 — Classical Dutch setup."),
+      M("e4", "Staunton Gambit: 2.e4!? — White sacs a pawn for development."),
     ],
   },
   "du-17": {
@@ -1506,6 +1578,7 @@
       M("e6", "3...e6 — Preparing the Classical setup."),
       M("Nf3", "4.Nf3 — Fluid development."),
       M("Be7", "4...Be7 — Classical Dutch setup."),
+      M("Bg5", "Anti-Dutch: 2.Bg5 — Trying to provoke ...h6 weaknesses."),
     ],
   },
   "du-18": {
@@ -1518,6 +1591,7 @@
       M("e6", "3...e6 — Preparing the Classical setup."),
       M("Nf3", "4.Nf3 — Fluid development."),
       M("Be7", "4...Be7 — Classical Dutch setup."),
+      M("Nc3", "Anti-Dutch: 2.Nc3 — Aggressive Anti-Dutch."),
     ],
   },
   "du-19": {
@@ -1592,6 +1666,7 @@
       M("e6", "3...e6 — Preparing the Classical setup."),
       M("Nf3", "4.Nf3 — Fluid development."),
       M("Be7", "4...Be7 — Classical Dutch setup."),
+      M("d5", "Stonewall ML: ...e6, ...d5, ...c6, ...Bd6, ...Nbd7, ...O-O"),
     ],
   },
   "du-25": {
@@ -1678,6 +1753,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Be3", "6.Be3 e6 7.f3 b5 8.Qd2 — English Attack: f3, Qd2, O-O-O, h-pawn storm."),
     ],
   },
   "sd-8": {
@@ -1741,6 +1817,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Bg5", "6.Bg5 — The Main Line. Pinning, threatening Bxf6."),
     ],
   },
   "sd-12": {
@@ -1755,6 +1832,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Be2", "6.Be2 e5 — The Classical Najdorf."),
     ],
   },
   "sd-13": {
@@ -1769,6 +1847,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Bg5", "6.Bg5 e6 7.f4 Qb6!? — The Poisoned Pawn! Black grabs b2."),
     ],
   },
   "sd-14": {
@@ -1783,6 +1862,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Bc4", "6.Bc4 — The Fischer-Sozin Attack!"),
     ],
   },
   "sd-15": {
@@ -1797,6 +1877,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("h3", "6.h3 — Modern Adams Attack."),
     ],
   },
   "sd-16": {
@@ -1862,6 +1943,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Be3", "6.Be3 e5 — Modern Najdorf with ...e5."),
     ],
   },
   "sd-20": {
@@ -1914,6 +1996,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("f3", "6.f3 — Direct preparation for the English Attack."),
     ],
   },
   "sd-23": {
@@ -1928,6 +2011,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("g3", "6.g3 — Quiet fianchetto setup."),
     ],
   },
   "sd-24": {
@@ -1942,6 +2026,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Rg1", "6.Rg1 — The fashionable Topalov idea, preparing g4."),
     ],
   },
   "sd-25": {
@@ -1956,6 +2041,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Qf3", "6.Qf3 — The hypermodern queen development."),
     ],
   },
   "sd-26": {
@@ -1970,6 +2056,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Nc6", "Sveshnikov: 5...Nc6 6.Ndb5 d6 7.Bf4 e5 8.Bg5 — Sharp main line."),
     ],
   },
   "sd-27": {
@@ -1984,6 +2071,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Nc6", "Taimanov: 4...Nc6 5.Nc3 Qc7 — Flexible setup."),
     ],
   },
   "sd-28": {
@@ -2012,6 +2100,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Be3", "Dragon: 6.Be3 g6 7.f3 Bg7 8.Qd2 — Yugoslav Attack!"),
     ],
   },
   "sd-30": {
@@ -2026,6 +2115,7 @@
       M("Nf6", "4...Nf6 — Attacking e4 with tempo."),
       M("Nc3", "5.Nc3 — Defending e4."),
       M("a6", "5...a6 — The Najdorf! The most popular Sicilian, controlling b5 and preparing flexible play."),
+      M("Nc6", "Accelerated Dragon: ...Nc6 + ...g6 — Avoiding Yugoslav."),
     ],
   },
   "ni-8": {
@@ -2048,6 +2138,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "4.e3 — Rubinstein. Solid and flexible."),
     ],
   },
   "ni-10": {
@@ -2058,6 +2149,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("Qc2", "4.Qc2 — Classical Nimzo, avoiding doubled pawns."),
     ],
   },
   "ni-11": {
@@ -2068,6 +2160,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("a3", "4.a3 Bxc3+ 5.bxc3 — Sämisch: doubled pawns for the bishop pair."),
     ],
   },
   "ni-12": {
@@ -2078,6 +2171,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("Bg5", "4.Bg5 — Leningrad! Pinning the f6 knight."),
     ],
   },
   "ni-13": {
@@ -2088,6 +2182,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("Nf3", "4.Nf3 — Reshevsky's flexible move order."),
     ],
   },
   "ni-14": {
@@ -2098,6 +2193,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "4.e3 c5 5.Bd3 Nc6 6.Nf3 Bxc3+ — Hübner!"),
     ],
   },
   "ni-15": {
@@ -2108,6 +2204,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("a3", "4.a3 Bxc3+ 5.bxc3 d5 — Modern Sämisch theory."),
     ],
   },
   "ni-16": {
@@ -2118,6 +2215,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("Qc2", "4.Qc2 O-O 5.a3 Bxc3+ 6.Qxc3 — Classical main line."),
     ],
   },
   "ni-17": {
@@ -2128,6 +2226,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "4.e3 O-O 5.Bd3 d5 6.Nf3 c5 — Rubinstein main line."),
     ],
   },
   "ni-18": {
@@ -2150,6 +2249,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "4.e3 O-O 5.Bd3 c5 6.Nf3 d5 — Bronstein move order."),
     ],
   },
   "ni-20": {
@@ -2160,6 +2260,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "Black's ...d5 setup — Classical strategy."),
     ],
   },
   "ni-21": {
@@ -2170,6 +2271,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "Black's ...c5 setup — Hypermodern strategy."),
     ],
   },
   "ni-22": {
@@ -2180,6 +2282,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "Black's ...b6 setup — Fianchetto strategy."),
     ],
   },
   "ni-23": {
@@ -2190,6 +2293,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("Qc2", "Endgame patterns favor the side without doubled pawns."),
     ],
   },
   "ni-24": {
@@ -2200,6 +2304,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "Key structures: doubled c-pawns, IQP, hanging pawns."),
     ],
   },
   "ni-25": {
@@ -2210,6 +2315,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "Plans: targeting doubled pawns, central control, kingside attack."),
     ],
   },
   "ni-26": {
@@ -2220,6 +2326,7 @@
       M("e6", "2...e6 — Preparing ...Bb4 or ...d5."),
       M("Nc3", "3.Nc3 — Inviting the Nimzo-Indian."),
       M("Bb4", "3...Bb4! — The Nimzo-Indian Defense! The bishop pins the knight, threatening to double White's pawns."),
+      M("e3", "Tactical patterns: ...Bxc3 trades, ...Ne4 jumps, ...d5 breaks."),
     ],
   },
   "ni-27": {
