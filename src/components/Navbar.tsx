@@ -132,6 +132,7 @@ const Navbar = () => {
   const [liveGames, setLiveGames] = useState(0);
   const [activeTournaments, setActiveTournaments] = useState(0);
   const { user, profile, loading, signOut } = useAuth();
+  const { open: openCmd } = useCommandPalette();
   const location = useLocation();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
   const searchRef = useRef<HTMLInputElement>(null);
