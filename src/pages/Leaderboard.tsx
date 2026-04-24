@@ -225,6 +225,7 @@ const Leaderboard = () => {
                           {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
                         </span>
                         <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={ratingOf(player)} size="xs" />
+                        <RankBadge rating={ratingOf(player)} size="sm" />
                         {player.country_flag && (
                           <span className="text-xs" title={findCountry(player.country)?.name ?? ""}>{player.country_flag}</span>
                         )}
