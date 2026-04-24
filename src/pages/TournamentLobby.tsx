@@ -13,11 +13,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Trophy, Clock, Users, Swords, Timer, Crown, Send, Eye, MessageSquare,
-  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X,
+  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X, Share2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Countdown from "@/components/Countdown";
 import { supabase } from "@/integrations/supabase/client";
+import ShareInviteDialog from "@/components/ShareInviteDialog";
 
 function sortByTiebreak<T extends { score: any; buchholz?: any; sonneborn?: any; wins?: any; rating_at_join: number }>(a: T, b: T) {
   const d = (Number(b.score) || 0) - (Number(a.score) || 0); if (d) return d;
@@ -55,6 +56,7 @@ const TournamentLobby = () => {
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState<"standings" | "rounds" | "chat">("standings");
   const [dismissedBanners, setDismissedBanners] = useState<Record<string, number>>({});
+  const [shareOpen, setShareOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const currentRound = tournament?.current_round ?? 0;
@@ -220,6 +222,11 @@ const TournamentLobby = () => {
               {isActive && myPairing?.game_id && (
                 <Button onClick={() => navigate(`/play/online?game=${myPairing.game_id}`)}>
                   <Swords className="h-4 w-4 mr-1" /> Play Your Game
+                </Button>
+              )}
+              {!isFinished && (
+                <Button variant="outline" onClick={() => setShareOpen(true)}>
+                  <Share2 className="h-4 w-4 mr-1" /> Invite friends
                 </Button>
               )}
             </div>
@@ -484,6 +491,16 @@ const TournamentLobby = () => {
         )}
       </main>
       <Footer />
+      {tournament && (
+        <ShareInviteDialog
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          title={`Invite friends to "${tournament.name}"`}
+          url={typeof window !== "undefined" ? `${window.location.origin}/tournaments/${tournament.id}` : ""}
+          message={`Join me in the "${tournament.name}" tournament on MasterChess! Starts ${new Date(tournament.starts_at).toLocaleString()}.`}
+          emailSubject={`Tournament invite: ${tournament.name}`}
+        />
+      )}
     </div>
   );
 };
