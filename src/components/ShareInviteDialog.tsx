@@ -105,15 +105,19 @@ const ShareInviteDialog = ({
   };
 
   const handleNativeShare = async () => {
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
+    const data = { title: emailSubject, text: message, url };
+    const nav: any = typeof navigator !== "undefined" ? navigator : null;
+    const canShare = nav && typeof nav.share === "function" && (!nav.canShare || nav.canShare(data));
+    if (canShare) {
       try {
-        await (navigator as any).share({ title: emailSubject, text: message, url });
-      } catch {
-        /* user cancelled */
+        await nav.share(data);
+        return;
+      } catch (err: any) {
+        // AbortError = user cancelled; anything else (e.g. Permission denied in iframe) → fall back to copy
+        if (err?.name === "AbortError") return;
       }
-    } else {
-      handleCopy();
     }
+    handleCopy();
   };
 
   return (
