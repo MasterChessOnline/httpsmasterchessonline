@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTournament } from "@/hooks/use-tournament";
 import { useTournamentNotifications } from "@/hooks/use-tournament-notifications";
+import { useTournamentAntiCheat } from "@/hooks/use-tournament-anti-cheat";
 import { useStreak } from "@/hooks/use-streak";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -39,6 +40,11 @@ const TournamentLobby = () => {
 
   const { streak } = useStreak(user?.id);
   useTournamentNotifications(tournament, myPairing, user?.id);
+  useTournamentAntiCheat({
+    tournamentId: tournament?.id,
+    gameId: myPairing?.game_id ?? null,
+    enabled: !!user && isRegistered && tournament?.status === "active",
+  });
 
   const [chatInput, setChatInput] = useState("");
   const [joining, setJoining] = useState(false);
