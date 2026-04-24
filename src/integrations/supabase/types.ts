@@ -1457,31 +1457,40 @@ export type Database = {
       }
       tournament_registrations: {
         Row: {
+          buchholz: number
           created_at: string
           id: string
           rating_at_join: number
           score: number
+          sonneborn: number
           tiebreak: number
           tournament_id: string
           user_id: string
+          wins: number
         }
         Insert: {
+          buchholz?: number
           created_at?: string
           id?: string
           rating_at_join?: number
           score?: number
+          sonneborn?: number
           tiebreak?: number
           tournament_id: string
           user_id: string
+          wins?: number
         }
         Update: {
+          buchholz?: number
           created_at?: string
           id?: string
           rating_at_join?: number
           score?: number
+          sonneborn?: number
           tiebreak?: number
           tournament_id?: string
           user_id?: string
+          wins?: number
         }
         Relationships: [
           {
@@ -1857,6 +1866,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      recalc_tournament_tiebreaks: {
+        Args: { _tid: string }
+        Returns: undefined
       }
       server_now: { Args: never; Returns: string }
       tournament_color_balance: {
