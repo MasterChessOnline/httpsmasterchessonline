@@ -24,6 +24,8 @@ import BadgeGrid from "@/components/BadgeGrid";
 import { getStreakState, type StreakState } from "@/lib/progression";
 
 import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
+import UserAvatar from "@/components/UserAvatar";
+import { primeUserProfile } from "@/hooks/use-user-avatar";
 
 interface ProfileData {
   id: string;
