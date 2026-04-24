@@ -801,7 +801,7 @@ const Play = () => {
               </div>
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 <p className="text-sm font-bold text-foreground">{playerName}</p>
-                <TitleBadge titleKey={(profile as any)?.highest_title_key} rating={playerRating} size="xs" />
+                <TitleBadge rating={playerRating} mode="bot" size="xs" />
               </div>
               <p className="text-xs text-muted-foreground">{playerRating} Elo</p>
             </motion.div>
@@ -827,7 +827,7 @@ const Play = () => {
               </div>
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 <p className="text-sm font-bold text-foreground">{currentBot.name} {currentBot.countryFlag}</p>
-                <TitleBadge rating={currentBot.rating} size="xs" />
+                <TitleBadge rating={currentBot.rating} mode="bot" size="xs" />
               </div>
               <p className="text-xs text-muted-foreground">{currentBot.rating} Elo</p>
             </motion.div>
@@ -965,7 +965,7 @@ const Play = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <p className="text-xs font-bold text-foreground truncate">{currentBot.name} {currentBot.countryFlag}</p>
-                  <TitleBadge rating={currentBot.rating} size="xs" />
+                  <TitleBadge rating={currentBot.rating} mode="bot" size="xs" />
                 </div>
                 <p className="text-[10px] text-muted-foreground">{currentBot.rating} Elo · {aiColor === "w" ? "⬜ White" : "⬛ Black"}</p>
               </div>
@@ -1022,7 +1022,7 @@ const Play = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <p className="text-xs font-bold text-foreground truncate">{profile?.display_name || profile?.username || "You"}</p>
-                  <TitleBadge titleKey={(profile as any)?.highest_title_key} rating={(profile as any)?.bot_rating ?? 1200} size="xs" />
+                  <TitleBadge rating={(profile as any)?.bot_rating ?? 1200} mode="bot" size="xs" />
                 </div>
                 <p className="text-[10px] text-muted-foreground">{(profile as any)?.bot_rating ?? 1200} Elo · {playerColor === "w" ? "⬜ White" : "⬛ Black"}</p>
               </div>

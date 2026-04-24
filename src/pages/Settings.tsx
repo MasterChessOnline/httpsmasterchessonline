@@ -362,11 +362,19 @@ const Settings = () => {
               </div>
 
               <div>
-                <Label className="text-xs text-muted-foreground">Rating &amp; Title</Label>
+                <Label className="text-xs text-muted-foreground">Online Rating &amp; Title</Label>
                 <div className="flex items-center gap-3 mt-1 flex-wrap">
                   <span className="text-2xl font-mono font-bold text-primary">{profile?.rating || 400}</span>
-                  <TitleBadge titleKey={(profile as any)?.highest_title_key} rating={profile?.rating || 400} size="sm" hideUnranked={false} />
+                  <TitleBadge rating={profile?.rating || 400} mode="online" size="sm" hideUnranked={false} />
                   <RankBadge rating={profile?.rating || 400} showProgress />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs text-muted-foreground">Bot Rating &amp; Title</Label>
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <span className="text-2xl font-mono font-bold text-accent">{(profile as any)?.bot_rating || 1200}</span>
+                  <TitleBadge rating={(profile as any)?.bot_rating || 1200} mode="bot" size="sm" hideUnranked={false} />
                 </div>
               </div>
             </div>

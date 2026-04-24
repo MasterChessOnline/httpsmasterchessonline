@@ -302,7 +302,7 @@ const Profile = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <TitleBadge titleKey={profileData.highest_title_key ?? getTitle(profileData.bot_rating ?? 1200).key} size="sm" hideUnranked={false} />
+                  <TitleBadge rating={profileData.bot_rating ?? 1200} mode="bot" size="sm" hideUnranked={false} />
                   <RankBadge rating={profileData.rating} size="sm" />
                   {streak && (
                     <StreakBadge streak={streak.current_streak} best={streak.best_streak} size="sm" showBest />
