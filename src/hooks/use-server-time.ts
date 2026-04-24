@@ -19,7 +19,6 @@ export function useServerTime() {
     let cancelled = false;
     const sync = async () => {
       const t0 = Date.now();
-      // @ts-expect-error rpc name not yet in generated types — runtime is fine
       const { data, error } = await supabase.rpc("server_now");
       const t1 = Date.now();
       if (cancelled || error || !data) return;
