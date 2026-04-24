@@ -191,7 +191,8 @@ async function handleStart(supabase: any, tournament_id: string) {
     return jsonRes({ error: "Need at least 2 players" }, 400);
   }
 
-  const pairings = generateSwissPairings(players, 1);
+  // Round 1 has no history yet
+  const pairings = generateSwissPairings(players, 1, new Set(), new Map());
 
   for (const pairing of pairings) {
     const { data: onlineGame } = await supabase
@@ -492,7 +493,26 @@ async function generateNextRound(supabase: any, tournamentId: string, nextRound:
 
   if (!players || players.length < 2 || !tournament) return;
 
-  const pairings = generateSwissPairings(players, nextRound);
+  // Build no-rematch + color-balance state from prior rounds
+  const { data: priorPairings } = await supabase
+    .from("tournament_pairings")
+    .select("white_player_id, black_player_id")
+    .eq("tournament_id", tournamentId);
+
+  const playedPairs = new Set<string>();
+  const colorCounts = new Map<string, { whites: number; blacks: number }>();
+  for (const p of priorPairings || []) {
+    if (!p.black_player_id) continue;
+    const a = p.white_player_id < p.black_player_id ? p.white_player_id : p.black_player_id;
+    const b = p.white_player_id < p.black_player_id ? p.black_player_id : p.white_player_id;
+    playedPairs.add(`${a}|${b}`);
+    const w = colorCounts.get(p.white_player_id) ?? { whites: 0, blacks: 0 };
+    w.whites++; colorCounts.set(p.white_player_id, w);
+    const k = colorCounts.get(p.black_player_id) ?? { whites: 0, blacks: 0 };
+    k.blacks++; colorCounts.set(p.black_player_id, k);
+  }
+
+  const pairings = generateSwissPairings(players, nextRound, playedPairs, colorCounts);
 
   for (const pairing of pairings) {
     const { data: onlineGame } = await supabase
