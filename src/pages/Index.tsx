@@ -107,6 +107,101 @@ const PreferenceToggles = () => {
   );
 };
 
+/* ── HERO BOARD — large, clean, the heart of the homepage ── */
+const HERO_PIECES: Record<string, string> = {
+  K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
+  k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
+};
+const HERO_INITIAL = [
+  ["r","n","b","q","k","b","n","r"],
+  ["p","p","p","p","p","p","p","p"],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["","","","","","","",""],
+  ["P","P","P","P","P","P","P","P"],
+  ["R","N","B","Q","K","B","N","R"],
+];
+// Italian Game opening — calm, classic
+const HERO_MOVES = [
+  { from: [6,4], to: [4,4] }, // e4
+  { from: [1,4], to: [3,4] }, // e5
+  { from: [7,6], to: [5,5] }, // Nf3
+  { from: [0,1], to: [2,2] }, // Nc6
+  { from: [7,5], to: [4,2] }, // Bc4
+  { from: [0,6], to: [2,5] }, // Nf6
+];
+
+const HeroBoard = () => {
+  const [board, setBoard] = useState(HERO_INITIAL);
+  const [moveIdx, setMoveIdx] = useState(0);
+  const [lastMove, setLastMove] = useState<{ from: number[]; to: number[] } | null>(null);
+
+  useEffect(() => {
+    if (moveIdx >= HERO_MOVES.length) {
+      const reset = setTimeout(() => {
+        setBoard(HERO_INITIAL);
+        setLastMove(null);
+        setMoveIdx(0);
+      }, 4000);
+      return () => clearTimeout(reset);
+    }
+    const timeout = setTimeout(() => {
+      const move = HERO_MOVES[moveIdx];
+      setBoard(prev => {
+        const next = prev.map(row => [...row]);
+        next[move.to[0]][move.to[1]] = next[move.from[0]][move.from[1]];
+        next[move.from[0]][move.from[1]] = "";
+        return next;
+      });
+      setLastMove(move);
+      setMoveIdx(i => i + 1);
+    }, moveIdx === 0 ? 1200 : 1400);
+    return () => clearTimeout(timeout);
+  }, [moveIdx]);
+
+  return (
+    <div className="grid grid-cols-8 w-full h-full">
+      {board.flatMap((row, r) =>
+        row.map((piece, c) => {
+          const isLight = (r + c) % 2 === 0;
+          const isLastFrom = lastMove?.from[0] === r && lastMove?.from[1] === c;
+          const isLastTo = lastMove?.to[0] === r && lastMove?.to[1] === c;
+          return (
+            <div
+              key={`${r}-${c}`}
+              className={`relative aspect-square flex items-center justify-center select-none ${
+                isLight ? "bg-board-light" : "bg-board-dark"
+              }`}
+            >
+              {(isLastFrom || isLastTo) && (
+                <motion.div
+                  className="absolute inset-0 bg-primary/25"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.25 }}
+                />
+              )}
+              {piece && (
+                <motion.span
+                  key={`${piece}-${r}-${c}`}
+                  className="relative z-10 text-3xl sm:text-4xl md:text-5xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                  layout
+                >
+                  {HERO_PIECES[piece]}
+                </motion.span>
+              )}
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+};
+
 const Index = () => {
   const { user, profile } = useAuth();
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
