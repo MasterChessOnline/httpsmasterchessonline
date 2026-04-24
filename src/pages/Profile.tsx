@@ -176,8 +176,12 @@ const Profile = () => {
             transition={{ duration: 0.4 }}
           >
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shrink-0 shadow-glow">
-                <User className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shrink-0 shadow-glow overflow-hidden">
+                {profileData.avatar_url ? (
+                  <img src={profileData.avatar_url} alt={profileData.display_name || "Player"} className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 {editing ? (
