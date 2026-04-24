@@ -46,6 +46,7 @@ const TournamentLobby = () => {
     gameId: myPairing?.game_id ?? null,
     enabled: !!user && isRegistered && tournament?.status === "active",
   });
+  const { offsetMs: serverOffsetMs } = useServerTime();
 
   const [chatInput, setChatInput] = useState("");
   const [joining, setJoining] = useState(false);
