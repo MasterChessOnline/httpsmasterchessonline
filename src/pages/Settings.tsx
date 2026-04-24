@@ -231,14 +231,107 @@ const Settings = () => {
         return (
           <div className="space-y-6">
             <div><h3 className="text-lg font-display font-bold text-foreground mb-1">Profile</h3><p className="text-sm text-muted-foreground">Customize how others see you.</p></div>
+
+            {/* Avatar uploader */}
+            <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+              <Label className="text-xs text-muted-foreground">Profile Picture</Label>
+              <div className="mt-3 flex items-center gap-4">
+                <div className="relative shrink-0">
+                  <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-primary/30 bg-primary/10 flex items-center justify-center shadow-glow">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                    ) : (
+                      <User className="h-10 w-10 text-primary" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground mb-2">JPG, PNG or GIF • max 5 MB</p>
+                  <div className="flex flex-wrap gap-2">
+                    <label>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+                      <span className="inline-flex items-center gap-1.5 cursor-pointer rounded-lg border border-primary/40 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 text-xs font-medium text-primary transition">
+                        <Upload className="w-3.5 h-3.5" />
+                        {uploadingAvatar ? "Uploading…" : avatarUrl ? "Change" : "Upload"}
+                      </span>
+                    </label>
+                    {avatarUrl && (
+                      <button
+                        onClick={handleAvatarRemove}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/40 bg-destructive/10 hover:bg-destructive/20 px-3 py-1.5 text-xs font-medium text-destructive transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="rounded-xl border border-border/50 bg-card/60 p-4 space-y-3">
               <div>
                 <Label htmlFor="displayName" className="text-xs text-muted-foreground">Display Name</Label>
                 <div className="flex gap-2 mt-1">
                   <Input id="displayName" value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={50} className="flex-1" />
-                  <Button onClick={saveProfile} disabled={saving} size="sm" className="gap-1"><Check className="w-3 h-3" /> {saving ? "…" : "Save"}</Button>
                 </div>
               </div>
+
+              {/* Bio with emoji picker */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <Label htmlFor="bio" className="text-xs text-muted-foreground">Bio • emojis welcome 🎉</Label>
+                  <span className="text-[10px] text-muted-foreground/70 font-mono">{bio.length}/500</span>
+                </div>
+                <Textarea
+                  id="bio"
+                  value={bio}
+                  onChange={e => setBio(e.target.value.slice(0, 500))}
+                  placeholder="Say something about yourself… ♟️ ⚡ 🏆 🔥"
+                  className="min-h-[90px] resize-none"
+                />
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowEmoji(v => !v)}
+                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition"
+                  >
+                    <Smile className="w-3.5 h-3.5" />
+                    {showEmoji ? "Hide emojis" : "Add emoji"}
+                  </button>
+                </div>
+                {showEmoji && (
+                  <div className="mt-2 rounded-lg border border-border/50 bg-background/60 p-2 max-h-40 overflow-y-auto">
+                    <div className="grid grid-cols-10 sm:grid-cols-12 gap-1 text-lg">
+                      {[
+                        "♟️","♞","♝","♜","♛","♚","♙","♘","♗","♖","♕","♔",
+                        "🏆","🥇","🥈","🥉","🎯","⚡","🔥","💎","✨","🌟","⭐","💫",
+                        "😀","😎","🤩","🥳","😏","🤔","😤","😈","🤯","👑","🧠","🚀",
+                        "❤️","💙","💜","🖤","🤍","💯","✅","❌","⚔️","🛡️","🎮","🕹️",
+                        "🇷🇸","🇺🇸","🇬🇧","🇩🇪","🇫🇷","🇪🇸","🇮🇹","🇷🇺","🇧🇷","🇯🇵","🇨🇳","🇮🇳",
+                        "🌍","🌎","🌏","🎲","♣️","♠️","♥️","♦️","🎼","🎵","☕","🍕"
+                      ].map((emo, i) => (
+                        <button
+                          key={`${emo}-${i}`}
+                          type="button"
+                          onClick={() => insertEmoji(emo)}
+                          className="hover:bg-primary/10 rounded p-1 transition"
+                        >
+                          {emo}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={saveProfile} disabled={saving} size="sm" className="gap-1">
+                  <Check className="w-3 h-3" /> {saving ? "Saving…" : "Save profile"}
+                </Button>
+              </div>
+
+              <Separator />
+
               <div>
                 <Label className="text-xs text-muted-foreground">Country</Label>
                 <select
@@ -267,6 +360,7 @@ const Settings = () => {
                   </p>
                 )}
               </div>
+
               <div>
                 <Label className="text-xs text-muted-foreground">Rating &amp; Title</Label>
                 <div className="flex items-center gap-3 mt-1 flex-wrap">
