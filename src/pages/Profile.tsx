@@ -320,16 +320,16 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Title progress (driven by bot rating — the MasterChess title ladder) */}
+            {/* Title progress (driven by bot rating — the AI bot title ladder) */}
             {(() => {
               const botRating = profileData.bot_rating ?? 1200;
-              const next = getNextTitle(botRating);
+              const next = getNextTitle(botRating, "bot");
               if (!next) return null;
-              const progress = getTitleProgress(botRating);
+              const progress = getTitleProgress(botRating, "bot");
               return (
                 <div className="mt-4 rounded-xl border border-border/50 bg-muted/20 p-3">
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">Next MasterChess title</span>
+                    <span className="text-muted-foreground">Next AI bot title</span>
                     <span className={`font-bold ${next.color}`}>{next.icon} {next.label}</span>
                   </div>
                   <Progress value={progress} className="h-1.5" />

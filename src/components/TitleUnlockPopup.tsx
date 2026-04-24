@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { getTitleByKey, type ChessTitle } from "@/lib/titles";
+import { getTitleByKey, getTitlesForMode, type ChessTitle } from "@/lib/titles";
 import { Trophy } from "lucide-react";
 
 interface TitleUnlockPopupProps {
@@ -13,7 +13,7 @@ export default function TitleUnlockPopup({ titleKey, onDismiss }: TitleUnlockPop
   const [title, setTitle] = useState<ChessTitle | null>(null);
 
   useEffect(() => {
-    setTitle(getTitleByKey(titleKey));
+    setTitle(getTitlesForMode("bot").find((item) => item.key === titleKey) ?? getTitleByKey(titleKey));
   }, [titleKey]);
 
   // Auto-dismiss after 5s

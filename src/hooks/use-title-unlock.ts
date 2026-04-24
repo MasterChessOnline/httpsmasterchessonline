@@ -12,9 +12,9 @@ export function useTitleUnlock() {
 
   useEffect(() => {
     if (!user || !profile) return;
-    // Titles are now driven by BOT rating (the only competitive ladder vs bots).
+    // Titles are driven by BOT rating and should use AI bot title labels/thresholds.
     const botRating = (profile as any).bot_rating ?? 1200;
-    const currentTitle = getTitle(botRating);
+    const currentTitle = getTitle(botRating, "bot");
     const highestKey = (profile as any).highest_title_key as string | undefined;
     const highest = maxTitleKey(highestKey, currentTitle.key);
 
