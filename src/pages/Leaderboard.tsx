@@ -152,7 +152,12 @@ const Leaderboard = () => {
                   {player.display_name || "Anonymous"}
                 </p>
                 <div className="mt-0.5 mb-0.5 flex flex-col items-center gap-0.5">
-                  <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={ratingOf(player)} size="xs" />
+                  <TitleBadge
+                    titleKey={mode === "online" ? player.highest_title_key ?? undefined : undefined}
+                    rating={ratingOf(player)}
+                    mode={mode}
+                    size="xs"
+                  />
                   <RankBadge rating={ratingOf(player)} size="sm" />
                 </div>
                 <p className={`font-mono font-bold ${rank === 1 ? "text-2xl text-primary drop-shadow-[0_0_8px_hsl(43_80%_55%/0.4)]" : "text-lg text-foreground"}`}>
@@ -224,7 +229,12 @@ const Leaderboard = () => {
                           {player.display_name || player.username || "Anonymous"}
                           {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
                         </span>
-                        <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={ratingOf(player)} size="xs" />
+                        <TitleBadge
+                          titleKey={mode === "online" ? player.highest_title_key ?? undefined : undefined}
+                          rating={ratingOf(player)}
+                          mode={mode}
+                          size="xs"
+                        />
                         <RankBadge rating={ratingOf(player)} size="sm" />
                         {player.country_flag && (
                           <span className="text-xs" title={findCountry(player.country)?.name ?? ""}>{player.country_flag}</span>
