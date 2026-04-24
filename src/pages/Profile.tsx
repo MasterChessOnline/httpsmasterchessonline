@@ -329,7 +329,7 @@ const Profile = () => {
               return (
                 <div className="mt-4 rounded-xl border border-border/50 bg-muted/20 p-3">
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">Next MasterChess title</span>
+                    <span className="text-muted-foreground">Next AI bot title</span>
                     <span className={`font-bold ${next.color}`}>{next.icon} {next.label}</span>
                   </div>
                   <Progress value={progress} className="h-1.5" />

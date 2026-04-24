@@ -11,7 +11,7 @@ import TitleBadge from "@/components/TitleBadge";
 import RankBadge from "@/components/RankBadge";
 import SeasonBanner from "@/components/SeasonBanner";
 import { findCountry } from "@/lib/countries";
-import { TITLES, getTitle } from "@/lib/titles";
+import { TITLES, getTitle, getTitlesForMode } from "@/lib/titles";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface LeaderboardEntry {
@@ -46,7 +46,7 @@ const Leaderboard = () => {
   const [sortBy, setSortBy] = useState<SortBy>("rating");
   const [titleFilter, setTitleFilter] = useState<string>("all");
 
-  const titleBands = TITLES.filter((t) => t.key.startsWith("mc-"));
+  const titleBands = getTitlesForMode(mode).filter((t) => t.key !== "unranked");
 
   useEffect(() => {
     supabase
@@ -75,10 +75,10 @@ const Leaderboard = () => {
   const sorted = useMemo(() => {
     let list = [...players];
 
-    // Title filter applies to the active mode's rating
+    // Title filter applies to the active mode's title ladder
     if (titleFilter !== "all") {
       list = list.filter((p) => {
-        const key = p.highest_title_key || getTitle(ratingOf(p)).key;
+        const key = mode === "online" ? (p.highest_title_key || getTitle(ratingOf(p), "online").key) : getTitle(ratingOf(p), "bot").key;
         return key === titleFilter;
       });
     }
