@@ -14,11 +14,12 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Orbitron', 'sans-serif'],
+        display: ['Cormorant Garamond', 'Cinzel', 'serif'],
         body: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
         serif: ['Cormorant Garamond', 'Cinzel', 'serif'],
         classical: ['Cormorant Garamond', 'serif'],
+        orbitron: ['Orbitron', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
