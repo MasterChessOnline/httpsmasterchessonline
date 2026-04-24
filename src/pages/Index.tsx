@@ -19,6 +19,7 @@ import heroImage from "@/assets/hero-chess.jpg";
 import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
 import DailyMissions from "@/components/DailyMissions";
+import ShareInviteDialog from "@/components/ShareInviteDialog";
 
 interface RecentGame {
   id: string;
@@ -111,6 +112,7 @@ const Index = () => {
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
   const [winStreak, setWinStreak] = useState(0);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -252,8 +254,39 @@ const Index = () => {
               </Link>
             ))}
           </motion.div>
+
+          {/* Invite friends — masterchess.live */}
+          <motion.div
+            className="mt-8 flex justify-center"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
+            <button
+              onClick={() => setInviteOpen(true)}
+              className="group inline-flex items-center gap-3 px-5 py-2.5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 hover:from-primary/20 hover:to-primary/20 hover:border-primary/60 backdrop-blur-md transition-all shadow-glow"
+              aria-label="Invite friends to masterchess.live"
+            >
+              <Crown className="h-4 w-4 text-primary group-hover:scale-110 group-hover:rotate-6 transition-transform" />
+              <span className="text-xs sm:text-sm font-display uppercase tracking-widest text-foreground">
+                Invite friends
+              </span>
+              <span className="hidden sm:inline text-xs font-mono text-primary/90">
+                masterchess.live
+              </span>
+            </button>
+          </motion.div>
         </motion.div>
       </div>
+
+      <ShareInviteDialog
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        title="Invite friends to MasterChess"
+        url="https://masterchess.live"
+        message="Join me on MasterChess — play, learn and compete:"
+        emailSubject="Join me on MasterChess"
+      />
 
       {/* ── MAIN CONTENT ── */}
       <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
