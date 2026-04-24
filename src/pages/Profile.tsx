@@ -74,6 +74,8 @@ const Profile = () => {
   const [onlineHistory, setOnlineHistory] = useState<RatingPoint[]>([]);
   const [botHistory, setBotHistory] = useState<RatingPoint[]>([]);
   const [streak, setStreak] = useState<StreakState | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = user?.id === userId;
 
