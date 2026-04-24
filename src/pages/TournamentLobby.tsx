@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTournament } from "@/hooks/use-tournament";
 import { useTournamentNotifications } from "@/hooks/use-tournament-notifications";
 import { useTournamentAntiCheat } from "@/hooks/use-tournament-anti-cheat";
+import { useServerTime } from "@/hooks/use-server-time";
 import { useStreak } from "@/hooks/use-streak";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
