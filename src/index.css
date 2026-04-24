@@ -172,18 +172,18 @@
     border: 1px solid hsl(43 90% 55% / 0.1);
   }
 
-  /* Neon glow button — gold */
+  /* Neon glow button — gold (idle quiet, hover bright) */
   .btn-neon {
     @apply transition-all duration-300 ease-out;
-    box-shadow: 0 0 15px hsl(43 90% 55% / 0.2);
+    box-shadow: 0 0 0 hsl(43 90% 55% / 0);
     will-change: transform, box-shadow;
   }
   .btn-neon:hover {
     transform: scale(1.03) translateY(-1px);
     box-shadow:
-      0 0 25px hsl(43 90% 55% / 0.3),
-      0 0 50px hsl(30 60% 40% / 0.12),
-      0 4px 12px hsl(30 8% 2% / 0.3);
+      0 0 20px hsl(43 90% 55% / 0.22),
+      0 0 40px hsl(30 60% 40% / 0.08),
+      0 4px 12px hsl(24 10% 2% / 0.3);
   }
   .btn-neon:active {
     transform: scale(0.98);
@@ -468,11 +468,11 @@ a, button, input, select, textarea {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Custom scrollbar — gold */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: hsl(30 8% 4%); }
-::-webkit-scrollbar-thumb { background: hsl(35 12% 18%); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(43 90% 55% / 0.4); }
+/* Custom scrollbar — gold accent */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: hsl(24 10% 5%); }
+::-webkit-scrollbar-thumb { background: hsl(38 10% 18%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(43 90% 55% / 0.5); }
 
 /* Glow pulse — gold */
 @keyframes glow-pulse {
