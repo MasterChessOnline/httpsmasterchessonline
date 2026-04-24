@@ -70,26 +70,18 @@ const NAV_SECTIONS: NavSection[] = [
     key: "tournaments",
     label: "Compete",
     icon: Trophy,
+    wide: true,
     accent: "38 92% 50%",
     accentRgb: "245,158,11",
     items: [
-      { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments", subheading: "Active" },
+      { label: "Top Players", href: "/leaderboard", icon: Crown, desc: "Global leaderboard ranking", highlight: true, subheading: "Ranks" },
+      { label: "Bullet Ranks", href: "/leaderboard", icon: Zap, desc: "1–2 min rankings" },
+      { label: "Blitz Ranks", href: "/leaderboard", icon: Clock, desc: "3–5 min rankings" },
+      { label: "Rapid Ranks", href: "/leaderboard", icon: Clock, desc: "10+ min rankings" },
+      { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments", separator: true, subheading: "Tournaments" },
       { label: "Starting Soon", href: "/tournaments", icon: Clock, desc: "Upcoming events" },
-      { label: "Create Tournament", href: "/tournaments", icon: Plus, desc: "Host your own event", separator: true, subheading: "Organize" },
-      { label: "My Tournaments", href: "/tournaments", icon: ListChecks, desc: "Your active tournaments", separator: true },
-    ],
-  },
-  {
-    key: "leaderboard",
-    label: "Ranks",
-    icon: BarChart3,
-    accent: "142 71% 45%",
-    accentRgb: "34,197,94",
-    items: [
-      { label: "Top Players", href: "/leaderboard", icon: Crown, desc: "Global ranking", subheading: "Rankings" },
-      { label: "Bullet", href: "/leaderboard", icon: Zap, desc: "1–2 min rankings", separator: true, subheading: "By Format" },
-      { label: "Blitz", href: "/leaderboard", icon: Clock, desc: "3–5 min rankings" },
-      { label: "Rapid", href: "/leaderboard", icon: Clock, desc: "10+ min rankings" },
+      { label: "Create Tournament", href: "/tournaments", icon: Plus, desc: "Host your own event" },
+      { label: "My Tournaments", href: "/tournaments", icon: ListChecks, desc: "Your active tournaments" },
     ],
   },
   {
@@ -230,7 +222,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop nav */}
-            <div className="hidden lg:flex items-center gap-1 mx-8">
+            <div className="hidden lg:flex items-center gap-0.5 mx-3 xl:mx-6">
               {NAV_SECTIONS.map((section) => {
                 const isActive = section.items.some(item =>
                   item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
@@ -244,7 +236,7 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className="relative flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
+                      className="relative flex items-center gap-1.5 px-2 xl:px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
                       style={{
                         color: isActive || activeDropdown === section.key ? accentColor : undefined,
                         backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
@@ -377,7 +369,7 @@ const Navbar = () => {
             {/* Right side */}
             <div className="flex items-center gap-2 shrink-0">
               {/* Search */}
-              <div className="hidden lg:flex items-center">
+              <div className="hidden xl:flex items-center">
                 <AnimatePresence>
                   {searchOpen && (
                     <motion.div
@@ -428,19 +420,17 @@ const Navbar = () => {
                   <StreakIndicator />
                   <Link
                     to={`/profile/${user.id}`}
-                    className="flex items-center gap-2.5 rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-3.5 py-2 hover:border-primary/30 hover:bg-card/70 transition-all duration-300"
+                    className="flex items-center gap-2 rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-2.5 py-2 hover:border-primary/30 hover:bg-card/70 transition-all duration-300"
+                    aria-label="Open profile"
                   >
                     <div className="relative">
                       <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
                       </div>
                     </div>
-                    <span className="text-sm font-medium text-foreground max-w-[80px] truncate hidden sm:inline">
-                      {profile?.display_name || profile?.username || "Player"}
-                    </span>
                     {profile && <span className="font-mono text-xs text-primary font-bold">{profile.rating}</span>}
                   </Link>
-                  <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden lg:flex" aria-label="Sign out">
+                  <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden xl:flex" aria-label="Sign out">
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </>
