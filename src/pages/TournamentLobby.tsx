@@ -224,6 +224,11 @@ const TournamentLobby = () => {
                   <Swords className="h-4 w-4 mr-1" /> Play Your Game
                 </Button>
               )}
+              {!isFinished && (
+                <Button variant="outline" onClick={() => setShareOpen(true)}>
+                  <Share2 className="h-4 w-4 mr-1" /> Invite friends
+                </Button>
+              )}
             </div>
           </div>
         </div>
