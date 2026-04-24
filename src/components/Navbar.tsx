@@ -420,19 +420,17 @@ const Navbar = () => {
                   <StreakIndicator />
                   <Link
                     to={`/profile/${user.id}`}
-                    className="flex items-center gap-2.5 rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-3.5 py-2 hover:border-primary/30 hover:bg-card/70 transition-all duration-300"
+                    className="flex items-center gap-2 rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-2.5 py-2 hover:border-primary/30 hover:bg-card/70 transition-all duration-300"
+                    aria-label="Open profile"
                   >
                     <div className="relative">
                       <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
                       </div>
                     </div>
-                    <span className="text-sm font-medium text-foreground max-w-[80px] truncate hidden sm:inline">
-                      {profile?.display_name || profile?.username || "Player"}
-                    </span>
                     {profile && <span className="font-mono text-xs text-primary font-bold">{profile.rating}</span>}
                   </Link>
-                  <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden lg:flex" aria-label="Sign out">
+                  <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden xl:flex" aria-label="Sign out">
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </>
