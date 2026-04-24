@@ -260,7 +260,7 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   return (
     <div className="w-full max-w-md mx-auto">
       {/* Mode tabs */}
-      {hasMoves && (
+      {hasMoves ? (
         <div className="flex rounded-lg border border-border/50 overflow-hidden mb-3">
           {([
             { key: "guided" as const, label: "Guided", icon: Play },
@@ -280,6 +280,19 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
               {label}
             </button>
           ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card px-3 py-2 mb-3">
+          <div className="flex items-center gap-2 text-xs font-medium text-primary">
+            <Eye className="w-3.5 h-3.5" />
+            Free Explore — move pieces to experiment with the topic
+          </div>
+          <button
+            onClick={resetExplore}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" /> Reset
+          </button>
         </div>
       )}
 
