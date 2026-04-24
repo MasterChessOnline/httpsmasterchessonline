@@ -281,9 +281,9 @@ const Navbar = () => {
                           }`}
                           style={{
                             top: shrunk ? "calc(100% + 12px)" : "calc(100% + 34px)",
-                            background: `linear-gradient(135deg, hsla(${section.accent} / 0.08) 0%, hsl(220 15% 9%) 35%, hsl(220 15% 9%) 100%)`,
-                            border: `1px solid hsla(${section.accent} / 0.25)`,
-                            boxShadow: `0 12px 40px rgba(0,0,0,0.6), 0 0 30px -5px rgba(${section.accentRgb},0.15), inset 0 1px 0 hsla(${section.accent} / 0.12)`,
+                            background: `linear-gradient(135deg, hsla(${section.accent} / 0.12) 0%, hsl(220 15% 6%) 35%, hsl(220 15% 5%) 100%)`,
+                            border: `1px solid hsla(${section.accent} / 0.35)`,
+                            boxShadow: `0 18px 50px rgba(0,0,0,0.85), 0 0 30px -5px rgba(${section.accentRgb},0.2), inset 0 1px 0 hsla(${section.accent} / 0.15)`,
                           }}
                           onMouseEnter={() => handleMouseEnter(section.key)}
                           onMouseLeave={handleMouseLeave}
@@ -291,12 +291,12 @@ const Navbar = () => {
                           <div
                             className="px-3 pt-3 pb-2 flex items-center gap-2 shrink-0 rounded-t-2xl"
                             style={{
-                              background: `linear-gradient(180deg, hsl(220 15% 9%) 0%, hsl(220 15% 9% / 0.96) 100%)`,
-                              borderBottom: `1px solid hsla(${section.accent} / 0.2)`,
-                              boxShadow: `0 2px 0 hsla(${section.accent} / 0.35)`,
+                              background: `linear-gradient(180deg, hsl(220 15% 8%) 0%, hsl(220 15% 7%) 100%)`,
+                              borderBottom: `1px solid hsla(${section.accent} / 0.28)`,
+                              boxShadow: `0 2px 0 hsla(${section.accent} / 0.4)`,
                             }}
                           >
-                            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `hsla(${section.accent} / 0.18)`, border: `1px solid hsla(${section.accent} / 0.3)` }}>
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `hsla(${section.accent} / 0.22)`, border: `1px solid hsla(${section.accent} / 0.35)` }}>
                               <section.icon className="h-3.5 w-3.5" style={{ color: accentColor }} />
                             </div>
                             <span className="text-xs font-bold uppercase tracking-[0.15em] leading-none whitespace-nowrap" style={{ color: accentColor, textShadow: `0 0 12px hsla(${section.accent} / 0.4)` }}>
@@ -314,7 +314,7 @@ const Navbar = () => {
                                       <div className="mx-2 my-1.5 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[8px] uppercase tracking-[0.1em] font-bold px-3 pt-1 pb-0.5" style={{ color: `hsla(${section.accent} / 0.5)` }}>
+                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-2 pb-1" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
                                         {item.subheading}
                                       </p>
                                     )}
