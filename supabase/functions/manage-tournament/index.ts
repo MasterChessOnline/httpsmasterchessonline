@@ -127,12 +127,22 @@ async function handleJoin(supabase: any, userId: string, tournament_id: string) 
 
   const { data: tournament } = await supabase
     .from("tournaments")
-    .select("max_players, status")
+    .select("max_players, status, starts_at, name")
     .eq("id", tournament_id)
     .single();
 
-  if (!tournament || tournament.status === "finished") {
-    return jsonRes({ error: "Tournament not available" }, 400);
+  if (!tournament) {
+    return jsonRes({ error: "Tournament not found" }, 404);
+  }
+  if (tournament.status === "finished") {
+    return jsonRes({ error: "This tournament has ended." }, 400);
+  }
+  if (tournament.status === "active") {
+    return jsonRes({ error: "Registration closed — tournament has already started." }, 400);
+  }
+  // Belt-and-suspenders: even if status hasn't flipped yet, refuse if start time has passed.
+  if (new Date(tournament.starts_at).getTime() <= Date.now()) {
+    return jsonRes({ error: "Registration closed — tournament is starting now." }, 400);
   }
 
   const { count } = await supabase
