@@ -25,6 +25,7 @@ import { getBotMove, getBotThinkMs, classifyCpLoss, estimateMoveQuality } from "
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 import { getStreakBonus, getStreakState, updateStreakState, evaluateBadges, type BadgeRow, type StreakState } from "@/lib/progression";
+import { bumpMissionProgress } from "@/hooks/use-daily-missions";
 import RatingChange from "@/components/RatingChange";
 import TitleBadge from "@/components/TitleBadge";
 import StreakBadge from "@/components/StreakBadge";
@@ -617,6 +618,26 @@ const Play = () => {
           currentStreak: newStreak.current_streak,
         });
         if (newBadges.length > 0) setUnlockedBadges(newBadges);
+
+        // Daily missions: bot game counters
+        try {
+          await bumpMissionProgress(user.id, "games_played", 1);
+          if (result === "win") {
+            await bumpMissionProgress(user.id, "games_won", 1);
+            await bumpMissionProgress(user.id, "bot_won", 1);
+          }
+          // Win streak (absolute set)
+          if (result === "win") {
+            await bumpMissionProgress(
+              user.id,
+              "win_streak",
+              0,
+              newStreak.current_streak
+            );
+          }
+        } catch (err) {
+          console.warn("Mission bump failed", err);
+        }
 
         refreshProfile();
       } catch {
