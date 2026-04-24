@@ -291,33 +291,124 @@ async function handleReportResult(supabase: any, game_id: string, result: string
 
     const { data: tournament } = await supabase
       .from("tournaments")
-      .select("current_round, total_rounds")
+      .select("current_round, total_rounds, tournament_type, ends_at")
       .eq("id", pairing.tournament_id)
       .single();
 
     if (tournament) {
-      const { data: pendingPairings } = await supabase
-        .from("tournament_pairings")
-        .select("id")
-        .eq("tournament_id", pairing.tournament_id)
-        .eq("round", tournament.current_round)
-        .is("result", null);
-
-      if (!pendingPairings || pendingPairings.length === 0) {
-        if (tournament.current_round >= tournament.total_rounds) {
+      // ARENA: instant re-pair freed players against any other free player
+      if (tournament.tournament_type === "arena") {
+        const arenaEnded = tournament.ends_at && new Date(tournament.ends_at) <= new Date();
+        if (arenaEnded) {
           await supabase
             .from("tournaments")
             .update({ status: "finished" })
             .eq("id", pairing.tournament_id);
           await awardTournamentBadges(supabase, pairing.tournament_id);
         } else {
-          await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
+          await generateArenaInstantPairings(supabase, pairing.tournament_id);
+        }
+      } else {
+        // SWISS / ROUND ROBIN: wait for all games in the round to finish, then advance
+        const { data: pendingPairings } = await supabase
+          .from("tournament_pairings")
+          .select("id")
+          .eq("tournament_id", pairing.tournament_id)
+          .eq("round", tournament.current_round)
+          .is("result", null);
+
+        if (!pendingPairings || pendingPairings.length === 0) {
+          if (tournament.current_round >= tournament.total_rounds) {
+            await supabase
+              .from("tournaments")
+              .update({ status: "finished" })
+              .eq("id", pairing.tournament_id);
+            await awardTournamentBadges(supabase, pairing.tournament_id);
+          } else {
+            await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
+          }
         }
       }
     }
   }
 
   return jsonRes({ success: true });
+}
+
+// ===================== ARENA: instant re-pairing =====================
+async function generateArenaInstantPairings(supabase: any, tournamentId: string) {
+  const { data: tournament } = await supabase
+    .from("tournaments")
+    .select("time_control_seconds, time_control_label, time_control_increment, current_round")
+    .eq("id", tournamentId)
+    .single();
+  if (!tournament) return;
+
+  // Find players who aren't currently in an unfinished game
+  const { data: regs } = await supabase
+    .from("tournament_registrations")
+    .select("user_id, rating_at_join, score")
+    .eq("tournament_id", tournamentId);
+  if (!regs || regs.length < 2) return;
+
+  const { data: openPairings } = await supabase
+    .from("tournament_pairings")
+    .select("white_player_id, black_player_id")
+    .eq("tournament_id", tournamentId)
+    .is("result", null);
+
+  const busy = new Set<string>();
+  for (const p of openPairings || []) {
+    if (p.white_player_id) busy.add(p.white_player_id);
+    if (p.black_player_id) busy.add(p.black_player_id);
+  }
+  const free = regs.filter((r: any) => !busy.has(r.user_id));
+  if (free.length < 2) return;
+
+  // History for no-rematch + color balance
+  const { data: priorPairings } = await supabase
+    .from("tournament_pairings")
+    .select("white_player_id, black_player_id")
+    .eq("tournament_id", tournamentId);
+
+  const playedPairs = new Set<string>();
+  const colorCounts = new Map<string, { whites: number; blacks: number }>();
+  for (const p of priorPairings || []) {
+    if (!p.black_player_id) continue;
+    const a = p.white_player_id < p.black_player_id ? p.white_player_id : p.black_player_id;
+    const b = p.white_player_id < p.black_player_id ? p.black_player_id : p.white_player_id;
+    playedPairs.add(`${a}|${b}`);
+    const w = colorCounts.get(p.white_player_id) ?? { whites: 0, blacks: 0 };
+    w.whites++; colorCounts.set(p.white_player_id, w);
+    const k = colorCounts.get(p.black_player_id) ?? { whites: 0, blacks: 0 };
+    k.blacks++; colorCounts.set(p.black_player_id, k);
+  }
+
+  const pairings = generateArenaPairings(free, playedPairs, colorCounts);
+  const round = tournament.current_round || 1;
+
+  for (const pairing of pairings) {
+    const { data: onlineGame } = await supabase
+      .from("online_games")
+      .insert({
+        white_player_id: pairing.white,
+        black_player_id: pairing.black,
+        white_time: tournament.time_control_seconds,
+        black_time: tournament.time_control_seconds,
+        time_control_label: tournament.time_control_label,
+        increment: tournament.time_control_increment,
+      })
+      .select()
+      .single();
+
+    await supabase.from("tournament_pairings").insert({
+      tournament_id: tournamentId,
+      round,
+      white_player_id: pairing.white,
+      black_player_id: pairing.black,
+      game_id: onlineGame?.id || null,
+    });
+  }
 }
 
 // ===================== STREAK TRACKING =====================
