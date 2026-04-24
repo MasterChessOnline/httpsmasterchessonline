@@ -223,11 +223,50 @@ const Profile = () => {
             transition={{ duration: 0.4 }}
           >
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shrink-0 shadow-glow overflow-hidden">
-                {profileData.avatar_url ? (
-                  <img src={profileData.avatar_url} alt={profileData.display_name || "Player"} className="h-full w-full object-cover" />
-                ) : (
-                  <User className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+              <div className="relative shrink-0 group">
+                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shadow-glow overflow-hidden">
+                  {profileData.avatar_url ? (
+                    <img src={profileData.avatar_url} alt={profileData.display_name || "Player"} className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+                  )}
+                </div>
+                {isOwnProfile && (
+                  <>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="absolute inset-0 rounded-full bg-background/70 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-primary disabled:opacity-100"
+                      aria-label="Change profile photo"
+                    >
+                      {uploadingAvatar ? (
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      ) : (
+                        <Camera className="h-6 w-6" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-primary text-primary-foreground border-2 border-background flex items-center justify-center shadow-lg hover:scale-110 transition-transform disabled:opacity-60"
+                      aria-label="Upload photo"
+                    >
+                      {uploadingAvatar ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Camera className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </>
                 )}
               </div>
               <div className="flex-1 min-w-0">
