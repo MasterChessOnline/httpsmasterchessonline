@@ -345,7 +345,7 @@ const Tournaments = () => {
             Compete & <span className="text-gradient-gold">Climb</span>
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto">
-            Join free online tournaments, compete by skill level, and earn badges. All logged-in players welcome!
+            Join free online tournaments, compete with players from around the world, and earn badges. All logged-in players welcome!
           </p>
           {(totalLive > 0 || totalOpen > 0) && (
             <div className="mt-3 flex justify-center gap-2">
