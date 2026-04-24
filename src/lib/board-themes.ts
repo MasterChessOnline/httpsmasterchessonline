@@ -11,7 +11,7 @@ export interface BoardTheme {
 }
 
 export const BOARD_THEMES: BoardTheme[] = [
-  { key: "classic",   label: "Classic Wood",      description: "Warm tournament wood",         light: "33 45% 70%",  dark: "25 38% 32%" },
+  { key: "classic",   label: "Dark Wood",         description: "Polished dark walnut tournament board", light: "30 35% 52%",  dark: "22 45% 16%" },
   { key: "green",     label: "Green Tournament",  description: "Olympiad green felt",          light: "120 22% 80%", dark: "145 32% 36%" },
   { key: "blue",      label: "Blue Modern",       description: "Cool deep ocean",              light: "210 38% 78%", dark: "210 45% 32%" },
   { key: "dark",      label: "Dark Minimal",      description: "Pure dark, distraction-free",  light: "220 12% 28%", dark: "220 14% 12%" },
@@ -43,8 +43,8 @@ export const PIECE_STYLES: PieceStyle[] = [
   {
     key: "standard",
     label: "Classic Staunton",
-    description: "Traditional tournament look",
-    render: { whiteFill: "#ffffff", blackFill: "hsl(220,15%,8%)", whiteStroke: "rgba(0,0,0,0.85)", fontWeight: 400 },
+    description: "Polished ivory & ebony, tournament finish",
+    render: { whiteFill: "#fbf3e0", blackFill: "#161214", whiteStroke: "rgba(40,25,10,0.75)", blackStroke: "rgba(255,235,200,0.18)", fontWeight: 500, glow: "rgba(255,220,170,0.22)" },
   },
   {
     key: "minimal",
@@ -102,9 +102,9 @@ export const PIECE_STYLES: PieceStyle[] = [
   },
   {
     key: "wood3d",
-    label: "3D Wood",
-    description: "Hand-carved tournament wood with depth",
-    render: { whiteFill: "#f3dcb4", blackFill: "#3a1f0f", whiteStroke: "rgba(110,70,30,0.9)", blackStroke: "rgba(255,200,140,0.35)", fontWeight: 600, glow: "rgba(120,70,20,0.35)" },
+    label: "Polished Walnut",
+    description: "Hand-carved walnut, lacquered tournament finish",
+    render: { whiteFill: "#f7e2b8", blackFill: "#1a0a04", whiteStroke: "rgba(90,55,20,0.95)", blackStroke: "rgba(255,210,150,0.45)", fontWeight: 600, glow: "rgba(180,110,40,0.5)" },
   },
   {
     key: "fantasy",
