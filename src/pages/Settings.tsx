@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import {
   User, Palette, Volume2, Globe, Bell, Shield, Gamepad2,
-  LogOut, Check, ChevronRight, Settings2, Brain, Target as TargetIcon
+  LogOut, Check, ChevronRight, Settings2, Brain, Target as TargetIcon,
+  Upload, Trash2, Smile
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
