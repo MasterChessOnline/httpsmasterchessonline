@@ -338,6 +338,8 @@ async function handleReportResult(supabase: any, game_id: string, result: string
               .eq("id", pairing.tournament_id);
             await awardTournamentBadges(supabase, pairing.tournament_id);
           } else {
+            // Spec: small delay (2–5s) between rounds for UX
+            await new Promise(r => setTimeout(r, 3000));
             await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
           }
         }
