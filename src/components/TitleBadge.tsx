@@ -54,7 +54,7 @@ export default function TitleBadge({
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
       >
         <span aria-hidden>{title.icon}</span>
-        <span>{title.label}</span>
+        <span>{label}</span>
       </motion.span>
     );
   }
@@ -62,7 +62,7 @@ export default function TitleBadge({
   return (
     <span className={baseClasses}>
       <span aria-hidden>{title.icon}</span>
-      <span>{title.label}</span>
+      <span>{label}</span>
     </span>
   );
 }
