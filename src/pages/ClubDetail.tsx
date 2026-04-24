@@ -274,9 +274,11 @@ const ClubDetail = () => {
                     <span className={`text-sm font-bold w-6 ${i === 0 ? "text-yellow-500" : i === 1 ? "text-gray-400" : i === 2 ? "text-amber-700" : "text-muted-foreground"}`}>
                       #{i + 1}
                     </span>
-                    <div className="h-7 w-7 rounded-full bg-muted/50 flex items-center justify-center text-[10px] font-bold overflow-hidden">
-                      {m.avatar_url ? <img src={m.avatar_url} className="h-full w-full object-cover" alt="" /> : (m.display_name || "?")[0]?.toUpperCase()}
-                    </div>
+                    <UserAvatar
+                      userId={m.user_id}
+                      fallbackName={m.display_name || "?"}
+                      className="h-7 w-7 text-[10px]"
+                    />
                     <Link to={`/profile/${m.user_id}`} className="flex-1 text-sm font-medium text-foreground hover:text-primary truncate">
                       {m.display_name || m.username || "Player"}
                     </Link>
