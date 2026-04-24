@@ -13,11 +13,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Trophy, Clock, Users, Swords, Timer, Crown, Send, Eye, MessageSquare,
-  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X,
+  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X, Share2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Countdown from "@/components/Countdown";
 import { supabase } from "@/integrations/supabase/client";
+import ShareInviteDialog from "@/components/ShareInviteDialog";
 
 function sortByTiebreak<T extends { score: any; buchholz?: any; sonneborn?: any; wins?: any; rating_at_join: number }>(a: T, b: T) {
   const d = (Number(b.score) || 0) - (Number(a.score) || 0); if (d) return d;
