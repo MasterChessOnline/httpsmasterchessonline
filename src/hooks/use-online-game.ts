@@ -84,6 +84,16 @@ export function useOnlineGame() {
       result: myResult,
     });
     await refreshProfile();
+
+    // Daily missions: increment counters for online games
+    try {
+      await bumpMissionProgress(user.id, "games_played", 1);
+      if (myResult === "win") {
+        await bumpMissionProgress(user.id, "games_won", 1);
+      }
+    } catch (err) {
+      console.warn("Mission bump failed", err);
+    }
   }, [user, refreshProfile]);
 
 
