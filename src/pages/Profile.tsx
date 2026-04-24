@@ -164,11 +164,13 @@ const Profile = () => {
 
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() } as any)
         .eq("user_id", user.id);
       if (updateError) throw updateError;
 
       setProfileData({ ...profileData, avatar_url: publicUrl });
+      // Push the new avatar to the global cache so all <UserAvatar /> instances refresh.
+      primeUserProfile({ user_id: user.id, avatar_url: publicUrl, updated_at: new Date().toISOString() });
       refreshProfile();
       toast.success("Profile photo updated! 🎉");
     } catch (err: any) {
