@@ -1858,6 +1858,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      server_now: { Args: never; Returns: string }
       tournament_color_balance: {
         Args: { _tournament_id: string }
         Returns: {
