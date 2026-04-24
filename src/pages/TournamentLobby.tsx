@@ -216,6 +216,25 @@ const TournamentLobby = () => {
           </div>
         </div>
 
+        {/* Countdown to start (Upcoming) */}
+        {isUpcoming && (
+          <div className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 md:p-8 text-center">
+            <div className="text-xs uppercase tracking-[0.2em] text-primary mb-3">Tournament starts in</div>
+            <Countdown target={tournament.starts_at} size="xl" />
+            <div className="text-xs text-muted-foreground mt-3">
+              {new Date(tournament.starts_at).toLocaleString()} · auto-starts when countdown ends
+            </div>
+          </div>
+        )}
+
+        {/* Overdue: cron will fire shortly, fallback already triggered */}
+        {isOverdue && (
+          <div className="mb-6 rounded-xl border border-accent/40 bg-accent/10 p-4 text-center">
+            <Loader2 className="h-5 w-5 animate-spin inline mr-2 text-accent-foreground" />
+            <span className="text-sm font-medium">Starting tournament…</span>
+          </div>
+        )}
+
         {/* Notification banner for active round */}
         {isActive && myPairing && !myPairing.result && myPairing.game_id && !isReadyDismissed && (
           <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 mb-6 flex items-center justify-between gap-2">
