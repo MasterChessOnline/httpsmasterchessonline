@@ -28,13 +28,6 @@ const CATEGORY_OPTIONS = [
   { value: "classical", label: "Classical", icon: Clock },
 ];
 
-const SKILL_OPTIONS = [
-  { value: "all", label: "All Levels" },
-  { value: "beginner", label: "Beginner", maxRating: 1000 },
-  { value: "intermediate", label: "Intermediate", maxRating: 1400 },
-  { value: "advanced", label: "Advanced", maxRating: 9999 },
-];
-
 const statusStyles: Record<string, { bg: string; label: string }> = {
   active: { bg: "bg-accent text-accent-foreground", label: "🔴 Live" },
   registering: { bg: "bg-primary/10 text-primary", label: "Open" },
@@ -110,7 +103,7 @@ const Tournaments = () => {
   const [viewTab, setViewTab] = useState<ViewTab>("all");
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [skillFilter, setSkillFilter] = useState("all");
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [dbTournaments, setDbTournaments] = useState<DbTournament[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
@@ -230,12 +223,6 @@ const Tournaments = () => {
   const filtered = dbTournaments.filter(t => {
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
-    if (skillFilter !== "all") {
-      // Map skill tier to time control ranges as a proxy
-      const tcSec = parseInt(t.time_control_label.split("+")[0]) * 60 || 300;
-      if (skillFilter === "beginner" && tcSec < 180) return false; // beginners skip bullet
-      if (skillFilter === "advanced" && tcSec > 600) return false; // advanced skip classical
-    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       if (!t.name.toLowerCase().includes(q) && !t.time_control_label.toLowerCase().includes(q)) return false;
@@ -358,7 +345,7 @@ const Tournaments = () => {
             Compete & <span className="text-gradient-gold">Climb</span>
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto">
-            Join free online tournaments, compete by skill level, and earn badges. All logged-in players welcome!
+            Join free online tournaments, compete with players from around the world, and earn badges. All logged-in players welcome!
           </p>
           {(totalLive > 0 || totalOpen > 0) && (
             <div className="mt-3 flex justify-center gap-2">
@@ -430,18 +417,6 @@ const Tournaments = () => {
                     statusFilter === s ? "border-primary bg-primary/10 text-primary" : "border-border/40 bg-muted/20 text-muted-foreground hover:border-primary/30"
                   }`}>
                   {s === "all" ? "All" : s === "active" ? "🔴 Live" : s === "registering" ? "Open" : "Finished"}
-                </button>
-              ))}
-            </div>
-
-            {/* Skill tier filter */}
-            <div className="flex gap-1.5 mb-5 flex-wrap">
-              {SKILL_OPTIONS.map((opt) => (
-                <button key={opt.value} onClick={() => setSkillFilter(opt.value)}
-                  className={`rounded-full px-3 py-1 text-[11px] font-medium transition-all border ${
-                    skillFilter === opt.value ? "border-accent bg-accent/20 text-accent-foreground" : "border-border/40 bg-muted/20 text-muted-foreground hover:border-accent/30"
-                  }`}>
-                  {opt.value === "beginner" ? "🟢 " : opt.value === "intermediate" ? "🟡 " : opt.value === "advanced" ? "🔴 " : ""}{opt.label}
                 </button>
               ))}
             </div>
