@@ -299,6 +299,9 @@ async function handleReportResult(supabase: any, game_id: string, result: string
         .eq("user_id", pairing.black_player_id);
     }
 
+    // Recompute Buchholz / Sonneborn-Berger / wins for this tournament
+    await supabase.rpc("recalc_tournament_tiebreaks", { _tid: pairing.tournament_id });
+
     const { data: tournament } = await supabase
       .from("tournaments")
       .select("current_round, total_rounds, tournament_type, ends_at")
