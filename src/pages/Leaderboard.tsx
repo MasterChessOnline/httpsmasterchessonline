@@ -229,7 +229,12 @@ const Leaderboard = () => {
                           {player.display_name || player.username || "Anonymous"}
                           {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
                         </span>
-                        <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={ratingOf(player)} size="xs" />
+                        <TitleBadge
+                          titleKey={mode === "online" ? player.highest_title_key ?? undefined : undefined}
+                          rating={ratingOf(player)}
+                          mode={mode}
+                          size="xs"
+                        />
                         <RankBadge rating={ratingOf(player)} size="sm" />
                         {player.country_flag && (
                           <span className="text-xs" title={findCountry(player.country)?.name ?? ""}>{player.country_flag}</span>
