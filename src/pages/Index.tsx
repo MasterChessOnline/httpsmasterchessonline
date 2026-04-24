@@ -186,7 +186,7 @@ const Index = () => {
               <Crown className="h-7 w-7 text-primary" />
             </motion.div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-3 tracking-tight uppercase">
+            <h1 className="relative font-display text-5xl sm:text-7xl lg:text-8xl font-black mb-3 tracking-tight uppercase drop-shadow-[0_8px_32px_hsl(var(--primary)/0.6)] [text-shadow:0_0_28px_hsl(var(--primary)/0.55),0_0_60px_hsl(var(--primary)/0.35),0_0_110px_hsl(var(--primary)/0.2)]">
               <span className="text-gradient-gold">Master</span>
               <span className="text-foreground">Chess</span>
             </h1>
