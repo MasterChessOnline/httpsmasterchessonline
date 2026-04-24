@@ -14,6 +14,8 @@ import {
   Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import Countdown from "@/components/Countdown";
+import { supabase } from "@/integrations/supabase/client";
 
 function getSkillLabel(rating: number) {
   if (rating < 1000) return "Beginner";
@@ -82,6 +84,26 @@ const TournamentLobby = () => {
   const isFinished = tournament.status === "finished";
   const currentRoundPairings = pairings.filter(p => p.round === tournament.current_round);
   const regMap = new Map(registrations.map(r => [r.user_id, r]));
+  const startsAtMs = new Date(tournament.starts_at).getTime();
+  const isUpcoming = isRegistering && startsAtMs > Date.now();
+  const isOverdue = isRegistering && startsAtMs <= Date.now();
+
+  // Client-side fallback: if start time has passed but cron hasn't fired yet,
+  // poke the autostart edge function for this specific tournament.
+  useEffect(() => {
+    if (!isOverdue) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await supabase.functions.invoke("tournament-autostart", {
+          body: { tournament_id: tournament.id },
+        });
+      } catch { /* cron will catch it */ }
+      if (cancelled) return;
+    })();
+    return () => { cancelled = true; };
+  }, [isOverdue, tournament.id]);
+
 
   const handleJoin = async () => {
     if (!user) { navigate("/login"); return; }
