@@ -65,6 +65,7 @@ import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
+import { CommandPaletteProvider } from "@/contexts/CommandPaletteContext";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -147,15 +148,17 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Suspense fallback={<ChessLoadingScreen />}>
-            <div className="pb-16 md:pb-0">
-              <AnimatedRoutes />
-            </div>
-            <AntiTiltWatcher />
-            <TitleUnlockGate />
-            <GameInviteListener />
-            <MobileBottomNav />
-          </Suspense>
+          <CommandPaletteProvider>
+            <Suspense fallback={<ChessLoadingScreen />}>
+              <div className="pb-16 md:pb-0">
+                <AnimatedRoutes />
+              </div>
+              <AntiTiltWatcher />
+              <TitleUnlockGate />
+              <GameInviteListener />
+              <MobileBottomNav />
+            </Suspense>
+          </CommandPaletteProvider>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
