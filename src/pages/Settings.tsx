@@ -178,8 +178,9 @@ const Settings = () => {
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
       const url = pub.publicUrl;
-      await supabase.from("profiles").update({ avatar_url: url } as any).eq("user_id", user.id);
-      setAvatarUrl(url);
+      await supabase.from("profiles").update({ avatar_url: url, updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
+      // Cache-bust the local <img> preview so the new image is shown immediately.
+      setAvatarUrl(url + "?v=" + Date.now());
       await refreshProfile();
       toast.success("Avatar updated");
     } catch (err: any) {
