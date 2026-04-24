@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Orbitron', 'sans-serif'],
+        display: ['Cormorant Garamond', 'Times New Roman', 'serif'],
         body: ['Inter', 'sans-serif'],
       },
       colors: {
