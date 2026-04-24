@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTournament } from "@/hooks/use-tournament";
 import { useTournamentNotifications } from "@/hooks/use-tournament-notifications";
 import { useTournamentAntiCheat } from "@/hooks/use-tournament-anti-cheat";
+import { useServerTime } from "@/hooks/use-server-time";
 import { useStreak } from "@/hooks/use-streak";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -45,6 +46,7 @@ const TournamentLobby = () => {
     gameId: myPairing?.game_id ?? null,
     enabled: !!user && isRegistered && tournament?.status === "active",
   });
+  const { offsetMs: serverOffsetMs } = useServerTime();
 
   const [chatInput, setChatInput] = useState("");
   const [joining, setJoining] = useState(false);
@@ -91,8 +93,8 @@ const TournamentLobby = () => {
   const currentRoundPairings = pairings.filter(p => p.round === tournament.current_round);
   const regMap = new Map(registrations.map(r => [r.user_id, r]));
   const startsAtMs = new Date(tournament.starts_at).getTime();
-  const isUpcoming = isRegistering && startsAtMs > Date.now();
-  const isOverdue = isRegistering && startsAtMs <= Date.now();
+  const isUpcoming = isRegistering && startsAtMs > Date.now() + serverOffsetMs;
+  const isOverdue = isRegistering && startsAtMs <= Date.now() + serverOffsetMs;
 
   // Client-side fallback: if start time has passed but cron hasn't fired yet,
   // poke the autostart edge function for this specific tournament.
@@ -226,7 +228,7 @@ const TournamentLobby = () => {
         {isUpcoming && (
           <div className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 md:p-8 text-center">
             <div className="text-xs uppercase tracking-[0.2em] text-primary mb-3">Tournament starts in</div>
-            <Countdown target={tournament.starts_at} size="xl" />
+            <Countdown target={tournament.starts_at} size="xl" serverOffsetMs={serverOffsetMs} />
             <div className="text-xs text-muted-foreground mt-3">
               {new Date(tournament.starts_at).toLocaleString()} · auto-starts when countdown ends
             </div>

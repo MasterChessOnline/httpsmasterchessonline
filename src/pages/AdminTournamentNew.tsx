@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/use-user-roles";
+import { useServerTime } from "@/hooks/use-server-time";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -31,22 +32,25 @@ const TIME_PRESETS = [
   { label: "30+0 Classical", seconds: 1800, increment: 0, category: "classical" },
 ];
 
-const formSchema = z.object({
-  name: z.string().trim().min(3, "At least 3 characters").max(80),
-  description: z.string().trim().max(500).optional(),
-  tournament_type: z.enum(["arena", "swiss", "round_robin"]),
-  time_preset_idx: z.number().int().min(0).max(TIME_PRESETS.length - 1),
-  starts_at: z.string().refine(
-    v => new Date(v).getTime() > Date.now() + 60 * 1000,
-    "Start time must be at least 1 minute in the future",
-  ),
-  registration_deadline: z.string().optional(),
-  max_players: z.number().int().min(2).max(1024).optional(),
-  total_rounds: z.number().int().min(1).max(15),
-  is_rated: z.boolean(),
-  visibility: z.enum(["public", "private"]),
-  anti_cheat_level: z.enum(["basic", "strict"]),
-});
+// formSchema is built lazily inside the component so it can use server time.
+function buildSchema(serverNowMs: number) {
+  return z.object({
+    name: z.string().trim().min(3, "At least 3 characters").max(80),
+    description: z.string().trim().max(500).optional(),
+    tournament_type: z.enum(["arena", "swiss", "round_robin"]),
+    time_preset_idx: z.number().int().min(0).max(TIME_PRESETS.length - 1),
+    starts_at: z.string().refine(
+      v => new Date(v).getTime() > serverNowMs + 60 * 1000,
+      "You cannot create a tournament in the past — start time must be at least 1 minute in the future (server time).",
+    ),
+    registration_deadline: z.string().optional(),
+    max_players: z.number().int().min(2).max(1024).optional(),
+    total_rounds: z.number().int().min(1).max(15),
+    is_rated: z.boolean(),
+    visibility: z.enum(["public", "private"]),
+    anti_cheat_level: z.enum(["basic", "strict"]),
+  });
+}
 
 function defaultStartIso() {
   // Default: 30 minutes from now, rounded to next 5 min
@@ -63,6 +67,7 @@ export default function AdminTournamentNew() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { canManageTournaments, loading: rolesLoading } = useUserRoles();
+  const { serverNow, synced } = useServerTime();
 
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -112,7 +117,7 @@ export default function AdminTournamentNew() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const parsed = formSchema.safeParse(form);
+      const parsed = buildSchema(synced ? serverNow() : Date.now()).safeParse(form);
       if (!parsed.success) {
         const first = parsed.error.errors[0];
         toast({ title: "Invalid input", description: first.message, variant: "destructive" });
