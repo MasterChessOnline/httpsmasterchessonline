@@ -132,7 +132,13 @@ const Settings = () => {
   const [showExpectedScore, setShowExpectedScore] = useState<boolean>(settings.showExpectedScore ?? true);
   const [ratingAnimation, setRatingAnimation] = useState<boolean>(settings.ratingAnimation ?? true);
 
-  useEffect(() => { if (profile) setDisplayName(profile.display_name || ""); }, [profile]);
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name || "");
+      setBio((profile as any).bio || "");
+      setAvatarUrl((profile as any).avatar_url || null);
+    }
+  }, [profile]);
 
   const toggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
     setter(value); saveSetting(key, value); toast.success("Setting updated");
@@ -141,10 +147,59 @@ const Settings = () => {
   const saveProfile = async () => {
     if (!user) return;
     setSaving(true);
-    await supabase.from("profiles").update({ display_name: displayName.trim() || "Player" }).eq("user_id", user.id);
+    await supabase.from("profiles").update({
+      display_name: displayName.trim() || "Player",
+      bio: bio.trim().slice(0, 500),
+    } as any).eq("user_id", user.id);
     await refreshProfile();
     setSaving(false);
     toast.success("Profile updated");
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = pub.publicUrl;
+      await supabase.from("profiles").update({ avatar_url: url } as any).eq("user_id", user.id);
+      setAvatarUrl(url);
+      await refreshProfile();
+      toast.success("Avatar updated");
+    } catch (err: any) {
+      toast.error(err?.message || "Upload failed");
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    if (!user) return;
+    await supabase.from("profiles").update({ avatar_url: null } as any).eq("user_id", user.id);
+    setAvatarUrl(null);
+    await refreshProfile();
+    toast.success("Avatar removed");
+  };
+
+  const insertEmoji = (emoji: string) => {
+    setBio(prev => (prev + emoji).slice(0, 500));
   };
 
   const handleSignOut = async () => { await signOut(); navigate("/"); };
