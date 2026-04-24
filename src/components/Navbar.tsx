@@ -222,7 +222,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop nav */}
-            <div className="hidden lg:flex items-center gap-1 mx-8">
+            <div className="hidden lg:flex items-center gap-0.5 mx-3 xl:mx-6">
               {NAV_SECTIONS.map((section) => {
                 const isActive = section.items.some(item =>
                   item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
