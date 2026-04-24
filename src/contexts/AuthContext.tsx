@@ -48,6 +48,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq("user_id", userId)
       .single();
     setProfile(data as Profile | null);
+    if (data) {
+      primeUserProfile({
+        user_id: (data as any).user_id,
+        display_name: (data as any).display_name ?? null,
+        avatar_url: (data as any).avatar_url ?? null,
+        updated_at: (data as any).updated_at ?? new Date().toISOString(),
+      });
+    }
   };
 
   const refreshProfile = async () => {
