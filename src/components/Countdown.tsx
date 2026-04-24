@@ -10,23 +10,32 @@ interface CountdownProps {
   /** Hide labels (D/H/M/S) */
   compact?: boolean;
   className?: string;
+  /**
+   * Offset in ms to add to `Date.now()` so the countdown is anchored to
+   * server time rather than the user's potentially-wrong device clock.
+   * Pass the value from `useServerTime().offsetMs`.
+   */
+  serverOffsetMs?: number;
 }
 
 function pad(n: number) { return n.toString().padStart(2, "0"); }
 
 export default function Countdown({
   target, onComplete, size = "md", compact = false, className = "",
+  serverOffsetMs = 0,
 }: CountdownProps) {
   const targetMs = useMemo(
     () => (typeof target === "string" ? new Date(target).getTime() : target.getTime()),
     [target],
   );
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now() + serverOffsetMs);
 
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    const tick = () => setNow(Date.now() + serverOffsetMs);
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [serverOffsetMs]);
 
   const diff = Math.max(0, targetMs - now);
   const completed = diff === 0;
