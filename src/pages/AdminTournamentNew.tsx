@@ -67,6 +67,7 @@ export default function AdminTournamentNew() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { canManageTournaments, loading: rolesLoading } = useUserRoles();
+  const { serverNow, synced } = useServerTime();
 
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -116,7 +117,7 @@ export default function AdminTournamentNew() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const parsed = formSchema.safeParse(form);
+      const parsed = buildSchema(synced ? serverNow() : Date.now()).safeParse(form);
       if (!parsed.success) {
         const first = parsed.error.errors[0];
         toast({ title: "Invalid input", description: first.message, variant: "destructive" });
