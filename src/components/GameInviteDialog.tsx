@@ -28,10 +28,18 @@ const TIME_CONTROLS = [
 ];
 
 const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Props) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [tcLabel, setTcLabel] = useState("5+3");
   const [rated, setRated] = useState(true);
   const [sending, setSending] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const senderName = profile?.display_name || profile?.username || "A friend";
+  const tcPretty = tcLabel;
+  const challengeUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/play/online?challenge=${user?.id ?? ""}&tc=${encodeURIComponent(tcLabel)}&rated=${rated ? 1 : 0}`
+    : "";
+  const shareMessage = `${senderName} is challenging you to a ${tcPretty} ${rated ? "rated" : "casual"} chess game on MasterChess!`;
 
   const send = async () => {
     if (!user) return;
