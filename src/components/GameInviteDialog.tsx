@@ -96,14 +96,25 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
           </div>
           <p className="text-[10px] text-muted-foreground text-center">Invite expires in 5 minutes</p>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" onClick={() => setShareOpen(true)} className="sm:mr-auto">
+            <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share link
+          </Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={send} disabled={sending}>
             {sending && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
             Send Challenge
           </Button>
         </DialogFooter>
       </DialogContent>
+      <ShareInviteDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        title={`Invite ${recipientName} via link`}
+        url={challengeUrl}
+        message={shareMessage}
+        emailSubject="Chess challenge on MasterChess"
+      />
     </Dialog>
   );
 };
