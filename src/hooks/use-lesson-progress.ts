@@ -105,6 +105,13 @@ export function useLessonProgress() {
       score: score ?? 100,
     }, { onConflict: "user_id,lesson_id" });
 
+    // Daily missions: lesson visit/completion
+    try {
+      await bumpMissionProgress(user.id, "lesson_visited", 1);
+    } catch (err) {
+      console.warn("Mission bump (lesson) failed", err);
+    }
+
     // Update local state
     setProgress(prev => {
       const next = new Map(prev);
