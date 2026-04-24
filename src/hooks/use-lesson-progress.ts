@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { bumpMissionProgress } from "@/hooks/use-daily-missions";
 
 interface LessonProgressRecord {
   lesson_id: string;
@@ -103,6 +104,13 @@ export function useLessonProgress() {
       completed_at: now,
       score: score ?? 100,
     }, { onConflict: "user_id,lesson_id" });
+
+    // Daily missions: lesson visit/completion
+    try {
+      await bumpMissionProgress(user.id, "lesson_visited", 1);
+    } catch (err) {
+      console.warn("Mission bump (lesson) failed", err);
+    }
 
     // Update local state
     setProgress(prev => {

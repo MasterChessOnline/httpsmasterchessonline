@@ -18,6 +18,7 @@ import heroImage from "@/assets/hero-chess.jpg";
 
 import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
+import DailyMissions from "@/components/DailyMissions";
 
 interface RecentGame {
   id: string;
@@ -374,6 +375,13 @@ const Index = () => {
                 )}
               </div>
             </ParallaxCard>
+          </SectionHeader>
+        )}
+
+        {/* Daily Missions widget — only for logged-in users */}
+        {user && (
+          <SectionHeader title="Today's Missions" icon={Target}>
+            <DailyMissions compact />
           </SectionHeader>
         )}
 

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import StreakIndicator from "@/components/StreakIndicator";
 
 interface DropdownItem {
   label: string;
@@ -424,6 +425,7 @@ const Navbar = () => {
                 <div className="h-9 w-24 bg-muted/20 rounded-xl animate-pulse" />
               ) : user ? (
                 <>
+                  <StreakIndicator />
                   <Link
                     to={`/profile/${user.id}`}
                     className="flex items-center gap-2.5 rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-3.5 py-2 hover:border-primary/30 hover:bg-card/70 transition-all duration-300"

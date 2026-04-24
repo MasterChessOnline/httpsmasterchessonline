@@ -64,6 +64,7 @@ import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
 import Titles from "./pages/Titles";
+import Missions from "./pages/Missions";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -92,6 +93,7 @@ function AnimatedRoutes() {
           <Route path="/friends" element={<Friends />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path="/achievements" element={<Achievements />} />
+          <Route path="/missions" element={<Missions />} />
           
           <Route path="/story" element={<StoryMode />} />
           <Route path="/openings" element={<OpeningTrainer />} />

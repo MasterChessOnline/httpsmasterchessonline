@@ -272,6 +272,48 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_missions: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          key: string
+          mission_type: string
+          sort_order: number
+          target_value: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          mission_type: string
+          sort_order?: number
+          target_value?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          mission_type?: string
+          sort_order?: number
+          target_value?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       direct_messages: {
         Row: {
           created_at: string
@@ -1548,6 +1590,87 @@ export type Database = {
           earned_at?: string
           equipped?: boolean
           id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_daily_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          freeze_available: boolean
+          freeze_used_date: string | null
+          id: string
+          last_active_date: string | null
+          longest_streak: number
+          total_active_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          freeze_available?: boolean
+          freeze_used_date?: string | null
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number
+          total_active_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          freeze_available?: boolean
+          freeze_used_date?: string | null
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number
+          total_active_days?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_mission_progress: {
+        Row: {
+          claimed: boolean
+          claimed_at: string | null
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          id: string
+          mission_date: string
+          mission_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          claimed?: boolean
+          claimed_at?: string | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          mission_date?: string
+          mission_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          claimed?: boolean
+          claimed_at?: string | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          mission_date?: string
+          mission_key?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
