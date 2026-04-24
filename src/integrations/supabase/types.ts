@@ -1330,6 +1330,51 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_anti_cheat_flags: {
+        Row: {
+          created_at: string
+          details: Json | null
+          game_id: string | null
+          id: string
+          resolution: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          signal_type: string
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          game_id?: string | null
+          id?: string
+          resolution?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          signal_type: string
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          game_id?: string | null
+          id?: string
+          resolution?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          signal_type?: string
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tournament_chat_messages: {
         Row: {
           created_at: string
@@ -1755,7 +1800,23 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      tournament_played_pairs: {
+        Row: {
+          player_a: string | null
+          player_b: string | null
+          rounds: number[] | null
+          tournament_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_pairings_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
@@ -1795,6 +1856,14 @@ export type Database = {
           message: Json
           msg_id: number
           read_ct: number
+        }[]
+      }
+      tournament_color_balance: {
+        Args: { _tournament_id: string }
+        Returns: {
+          blacks: number
+          user_id: string
+          whites: number
         }[]
       }
       update_elo_ratings: {
