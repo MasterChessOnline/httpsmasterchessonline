@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateXP, getLevelFromXP } from "@/lib/gamification";
 import TitleBadge from "@/components/TitleBadge";
+import RankBadge from "@/components/RankBadge";
 import SeasonBanner from "@/components/SeasonBanner";
 import { findCountry } from "@/lib/countries";
 import { TITLES, getTitle } from "@/lib/titles";
