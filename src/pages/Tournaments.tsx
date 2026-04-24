@@ -28,13 +28,6 @@ const CATEGORY_OPTIONS = [
   { value: "classical", label: "Classical", icon: Clock },
 ];
 
-const SKILL_OPTIONS = [
-  { value: "all", label: "All Levels" },
-  { value: "beginner", label: "Beginner", maxRating: 1000 },
-  { value: "intermediate", label: "Intermediate", maxRating: 1400 },
-  { value: "advanced", label: "Advanced", maxRating: 9999 },
-];
-
 const statusStyles: Record<string, { bg: string; label: string }> = {
   active: { bg: "bg-accent text-accent-foreground", label: "🔴 Live" },
   registering: { bg: "bg-primary/10 text-primary", label: "Open" },
@@ -430,18 +423,6 @@ const Tournaments = () => {
                     statusFilter === s ? "border-primary bg-primary/10 text-primary" : "border-border/40 bg-muted/20 text-muted-foreground hover:border-primary/30"
                   }`}>
                   {s === "all" ? "All" : s === "active" ? "🔴 Live" : s === "registering" ? "Open" : "Finished"}
-                </button>
-              ))}
-            </div>
-
-            {/* Skill tier filter */}
-            <div className="flex gap-1.5 mb-5 flex-wrap">
-              {SKILL_OPTIONS.map((opt) => (
-                <button key={opt.value} onClick={() => setSkillFilter(opt.value)}
-                  className={`rounded-full px-3 py-1 text-[11px] font-medium transition-all border ${
-                    skillFilter === opt.value ? "border-accent bg-accent/20 text-accent-foreground" : "border-border/40 bg-muted/20 text-muted-foreground hover:border-accent/30"
-                  }`}>
-                  {opt.value === "beginner" ? "🟢 " : opt.value === "intermediate" ? "🟡 " : opt.value === "advanced" ? "🔴 " : ""}{opt.label}
                 </button>
               ))}
             </div>
