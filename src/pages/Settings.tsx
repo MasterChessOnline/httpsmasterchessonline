@@ -193,7 +193,7 @@ const Settings = () => {
 
   const handleAvatarRemove = async () => {
     if (!user) return;
-    await supabase.from("profiles").update({ avatar_url: null } as any).eq("user_id", user.id);
+    await supabase.from("profiles").update({ avatar_url: null, updated_at: new Date().toISOString() } as any).eq("user_id", user.id);
     setAvatarUrl(null);
     await refreshProfile();
     toast.success("Avatar removed");
