@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateXP, getLevelFromXP } from "@/lib/gamification";
 import TitleBadge from "@/components/TitleBadge";
+import RankBadge from "@/components/RankBadge";
 import SeasonBanner from "@/components/SeasonBanner";
 import { findCountry } from "@/lib/countries";
 import { TITLES, getTitle } from "@/lib/titles";
@@ -150,8 +151,9 @@ const Leaderboard = () => {
                 <p className={`text-sm font-semibold truncate max-w-[90px] ${rank === 1 ? "text-primary" : "text-foreground"}`}>
                   {player.display_name || "Anonymous"}
                 </p>
-                <div className="mt-0.5 mb-0.5">
+                <div className="mt-0.5 mb-0.5 flex flex-col items-center gap-0.5">
                   <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={ratingOf(player)} size="xs" />
+                  <RankBadge rating={ratingOf(player)} size="sm" />
                 </div>
                 <p className={`font-mono font-bold ${rank === 1 ? "text-2xl text-primary drop-shadow-[0_0_8px_hsl(43_80%_55%/0.4)]" : "text-lg text-foreground"}`}>
                   {ratingOf(player)}
@@ -223,6 +225,7 @@ const Leaderboard = () => {
                           {isMe && <span className="text-xs ml-1 opacity-70">(you)</span>}
                         </span>
                         <TitleBadge titleKey={player.highest_title_key ?? undefined} rating={ratingOf(player)} size="xs" />
+                        <RankBadge rating={ratingOf(player)} size="sm" />
                         {player.country_flag && (
                           <span className="text-xs" title={findCountry(player.country)?.name ?? ""}>{player.country_flag}</span>
                         )}
