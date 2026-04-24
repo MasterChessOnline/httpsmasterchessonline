@@ -188,9 +188,9 @@ const Index = () => {
               <Crown className="h-7 w-7 text-primary" />
             </motion.div>
 
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 tracking-tight">
-              <span className="text-gradient-gold">Master</span>
-              <span className="text-foreground">Chess</span>
+            <h1 className="font-classical text-5xl sm:text-6xl lg:text-7xl font-semibold mb-3 tracking-normal">
+              <span className="text-gradient-gold italic">Master</span>
+              <span className="text-foreground"> Chess</span>
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 font-light tracking-wide">
               Play, learn, and compete — your next great game starts here
