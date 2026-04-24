@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import EmojiPicker, { EmojiStyle, Theme } from "emoji-picker-react";
 import { formatDistanceToNow } from "date-fns";
+import UserAvatar from "@/components/UserAvatar";
 
 interface Club {
   id: string; name: string; description: string; icon: string;
