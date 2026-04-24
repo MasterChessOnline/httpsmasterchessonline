@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -44,7 +44,7 @@
     --board-light: 40 35% 65%;
     --board-dark: 30 30% 25%;
 
-    --font-display: 'Orbitron', sans-serif;
+    --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
     --font-body: 'Inter', sans-serif;
 
     --gradient-hero: linear-gradient(180deg, hsl(30 8% 4% / 0.2) 0%, hsl(30 8% 4% / 0.98) 100%);
@@ -70,7 +70,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    letter-spacing: 0.02em;
+    letter-spacing: -0.01em;
     /* Visibility rule: headings & subheadings must always be fully readable */
     overflow-wrap: break-word;
     word-wrap: break-word;
