@@ -56,6 +56,7 @@ const TournamentLobby = () => {
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState<"standings" | "rounds" | "chat">("standings");
   const [dismissedBanners, setDismissedBanners] = useState<Record<string, number>>({});
+  const [shareOpen, setShareOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const currentRound = tournament?.current_round ?? 0;
