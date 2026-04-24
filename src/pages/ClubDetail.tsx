@@ -226,9 +226,11 @@ const ClubDetail = () => {
                       const mine = msg.user_id === user?.id;
                       return (
                         <div key={msg.id} className={`flex gap-2 ${mine ? "flex-row-reverse" : ""}`}>
-                          <div className="h-7 w-7 rounded-full bg-muted/50 flex items-center justify-center text-[10px] font-bold text-foreground overflow-hidden flex-shrink-0">
-                            {msg.avatar_url ? <img src={msg.avatar_url} className="h-full w-full object-cover" alt="" /> : (msg.display_name || "?")[0]?.toUpperCase()}
-                          </div>
+                          <UserAvatar
+                            userId={msg.user_id}
+                            fallbackName={msg.display_name || "?"}
+                            className="h-7 w-7 text-[10px] flex-shrink-0"
+                          />
                           <div className={`flex flex-col ${mine ? "items-end" : "items-start"} max-w-[75%]`}>
                             <span className="text-[10px] text-muted-foreground px-1">{msg.display_name || "Player"}</span>
                             <span className={`inline-block px-3 py-1.5 rounded-2xl text-xs break-words ${
