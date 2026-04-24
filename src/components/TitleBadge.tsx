@@ -1,4 +1,4 @@
-import { getTitle, getTitleByKey, type ChessTitle } from "@/lib/titles";
+import { getTitle, getTitleByKey, type ChessTitle, type RatingMode, BOT_TITLE_OVERRIDES } from "@/lib/titles";
 import { motion } from "framer-motion";
 
 interface TitleBadgeProps {
@@ -8,6 +8,8 @@ interface TitleBadgeProps {
   size?: "xs" | "sm" | "md" | "lg";
   /** When true, hides the badge for unranked players. */
   hideUnranked?: boolean;
+  /** Which name set to use (online = FIDE, bot = AI Arena). Defaults to online. */
+  mode?: RatingMode;
   className?: string;
 }
 
@@ -23,13 +25,17 @@ export default function TitleBadge({
   titleKey,
   size = "sm",
   hideUnranked = true,
+  mode = "online",
   className = "",
 }: TitleBadgeProps) {
   let title: ChessTitle | null = null;
   if (titleKey) title = getTitleByKey(titleKey);
-  if (!title && typeof rating === "number") title = getTitle(rating);
+  if (!title && typeof rating === "number") title = getTitle(rating, mode);
   if (!title) return null;
   if (hideUnranked && title.key === "unranked") return null;
+
+  // Apply bot-mode label override if requested.
+  const label = mode === "bot" ? (BOT_TITLE_OVERRIDES[title.key]?.label ?? title.label) : title.label;
 
   const baseClasses = `inline-flex items-center rounded-md border font-bold uppercase tracking-wide ${SIZE_CLASSES[size]} ${title.color} ${title.bgColor} ${title.borderColor} ${className}`;
 
