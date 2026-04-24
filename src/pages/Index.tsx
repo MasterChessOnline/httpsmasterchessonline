@@ -164,11 +164,11 @@ const Index = () => {
             src={heroImage}
             alt="Chess board"
             className="absolute inset-0 w-full h-[120%] object-cover"
-            style={{ filter: "brightness(0.15) saturate(0.7)" }}
+            style={{ filter: "brightness(0.28) saturate(0.85)" }}
             loading="eager"
           />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
         {/* Scan-line futuristic overlay */}
         <div className="absolute inset-0 scan-line pointer-events-none" />
 
@@ -186,7 +186,7 @@ const Index = () => {
               <Crown className="h-7 w-7 text-primary" />
             </motion.div>
 
-            <h1 className="relative font-display text-5xl sm:text-7xl lg:text-8xl font-black mb-3 tracking-tight uppercase drop-shadow-[0_8px_32px_hsl(var(--primary)/0.6)] [text-shadow:0_0_28px_hsl(var(--primary)/0.55),0_0_60px_hsl(var(--primary)/0.35),0_0_110px_hsl(var(--primary)/0.2)]">
+            <h1 className="relative font-display text-5xl sm:text-7xl lg:text-8xl font-black mb-3 tracking-tight uppercase [text-shadow:0_0_40px_hsl(var(--primary)/0.22),0_0_90px_hsl(var(--primary)/0.14),0_0_160px_hsl(var(--primary)/0.08)]">
               <span className="text-gradient-gold">Master</span>
               <span className="text-foreground">Chess</span>
             </h1>
