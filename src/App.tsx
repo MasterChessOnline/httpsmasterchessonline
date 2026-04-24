@@ -60,6 +60,7 @@ import Training from "./pages/Training";
 import ChessCard from "./pages/ChessCard";
 import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
+import AdminTournamentNew from "./pages/AdminTournamentNew";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
@@ -88,6 +89,7 @@ function AnimatedRoutes() {
           <Route path="/play/titles" element={<Titles />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/tournaments" element={<Tournaments />} />
+          <Route path="/admin/tournaments/new" element={<AdminTournamentNew />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile/:userId" element={<Profile />} />
