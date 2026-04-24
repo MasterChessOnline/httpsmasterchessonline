@@ -228,13 +228,11 @@ const Profile = () => {
           >
             <div className="flex items-center gap-4">
               <div className="relative shrink-0 group">
-                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shadow-glow overflow-hidden">
-                  {profileData.avatar_url ? (
-                    <img src={profileData.avatar_url} alt={profileData.display_name || "Player"} className="h-full w-full object-cover" />
-                  ) : (
-                    <User className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-                  )}
-                </div>
+                <UserAvatar
+                  userId={profileData.user_id}
+                  fallbackName={profileData.display_name || "Player"}
+                  className="h-16 w-16 sm:h-20 sm:w-20 border-2 border-primary/30 shadow-glow"
+                />
                 {isOwnProfile && (
                   <>
                     <input
