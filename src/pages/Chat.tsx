@@ -195,9 +195,11 @@ const Chat = () => {
                       selectedFriend?.user_id === f.user_id ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/40 border border-transparent"
                     }`}
                   >
-                    <div className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-xs font-bold text-foreground overflow-hidden">
-                      {f.avatar_url ? <img src={f.avatar_url} alt={name} className="h-full w-full object-cover" /> : name[0]?.toUpperCase()}
-                    </div>
+                    <UserAvatar
+                      userId={f.user_id}
+                      fallbackName={name}
+                      className="h-8 w-8 text-xs"
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-foreground truncate">{name}</p>
                       <p className="text-[10px] text-muted-foreground font-mono">{f.rating} ELO</p>
