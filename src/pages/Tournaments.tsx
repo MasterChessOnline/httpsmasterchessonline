@@ -288,6 +288,12 @@ const Tournaments = () => {
               <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{t.total_rounds} rounds</span>
               <span className="flex items-center gap-1"><Users className="h-3 w-3" />{t.player_count || 0}/{t.max_players}</span>
               <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(t.starts_at)}</span>
+              {t.status === "registering" && new Date(t.starts_at).getTime() > Date.now() && (
+                <span className="flex items-center gap-1 text-primary font-medium font-mono">
+                  <Timer className="h-3 w-3" />
+                  <Countdown target={t.starts_at} size="sm" compact />
+                </span>
+              )}
               {t.status === "active" && (
                 <span className="flex items-center gap-1 text-primary font-medium"><Zap className="h-3 w-3" />Round {t.current_round}/{t.total_rounds}</span>
               )}
