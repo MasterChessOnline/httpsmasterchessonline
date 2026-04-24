@@ -226,6 +226,15 @@ const Profile = () => {
               </div>
             </div>
 
+            {/* Bio (supports emojis & free expression) */}
+            {profileData.bio && profileData.bio.trim().length > 0 && (
+              <div className="mt-4 rounded-xl border border-border/50 bg-muted/10 p-3">
+                <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words leading-relaxed">
+                  {profileData.bio}
+                </p>
+              </div>
+            )}
+
             {/* Title progress (driven by bot rating — the MasterChess title ladder) */}
             {(() => {
               const botRating = profileData.bot_rating ?? 1200;
