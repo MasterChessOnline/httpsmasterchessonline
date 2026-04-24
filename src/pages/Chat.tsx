@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import EmojiPicker, { EmojiStyle, Theme } from "emoji-picker-react";
 import { formatDistanceToNow } from "date-fns";
+import UserAvatar from "@/components/UserAvatar";
 
 interface Friend {
   user_id: string;
