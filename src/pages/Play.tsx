@@ -740,14 +740,14 @@ const Play = () => {
           {/* Bot grid */}
           <div className="w-full max-w-lg">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3 text-center">Or pick an opponent</p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {getBotByDifficulty(difficulty).map(bot => (
                 <motion.button
                   key={bot.id}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => startMatchmaking(bot)}
-                  className="rounded-xl p-3 text-center transition-all border border-border/40 bg-card hover:border-primary/40 hover:shadow-glow"
+                  className="rounded-xl p-3 text-center transition-all border border-border/40 bg-card hover:border-primary/40 hover:shadow-glow basis-[calc(33.333%-0.5rem)] sm:basis-[calc(25%-0.5rem)] max-w-[140px]"
                 >
                   <span className="text-3xl block mb-1">{bot.avatar}</span>
                   <span className="text-xs font-bold block text-foreground leading-tight">{bot.name}</span>

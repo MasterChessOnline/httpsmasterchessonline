@@ -779,4 +779,28 @@ a, button, input, select, textarea {
   }
 }
 
+/* ============================================================
+   Global content width cap — prevents over-stretched layouts
+   on ultra-wide / 4K screens. Centers the central lamella so
+   nothing floats orphaned on the far left or right. The cap is
+   only enforced beyond 1600px so existing responsive layouts
+   remain untouched on normal monitors.
+   ============================================================ */
+@media (min-width: 1600px) {
+  main,
+  footer > div,
+  body > div > main {
+    max-width: 1480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Make sure any flex/grid row inside a centered <main> distributes
+   children with even justification rather than packing them left. */
+main > section,
+main > div {
+  margin-left: auto;
+  margin-right: auto;
+}
 
