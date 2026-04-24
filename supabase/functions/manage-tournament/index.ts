@@ -299,6 +299,9 @@ async function handleReportResult(supabase: any, game_id: string, result: string
         .eq("user_id", pairing.black_player_id);
     }
 
+    // Recompute Buchholz / Sonneborn-Berger / wins for this tournament
+    await supabase.rpc("recalc_tournament_tiebreaks", { _tid: pairing.tournament_id });
+
     const { data: tournament } = await supabase
       .from("tournaments")
       .select("current_round, total_rounds, tournament_type, ends_at")
@@ -335,6 +338,8 @@ async function handleReportResult(supabase: any, game_id: string, result: string
               .eq("id", pairing.tournament_id);
             await awardTournamentBadges(supabase, pairing.tournament_id);
           } else {
+            // Spec: small delay (2–5s) between rounds for UX
+            await new Promise(r => setTimeout(r, 3000));
             await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
           }
         }
@@ -588,9 +593,13 @@ async function generateNextRound(supabase: any, tournamentId: string, nextRound:
 
   const { data: players } = await supabase
     .from("tournament_registrations")
-    .select("user_id, rating_at_join, score")
+    .select("user_id, rating_at_join, score, buchholz, sonneborn, wins")
     .eq("tournament_id", tournamentId)
-    .order("score", { ascending: false });
+    .order("score", { ascending: false })
+    .order("buchholz", { ascending: false })
+    .order("sonneborn", { ascending: false })
+    .order("wins", { ascending: false })
+    .order("rating_at_join", { ascending: false });
 
   if (!players || players.length < 2 || !tournament) return;
 

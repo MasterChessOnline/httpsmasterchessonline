@@ -19,10 +19,12 @@ import { toast } from "@/hooks/use-toast";
 import Countdown from "@/components/Countdown";
 import { supabase } from "@/integrations/supabase/client";
 
-function getSkillLabel(rating: number) {
-  if (rating < 1000) return "Beginner";
-  if (rating < 1400) return "Intermediate";
-  return "Advanced";
+function sortByTiebreak<T extends { score: any; buchholz?: any; sonneborn?: any; wins?: any; rating_at_join: number }>(a: T, b: T) {
+  const d = (Number(b.score) || 0) - (Number(a.score) || 0); if (d) return d;
+  const dB = (Number(b.buchholz) || 0) - (Number(a.buchholz) || 0); if (dB) return dB;
+  const dS = (Number(b.sonneborn) || 0) - (Number(a.sonneborn) || 0); if (dS) return dS;
+  const dW = (Number(b.wins) || 0) - (Number(a.wins) || 0); if (dW) return dW;
+  return b.rating_at_join - a.rating_at_join;
 }
 
 function getPlayerName(reg: { display_name?: string; username?: string; user_id: string }) {
@@ -321,15 +323,21 @@ const TournamentLobby = () => {
         {/* ============ STANDINGS ============ */}
         {activeTab === "standings" && (
           <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-            <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 px-4 py-2 text-xs font-medium text-muted-foreground bg-muted/30 border-b border-border/30">
-              <span>#</span><span>Player</span><span>Rating</span><span>Skill</span><span>Score</span>
+            <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-2 px-4 py-2 text-xs font-medium text-muted-foreground bg-muted/30 border-b border-border/30">
+              <span>#</span>
+              <span>Player</span>
+              <span className="text-right" title="Rating">Rating</span>
+              <span className="text-right" title="Score">Pts</span>
+              <span className="text-right" title="Buchholz — sum of opponents' scores">BH</span>
+              <span className="text-right" title="Sonneborn-Berger">SB</span>
+              <span className="text-right" title="Wins (full points)">W</span>
             </div>
             {registrations.length === 0 ? (
               <p className="text-center text-muted-foreground py-8 text-sm">No players registered yet.</p>
             ) : (
-              registrations.sort((a, b) => Number(b.score) - Number(a.score) || b.rating_at_join - a.rating_at_join).map((reg, i) => (
+              [...registrations].sort(sortByTiebreak).map((reg, i) => (
                 <div key={reg.id}
-                  className={`grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 px-4 py-2.5 text-sm items-center border-b border-border/20 last:border-0 ${
+                  className={`grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-2 px-4 py-2.5 text-sm items-center border-b border-border/20 last:border-0 ${
                     user && reg.user_id === user.id ? "bg-primary/5" : ""
                   }`}>
                   <span className="w-6 text-center">
@@ -339,9 +347,11 @@ const TournamentLobby = () => {
                     {getPlayerName(reg)}
                     {user && reg.user_id === user.id && <span className="text-primary text-xs ml-1">(you)</span>}
                   </span>
-                  <span className="text-muted-foreground">{reg.rating_at_join}</span>
-                  <Badge variant="outline" className="text-[10px]">{getSkillLabel(reg.rating_at_join)}</Badge>
-                  <span className="font-bold text-primary">{Number(reg.score)}</span>
+                  <span className="text-right text-muted-foreground">{reg.rating_at_join}</span>
+                  <span className="text-right font-bold text-primary">{Number(reg.score)}</span>
+                  <span className="text-right text-xs text-muted-foreground tabular-nums">{Number((reg as any).buchholz || 0).toFixed(1)}</span>
+                  <span className="text-right text-xs text-muted-foreground tabular-nums">{Number((reg as any).sonneborn || 0).toFixed(2)}</span>
+                  <span className="text-right text-xs text-muted-foreground tabular-nums">{Number((reg as any).wins || 0)}</span>
                 </div>
               ))
             )}
@@ -462,7 +472,7 @@ const TournamentLobby = () => {
           <div className="mt-8 text-center">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">🏆 Final Results</h2>
             <div className="inline-flex gap-6 justify-center flex-wrap">
-              {registrations.sort((a, b) => Number(b.score) - Number(a.score)).slice(0, 3).map((reg, i) => (
+              {[...registrations].sort(sortByTiebreak).slice(0, 3).map((reg, i) => (
                 <div key={reg.id} className="text-center">
                   <div className="text-3xl mb-1">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</div>
                   <p className="font-medium text-foreground">{getPlayerName(reg)}</p>
