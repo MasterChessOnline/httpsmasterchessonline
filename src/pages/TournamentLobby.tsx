@@ -472,7 +472,7 @@ const TournamentLobby = () => {
           <div className="mt-8 text-center">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">🏆 Final Results</h2>
             <div className="inline-flex gap-6 justify-center flex-wrap">
-              {registrations.sort((a, b) => Number(b.score) - Number(a.score)).slice(0, 3).map((reg, i) => (
+              {[...registrations].sort(sortByTiebreak).slice(0, 3).map((reg, i) => (
                 <div key={reg.id} className="text-center">
                   <div className="text-3xl mb-1">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</div>
                   <p className="font-medium text-foreground">{getPlayerName(reg)}</p>
