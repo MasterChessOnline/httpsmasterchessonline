@@ -2,11 +2,10 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Swords, Share2 } from "lucide-react";
+import { Loader2, Swords } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import ShareInviteDialog from "@/components/ShareInviteDialog";
 
 interface Props {
   open: boolean;
@@ -28,18 +27,10 @@ const TIME_CONTROLS = [
 ];
 
 const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Props) => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [tcLabel, setTcLabel] = useState("5+3");
   const [rated, setRated] = useState(true);
   const [sending, setSending] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-
-  const senderName = profile?.display_name || profile?.username || "A friend";
-  const tcPretty = tcLabel;
-  const challengeUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/play/online?challenge=${user?.id ?? ""}&tc=${encodeURIComponent(tcLabel)}&rated=${rated ? 1 : 0}`
-    : "";
-  const shareMessage = `${senderName} is challenging you to a ${tcPretty} ${rated ? "rated" : "casual"} chess game on MasterChess!`;
 
   const send = async () => {
     if (!user) return;
@@ -96,25 +87,14 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
           </div>
           <p className="text-[10px] text-muted-foreground text-center">Invite expires in 5 minutes</p>
         </div>
-        <DialogFooter className="gap-2 sm:gap-2">
-          <Button variant="outline" onClick={() => setShareOpen(true)} className="sm:mr-auto">
-            <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share link
-          </Button>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={send} disabled={sending}>
             {sending && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
             Send Challenge
           </Button>
         </DialogFooter>
       </DialogContent>
-      <ShareInviteDialog
-        open={shareOpen}
-        onOpenChange={setShareOpen}
-        title={`Invite ${recipientName} via link`}
-        url={challengeUrl}
-        message={shareMessage}
-        emailSubject="Chess challenge on MasterChess"
-      />
     </Dialog>
   );
 };

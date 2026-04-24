@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import EmojiPicker, { EmojiStyle, Theme } from "emoji-picker-react";
 import { formatDistanceToNow } from "date-fns";
-import UserAvatar from "@/components/UserAvatar";
 
 interface Friend {
   user_id: string;
@@ -195,11 +194,9 @@ const Chat = () => {
                       selectedFriend?.user_id === f.user_id ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/40 border border-transparent"
                     }`}
                   >
-                    <UserAvatar
-                      userId={f.user_id}
-                      fallbackName={name}
-                      className="h-8 w-8 text-xs"
-                    />
+                    <div className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-xs font-bold text-foreground overflow-hidden">
+                      {f.avatar_url ? <img src={f.avatar_url} alt={name} className="h-full w-full object-cover" /> : name[0]?.toUpperCase()}
+                    </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-foreground truncate">{name}</p>
                       <p className="text-[10px] text-muted-foreground font-mono">{f.rating} ELO</p>
@@ -220,11 +217,11 @@ const Chat = () => {
             {selectedFriend ? (
               <>
                 <div className="px-4 py-3 border-b border-border/30 flex items-center gap-2.5">
-                  <UserAvatar
-                    userId={selectedFriend.user_id}
-                    fallbackName={selectedFriend.display_name || selectedFriend.username || "?"}
-                    className="h-8 w-8 text-sm"
-                  />
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary overflow-hidden">
+                    {selectedFriend.avatar_url
+                      ? <img src={selectedFriend.avatar_url} alt="" className="h-full w-full object-cover" />
+                      : (selectedFriend.display_name || selectedFriend.username || "?")[0].toUpperCase()}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground truncate">
                       {selectedFriend.display_name || selectedFriend.username || "Player"}

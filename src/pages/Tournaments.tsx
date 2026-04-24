@@ -17,8 +17,6 @@ import { toast } from "@/hooks/use-toast";
 import { useStreak } from "@/hooks/use-streak";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
 import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
-import { useUserRoles } from "@/hooks/use-user-roles";
-import Countdown from "@/components/Countdown";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
@@ -26,6 +24,13 @@ const CATEGORY_OPTIONS = [
   { value: "blitz", label: "Blitz", icon: Zap },
   { value: "rapid", label: "Rapid", icon: Timer },
   { value: "classical", label: "Classical", icon: Clock },
+];
+
+const SKILL_OPTIONS = [
+  { value: "all", label: "All Levels" },
+  { value: "beginner", label: "Beginner", maxRating: 1000 },
+  { value: "intermediate", label: "Intermediate", maxRating: 1400 },
+  { value: "advanced", label: "Advanced", maxRating: 9999 },
 ];
 
 const statusStyles: Record<string, { bg: string; label: string }> = {
@@ -99,11 +104,10 @@ const Tournaments = () => {
   const { streak } = useStreak(user?.id);
   const { activeTournament } = useActiveTournament(user?.id);
   useTournamentReminder(user?.id);
-  const { canManageTournaments } = useUserRoles();
   const [viewTab, setViewTab] = useState<ViewTab>("all");
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  
+  const [skillFilter, setSkillFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [dbTournaments, setDbTournaments] = useState<DbTournament[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
@@ -223,6 +227,12 @@ const Tournaments = () => {
   const filtered = dbTournaments.filter(t => {
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
+    if (skillFilter !== "all") {
+      // Map skill tier to time control ranges as a proxy
+      const tcSec = parseInt(t.time_control_label.split("+")[0]) * 60 || 300;
+      if (skillFilter === "beginner" && tcSec < 180) return false; // beginners skip bullet
+      if (skillFilter === "advanced" && tcSec > 600) return false; // advanced skip classical
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       if (!t.name.toLowerCase().includes(q) && !t.time_control_label.toLowerCase().includes(q)) return false;
@@ -276,12 +286,6 @@ const Tournaments = () => {
               <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{t.total_rounds} rounds</span>
               <span className="flex items-center gap-1"><Users className="h-3 w-3" />{t.player_count || 0}/{t.max_players}</span>
               <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(t.starts_at)}</span>
-              {t.status === "registering" && new Date(t.starts_at).getTime() > Date.now() && (
-                <span className="flex items-center gap-1 text-primary font-medium font-mono">
-                  <Timer className="h-3 w-3" />
-                  <Countdown target={t.starts_at} size="sm" compact />
-                </span>
-              )}
               {t.status === "active" && (
                 <span className="flex items-center gap-1 text-primary font-medium"><Zap className="h-3 w-3" />Round {t.current_round}/{t.total_rounds}</span>
               )}
@@ -345,7 +349,7 @@ const Tournaments = () => {
             Compete & <span className="text-gradient-gold">Climb</span>
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto">
-            Join free online tournaments, compete with players from around the world, and earn badges. All logged-in players welcome!
+            Join free online tournaments, compete by skill level, and earn badges. All logged-in players welcome!
           </p>
           {(totalLive > 0 || totalOpen > 0) && (
             <div className="mt-3 flex justify-center gap-2">
@@ -402,12 +406,10 @@ const Tournaments = () => {
                   </button>
                 ))}
               </div>
-              {canManageTournaments && (
-                <Button onClick={() => navigate("/admin/tournaments/new")} size="sm">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Create
-                </Button>
-              )}
+              <Button onClick={handleCreateTournament} disabled={creating} size="sm">
+                {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+                Create
+              </Button>
             </div>
 
             <div className="flex gap-1.5 mb-3 flex-wrap">
@@ -417,6 +419,18 @@ const Tournaments = () => {
                     statusFilter === s ? "border-primary bg-primary/10 text-primary" : "border-border/40 bg-muted/20 text-muted-foreground hover:border-primary/30"
                   }`}>
                   {s === "all" ? "All" : s === "active" ? "🔴 Live" : s === "registering" ? "Open" : "Finished"}
+                </button>
+              ))}
+            </div>
+
+            {/* Skill tier filter */}
+            <div className="flex gap-1.5 mb-5 flex-wrap">
+              {SKILL_OPTIONS.map((opt) => (
+                <button key={opt.value} onClick={() => setSkillFilter(opt.value)}
+                  className={`rounded-full px-3 py-1 text-[11px] font-medium transition-all border ${
+                    skillFilter === opt.value ? "border-accent bg-accent/20 text-accent-foreground" : "border-border/40 bg-muted/20 text-muted-foreground hover:border-accent/30"
+                  }`}>
+                  {opt.value === "beginner" ? "🟢 " : opt.value === "intermediate" ? "🟡 " : opt.value === "advanced" ? "🔴 " : ""}{opt.label}
                 </button>
               ))}
             </div>

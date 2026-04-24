@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { primeUserProfile } from "@/hooks/use-user-avatar";
 
 interface Profile {
   id: string;
@@ -48,14 +47,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq("user_id", userId)
       .single();
     setProfile(data as Profile | null);
-    if (data) {
-      primeUserProfile({
-        user_id: (data as any).user_id,
-        display_name: (data as any).display_name ?? null,
-        avatar_url: (data as any).avatar_url ?? null,
-        updated_at: (data as any).updated_at ?? new Date().toISOString(),
-      });
-    }
   };
 
   const refreshProfile = async () => {
@@ -89,33 +80,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // Subscribe to realtime updates on the logged-in user's profile so that
-  // changes (avatar, display name, rating…) propagate everywhere instantly.
-  useEffect(() => {
-    const userId = session?.user?.id;
-    if (!userId) return;
-    const channel = supabase
-      .channel(`profile-self-${userId}`)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${userId}` },
-        (payload: any) => {
-          const row = payload.new as Profile;
-          setProfile(row);
-          primeUserProfile({
-            user_id: row.user_id,
-            display_name: row.display_name ?? null,
-            avatar_url: row.avatar_url ?? null,
-            updated_at: (row as any).updated_at ?? new Date().toISOString(),
-          });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [session?.user?.id]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

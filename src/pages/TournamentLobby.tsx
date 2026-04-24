@@ -3,8 +3,6 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTournament } from "@/hooks/use-tournament";
 import { useTournamentNotifications } from "@/hooks/use-tournament-notifications";
-import { useTournamentAntiCheat } from "@/hooks/use-tournament-anti-cheat";
-import { useServerTime } from "@/hooks/use-server-time";
 import { useStreak } from "@/hooks/use-streak";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,19 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Trophy, Clock, Users, Swords, Timer, Crown, Send, Eye, MessageSquare,
-  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X, Share2,
+  Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import Countdown from "@/components/Countdown";
-import { supabase } from "@/integrations/supabase/client";
-import ShareInviteDialog from "@/components/ShareInviteDialog";
 
-function sortByTiebreak<T extends { score: any; buchholz?: any; sonneborn?: any; wins?: any; rating_at_join: number }>(a: T, b: T) {
-  const d = (Number(b.score) || 0) - (Number(a.score) || 0); if (d) return d;
-  const dB = (Number(b.buchholz) || 0) - (Number(a.buchholz) || 0); if (dB) return dB;
-  const dS = (Number(b.sonneborn) || 0) - (Number(a.sonneborn) || 0); if (dS) return dS;
-  const dW = (Number(b.wins) || 0) - (Number(a.wins) || 0); if (dW) return dW;
-  return b.rating_at_join - a.rating_at_join;
+function getSkillLabel(rating: number) {
+  if (rating < 1000) return "Beginner";
+  if (rating < 1400) return "Intermediate";
+  return "Advanced";
 }
 
 function getPlayerName(reg: { display_name?: string; username?: string; user_id: string }) {
@@ -44,19 +37,12 @@ const TournamentLobby = () => {
 
   const { streak } = useStreak(user?.id);
   useTournamentNotifications(tournament, myPairing, user?.id);
-  useTournamentAntiCheat({
-    tournamentId: tournament?.id,
-    gameId: myPairing?.game_id ?? null,
-    enabled: !!user && isRegistered && tournament?.status === "active",
-  });
-  const { offsetMs: serverOffsetMs } = useServerTime();
 
   const [chatInput, setChatInput] = useState("");
   const [joining, setJoining] = useState(false);
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState<"standings" | "rounds" | "chat">("standings");
   const [dismissedBanners, setDismissedBanners] = useState<Record<string, number>>({});
-  const [shareOpen, setShareOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const currentRound = tournament?.current_round ?? 0;
@@ -96,26 +82,6 @@ const TournamentLobby = () => {
   const isFinished = tournament.status === "finished";
   const currentRoundPairings = pairings.filter(p => p.round === tournament.current_round);
   const regMap = new Map(registrations.map(r => [r.user_id, r]));
-  const startsAtMs = new Date(tournament.starts_at).getTime();
-  const isUpcoming = isRegistering && startsAtMs > Date.now() + serverOffsetMs;
-  const isOverdue = isRegistering && startsAtMs <= Date.now() + serverOffsetMs;
-
-  // Client-side fallback: if start time has passed but cron hasn't fired yet,
-  // poke the autostart edge function for this specific tournament.
-  useEffect(() => {
-    if (!isOverdue) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        await supabase.functions.invoke("tournament-autostart", {
-          body: { tournament_id: tournament.id },
-        });
-      } catch { /* cron will catch it */ }
-      if (cancelled) return;
-    })();
-    return () => { cancelled = true; };
-  }, [isOverdue, tournament.id]);
-
 
   const handleJoin = async () => {
     if (!user) { navigate("/login"); return; }
@@ -224,33 +190,9 @@ const TournamentLobby = () => {
                   <Swords className="h-4 w-4 mr-1" /> Play Your Game
                 </Button>
               )}
-              {!isFinished && (
-                <Button variant="outline" onClick={() => setShareOpen(true)}>
-                  <Share2 className="h-4 w-4 mr-1" /> Invite friends
-                </Button>
-              )}
             </div>
           </div>
         </div>
-
-        {/* Countdown to start (Upcoming) */}
-        {isUpcoming && (
-          <div className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 md:p-8 text-center">
-            <div className="text-xs uppercase tracking-[0.2em] text-primary mb-3">Tournament starts in</div>
-            <Countdown target={tournament.starts_at} size="xl" serverOffsetMs={serverOffsetMs} />
-            <div className="text-xs text-muted-foreground mt-3">
-              {new Date(tournament.starts_at).toLocaleString()} · auto-starts when countdown ends
-            </div>
-          </div>
-        )}
-
-        {/* Overdue: cron will fire shortly, fallback already triggered */}
-        {isOverdue && (
-          <div className="mb-6 rounded-xl border border-accent/40 bg-accent/10 p-4 text-center">
-            <Loader2 className="h-5 w-5 animate-spin inline mr-2 text-accent-foreground" />
-            <span className="text-sm font-medium">Starting tournament…</span>
-          </div>
-        )}
 
         {/* Notification banner for active round */}
         {isActive && myPairing && !myPairing.result && myPairing.game_id && !isReadyDismissed && (
@@ -330,21 +272,15 @@ const TournamentLobby = () => {
         {/* ============ STANDINGS ============ */}
         {activeTab === "standings" && (
           <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-            <div className="grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-2 px-4 py-2 text-xs font-medium text-muted-foreground bg-muted/30 border-b border-border/30">
-              <span>#</span>
-              <span>Player</span>
-              <span className="text-right" title="Rating">Rating</span>
-              <span className="text-right" title="Score">Pts</span>
-              <span className="text-right" title="Buchholz — sum of opponents' scores">BH</span>
-              <span className="text-right" title="Sonneborn-Berger">SB</span>
-              <span className="text-right" title="Wins (full points)">W</span>
+            <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 px-4 py-2 text-xs font-medium text-muted-foreground bg-muted/30 border-b border-border/30">
+              <span>#</span><span>Player</span><span>Rating</span><span>Skill</span><span>Score</span>
             </div>
             {registrations.length === 0 ? (
               <p className="text-center text-muted-foreground py-8 text-sm">No players registered yet.</p>
             ) : (
-              [...registrations].sort(sortByTiebreak).map((reg, i) => (
+              registrations.sort((a, b) => Number(b.score) - Number(a.score) || b.rating_at_join - a.rating_at_join).map((reg, i) => (
                 <div key={reg.id}
-                  className={`grid grid-cols-[auto_1fr_auto_auto_auto_auto_auto] gap-2 px-4 py-2.5 text-sm items-center border-b border-border/20 last:border-0 ${
+                  className={`grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 px-4 py-2.5 text-sm items-center border-b border-border/20 last:border-0 ${
                     user && reg.user_id === user.id ? "bg-primary/5" : ""
                   }`}>
                   <span className="w-6 text-center">
@@ -354,11 +290,9 @@ const TournamentLobby = () => {
                     {getPlayerName(reg)}
                     {user && reg.user_id === user.id && <span className="text-primary text-xs ml-1">(you)</span>}
                   </span>
-                  <span className="text-right text-muted-foreground">{reg.rating_at_join}</span>
-                  <span className="text-right font-bold text-primary">{Number(reg.score)}</span>
-                  <span className="text-right text-xs text-muted-foreground tabular-nums">{Number((reg as any).buchholz || 0).toFixed(1)}</span>
-                  <span className="text-right text-xs text-muted-foreground tabular-nums">{Number((reg as any).sonneborn || 0).toFixed(2)}</span>
-                  <span className="text-right text-xs text-muted-foreground tabular-nums">{Number((reg as any).wins || 0)}</span>
+                  <span className="text-muted-foreground">{reg.rating_at_join}</span>
+                  <Badge variant="outline" className="text-[10px]">{getSkillLabel(reg.rating_at_join)}</Badge>
+                  <span className="font-bold text-primary">{Number(reg.score)}</span>
                 </div>
               ))
             )}
@@ -479,7 +413,7 @@ const TournamentLobby = () => {
           <div className="mt-8 text-center">
             <h2 className="font-display text-xl font-bold text-foreground mb-4">🏆 Final Results</h2>
             <div className="inline-flex gap-6 justify-center flex-wrap">
-              {[...registrations].sort(sortByTiebreak).slice(0, 3).map((reg, i) => (
+              {registrations.sort((a, b) => Number(b.score) - Number(a.score)).slice(0, 3).map((reg, i) => (
                 <div key={reg.id} className="text-center">
                   <div className="text-3xl mb-1">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</div>
                   <p className="font-medium text-foreground">{getPlayerName(reg)}</p>
@@ -491,16 +425,6 @@ const TournamentLobby = () => {
         )}
       </main>
       <Footer />
-      {tournament && (
-        <ShareInviteDialog
-          open={shareOpen}
-          onOpenChange={setShareOpen}
-          title={`Invite friends to "${tournament.name}"`}
-          url={typeof window !== "undefined" ? `${window.location.origin}/tournaments/${tournament.id}` : ""}
-          message={`Join me in the "${tournament.name}" tournament on MasterChess! Starts ${new Date(tournament.starts_at).toLocaleString()}.`}
-          emailSubject={`Tournament invite: ${tournament.name}`}
-        />
-      )}
     </div>
   );
 };

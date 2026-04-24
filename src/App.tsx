@@ -60,13 +60,11 @@ import Training from "./pages/Training";
 import ChessCard from "./pages/ChessCard";
 import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
-import AdminTournamentNew from "./pages/AdminTournamentNew";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
-import { CommandPaletteProvider } from "@/contexts/CommandPaletteContext";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -89,7 +87,6 @@ function AnimatedRoutes() {
           <Route path="/play/titles" element={<Titles />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/tournaments" element={<Tournaments />} />
-          <Route path="/admin/tournaments/new" element={<AdminTournamentNew />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile/:userId" element={<Profile />} />
@@ -150,17 +147,15 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <CommandPaletteProvider>
-            <Suspense fallback={<ChessLoadingScreen />}>
-              <div className="pb-16 md:pb-0">
-                <AnimatedRoutes />
-              </div>
-              <AntiTiltWatcher />
-              <TitleUnlockGate />
-              <GameInviteListener />
-              <MobileBottomNav />
-            </Suspense>
-          </CommandPaletteProvider>
+          <Suspense fallback={<ChessLoadingScreen />}>
+            <div className="pb-16 md:pb-0">
+              <AnimatedRoutes />
+            </div>
+            <AntiTiltWatcher />
+            <TitleUnlockGate />
+            <GameInviteListener />
+            <MobileBottomNav />
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import EmojiPicker, { EmojiStyle, Theme } from "emoji-picker-react";
 import { formatDistanceToNow } from "date-fns";
-import UserAvatar from "@/components/UserAvatar";
 
 interface Club {
   id: string; name: string; description: string; icon: string;
@@ -226,11 +225,9 @@ const ClubDetail = () => {
                       const mine = msg.user_id === user?.id;
                       return (
                         <div key={msg.id} className={`flex gap-2 ${mine ? "flex-row-reverse" : ""}`}>
-                          <UserAvatar
-                            userId={msg.user_id}
-                            fallbackName={msg.display_name || "?"}
-                            className="h-7 w-7 text-[10px] flex-shrink-0"
-                          />
+                          <div className="h-7 w-7 rounded-full bg-muted/50 flex items-center justify-center text-[10px] font-bold text-foreground overflow-hidden flex-shrink-0">
+                            {msg.avatar_url ? <img src={msg.avatar_url} className="h-full w-full object-cover" alt="" /> : (msg.display_name || "?")[0]?.toUpperCase()}
+                          </div>
                           <div className={`flex flex-col ${mine ? "items-end" : "items-start"} max-w-[75%]`}>
                             <span className="text-[10px] text-muted-foreground px-1">{msg.display_name || "Player"}</span>
                             <span className={`inline-block px-3 py-1.5 rounded-2xl text-xs break-words ${
@@ -274,11 +271,9 @@ const ClubDetail = () => {
                     <span className={`text-sm font-bold w-6 ${i === 0 ? "text-yellow-500" : i === 1 ? "text-gray-400" : i === 2 ? "text-amber-700" : "text-muted-foreground"}`}>
                       #{i + 1}
                     </span>
-                    <UserAvatar
-                      userId={m.user_id}
-                      fallbackName={m.display_name || "?"}
-                      className="h-7 w-7 text-[10px]"
-                    />
+                    <div className="h-7 w-7 rounded-full bg-muted/50 flex items-center justify-center text-[10px] font-bold overflow-hidden">
+                      {m.avatar_url ? <img src={m.avatar_url} className="h-full w-full object-cover" alt="" /> : (m.display_name || "?")[0]?.toUpperCase()}
+                    </div>
                     <Link to={`/profile/${m.user_id}`} className="flex-1 text-sm font-medium text-foreground hover:text-primary truncate">
                       {m.display_name || m.username || "Player"}
                     </Link>
@@ -295,11 +290,9 @@ const ClubDetail = () => {
               <div className="space-y-1.5">
                 {members.map(m => (
                   <div key={m.user_id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/30 transition-colors">
-                    <UserAvatar
-                      userId={m.user_id}
-                      fallbackName={m.display_name || "?"}
-                      className="h-8 w-8 text-xs"
-                    />
+                    <div className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-xs font-bold overflow-hidden">
+                      {m.avatar_url ? <img src={m.avatar_url} className="h-full w-full object-cover" alt="" /> : (m.display_name || "?")[0]?.toUpperCase()}
+                    </div>
                     <Link to={`/profile/${m.user_id}`} className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground hover:text-primary truncate">{m.display_name || m.username || "Player"}</p>
                       <p className="text-[10px] text-muted-foreground font-mono">{m.rating} ELO</p>

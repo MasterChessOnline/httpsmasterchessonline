@@ -17,7 +17,7 @@ export default function StreakIndicator() {
   return (
     <Link
       to="/missions"
-      title={`Streak: ${data.current_streak} day${data.current_streak === 1 ? "" : "s"} in a row`}
+      title={`Streak: ${data.current_streak} dana zaredom`}
       className="hidden sm:flex items-center gap-1 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/15 to-card/50 backdrop-blur-sm px-2.5 py-1.5 hover:border-primary/50 hover:from-primary/25 transition-all duration-300"
     >
       <motion.span

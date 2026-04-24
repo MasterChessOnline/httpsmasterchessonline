@@ -134,12 +134,12 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
     setClaiming(null);
     if (ok) {
       const m = missions.find((x) => x.key === key);
-      toast.success(`+${m?.xp_reward ?? 0} XP earned!`, {
+      toast.success(`+${m?.xp_reward ?? 0} XP osvojeno!`, {
         description: m?.title,
         icon: "🏆",
       });
     } else {
-      toast.error("Failed to claim");
+      toast.error("Nije uspelo");
     }
   };
 
@@ -147,16 +147,16 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
     return (
       <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-card/80 backdrop-blur-sm p-5">
         <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
-          <Target className="h-5 w-5 text-primary" /> Daily Missions
+          <Target className="h-5 w-5 text-primary" /> Dnevne misije
         </h2>
         <p className="text-sm text-muted-foreground mb-3">
-          Sign in to unlock daily missions and rewards.
+          Prijavi se da bi otključao dnevne misije i nagrade.
         </p>
         <Link
           to="/login"
           className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
         >
-          Sign In
+          Prijava
         </Link>
       </div>
     );
@@ -178,7 +178,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
       <div className="flex items-center justify-between mb-4 relative">
         <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
           <Target className="h-5 w-5 text-primary" />
-          Daily Missions
+          Dnevne misije
         </h2>
         <div className="flex items-center gap-2">
           {claimableXp > 0 && (
@@ -220,7 +220,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
           to="/missions"
           className="mt-3 block text-center text-xs font-semibold text-primary hover:text-primary/80 transition"
         >
-          See all missions →
+          Vidi sve misije →
         </Link>
       )}
     </div>

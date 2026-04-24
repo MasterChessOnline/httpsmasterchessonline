@@ -127,22 +127,12 @@ async function handleJoin(supabase: any, userId: string, tournament_id: string) 
 
   const { data: tournament } = await supabase
     .from("tournaments")
-    .select("max_players, status, starts_at, name")
+    .select("max_players, status")
     .eq("id", tournament_id)
     .single();
 
-  if (!tournament) {
-    return jsonRes({ error: "Tournament not found" }, 404);
-  }
-  if (tournament.status === "finished") {
-    return jsonRes({ error: "This tournament has ended." }, 400);
-  }
-  if (tournament.status === "active") {
-    return jsonRes({ error: "Registration closed — tournament has already started." }, 400);
-  }
-  // Belt-and-suspenders: even if status hasn't flipped yet, refuse if start time has passed.
-  if (new Date(tournament.starts_at).getTime() <= Date.now()) {
-    return jsonRes({ error: "Registration closed — tournament is starting now." }, 400);
+  if (!tournament || tournament.status === "finished") {
+    return jsonRes({ error: "Tournament not available" }, 400);
   }
 
   const { count } = await supabase
@@ -201,8 +191,7 @@ async function handleStart(supabase: any, tournament_id: string) {
     return jsonRes({ error: "Need at least 2 players" }, 400);
   }
 
-  // Round 1 has no history yet
-  const pairings = generateSwissPairings(players, 1, new Set(), new Map());
+  const pairings = generateSwissPairings(players, 1);
 
   for (const pairing of pairings) {
     const { data: onlineGame } = await supabase
@@ -299,131 +288,35 @@ async function handleReportResult(supabase: any, game_id: string, result: string
         .eq("user_id", pairing.black_player_id);
     }
 
-    // Recompute Buchholz / Sonneborn-Berger / wins for this tournament
-    await supabase.rpc("recalc_tournament_tiebreaks", { _tid: pairing.tournament_id });
-
     const { data: tournament } = await supabase
       .from("tournaments")
-      .select("current_round, total_rounds, tournament_type, ends_at")
+      .select("current_round, total_rounds")
       .eq("id", pairing.tournament_id)
       .single();
 
     if (tournament) {
-      // ARENA: instant re-pair freed players against any other free player
-      if (tournament.tournament_type === "arena") {
-        const arenaEnded = tournament.ends_at && new Date(tournament.ends_at) <= new Date();
-        if (arenaEnded) {
+      const { data: pendingPairings } = await supabase
+        .from("tournament_pairings")
+        .select("id")
+        .eq("tournament_id", pairing.tournament_id)
+        .eq("round", tournament.current_round)
+        .is("result", null);
+
+      if (!pendingPairings || pendingPairings.length === 0) {
+        if (tournament.current_round >= tournament.total_rounds) {
           await supabase
             .from("tournaments")
             .update({ status: "finished" })
             .eq("id", pairing.tournament_id);
           await awardTournamentBadges(supabase, pairing.tournament_id);
         } else {
-          await generateArenaInstantPairings(supabase, pairing.tournament_id);
-        }
-      } else {
-        // SWISS / ROUND ROBIN: wait for all games in the round to finish, then advance
-        const { data: pendingPairings } = await supabase
-          .from("tournament_pairings")
-          .select("id")
-          .eq("tournament_id", pairing.tournament_id)
-          .eq("round", tournament.current_round)
-          .is("result", null);
-
-        if (!pendingPairings || pendingPairings.length === 0) {
-          if (tournament.current_round >= tournament.total_rounds) {
-            await supabase
-              .from("tournaments")
-              .update({ status: "finished" })
-              .eq("id", pairing.tournament_id);
-            await awardTournamentBadges(supabase, pairing.tournament_id);
-          } else {
-            // Spec: small delay (2–5s) between rounds for UX
-            await new Promise(r => setTimeout(r, 3000));
-            await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
-          }
+          await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
         }
       }
     }
   }
 
   return jsonRes({ success: true });
-}
-
-// ===================== ARENA: instant re-pairing =====================
-async function generateArenaInstantPairings(supabase: any, tournamentId: string) {
-  const { data: tournament } = await supabase
-    .from("tournaments")
-    .select("time_control_seconds, time_control_label, time_control_increment, current_round")
-    .eq("id", tournamentId)
-    .single();
-  if (!tournament) return;
-
-  // Find players who aren't currently in an unfinished game
-  const { data: regs } = await supabase
-    .from("tournament_registrations")
-    .select("user_id, rating_at_join, score")
-    .eq("tournament_id", tournamentId);
-  if (!regs || regs.length < 2) return;
-
-  const { data: openPairings } = await supabase
-    .from("tournament_pairings")
-    .select("white_player_id, black_player_id")
-    .eq("tournament_id", tournamentId)
-    .is("result", null);
-
-  const busy = new Set<string>();
-  for (const p of openPairings || []) {
-    if (p.white_player_id) busy.add(p.white_player_id);
-    if (p.black_player_id) busy.add(p.black_player_id);
-  }
-  const free = regs.filter((r: any) => !busy.has(r.user_id));
-  if (free.length < 2) return;
-
-  // History for no-rematch + color balance
-  const { data: priorPairings } = await supabase
-    .from("tournament_pairings")
-    .select("white_player_id, black_player_id")
-    .eq("tournament_id", tournamentId);
-
-  const playedPairs = new Set<string>();
-  const colorCounts = new Map<string, { whites: number; blacks: number }>();
-  for (const p of priorPairings || []) {
-    if (!p.black_player_id) continue;
-    const a = p.white_player_id < p.black_player_id ? p.white_player_id : p.black_player_id;
-    const b = p.white_player_id < p.black_player_id ? p.black_player_id : p.white_player_id;
-    playedPairs.add(`${a}|${b}`);
-    const w = colorCounts.get(p.white_player_id) ?? { whites: 0, blacks: 0 };
-    w.whites++; colorCounts.set(p.white_player_id, w);
-    const k = colorCounts.get(p.black_player_id) ?? { whites: 0, blacks: 0 };
-    k.blacks++; colorCounts.set(p.black_player_id, k);
-  }
-
-  const pairings = generateArenaPairings(free, playedPairs, colorCounts);
-  const round = tournament.current_round || 1;
-
-  for (const pairing of pairings) {
-    const { data: onlineGame } = await supabase
-      .from("online_games")
-      .insert({
-        white_player_id: pairing.white,
-        black_player_id: pairing.black,
-        white_time: tournament.time_control_seconds,
-        black_time: tournament.time_control_seconds,
-        time_control_label: tournament.time_control_label,
-        increment: tournament.time_control_increment,
-      })
-      .select()
-      .single();
-
-    await supabase.from("tournament_pairings").insert({
-      tournament_id: tournamentId,
-      round,
-      white_player_id: pairing.white,
-      black_player_id: pairing.black,
-      game_id: onlineGame?.id || null,
-    });
-  }
 }
 
 // ===================== STREAK TRACKING =====================
@@ -503,25 +396,10 @@ async function awardStreakBadges(supabase: any, userId: string, streak: number, 
   }
 }
 
-// ===================== SWISS PAIRING (no-rematch + color balance) =====================
-type Player = { user_id: string; rating_at_join: number; score: number | null };
-
-function pairKey(a: string, b: string) {
-  return a < b ? `${a}|${b}` : `${b}|${a}`;
-}
-
-/**
- * Swiss pairing with:
- *   - score-group preference (closest scores paired)
- *   - no-rematch: skip pairs already in `playedPairs`
- *   - color balance: prefer the player who has played White less often as White
- *   - alternating fallback if no rematch-free pair is found in a group
- */
+// ===================== SWISS PAIRING =====================
 function generateSwissPairings(
-  players: Player[],
-  round: number,
-  playedPairs: Set<string> = new Set(),
-  colorCounts: Map<string, { whites: number; blacks: number }> = new Map(),
+  players: Array<{ user_id: string; rating_at_join: number; score: number | null }>,
+  round: number
 ) {
   const sorted = [...players].sort((a, b) => {
     const scoreDiff = (Number(b.score) || 0) - (Number(a.score) || 0);
@@ -532,56 +410,22 @@ function generateSwissPairings(
   const pairings: Array<{ white: string; black: string }> = [];
   const paired = new Set<string>();
 
-  const pickColor = (a: string, b: string): { white: string; black: string } => {
-    const ca = colorCounts.get(a) ?? { whites: 0, blacks: 0 };
-    const cb = colorCounts.get(b) ?? { whites: 0, blacks: 0 };
-    // Player with fewer whites gets white. Tie-break: alternate by round.
-    const aWhitesAdvantage = ca.whites - ca.blacks;
-    const bWhitesAdvantage = cb.whites - cb.blacks;
-    if (aWhitesAdvantage < bWhitesAdvantage) return { white: a, black: b };
-    if (bWhitesAdvantage < aWhitesAdvantage) return { white: b, black: a };
-    return round % 2 === 0 ? { white: a, black: b } : { white: b, black: a };
-  };
-
   for (let i = 0; i < sorted.length; i++) {
     if (paired.has(sorted[i].user_id)) continue;
-
-    // First pass: find an opponent we haven't already played
-    let partnerIdx = -1;
     for (let j = i + 1; j < sorted.length; j++) {
       if (paired.has(sorted[j].user_id)) continue;
-      if (!playedPairs.has(pairKey(sorted[i].user_id, sorted[j].user_id))) {
-        partnerIdx = j;
-        break;
-      }
+      const whiteFirst = (i + round) % 2 === 0;
+      pairings.push({
+        white: whiteFirst ? sorted[i].user_id : sorted[j].user_id,
+        black: whiteFirst ? sorted[j].user_id : sorted[i].user_id,
+      });
+      paired.add(sorted[i].user_id);
+      paired.add(sorted[j].user_id);
+      break;
     }
-    // Fallback: accept a rematch with the next available player rather than leaving someone out
-    if (partnerIdx === -1) {
-      for (let j = i + 1; j < sorted.length; j++) {
-        if (!paired.has(sorted[j].user_id)) { partnerIdx = j; break; }
-      }
-    }
-    if (partnerIdx === -1) continue;
-
-    const a = sorted[i].user_id;
-    const b = sorted[partnerIdx].user_id;
-    pairings.push(pickColor(a, b));
-    paired.add(a);
-    paired.add(b);
   }
 
   return pairings;
-}
-
-// ===================== ARENA PAIRING =====================
-// Arena: players are paired instantly with the closest available opponent by score,
-// preferring opponents they have NOT just played. There are no fixed rounds.
-function generateArenaPairings(
-  available: Player[],
-  playedPairs: Set<string>,
-  colorCounts: Map<string, { whites: number; blacks: number }>,
-) {
-  return generateSwissPairings(available, 1, playedPairs, colorCounts);
 }
 
 async function generateNextRound(supabase: any, tournamentId: string, nextRound: number) {
@@ -593,36 +437,13 @@ async function generateNextRound(supabase: any, tournamentId: string, nextRound:
 
   const { data: players } = await supabase
     .from("tournament_registrations")
-    .select("user_id, rating_at_join, score, buchholz, sonneborn, wins")
+    .select("user_id, rating_at_join, score")
     .eq("tournament_id", tournamentId)
-    .order("score", { ascending: false })
-    .order("buchholz", { ascending: false })
-    .order("sonneborn", { ascending: false })
-    .order("wins", { ascending: false })
-    .order("rating_at_join", { ascending: false });
+    .order("score", { ascending: false });
 
   if (!players || players.length < 2 || !tournament) return;
 
-  // Build no-rematch + color-balance state from prior rounds
-  const { data: priorPairings } = await supabase
-    .from("tournament_pairings")
-    .select("white_player_id, black_player_id")
-    .eq("tournament_id", tournamentId);
-
-  const playedPairs = new Set<string>();
-  const colorCounts = new Map<string, { whites: number; blacks: number }>();
-  for (const p of priorPairings || []) {
-    if (!p.black_player_id) continue;
-    const a = p.white_player_id < p.black_player_id ? p.white_player_id : p.black_player_id;
-    const b = p.white_player_id < p.black_player_id ? p.black_player_id : p.white_player_id;
-    playedPairs.add(`${a}|${b}`);
-    const w = colorCounts.get(p.white_player_id) ?? { whites: 0, blacks: 0 };
-    w.whites++; colorCounts.set(p.white_player_id, w);
-    const k = colorCounts.get(p.black_player_id) ?? { whites: 0, blacks: 0 };
-    k.blacks++; colorCounts.set(p.black_player_id, k);
-  }
-
-  const pairings = generateSwissPairings(players, nextRound, playedPairs, colorCounts);
+  const pairings = generateSwissPairings(players, nextRound);
 
   for (const pairing of pairings) {
     const { data: onlineGame } = await supabase

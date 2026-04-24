@@ -1330,51 +1330,6 @@ export type Database = {
         }
         Relationships: []
       }
-      tournament_anti_cheat_flags: {
-        Row: {
-          created_at: string
-          details: Json | null
-          game_id: string | null
-          id: string
-          resolution: string | null
-          resolved: boolean
-          resolved_at: string | null
-          resolved_by: string | null
-          severity: string
-          signal_type: string
-          tournament_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          details?: Json | null
-          game_id?: string | null
-          id?: string
-          resolution?: string | null
-          resolved?: boolean
-          resolved_at?: string | null
-          resolved_by?: string | null
-          severity?: string
-          signal_type: string
-          tournament_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          details?: Json | null
-          game_id?: string | null
-          id?: string
-          resolution?: string | null
-          resolved?: boolean
-          resolved_at?: string | null
-          resolved_by?: string | null
-          severity?: string
-          signal_type?: string
-          tournament_id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       tournament_chat_messages: {
         Row: {
           created_at: string
@@ -1457,40 +1412,31 @@ export type Database = {
       }
       tournament_registrations: {
         Row: {
-          buchholz: number
           created_at: string
           id: string
           rating_at_join: number
           score: number
-          sonneborn: number
           tiebreak: number
           tournament_id: string
           user_id: string
-          wins: number
         }
         Insert: {
-          buchholz?: number
           created_at?: string
           id?: string
           rating_at_join?: number
           score?: number
-          sonneborn?: number
           tiebreak?: number
           tournament_id: string
           user_id: string
-          wins?: number
         }
         Update: {
-          buchholz?: number
           created_at?: string
           id?: string
           rating_at_join?: number
           score?: number
-          sonneborn?: number
           tiebreak?: number
           tournament_id?: string
           user_id?: string
-          wins?: number
         }
         Relationships: [
           {
@@ -1534,85 +1480,61 @@ export type Database = {
       }
       tournaments: {
         Row: {
-          anti_cheat_level: string
-          auto_started: boolean
           category: string
           created_at: string
-          created_by: string | null
           current_round: number
           description: string
           entry_fee: number
           format: string
           id: string
-          is_rated: boolean
           max_players: number
           name: string
-          registration_deadline: string | null
           round_started_at: string | null
-          start_time_locked: boolean
           starts_at: string
           status: string
           time_control_increment: number
           time_control_label: string
           time_control_seconds: number
           total_rounds: number
-          tournament_type: string
           updated_at: string
-          visibility: string
         }
         Insert: {
-          anti_cheat_level?: string
-          auto_started?: boolean
           category?: string
           created_at?: string
-          created_by?: string | null
           current_round?: number
           description?: string
           entry_fee?: number
           format?: string
           id?: string
-          is_rated?: boolean
           max_players?: number
           name: string
-          registration_deadline?: string | null
           round_started_at?: string | null
-          start_time_locked?: boolean
           starts_at?: string
           status?: string
           time_control_increment?: number
           time_control_label?: string
           time_control_seconds?: number
           total_rounds?: number
-          tournament_type?: string
           updated_at?: string
-          visibility?: string
         }
         Update: {
-          anti_cheat_level?: string
-          auto_started?: boolean
           category?: string
           created_at?: string
-          created_by?: string | null
           current_round?: number
           description?: string
           entry_fee?: number
           format?: string
           id?: string
-          is_rated?: boolean
           max_players?: number
           name?: string
-          registration_deadline?: string | null
           round_started_at?: string | null
-          start_time_locked?: boolean
           starts_at?: string
           status?: string
           time_control_increment?: number
           time_control_label?: string
           time_control_seconds?: number
           total_rounds?: number
-          tournament_type?: string
           updated_at?: string
-          visibility?: string
         }
         Relationships: []
       }
@@ -1809,27 +1731,10 @@ export type Database = {
       }
     }
     Views: {
-      tournament_played_pairs: {
-        Row: {
-          player_a: string | null
-          player_b: string | null
-          rounds: number[] | null
-          tournament_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tournament_pairings_tournament_id_fkey"
-            columns: ["tournament_id"]
-            isOneToOne: false
-            referencedRelation: "tournaments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
-      can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1867,26 +1772,13 @@ export type Database = {
           read_ct: number
         }[]
       }
-      recalc_tournament_tiebreaks: {
-        Args: { _tid: string }
-        Returns: undefined
-      }
-      server_now: { Args: never; Returns: string }
-      tournament_color_balance: {
-        Args: { _tournament_id: string }
-        Returns: {
-          blacks: number
-          user_id: string
-          whites: number
-        }[]
-      }
       update_elo_ratings: {
         Args: { p_black_id: string; p_result: string; p_white_id: string }
         Returns: undefined
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user" | "organizer"
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2014,7 +1906,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user", "organizer"],
+      app_role: ["admin", "moderator", "user"],
     },
   },
 } as const

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import StreakIndicator from "@/components/StreakIndicator";
-import { useCommandPalette } from "@/contexts/CommandPaletteContext";
 
 interface DropdownItem {
   label: string;
@@ -132,7 +131,6 @@ const Navbar = () => {
   const [liveGames, setLiveGames] = useState(0);
   const [activeTournaments, setActiveTournaments] = useState(0);
   const { user, profile, loading, signOut } = useAuth();
-  const { open: openCmd } = useCommandPalette();
   const location = useLocation();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -226,7 +224,7 @@ const Navbar = () => {
               >
                 <Crown className="h-5 w-5 text-primary" />
               </motion.div>
-              <span className="font-bold tracking-wider text-foreground hidden sm:inline uppercase text-base" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+              <span className="font-display font-bold tracking-wider text-foreground hidden sm:inline uppercase text-base">
                 Master<span className="text-gradient-gold">Chess</span>
               </span>
             </Link>
@@ -378,28 +376,36 @@ const Navbar = () => {
 
             {/* Right side */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* Command Palette trigger (⌘K) */}
-              <button
-                onClick={() => openCmd()}
-                className="hidden lg:flex items-center gap-2 h-9 pl-3 pr-2 rounded-lg bg-muted/20 hover:bg-muted/40 border border-border/40 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all duration-200 group"
-                aria-label="Open command palette (Ctrl+K)"
-                title="Search anything (Ctrl+K)"
-              >
-                <Search className="h-3.5 w-3.5" />
-                <span className="text-xs">Search</span>
-                <kbd className="ml-2 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border/60 bg-background/60 font-mono text-[10px] text-muted-foreground group-hover:text-primary/80 group-hover:border-primary/30 transition-colors">
-                  ⌘K
-                </kbd>
-              </button>
-
-              {/* Mobile compact search trigger */}
-              <button
-                onClick={() => openCmd()}
-                className="lg:hidden p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
-                aria-label="Open command palette"
-              >
-                <Search className="h-4 w-4" />
-              </button>
+              {/* Search */}
+              <div className="hidden lg:flex items-center">
+                <AnimatePresence>
+                  {searchOpen && (
+                    <motion.div
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 200, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      className="overflow-hidden mr-1"
+                    >
+                      <input
+                        ref={searchRef}
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        onKeyDown={e => { if (e.key === "Escape") setSearchOpen(false); }}
+                        placeholder="Search..."
+                        className="h-9 w-full bg-muted/20 border border-border/40 rounded-lg px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-all duration-300"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <button
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className="p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
+                  aria-label="Search"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </div>
 
 
               {/* Play Now button */}

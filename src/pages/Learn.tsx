@@ -606,9 +606,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
     if (lessonData?.variations && lessonData.variations.length > 0) return lessonData.variations;
     if (lessonData?.moves?.length) return [{ name: "", startFen: lessonData.startFen, moves: lessonData.moves }];
     if (lesson.fen) return [{ name: "Position", startFen: lesson.fen, moves: [] }];
-    // Fallback: every lesson gets an interactive board (free explore from starting position)
-    // so users can experiment with the topic on a real board while reading.
-    return [{ name: "Free Explore", startFen: undefined, moves: [] }];
+    return [];
   }, [lesson.id]);
 
   const hasExercise = variations.length > 0;

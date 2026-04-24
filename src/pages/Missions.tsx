@@ -38,10 +38,10 @@ const Missions = () => {
             </div>
             <div>
               <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-                Daily Missions
+                Dnevne Misije
               </h1>
               <p className="text-sm text-muted-foreground">
-                Complete missions, keep your streak, earn XP rewards.
+                Ispuni misije, čuvaj streak, osvoji XP nagrade.
               </p>
             </div>
           </div>
@@ -64,36 +64,36 @@ const Missions = () => {
             </motion.div>
             <div className="relative">
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                Current streak
+                Trenutni streak
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="font-display text-4xl font-bold text-primary tabular-nums">
                   {streak?.current_streak ?? 0}
                 </span>
-                <span className="text-sm text-muted-foreground">days</span>
+                <span className="text-sm text-muted-foreground">dana</span>
               </div>
               <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Flame className="h-3.5 w-3.5 text-primary" />
                 {streak?.current_streak && streak.current_streak >= 3
-                  ? "Keep it up! Don't break the chain."
-                  : "Play every day to grow your streak."}
+                  ? "Drži se! Ne prekidaj seriju."
+                  : "Igraj svaki dan da rasteš streak."}
               </div>
             </div>
           </div>
 
           <div className="rounded-xl border border-border/40 bg-card p-5">
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-              Longest streak
+              Najduži streak
             </p>
             <div className="flex items-baseline gap-2">
               <span className="font-display text-4xl font-bold text-foreground tabular-nums">
                 {streak?.longest_streak ?? 0}
               </span>
-              <span className="text-sm text-muted-foreground">days</span>
+              <span className="text-sm text-muted-foreground">dana</span>
             </div>
             <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Trophy className="h-3.5 w-3.5 text-primary/80" />
-              Your record
+              Tvoj rekord
             </div>
           </div>
 
@@ -106,9 +106,9 @@ const Missions = () => {
                 <>
                   <Snowflake className="h-8 w-8 text-blue-400" />
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Ready</p>
+                    <p className="text-sm font-semibold text-foreground">Spreman</p>
                     <p className="text-[11px] text-muted-foreground">
-                      Protects your streak if you skip a day
+                      Štiti streak ako preskočiš dan
                     </p>
                   </div>
                 </>
@@ -117,10 +117,10 @@ const Missions = () => {
                   <Snowflake className="h-8 w-8 text-muted-foreground/40" />
                   <div>
                     <p className="text-sm font-semibold text-muted-foreground">
-                      Used
+                      Iskorišćen
                     </p>
                     <p className="text-[11px] text-muted-foreground">
-                      Returns after a new winning streak
+                      Vraća se posle nove pobede streak
                     </p>
                   </div>
                 </>
@@ -147,24 +147,24 @@ const Missions = () => {
         >
           <h3 className="font-display text-lg font-semibold text-foreground flex items-center gap-2 mb-3">
             <Sparkles className="h-4 w-4 text-primary" />
-            How do missions work?
+            Kako rade misije?
           </h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex gap-2">
               <Calendar className="h-4 w-4 text-primary/60 shrink-0 mt-0.5" />
-              <span>Missions reset every night at midnight — fresh ones daily.</span>
+              <span>Misije se resetuju svake noći u ponoć — nove svaki dan.</span>
             </li>
             <li className="flex gap-2">
               <Trophy className="h-4 w-4 text-primary/60 shrink-0 mt-0.5" />
-              <span>Wins against both humans and bots count toward missions.</span>
+              <span>Pobedi i partije protiv ljudi i botova računaju se za misije.</span>
             </li>
             <li className="flex gap-2">
               <Flame className="h-4 w-4 text-primary/60 shrink-0 mt-0.5" />
-              <span>Daily activity grows your streak. Streak Freeze protects you if you miss a day.</span>
+              <span>Aktivnost svaki dan podiže tvoj streak. Streak Freeze te čuva ako jednom propustiš dan.</span>
             </li>
             <li className="flex gap-2">
               <Sparkles className="h-4 w-4 text-primary/60 shrink-0 mt-0.5" />
-              <span>After completing a mission, click <strong className="text-primary">Claim</strong> to collect your XP.</span>
+              <span>Nakon ispunjenja misije, klikni <strong className="text-primary">Claim</strong> da pokupiš XP.</span>
             </li>
           </ul>
         </motion.div>
