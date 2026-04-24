@@ -14,6 +14,8 @@ import {
   Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import Countdown from "@/components/Countdown";
+import { supabase } from "@/integrations/supabase/client";
 
 function getSkillLabel(rating: number) {
   if (rating < 1000) return "Beginner";
@@ -82,6 +84,26 @@ const TournamentLobby = () => {
   const isFinished = tournament.status === "finished";
   const currentRoundPairings = pairings.filter(p => p.round === tournament.current_round);
   const regMap = new Map(registrations.map(r => [r.user_id, r]));
+  const startsAtMs = new Date(tournament.starts_at).getTime();
+  const isUpcoming = isRegistering && startsAtMs > Date.now();
+  const isOverdue = isRegistering && startsAtMs <= Date.now();
+
+  // Client-side fallback: if start time has passed but cron hasn't fired yet,
+  // poke the autostart edge function for this specific tournament.
+  useEffect(() => {
+    if (!isOverdue) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await supabase.functions.invoke("tournament-autostart", {
+          body: { tournament_id: tournament.id },
+        });
+      } catch { /* cron will catch it */ }
+      if (cancelled) return;
+    })();
+    return () => { cancelled = true; };
+  }, [isOverdue, tournament.id]);
+
 
   const handleJoin = async () => {
     if (!user) { navigate("/login"); return; }
@@ -193,6 +215,25 @@ const TournamentLobby = () => {
             </div>
           </div>
         </div>
+
+        {/* Countdown to start (Upcoming) */}
+        {isUpcoming && (
+          <div className="mb-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 md:p-8 text-center">
+            <div className="text-xs uppercase tracking-[0.2em] text-primary mb-3">Tournament starts in</div>
+            <Countdown target={tournament.starts_at} size="xl" />
+            <div className="text-xs text-muted-foreground mt-3">
+              {new Date(tournament.starts_at).toLocaleString()} · auto-starts when countdown ends
+            </div>
+          </div>
+        )}
+
+        {/* Overdue: cron will fire shortly, fallback already triggered */}
+        {isOverdue && (
+          <div className="mb-6 rounded-xl border border-accent/40 bg-accent/10 p-4 text-center">
+            <Loader2 className="h-5 w-5 animate-spin inline mr-2 text-accent-foreground" />
+            <span className="text-sm font-medium">Starting tournament…</span>
+          </div>
+        )}
 
         {/* Notification banner for active round */}
         {isActive && myPairing && !myPairing.result && myPairing.game_id && !isReadyDismissed && (
