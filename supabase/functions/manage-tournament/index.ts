@@ -593,9 +593,13 @@ async function generateNextRound(supabase: any, tournamentId: string, nextRound:
 
   const { data: players } = await supabase
     .from("tournament_registrations")
-    .select("user_id, rating_at_join, score")
+    .select("user_id, rating_at_join, score, buchholz, sonneborn, wins")
     .eq("tournament_id", tournamentId)
-    .order("score", { ascending: false });
+    .order("score", { ascending: false })
+    .order("buchholz", { ascending: false })
+    .order("sonneborn", { ascending: false })
+    .order("wins", { ascending: false })
+    .order("rating_at_join", { ascending: false });
 
   if (!players || players.length < 2 || !tournament) return;
 
