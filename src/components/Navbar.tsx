@@ -369,7 +369,7 @@ const Navbar = () => {
             {/* Right side */}
             <div className="flex items-center gap-2 shrink-0">
               {/* Search */}
-              <div className="hidden lg:flex items-center">
+              <div className="hidden xl:flex items-center">
                 <AnimatePresence>
                   {searchOpen && (
                     <motion.div
