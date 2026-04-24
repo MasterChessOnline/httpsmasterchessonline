@@ -17,6 +17,7 @@ export default {
         display: ['Orbitron', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        serif: ['Cinzel', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",

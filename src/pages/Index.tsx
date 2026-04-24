@@ -166,7 +166,7 @@ const Index = () => {
             src={heroImage}
             alt="Chess board"
             className="absolute inset-0 w-full h-[120%] object-cover"
-            style={{ filter: "brightness(0.15) saturate(0.7)" }}
+            style={{ filter: "brightness(0.28) saturate(0.8)" }}
             loading="eager"
           />
         </motion.div>
@@ -188,7 +188,7 @@ const Index = () => {
               <Crown className="h-7 w-7 text-primary" />
             </motion.div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black mb-3 tracking-tight uppercase">
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 tracking-tight">
               <span className="text-gradient-gold">Master</span>
               <span className="text-foreground">Chess</span>
             </h1>
