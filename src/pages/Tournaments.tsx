@@ -17,6 +17,7 @@ import { toast } from "@/hooks/use-toast";
 import { useStreak } from "@/hooks/use-streak";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
 import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
+import { useUserRoles } from "@/hooks/use-user-roles";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
@@ -104,6 +105,7 @@ const Tournaments = () => {
   const { streak } = useStreak(user?.id);
   const { activeTournament } = useActiveTournament(user?.id);
   useTournamentReminder(user?.id);
+  const { canManageTournaments } = useUserRoles();
   const [viewTab, setViewTab] = useState<ViewTab>("all");
   const [category, setCategory] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -406,10 +408,12 @@ const Tournaments = () => {
                   </button>
                 ))}
               </div>
-              <Button onClick={handleCreateTournament} disabled={creating} size="sm">
-                {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-                Create
-              </Button>
+              {canManageTournaments && (
+                <Button onClick={() => navigate("/admin/tournaments/new")} size="sm">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Create
+                </Button>
+              )}
             </div>
 
             <div className="flex gap-1.5 mb-3 flex-wrap">
