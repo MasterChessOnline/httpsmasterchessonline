@@ -801,7 +801,7 @@ const Play = () => {
               </div>
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 <p className="text-sm font-bold text-foreground">{playerName}</p>
-                <TitleBadge titleKey={(profile as any)?.highest_title_key} rating={playerRating} size="xs" />
+                <TitleBadge rating={playerRating} mode="bot" size="xs" />
               </div>
               <p className="text-xs text-muted-foreground">{playerRating} Elo</p>
             </motion.div>
