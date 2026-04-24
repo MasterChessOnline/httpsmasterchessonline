@@ -491,6 +491,16 @@ const TournamentLobby = () => {
         )}
       </main>
       <Footer />
+      {tournament && (
+        <ShareInviteDialog
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          title={`Invite friends to "${tournament.name}"`}
+          url={typeof window !== "undefined" ? `${window.location.origin}/tournaments/${tournament.id}` : ""}
+          message={`Join me in the "${tournament.name}" tournament on MasterChess! Starts ${new Date(tournament.starts_at).toLocaleString()}.`}
+          emailSubject={`Tournament invite: ${tournament.name}`}
+        />
+      )}
     </div>
   );
 };
