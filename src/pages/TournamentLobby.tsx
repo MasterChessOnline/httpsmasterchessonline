@@ -19,10 +19,12 @@ import { toast } from "@/hooks/use-toast";
 import Countdown from "@/components/Countdown";
 import { supabase } from "@/integrations/supabase/client";
 
-function getSkillLabel(rating: number) {
-  if (rating < 1000) return "Beginner";
-  if (rating < 1400) return "Intermediate";
-  return "Advanced";
+function sortByTiebreak<T extends { score: any; buchholz?: any; sonneborn?: any; wins?: any; rating_at_join: number }>(a: T, b: T) {
+  const d = (Number(b.score) || 0) - (Number(a.score) || 0); if (d) return d;
+  const dB = (Number(b.buchholz) || 0) - (Number(a.buchholz) || 0); if (dB) return dB;
+  const dS = (Number(b.sonneborn) || 0) - (Number(a.sonneborn) || 0); if (dS) return dS;
+  const dW = (Number(b.wins) || 0) - (Number(a.wins) || 0); if (dW) return dW;
+  return b.rating_at_join - a.rating_at_join;
 }
 
 function getPlayerName(reg: { display_name?: string; username?: string; user_id: string }) {
