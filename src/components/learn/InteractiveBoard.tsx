@@ -196,20 +196,30 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
 
   const board = useMemo(() => new Chess(currentFen).board(), [currentFen]);
 
-  const currentExplanation = mode === "guided" && moveIndex > 0 && moveIndex <= moves.length
-    ? moves[moveIndex - 1].explanation : null;
+  const currentExplanation = mode === "guided" && moveIndex > 0 && moveIndex <= effectiveMoves.length
+    ? effectiveMoves[moveIndex - 1].explanation : null;
+
+  // Branches available at the CURRENT position (i.e. branches attached to
+  // the move that would be played next from the main line). Only show on
+  // the main line (no nested branches).
+  const availableBranches = useMemo(() => {
+    if (mode !== "guided" || branchAt !== null) return null;
+    const nextMove = moves[moveIndex];
+    if (!nextMove?.branches?.length) return null;
+    return { atIndex: moveIndex, branches: nextMove.branches };
+  }, [mode, branchAt, moves, moveIndex]);
 
   // Last move highlighting for guided mode
   const lastMoveHighlight = useMemo(() => {
     if (mode !== "guided" || moveIndex === 0) return null;
     try {
       const chess = new Chess(positions[moveIndex - 1]);
-      const result = chess.move(moves[moveIndex - 1].san);
+      const result = chess.move(effectiveMoves[moveIndex - 1].san);
       return result ? { from: result.from, to: result.to } : null;
     } catch {
       return null;
     }
-  }, [moveIndex, positions, moves, mode]);
+  }, [moveIndex, positions, effectiveMoves, mode]);
 
   // Handle explore mode clicks
   const handleExploreClick = (square: Square) => {
