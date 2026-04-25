@@ -494,6 +494,14 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
           </Button>
         )}
       </div>
+
+      {/* Keyboard / swipe hint (guided mode only) */}
+      {mode === "guided" && totalMoves > 0 && (
+        <p className="text-[11px] text-muted-foreground/70 text-center mt-2 leading-relaxed">
+          <span className="hidden sm:inline">Use ← → arrow keys, Space, or Home/End to navigate moves.</span>
+          <span className="sm:hidden">Tap arrows or swipe left / right on the board to step through moves.</span>
+        </p>
+      )}
     </div>
   );
 }
