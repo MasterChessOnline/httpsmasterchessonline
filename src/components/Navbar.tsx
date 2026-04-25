@@ -86,31 +86,40 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    key: "live",
-    label: "Live",
-    icon: Radio,
-    accent: "0 84% 60%",
-    accentRgb: "239,68,68",
-    items: [
-      { label: "Stream Hub", href: "/live", icon: Radio, desc: "Watch DailyChess_12 live", highlight: true },
-      { label: "Spectate Games", href: "/spectate", icon: Eye, desc: "Watch player matches" },
-      { label: "Community", href: "/community", icon: Users, desc: "Posts & chess moments", separator: true },
-    ],
-  },
-  {
     key: "profile",
     label: "Profile",
     icon: User,
     accent: "190 95% 55%",
     accentRgb: "34,211,238",
     items: [
-      { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true },
-      { label: "Chess Card", href: "/chess-card", icon: Sparkles, desc: "Your skill profile & compare", auth: true, highlight: true },
+      { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true, highlight: true },
+      { label: "Chess Card", href: "/chess-card", icon: Sparkles, desc: "Your skill profile & compare", auth: true },
       { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
-      { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true },
+      { label: "Stats", href: "/stats", icon: BarChart3, desc: "Detailed analytics", subheading: "Insights", separator: true },
+      { label: "Achievements", href: "/achievements", icon: Medal, desc: "Unlocked milestones" },
+      { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true, subheading: "Account" },
     ],
   },
 ];
+
+// Friends mega-section — lives separately, rendered as the rightmost nav dropdown
+const FRIENDS_SECTION: NavSection = {
+  key: "friends",
+  label: "Friends",
+  icon: Users,
+  accent: "150 70% 55%",
+  accentRgb: "74,222,128",
+  items: [
+    { label: "All Friends", href: "/friends", icon: Users, desc: "View your friends list", auth: true, highlight: true },
+    { label: "Add a Friend", href: "/friends", icon: UserPlus, desc: "Send a new friend request", auth: true },
+    { label: "Friend Requests", href: "/friends", icon: Bell, desc: "Pending invitations", auth: true },
+    { label: "Challenge a Friend", href: "/friends", icon: Swords, desc: "Send a game invite", auth: true, separator: true, subheading: "Play Together" },
+    { label: "Group Match", href: "/friends", icon: Gamepad2, desc: "Quick game with a friend", auth: true },
+    { label: "Browse Teams", href: "/clubs", icon: Shield, desc: "Find a club or team", separator: true, subheading: "Teams & Clubs" },
+    { label: "Create a Team", href: "/clubs", icon: Plus, desc: "Build your own group", auth: true },
+    { label: "Chat", href: "/chat", icon: FileText, desc: "Direct messages", auth: true, separator: true },
+  ],
+};
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
