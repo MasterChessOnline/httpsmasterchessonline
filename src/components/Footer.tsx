@@ -45,7 +45,9 @@ const Footer = () => (
               { label: "Leaderboard", href: "/leaderboard" },
               { label: "Achievements", href: "/achievements" },
               { label: "Friends", href: "/friends" },
+              { label: "Community", href: "/community" },
               { label: "Live · DailyChess_12", href: "/live" },
+              { label: "About", href: "/about" },
             ],
           },
         ].map((section) => (
