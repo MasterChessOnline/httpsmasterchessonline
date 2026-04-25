@@ -221,7 +221,7 @@ const Navbar = () => {
           aria-label="Main navigation"
         >
           <div
-            className={`container mx-auto flex items-center gap-2 px-5 transition-all duration-500 ${
+            className={`container mx-auto flex items-center justify-between gap-4 px-5 transition-all duration-500 ${
               shrunk ? "h-14" : "h-16"
             }`}
           >
