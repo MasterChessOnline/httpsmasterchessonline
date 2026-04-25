@@ -114,11 +114,18 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   useEffect(() => {
     setMoveIndex(0);
     setMode("guided");
+    setBranchAt(null);
+    setBranchIdx(0);
     setExploreChess(new Chess(baseFen));
     setExploreSelected(null);
     setExploreLegalMoves([]);
     resetPractice();
   }, [baseFen, moves]);
+
+  // When the active branch/effective line changes, clamp the move pointer
+  useEffect(() => {
+    setMoveIndex((i) => Math.min(i, positions.length - 1));
+  }, [positions.length]);
 
   const resetPractice = useCallback(() => {
     setPracticeIndex(0);
