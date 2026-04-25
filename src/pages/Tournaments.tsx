@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -101,6 +101,8 @@ function getSkillLabel(category: string) {
 const Tournaments = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterParam = searchParams.get("filter") || ""; // "mine" | "starting" | "create"
   const { streak } = useStreak(user?.id);
   const { activeTournament } = useActiveTournament(user?.id);
   useTournamentReminder(user?.id);
@@ -114,6 +116,7 @@ const Tournaments = () => {
   const [creating, setCreating] = useState(false);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [myRegistrations, setMyRegistrations] = useState<Set<string>>(new Set());
+  const [onlyMine, setOnlyMine] = useState(filterParam === "mine");
 
   const [lbPlayers, setLbPlayers] = useState<LeaderboardEntry[]>([]);
   const [lbLoading, setLbLoading] = useState(false);
