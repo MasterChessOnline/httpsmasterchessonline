@@ -613,7 +613,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
   const hasExercise = variations.length > 0;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl lg:max-w-5xl mx-auto">
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
         <ArrowLeft className="h-4 w-4" /> Back to {course.title}
       </button>
