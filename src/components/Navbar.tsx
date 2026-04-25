@@ -240,7 +240,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop nav */}
-            <div className="hidden lg:flex items-center gap-2 ml-auto">
+            <div className="hidden lg:flex items-center gap-2">
               {NAV_SECTIONS.map((section) => {
                 const isActive = section.items.some(item =>
                   item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
