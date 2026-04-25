@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Clock, Users, Zap, Swords, Timer, Crown, Gem,
   RefreshCw, Network, GitBranch, Calendar,
-  TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search, Flame,
+  TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search, Flame, ListChecks,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
