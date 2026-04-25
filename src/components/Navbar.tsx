@@ -153,9 +153,17 @@ const Navbar = () => {
     setSearchOpen(false);
   }, [location.pathname]);
 
+  // Cmd/Ctrl+K opens the search palette globally
   useEffect(() => {
-    if (searchOpen && searchRef.current) searchRef.current.focus();
-  }, [searchOpen]);
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Live status data — real counts from backend, refreshed gently
   useEffect(() => {
