@@ -7,9 +7,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
+/**
+ * A single move in a guided sequence.
+ *
+ * `branches` lets a move offer alternative continuations (sub-variations)
+ * that play instead of the main line at this point. ChessBase-style:
+ *   1.e4 e5 2.Nf3 [main: 2...Nc6 ...] [branch: "Petroff" 2...Nf6 ...]
+ * Each branch is a full named line that REPLACES the next moves of the
+ * main line from the position BEFORE this move's SAN.
+ */
+export interface MoveBranch {
+  name: string;
+  /** Optional short summary shown in the branch picker. */
+  summary?: string;
+  moves: MoveStep[];
+}
+
 export interface MoveStep {
   san: string;
   explanation: string;
+  /** Optional alternative lines branching at the position before this SAN. */
+  branches?: MoveBranch[];
 }
 
 type BoardMode = "guided" | "practice" | "explore";
