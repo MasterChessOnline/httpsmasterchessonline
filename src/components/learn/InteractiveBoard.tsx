@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import {
   ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
@@ -101,16 +101,49 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   const goForward = useCallback(() => setMoveIndex((i) => Math.min(i + 1, totalMoves)), [totalMoves]);
   const goBack = useCallback(() => setMoveIndex((i) => Math.max(i - 1, 0)), []);
 
-  // Keyboard navigation
+  // Keyboard navigation (guided mode)
   useEffect(() => {
     if (mode !== "guided") return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") { e.preventDefault(); goForward(); }
-      if (e.key === "ArrowLeft") { e.preventDefault(); goBack(); }
+      // Don't hijack keys when user is typing in an input/textarea
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault(); goForward();
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault(); goBack();
+      } else if (e.key === "Home") {
+        e.preventDefault(); goToStart();
+      } else if (e.key === "End") {
+        e.preventDefault(); goToEnd();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [goForward, goBack, mode]);
+  }, [goForward, goBack, goToStart, goToEnd, mode]);
+
+  // Touch swipe navigation (guided mode, mobile)
+  const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (mode !== "guided") return;
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (mode !== "guided" || !touchStartRef.current) return;
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    const dt = Date.now() - start.t;
+    // Horizontal swipe: > 50px, mostly horizontal, under 600ms
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 600) {
+      if (dx < 0) goForward();
+      else goBack();
+    }
+  };
 
   // Current board state based on mode
   const currentFen = mode === "guided"
@@ -284,7 +317,10 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
       )}
 
       {/* Board */}
-      <div className={`rounded-lg overflow-hidden border mb-3 transition-all ${
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className={`rounded-lg overflow-hidden border mb-3 transition-all touch-pan-y ${
         practiceResult === "correct" ? "border-green-500/50 shadow-[0_0_15px_hsl(142,70%,45%,0.15)]"
         : practiceResult === "wrong" ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
         : "border-border/50"
@@ -458,6 +494,14 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
           </Button>
         )}
       </div>
+
+      {/* Keyboard / swipe hint (guided mode only) */}
+      {mode === "guided" && totalMoves > 0 && (
+        <p className="text-[11px] text-muted-foreground/70 text-center mt-2 leading-relaxed">
+          <span className="hidden sm:inline">Use ← → arrow keys, Space, or Home/End to navigate moves.</span>
+          <span className="sm:hidden">Tap arrows or swipe left / right on the board to step through moves.</span>
+        </p>
+      )}
     </div>
   );
 }
