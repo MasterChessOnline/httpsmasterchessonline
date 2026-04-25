@@ -155,7 +155,7 @@ const HeroSection = () => {
           <span className="text-xs font-semibold tracking-wide text-primary uppercase">Play · Learn · Compete</span>
         </motion.div>
 
-        <motion.h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[5.5rem]"
+        <motion.h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[5.5rem]"
           initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.35 }}>
           <span className="relative inline-block overflow-hidden">
             <AnimatePresence mode="wait">

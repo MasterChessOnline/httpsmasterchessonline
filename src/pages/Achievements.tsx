@@ -126,7 +126,9 @@ const Achievements = () => {
 
           <TabsContent value="achievements">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {achievements.map((ach) => {
+              {achievements
+                .filter((a) => !/(puzzle|tactic)/i.test(`${a.name} ${a.description} ${a.key}`))
+                .map((ach) => {
                 const isEarned = earned.has(ach.id);
                 const Icon = ICON_MAP[ach.icon] || Trophy;
                 const reward = ach.reward_value ? COLLECTIBLES.find((c) => c.key === ach.reward_value) : null;
@@ -135,14 +137,16 @@ const Achievements = () => {
                   <div
                     key={ach.id}
                     className={`bg-card border rounded-xl p-4 transition-all ${
-                      isEarned ? "border-primary/40 shadow-[0_0_15px_-5px_hsl(var(--primary)/0.3)]" : "border-border opacity-60"
+                      isEarned
+                        ? "border-primary/60 ring-1 ring-primary/30 shadow-[0_0_25px_-5px_hsl(var(--primary)/0.45)]"
+                        : "border-border/30 opacity-40 saturate-50"
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        isEarned ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                        isEarned ? "bg-primary/25 text-primary shadow-[0_0_15px_hsl(var(--primary)/0.4)]" : "bg-muted text-muted-foreground/60"
                       }`}>
-                        <Icon className="w-5 h-5" />
+                        {isEarned ? <Icon className="w-5 h-5" /> : <Lock className="w-4 h-4" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-semibold flex items-center gap-1.5">

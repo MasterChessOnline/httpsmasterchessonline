@@ -9,7 +9,7 @@ import { useOnlineGame } from "@/hooks/use-online-game";
 import RatingChange from "@/components/RatingChange";
 import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,9 +41,19 @@ interface ChatMessage {
   created_at: string;
 }
 
+const TC_PRESET_BY_PARAM: Record<string, number> = {
+  bullet: 1, // 1+0
+  blitz: 4, // 3+0
+  rapid: 8, // 10+0
+  classical: 11,
+};
+
 const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const tcParam = searchParams.get("tc") || "";
+  const initialTcIdx = TC_PRESET_BY_PARAM[tcParam] ?? 4;
   const {
     status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult,
     searchMatch, cancelSearch, makeMove, endGame, resign, reset: resetOnline,
@@ -53,7 +63,7 @@ const PlayOnline = () => {
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
-  const [timeControlIdx, setTimeControlIdx] = useState(4);
+  const [timeControlIdx, setTimeControlIdx] = useState(initialTcIdx);
   const gameRef = useRef(new Chess());
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");

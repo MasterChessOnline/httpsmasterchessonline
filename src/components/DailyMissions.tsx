@@ -12,7 +12,7 @@ import {
   Gift,
   Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import { useDailyMissions, type MissionWithProgress } from "@/hooks/use-daily-missions";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -27,20 +27,22 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   target: Target,
 };
 
-function MissionRow({
-  mission,
-  onClaim,
-  busy,
-}: {
+interface MissionRowProps {
   mission: MissionWithProgress;
   onClaim: (key: string) => void;
   busy: boolean;
-}) {
+}
+
+const MissionRow = forwardRef<HTMLDivElement, MissionRowProps>(function MissionRow(
+  { mission, onClaim, busy },
+  ref,
+) {
   const Icon = ICONS[mission.icon] ?? Target;
   const claimable = mission.completed && !mission.claimed;
 
   return (
     <motion.div
+      ref={ref}
       layout
       initial={{ opacity: 0, x: -8 }}
       animate={{ opacity: 1, x: 0 }}
@@ -100,11 +102,7 @@ function MissionRow({
             disabled={busy}
             className="rounded-md bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition"
           >
-            {busy ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              "Claim"
-            )}
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Claim"}
           </button>
         )}
         {!mission.claimed && !claimable && (
@@ -115,7 +113,7 @@ function MissionRow({
       </div>
     </motion.div>
   );
-}
+});
 
 interface DailyMissionsProps {
   /** When true, render compact widget (≤3 visible). Default false = full list. */
@@ -134,12 +132,12 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
     setClaiming(null);
     if (ok) {
       const m = missions.find((x) => x.key === key);
-      toast.success(`+${m?.xp_reward ?? 0} XP osvojeno!`, {
+      toast.success(`+${m?.xp_reward ?? 0} XP earned!`, {
         description: m?.title,
         icon: "🏆",
       });
     } else {
-      toast.error("Nije uspelo");
+      toast.error("Failed to claim");
     }
   };
 
@@ -147,16 +145,16 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
     return (
       <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-card/80 backdrop-blur-sm p-5">
         <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
-          <Target className="h-5 w-5 text-primary" /> Dnevne misije
+          <Target className="h-5 w-5 text-primary" /> Daily Missions
         </h2>
         <p className="text-sm text-muted-foreground mb-3">
-          Prijavi se da bi otključao dnevne misije i nagrade.
+          Sign in to unlock daily missions and rewards.
         </p>
         <Link
           to="/login"
           className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
         >
-          Prijava
+          Sign In
         </Link>
       </div>
     );
@@ -166,7 +164,6 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
 
   return (
     <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-card/80 backdrop-blur-sm p-5 relative overflow-hidden">
-      {/* sparkle overlay when claimable */}
       {claimableXp > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -178,7 +175,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
       <div className="flex items-center justify-between mb-4 relative">
         <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
           <Target className="h-5 w-5 text-primary" />
-          Dnevne misije
+          Daily Missions
         </h2>
         <div className="flex items-center gap-2">
           {claimableXp > 0 && (
@@ -220,7 +217,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
           to="/missions"
           className="mt-3 block text-center text-xs font-semibold text-primary hover:text-primary/80 transition"
         >
-          Vidi sve misije →
+          View all missions →
         </Link>
       )}
     </div>
