@@ -321,7 +321,7 @@ const Navbar = () => {
                               {section.label}
                             </span>
                           </div>
-                          <div className="px-1.5 pb-1.5">
+                          <div className="px-1.5 pb-1 pt-0.5">
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
@@ -329,16 +329,16 @@ const Navbar = () => {
                                 return (
                                   <div key={item.label}>
                                     {item.separator && idx > 0 && (
-                                      <div className="mx-2 my-1.5 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
+                                      <div className="mx-2 my-1 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-2 pb-1" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
+                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-1.5 pb-0.5" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
                                         {item.subheading}
                                       </p>
                                     )}
                                     <Link
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group/item"
+                                      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all duration-200 group/item"
                                       style={{
                                         backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.accent} / 0.08)` : undefined,
                                         border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
@@ -452,7 +452,7 @@ const Navbar = () => {
                               {section.label}
                             </span>
                           </div>
-                          <div className="px-1.5 pb-1.5">
+                          <div className="px-1.5 pb-1 pt-0.5">
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
@@ -460,16 +460,16 @@ const Navbar = () => {
                                 return (
                                   <div key={item.label}>
                                     {item.separator && idx > 0 && (
-                                      <div className="mx-2 my-1.5 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
+                                      <div className="mx-2 my-1 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-2 pb-1" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
+                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-1.5 pb-0.5" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
                                         {item.subheading}
                                       </p>
                                     )}
                                     <Link
                                       to={item.href}
-                                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200"
+                                      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all duration-200"
                                       style={{
                                         backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.accent} / 0.08)` : undefined,
                                         border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
