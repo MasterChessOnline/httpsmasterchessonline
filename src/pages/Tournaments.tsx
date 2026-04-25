@@ -165,6 +165,22 @@ const Tournaments = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // React to ?filter= changes
+  useEffect(() => {
+    if (filterParam === "mine") setOnlyMine(true);
+    else if (filterParam !== "mine") setOnlyMine(false);
+    if (filterParam === "starting") {
+      setStatusFilter("registering");
+    }
+    if (filterParam === "create" && user && !creating) {
+      // auto-trigger create flow once
+      handleCreateTournament();
+      // strip the param so we don't loop on re-render
+      setSearchParams({}, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterParam, user]);
+
   useEffect(() => {
     if (viewTab === "leaderboard" && lbPlayers.length === 0) {
       setLbLoading(true);
@@ -228,6 +244,7 @@ const Tournaments = () => {
 
   // Filter tournaments
   const filtered = dbTournaments.filter(t => {
+    if (onlyMine && !myRegistrations.has(t.id)) return false;
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
     if (skillFilter !== "all") {
