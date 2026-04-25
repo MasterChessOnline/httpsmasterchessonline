@@ -254,7 +254,7 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className="relative flex items-center gap-1.5 px-2 xl:px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
+                      className="relative flex items-center gap-1.5 px-3 h-9 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
                       style={{
                         color: isActive || activeDropdown === section.key ? accentColor : undefined,
                         backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
