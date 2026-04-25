@@ -221,7 +221,7 @@ const Navbar = () => {
           aria-label="Main navigation"
         >
           <div
-            className={`container mx-auto flex items-center justify-between px-5 transition-all duration-500 ${
+            className={`container mx-auto flex items-center justify-between gap-4 px-5 transition-all duration-500 ${
               shrunk ? "h-14" : "h-16"
             }`}
           >
@@ -240,7 +240,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop nav */}
-            <div className="hidden lg:flex items-center gap-0.5 mx-3 xl:mx-6">
+            <div className="hidden lg:flex items-center gap-2">
               {NAV_SECTIONS.map((section) => {
                 const isActive = section.items.some(item =>
                   item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
@@ -254,7 +254,7 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className="relative flex items-center gap-1.5 px-2 xl:px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
+                      className="relative flex items-center gap-1.5 px-3 h-9 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
                       style={{
                         color: isActive || activeDropdown === section.key ? accentColor : undefined,
                         backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
@@ -385,7 +385,7 @@ const Navbar = () => {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {/* Friends dropdown */}
               {(() => {
                 const section = FRIENDS_SECTION;
@@ -492,7 +492,7 @@ const Navbar = () => {
               {/* Search button — opens full palette */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="hidden lg:flex items-center justify-center p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
+                className="hidden lg:flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200 shrink-0"
                 aria-label="Search MasterChess"
                 title="Search every page (Ctrl/Cmd+K)"
               >
