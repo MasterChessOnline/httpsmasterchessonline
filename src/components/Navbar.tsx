@@ -501,6 +501,16 @@ const Navbar = () => {
                 );
               })()}
 
+              {/* Search button — opens full palette */}
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="hidden lg:flex items-center justify-center p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
+                aria-label="Search MasterChess"
+                title="Search every page (Ctrl/Cmd+K)"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+
               {/* User streak + sign out */}
               {loading ? (
                 <div className="h-9 w-9 bg-muted/20 rounded-xl animate-pulse" />
