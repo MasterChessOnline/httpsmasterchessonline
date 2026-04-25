@@ -477,20 +477,77 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
         ) : null}
       </div>
 
+      {/* Branch picker — appears when current position has alternative continuations */}
+      {availableBranches && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 mb-3">
+          <div className="flex items-center gap-1.5 mb-2 text-[11px] font-medium text-amber-400/90 uppercase tracking-wider">
+            <GitBranch className="w-3 h-3" />
+            Alternative line at this position
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {availableBranches.branches.map((b, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setBranchAt(availableBranches.atIndex);
+                  setBranchIdx(i);
+                  setMoveIndex(availableBranches.atIndex + 1);
+                }}
+                title={b.summary}
+                className="px-2.5 py-1 rounded-md text-xs font-medium border border-amber-500/30 bg-card hover:bg-amber-500/10 hover:border-amber-500/50 text-foreground transition-colors"
+              >
+                <span className="text-amber-400/80 mr-1">→</span>
+                {b.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Active branch banner + back-to-main */}
+      {branchAt !== null && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-xs">
+            <GitBranch className="w-3.5 h-3.5 text-primary" />
+            <span className="text-muted-foreground">In branch:</span>
+            <span className="font-semibold text-foreground">
+              {moves[branchAt]?.branches?.[branchIdx]?.name}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => {
+              setBranchAt(null);
+              setBranchIdx(0);
+              setMoveIndex((i) => Math.min(i, moves.length));
+            }}
+          >
+            <RotateCcw className="w-3 h-3 mr-1" /> Main line
+          </Button>
+        </div>
+      )}
+
       {/* Move list (guided mode) */}
-      {mode === "guided" && moves.length > 0 && (
+      {mode === "guided" && effectiveMoves.length > 0 && (
         <div className="rounded-lg border border-border/50 bg-card p-3 mb-3 max-h-[100px] overflow-y-auto">
           <div className="flex flex-wrap gap-1 text-sm">
-            {moves.map((step, idx) => {
+            {effectiveMoves.map((step, idx) => {
               const moveNum = getMoveNumber(idx);
               const isActive = idx + 1 === moveIndex;
+              const isInBranch = branchAt !== null && idx >= branchAt;
               return (
                 <span key={idx} className="inline-flex items-center gap-0.5">
                   {moveNum && <span className="text-muted-foreground font-medium">{moveNum}</span>}
                   <button
                     onClick={() => setMoveIndex(idx + 1)}
                     className={`px-1.5 py-0.5 rounded font-mono text-xs transition-colors ${
-                      isActive ? "bg-primary text-primary-foreground font-bold" : "text-foreground hover:bg-muted"
+                      isActive
+                        ? "bg-primary text-primary-foreground font-bold"
+                        : isInBranch
+                          ? "text-amber-400/90 hover:bg-amber-500/10"
+                          : "text-foreground hover:bg-muted"
                     }`}
                   >
                     {step.san}
