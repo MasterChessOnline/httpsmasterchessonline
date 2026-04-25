@@ -1,4 +1,4 @@
-import { MoveStep } from "@/components/learn/InteractiveBoard";
+import { MoveStep, MoveBranch } from "@/components/learn/InteractiveBoard";
 
 /**
  * A single named variation with its own board and moves.
@@ -21,7 +21,9 @@ export interface LessonMoveData {
   variations?: LessonVariation[];
 }
 
-const M = (san: string, explanation: string): MoveStep => ({ san, explanation });
+const M = (san: string, explanation: string, branches?: MoveBranch[]): MoveStep => (
+  branches && branches.length ? { san, explanation, branches } : { san, explanation }
+);
 
 /** Helper to create a named variation */
 const V = (name: string, moves: MoveStep[], startFen?: string): LessonVariation => ({
