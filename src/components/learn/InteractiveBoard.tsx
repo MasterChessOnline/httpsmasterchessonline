@@ -60,11 +60,25 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   const baseFen = startFen || DEFAULT_FEN;
   const hasMoves = moves.length > 0;
 
-  // Pre-compute all FEN positions
+  // Active branch: when set, the line "switches" to a branch at branchAt
+  // (index of the move in the main line where the branch starts INSTEAD of).
+  // Up to one level of branching is supported.
+  const [branchAt, setBranchAt] = useState<number | null>(null);
+  const [branchIdx, setBranchIdx] = useState<number>(0);
+
+  // Active "effective" sequence of moves = main line up to branchAt, then branch moves
+  const effectiveMoves = useMemo<MoveStep[]>(() => {
+    if (branchAt === null) return moves;
+    const branch = moves[branchAt]?.branches?.[branchIdx];
+    if (!branch) return moves;
+    return [...moves.slice(0, branchAt), ...branch.moves];
+  }, [moves, branchAt, branchIdx]);
+
+  // Pre-compute all FEN positions for the effective sequence
   const positions = useMemo(() => {
     const fens: string[] = [baseFen];
     const chess = new Chess(baseFen);
-    for (const step of moves) {
+    for (const step of effectiveMoves) {
       try {
         chess.move(step.san);
         fens.push(chess.fen());
@@ -73,11 +87,14 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
       }
     }
     return fens;
-  }, [baseFen, moves]);
+  }, [baseFen, effectiveMoves]);
 
   const [mode, setMode] = useState<BoardMode>("guided");
   const [moveIndex, setMoveIndex] = useState(0);
   const totalMoves = positions.length - 1;
+
+  // Index of the first move that belongs to the branch (for highlighting)
+  const branchStartIdx = branchAt !== null ? branchAt : -1;
 
   // Explore mode state
   const [exploreChess, setExploreChess] = useState(() => new Chess(baseFen));
