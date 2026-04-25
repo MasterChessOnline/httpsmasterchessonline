@@ -295,7 +295,7 @@ const Navbar = () => {
                           exit={{ opacity: 0, y: 6, scale: 0.98 }}
                           transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                           className={`absolute left-1/2 -translate-x-1/2 rounded-2xl z-[70] backdrop-blur-2xl flex flex-col ${
-                            section.wide ? "w-[380px]" : "w-[300px]"
+                            section.wide ? "w-[300px]" : "w-[240px]"
                           }`}
                           style={{
                             top: shrunk ? "calc(100% + 12px)" : "calc(100% + 34px)",
