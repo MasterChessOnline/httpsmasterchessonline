@@ -492,7 +492,7 @@ const Navbar = () => {
               {/* Search button — opens full palette */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="hidden lg:flex items-center justify-center p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
+                className="hidden lg:flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200 shrink-0"
                 aria-label="Search MasterChess"
                 title="Search every page (Ctrl/Cmd+K)"
               >
