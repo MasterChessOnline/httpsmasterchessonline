@@ -371,6 +371,17 @@ const Tournaments = () => {
           <p className="text-muted-foreground max-w-lg mx-auto">
             Join free online tournaments, compete by skill level, and earn badges. All logged-in players welcome!
           </p>
+          {onlyMine && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+              <ListChecks className="h-3 w-3" /> Showing only your tournaments
+              <button
+                className="ml-1 hover:text-foreground"
+                onClick={() => { setOnlyMine(false); setSearchParams({}, { replace: true }); }}
+              >
+                ×
+              </button>
+            </div>
+          )}
           {(totalLive > 0 || totalOpen > 0) && (
             <div className="mt-3 flex justify-center gap-2">
               {totalLive > 0 && (
