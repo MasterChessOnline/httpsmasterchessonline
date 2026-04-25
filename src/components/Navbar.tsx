@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Radio } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Radio, UserPlus } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import StreakIndicator from "@/components/StreakIndicator";
+import NavSearchPalette from "@/components/NavSearchPalette";
 
 interface DropdownItem {
   label: string;
@@ -85,31 +86,40 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    key: "live",
-    label: "Live",
-    icon: Radio,
-    accent: "0 84% 60%",
-    accentRgb: "239,68,68",
-    items: [
-      { label: "Stream Hub", href: "/live", icon: Radio, desc: "Watch DailyChess_12 live", highlight: true },
-      { label: "Spectate Games", href: "/spectate", icon: Eye, desc: "Watch player matches" },
-      { label: "Community", href: "/community", icon: Users, desc: "Posts & chess moments", separator: true },
-    ],
-  },
-  {
     key: "profile",
     label: "Profile",
     icon: User,
     accent: "190 95% 55%",
     accentRgb: "34,211,238",
     items: [
-      { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true },
-      { label: "Chess Card", href: "/chess-card", icon: Sparkles, desc: "Your skill profile & compare", auth: true, highlight: true },
+      { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true, highlight: true },
+      { label: "Chess Card", href: "/chess-card", icon: Sparkles, desc: "Your skill profile & compare", auth: true },
       { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
-      { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true },
+      { label: "Stats", href: "/stats", icon: BarChart3, desc: "Detailed analytics", subheading: "Insights", separator: true },
+      { label: "Achievements", href: "/achievements", icon: Medal, desc: "Unlocked milestones" },
+      { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true, subheading: "Account" },
     ],
   },
 ];
+
+// Friends mega-section — lives separately, rendered as the rightmost nav dropdown
+const FRIENDS_SECTION: NavSection = {
+  key: "friends",
+  label: "Friends",
+  icon: Users,
+  accent: "150 70% 55%",
+  accentRgb: "74,222,128",
+  items: [
+    { label: "All Friends", href: "/friends", icon: Users, desc: "View your friends list", auth: true, highlight: true },
+    { label: "Add a Friend", href: "/friends", icon: UserPlus, desc: "Send a new friend request", auth: true },
+    { label: "Friend Requests", href: "/friends", icon: Bell, desc: "Pending invitations", auth: true },
+    { label: "Challenge a Friend", href: "/friends", icon: Swords, desc: "Send a game invite", auth: true, separator: true, subheading: "Play Together" },
+    { label: "Group Match", href: "/friends", icon: Gamepad2, desc: "Quick game with a friend", auth: true },
+    { label: "Browse Teams", href: "/clubs", icon: Shield, desc: "Find a club or team", separator: true, subheading: "Teams & Clubs" },
+    { label: "Create a Team", href: "/clubs", icon: Plus, desc: "Build your own group", auth: true },
+    { label: "Chat", href: "/chat", icon: FileText, desc: "Direct messages", auth: true, separator: true },
+  ],
+};
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -143,9 +153,17 @@ const Navbar = () => {
     setSearchOpen(false);
   }, [location.pathname]);
 
+  // Cmd/Ctrl+K opens the search palette globally
   useEffect(() => {
-    if (searchOpen && searchRef.current) searchRef.current.focus();
-  }, [searchOpen]);
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Live status data — real counts from backend, refreshed gently
   useEffect(() => {
@@ -367,38 +385,16 @@ const Navbar = () => {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-2 shrink-0">
-              {/* Search */}
-              <div className="hidden xl:flex items-center">
-                <AnimatePresence>
-                  {searchOpen && (
-                    <motion.div
-                      initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 200, opacity: 1 }}
-                      exit={{ width: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                      className="overflow-hidden mr-1"
-                    >
-                      <input
-                        ref={searchRef}
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        onKeyDown={e => { if (e.key === "Escape") setSearchOpen(false); }}
-                        placeholder="Search..."
-                        className="h-9 w-full bg-muted/20 border border-border/40 rounded-lg px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 transition-all duration-300"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <button
-                  onClick={() => setSearchOpen(!searchOpen)}
-                  className="p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
-                  aria-label="Search"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              </div>
-
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Search button — opens full palette */}
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="hidden lg:flex items-center justify-center p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
+                aria-label="Search MasterChess"
+                title="Search every page (Ctrl/Cmd+K)"
+              >
+                <Search className="h-4 w-4" />
+              </button>
 
               {/* Play Now button */}
               <Link to="/play" className="hidden lg:block">
@@ -412,24 +408,115 @@ const Navbar = () => {
                 </Button>
               </Link>
 
-              {/* User area */}
+              {/* Friends dropdown — replaces old profile chip slot */}
+              {(() => {
+                const section = FRIENDS_SECTION;
+                const accentColor = `hsl(${section.accent})`;
+                const isActive = location.pathname.startsWith("/friends");
+                return (
+                  <div
+                    className="hidden lg:block relative"
+                    onMouseEnter={() => handleMouseEnter(section.key)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <button
+                      className="relative flex items-center gap-1.5 px-2.5 h-9 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap"
+                      style={{
+                        color: isActive || activeDropdown === section.key ? accentColor : undefined,
+                        backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : `hsla(${section.accent} / 0.04)`,
+                        border: `1px solid hsla(${section.accent} / ${isActive || activeDropdown === section.key ? 0.4 : 0.18})`,
+                      }}
+                    >
+                      <section.icon className="h-4 w-4" style={{ color: accentColor }} />
+                      <span className={!(isActive || activeDropdown === section.key) ? "text-foreground/85" : ""}>{section.label}</span>
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
+                        style={{ color: accentColor }}
+                      />
+                    </button>
+
+                    <AnimatePresence>
+                      {activeDropdown === section.key && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                          className="absolute right-0 rounded-2xl z-[70] backdrop-blur-2xl flex flex-col w-[320px]"
+                          style={{
+                            top: "calc(100% + 12px)",
+                            background: `linear-gradient(135deg, hsla(${section.accent} / 0.12) 0%, hsl(220 15% 6%) 35%, hsl(220 15% 5%) 100%)`,
+                            border: `1px solid hsla(${section.accent} / 0.35)`,
+                            boxShadow: `0 18px 50px rgba(0,0,0,0.85), 0 0 30px -5px rgba(${section.accentRgb},0.2), inset 0 1px 0 hsla(${section.accent} / 0.15)`,
+                          }}
+                          onMouseEnter={() => handleMouseEnter(section.key)}
+                          onMouseLeave={handleMouseLeave}
+                        >
+                          <div
+                            className="px-3 pt-3 pb-2 flex items-center gap-2 shrink-0 rounded-t-2xl"
+                            style={{
+                              background: `linear-gradient(180deg, hsl(220 15% 8%) 0%, hsl(220 15% 7%) 100%)`,
+                              borderBottom: `1px solid hsla(${section.accent} / 0.28)`,
+                              boxShadow: `0 2px 0 hsla(${section.accent} / 0.4)`,
+                            }}
+                          >
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `hsla(${section.accent} / 0.22)`, border: `1px solid hsla(${section.accent} / 0.35)` }}>
+                              <section.icon className="h-3.5 w-3.5" style={{ color: accentColor }} />
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-[0.15em] leading-none whitespace-nowrap" style={{ color: accentColor, textShadow: `0 0 12px hsla(${section.accent} / 0.4)` }}>
+                              {section.label}
+                            </span>
+                          </div>
+                          <div className="px-1.5 pb-1.5">
+                            {section.items
+                              .filter(item => !item.auth || user)
+                              .map((item, idx) => {
+                                const itemActive = location.pathname.startsWith(item.href);
+                                return (
+                                  <div key={item.label}>
+                                    {item.separator && idx > 0 && (
+                                      <div className="mx-2 my-1.5 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
+                                    )}
+                                    {item.subheading && (
+                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-2 pb-1" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
+                                        {item.subheading}
+                                      </p>
+                                    )}
+                                    <Link
+                                      to={item.href}
+                                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200"
+                                      style={{
+                                        backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.accent} / 0.08)` : undefined,
+                                        border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
+                                      }}
+                                      onMouseEnter={(e) => { if (!item.highlight) e.currentTarget.style.backgroundColor = `hsla(${section.accent} / 0.08)`; }}
+                                      onMouseLeave={(e) => { if (!item.highlight && !itemActive) e.currentTarget.style.backgroundColor = "transparent"; }}
+                                    >
+                                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: item.highlight || itemActive ? `hsla(${section.accent} / 0.2)` : `hsla(${section.accent} / 0.08)` }}>
+                                        <item.icon className="h-3.5 w-3.5" style={{ color: item.highlight || itemActive ? accentColor : `hsla(${section.accent} / 0.7)` }} />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-medium leading-tight" style={{ color: item.highlight ? accentColor : "hsl(var(--foreground))" }}>{item.label}</p>
+                                        <p className="text-[10px] text-muted-foreground/60 leading-tight mt-0.5">{item.desc}</p>
+                                      </div>
+                                    </Link>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })()}
+
+              {/* User streak + sign out */}
               {loading ? (
-                <div className="h-9 w-24 bg-muted/20 rounded-xl animate-pulse" />
+                <div className="h-9 w-9 bg-muted/20 rounded-xl animate-pulse" />
               ) : user ? (
                 <>
                   <StreakIndicator />
-                  <Link
-                    to={`/profile/${user.id}`}
-                    className="flex items-center gap-2 rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm px-2.5 py-2 hover:border-primary/30 hover:bg-card/70 transition-all duration-300"
-                    aria-label="Open profile"
-                  >
-                    <div className="relative">
-                      <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="h-4 w-4 text-primary" />
-                      </div>
-                    </div>
-                    {profile && <span className="font-mono text-xs text-primary font-bold">{profile.rating}</span>}
-                  </Link>
                   <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden xl:flex" aria-label="Sign out">
                     <LogOut className="h-4 w-4" />
                   </Button>
@@ -455,27 +542,11 @@ const Navbar = () => {
             </div>
           </div>
         </motion.nav>
-
-        {/* Thin live status bar */}
-        <AnimatePresence>
-          {!shrunk && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.3 }}
-              className="hidden md:block border-b border-border/10 bg-[hsl(220,15%,5%)/0.7] backdrop-blur-xl"
-            >
-              <div className="container mx-auto px-5 h-6 flex items-center justify-end text-[10.5px] font-medium tracking-wide">
-                <Link to="/live" className="hidden sm:flex items-center gap-1.5 text-muted-foreground/70 hover:text-foreground transition-colors">
-                  <Radio className="h-2.5 w-2.5 text-rose-400" />
-                  <span>DailyChess_12 live</span>
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
+
+      {/* Search palette */}
+      <NavSearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
+
 
       {/* Spacer */}
       <div className={`transition-all duration-500 ${shrunk ? "h-14" : "h-[88px]"}`} />
@@ -500,7 +571,7 @@ const Navbar = () => {
                 </Button>
               </Link>
 
-              {NAV_SECTIONS.map((section) => {
+              {[...NAV_SECTIONS, FRIENDS_SECTION].map((section) => {
                 const accentColor = `hsl(${section.accent})`;
                 return (
                   <div
