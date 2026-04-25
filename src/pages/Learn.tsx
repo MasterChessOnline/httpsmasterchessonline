@@ -693,16 +693,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
           <h3 className="font-display text-base font-semibold text-foreground mb-3 flex items-center gap-2">
             <Target className="w-4 h-4 text-primary" /> Interactive Exercise
           </h3>
-          <div className="space-y-6">
-            {variations.map((variation, vIdx) => (
-              <div key={vIdx}>
-                {variation.name && (
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">{variation.name}</p>
-                )}
-                <InteractiveBoard startFen={variation.startFen || lesson.fen} moves={variation.moves} />
-              </div>
-            ))}
-          </div>
+          <VariationsExercise variations={variations} fallbackFen={lesson.fen} />
         </div>
       )}
 
