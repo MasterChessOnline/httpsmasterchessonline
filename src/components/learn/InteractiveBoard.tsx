@@ -454,7 +454,16 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
       {/* Explanation bubble */}
       <div className="min-h-[60px] rounded-lg border border-border/50 bg-card p-3 mb-3">
         {mode === "guided" && currentExplanation ? (
-          <p className="text-sm text-foreground leading-relaxed">{currentExplanation}</p>
+          <div>
+            <div className="flex items-center gap-2 mb-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span className="font-mono font-bold text-primary">
+                {getMoveNumber(moveIndex - 1) || "…"} {effectiveMoves[moveIndex - 1].san}
+              </span>
+              <span className="opacity-60">·</span>
+              <span>Move {moveIndex} of {totalMoves}</span>
+            </div>
+            <p className="text-sm text-foreground leading-relaxed">{currentExplanation}</p>
+          </div>
         ) : mode === "guided" ? (
           <p className="text-sm text-muted-foreground italic">
             {totalMoves > 0 ? "Press ▶ or use arrow keys to step through the moves." : "This position illustrates the lesson concept."}
