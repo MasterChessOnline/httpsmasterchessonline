@@ -17,6 +17,7 @@ import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/cours
 import { useAuth } from "@/contexts/AuthContext";
 
 import InteractiveBoard from "@/components/learn/InteractiveBoard";
+import VariationsExercise from "@/components/learn/VariationsExercise";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { toast } from "@/hooks/use-toast";
@@ -612,7 +613,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
   const hasExercise = variations.length > 0;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl lg:max-w-5xl mx-auto">
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
         <ArrowLeft className="h-4 w-4" /> Back to {course.title}
       </button>
@@ -693,16 +694,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
           <h3 className="font-display text-base font-semibold text-foreground mb-3 flex items-center gap-2">
             <Target className="w-4 h-4 text-primary" /> Interactive Exercise
           </h3>
-          <div className="space-y-6">
-            {variations.map((variation, vIdx) => (
-              <div key={vIdx}>
-                {variation.name && (
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">{variation.name}</p>
-                )}
-                <InteractiveBoard startFen={variation.startFen || lesson.fen} moves={variation.moves} />
-              </div>
-            ))}
-          </div>
+          <VariationsExercise variations={variations} fallbackFen={lesson.fen} />
         </div>
       )}
 
