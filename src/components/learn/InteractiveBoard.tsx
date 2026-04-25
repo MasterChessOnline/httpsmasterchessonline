@@ -2,14 +2,32 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import {
   ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle,
+  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle, GitBranch,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
+/**
+ * A single move in a guided sequence.
+ *
+ * `branches` lets a move offer alternative continuations (sub-variations)
+ * that play instead of the main line at this point. ChessBase-style:
+ *   1.e4 e5 2.Nf3 [main: 2...Nc6 ...] [branch: "Petroff" 2...Nf6 ...]
+ * Each branch is a full named line that REPLACES the next moves of the
+ * main line from the position BEFORE this move's SAN.
+ */
+export interface MoveBranch {
+  name: string;
+  /** Optional short summary shown in the branch picker. */
+  summary?: string;
+  moves: MoveStep[];
+}
+
 export interface MoveStep {
   san: string;
   explanation: string;
+  /** Optional alternative lines branching at the position before this SAN. */
+  branches?: MoveBranch[];
 }
 
 type BoardMode = "guided" | "practice" | "explore";
@@ -42,11 +60,25 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   const baseFen = startFen || DEFAULT_FEN;
   const hasMoves = moves.length > 0;
 
-  // Pre-compute all FEN positions
+  // Active branch: when set, the line "switches" to a branch at branchAt
+  // (index of the move in the main line where the branch starts INSTEAD of).
+  // Up to one level of branching is supported.
+  const [branchAt, setBranchAt] = useState<number | null>(null);
+  const [branchIdx, setBranchIdx] = useState<number>(0);
+
+  // Active "effective" sequence of moves = main line up to branchAt, then branch moves
+  const effectiveMoves = useMemo<MoveStep[]>(() => {
+    if (branchAt === null) return moves;
+    const branch = moves[branchAt]?.branches?.[branchIdx];
+    if (!branch) return moves;
+    return [...moves.slice(0, branchAt), ...branch.moves];
+  }, [moves, branchAt, branchIdx]);
+
+  // Pre-compute all FEN positions for the effective sequence
   const positions = useMemo(() => {
     const fens: string[] = [baseFen];
     const chess = new Chess(baseFen);
-    for (const step of moves) {
+    for (const step of effectiveMoves) {
       try {
         chess.move(step.san);
         fens.push(chess.fen());
@@ -55,11 +87,14 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
       }
     }
     return fens;
-  }, [baseFen, moves]);
+  }, [baseFen, effectiveMoves]);
 
   const [mode, setMode] = useState<BoardMode>("guided");
   const [moveIndex, setMoveIndex] = useState(0);
   const totalMoves = positions.length - 1;
+
+  // Index of the first move that belongs to the branch (for highlighting)
+  const branchStartIdx = branchAt !== null ? branchAt : -1;
 
   // Explore mode state
   const [exploreChess, setExploreChess] = useState(() => new Chess(baseFen));
@@ -79,11 +114,18 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   useEffect(() => {
     setMoveIndex(0);
     setMode("guided");
+    setBranchAt(null);
+    setBranchIdx(0);
     setExploreChess(new Chess(baseFen));
     setExploreSelected(null);
     setExploreLegalMoves([]);
     resetPractice();
   }, [baseFen, moves]);
+
+  // When the active branch/effective line changes, clamp the move pointer
+  useEffect(() => {
+    setMoveIndex((i) => Math.min(i, positions.length - 1));
+  }, [positions.length]);
 
   const resetPractice = useCallback(() => {
     setPracticeIndex(0);
@@ -154,20 +196,30 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
 
   const board = useMemo(() => new Chess(currentFen).board(), [currentFen]);
 
-  const currentExplanation = mode === "guided" && moveIndex > 0 && moveIndex <= moves.length
-    ? moves[moveIndex - 1].explanation : null;
+  const currentExplanation = mode === "guided" && moveIndex > 0 && moveIndex <= effectiveMoves.length
+    ? effectiveMoves[moveIndex - 1].explanation : null;
+
+  // Branches available at the CURRENT position (i.e. branches attached to
+  // the move that would be played next from the main line). Only show on
+  // the main line (no nested branches).
+  const availableBranches = useMemo(() => {
+    if (mode !== "guided" || branchAt !== null) return null;
+    const nextMove = moves[moveIndex];
+    if (!nextMove?.branches?.length) return null;
+    return { atIndex: moveIndex, branches: nextMove.branches };
+  }, [mode, branchAt, moves, moveIndex]);
 
   // Last move highlighting for guided mode
   const lastMoveHighlight = useMemo(() => {
     if (mode !== "guided" || moveIndex === 0) return null;
     try {
       const chess = new Chess(positions[moveIndex - 1]);
-      const result = chess.move(moves[moveIndex - 1].san);
+      const result = chess.move(effectiveMoves[moveIndex - 1].san);
       return result ? { from: result.from, to: result.to } : null;
     } catch {
       return null;
     }
-  }, [moveIndex, positions, moves, mode]);
+  }, [moveIndex, positions, effectiveMoves, mode]);
 
   // Handle explore mode clicks
   const handleExploreClick = (square: Square) => {
@@ -402,7 +454,16 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
       {/* Explanation bubble */}
       <div className="min-h-[60px] rounded-lg border border-border/50 bg-card p-3 mb-3">
         {mode === "guided" && currentExplanation ? (
-          <p className="text-sm text-foreground leading-relaxed">{currentExplanation}</p>
+          <div>
+            <div className="flex items-center gap-2 mb-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span className="font-mono font-bold text-primary">
+                {getMoveNumber(moveIndex - 1) || "…"} {effectiveMoves[moveIndex - 1].san}
+              </span>
+              <span className="opacity-60">·</span>
+              <span>Move {moveIndex} of {totalMoves}</span>
+            </div>
+            <p className="text-sm text-foreground leading-relaxed">{currentExplanation}</p>
+          </div>
         ) : mode === "guided" ? (
           <p className="text-sm text-muted-foreground italic">
             {totalMoves > 0 ? "Press ▶ or use arrow keys to step through the moves." : "This position illustrates the lesson concept."}
@@ -425,20 +486,77 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
         ) : null}
       </div>
 
+      {/* Branch picker — appears when current position has alternative continuations */}
+      {availableBranches && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 mb-3">
+          <div className="flex items-center gap-1.5 mb-2 text-[11px] font-medium text-amber-400/90 uppercase tracking-wider">
+            <GitBranch className="w-3 h-3" />
+            Alternative line at this position
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {availableBranches.branches.map((b, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setBranchAt(availableBranches.atIndex);
+                  setBranchIdx(i);
+                  setMoveIndex(availableBranches.atIndex + 1);
+                }}
+                title={b.summary}
+                className="px-2.5 py-1 rounded-md text-xs font-medium border border-amber-500/30 bg-card hover:bg-amber-500/10 hover:border-amber-500/50 text-foreground transition-colors"
+              >
+                <span className="text-amber-400/80 mr-1">→</span>
+                {b.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Active branch banner + back-to-main */}
+      {branchAt !== null && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-xs">
+            <GitBranch className="w-3.5 h-3.5 text-primary" />
+            <span className="text-muted-foreground">In branch:</span>
+            <span className="font-semibold text-foreground">
+              {moves[branchAt]?.branches?.[branchIdx]?.name}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => {
+              setBranchAt(null);
+              setBranchIdx(0);
+              setMoveIndex((i) => Math.min(i, moves.length));
+            }}
+          >
+            <RotateCcw className="w-3 h-3 mr-1" /> Main line
+          </Button>
+        </div>
+      )}
+
       {/* Move list (guided mode) */}
-      {mode === "guided" && moves.length > 0 && (
+      {mode === "guided" && effectiveMoves.length > 0 && (
         <div className="rounded-lg border border-border/50 bg-card p-3 mb-3 max-h-[100px] overflow-y-auto">
           <div className="flex flex-wrap gap-1 text-sm">
-            {moves.map((step, idx) => {
+            {effectiveMoves.map((step, idx) => {
               const moveNum = getMoveNumber(idx);
               const isActive = idx + 1 === moveIndex;
+              const isInBranch = branchAt !== null && idx >= branchAt;
               return (
                 <span key={idx} className="inline-flex items-center gap-0.5">
                   {moveNum && <span className="text-muted-foreground font-medium">{moveNum}</span>}
                   <button
                     onClick={() => setMoveIndex(idx + 1)}
                     className={`px-1.5 py-0.5 rounded font-mono text-xs transition-colors ${
-                      isActive ? "bg-primary text-primary-foreground font-bold" : "text-foreground hover:bg-muted"
+                      isActive
+                        ? "bg-primary text-primary-foreground font-bold"
+                        : isInBranch
+                          ? "text-amber-400/90 hover:bg-amber-500/10"
+                          : "text-foreground hover:bg-muted"
                     }`}
                   >
                     {step.san}
