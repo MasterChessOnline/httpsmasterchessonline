@@ -398,18 +398,25 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className="relative flex items-center gap-1.5 px-2.5 h-9 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap"
+                      className="relative flex items-center gap-1.5 px-3 h-9 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
                       style={{
                         color: isActive || activeDropdown === section.key ? accentColor : undefined,
-                        backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : `hsla(${section.accent} / 0.04)`,
-                        border: `1px solid hsla(${section.accent} / ${isActive || activeDropdown === section.key ? 0.4 : 0.18})`,
+                        backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
                       }}
                     >
-                      <section.icon className="h-4 w-4" style={{ color: accentColor }} />
-                      <span className={!(isActive || activeDropdown === section.key) ? "text-foreground/85" : ""}>{section.label}</span>
+                      {/* Subtle light sweep on hover */}
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-[900ms] ease-out"
+                        style={{
+                          background: `linear-gradient(110deg, transparent 30%, hsla(${section.accent} / 0.18) 50%, transparent 70%)`,
+                        }}
+                      />
+                      <section.icon className="relative h-4 w-4 shrink-0" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
+                      <span className={`relative whitespace-nowrap ${!(isActive || activeDropdown === section.key) ? "text-muted-foreground group-hover:text-foreground" : ""}`}>{section.label}</span>
                       <ChevronDown
-                        className={`h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
-                        style={{ color: accentColor }}
+                        className={`relative h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
+                        style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined}
                       />
                     </button>
 
