@@ -386,29 +386,7 @@ const Navbar = () => {
 
             {/* Right side */}
             <div className="flex items-center gap-1.5 shrink-0">
-              {/* Search button — opens full palette */}
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="hidden lg:flex items-center justify-center p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
-                aria-label="Search MasterChess"
-                title="Search every page (Ctrl/Cmd+K)"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-
-              {/* Play Now button */}
-              <Link to="/play" className="hidden lg:block">
-                <Button
-                  size="sm"
-                  className="relative bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-sm px-5 h-9 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.35)] overflow-hidden group transition-all duration-300"
-                >
-                  <Play className="h-4 w-4 mr-1.5 fill-current" />
-                  Play Now
-                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                </Button>
-              </Link>
-
-              {/* Friends dropdown — replaces old profile chip slot */}
+              {/* Friends dropdown */}
               {(() => {
                 const section = FRIENDS_SECTION;
                 const accentColor = `hsl(${section.accent})`;
@@ -442,7 +420,7 @@ const Navbar = () => {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 6, scale: 0.98 }}
                           transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                          className="absolute right-0 rounded-2xl z-[70] backdrop-blur-2xl flex flex-col w-[320px]"
+                          className="absolute left-1/2 -translate-x-1/2 rounded-2xl z-[70] backdrop-blur-2xl flex flex-col w-[320px]"
                           style={{
                             top: "calc(100% + 12px)",
                             background: `linear-gradient(135deg, hsla(${section.accent} / 0.12) 0%, hsl(220 15% 6%) 35%, hsl(220 15% 5%) 100%)`,
@@ -510,6 +488,28 @@ const Navbar = () => {
                   </div>
                 );
               })()}
+
+              {/* Search button — opens full palette */}
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="hidden lg:flex items-center justify-center p-2.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200"
+                aria-label="Search MasterChess"
+                title="Search every page (Ctrl/Cmd+K)"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+
+              {/* Play Now button */}
+              <Link to="/play" className="hidden lg:block">
+                <Button
+                  size="sm"
+                  className="relative bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-sm px-5 h-9 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.35)] overflow-hidden group transition-all duration-300"
+                >
+                  <Play className="h-4 w-4 mr-1.5 fill-current" />
+                  Play Now
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                </Button>
+              </Link>
 
               {/* User streak + sign out */}
               {loading ? (
