@@ -571,7 +571,7 @@ const Navbar = () => {
                 </Button>
               </Link>
 
-              {NAV_SECTIONS.map((section) => {
+              {[...NAV_SECTIONS, FRIENDS_SECTION].map((section) => {
                 const accentColor = `hsl(${section.accent})`;
                 return (
                   <div
