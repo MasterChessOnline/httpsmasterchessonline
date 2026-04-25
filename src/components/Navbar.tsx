@@ -325,7 +325,8 @@ const Navbar = () => {
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
-                                const itemActive = item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href);
+                                const itemPath = item.href.split(/[#?]/)[0];
+                                const itemActive = itemPath === "/" ? location.pathname === "/" : location.pathname.startsWith(itemPath);
                                 return (
                                   <div key={item.label}>
                                     {item.separator && idx > 0 && (
@@ -456,7 +457,8 @@ const Navbar = () => {
                             {section.items
                               .filter(item => !item.auth || user)
                               .map((item, idx) => {
-                                const itemActive = location.pathname.startsWith(item.href);
+                                const itemPath = item.href.split(/[#?]/)[0];
+                                const itemActive = location.pathname.startsWith(itemPath);
                                 return (
                                   <div key={item.label}>
                                     {item.separator && idx > 0 && (
