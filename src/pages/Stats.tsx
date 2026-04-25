@@ -69,7 +69,8 @@ const Stats = () => {
   const blackWinRate = blackGames > 0 ? Math.round((blackWins / blackGames) * 100) : 0;
 
   // Rating tier
-  const getTier = (r: number) => {
+  const getTier = (r: number, games: number) => {
+    if (games === 0) return { name: "Unranked", color: "text-muted-foreground", bg: "bg-muted/20" };
     if (r >= 2400) return { name: "Grandmaster", color: "text-red-400", bg: "bg-red-500/10" };
     if (r >= 2000) return { name: "Master", color: "text-purple-400", bg: "bg-purple-500/10" };
     if (r >= 1600) return { name: "Expert", color: "text-blue-400", bg: "bg-blue-500/10" };
@@ -77,7 +78,7 @@ const Stats = () => {
     if (r >= 800) return { name: "Beginner", color: "text-yellow-400", bg: "bg-yellow-500/10" };
     return { name: "Novice", color: "text-muted-foreground", bg: "bg-muted/20" };
   };
-  const tier = getTier(profile.rating);
+  const tier = getTier(profile.rating, profile.games_played);
 
   // Win streak from recent
   let currentStreak = 0;

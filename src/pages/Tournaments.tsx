@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Trophy, Clock, Users, Zap, Swords, Timer, Crown, Gem,
   RefreshCw, Network, GitBranch, Calendar,
-  TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search, Flame,
+  TrendingUp, Medal, User, Plus, Loader2, Play, Lock, Search, Flame, ListChecks,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -101,6 +101,8 @@ function getSkillLabel(category: string) {
 const Tournaments = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterParam = searchParams.get("filter") || ""; // "mine" | "starting" | "create"
   const { streak } = useStreak(user?.id);
   const { activeTournament } = useActiveTournament(user?.id);
   useTournamentReminder(user?.id);
@@ -114,6 +116,7 @@ const Tournaments = () => {
   const [creating, setCreating] = useState(false);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [myRegistrations, setMyRegistrations] = useState<Set<string>>(new Set());
+  const [onlyMine, setOnlyMine] = useState(filterParam === "mine");
 
   const [lbPlayers, setLbPlayers] = useState<LeaderboardEntry[]>([]);
   const [lbLoading, setLbLoading] = useState(false);
@@ -161,6 +164,22 @@ const Tournaments = () => {
 
     return () => { supabase.removeChannel(channel); };
   }, [user]);
+
+  // React to ?filter= changes
+  useEffect(() => {
+    if (filterParam === "mine") setOnlyMine(true);
+    else if (filterParam !== "mine") setOnlyMine(false);
+    if (filterParam === "starting") {
+      setStatusFilter("registering");
+    }
+    if (filterParam === "create" && user && !creating) {
+      // auto-trigger create flow once
+      handleCreateTournament();
+      // strip the param so we don't loop on re-render
+      setSearchParams({}, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterParam, user]);
 
   useEffect(() => {
     if (viewTab === "leaderboard" && lbPlayers.length === 0) {
@@ -225,6 +244,7 @@ const Tournaments = () => {
 
   // Filter tournaments
   const filtered = dbTournaments.filter(t => {
+    if (onlyMine && !myRegistrations.has(t.id)) return false;
     if (category !== "all" && t.category !== category) return false;
     if (statusFilter !== "all" && t.status !== statusFilter) return false;
     if (skillFilter !== "all") {
@@ -351,6 +371,17 @@ const Tournaments = () => {
           <p className="text-muted-foreground max-w-lg mx-auto">
             Join free online tournaments, compete by skill level, and earn badges. All logged-in players welcome!
           </p>
+          {onlyMine && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+              <ListChecks className="h-3 w-3" /> Showing only your tournaments
+              <button
+                className="ml-1 hover:text-foreground"
+                onClick={() => { setOnlyMine(false); setSearchParams({}, { replace: true }); }}
+              >
+                ×
+              </button>
+            </div>
+          )}
           {(totalLive > 0 || totalOpen > 0) && (
             <div className="mt-3 flex justify-center gap-2">
               {totalLive > 0 && (

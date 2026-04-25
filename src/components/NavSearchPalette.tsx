@@ -38,16 +38,13 @@ const ENTRIES: SearchEntry[] = [
   { label: "Blitz (3–5 min)",   href: "/play/online",   icon: Clock,     desc: "Quick tactical battles",     category: "play",    keywords: "blitz" },
   { label: "Rapid (10+ min)",   href: "/play/online",   icon: Clock,     desc: "Deep strategic play",        category: "play",    keywords: "rapid" },
   { label: "Ongoing Games",     href: "/play/online",   icon: Gamepad2,  desc: "Resume your matches",        category: "play" },
-  { label: "Daily Challenge",   href: "/daily-challenge", icon: Target,  desc: "Today's puzzle position",    category: "play" },
   { label: "Story Mode",        href: "/story",         icon: BookOpen,  desc: "Narrative campaign",         category: "play" },
   { label: "Play Like a GM",    href: "/play-like-gm",  icon: Crown,     desc: "Mimic legendary games",      category: "play" },
-  { label: "Guess the Move",    href: "/guess-the-move", icon: Crosshair, desc: "Test your intuition",       category: "play" },
-  { label: "Skill Tree",        href: "/skill-tree",    icon: Star,      desc: "Unlock playstyles",          category: "play" },
   { label: "Titles & Ratings",  href: "/play/titles",   icon: Award,     desc: "Rating thresholds",          category: "play" },
 
   // LEARN
   { label: "Daily Training Plan", href: "/daily-plan",  icon: Sparkles,  desc: "Personalized daily tasks",   category: "learn",   keywords: "daily plan" },
-  { label: "AI Coach",            href: "/coach",       icon: Brain,     desc: "Ask the chess coach",        category: "learn" },
+  { label: "Coach",               href: "/coach",       icon: Brain,     desc: "Ask the chess coach",        category: "learn" },
   { label: "Opening Repertoire",  href: "/repertoire",  icon: BookOpen,  desc: "Build your repertoire",      category: "learn" },
   { label: "Training",            href: "/learn",       icon: Target,    desc: "Structured learning path",   category: "learn" },
   { label: "Openings",            href: "/openings",    icon: BookOpen,  desc: "Master opening systems",     category: "learn" },

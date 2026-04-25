@@ -22,6 +22,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
+import ProfileRedirect from "./pages/ProfileRedirect";
 import Friends from "./pages/Friends";
 import ComingSoon from "./pages/ComingSoon";
 import Achievements from "./pages/Achievements";
@@ -89,6 +90,7 @@ function AnimatedRoutes() {
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/profile" element={<ProfileRedirect />} />
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/coming-soon" element={<ComingSoon />} />

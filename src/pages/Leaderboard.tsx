@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Trophy, Medal, Crown, TrendingUp, Flame, Swords, Filter, Bot, Globe } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Trophy, Medal, Crown, TrendingUp, Flame, Swords, Filter, Bot, Globe, Zap, Clock } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateXP, getLevelFromXP } from "@/lib/gamification";
@@ -37,11 +37,23 @@ interface LeaderboardEntry {
 type Mode = "online" | "bot";
 type SortBy = "rating" | "xp" | "wins" | "winrate";
 
+const TC_LABELS: Record<string, { label: string; icon: typeof Zap }> = {
+  bullet: { label: "Bullet · 1–2 min", icon: Zap },
+  blitz: { label: "Blitz · 3–5 min", icon: Zap },
+  rapid: { label: "Rapid · 10+ min", icon: Clock },
+  classical: { label: "Classical", icon: Clock },
+};
+
 const Leaderboard = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const initialMode: Mode = searchParams.get("mode") === "bot" ? "bot" : "online";
+  const tcParam = searchParams.get("tc") || "";
+  const tcInfo = TC_LABELS[tcParam];
+
   const [players, setPlayers] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<Mode>("online");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [filter, setFilter] = useState<"all" | "top50" | "active">("all");
   const [sortBy, setSortBy] = useState<SortBy>("rating");
   const [titleFilter, setTitleFilter] = useState<string>("all");
@@ -280,6 +292,11 @@ const Leaderboard = () => {
             <span className="text-gradient-neon">Leaderboard</span>
           </h1>
           <p className="text-muted-foreground text-sm">Top players ranked by skill & dedication</p>
+          {tcInfo && (
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary font-semibold">
+              <tcInfo.icon className="h-3 w-3" /> {tcInfo.label}
+            </div>
+          )}
         </motion.div>
 
         <div className="max-w-2xl mx-auto mb-6">
