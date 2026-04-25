@@ -317,7 +317,10 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
       )}
 
       {/* Board */}
-      <div className={`rounded-lg overflow-hidden border mb-3 transition-all ${
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className={`rounded-lg overflow-hidden border mb-3 transition-all touch-pan-y ${
         practiceResult === "correct" ? "border-green-500/50 shadow-[0_0_15px_hsl(142,70%,45%,0.15)]"
         : practiceResult === "wrong" ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
         : "border-border/50"
