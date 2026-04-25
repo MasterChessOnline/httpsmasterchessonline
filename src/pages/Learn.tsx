@@ -17,6 +17,7 @@ import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/cours
 import { useAuth } from "@/contexts/AuthContext";
 
 import InteractiveBoard from "@/components/learn/InteractiveBoard";
+import VariationsExercise from "@/components/learn/VariationsExercise";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { toast } from "@/hooks/use-toast";
