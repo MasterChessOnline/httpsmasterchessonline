@@ -292,6 +292,11 @@ const Leaderboard = () => {
             <span className="text-gradient-neon">Leaderboard</span>
           </h1>
           <p className="text-muted-foreground text-sm">Top players ranked by skill & dedication</p>
+          {tcInfo && (
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary font-semibold">
+              <tcInfo.icon className="h-3 w-3" /> {tcInfo.label}
+            </div>
+          )}
         </motion.div>
 
         <div className="max-w-2xl mx-auto mb-6">
