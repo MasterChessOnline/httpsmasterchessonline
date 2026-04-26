@@ -43,8 +43,18 @@ export function useOnlineGame() {
     : null;
 
   // Helper: apply elo + log rating history + compute the user's RatingCalcResult
-  const applyEloAndLog = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string }) => {
+  const applyEloAndLog = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }) => {
     if (!user) return;
+
+    // Casual games: skip rating updates entirely.
+    if (g.is_rated === false) {
+      setRatingResult(null);
+      try {
+        await bumpMissionProgress(user.id, "games_played", 1);
+      } catch {}
+      return;
+    }
+
     // Snapshot opponent + my old rating BEFORE the RPC mutates them
     const isWhite = g.white_player_id === user.id;
     const opponentId = isWhite ? g.black_player_id : g.white_player_id;
