@@ -222,11 +222,30 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
           <p className="text-[10px] text-muted-foreground text-center">Invite expires in 5 minutes</p>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={waiting}>Cancel</Button>
-          <Button onClick={send} disabled={sending || waiting}>
-            {(sending || waiting) && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
-            {waiting ? "Waiting for response..." : "Send Challenge"}
-          </Button>
+          {waiting ? (
+            // While waiting for the recipient, allow the sender to retract the
+            // challenge. Marks the invite as cancelled in the DB so the
+            // recipient's listener stops showing it.
+            <Button
+              variant="destructive"
+              onClick={cancelInvite}
+              disabled={cancelling}
+              className="w-full sm:w-auto"
+            >
+              {cancelling ? (
+                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              ) : null}
+              {cancelling ? "Cancelling..." : "Cancel Challenge"}
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+              <Button onClick={send} disabled={sending}>
+                {sending && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                Send Challenge
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
