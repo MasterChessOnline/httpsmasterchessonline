@@ -364,26 +364,40 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
 
       {/* ── MASTERCLASS COURSES ── (always visible, top placement) */}
       {masterclassCourses.length > 0 && (
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-primary/60" />
-            <h2 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
-              <Crown className="w-5 h-5 text-primary fill-primary" /> Masterclass · Premium Deep-Dives
-            </h2>
-            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/40 to-primary/60" />
-          </div>
-          <p className="text-center text-muted-foreground text-sm mb-5">
-            Elite-level courses with 30+ annotated variations, interactive boards, and practice mode.
-          </p>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {masterclassCourses.map((course) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                onClick={() => onSelectCourse(course)}
-                progress={getCourseProgress(course.id, course.lessons.length)}
-              />
-            ))}
+        <div className="mb-12 relative">
+          {/* Soft gold glow backdrop */}
+          <div
+            aria-hidden
+            className="absolute inset-x-0 -top-6 -bottom-6 pointer-events-none opacity-60 blur-3xl"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, hsl(var(--primary) / 0.18) 0%, transparent 70%)",
+            }}
+          />
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/50 to-primary/70" />
+              <h2 className="font-display text-xl sm:text-2xl font-extrabold text-foreground flex items-center gap-2.5 whitespace-nowrap">
+                <Crown className="w-6 h-6 text-primary fill-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />
+                <span className="bg-gradient-to-r from-primary via-yellow-300 to-primary bg-clip-text text-transparent">
+                  Masterclass · Premium Deep-Dives
+                </span>
+              </h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/50 to-primary/70" />
+            </div>
+            <p className="text-center text-muted-foreground text-sm mb-6 max-w-2xl mx-auto">
+              Elite, Stockfish-vetted opening repertoires with 50+ annotated variations, interactive boards, and Practice mode.
+            </p>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {masterclassCourses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onClick={() => onSelectCourse(course)}
+                  progress={getCourseProgress(course.id, course.lessons.length)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}
