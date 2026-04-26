@@ -342,25 +342,32 @@ const Play = () => {
         return;
       }
       if (selectedSquare) {
-        // Set premove (from selectedSquare → square)
-        setPremove({ from: selectedSquare, to: square });
+        // Only allow legal premove targets for the selected piece
+        if (legalMoves.includes(square)) {
+          setPremove({ from: selectedSquare, to: square });
+        }
         setSelectedSquare(null);
         setLegalMoves([]);
         return;
       }
-      // Select a piece for premove (show all squares as potential targets)
+      // Select a piece for premove and compute pseudo-legal targets
       const piece = game.get(square);
       if (piece && piece.color === playerColor) {
         setSelectedSquare(square);
-        // For premoves, show all squares as possible (validation happens on execution)
-        const allSquares: Square[] = [];
-        for (const f of ["a","b","c","d","e","f","g","h"]) {
-          for (const r of [1,2,3,4,5,6,7,8]) {
-            const sq = `${f}${r}` as Square;
-            if (sq !== square) allSquares.push(sq);
-          }
+        // Build a hypothetical position where it's the player's turn so we can
+        // ask chess.js for that piece's legal moves. This restricts premoves
+        // to actually-legal piece movements (e.g. knight L-shapes only).
+        try {
+          const parts = game.fen().split(" ");
+          parts[1] = playerColor; // flip side to move
+          parts[3] = "-";          // clear en passant to avoid invalid FEN
+          const hypo = new Chess();
+          hypo.load(parts.join(" "));
+          const moves = hypo.moves({ square, verbose: true }) as Array<{ to: Square }>;
+          setLegalMoves(moves.map((m) => m.to));
+        } catch {
+          setLegalMoves([]);
         }
-        setLegalMoves(allSquares);
       }
       return;
     }
