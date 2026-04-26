@@ -7,6 +7,7 @@ import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake, 
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
 import ChessBoard from "@/components/chess/ChessBoard";
+import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import { useToast } from "@/hooks/use-toast";
 import RatingChange from "@/components/RatingChange";
 import { playChessSound } from "@/lib/chess-sounds";
