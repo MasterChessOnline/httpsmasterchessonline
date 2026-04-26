@@ -474,6 +474,70 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   const nextLessonIdx = course.lessons.findIndex((l) => !isCompleted(l.id));
   const allCompleted = nextLessonIdx === -1;
 
+  // Render a single lesson card (shared between flat & chapter-grouped layouts)
+  const renderLessonCard = (lesson: typeof course.lessons[number], idx: number) => {
+    const status = getLessonStatus(idx);
+    const diff = variationDifficulty(idx);
+    const bookmarked = isBookmarked(lesson.id);
+    const exercise = hasExercise(lesson.id);
+    const cleanTitle = lesson.title.replace(/^(Variation|Chapter|Lesson|Line)\s+\d+:\s*/i, "");
+    const moveLine =
+      lesson.content.match(/Sequence:\s*(.*?)\. Play through/)?.[1] ||
+      lesson.keyPoints[0]?.replace(/^Memorize the line:\s*/i, "") ||
+      "";
+
+    return (
+      <motion.button
+        key={lesson.id}
+        onClick={() => onSelectLesson(idx)}
+        className={`group relative rounded-xl border p-5 text-left transition-all overflow-hidden ${
+          status.completed
+            ? "border-green-500/30 bg-card hover:border-green-500/50"
+            : "border-border/50 bg-card hover:border-primary/50 hover:shadow-[0_0_25px_hsl(var(--primary)/0.2)]"
+        }`}
+        whileHover={{ y: -3 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
+        <div className={`absolute top-0 left-0 right-0 h-0.5 ${
+          status.completed ? "bg-green-500/60" : "bg-primary/60"
+        }`} />
+        <div className="flex items-center justify-between mb-3">
+          <span className={`flex items-center justify-center h-8 w-8 rounded-full text-xs font-bold ${
+            status.completed ? "bg-green-500/20 text-green-400" : "bg-primary/15 text-primary"
+          }`}>
+            {status.completed ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+          </span>
+          <Badge variant="outline" className={`text-[10px] ${diff.color} ${diff.bg} ${diff.border}`}>
+            {diff.label}
+          </Badge>
+        </div>
+        <h4 className="font-display text-sm font-bold text-foreground leading-tight mb-3 line-clamp-2 min-h-[2.4rem]">
+          {cleanTitle}
+        </h4>
+        <p className="mb-4 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">
+          {moveLine}
+        </p>
+        <div className="flex items-center gap-1.5 mb-3 min-h-[18px]">
+          {exercise && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground bg-muted/40 px-1.5 py-0.5 rounded-full">
+              <Play className="w-2.5 h-2.5" /> Interactive
+            </span>
+          )}
+          {bookmarked && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+              <Bookmark className="w-2.5 h-2.5 fill-primary" /> Saved
+            </span>
+          )}
+        </div>
+        <Button size="sm" className="w-full" variant={status.completed ? "outline" : "default"}>
+          <Play className="w-3 h-3 mr-1.5" />
+          {status.completed ? "Review" : "Start"}
+        </Button>
+      </motion.button>
+    );
+  };
+
+
   return (
     <div className="max-w-6xl mx-auto">
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
