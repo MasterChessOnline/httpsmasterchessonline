@@ -24,8 +24,8 @@ export const BOARD_THEMES: BoardTheme[] = [
   { key: "forest",    label: "Forest",            description: "Earth & moss",                 light: "75 25% 70%",  dark: "120 30% 22%" },
   { key: "rose",      label: "Rose Quartz",       description: "Soft warm pink",               light: "350 60% 88%", dark: "345 30% 38%" },
 
-  // — Lichess-inspired —
-  { key: "brown",     label: "Lichess Brown",     description: "Iconic warm brown",            light: "32 47% 78%",  dark: "26 40% 38%" },
+  // — Classic warm tones —
+  { key: "brown",     label: "Classic Brown",     description: "Iconic warm brown",            light: "32 47% 78%",  dark: "26 40% 38%" },
   { key: "blue3",     label: "Sky Blue",          description: "Soft pastel sky",              light: "210 60% 88%", dark: "210 50% 48%" },
   { key: "purple",    label: "Royal Purple",      description: "Deep regal purple",            light: "275 35% 80%", dark: "275 45% 30%" },
 
@@ -94,11 +94,11 @@ export interface PieceStyle {
 }
 
 export const PIECE_STYLES: PieceStyle[] = [
-  // === REAL SVG PIECE SETS — look like actual chess pieces (chess.com / lichess style) ===
+  // === REAL SVG PIECE SETS — authentic chess piece artwork ===
   {
     key: "cburnett",
-    label: "Cburnett (Classic)",
-    description: "Iconic Staunton — lichess default, hand-drawn",
+    label: "Cburnett Classic",
+    description: "Iconic Staunton — hand-drawn tournament style",
     mode: "svg",
     svgFolder: "cburnett",
     glyphs: GLYPHS_STANDARD,
@@ -106,8 +106,8 @@ export const PIECE_STYLES: PieceStyle[] = [
   },
   {
     key: "neo",
-    label: "Neo (Chess.com Style)",
-    description: "Modern bold silhouettes with strong outlines",
+    label: "Neo Modern",
+    description: "Bold silhouettes with strong outlines",
     mode: "svg",
     svgFolder: "cardinal",
     glyphs: GLYPHS_STANDARD,
