@@ -78,7 +78,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [mode, setMode] = useState<Mode>("explore");
   const [currentPath, setCurrentPath] = useState<number[]>([0]); // path of indices into tree
   const [viewUpToIndex, setViewUpToIndex] = useState(0); // how many moves deep we're viewing
-  const [flipped, setFlipped] = useState(false);
+  const [flipped, setFlipped] = useState(MASTERCLASS_OPENINGS[opening.id]?.side === "black");
   const [selectedMasterLine, setSelectedMasterLine] = useState(0);
 
   // Training state
