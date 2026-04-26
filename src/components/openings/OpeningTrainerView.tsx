@@ -92,18 +92,17 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [showHint, setShowHint] = useState(false);
 
   // Build a flat list of individual variations for ANY opening.
-  // Jobava London uses curated titles + LESSON_MOVES; other openings derive
-  // variations from the move tree via getAllVariationPaths().
+  // Masterclass openings (Jobava, Kalashnikov, …) use curated titles + LESSON_MOVES;
+  // other openings derive variations from the move tree via getAllVariationPaths().
   const masterclassLines: MasterclassLine[] = useMemo(() => {
-    if (opening.id === "masterclass-jobava-london") {
-      // Pull curated titles from the Jobava London course definition so the
-      // trainer sidebar matches the Learn course cards (Line N — <Name>).
-      const jobavaCourse = COURSES.find((c) => c.id === "masterclass-jobava-london");
+    const mc = MASTERCLASS_OPENINGS[opening.id];
+    if (mc) {
+      const course = COURSES.find((c) => c.id === mc.courseId);
       const lessonTitleById = new Map<string, string>(
-        (jobavaCourse?.lessons ?? []).map((l) => [l.id, l.title]),
+        (course?.lessons ?? []).map((l) => [l.id, l.title]),
       );
-      return Array.from({ length: JOBAVA_LINE_COUNT }, (_, index) => {
-        const lessonId = `jl-${index + 1}`;
+      return Array.from({ length: mc.lineCount }, (_, index) => {
+        const lessonId = `${mc.lessonPrefix}-${index + 1}`;
         const lessonMoves = LESSON_MOVES[lessonId]?.moves || [];
         return {
           id: lessonId,
