@@ -156,6 +156,13 @@ export default function ChessBoard({
                         }}
                       />
                     )}
+                    {/* Hint indicator — pulsing accent ring on suggested from/to squares */}
+                    {(isHint || isHintTo) && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-[8%] rounded-full border-[3px] border-accent animate-pulse pointer-events-none z-20"
+                      />
+                    )}
                     {/* Legal move dot */}
                     {isLegal && !piece && (
                       <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />
