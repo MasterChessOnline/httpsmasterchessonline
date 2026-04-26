@@ -454,9 +454,8 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
 
   const getLessonStatus = (idx: number) => {
     const completed = isCompleted(course.lessons[idx].id);
-    // Masterclass: all variations unlocked (browse-anywhere card grid)
-    const sequentialLocked = !isMasterclass && idx > 0 && !isCompleted(course.lessons[idx - 1].id) && !completed;
-    return { completed, premiumLocked: false, sequentialLocked, locked: sequentialLocked };
+    // All courses now use browse-anywhere card grid (no sequential locks)
+    return { completed, premiumLocked: false, sequentialLocked: false, locked: false };
   };
 
   // Difficulty tag for masterclass cards (cycles Easy → Medium → Advanced based on variation index)
