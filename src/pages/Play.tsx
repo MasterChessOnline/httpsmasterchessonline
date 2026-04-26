@@ -222,15 +222,14 @@ const Play = () => {
               showBotMessage(currentBot.taunts.onWin);
             } else if (game.isCheck()) {
               playChessSound("check");
-              showBotMessage(currentBot.taunts.onCheck);
             } else if (move.captured) {
               playChessSound("capture");
-              if (Math.random() < 0.3) showBotMessage(currentBot.taunts.onCapture);
             } else {
               playChessSound("move");
             }
 
-            if (decision.quality === "blunder" && Math.random() < 0.5) {
+            // Bot only "speaks" when it blunders mid-game
+            if (decision.quality === "blunder") {
               setTimeout(() => showBotMessage(currentBot.taunts.onBlunder), 500);
             }
           }
