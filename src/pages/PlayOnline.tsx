@@ -76,6 +76,7 @@ const PlayOnline = () => {
   const [focusMode, setFocusMode] = useState(false);
   const [drawOfferedByMe, setDrawOfferedByMe] = useState(false);
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
+  const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const { toast } = useToast();
 
   const tc = TIME_CONTROLS[timeControlIdx];
