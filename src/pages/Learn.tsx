@@ -474,7 +474,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   const allCompleted = nextLessonIdx === -1;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className={`${isMasterclass ? "max-w-6xl" : "max-w-3xl"} mx-auto`}>
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
         <ArrowLeft className="h-4 w-4" /> All Courses
       </button>
