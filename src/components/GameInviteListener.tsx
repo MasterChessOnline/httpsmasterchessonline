@@ -1,6 +1,6 @@
 // Listens for incoming game invites and shows a toast popup.
 // Mounted globally in App.tsx.
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
