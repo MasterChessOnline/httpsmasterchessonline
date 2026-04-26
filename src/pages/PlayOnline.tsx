@@ -532,6 +532,7 @@ const PlayOnline = () => {
               setWhiteTime={setWhiteTime} setBlackTime={setBlackTime}
               unlimited={unlimited}
             />
+            </div>
           </div>
 
           {/* Sidebar: Status, Moves, Chat, Controls */}
