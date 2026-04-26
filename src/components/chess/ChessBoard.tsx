@@ -61,9 +61,11 @@ export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
   isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick, overlay,
 }: ChessBoardProps) {
+  const { get: getGlyph, style: pieceStyle } = usePieceGlyphs();
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
+
 
   // Subtle indicator: which king is currently in check?
   const inCheck = game.inCheck();
