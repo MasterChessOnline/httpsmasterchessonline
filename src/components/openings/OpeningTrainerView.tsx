@@ -22,17 +22,19 @@ type Mode = "explore" | "train";
 // in `lesson-moves.ts`. Add a new entry here when you ship another masterclass.
 const MASTERCLASS_OPENINGS: Record<
   string,
-  { courseId: string; lessonPrefix: string; lineCount: number }
+  { courseId: string; lessonPrefix: string; lineCount: number; side: "white" | "black" }
 > = {
   "masterclass-jobava-london": {
     courseId: "masterkurs-jobava-london",
     lessonPrefix: "jl",
     lineCount: 130,
+    side: "white",
   },
   "masterclass-kalashnikov": {
     courseId: "masterkurs-kalashnikov",
     lessonPrefix: "kal",
     lineCount: 50,
+    side: "black",
   },
 };
 
@@ -76,7 +78,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [mode, setMode] = useState<Mode>("explore");
   const [currentPath, setCurrentPath] = useState<number[]>([0]); // path of indices into tree
   const [viewUpToIndex, setViewUpToIndex] = useState(0); // how many moves deep we're viewing
-  const [flipped, setFlipped] = useState(false);
+  const [flipped, setFlipped] = useState(MASTERCLASS_OPENINGS[opening.id]?.side === "black");
   const [selectedMasterLine, setSelectedMasterLine] = useState(0);
 
   // Training state
