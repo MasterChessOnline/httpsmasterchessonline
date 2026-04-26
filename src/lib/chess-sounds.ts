@@ -2,6 +2,12 @@
 // Loaded from /public/sounds and routed through a Web Audio graph that adds
 // low-end body, gentle saturation and a soft compressor so every hit feels
 // warm, weighty and emotionally present (not a dry click).
+//
+// Sound packs colour-shift the same source samples via per-pack pitch + filter
+// + body settings so users can pick "Wood", "Marble", "Neon" etc. without
+// shipping eight copies of every sample.
+
+type SampleKey = "move" | "capture" | "check" | "gameOver" | "start";
 
 const SAMPLE_PATHS: Record<SampleKey, string> = {
   move: "/sounds/move-self.mp3",
@@ -11,7 +17,63 @@ const SAMPLE_PATHS: Record<SampleKey, string> = {
   start: "/sounds/game-start.mp3",
 };
 
-type SampleKey = "move" | "capture" | "check" | "gameOver" | "start";
+// --- Sound pack registry ------------------------------------------------
+
+export interface SoundPack {
+  key: string;
+  label: string;
+  description: string;
+  // Multiplier applied to playback rate (1 = original, >1 = brighter/sharper)
+  pitch: number;
+  // Bass-shelf gain (dB) on master bus — higher = warmer / chunkier
+  bassDb: number;
+  // High-shelf gain (dB) — negative softens, positive sharpens
+  trebleDb: number;
+  // Per-hit body gain (the low thump duplicate)
+  bodyMix: number;
+  // Master bus gain
+  masterGain: number;
+  // Compressor threshold (dB)
+  threshold: number;
+}
+
+export const SOUND_PACKS: SoundPack[] = [
+  { key: "wood",    label: "Wood (Default)",  description: "Warm tournament walnut",       pitch: 1.0,  bassDb: 7.5, trebleDb: -2.5, bodyMix: 0.55, masterGain: 1.15, threshold: -16 },
+  { key: "marble",  label: "Marble",          description: "Bright crisp polished stone",  pitch: 1.18, bassDb: 2.0, trebleDb:  3.5, bodyMix: 0.25, masterGain: 1.05, threshold: -14 },
+  { key: "neon",    label: "Neon Digital",    description: "Modern UI blip",               pitch: 1.32, bassDb: 1.0, trebleDb:  5.0, bodyMix: 0.15, masterGain: 1.00, threshold: -12 },
+  { key: "soft",    label: "Soft Felt",       description: "Hushed, library-quiet click",  pitch: 0.92, bassDb: 4.0, trebleDb: -6.0, bodyMix: 0.40, masterGain: 0.80, threshold: -18 },
+  { key: "metal",   label: "Metal",           description: "Sharp metallic chime",         pitch: 1.45, bassDb: 0.0, trebleDb:  6.5, bodyMix: 0.10, masterGain: 1.00, threshold: -12 },
+  { key: "glass",   label: "Glass",           description: "Light glassy ping",            pitch: 1.55, bassDb: -2.0, trebleDb: 5.5, bodyMix: 0.08, masterGain: 0.95, threshold: -14 },
+  { key: "retro",   label: "Retro 8-bit",     description: "Pixel-game blip",              pitch: 1.65, bassDb: 3.0, trebleDb:  2.0, bodyMix: 0.20, masterGain: 1.00, threshold: -12 },
+  { key: "silk",    label: "Silk",            description: "Velvety whisper",              pitch: 0.85, bassDb: 6.5, trebleDb: -8.0, bodyMix: 0.50, masterGain: 0.70, threshold: -20 },
+];
+
+let activePack: SoundPack = SOUND_PACKS[0];
+
+export function getActiveSoundPack(): SoundPack {
+  return activePack;
+}
+
+export function applySoundPack(packKey: string) {
+  const pack = SOUND_PACKS.find(p => p.key === packKey) || SOUND_PACKS[0];
+  activePack = pack;
+  // Rebuild the bus on next play so new EQ values apply.
+  if (audioCtx) {
+    try { masterBus?.disconnect(); } catch {}
+    masterBus = null;
+    bassShelf = null;
+    warmthFilter = null;
+    compressor = null;
+  }
+}
+
+export function bootstrapSoundPack() {
+  if (typeof window === "undefined") return;
+  try {
+    const s = JSON.parse(localStorage.getItem("chess-settings") || "{}");
+    if (s.soundPack) applySoundPack(s.soundPack);
+  } catch {}
+}
 
 let audioCtx: AudioContext | null = null;
 let masterBus: GainNode | null = null;
