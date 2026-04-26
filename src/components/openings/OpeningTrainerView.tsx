@@ -155,6 +155,14 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
     playChessSound("move");
   }, []);
 
+  const handleSelectMasterLine = useCallback((index: number) => {
+    setSelectedMasterLine(index);
+    setViewUpToIndex(0);
+    setTrainCustomMoves(null);
+    setMode("explore");
+    playChessSound("move");
+  }, []);
+
   // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
