@@ -450,11 +450,20 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const prog = getCourseProgress(course.id, course.lessons.length);
+  const isMasterclass = course.tier === "masterclass";
 
   const getLessonStatus = (idx: number) => {
     const completed = isCompleted(course.lessons[idx].id);
-    const sequentialLocked = idx > 0 && !isCompleted(course.lessons[idx - 1].id) && !completed;
+    // Masterclass: all variations unlocked (browse-anywhere card grid)
+    const sequentialLocked = !isMasterclass && idx > 0 && !isCompleted(course.lessons[idx - 1].id) && !completed;
     return { completed, premiumLocked: false, sequentialLocked, locked: sequentialLocked };
+  };
+
+  // Difficulty tag for masterclass cards (cycles Easy → Medium → Advanced based on variation index)
+  const variationDifficulty = (idx: number): { label: string; color: string; bg: string; border: string } => {
+    if (idx < 10) return { label: "Easy", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" };
+    if (idx < 20) return { label: "Medium", color: "text-primary", bg: "bg-primary/10", border: "border-primary/30" };
+    return { label: "Advanced", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30" };
   };
 
   const hasVideo = (_id: string) => false;
@@ -465,7 +474,7 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   const allCompleted = nextLessonIdx === -1;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className={`${isMasterclass ? "max-w-6xl" : "max-w-3xl"} mx-auto`}>
       <button onClick={onBack} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-6">
         <ArrowLeft className="h-4 w-4" /> All Courses
       </button>
@@ -531,94 +540,161 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
         <BookOpen className="w-5 h-5 text-primary" /> Course Chapters
       </h3>
 
-      <div className="space-y-2.5">
-        {course.lessons.map((lesson, idx) => {
-          const status = getLessonStatus(idx);
-          const bookmarked = isBookmarked(lesson.id);
-          const video = hasVideo(lesson.id);
-          const exercise = hasExercise(lesson.id);
-          const isNext = idx === nextLessonIdx && !status.locked;
+      {/* Chapter List */}
+      <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+        <BookOpen className="w-5 h-5 text-primary" />
+        {isMasterclass ? "Variations" : "Course Chapters"}
+      </h3>
 
-          return (
-            <button
-              key={lesson.id}
-              onClick={() => {
-                if (status.sequentialLocked) toast({ title: "Complete previous chapter first", description: `Finish "${course.lessons[idx - 1].title}" to unlock this chapter.` });
-                else onSelectLesson(idx);
-              }}
-              className={`w-full flex items-center gap-3 sm:gap-4 rounded-xl border p-4 transition-all text-left group ${
-                isNext
-                  ? "border-primary/40 bg-primary/5 shadow-glow"
-                  : status.locked
-                    ? "border-border/20 bg-card/50 opacity-50"
-                    : status.completed
-                      ? "border-green-500/20 bg-card hover:border-green-500/30"
-                      : "border-border/40 bg-card hover:border-primary/30 hover:shadow-glow"
-              }`}
-            >
-              {/* Chapter number circle */}
-              <span className={`flex items-center justify-center h-10 w-10 rounded-full shrink-0 text-sm font-bold transition-colors ${
-                status.completed
-                  ? "bg-green-500/20 text-green-400"
-                  : isNext
-                    ? "bg-primary/20 text-primary ring-2 ring-primary/30"
-                    : status.sequentialLocked
-                        ? "bg-muted/30 text-muted-foreground/30"
-                        : "bg-primary/10 text-primary"
-              }`}>
-                {status.completed ? (
-                  <CheckCircle2 className="h-5 w-5" />
-                ) : status.locked ? (
-                  <Lock className="h-3.5 w-3.5" />
-                ) : (
-                  idx + 1
-                )}
-              </span>
+      {isMasterclass ? (
+        /* ── MASTERCLASS: Card Grid ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {course.lessons.map((lesson, idx) => {
+            const status = getLessonStatus(idx);
+            const diff = variationDifficulty(idx);
+            // Strip "Variation N: " prefix for clean card title
+            const cleanTitle = lesson.title.replace(/^Variation\s+\d+:\s*/i, "");
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className={`font-medium truncate text-sm sm:text-base ${status.locked ? "text-muted-foreground/60" : "text-foreground"}`}>
-                    {lesson.title}
-                  </p>
-                  {isNext && (
-                    <Badge className="bg-primary/20 text-primary border-primary/30 text-[9px] shrink-0">
-                      Next
-                    </Badge>
+            return (
+              <motion.button
+                key={lesson.id}
+                onClick={() => onSelectLesson(idx)}
+                className={`group relative rounded-xl border p-4 text-left transition-all overflow-hidden ${
+                  status.completed
+                    ? "border-green-500/30 bg-card hover:border-green-500/50"
+                    : "border-border/50 bg-card hover:border-primary/50 hover:shadow-[0_0_25px_hsl(var(--primary)/0.2)]"
+                }`}
+                whileHover={{ y: -3 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                {/* Top accent bar */}
+                <div className={`absolute top-0 left-0 right-0 h-0.5 ${
+                  status.completed ? "bg-green-500/60" : "bg-primary/60"
+                }`} />
+
+                {/* Variation number + status */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`flex items-center justify-center h-8 w-8 rounded-full text-xs font-bold ${
+                    status.completed
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-primary/15 text-primary"
+                  }`}>
+                    {status.completed ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                  </span>
+                  <Badge variant="outline" className={`text-[10px] ${diff.color} ${diff.bg} ${diff.border}`}>
+                    {diff.label}
+                  </Badge>
+                </div>
+
+                {/* Title */}
+                <h4 className="font-display text-sm font-bold text-foreground leading-tight mb-3 line-clamp-2 min-h-[2.4rem]">
+                  {cleanTitle}
+                </h4>
+
+                {/* Start button */}
+                <Button
+                  size="sm"
+                  className="w-full"
+                  variant={status.completed ? "outline" : "default"}
+                >
+                  <Play className="w-3 h-3 mr-1.5" />
+                  {status.completed ? "Review" : "Start"}
+                </Button>
+              </motion.button>
+            );
+          })}
+        </div>
+      ) : (
+        /* ── DEFAULT: Sequential Chapter List ── */
+        <div className="space-y-2.5">
+          {course.lessons.map((lesson, idx) => {
+            const status = getLessonStatus(idx);
+            const bookmarked = isBookmarked(lesson.id);
+            const video = hasVideo(lesson.id);
+            const exercise = hasExercise(lesson.id);
+            const isNext = idx === nextLessonIdx && !status.locked;
+
+            return (
+              <button
+                key={lesson.id}
+                onClick={() => {
+                  if (status.sequentialLocked) toast({ title: "Complete previous chapter first", description: `Finish "${course.lessons[idx - 1].title}" to unlock this chapter.` });
+                  else onSelectLesson(idx);
+                }}
+                className={`w-full flex items-center gap-3 sm:gap-4 rounded-xl border p-4 transition-all text-left group ${
+                  isNext
+                    ? "border-primary/40 bg-primary/5 shadow-glow"
+                    : status.locked
+                      ? "border-border/20 bg-card/50 opacity-50"
+                      : status.completed
+                        ? "border-green-500/20 bg-card hover:border-green-500/30"
+                        : "border-border/40 bg-card hover:border-primary/30 hover:shadow-glow"
+                }`}
+              >
+                {/* Chapter number circle */}
+                <span className={`flex items-center justify-center h-10 w-10 rounded-full shrink-0 text-sm font-bold transition-colors ${
+                  status.completed
+                    ? "bg-green-500/20 text-green-400"
+                    : isNext
+                      ? "bg-primary/20 text-primary ring-2 ring-primary/30"
+                      : status.sequentialLocked
+                          ? "bg-muted/30 text-muted-foreground/30"
+                          : "bg-primary/10 text-primary"
+                }`}>
+                  {status.completed ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : status.locked ? (
+                    <Lock className="h-3.5 w-3.5" />
+                  ) : (
+                    idx + 1
+                  )}
+                </span>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className={`font-medium truncate text-sm sm:text-base ${status.locked ? "text-muted-foreground/60" : "text-foreground"}`}>
+                      {lesson.title}
+                    </p>
+                    {isNext && (
+                      <Badge className="bg-primary/20 text-primary border-primary/30 text-[9px] shrink-0">
+                        Next
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{lesson.keyPoints[0]}</p>
+                  {/* Feature tags */}
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    {video && (
+                      <span className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground bg-muted/40 px-1.5 py-0.5 rounded-full">
+                        <Video className="w-2.5 h-2.5" /> Video
+                      </span>
+                    )}
+                    {exercise && (
+                      <span className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground bg-muted/40 px-1.5 py-0.5 rounded-full">
+                        <Play className="w-2.5 h-2.5" /> Exercise
+                      </span>
+                    )}
+                    {bookmarked && (
+                      <span className="inline-flex items-center gap-0.5 text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                        <Bookmark className="w-2.5 h-2.5 fill-primary" /> Saved
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="shrink-0">
+                  {status.sequentialLocked ? (
+                    <span className="text-[10px] text-muted-foreground/40">Locked</span>
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground truncate mt-0.5">{lesson.keyPoints[0]}</p>
-                {/* Feature tags */}
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  {video && (
-                    <span className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground bg-muted/40 px-1.5 py-0.5 rounded-full">
-                      <Video className="w-2.5 h-2.5" /> Video
-                    </span>
-                  )}
-                  {exercise && (
-                    <span className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground bg-muted/40 px-1.5 py-0.5 rounded-full">
-                      <Play className="w-2.5 h-2.5" /> Exercise
-                    </span>
-                  )}
-                  {bookmarked && (
-                    <span className="inline-flex items-center gap-0.5 text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
-                      <Bookmark className="w-2.5 h-2.5 fill-primary" /> Saved
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="shrink-0">
-                {status.sequentialLocked ? (
-                  <span className="text-[10px] text-muted-foreground/40">Locked</span>
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
     </div>
   );
