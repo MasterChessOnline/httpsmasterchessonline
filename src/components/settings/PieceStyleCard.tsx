@@ -7,15 +7,26 @@ interface Props {
   onSelect: () => void;
 }
 
-// Six representative pieces (king, queen, rook, bishop, knight, pawn) — one of each.
-const SAMPLE_GLYPHS = ["♔", "♕", "♗", "♞", "♜", "♟"];
+const COLORFUL_STYLES = new Set(["emoji", "animals"]);
 
 /**
- * Visual preview card for a piece style — renders 6 actual pieces in
- * the chosen color/weight combo so the user picks by sight.
+ * Visual preview card for a piece style — renders 6 actual pieces from the
+ * chosen glyph set so the user picks by sight (king, queen, bishop, knight, rook, pawn).
  */
 export default function PieceStyleCard({ style, active, onSelect }: Props) {
   const r = style.render;
+  const colorful = COLORFUL_STYLES.has(style.key);
+  const scale = r.scale ?? 1;
+
+  // Three white + three black so the user sees both contrasts.
+  const samples: Array<{ glyph: string; white: boolean }> = [
+    { glyph: style.glyphs.K, white: true },
+    { glyph: style.glyphs.Q, white: true },
+    { glyph: style.glyphs.B, white: true },
+    { glyph: style.glyphs.n, white: false },
+    { glyph: style.glyphs.r, white: false },
+    { glyph: style.glyphs.p, white: false },
+  ];
 
   return (
     <button
@@ -35,34 +46,33 @@ export default function PieceStyleCard({ style, active, onSelect }: Props) {
 
       {/* Piece preview row — half white, half black to show contrast */}
       <div className="flex items-center justify-around gap-0.5 rounded-lg bg-gradient-to-r from-[hsl(220,10%,82%)] via-[hsl(220,12%,40%)] to-[hsl(220,15%,15%)] px-2 py-3 mb-2.5 transition-transform duration-300 group-hover:scale-[1.03]">
-        {SAMPLE_GLYPHS.map((g, i) => {
-          const white = i < 3;
-          return (
-            <span
-              key={i}
-              className="text-2xl leading-none"
-              style={{
-                color: white ? r.whiteFill : r.blackFill,
-                fontWeight: r.fontWeight || 400,
-                textShadow: r.glow
-                  ? `0 0 8px ${r.glow}`
-                  : white
-                    ? `0 1px 2px ${r.whiteStroke || "rgba(0,0,0,0.85)"}`
-                    : r.blackStroke
-                      ? `0 0 3px ${r.blackStroke}`
-                      : "0 1px 2px rgba(255,255,255,0.15)",
-                WebkitTextStroke: white && r.whiteStroke
-                  ? `0.4px ${r.whiteStroke}`
-                  : !white && r.blackStroke
-                    ? `0.4px ${r.blackStroke}`
-                    : undefined,
-                filter: r.glow ? `drop-shadow(0 0 4px ${r.glow})` : undefined,
-              }}
-            >
-              {g}
-            </span>
-          );
-        })}
+        {samples.map((s, i) => (
+          <span
+            key={i}
+            className="text-2xl leading-none inline-block"
+            style={{
+              color: colorful ? undefined : (s.white ? r.whiteFill : r.blackFill),
+              fontWeight: r.fontWeight || 400,
+              fontFamily: r.fontFamily || undefined,
+              transform: `scale(${scale})`,
+              textShadow: colorful ? undefined : (r.glow
+                ? `0 0 8px ${r.glow}`
+                : s.white
+                  ? `0 1px 2px ${r.whiteStroke || "rgba(0,0,0,0.85)"}`
+                  : r.blackStroke
+                    ? `0 0 3px ${r.blackStroke}`
+                    : "0 1px 2px rgba(255,255,255,0.15)"),
+              WebkitTextStroke: !colorful && s.white && r.whiteStroke
+                ? `0.4px ${r.whiteStroke}`
+                : !colorful && !s.white && r.blackStroke
+                  ? `0.4px ${r.blackStroke}`
+                  : undefined,
+              filter: r.glow && !colorful ? `drop-shadow(0 0 4px ${r.glow})` : undefined,
+            }}
+          >
+            {s.glyph}
+          </span>
+        ))}
       </div>
 
       <p className={`text-xs font-semibold leading-tight ${active ? "text-primary" : "text-foreground"}`}>
