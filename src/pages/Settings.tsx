@@ -22,6 +22,7 @@ import RankBadge from "@/components/RankBadge";
 import TitleBadge from "@/components/TitleBadge";
 import { COUNTRIES, findCountry } from "@/lib/countries";
 import { BOARD_THEMES, PIECE_STYLES, applyBoardTheme, applyPieceStyle } from "@/lib/board-themes";
+import { SOUND_PACKS, applySoundPack, playMoveSound } from "@/lib/chess-sounds";
 import BoardThemeCard from "@/components/settings/BoardThemeCard";
 import PieceStyleCard from "@/components/settings/PieceStyleCard";
 import LiveBoardPreview from "@/components/settings/LiveBoardPreview";
