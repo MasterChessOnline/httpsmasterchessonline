@@ -80,20 +80,41 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [trainLegalMoves, setTrainLegalMoves] = useState<Square[]>([]);
   const [showHint, setShowHint] = useState(false);
 
+  // Build a flat list of individual variations for ANY opening.
+  // Jobava London uses curated titles + LESSON_MOVES; other openings derive
+  // variations from the move tree via getAllVariationPaths().
   const masterclassLines: MasterclassLine[] = useMemo(() => {
-    if (opening.id !== "masterclass-jobava-london") return [];
-    return Array.from({ length: 30 }, (_, index) => {
-      const lessonId = `jl-${index + 1}`;
-      const lessonMoves = LESSON_MOVES[lessonId]?.moves || [];
-      return {
-        id: lessonId,
-        title: JOBAVA_VARIATION_TITLES[index],
-        moves: lessonMoves.map((move) => ({ san: move.san, explanation: move.explanation, children: [], isMainLine: true })),
-      };
-    }).filter((line) => line.moves.length > 0);
-  }, [opening.id]);
+    if (opening.id === "masterclass-jobava-london") {
+      return Array.from({ length: 30 }, (_, index) => {
+        const lessonId = `jl-${index + 1}`;
+        const lessonMoves = LESSON_MOVES[lessonId]?.moves || [];
+        return {
+          id: lessonId,
+          title: JOBAVA_VARIATION_TITLES[index],
+          moves: lessonMoves.map((move) => ({ san: move.san, explanation: move.explanation, children: [], isMainLine: true })),
+        };
+      }).filter((line) => line.moves.length > 0);
+    }
 
-  const isMasterclassOpening = masterclassLines.length === 30;
+    // For every other opening: build one card per leaf-path in the tree.
+    const paths = getAllVariationPaths(opening.tree);
+    return paths.map((path, index) => {
+      // Try to derive a friendly title: last move with explanation, else "Variation N"
+      const lastMoveWithExpl = [...path].reverse().find((m) => m.explanation);
+      const fallbackTitle = `Variation ${index + 1}`;
+      const title = lastMoveWithExpl?.explanation
+        ? lastMoveWithExpl.explanation.split(/[.—–-]/)[0].trim().slice(0, 60) || fallbackTitle
+        : fallbackTitle;
+      return {
+        id: `${opening.id}-var-${index}`,
+        title: title || fallbackTitle,
+        moves: path,
+      };
+    });
+  }, [opening.id, opening.tree]);
+
+  // Treat any opening with 2+ variations as the "individual variations" UI
+  const isMasterclassOpening = masterclassLines.length >= 2;
   const activeMasterLine = isMasterclassOpening ? masterclassLines[selectedMasterLine] : null;
 
   // Build the full path of moves for the current selection
