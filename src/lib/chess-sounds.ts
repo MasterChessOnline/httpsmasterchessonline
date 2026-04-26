@@ -100,24 +100,24 @@ function getBus(ctx: AudioContext): GainNode {
   bassShelf = ctx.createBiquadFilter();
   bassShelf.type = "lowshelf";
   bassShelf.frequency.setValueAtTime(220, ctx.currentTime);
-  bassShelf.gain.setValueAtTime(7.5, ctx.currentTime);
+  bassShelf.gain.setValueAtTime(activePack.bassDb, ctx.currentTime);
 
-  // Warmth filter — gently rolls off harsh digital highs for an analog vibe.
+  // Warmth/treble filter — pack-controlled.
   warmthFilter = ctx.createBiquadFilter();
   warmthFilter.type = "highshelf";
   warmthFilter.frequency.setValueAtTime(7500, ctx.currentTime);
-  warmthFilter.gain.setValueAtTime(-2.5, ctx.currentTime);
+  warmthFilter.gain.setValueAtTime(activePack.trebleDb, ctx.currentTime);
 
   // Compressor — keeps peaks polite while the body breathes and feels louder.
   compressor = ctx.createDynamicsCompressor();
-  compressor.threshold.setValueAtTime(-16, ctx.currentTime);
+  compressor.threshold.setValueAtTime(activePack.threshold, ctx.currentTime);
   compressor.knee.setValueAtTime(10, ctx.currentTime);
   compressor.ratio.setValueAtTime(3, ctx.currentTime);
   compressor.attack.setValueAtTime(0.002, ctx.currentTime);
   compressor.release.setValueAtTime(0.18, ctx.currentTime);
 
   masterBus = ctx.createGain();
-  masterBus.gain.setValueAtTime(1.15, ctx.currentTime);
+  masterBus.gain.setValueAtTime(activePack.masterGain, ctx.currentTime);
 
   bassShelf.connect(warmthFilter);
   warmthFilter.connect(compressor);
@@ -167,7 +167,8 @@ function playBuffer(buffer: AudioBuffer, options: PlayOptions = {}) {
 
   const source = ctx.createBufferSource();
   source.buffer = buffer;
-  source.playbackRate.setValueAtTime(options.rate ?? 1, startAt);
+  // Combine per-hit rate with the active sound-pack pitch shift.
+  source.playbackRate.setValueAtTime((options.rate ?? 1) * activePack.pitch, startAt);
 
   // Per-hit warm body — duplicates the lowest band slightly delayed for a
   // subtle thump that makes the impact feel like real wood, not a click.
@@ -180,7 +181,7 @@ function playBuffer(buffer: AudioBuffer, options: PlayOptions = {}) {
   bodyFilter.Q.setValueAtTime(0.8, startAt);
 
   const bodyGain = ctx.createGain();
-  bodyGain.gain.setValueAtTime((options.gain ?? 1) * 0.55 * (1 + (options.bassBoost ?? 0) * 0.08), startAt);
+  bodyGain.gain.setValueAtTime((options.gain ?? 1) * activePack.bodyMix * (1 + (options.bassBoost ?? 0) * 0.08), startAt);
 
   source.connect(dryGain);
   dryGain.connect(bus);
