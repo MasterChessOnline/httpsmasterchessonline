@@ -91,6 +91,7 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
     }
 
     const inviteId = (invite as any).id;
+    setActiveInviteId(inviteId);
     setWaiting(true);
     toast({ title: "Challenge sent!", description: `Waiting for ${recipientName} to accept...` });
 
@@ -105,13 +106,17 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
       }, (payload) => {
         const inv = payload.new as any;
         if (inv.status === "accepted" && inv.game_id) {
-          supabase.removeChannel(channel);
+          cleanupRef.current?.();
+          cleanupRef.current = null;
+          setActiveInviteId(null);
           setWaiting(false);
           onOpenChange(false);
           toast({ title: "Challenge accepted!", description: "Entering game..." });
           navigate(`/play/online?game=${inv.game_id}`);
         } else if (inv.status === "declined") {
-          supabase.removeChannel(channel);
+          cleanupRef.current?.();
+          cleanupRef.current = null;
+          setActiveInviteId(null);
           setWaiting(false);
           toast({ title: "Challenge declined", description: `${recipientName} declined your challenge.`, variant: "destructive" });
         }
@@ -127,20 +132,34 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
         .maybeSingle();
       const d = data as any;
       if (d?.status === "accepted" && d?.game_id) {
-        clearInterval(poll);
-        supabase.removeChannel(channel);
+        cleanupRef.current?.();
+        cleanupRef.current = null;
+        setActiveInviteId(null);
         setWaiting(false);
         onOpenChange(false);
         navigate(`/play/online?game=${d.game_id}`);
-      } else if (d?.status === "declined" || d?.status === "expired") {
-        clearInterval(poll);
-        supabase.removeChannel(channel);
+      } else if (d?.status === "declined" || d?.status === "expired" || d?.status === "cancelled") {
+        cleanupRef.current?.();
+        cleanupRef.current = null;
+        setActiveInviteId(null);
         setWaiting(false);
       }
     }, 2000);
 
     // Stop polling after 5 min (invite expiry)
-    setTimeout(() => { clearInterval(poll); supabase.removeChannel(channel); setWaiting(false); }, 5 * 60 * 1000);
+    const expiryTimer = setTimeout(() => {
+      cleanupRef.current?.();
+      cleanupRef.current = null;
+      setActiveInviteId(null);
+      setWaiting(false);
+    }, 5 * 60 * 1000);
+
+    // Single cleanup hook used by accept/decline/cancel/unmount.
+    cleanupRef.current = () => {
+      clearInterval(poll);
+      clearTimeout(expiryTimer);
+      supabase.removeChannel(channel);
+    };
   };
 
   return (
