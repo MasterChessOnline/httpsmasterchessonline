@@ -99,6 +99,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [trainLegalMoves, setTrainLegalMoves] = useState<Square[]>([]);
   const [showHint, setShowHint] = useState(false);
+  const [playDialogOpen, setPlayDialogOpen] = useState(false);
 
   // Build a flat list of individual variations for ANY opening.
   // Masterclass openings (Jobava, Kalashnikov, …) use curated titles + LESSON_MOVES;
