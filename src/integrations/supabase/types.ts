@@ -711,6 +711,7 @@ export type Database = {
           fen: string
           id: string
           increment: number
+          is_rated: boolean
           last_move_at: string | null
           last_move_from: string | null
           last_move_to: string | null
@@ -730,6 +731,7 @@ export type Database = {
           fen?: string
           id?: string
           increment?: number
+          is_rated?: boolean
           last_move_at?: string | null
           last_move_from?: string | null
           last_move_to?: string | null
@@ -749,6 +751,7 @@ export type Database = {
           fen?: string
           id?: string
           increment?: number
+          is_rated?: boolean
           last_move_at?: string | null
           last_move_from?: string | null
           last_move_to?: string | null
