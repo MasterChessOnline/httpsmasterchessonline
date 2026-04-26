@@ -102,13 +102,17 @@ const Play = () => {
 
   const updateState = () => setFen(game.fen());
 
-  // Bot greeting removed — bot only speaks on blunders & game end
-  // (kept showBotMessage helper for blunder/end-of-game taunts)
+  // Bot only speaks on blunders & game end
+  const botMessageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (botMessageTimerRef.current) clearTimeout(botMessageTimerRef.current);
+  }, []);
 
   const showBotMessage = (msg: string) => {
     if (!msg) return;
+    if (botMessageTimerRef.current) clearTimeout(botMessageTimerRef.current);
     setBotMessage(msg);
-    setTimeout(() => setBotMessage(""), 3500);
+    botMessageTimerRef.current = setTimeout(() => setBotMessage(""), 3500);
   };
 
   // Keyboard shortcuts
