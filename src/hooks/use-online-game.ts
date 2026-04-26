@@ -412,6 +412,7 @@ export function useOnlineGame() {
         white_player_id: game.white_player_id,
         black_player_id: game.black_player_id,
         result,
+        is_rated: game.is_rated,
       });
     }
   }, [game, applyEloAndLog]);
