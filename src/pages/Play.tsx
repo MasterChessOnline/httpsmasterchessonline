@@ -168,20 +168,37 @@ const Play = () => {
     playChessSound("gameOver");
   }, []);
 
-  // Hint
+  // Hint — suggests the engine's recommended move (from + to + reasoning)
   useEffect(() => {
     if (!hintsEnabled || mode !== "ai" || game.turn() !== playerColor || isGameOver || gamePhase !== "playing") {
       setHintSquare(null);
+      setHintToSquare(null);
+      setHintText("");
       return;
     }
     const timer = setTimeout(() => {
-      const bestMove = getAIMove(game, "intermediate");
-      if (bestMove) {
-        const tempGame = new Chess(game.fen());
-        const move = tempGame.move(bestMove);
-        if (move) setHintSquare(move.from as Square);
-      }
-    }, 1500);
+      // Use a stronger level for hints so suggestions are actually helpful
+      const bestMove = getAIMove(game, "advanced");
+      if (!bestMove) return;
+      const tempGame = new Chess(game.fen());
+      const move = tempGame.move(bestMove);
+      if (!move) return;
+      setHintSquare(move.from as Square);
+      setHintToSquare(move.to as Square);
+
+      // Build a friendly explanation
+      const pieceNames: Record<string, string> = { p: "Pawn", n: "Knight", b: "Bishop", r: "Rook", q: "Queen", k: "King" };
+      const pieceName = pieceNames[move.piece] || "Piece";
+      let reason = "";
+      if (move.flags.includes("c") || move.flags.includes("e")) reason = "captures material";
+      else if (tempGame.isCheckmate()) reason = "delivers checkmate!";
+      else if (tempGame.inCheck()) reason = "puts the king in check";
+      else if (move.flags.includes("k") || move.flags.includes("q")) reason = "castles to safety";
+      else if (move.flags.includes("p")) reason = "promotes the pawn";
+      else if (["e4","d4","e5","d5","c4","c5","f4","f5"].includes(move.to)) reason = "controls the center";
+      else reason = "improves your position";
+      setHintText(`${pieceName} ${move.from} → ${move.to} — ${reason}`);
+    }, 800);
     return () => clearTimeout(timer);
   }, [fen, hintsEnabled, mode, playerColor, isGameOver, gamePhase]);
 
