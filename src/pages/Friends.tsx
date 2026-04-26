@@ -17,9 +17,11 @@ import {
   Search as SearchIcon,
   Users as UsersIcon,
   Bell,
+  Share2,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import GameInviteDialog from "@/components/GameInviteDialog";
+import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
 import { toast } from "sonner";
 
 interface FriendRow {
@@ -45,10 +47,11 @@ const TAB_HASH_MAP: Record<string, string> = {
   "#add": "add",
   "#requests": "requests",
   "#challenge": "challenge",
+  "#invite": "invite",
 };
 
 const Friends = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -207,7 +210,7 @@ const Friends = () => {
 
         <div className="max-w-2xl mx-auto">
           <Tabs value={tab} onValueChange={onTabChange} className="w-full">
-            <TabsList className="grid grid-cols-4 w-full mb-6">
+            <TabsList className="grid grid-cols-5 w-full mb-6">
               <TabsTrigger value="all" className="text-xs">
                 <UsersIcon className="h-3.5 w-3.5 mr-1.5" />
                 All ({accepted.length})
@@ -227,6 +230,10 @@ const Friends = () => {
               <TabsTrigger value="challenge" className="text-xs">
                 <Swords className="h-3.5 w-3.5 mr-1.5" />
                 Challenge
+              </TabsTrigger>
+              <TabsTrigger value="invite" className="text-xs">
+                <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                Invite
               </TabsTrigger>
             </TabsList>
 
@@ -479,6 +486,14 @@ const Friends = () => {
                   })}
                 </>
               )}
+            </TabsContent>
+
+            {/* Invite via link / social */}
+            <TabsContent value="invite">
+              <InviteFriendsCard
+                username={profile?.username}
+                displayName={profile?.display_name}
+              />
             </TabsContent>
           </Tabs>
         </div>
