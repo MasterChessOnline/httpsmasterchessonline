@@ -17,9 +17,11 @@ import {
   Search as SearchIcon,
   Users as UsersIcon,
   Bell,
+  Share2,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import GameInviteDialog from "@/components/GameInviteDialog";
+import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
 import { toast } from "sonner";
 
 interface FriendRow {
@@ -45,10 +47,11 @@ const TAB_HASH_MAP: Record<string, string> = {
   "#add": "add",
   "#requests": "requests",
   "#challenge": "challenge",
+  "#invite": "invite",
 };
 
 const Friends = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
