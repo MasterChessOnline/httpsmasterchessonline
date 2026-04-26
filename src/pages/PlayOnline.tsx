@@ -435,34 +435,17 @@ const PlayOnline = () => {
               </span>
             </div>
           )}
-          <div className="aspect-square w-full">
-            <div className="grid grid-cols-8 w-full h-full rounded-lg overflow-hidden border border-border/30 shadow-lg">
-              {displayRanks.map((rank, ri) =>
-                displayFiles.map((file, fi) => {
-                  const square = `${file}${rank}` as Square;
-                  const isLight = (ri + fi) % 2 === 0;
-                  const piece = game.board()[boardFlipped ? 7 - ri : ri][boardFlipped ? 7 - fi : fi];
-                  const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-                  const pd = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
-                  const isSelected = selectedSquare === square;
-                  const isLegal = legalMoves.includes(square);
-                  const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
-                  return (
-                    <div key={square} onClick={() => handleSquareClick(square)}
-                      className={`relative flex items-center justify-center cursor-pointer transition-colors
-                        ${isLight ? "bg-[hsl(35,30%,82%)]" : "bg-[hsl(145,32%,38%)]"}
-                        ${isSelected ? "ring-2 ring-inset ring-primary/70" : ""}
-                        ${isLastMove ? "bg-[hsl(50,80%,60%)]/40" : ""}
-                      `}>
-                      {pd && <span className={`text-[clamp(1.2rem,4vw,2.8rem)] leading-none select-none ${pd.className}`}>{pd.symbol}</span>}
-                      {isLegal && !pd && <div className="absolute w-[25%] h-[25%] rounded-full bg-primary/30" />}
-                      {isLegal && pd && <div className="absolute inset-0 ring-2 ring-inset ring-primary/40 rounded-none" />}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
+          <ChessBoard
+            game={game}
+            flipped={boardFlipped}
+            selectedSquare={selectedSquare}
+            legalMoves={legalMoves}
+            lastMove={lastMove}
+            isGameOver={isGameOver}
+            isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
+            hintSquare={null}
+            onSquareClick={handleSquareClick}
+          />
           {/* Player clock */}
           {!unlimited && (
             <div className="flex justify-end mt-2">
