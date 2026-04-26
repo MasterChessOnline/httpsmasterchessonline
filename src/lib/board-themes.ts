@@ -266,6 +266,6 @@ export function bootstrapVisualSettings() {
   const s = readSettings();
   if (s.boardTheme) applyBoardTheme(s.boardTheme);
   // Migrate old keys that no longer exist (emoji, animals, letters, etc.) → fall back.
-  const validKey = PIECE_STYLES.find(p => p.key === s.pieceStyle)?.key || "cburnett";
+  const validKey = PIECE_STYLES.find(p => p.key === s.pieceStyle)?.key || "merida";
   applyPieceStyle(validKey);
 }
