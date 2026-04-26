@@ -41,10 +41,10 @@ export default function OpeningCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
       onClick={onSelect}
-      className={`group relative rounded-xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 overflow-hidden ${
+      className={`group relative rounded-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 overflow-hidden ${
         isMasterclass
-          ? "bg-gradient-to-br from-primary/15 via-card to-card border-2 border-primary/60 shadow-[0_0_30px_hsl(var(--primary)/0.22)] hover:border-primary hover:shadow-[0_0_55px_hsl(var(--primary)/0.4)]"
-          : "bg-card border border-border/50 hover:border-primary/40 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)]"
+          ? "pt-8 px-4 pb-4 bg-gradient-to-br from-primary/15 via-card to-card border-2 border-primary/60 shadow-[0_0_30px_hsl(var(--primary)/0.22)] hover:border-primary hover:shadow-[0_0_55px_hsl(var(--primary)/0.4)]"
+          : "p-4 bg-card border border-border/50 hover:border-primary/40 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)]"
       }`}
     >
       {/* Animated shimmer for masterclass cards */}
@@ -63,7 +63,7 @@ export default function OpeningCard({
       )}
 
       {isMasterclass && (
-        <div className="absolute -top-2 -left-2 z-10 flex items-center gap-1.5">
+        <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5 flex-wrap">
           <Badge className="bg-primary text-primary-foreground border border-primary/60 text-[9px] uppercase tracking-wider font-bold shadow-lg">
             <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> Masterclass
           </Badge>
