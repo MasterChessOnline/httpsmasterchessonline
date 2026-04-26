@@ -620,7 +620,7 @@ const Play = () => {
   useEffect(() => {
     if (!isGameOver || !gameResult || mode !== "ai" || !user || !profile) return;
     if (ratingAppliedRef.current) return;
-    if (moveHistory.length < 4) return; // ignore instant resigns
+    if (moveHistory.length < 2) return; // ignore zero-move quits only
     ratingAppliedRef.current = true;
 
     const playerWon =
