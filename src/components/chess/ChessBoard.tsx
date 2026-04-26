@@ -1,18 +1,11 @@
 import { useState, useCallback, useMemo, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePieceGlyphs } from "@/lib/piece-glyphs";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
-const PIECE_UNICODE: Record<string, { symbol: string; white: boolean }> = {
-  wk: { symbol: "♔", white: true }, wq: { symbol: "♕", white: true },
-  wr: { symbol: "♖", white: true }, wb: { symbol: "♗", white: true },
-  wn: { symbol: "♘", white: true }, wp: { symbol: "♙", white: true },
-  bk: { symbol: "♚", white: false }, bq: { symbol: "♛", white: false },
-  br: { symbol: "♜", white: false }, bb: { symbol: "♝", white: false },
-  bn: { symbol: "♞", white: false }, bp: { symbol: "♟", white: false },
-};
 
 // Calculate the visual offset (in %) between two squares
 function getSlideOffset(
