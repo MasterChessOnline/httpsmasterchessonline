@@ -251,9 +251,15 @@ const Play = () => {
               playChessSound("move");
             }
 
-            // Bot only "speaks" when it blunders mid-game
+            // Bot only "speaks" on real blunders. For weaker bots (beginner/intermediate)
+            // require a much bigger mistake AND throttle, since they blunder very often.
             if (decision.quality === "blunder") {
-              setTimeout(() => showBotMessage(currentBot.taunts.onBlunder), 500);
+              const isWeakBot = currentBot.difficulty === "beginner" || currentBot.difficulty === "intermediate";
+              const bigEnough = !isWeakBot || decision.cpLoss >= 400;
+              const throttle = !isWeakBot || Math.random() < 0.35;
+              if (bigEnough && throttle) {
+                setTimeout(() => showBotMessage(currentBot.taunts.onBlunder), 500);
+              }
             }
           }
         }
