@@ -47,6 +47,7 @@ const RatingChange = forwardRef<HTMLDivElement, RatingChangeProps>(function Rati
   return (
     <AnimatePresence>
       <motion.div
+        ref={ref}
         initial={animate ? { opacity: 0, y: 10, scale: 0.96 } : false}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 22 }}
@@ -78,4 +79,6 @@ const RatingChange = forwardRef<HTMLDivElement, RatingChangeProps>(function Rati
       </motion.div>
     </AnimatePresence>
   );
-}
+});
+
+export default RatingChange;
