@@ -601,7 +601,7 @@ const PlayOnline = () => {
             <div className="rounded-xl border border-border/50 bg-card/80 p-3">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Chat</p>
               <div className="space-y-1 max-h-32 overflow-y-auto mb-2">
-                {chatMessages.map(msg => (
+                {chatMessages.filter(m => !m.message.startsWith("__")).map(msg => (
                   <div key={msg.id} className={`text-xs ${msg.user_id === user?.id ? "text-primary" : "text-foreground"}`}>
                     <span className="font-medium">{msg.user_id === user?.id ? "You" : "Opponent"}:</span> {msg.message}
                   </div>
