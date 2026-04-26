@@ -541,6 +541,7 @@ const Play = () => {
 
   const goToLobby = () => {
     resetGameState();
+    setReturnToOpening(null);
     setGamePhase("lobby");
   };
 
