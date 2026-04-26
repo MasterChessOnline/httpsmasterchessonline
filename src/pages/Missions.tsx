@@ -4,6 +4,7 @@ import { Flame, Snowflake, Trophy, Calendar, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DailyMissions from "@/components/DailyMissions";
+import StreakRewardsCard from "@/components/StreakRewardsCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useDailyStreak } from "@/hooks/use-daily-streak";
