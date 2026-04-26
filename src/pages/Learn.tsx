@@ -149,28 +149,41 @@ function CourseCard({ course, onClick, progress }: {
 }) {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
+  const isMasterclass = course.tier === "masterclass";
 
   return (
     <motion.article
       onClick={onClick}
-      className="group relative rounded-xl border border-border/50 hover:border-primary/40 bg-card overflow-hidden transition-all cursor-pointer"
-      whileHover={{ y: -4, boxShadow: "0 0 30px hsl(43 90% 55% / 0.1)" }}
+      className={`group relative rounded-xl border overflow-hidden transition-all cursor-pointer ${
+        isMasterclass
+          ? "border-primary/60 bg-gradient-to-br from-primary/10 via-card to-card shadow-[0_0_25px_hsl(43_90%_55%/0.15)] hover:shadow-[0_0_45px_hsl(43_90%_55%/0.3)]"
+          : "border-border/50 hover:border-primary/40 bg-card"
+      }`}
+      whileHover={{ y: -4, boxShadow: isMasterclass ? "0 0 50px hsl(43 90% 55% / 0.35)" : "0 0 30px hsl(43 90% 55% / 0.1)" }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <div className="h-1 w-full bg-primary/50" />
+      <div className={`h-1 w-full ${isMasterclass ? "bg-gradient-to-r from-primary via-primary/80 to-primary" : "bg-primary/50"}`} />
+
+      {isMasterclass && (
+        <div className="absolute top-3 right-3 z-10">
+          <Badge className="bg-primary text-primary-foreground border-primary/60 text-[9px] uppercase tracking-wider font-bold shadow-lg">
+            <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> Masterclass
+          </Badge>
+        </div>
+      )}
 
       <div className="p-5">
         <div className="flex items-start gap-3 mb-3">
           <motion.div
-            className={`rounded-lg ${lvl.bg} p-2.5 shrink-0`}
+            className={`rounded-lg ${isMasterclass ? "bg-primary/15" : lvl.bg} p-2.5 shrink-0`}
             whileHover={{ rotate: 10, scale: 1.1 }}
             transition={{ type: "spring", stiffness: 400 }}
           >
-            <Icon className={`h-5 w-5 ${lvl.color}`} />
+            <Icon className={`h-5 w-5 ${isMasterclass ? "text-primary" : lvl.color}`} />
           </motion.div>
           <div className="flex-1 min-w-0">
-            <h2 className="font-display text-base font-bold text-foreground leading-tight">{course.title}</h2>
-            <div className="flex items-center gap-2 mt-1">
+            <h2 className="font-display text-base font-bold text-foreground leading-tight pr-20">{course.title}</h2>
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
               <span className="text-[10px] text-muted-foreground">{course.lessons.length} chapters</span>
@@ -198,7 +211,7 @@ function CourseCard({ course, onClick, progress }: {
           {progress.completed > 0 ? (
             <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           ) : (
-            <>Start Course <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
+            <>{isMasterclass ? "Enter Masterclass" : "Start Course"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           )}
         </Button>
       </div>
