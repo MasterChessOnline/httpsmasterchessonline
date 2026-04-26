@@ -217,7 +217,7 @@ function CourseCard({ course, onClick, progress }: {
             <Icon className={`h-5 w-5 ${isMasterclass ? "text-primary" : lvl.color}`} />
           </motion.div>
           <div className="flex-1 min-w-0">
-            <h2 className="font-display text-base font-bold text-foreground leading-tight pr-20">{course.title}</h2>
+            <h2 className={`font-display text-base font-bold text-foreground leading-tight ${isMasterclass ? "pr-32" : "pr-20"}`}>{course.title}</h2>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
