@@ -1109,6 +1109,23 @@ const Play = () => {
 
           {/* Controls column */}
           <div className="w-full lg:max-w-xs space-y-3">
+            {/* Continue course (when game was launched from Opening Trainer) */}
+            {returnToOpening && (
+              <Link
+                to={`/openings?openingId=${encodeURIComponent(returnToOpening.id)}`}
+                className="block rounded-xl border border-primary/40 bg-gradient-to-br from-primary/10 to-primary/5 p-3 hover:border-primary/70 hover:shadow-[0_0_12px_hsl(var(--primary)/0.3)] transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-primary">Continue course</p>
+                    {returnToOpening.label && (
+                      <p className="text-xs text-muted-foreground truncate">{returnToOpening.label}</p>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            )}
             {/* Game status */}
             <div className="rounded-xl border border-border/50 bg-card/60 p-3 text-center">
               <p className="text-sm font-medium text-foreground">{statusText}</p>
