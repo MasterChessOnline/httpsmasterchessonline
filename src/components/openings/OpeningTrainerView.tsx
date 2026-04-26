@@ -498,6 +498,21 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
               </div>
             )}
 
+            {/* Play vs Computer from current position */}
+            {mode === "explore" && (
+              <div className="flex justify-center">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setPlayDialogOpen(true)}
+                  className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary shadow-[0_0_14px_hsl(var(--primary)/0.35)]"
+                >
+                  <Swords className="h-4 w-4" />
+                  Play this position vs Computer
+                </Button>
+              </div>
+            )}
+
             {/* Training feedback */}
             {mode === "train" && (
               <div className="space-y-3">
