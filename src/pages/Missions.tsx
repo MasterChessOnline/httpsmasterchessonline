@@ -130,11 +130,21 @@ const Missions = () => {
           </div>
         </motion.div>
 
+        {/* Streak rewards ladder */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="mb-8"
+        >
+          <StreakRewardsCard currentStreak={streak?.current_streak ?? 0} />
+        </motion.div>
+
         {/* Missions */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.12 }}
         >
           <DailyMissions />
         </motion.div>
