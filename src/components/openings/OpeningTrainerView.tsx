@@ -70,6 +70,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
 
   // Training state
   const [trainPath, setTrainPath] = useState<number[]>([]);
+  const [trainCustomMoves, setTrainCustomMoves] = useState<OpeningMove[] | null>(null);
   const [trainMoveIndex, setTrainMoveIndex] = useState(0);
   const [wrongSquare, setWrongSquare] = useState<Square | null>(null);
   const [correctSquare, setCorrectSquare] = useState<Square | null>(null);
@@ -169,6 +170,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
 
   // Extend path if we navigate deeper and need to pick children
   useEffect(() => {
+    if (activeMasterLine) return;
     // If viewUpToIndex goes past current path length, extend with main line (index 0)
     if (viewUpToIndex >= currentPath.length) {
       const node = getNodeAtPath(opening.tree, currentPath);
@@ -176,14 +178,28 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
         setCurrentPath([...currentPath, 0]);
       }
     }
-  }, [viewUpToIndex, currentPath, opening.tree]);
+  }, [activeMasterLine, viewUpToIndex, currentPath, opening.tree]);
 
   // ═══════ TRAINING MODE ═══════
-  const allPaths = useMemo(() => getAllVariationPaths(opening.tree), [opening.tree]);
-  const mainLineMoves = useMemo(() => getMainLine(opening.tree), [opening.tree]);
+  const allPaths = useMemo(() => isMasterclassOpening ? masterclassLines.map((line) => line.moves) : getAllVariationPaths(opening.tree), [isMasterclassOpening, masterclassLines, opening.tree]);
+  const mainLineMoves = useMemo(() => activeMasterLine?.moves || getMainLine(opening.tree), [activeMasterLine, opening.tree]);
 
   const startTraining = useCallback((pathMoves?: OpeningMove[]) => {
     const moves = pathMoves || mainLineMoves;
+    if (isMasterclassOpening) {
+      setTrainCustomMoves(moves);
+      setTrainPath([]);
+      setTrainMoveIndex(0);
+      setTrainCompleted(false);
+      setTrainFeedback(null);
+      setWrongSquare(null);
+      setCorrectSquare(null);
+      setSelectedSquare(null);
+      setTrainLegalMoves([]);
+      setShowHint(false);
+      setMode("train");
+      return;
+    }
     const pathIndices: number[] = [];
     let nodes = opening.tree;
     for (const mv of moves) {
@@ -194,6 +210,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
       }
     }
     setTrainPath(pathIndices);
+    setTrainCustomMoves(null);
     setTrainMoveIndex(0);
     setTrainCompleted(false);
     setTrainFeedback(null);
@@ -203,9 +220,9 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
     setTrainLegalMoves([]);
     setShowHint(false);
     setMode("train");
-  }, [mainLineMoves, opening.tree]);
+  }, [isMasterclassOpening, mainLineMoves, opening.tree]);
 
-  const trainMovesSequence = useMemo(() => getMovesForPath(opening.tree, trainPath), [opening.tree, trainPath]);
+  const trainMovesSequence = useMemo(() => trainCustomMoves || getMovesForPath(opening.tree, trainPath), [opening.tree, trainCustomMoves, trainPath]);
 
   const trainFen = useMemo(() => {
     const game = new Chess();
