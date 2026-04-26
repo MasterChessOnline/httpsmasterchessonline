@@ -409,6 +409,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   }, [trainMoveIndex, trainMovesSequence]);
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
