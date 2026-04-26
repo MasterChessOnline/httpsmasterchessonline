@@ -16,14 +16,8 @@ import {
 
 type Mode = "explore" | "train";
 
-const JOBAVA_VARIATION_TITLES = [
-  "Main Solid System", "Early Center Break", "Anti ...c5 Tactical", "Opposite-side Attack", "King's Indian Setup",
-  "Fianchetto Control", "Nimzo Structure Exchange", "Benoni Structure", "Positional Squeeze", "Pawn Storm Attack",
-  "Queen's Indian Style", "Modern Dragon Structure", "Classical Jobava Setup", "Tactical Center Break", "Flexible Development",
-  "Early c5 Counterattack", "Queen Activity Line", "Central Exchange System", "Benoni Structure Active", "Early Tactical Explosion",
-  "Kingside Pressure", "Structural Pressure", "Modern Attack Plan", "Open Center Attack", "King Safety Pressure",
-  "Slow Build Attack", "Early Queen Activity", "Positional Edge", "King-Attack Speed", "Final Master Attack",
-];
+// Total Jobava London masterclass lines (kept in sync with courses-data.ts).
+const JOBAVA_LINE_COUNT = 100;
 
 interface MasterclassLine {
   id: string;
