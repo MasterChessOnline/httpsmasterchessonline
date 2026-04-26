@@ -22,17 +22,19 @@ type Mode = "explore" | "train";
 // in `lesson-moves.ts`. Add a new entry here when you ship another masterclass.
 const MASTERCLASS_OPENINGS: Record<
   string,
-  { courseId: string; lessonPrefix: string; lineCount: number }
+  { courseId: string; lessonPrefix: string; lineCount: number; side: "white" | "black" }
 > = {
   "masterclass-jobava-london": {
     courseId: "masterkurs-jobava-london",
     lessonPrefix: "jl",
     lineCount: 130,
+    side: "white",
   },
   "masterclass-kalashnikov": {
     courseId: "masterkurs-kalashnikov",
     lessonPrefix: "kal",
     lineCount: 50,
+    side: "black",
   },
 };
 
