@@ -469,9 +469,10 @@ const PlayOnline = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container mx-auto px-2 sm:px-6 pt-16 sm:pt-20 pb-16">
-        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-4">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 lg:items-start">
           {/* Board + Clocks */}
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 min-w-0 space-y-2 flex flex-col items-center">
+            <div className="w-full max-w-[560px] space-y-2">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
               <div className="flex items-center gap-2">
