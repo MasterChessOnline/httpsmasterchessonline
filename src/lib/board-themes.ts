@@ -11,6 +11,7 @@ export interface BoardTheme {
 }
 
 export const BOARD_THEMES: BoardTheme[] = [
+  // — Originals —
   { key: "classic",   label: "Dark Wood",         description: "Polished dark walnut tournament board", light: "30 35% 52%",  dark: "22 45% 16%" },
   { key: "green",     label: "Green Tournament",  description: "Olympiad green felt",          light: "120 22% 80%", dark: "145 32% 36%" },
   { key: "blue",      label: "Blue Modern",       description: "Cool deep ocean",              light: "210 38% 78%", dark: "210 45% 32%" },
@@ -22,12 +23,96 @@ export const BOARD_THEMES: BoardTheme[] = [
   { key: "minimal",   label: "Flat Minimal",      description: "No texture, soft greys",       light: "220 8% 88%",  dark: "220 10% 38%" },
   { key: "forest",    label: "Forest",            description: "Earth & moss",                 light: "75 25% 70%",  dark: "120 30% 22%" },
   { key: "rose",      label: "Rose Quartz",       description: "Soft warm pink",               light: "350 60% 88%", dark: "345 30% 38%" },
+
+  // — Lichess-inspired —
+  { key: "brown",     label: "Lichess Brown",     description: "Iconic warm brown",            light: "32 47% 78%",  dark: "26 40% 38%" },
+  { key: "blue3",     label: "Sky Blue",          description: "Soft pastel sky",              light: "210 60% 88%", dark: "210 50% 48%" },
+  { key: "purple",    label: "Royal Purple",      description: "Deep regal purple",            light: "275 35% 80%", dark: "275 45% 30%" },
+
+  // — New colors —
+  { key: "sand",      label: "Desert Sand",       description: "Warm dunes",                   light: "40 55% 82%",  dark: "30 40% 42%" },
+  { key: "ice",       label: "Glacier Ice",       description: "Frozen blue-white",            light: "195 60% 92%", dark: "200 35% 45%" },
+  { key: "coral",     label: "Coral Reef",        description: "Warm tropical coral",          light: "15 70% 85%",  dark: "10 50% 38%" },
+  { key: "olive",     label: "Olive Grove",       description: "Mediterranean olive",          light: "65 30% 72%",  dark: "75 25% 28%" },
+  { key: "midnight",  label: "Midnight",          description: "Deep navy noir",               light: "220 30% 35%", dark: "225 50% 10%" },
+  { key: "sunset",    label: "Sunset",            description: "Warm orange & wine",           light: "25 75% 70%",  dark: "350 45% 25%" },
+  { key: "mint",      label: "Mint Fresh",        description: "Crisp mint pastel",            light: "150 50% 85%", dark: "165 40% 35%" },
+
+  // — Tournament & specialty —
+  { key: "tournament", label: "Tournament Vinyl", description: "Standard FIDE vinyl",          light: "45 25% 88%",  dark: "150 25% 30%" },
+  { key: "glassmorph", label: "Glassmorphic",     description: "Frosted glass aesthetic",      light: "200 30% 90%", dark: "215 40% 20%" },
+  { key: "carbon",    label: "Carbon Fiber",      description: "Tech matte black",             light: "210 8% 32%",  dark: "210 10% 14%" },
+  { key: "ivory",     label: "Antique Ivory",     description: "Warm aged ivory",              light: "40 40% 85%",  dark: "30 20% 25%" },
+  { key: "emerald",   label: "Emerald",           description: "Jeweled deep green",           light: "150 35% 75%", dark: "155 60% 18%" },
+  { key: "ruby",      label: "Ruby",              description: "Burgundy & rose",              light: "350 45% 80%", dark: "355 55% 25%" },
+  { key: "sapphire",  label: "Sapphire",          description: "Royal jewel blue",             light: "215 55% 78%", dark: "220 70% 22%" },
+
+  // — Seasonal —
+  { key: "halloween", label: "Halloween",         description: "Pumpkin & shadow",             light: "30 80% 60%",  dark: "270 50% 14%" },
+  { key: "winter",    label: "Winter",            description: "Snow & frost",                 light: "200 30% 95%", dark: "215 25% 35%" },
+  { key: "spring",    label: "Spring Bloom",      description: "Cherry blossom pastel",        light: "340 55% 90%", dark: "120 25% 40%" },
 ];
+
+export interface PieceGlyphSet {
+  // Each entry is the glyph (or short string) used to render that piece.
+  // Keys are lowercase pieces — case is interpreted at render time.
+  K: string; Q: string; R: string; B: string; N: string; P: string; // white
+  k: string; q: string; r: string; b: string; n: string; p: string; // black
+}
+
+// Standard chess Unicode set (used by most styles).
+const GLYPHS_STANDARD: PieceGlyphSet = {
+  K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
+  k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
+};
+
+// Latin letter set — bold capitals/lowercase. Looks like an algebraic notation board.
+const GLYPHS_LETTERS: PieceGlyphSet = {
+  K: "K", Q: "Q", R: "R", B: "B", N: "N", P: "P",
+  k: "k", q: "q", r: "r", b: "b", n: "n", p: "p",
+};
+
+// Geometric shapes — minimalist, very distinct silhouettes.
+const GLYPHS_SHAPES: PieceGlyphSet = {
+  K: "★", Q: "✦", R: "■", B: "▲", N: "◆", P: "●",
+  k: "☆", q: "✧", r: "□", b: "△", n: "◇", p: "○",
+};
+
+// Xiangqi / shogi inspired — single CJK characters per role.
+const GLYPHS_CJK: PieceGlyphSet = {
+  K: "王", Q: "后", R: "車", B: "象", N: "馬", P: "兵",
+  k: "将", q: "妃", r: "车", b: "相", n: "马", p: "卒",
+};
+
+// Emoji set — playful, instantly recognizable shapes.
+const GLYPHS_EMOJI: PieceGlyphSet = {
+  K: "🤴", Q: "👸", R: "🏰", B: "⛪", N: "🐴", P: "🛡️",
+  k: "👑", q: "🦹", r: "🗼", b: "🔮", n: "🦄", p: "⚔️",
+};
+
+// Animal kingdom — every piece is a different creature.
+const GLYPHS_ANIMALS: PieceGlyphSet = {
+  K: "🦁", Q: "🦅", R: "🐘", B: "🦊", N: "🐎", P: "🐭",
+  k: "🐺", q: "🦉", r: "🦏", b: "🦝", n: "🦓", p: "🐀",
+};
+
+// Medieval heraldry — heavy bold ornament glyphs.
+const GLYPHS_HERALDRY: PieceGlyphSet = {
+  K: "♛", Q: "♜", R: "▩", B: "✠", N: "❦", P: "❖",
+  k: "♕", q: "♖", r: "▦", b: "✚", n: "❧", p: "◈",
+};
+
+// Runes — esoteric / fantasy vibe.
+const GLYPHS_RUNES: PieceGlyphSet = {
+  K: "ᛟ", Q: "ᚦ", R: "ᛏ", B: "ᛒ", N: "ᚺ", P: "ᛉ",
+  k: "ᛜ", q: "ᚹ", r: "ᛁ", b: "ᛚ", n: "ᛇ", p: "ᛋ",
+};
 
 export interface PieceStyle {
   key: string;
   label: string;
   description: string;
+  glyphs: PieceGlyphSet;
   // Pure-CSS rendering recipe so we don't need image assets
   render: {
     whiteFill: string;          // CSS color for white pieces
@@ -36,85 +121,152 @@ export interface PieceStyle {
     blackStroke?: string;       // Optional outline for black
     fontWeight?: number;
     glow?: string;              // box/text-shadow color for accents
+    fontFamily?: string;        // Optional font family override
+    scale?: number;             // Optional scale factor for glyph (e.g. 0.85 for emoji)
   };
 }
 
 export const PIECE_STYLES: PieceStyle[] = [
+  // === STANDARD UNICODE FAMILY ===
   {
     key: "standard",
     label: "Classic Staunton",
     description: "Polished ivory & ebony, tournament finish",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#fbf3e0", blackFill: "#161214", whiteStroke: "rgba(40,25,10,0.75)", blackStroke: "rgba(255,235,200,0.18)", fontWeight: 500, glow: "rgba(255,220,170,0.22)" },
   },
   {
     key: "minimal",
     label: "Modern Minimal",
     description: "Light, clean silhouettes",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#f4f4f5", blackFill: "#18181b", fontWeight: 300 },
   },
   {
     key: "bold",
     label: "Bold High-Contrast",
     description: "Heavy weight, easy to read",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#ffffff", blackFill: "#000000", whiteStroke: "rgba(0,0,0,1)", blackStroke: "rgba(255,255,255,0.4)", fontWeight: 700 },
   },
   {
     key: "glass",
     label: "Glass",
     description: "Translucent with subtle glow",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "rgba(255,255,255,0.85)", blackFill: "rgba(20,20,30,0.85)", whiteStroke: "rgba(255,255,255,0.6)", blackStroke: "rgba(180,180,255,0.5)", glow: "rgba(180,200,255,0.45)", fontWeight: 400 },
   },
   {
     key: "outline",
     label: "Outline",
     description: "Hollow pieces, max clarity",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "transparent", blackFill: "transparent", whiteStroke: "rgba(255,255,255,1)", blackStroke: "rgba(0,0,0,1)", fontWeight: 600 },
   },
   {
     key: "neon",
     label: "Neon Glow",
     description: "Cyber-style with light bloom",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#fef3c7", blackFill: "#a78bfa", glow: "rgba(168,85,247,0.6)", fontWeight: 500 },
   },
   {
     key: "royal",
     label: "Golden Royal",
     description: "Premium gold accents",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#fbbf24", blackFill: "#1f1611", whiteStroke: "rgba(120,80,0,0.7)", fontWeight: 500 },
   },
   {
     key: "monochrome",
     label: "Monochrome",
     description: "Pure black on white",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#e5e5e5", blackFill: "#0a0a0a", fontWeight: 400 },
   },
   {
     key: "tournament",
     label: "Tournament Pro",
     description: "Crisp ivory & graphite",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#faf6ec", blackFill: "#2a2622", whiteStroke: "rgba(60,40,20,0.6)", blackStroke: "rgba(255,255,255,0.15)", fontWeight: 500 },
   },
   {
     key: "cartoon",
     label: "Cartoon",
     description: "Playful rounded look",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#fff4d4", blackFill: "#3b2a4a", whiteStroke: "rgba(180,120,40,0.8)", blackStroke: "rgba(255,200,255,0.4)", fontWeight: 700 },
   },
   {
     key: "wood3d",
     label: "Polished Walnut",
     description: "Hand-carved walnut, lacquered tournament finish",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#f7e2b8", blackFill: "#1a0a04", whiteStroke: "rgba(90,55,20,0.95)", blackStroke: "rgba(255,210,150,0.45)", fontWeight: 600, glow: "rgba(180,110,40,0.5)" },
   },
   {
     key: "fantasy",
     label: "Fantasy",
     description: "Mystical themed pieces with magical aura",
+    glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#e0f7ff", blackFill: "#2a0a3a", whiteStroke: "rgba(120,200,255,0.9)", blackStroke: "rgba(220,140,255,0.7)", fontWeight: 600, glow: "rgba(160,120,255,0.55)" },
+  },
+
+  // === DIFFERENT GLYPH FAMILIES — actually look different ===
+  {
+    key: "letters",
+    label: "Algebraic Letters",
+    description: "Bold KQRBNP letters — looks like notation",
+    glyphs: GLYPHS_LETTERS,
+    render: { whiteFill: "#fafafa", blackFill: "#0a0a0a", whiteStroke: "rgba(0,0,0,0.6)", blackStroke: "rgba(255,255,255,0.2)", fontWeight: 800, fontFamily: "'JetBrains Mono', 'SF Mono', monospace", scale: 0.78 },
+  },
+  {
+    key: "shapes",
+    label: "Geometric Shapes",
+    description: "Stars, squares, triangles — pure minimalism",
+    glyphs: GLYPHS_SHAPES,
+    render: { whiteFill: "#fef3c7", blackFill: "#1e293b", whiteStroke: "rgba(0,0,0,0.4)", blackStroke: "rgba(255,255,255,0.3)", fontWeight: 400, scale: 0.85 },
+  },
+  {
+    key: "cjk",
+    label: "Xiangqi Style",
+    description: "CJK characters — Chinese chess influence",
+    glyphs: GLYPHS_CJK,
+    render: { whiteFill: "#fef9e7", blackFill: "#7f1d1d", whiteStroke: "rgba(120,30,30,0.85)", blackStroke: "rgba(255,220,180,0.4)", fontWeight: 700, fontFamily: "'Noto Serif CJK SC', 'SimSun', serif", scale: 0.7 },
+  },
+  {
+    key: "emoji",
+    label: "Royal Emoji",
+    description: "King, queen, castle, knight — full color emoji",
+    glyphs: GLYPHS_EMOJI,
+    render: { whiteFill: "transparent", blackFill: "transparent", fontWeight: 400, scale: 0.88 },
+  },
+  {
+    key: "animals",
+    label: "Animal Kingdom",
+    description: "Lions, eagles, elephants — every piece is unique",
+    glyphs: GLYPHS_ANIMALS,
+    render: { whiteFill: "transparent", blackFill: "transparent", fontWeight: 400, scale: 0.88 },
+  },
+  {
+    key: "heraldry",
+    label: "Medieval Heraldry",
+    description: "Crosses, fleurs, ornaments — coat-of-arms feel",
+    glyphs: GLYPHS_HERALDRY,
+    render: { whiteFill: "#fde68a", blackFill: "#451a03", whiteStroke: "rgba(120,60,0,0.7)", blackStroke: "rgba(255,210,150,0.4)", fontWeight: 600, scale: 0.92 },
+  },
+  {
+    key: "runes",
+    label: "Norse Runes",
+    description: "Ancient runic glyphs — mystical & rare",
+    glyphs: GLYPHS_RUNES,
+    render: { whiteFill: "#dbeafe", blackFill: "#1e1b4b", whiteStroke: "rgba(30,30,80,0.7)", blackStroke: "rgba(180,200,255,0.45)", fontWeight: 600, glow: "rgba(120,140,255,0.4)", scale: 0.82 },
   },
 ];
 
 const STORAGE_KEY = "chess-settings";
+const PIECE_STYLE_EVENT = "masterchess:piecestyle-change";
 
 function readSettings(): Record<string, any> {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
@@ -129,9 +281,16 @@ export function applyBoardTheme(themeKey: string) {
   root.style.setProperty("--board-dark", theme.dark);
 }
 
-/** Apply a piece style by writing CSS variables consumed by chess pieces. */
+let activePieceStyle: PieceStyle = PIECE_STYLES[0];
+
+export function getActivePieceStyle(): PieceStyle {
+  return activePieceStyle;
+}
+
+/** Apply a piece style — CSS vars + broadcasts an event so React boards re-render with new glyphs. */
 export function applyPieceStyle(styleKey: string) {
   const style = PIECE_STYLES.find(s => s.key === styleKey) || PIECE_STYLES[0];
+  activePieceStyle = style;
   const root = document.documentElement;
   root.style.setProperty("--piece-white", style.render.whiteFill);
   root.style.setProperty("--piece-black", style.render.blackFill);
@@ -139,6 +298,18 @@ export function applyPieceStyle(styleKey: string) {
   root.style.setProperty("--piece-black-stroke", style.render.blackStroke || "transparent");
   root.style.setProperty("--piece-weight", String(style.render.fontWeight || 400));
   root.style.setProperty("--piece-glow", style.render.glow || "transparent");
+  root.style.setProperty("--piece-font-family", style.render.fontFamily || "inherit");
+  root.style.setProperty("--piece-scale", String(style.render.scale ?? 1));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(PIECE_STYLE_EVENT, { detail: style.key }));
+  }
+}
+
+/** Subscribe to piece-style changes (returns unsubscribe). */
+export function onPieceStyleChange(listener: () => void): () => void {
+  if (typeof window === "undefined") return () => undefined;
+  window.addEventListener(PIECE_STYLE_EVENT, listener);
+  return () => window.removeEventListener(PIECE_STYLE_EVENT, listener);
 }
 
 /** Bootstrap on app start: load saved theme + piece style and apply to :root. */
@@ -146,5 +317,5 @@ export function bootstrapVisualSettings() {
   if (typeof window === "undefined") return;
   const s = readSettings();
   if (s.boardTheme) applyBoardTheme(s.boardTheme);
-  if (s.pieceStyle) applyPieceStyle(s.pieceStyle);
+  applyPieceStyle(s.pieceStyle || "standard");
 }

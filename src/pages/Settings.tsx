@@ -22,6 +22,7 @@ import RankBadge from "@/components/RankBadge";
 import TitleBadge from "@/components/TitleBadge";
 import { COUNTRIES, findCountry } from "@/lib/countries";
 import { BOARD_THEMES, PIECE_STYLES, applyBoardTheme, applyPieceStyle } from "@/lib/board-themes";
+import { SOUND_PACKS, applySoundPack, playMoveSound } from "@/lib/chess-sounds";
 import BoardThemeCard from "@/components/settings/BoardThemeCard";
 import PieceStyleCard from "@/components/settings/PieceStyleCard";
 import LiveBoardPreview from "@/components/settings/LiveBoardPreview";
@@ -131,6 +132,11 @@ const Settings = () => {
   const [showRatingChange, setShowRatingChange] = useState<boolean>(settings.showRatingChange ?? true);
   const [showExpectedScore, setShowExpectedScore] = useState<boolean>(settings.showExpectedScore ?? true);
   const [ratingAnimation, setRatingAnimation] = useState<boolean>(settings.ratingAnimation ?? true);
+  // Sound pack
+  const [soundPack, setSoundPack] = useState<string>(() => {
+    const saved = settings.soundPack;
+    return SOUND_PACKS.find(p => p.key === saved) ? saved : "wood";
+  });
 
   useEffect(() => {
     if (profile) {
@@ -525,6 +531,51 @@ const Settings = () => {
                   <span className="text-xs text-muted-foreground font-mono">{volume}%</span>
                 </div>
                 <Slider value={[volume]} onValueChange={([v]) => { setVolume(v); saveSetting("volume", v); }} min={0} max={100} step={5} />
+              </div>
+
+              {/* Sound packs — pick the texture/timbre of every move */}
+              <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Sound pack</p>
+                    <p className="text-xs text-muted-foreground">Choose the texture of every piece move — tap a card to preview</p>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground/60 font-mono">{SOUND_PACKS.length} packs</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                  {SOUND_PACKS.map(pack => {
+                    const active = soundPack === pack.key;
+                    return (
+                      <button
+                        key={pack.key}
+                        onClick={() => {
+                          setSoundPack(pack.key);
+                          saveSetting("soundPack", pack.key);
+                          applySoundPack(pack.key);
+                          // Instant audible preview
+                          playMoveSound();
+                          toast.success(`Sound: ${pack.label}`);
+                        }}
+                        className={`group relative rounded-lg border p-3 text-left transition-all ${
+                          active
+                            ? "border-primary bg-primary/10 shadow-md shadow-primary/20"
+                            : "border-border/50 bg-background/40 hover:border-primary/30 hover:bg-card/80"
+                        }`}
+                      >
+                        {active && (
+                          <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
+                            <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Volume2 className={`w-4 h-4 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                          <p className={`text-xs font-semibold ${active ? "text-primary" : "text-foreground"}`}>{pack.label}</p>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-snug">{pack.description}</p>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

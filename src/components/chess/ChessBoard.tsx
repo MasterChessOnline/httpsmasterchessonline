@@ -1,18 +1,11 @@
 import { useState, useCallback, useMemo, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePieceGlyphs } from "@/lib/piece-glyphs";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
-const PIECE_UNICODE: Record<string, { symbol: string; white: boolean }> = {
-  wk: { symbol: "♔", white: true }, wq: { symbol: "♕", white: true },
-  wr: { symbol: "♖", white: true }, wb: { symbol: "♗", white: true },
-  wn: { symbol: "♘", white: true }, wp: { symbol: "♙", white: true },
-  bk: { symbol: "♚", white: false }, bq: { symbol: "♛", white: false },
-  br: { symbol: "♜", white: false }, bb: { symbol: "♝", white: false },
-  bn: { symbol: "♞", white: false }, bp: { symbol: "♟", white: false },
-};
 
 // Calculate the visual offset (in %) between two squares
 function getSlideOffset(
@@ -68,9 +61,11 @@ export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
   isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick, overlay,
 }: ChessBoardProps) {
+  const { get: getGlyph, style: pieceStyle } = usePieceGlyphs();
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
+
 
   // Subtle indicator: which king is currently in check?
   const inCheck = game.inCheck();
@@ -123,7 +118,7 @@ export default function ChessBoard({
                 const isPremove = premove && (premove.from === square || premove.to === square);
                 const isCheckedKing = checkedKingSquare === square;
                 const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-                const pd = pieceKey ? PIECE_UNICODE[pieceKey] : null;
+                const pd = pieceKey ? getGlyph(pieceKey) : null;
 
                 // Did this piece just arrive here via a move?
                 const justMoved = lastMove?.to === square && pd;
@@ -188,20 +183,28 @@ export default function ChessBoard({
                             : undefined
                         }
                         className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none z-10 cursor-pointer ${
-                          pd.white
+                          !pd.colorful && pd.white
                             ? "drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
-                            : "drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
+                            : !pd.colorful
+                              ? "drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
+                              : "drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
                         } ${isSelected ? "drop-shadow-[0_0_10px_hsl(43_80%_55%/0.6)] scale-110" : ""}`}
                         style={{
                           position: "relative",
-                          color: pd.white
-                            ? "var(--piece-white, #ffffff)"
-                            : "var(--piece-black, hsl(220,15%,8%))",
-                          fontWeight: "var(--piece-weight, 400)" as any,
-                          WebkitTextStroke: pd.white
-                            ? "0.5px var(--piece-white-stroke, transparent)"
-                            : "0.5px var(--piece-black-stroke, transparent)",
-                          textShadow: "0 0 8px var(--piece-glow, transparent)",
+                          color: pd.colorful
+                            ? undefined
+                            : pd.white
+                              ? "var(--piece-white, #ffffff)"
+                              : "var(--piece-black, hsl(220,15%,8%))",
+                          fontWeight: pd.colorful ? 400 : ("var(--piece-weight, 400)" as any),
+                          fontFamily: pieceStyle.render.fontFamily || undefined,
+                          transform: `scale(${pieceStyle.render.scale ?? 1})`,
+                          WebkitTextStroke: pd.colorful
+                            ? undefined
+                            : pd.white
+                              ? "0.5px var(--piece-white-stroke, transparent)"
+                              : "0.5px var(--piece-black-stroke, transparent)",
+                          textShadow: pd.colorful ? undefined : "0 0 8px var(--piece-glow, transparent)",
                         }}
                       >
                         {pd.symbol}

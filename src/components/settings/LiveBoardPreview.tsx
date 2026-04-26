@@ -4,17 +4,16 @@ import type { BoardTheme, PieceStyle } from "@/lib/board-themes";
 const FILES = ["a","b","c","d","e","f","g","h"];
 const RANKS = [8,7,6,5,4,3,2,1];
 
-// Initial position for visual preview only.
-const POSITION: Record<string, string> = {
-  a8: "♜", b8: "♞", c8: "♝", d8: "♛", e8: "♚", f8: "♝", g8: "♞", h8: "♜",
-  a7: "♟", b7: "♟", c7: "♟", d7: "♟", e7: "♟", f7: "♟", g7: "♟", h7: "♟",
-  a2: "♙", b2: "♙", c2: "♙", d2: "♙", e2: "♙", f2: "♙", g2: "♙", h2: "♙",
-  a1: "♖", b1: "♘", c1: "♗", d1: "♕", e1: "♔", f1: "♗", g1: "♘", h1: "♖",
+// Initial position mapped to piece keys ("K", "Q", "R", "B", "N", "P" for white;
+// lowercase for black). The actual glyph rendered comes from the chosen piece set.
+const POSITION: Record<string, keyof PieceStyle["glyphs"]> = {
+  a8: "r", b8: "n", c8: "b", d8: "q", e8: "k", f8: "b", g8: "n", h8: "r",
+  a7: "p", b7: "p", c7: "p", d7: "p", e7: "p", f7: "p", g7: "p", h7: "p",
+  a2: "P", b2: "P", c2: "P", d2: "P", e2: "P", f2: "P", g2: "P", h2: "P",
+  a1: "R", b1: "N", c1: "B", d1: "Q", e1: "K", f1: "B", g1: "N", h1: "R",
 };
 
-// White pieces use uppercase glyphs (Unicode chess set)
-const isWhitePiece = (g: string) =>
-  ["♔","♕","♖","♗","♘","♙"].includes(g);
+const COLORFUL_STYLES = new Set(["emoji", "animals"]);
 
 interface Props {
   theme: BoardTheme;
@@ -27,6 +26,8 @@ interface Props {
  */
 export default function LiveBoardPreview({ theme, piece }: Props) {
   const r = piece.render;
+  const colorful = COLORFUL_STYLES.has(piece.key);
+  const scale = r.scale ?? 1;
 
   return (
     <motion.div
@@ -62,8 +63,9 @@ export default function LiveBoardPreview({ theme, piece }: Props) {
           FILES.map((file) => {
             const sq = `${file}${rank}`;
             const isLight = (FILES.indexOf(file) + RANKS.indexOf(rank)) % 2 === 0;
-            const glyph = POSITION[sq];
-            const white = glyph ? isWhitePiece(glyph) : false;
+            const pieceKey = POSITION[sq];
+            const glyph = pieceKey ? piece.glyphs[pieceKey] : undefined;
+            const white = pieceKey ? pieceKey === pieceKey.toUpperCase() : false;
             return (
               <div
                 key={sq}
@@ -75,19 +77,22 @@ export default function LiveBoardPreview({ theme, piece }: Props) {
                 {glyph && (
                   <span
                     style={{
-                      color: white ? r.whiteFill : r.blackFill,
+                      color: colorful ? undefined : (white ? r.whiteFill : r.blackFill),
                       fontWeight: r.fontWeight || 400,
-                      textShadow: r.glow
+                      fontFamily: r.fontFamily || undefined,
+                      transform: `scale(${scale})`,
+                      display: "inline-block",
+                      textShadow: colorful ? undefined : (r.glow
                         ? `0 0 10px ${r.glow}`
                         : white
                           ? `0 1px 2px ${r.whiteStroke || "rgba(0,0,0,0.85)"}`
                           : r.blackStroke
                             ? `0 0 4px ${r.blackStroke}`
-                            : "0 1px 2px rgba(255,255,255,0.15)",
-                      filter: r.glow ? `drop-shadow(0 0 6px ${r.glow})` : undefined,
-                      WebkitTextStroke: white && r.whiteStroke
+                            : "0 1px 2px rgba(255,255,255,0.15)"),
+                      filter: r.glow && !colorful ? `drop-shadow(0 0 6px ${r.glow})` : undefined,
+                      WebkitTextStroke: !colorful && white && r.whiteStroke
                         ? `0.5px ${r.whiteStroke}`
-                        : !white && r.blackStroke
+                        : !colorful && !white && r.blackStroke
                           ? `0.5px ${r.blackStroke}`
                           : undefined,
                     }}
