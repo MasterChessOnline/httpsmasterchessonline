@@ -26,7 +26,14 @@ export default function OpeningCard({
   onToggleFavorite,
   index,
 }: OpeningCardProps) {
-  const isMasterclass = opening.name.toLowerCase().includes("masterclass") || opening.id.includes("masterclass");
+  const isMasterclass = opening.name.toLowerCase().includes("masterclass") || opening.name.toLowerCase().includes("masterkurs") || opening.id.includes("masterclass");
+
+  // Side: which color this repertoire is built for (only relevant for masterclass repertoires)
+  const masterclassSide: "white" | "black" | null = isMasterclass
+    ? opening.id.includes("kalashnikov")
+      ? "black"
+      : "white"
+    : null;
 
   return (
     <motion.div
@@ -34,17 +41,44 @@ export default function OpeningCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
       onClick={onSelect}
-      className={`group relative rounded-xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 ${
+      className={`group relative rounded-xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 overflow-hidden ${
         isMasterclass
-          ? "bg-gradient-to-br from-primary/10 via-card to-card border border-primary/60 shadow-[0_0_25px_hsl(var(--primary)/0.18)] hover:border-primary hover:shadow-[0_0_45px_hsl(var(--primary)/0.35)]"
+          ? "bg-gradient-to-br from-primary/15 via-card to-card border-2 border-primary/60 shadow-[0_0_30px_hsl(var(--primary)/0.22)] hover:border-primary hover:shadow-[0_0_55px_hsl(var(--primary)/0.4)]"
           : "bg-card border border-border/50 hover:border-primary/40 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)]"
       }`}
     >
+      {/* Animated shimmer for masterclass cards */}
       {isMasterclass && (
-        <div className="absolute -top-2 -left-2 z-10">
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute -inset-x-12 top-0 h-full opacity-0 group-hover:opacity-100"
+          initial={false}
+          animate={{ x: ["-30%", "130%"] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+          style={{
+            background:
+              "linear-gradient(110deg, transparent 30%, hsl(var(--primary) / 0.18) 50%, transparent 70%)",
+          }}
+        />
+      )}
+
+      {isMasterclass && (
+        <div className="absolute -top-2 -left-2 z-10 flex items-center gap-1.5">
           <Badge className="bg-primary text-primary-foreground border border-primary/60 text-[9px] uppercase tracking-wider font-bold shadow-lg">
             <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> Masterclass
           </Badge>
+          {masterclassSide && (
+            <Badge
+              variant="outline"
+              className={`text-[9px] uppercase tracking-wider font-bold shadow-md ${
+                masterclassSide === "white"
+                  ? "bg-background text-foreground border-foreground/40"
+                  : "bg-foreground text-background border-foreground"
+              }`}
+            >
+              For {masterclassSide === "white" ? "White" : "Black"}
+            </Badge>
+          )}
         </div>
       )}
 
@@ -52,7 +86,7 @@ export default function OpeningCard({
       {onToggleFavorite && (
         <button
           onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
-          className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted transition-colors"
+          className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted transition-colors z-10"
         >
           <Star
             className={`h-4 w-4 transition-colors ${
