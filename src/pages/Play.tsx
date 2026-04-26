@@ -74,6 +74,7 @@ const Play = () => {
   // --- NEW: Game phase state (lobby → searching → matchup → playing) ---
   const [gamePhase, setGamePhase] = useState<GamePhaseState>("lobby");
   const [searchProgress, setSearchProgress] = useState(0);
+  const [returnToOpening, setReturnToOpening] = useState<{ id: string; label: string | null } | null>(null);
 
   // --- NEW: Premove system ---
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
