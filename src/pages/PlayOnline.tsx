@@ -554,11 +554,32 @@ const PlayOnline = () => {
               </div>
             </div>
 
+            {/* Draw Offer Banner */}
+            {drawOfferedByOpponent && !isGameOver && (
+              <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center space-y-2">
+                <p className="text-sm font-medium text-primary">Opponent offers a draw</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="default" className="flex-1" onClick={acceptDraw}>Accept</Button>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={declineDraw}>Decline</Button>
+                </div>
+              </div>
+            )}
+
             {/* Game Controls */}
             {!isGameOver && onlineStatus === "playing" && (
-              <div className="flex gap-2">
-                <Button variant="destructive" size="sm" className="flex-1 gap-1" onClick={resign}>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" onClick={resign}>
                   <Flag className="h-3.5 w-3.5" /> Resign
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 min-w-[100px] gap-1"
+                  onClick={offerDraw}
+                  disabled={drawOfferedByMe || drawOfferedByOpponent}
+                >
+                  <Handshake className="h-3.5 w-3.5" />
+                  {drawOfferedByMe ? "Draw offered…" : "Offer Draw"}
                 </Button>
                 <Button variant="outline" size="sm" className="gap-1" onClick={() => setFocusMode(true)}>
                   <Eye className="h-3.5 w-3.5" /> Focus
