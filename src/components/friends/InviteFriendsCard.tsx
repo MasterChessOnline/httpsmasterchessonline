@@ -156,12 +156,15 @@ export default function InviteFriendsCard({
         <div className="flex items-center gap-2 mb-2">
           <Share2 className="h-4 w-4 text-primary" />
           <h3 className="font-display text-base font-bold text-foreground">
-            Invite friends to MasterChess
+            {variant === "share"
+              ? "Share MasterChess"
+              : "Invite friends to MasterChess"}
           </h3>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          Share your personal invite link. When friends join, you'll be able to
-          challenge them right away.
+          {variant === "share"
+            ? "Spread the word — send the link to anyone who loves chess. They'll land straight on the homepage."
+            : "Share your personal invite link. When friends join, you'll be able to challenge them right away."}
         </p>
 
         {/* Link + copy */}
