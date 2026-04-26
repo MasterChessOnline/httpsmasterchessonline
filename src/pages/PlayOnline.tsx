@@ -491,8 +491,8 @@ const PlayOnline = () => {
       <main className="container mx-auto px-2 sm:px-6 pt-16 sm:pt-20 pb-16">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 lg:items-start">
           {/* Board + Clocks */}
-          <div className="flex-1 min-w-0 space-y-2 flex flex-col items-center">
-            <div className="w-full max-w-[560px] space-y-2">
+          <div className="flex-1 min-w-0 flex flex-col items-center">
+            <div className="w-full max-w-[min(85vw,520px)] space-y-1.5">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
               <div className="flex items-center gap-2">
@@ -511,20 +511,19 @@ const PlayOnline = () => {
               )}
             </div>
 
-            {/* Board */}
-            <div className="w-full max-w-[560px] mx-auto">
-              <ChessBoard
-                game={game}
-                flipped={boardFlipped}
-                selectedSquare={selectedSquare}
-                legalMoves={legalMoves}
-                lastMove={lastMove}
-                isGameOver={isGameOver}
-                isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
-                hintSquare={null}
-                onSquareClick={handleSquareClick}
-              />
-            </div>
+            {/* Board — same component & sizing used everywhere on the site,
+                so it always picks up the user's chosen piece set + theme. */}
+            <ChessBoard
+              game={game}
+              flipped={boardFlipped}
+              selectedSquare={selectedSquare}
+              legalMoves={legalMoves}
+              lastMove={lastMove}
+              isGameOver={isGameOver}
+              isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
+              hintSquare={null}
+              onSquareClick={handleSquareClick}
+            />
 
             {/* Player info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">

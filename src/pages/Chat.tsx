@@ -229,25 +229,43 @@ const Chat = () => {
                     <p className="text-[10px] text-muted-foreground font-mono">{selectedFriend.rating} ELO</p>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {messages.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center pt-16">Start the conversation! Say hi 👋</p>
+                    <p className="text-sm text-muted-foreground text-center pt-16">Start the conversation! Say hi 👋</p>
                   )}
                   {messages.map(msg => {
                     const mine = msg.sender_id === user.id;
+                    // Detect "emoji-only" messages: short messages composed solely of emoji + whitespace.
+                    // Render those as a giant emoji with no bubble (Discord/iMessage style).
+                    const trimmed = msg.message.trim();
+                    const emojiOnlyRegex = /^(?:\s|\p{Extended_Pictographic}|\p{Emoji_Component}|\uFE0F|\u200D)+$/u;
+                    const isEmojiOnly =
+                      trimmed.length > 0 &&
+                      trimmed.length <= 12 &&
+                      emojiOnlyRegex.test(trimmed);
+
                     return (
                       <div key={msg.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                         <div className={`flex flex-col ${mine ? "items-end" : "items-start"} max-w-[80%]`}>
-                          <span className={`inline-block px-3 py-1.5 rounded-2xl text-xs break-words ${
-                            mine
-                              ? "bg-primary/20 text-primary rounded-br-sm"
-                              : "bg-muted/50 text-foreground rounded-bl-sm"
-                          }`}>
-                            {msg.message}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground mt-0.5 px-1 flex items-center gap-1">
+                          {isEmojiOnly ? (
+                            <span
+                              className="leading-none select-none"
+                              style={{ fontSize: "clamp(2.5rem, 7vw, 4rem)" }}
+                            >
+                              {trimmed}
+                            </span>
+                          ) : (
+                            <span className={`inline-block px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words shadow-sm ${
+                              mine
+                                ? "bg-primary/20 text-foreground rounded-br-md border border-primary/20"
+                                : "bg-muted/60 text-foreground rounded-bl-md border border-border/30"
+                            }`}>
+                              {msg.message}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-muted-foreground mt-1 px-1 flex items-center gap-1">
                             {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
-                            {mine && (msg.read_at ? <CheckCheck className="h-2.5 w-2.5 text-primary" /> : <Check className="h-2.5 w-2.5" />)}
+                            {mine && (msg.read_at ? <CheckCheck className="h-3 w-3 text-primary" /> : <Check className="h-3 w-3" />)}
                           </span>
                         </div>
                       </div>
