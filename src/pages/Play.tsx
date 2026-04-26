@@ -1131,6 +1131,25 @@ const Play = () => {
             )}
           </div>
         </div>
+
+        {/* Post-game analysis — full width, side by side on desktop */}
+        {isGameOver && gameResult && mode === "ai" && (moveHistory.length >= 4 || pgn) && (
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {moveHistory.length >= 4 && (
+              <GameSummary
+                moveHistory={moveHistory}
+                result={gameResult}
+                playerColor={playerColor}
+                difficulty={difficulty}
+                playerMoveQuality={playerMoveQuality}
+                botName={currentBot.name}
+              />
+            )}
+            {pgn && (
+              <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />
+            )}
+          </div>
+        )}
       </main>
 
       <PromotionDialog isOpen={!!pendingPromotion} color={game.turn()} onSelect={handlePromotionSelect} onCancel={() => setPendingPromotion(null)} />
