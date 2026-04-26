@@ -247,8 +247,11 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   ];
 
   const coreCourses = COURSES.filter((c) => CORE_IDS.has(c.id));
+  const masterclassCourses = COURSES.filter((c) => c.tier === "masterclass");
+  const masterclassIds = new Set(masterclassCourses.map((c) => c.id));
   const additionalCourses = COURSES.filter((c) => {
     if (CORE_IDS.has(c.id)) return false;
+    if (masterclassIds.has(c.id)) return false;
     if (levelFilter !== "all" && c.level !== levelFilter) return false;
     if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
     return true;
@@ -323,6 +326,32 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
           ))}
         </div>
       </div>
+
+      {/* ── MASTERCLASS COURSES ── (always visible, top placement) */}
+      {masterclassCourses.length > 0 && (
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-primary/60" />
+            <h2 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
+              <Crown className="w-5 h-5 text-primary fill-primary" /> Masterclass · Premium Deep-Dives
+            </h2>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/40 to-primary/60" />
+          </div>
+          <p className="text-center text-muted-foreground text-sm mb-5">
+            Elite-level courses with 30+ annotated variations, interactive boards, and practice mode.
+          </p>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {masterclassCourses.map((course) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                onClick={() => onSelectCourse(course)}
+                progress={getCourseProgress(course.id, course.lessons.length)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── ADDITIONAL COURSES ── */}
       <div>
