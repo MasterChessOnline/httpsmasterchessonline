@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import { Opening, OpeningMove, getMainLine, getAllVariationPaths } from "@/lib/openings-data";
+import { LESSON_MOVES } from "@/lib/lesson-moves";
 import OpeningBoard from "./OpeningBoard";
 import VariationTree from "./VariationTree";
 import { playChessSound } from "@/lib/chess-sounds";
@@ -14,6 +15,21 @@ import {
 } from "lucide-react";
 
 type Mode = "explore" | "train";
+
+const JOBAVA_VARIATION_TITLES = [
+  "Main Solid System", "Early Center Break", "Anti ...c5 Tactical", "Opposite-side Attack", "King's Indian Setup",
+  "Fianchetto Control", "Nimzo Structure Exchange", "Benoni Structure", "Positional Squeeze", "Pawn Storm Attack",
+  "Queen's Indian Style", "Modern Dragon Structure", "Classical Jobava Setup", "Tactical Center Break", "Flexible Development",
+  "Early c5 Counterattack", "Queen Activity Line", "Central Exchange System", "Benoni Structure Active", "Early Tactical Explosion",
+  "Kingside Pressure", "Structural Pressure", "Modern Attack Plan", "Open Center Attack", "King Safety Pressure",
+  "Slow Build Attack", "Early Queen Activity", "Positional Edge", "King-Attack Speed", "Final Master Attack",
+];
+
+interface MasterclassLine {
+  id: string;
+  title: string;
+  moves: OpeningMove[];
+}
 
 interface OpeningTrainerViewProps {
   opening: Opening;
@@ -50,6 +66,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [currentPath, setCurrentPath] = useState<number[]>([0]); // path of indices into tree
   const [viewUpToIndex, setViewUpToIndex] = useState(0); // how many moves deep we're viewing
   const [flipped, setFlipped] = useState(false);
+  const [selectedMasterLine, setSelectedMasterLine] = useState(0);
 
   // Training state
   const [trainPath, setTrainPath] = useState<number[]>([]);
@@ -62,11 +79,28 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [trainLegalMoves, setTrainLegalMoves] = useState<Square[]>([]);
   const [showHint, setShowHint] = useState(false);
 
+  const masterclassLines: MasterclassLine[] = useMemo(() => {
+    if (opening.id !== "masterclass-jobava-london") return [];
+    return Array.from({ length: 30 }, (_, index) => {
+      const lessonId = `jl-${index + 1}`;
+      const lessonMoves = LESSON_MOVES[lessonId]?.moves || [];
+      return {
+        id: lessonId,
+        title: JOBAVA_VARIATION_TITLES[index],
+        moves: lessonMoves.map((move) => ({ san: move.move, explanation: move.explanation, children: [], isMainLine: true })),
+      };
+    }).filter((line) => line.moves.length > 0);
+  }, [opening.id]);
+
+  const isMasterclassOpening = masterclassLines.length === 30;
+  const activeMasterLine = isMasterclassOpening ? masterclassLines[selectedMasterLine] : null;
+
   // Build the full path of moves for the current selection
   const fullMovePath = useMemo(() => {
+    if (activeMasterLine) return activeMasterLine.moves;
     // Walk from root, always taking index from currentPath
     return getMovesForPath(opening.tree, currentPath);
-  }, [opening.tree, currentPath]);
+  }, [activeMasterLine, opening.tree, currentPath]);
 
   // Clamp viewUpToIndex
   const clampedView = Math.min(viewUpToIndex, fullMovePath.length - 1);
