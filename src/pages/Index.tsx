@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -571,6 +572,13 @@ const Index = () => {
           </div>
         </SectionHeader>
       </div>
+
+      {/* Share MasterChess — site-wide share card */}
+      <section className="px-4 pb-16">
+        <div className="max-w-2xl mx-auto">
+          <InviteFriendsCard variant="share" />
+        </div>
+      </section>
 
       <Footer />
     </div>

@@ -16,6 +16,11 @@ interface InviteFriendsCardProps {
   username?: string | null;
   /** Display name shown in the share copy. */
   displayName?: string | null;
+  /**
+   * "invite" → personal friend invite (default, used on /friends).
+   * "share"  → generic site-wide share card (used on the homepage).
+   */
+  variant?: "invite" | "share";
 }
 
 const INVITE_DOMAIN = "https://masterchess.live";
@@ -27,19 +32,26 @@ const PLATFORM_BTN =
 export default function InviteFriendsCard({
   username,
   displayName,
+  variant = "invite",
 }: InviteFriendsCardProps) {
   const [copied, setCopied] = useState(false);
 
   const inviteUrl = useMemo(() => {
-    if (username) {
+    if (variant === "invite" && username) {
       return `${INVITE_DOMAIN}/?ref=${encodeURIComponent(username)}`;
     }
     return `${INVITE_DOMAIN}/`;
-  }, [username]);
+  }, [username, variant]);
 
   const inviter = displayName || username || "A friend";
-  const message = `${inviter} invites you to play chess on MasterChess — train, learn openings, and play live games. Join now: ${inviteUrl}`;
-  const shortMessage = `Join me on MasterChess and let's play! ${inviteUrl}`;
+  const message =
+    variant === "share"
+      ? `♟️ Play, learn and compete on MasterChess — opening trainer, live games, tournaments and bots from 400 to 3200 ELO. Join free: ${inviteUrl}`
+      : `${inviter} invites you to play chess on MasterChess — train, learn openings, and play live games. Join now: ${inviteUrl}`;
+  const shortMessage =
+    variant === "share"
+      ? `Play, learn and compete on MasterChess ♟️ ${inviteUrl}`
+      : `Join me on MasterChess and let's play! ${inviteUrl}`;
 
   const copyLink = async () => {
     try {
@@ -144,12 +156,15 @@ export default function InviteFriendsCard({
         <div className="flex items-center gap-2 mb-2">
           <Share2 className="h-4 w-4 text-primary" />
           <h3 className="font-display text-base font-bold text-foreground">
-            Invite friends to MasterChess
+            {variant === "share"
+              ? "Share MasterChess"
+              : "Invite friends to MasterChess"}
           </h3>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          Share your personal invite link. When friends join, you'll be able to
-          challenge them right away.
+          {variant === "share"
+            ? "Spread the word — send the link to anyone who loves chess. They'll land straight on the homepage."
+            : "Share your personal invite link. When friends join, you'll be able to challenge them right away."}
         </p>
 
         {/* Link + copy */}
