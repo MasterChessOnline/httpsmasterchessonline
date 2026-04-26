@@ -23,6 +23,7 @@ export interface OnlineGame {
   last_move_from: string | null;
   last_move_to: string | null;
   turn: string;
+  is_rated?: boolean;
 }
 
 export function useOnlineGame() {
