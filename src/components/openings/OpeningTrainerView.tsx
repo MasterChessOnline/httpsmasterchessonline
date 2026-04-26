@@ -80,12 +80,18 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   // variations from the move tree via getAllVariationPaths().
   const masterclassLines: MasterclassLine[] = useMemo(() => {
     if (opening.id === "masterclass-jobava-london") {
+      // Pull curated titles from the Jobava London course definition so the
+      // trainer sidebar matches the Learn course cards (Line N — <Name>).
+      const jobavaCourse = COURSES.find((c) => c.id === "masterclass-jobava-london");
+      const lessonTitleById = new Map<string, string>(
+        (jobavaCourse?.lessons ?? []).map((l) => [l.id, l.title]),
+      );
       return Array.from({ length: JOBAVA_LINE_COUNT }, (_, index) => {
         const lessonId = `jl-${index + 1}`;
         const lessonMoves = LESSON_MOVES[lessonId]?.moves || [];
         return {
           id: lessonId,
-          title: `Line ${index + 1}`,
+          title: lessonTitleById.get(lessonId) ?? `Line ${index + 1}`,
           moves: lessonMoves.map((move) => ({ san: move.san, explanation: move.explanation, children: [], isMainLine: true })),
         };
       }).filter((line) => line.moves.length > 0);
