@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake, Zap, Eye, MonitorOff } from "lucide-react";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
+import ChessBoard from "@/components/chess/ChessBoard";
+import { useToast } from "@/hooks/use-toast";
 import RatingChange from "@/components/RatingChange";
 import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
