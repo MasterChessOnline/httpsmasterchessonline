@@ -458,10 +458,12 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
     return { completed, premiumLocked: false, sequentialLocked: false, locked: false };
   };
 
-  // Difficulty tag for masterclass cards (cycles Easy → Medium → Advanced based on variation index)
+  // Difficulty tag — distributes Easy/Medium/Advanced across the lesson list
   const variationDifficulty = (idx: number): { label: string; color: string; bg: string; border: string } => {
-    if (idx < 10) return { label: "Easy", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" };
-    if (idx < 20) return { label: "Medium", color: "text-primary", bg: "bg-primary/10", border: "border-primary/30" };
+    const total = course.lessons.length;
+    const ratio = total <= 1 ? 0 : idx / (total - 1);
+    if (ratio < 0.34) return { label: "Easy", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" };
+    if (ratio < 0.67) return { label: "Medium", color: "text-primary", bg: "bg-primary/10", border: "border-primary/30" };
     return { label: "Advanced", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30" };
   };
 
