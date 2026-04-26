@@ -14,6 +14,8 @@ interface PlayFromPositionDialogProps {
   fen: string;
   /** Display name of the line/opening, used in confirmation copy. */
   contextLabel?: string;
+  /** Opening id to return to from the Play page (Continue course button). */
+  returnOpeningId?: string;
 }
 
 type Side = "w" | "b";
@@ -29,6 +31,7 @@ export default function PlayFromPositionDialog({
   onOpenChange,
   fen,
   contextLabel,
+  returnOpeningId,
 }: PlayFromPositionDialogProps) {
   const navigate = useNavigate();
   const [side, setSide] = useState<Side>("w");
@@ -53,6 +56,7 @@ export default function PlayFromPositionDialog({
         botId: selectedBotId,
         playerColor: side,
         contextLabel: contextLabel ?? null,
+        returnOpeningId: returnOpeningId ?? null,
         ts: Date.now(),
       }),
     );
