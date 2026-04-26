@@ -1093,6 +1093,7 @@ const Play = () => {
                 isGameOver={isGameOver}
                 isPlayerTurn={isPlayerTurn}
                 hintSquare={hintSquare}
+                hintToSquare={hintToSquare}
                 onSquareClick={handleSquareClick}
                 premove={premove}
                 overlay={gameOverInfo ? (
