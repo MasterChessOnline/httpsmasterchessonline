@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, BookOpen, Filter } from "lucide-react";
+import { Search, BookOpen, Filter, Crown } from "lucide-react";
 
 type CategoryFilter = "all" | Opening["category"];
 type DifficultyFilter = "all" | Opening["difficulty"];
@@ -62,14 +62,27 @@ export default function OpeningTrainer() {
     });
   }, [search, category, difficulty]);
 
-  // Sort: favorites first
-  const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
+  // Detect masterclass openings (premium courses)
+  const isMasterclass = (o: Opening) =>
+    o.id.includes("masterclass") || o.name.toLowerCase().includes("masterclass") || o.name.toLowerCase().includes("masterkurs");
+
+  // Split: masterclasses first, then everything else (favorites prioritised within each)
+  const masterclassOpenings = useMemo(
+    () => filtered.filter(isMasterclass).sort((a, b) => {
       const aFav = favorites.has(a.id) ? 0 : 1;
       const bFav = favorites.has(b.id) ? 0 : 1;
       return aFav - bFav;
-    });
-  }, [filtered, favorites]);
+    }),
+    [filtered, favorites],
+  );
+  const regularOpenings = useMemo(
+    () => filtered.filter((o) => !isMasterclass(o)).sort((a, b) => {
+      const aFav = favorites.has(a.id) ? 0 : 1;
+      const bFav = favorites.has(b.id) ? 0 : 1;
+      return aFav - bFav;
+    }),
+    [filtered, favorites],
+  );
 
   if (selectedOpening) {
     return <OpeningTrainerView opening={selectedOpening} onBack={() => setSelectedOpening(null)} />;
@@ -144,9 +157,51 @@ export default function OpeningTrainer() {
         </div>
       </section>
 
-      {/* Grid */}
+      {/* Masterclass — premium hero strip */}
+      {masterclassOpenings.length > 0 && (
+        <section className="px-4 pb-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-primary/60" />
+              <h2 className="font-display text-base sm:text-lg font-bold text-foreground flex items-center gap-2 whitespace-nowrap">
+                <Crown className="w-5 h-5 text-primary fill-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]" />
+                Masterclass · Premium Repertoires
+              </h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/40 to-primary/60" />
+            </div>
+            <p className="text-center text-muted-foreground text-xs sm:text-sm mb-5 max-w-2xl mx-auto">
+              Elite, Stockfish-vetted opening repertoires with 50–130 annotated lines, interactive boards, and Practice mode.
+            </p>
+            <motion.div
+              key={`mc-${category}-${difficulty}-${search}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              {masterclassOpenings.map((opening, i) => (
+                <OpeningCard
+                  key={opening.id}
+                  opening={opening}
+                  index={i}
+                  isFavorite={favorites.has(opening.id)}
+                  onSelect={() => setSelectedOpening(opening)}
+                  onToggleFavorite={() => toggleFavorite(opening.id)}
+                />
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      )}
+
+      {/* Regular openings grid */}
       <section className="px-4 pb-20">
         <div className="max-w-5xl mx-auto">
+          {masterclassOpenings.length > 0 && regularOpenings.length > 0 && (
+            <h2 className="font-display text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+              All Openings
+            </h2>
+          )}
           <AnimatePresence mode="wait">
             <motion.div
               key={`${category}-${difficulty}-${search}`}
@@ -156,7 +211,7 @@ export default function OpeningTrainer() {
               transition={{ duration: 0.2 }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
             >
-              {sorted.map((opening, i) => (
+              {regularOpenings.map((opening, i) => (
                 <OpeningCard
                   key={opening.id}
                   opening={opening}
@@ -169,7 +224,7 @@ export default function OpeningTrainer() {
             </motion.div>
           </AnimatePresence>
 
-          {sorted.length === 0 && (
+          {masterclassOpenings.length === 0 && regularOpenings.length === 0 && (
             <div className="text-center py-16">
               <p className="text-muted-foreground">No openings match your search.</p>
             </div>
