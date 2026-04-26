@@ -39,6 +39,7 @@ interface ChessBoardProps {
   isGameOver: boolean;
   isPlayerTurn: boolean;
   hintSquare?: Square | null;
+  hintToSquare?: Square | null;
   premove?: { from: Square; to: Square } | null;
   onSquareClick: (square: Square) => void;
   overlay?: React.ReactNode;
