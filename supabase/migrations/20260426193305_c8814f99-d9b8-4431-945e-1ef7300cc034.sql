@@ -1,0 +1,1 @@
+ALTER TABLE public.game_invites ADD COLUMN IF NOT EXISTS sender_color TEXT NOT NULL DEFAULT 'random' CHECK (sender_color IN ('white','black','random'));

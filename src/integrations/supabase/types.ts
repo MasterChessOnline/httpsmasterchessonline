@@ -519,6 +519,7 @@ export type Database = {
           message: string | null
           recipient_id: string
           responded_at: string | null
+          sender_color: string
           sender_id: string
           status: string
           time_control_increment: number
@@ -534,6 +535,7 @@ export type Database = {
           message?: string | null
           recipient_id: string
           responded_at?: string | null
+          sender_color?: string
           sender_id: string
           status?: string
           time_control_increment?: number
@@ -549,6 +551,7 @@ export type Database = {
           message?: string | null
           recipient_id?: string
           responded_at?: string | null
+          sender_color?: string
           sender_id?: string
           status?: string
           time_control_increment?: number
