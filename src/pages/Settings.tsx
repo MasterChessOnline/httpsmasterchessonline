@@ -132,6 +132,11 @@ const Settings = () => {
   const [showRatingChange, setShowRatingChange] = useState<boolean>(settings.showRatingChange ?? true);
   const [showExpectedScore, setShowExpectedScore] = useState<boolean>(settings.showExpectedScore ?? true);
   const [ratingAnimation, setRatingAnimation] = useState<boolean>(settings.ratingAnimation ?? true);
+  // Sound pack
+  const [soundPack, setSoundPack] = useState<string>(() => {
+    const saved = settings.soundPack;
+    return SOUND_PACKS.find(p => p.key === saved) ? saved : "wood";
+  });
 
   useEffect(() => {
     if (profile) {
