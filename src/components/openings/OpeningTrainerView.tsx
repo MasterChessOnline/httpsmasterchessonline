@@ -17,8 +17,24 @@ import {
 
 type Mode = "explore" | "train";
 
-// Total Jobava London masterclass lines (kept in sync with courses-data.ts).
-const JOBAVA_LINE_COUNT = 130;
+// Registry of openings that pull their lines from a `MasterKurs` course in
+// `courses-data.ts` (curated titles + chapters) plus the matching lesson IDs
+// in `lesson-moves.ts`. Add a new entry here when you ship another masterclass.
+const MASTERCLASS_OPENINGS: Record<
+  string,
+  { courseId: string; lessonPrefix: string; lineCount: number }
+> = {
+  "masterclass-jobava-london": {
+    courseId: "masterkurs-jobava-london",
+    lessonPrefix: "jl",
+    lineCount: 130,
+  },
+  "masterclass-kalashnikov": {
+    courseId: "masterkurs-kalashnikov",
+    lessonPrefix: "kal",
+    lineCount: 50,
+  },
+};
 
 interface MasterclassLine {
   id: string;
