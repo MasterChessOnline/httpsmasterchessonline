@@ -63,7 +63,7 @@ export default function OpeningCard({
       )}
 
       {isMasterclass && (
-        <div className="absolute -top-2 -left-2 z-10 flex items-center gap-1.5">
+        <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5 flex-wrap">
           <Badge className="bg-primary text-primary-foreground border border-primary/60 text-[9px] uppercase tracking-wider font-bold shadow-lg">
             <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> Masterclass
           </Badge>
