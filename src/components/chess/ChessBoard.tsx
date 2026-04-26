@@ -162,10 +162,10 @@ export default function ChessBoard({
                     {isLegal && pd && (
                       <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />
                     )}
-                    {/* Piece with slide animation */}
+                    {/* Piece — SVG artwork or Unicode glyph depending on the active set */}
                     {pd && (
                       <motion.span
-                        key={slideOffset ? `slide-${moveCountRef.current}` : `${square}-${pieceKey}`}
+                        key={slideOffset ? `slide-${moveCountRef.current}` : `${square}-${pieceKey}-${pieceStyle.key}`}
                         initial={
                           slideOffset
                             ? { x: slideOffset.x, y: slideOffset.y, scale: 1 }
@@ -182,32 +182,40 @@ export default function ChessBoard({
                             ? { scale: 1.15, y: -3, filter: pd.white ? "drop-shadow(0 0 12px rgba(255,215,0,0.6))" : "drop-shadow(0 0 12px rgba(100,180,255,0.5))", transition: { duration: 0.15 } }
                             : undefined
                         }
-                        className={`text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none z-10 cursor-pointer ${
-                          !pd.colorful && pd.white
-                            ? "drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
-                            : !pd.colorful
-                              ? "drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
-                              : "drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+                        className={`leading-none z-10 cursor-pointer flex items-center justify-center ${
+                          pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)]"
+                        } ${
+                          pd.white
+                            ? "drop-shadow-[0_1px_3px_rgba(0,0,0,0.55)]"
+                            : "drop-shadow-[0_1px_2px_rgba(255,255,255,0.18)]"
                         } ${isSelected ? "drop-shadow-[0_0_10px_hsl(43_80%_55%/0.6)] scale-110" : ""}`}
                         style={{
                           position: "relative",
-                          color: pd.colorful
-                            ? undefined
-                            : pd.white
-                              ? "var(--piece-white, #ffffff)"
-                              : "var(--piece-black, hsl(220,15%,8%))",
-                          fontWeight: pd.colorful ? 400 : ("var(--piece-weight, 400)" as any),
-                          fontFamily: pieceStyle.render.fontFamily || undefined,
-                          transform: `scale(${pieceStyle.render.scale ?? 1})`,
-                          WebkitTextStroke: pd.colorful
-                            ? undefined
-                            : pd.white
-                              ? "0.5px var(--piece-white-stroke, transparent)"
-                              : "0.5px var(--piece-black-stroke, transparent)",
-                          textShadow: pd.colorful ? undefined : "0 0 8px var(--piece-glow, transparent)",
+                          ...(pd.svgUrl
+                            ? {}
+                            : {
+                                color: pd.white
+                                  ? "var(--piece-white, #ffffff)"
+                                  : "var(--piece-black, hsl(220,15%,8%))",
+                                fontWeight: "var(--piece-weight, 400)" as any,
+                                WebkitTextStroke: pd.white
+                                  ? "0.5px var(--piece-white-stroke, transparent)"
+                                  : "0.5px var(--piece-black-stroke, transparent)",
+                                textShadow: "0 0 8px var(--piece-glow, transparent)",
+                              }),
                         }}
                       >
-                        {pd.symbol}
+                        {pd.svgUrl ? (
+                          <img
+                            src={pd.svgUrl}
+                            alt=""
+                            draggable={false}
+                            className="w-full h-full object-contain pointer-events-none"
+                            style={pd.pixelated ? { imageRendering: "pixelated" } : undefined}
+                          />
+                        ) : (
+                          pd.symbol
+                        )}
                       </motion.span>
                     )}
                   </button>

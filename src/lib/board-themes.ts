@@ -54,84 +54,90 @@ export const BOARD_THEMES: BoardTheme[] = [
 ];
 
 export interface PieceGlyphSet {
-  // Each entry is the glyph (or short string) used to render that piece.
-  // Keys are lowercase pieces — case is interpreted at render time.
+  // Each entry is the glyph (or short string) used to render that piece — only
+  // used by the Unicode-based "standard" family. SVG-based sets ignore this
+  // and load actual piece artwork from /public/pieces/<set>/<color><type>.svg.
   K: string; Q: string; R: string; B: string; N: string; P: string; // white
   k: string; q: string; r: string; b: string; n: string; p: string; // black
 }
 
-// Standard chess Unicode set (used by most styles).
+// Standard chess Unicode set (used by the Unicode-render family of styles).
 const GLYPHS_STANDARD: PieceGlyphSet = {
   K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
   k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
-};
-
-// Latin letter set — bold capitals/lowercase. Looks like an algebraic notation board.
-const GLYPHS_LETTERS: PieceGlyphSet = {
-  K: "K", Q: "Q", R: "R", B: "B", N: "N", P: "P",
-  k: "k", q: "q", r: "r", b: "b", n: "n", p: "p",
-};
-
-// Geometric shapes — minimalist, very distinct silhouettes.
-const GLYPHS_SHAPES: PieceGlyphSet = {
-  K: "★", Q: "✦", R: "■", B: "▲", N: "◆", P: "●",
-  k: "☆", q: "✧", r: "□", b: "△", n: "◇", p: "○",
-};
-
-// Xiangqi / shogi inspired — single CJK characters per role.
-const GLYPHS_CJK: PieceGlyphSet = {
-  K: "王", Q: "后", R: "車", B: "象", N: "馬", P: "兵",
-  k: "将", q: "妃", r: "车", b: "相", n: "马", p: "卒",
-};
-
-// Emoji set — playful, instantly recognizable shapes.
-const GLYPHS_EMOJI: PieceGlyphSet = {
-  K: "🤴", Q: "👸", R: "🏰", B: "⛪", N: "🐴", P: "🛡️",
-  k: "👑", q: "🦹", r: "🗼", b: "🔮", n: "🦄", p: "⚔️",
-};
-
-// Animal kingdom — every piece is a different creature.
-const GLYPHS_ANIMALS: PieceGlyphSet = {
-  K: "🦁", Q: "🦅", R: "🐘", B: "🦊", N: "🐎", P: "🐭",
-  k: "🐺", q: "🦉", r: "🦏", b: "🦝", n: "🦓", p: "🐀",
-};
-
-// Medieval heraldry — heavy bold ornament glyphs.
-const GLYPHS_HERALDRY: PieceGlyphSet = {
-  K: "♛", Q: "♜", R: "▩", B: "✠", N: "❦", P: "❖",
-  k: "♕", q: "♖", r: "▦", b: "✚", n: "❧", p: "◈",
-};
-
-// Runes — esoteric / fantasy vibe.
-const GLYPHS_RUNES: PieceGlyphSet = {
-  K: "ᛟ", Q: "ᚦ", R: "ᛏ", B: "ᛒ", N: "ᚺ", P: "ᛉ",
-  k: "ᛜ", q: "ᚹ", r: "ᛁ", b: "ᛚ", n: "ᛇ", p: "ᛋ",
 };
 
 export interface PieceStyle {
   key: string;
   label: string;
   description: string;
+  // Render mode:
+  //  - "unicode" → render the glyph from `glyphs` and tint with whiteFill/blackFill
+  //  - "svg"     → render <img src="/pieces/<svgFolder>/wK.svg"> (real artwork)
+  mode: "unicode" | "svg";
   glyphs: PieceGlyphSet;
-  // Pure-CSS rendering recipe so we don't need image assets
+  // SVG folder under /public/pieces — only used when mode === "svg"
+  svgFolder?: "cburnett" | "merida" | "cardinal" | "pixel";
+  // Pure-CSS rendering recipe (used by unicode mode + as accent on some svg sets)
   render: {
-    whiteFill: string;          // CSS color for white pieces
-    blackFill: string;          // CSS color for black pieces
+    whiteFill: string;          // CSS color for white pieces (unicode only)
+    blackFill: string;          // CSS color for black pieces (unicode only)
     whiteStroke?: string;       // Optional outline for white
     blackStroke?: string;       // Optional outline for black
     fontWeight?: number;
     glow?: string;              // box/text-shadow color for accents
-    fontFamily?: string;        // Optional font family override
-    scale?: number;             // Optional scale factor for glyph (e.g. 0.85 for emoji)
+    // Filter applied to SVG <img> for tonal tweaks (e.g. brightness, hue-rotate).
+    svgFilter?: string;
+    // Pixel rendering — used by 8-bit set so it stays crisp.
+    pixelated?: boolean;
   };
 }
 
 export const PIECE_STYLES: PieceStyle[] = [
-  // === STANDARD UNICODE FAMILY ===
+  // === REAL SVG PIECE SETS — look like actual chess pieces (chess.com / lichess style) ===
+  {
+    key: "cburnett",
+    label: "Cburnett (Classic)",
+    description: "Iconic Staunton — lichess default, hand-drawn",
+    mode: "svg",
+    svgFolder: "cburnett",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#fbf3e0", blackFill: "#161214" },
+  },
+  {
+    key: "neo",
+    label: "Neo (Chess.com Style)",
+    description: "Modern bold silhouettes with strong outlines",
+    mode: "svg",
+    svgFolder: "cardinal",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#ffffff", blackFill: "#000000" },
+  },
+  {
+    key: "merida",
+    label: "Merida",
+    description: "Tournament classic — Italian competition style",
+    mode: "svg",
+    svgFolder: "merida",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#ffffff", blackFill: "#000000" },
+  },
+  {
+    key: "pixel",
+    label: "Pixel (8-bit)",
+    description: "Retro 8-bit pieces — crunchy & nostalgic",
+    mode: "svg",
+    svgFolder: "pixel",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#ffffff", blackFill: "#000000", pixelated: true },
+  },
+
+  // === UNICODE STAUNTON FAMILY — fast, no assets, color/finish variations ===
   {
     key: "standard",
     label: "Classic Staunton",
     description: "Polished ivory & ebony, tournament finish",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#fbf3e0", blackFill: "#161214", whiteStroke: "rgba(40,25,10,0.75)", blackStroke: "rgba(255,235,200,0.18)", fontWeight: 500, glow: "rgba(255,220,170,0.22)" },
   },
@@ -139,6 +145,7 @@ export const PIECE_STYLES: PieceStyle[] = [
     key: "minimal",
     label: "Modern Minimal",
     description: "Light, clean silhouettes",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#f4f4f5", blackFill: "#18181b", fontWeight: 300 },
   },
@@ -146,6 +153,7 @@ export const PIECE_STYLES: PieceStyle[] = [
     key: "bold",
     label: "Bold High-Contrast",
     description: "Heavy weight, easy to read",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#ffffff", blackFill: "#000000", whiteStroke: "rgba(0,0,0,1)", blackStroke: "rgba(255,255,255,0.4)", fontWeight: 700 },
   },
@@ -153,6 +161,7 @@ export const PIECE_STYLES: PieceStyle[] = [
     key: "glass",
     label: "Glass",
     description: "Translucent with subtle glow",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "rgba(255,255,255,0.85)", blackFill: "rgba(20,20,30,0.85)", whiteStroke: "rgba(255,255,255,0.6)", blackStroke: "rgba(180,180,255,0.5)", glow: "rgba(180,200,255,0.45)", fontWeight: 400 },
   },
@@ -160,6 +169,7 @@ export const PIECE_STYLES: PieceStyle[] = [
     key: "outline",
     label: "Outline",
     description: "Hollow pieces, max clarity",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "transparent", blackFill: "transparent", whiteStroke: "rgba(255,255,255,1)", blackStroke: "rgba(0,0,0,1)", fontWeight: 600 },
   },
@@ -167,6 +177,7 @@ export const PIECE_STYLES: PieceStyle[] = [
     key: "neon",
     label: "Neon Glow",
     description: "Cyber-style with light bloom",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#fef3c7", blackFill: "#a78bfa", glow: "rgba(168,85,247,0.6)", fontWeight: 500 },
   },
@@ -174,6 +185,7 @@ export const PIECE_STYLES: PieceStyle[] = [
     key: "royal",
     label: "Golden Royal",
     description: "Premium gold accents",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#fbbf24", blackFill: "#1f1611", whiteStroke: "rgba(120,80,0,0.7)", fontWeight: 500 },
   },
@@ -181,27 +193,15 @@ export const PIECE_STYLES: PieceStyle[] = [
     key: "monochrome",
     label: "Monochrome",
     description: "Pure black on white",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#e5e5e5", blackFill: "#0a0a0a", fontWeight: 400 },
-  },
-  {
-    key: "tournament",
-    label: "Tournament Pro",
-    description: "Crisp ivory & graphite",
-    glyphs: GLYPHS_STANDARD,
-    render: { whiteFill: "#faf6ec", blackFill: "#2a2622", whiteStroke: "rgba(60,40,20,0.6)", blackStroke: "rgba(255,255,255,0.15)", fontWeight: 500 },
-  },
-  {
-    key: "cartoon",
-    label: "Cartoon",
-    description: "Playful rounded look",
-    glyphs: GLYPHS_STANDARD,
-    render: { whiteFill: "#fff4d4", blackFill: "#3b2a4a", whiteStroke: "rgba(180,120,40,0.8)", blackStroke: "rgba(255,200,255,0.4)", fontWeight: 700 },
   },
   {
     key: "wood3d",
     label: "Polished Walnut",
     description: "Hand-carved walnut, lacquered tournament finish",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#f7e2b8", blackFill: "#1a0a04", whiteStroke: "rgba(90,55,20,0.95)", blackStroke: "rgba(255,210,150,0.45)", fontWeight: 600, glow: "rgba(180,110,40,0.5)" },
   },
@@ -209,59 +209,9 @@ export const PIECE_STYLES: PieceStyle[] = [
     key: "fantasy",
     label: "Fantasy",
     description: "Mystical themed pieces with magical aura",
+    mode: "unicode",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#e0f7ff", blackFill: "#2a0a3a", whiteStroke: "rgba(120,200,255,0.9)", blackStroke: "rgba(220,140,255,0.7)", fontWeight: 600, glow: "rgba(160,120,255,0.55)" },
-  },
-
-  // === DIFFERENT GLYPH FAMILIES — actually look different ===
-  {
-    key: "letters",
-    label: "Algebraic Letters",
-    description: "Bold KQRBNP letters — looks like notation",
-    glyphs: GLYPHS_LETTERS,
-    render: { whiteFill: "#fafafa", blackFill: "#0a0a0a", whiteStroke: "rgba(0,0,0,0.6)", blackStroke: "rgba(255,255,255,0.2)", fontWeight: 800, fontFamily: "'JetBrains Mono', 'SF Mono', monospace", scale: 0.78 },
-  },
-  {
-    key: "shapes",
-    label: "Geometric Shapes",
-    description: "Stars, squares, triangles — pure minimalism",
-    glyphs: GLYPHS_SHAPES,
-    render: { whiteFill: "#fef3c7", blackFill: "#1e293b", whiteStroke: "rgba(0,0,0,0.4)", blackStroke: "rgba(255,255,255,0.3)", fontWeight: 400, scale: 0.85 },
-  },
-  {
-    key: "cjk",
-    label: "Xiangqi Style",
-    description: "CJK characters — Chinese chess influence",
-    glyphs: GLYPHS_CJK,
-    render: { whiteFill: "#fef9e7", blackFill: "#7f1d1d", whiteStroke: "rgba(120,30,30,0.85)", blackStroke: "rgba(255,220,180,0.4)", fontWeight: 700, fontFamily: "'Noto Serif CJK SC', 'SimSun', serif", scale: 0.7 },
-  },
-  {
-    key: "emoji",
-    label: "Royal Emoji",
-    description: "King, queen, castle, knight — full color emoji",
-    glyphs: GLYPHS_EMOJI,
-    render: { whiteFill: "transparent", blackFill: "transparent", fontWeight: 400, scale: 0.88 },
-  },
-  {
-    key: "animals",
-    label: "Animal Kingdom",
-    description: "Lions, eagles, elephants — every piece is unique",
-    glyphs: GLYPHS_ANIMALS,
-    render: { whiteFill: "transparent", blackFill: "transparent", fontWeight: 400, scale: 0.88 },
-  },
-  {
-    key: "heraldry",
-    label: "Medieval Heraldry",
-    description: "Crosses, fleurs, ornaments — coat-of-arms feel",
-    glyphs: GLYPHS_HERALDRY,
-    render: { whiteFill: "#fde68a", blackFill: "#451a03", whiteStroke: "rgba(120,60,0,0.7)", blackStroke: "rgba(255,210,150,0.4)", fontWeight: 600, scale: 0.92 },
-  },
-  {
-    key: "runes",
-    label: "Norse Runes",
-    description: "Ancient runic glyphs — mystical & rare",
-    glyphs: GLYPHS_RUNES,
-    render: { whiteFill: "#dbeafe", blackFill: "#1e1b4b", whiteStroke: "rgba(30,30,80,0.7)", blackStroke: "rgba(180,200,255,0.45)", fontWeight: 600, glow: "rgba(120,140,255,0.4)", scale: 0.82 },
   },
 ];
 
@@ -298,8 +248,6 @@ export function applyPieceStyle(styleKey: string) {
   root.style.setProperty("--piece-black-stroke", style.render.blackStroke || "transparent");
   root.style.setProperty("--piece-weight", String(style.render.fontWeight || 400));
   root.style.setProperty("--piece-glow", style.render.glow || "transparent");
-  root.style.setProperty("--piece-font-family", style.render.fontFamily || "inherit");
-  root.style.setProperty("--piece-scale", String(style.render.scale ?? 1));
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(PIECE_STYLE_EVENT, { detail: style.key }));
   }
@@ -317,5 +265,7 @@ export function bootstrapVisualSettings() {
   if (typeof window === "undefined") return;
   const s = readSettings();
   if (s.boardTheme) applyBoardTheme(s.boardTheme);
-  applyPieceStyle(s.pieceStyle || "standard");
+  // Migrate old keys that no longer exist (emoji, animals, letters, etc.) → fall back.
+  const validKey = PIECE_STYLES.find(p => p.key === s.pieceStyle)?.key || "cburnett";
+  applyPieceStyle(validKey);
 }
