@@ -125,7 +125,7 @@ for (const line of out) {
   }).join(" ");
   const safeMoveString = moveString.replace(/"/g, '\\"');
   const safeTitle = title.replace(/"/g, '\\"');
-  coursesTs += `      L("jl-${line.num}", "${safeTitle}", "Sequence: ${safeMoveString}. Play through the moves on the interactive board, then click \\"Practice\\" to test your recall.", ["Memorize the line: ${safeMoveString}", "Understand the typical Jobava plans behind every move.", "Use the practice mode to drill the moves without hints."], "${line.chapter.replace(/"/g, '\\"')}"),\n`;
+  coursesTs += `      LC("jl-${line.num}", "${safeTitle}", "Sequence: ${safeMoveString}. Play through the moves on the interactive board, then click \\"Practice\\" to test your recall.", ["Memorize the line: ${safeMoveString}", "Understand the typical Jobava plans behind every move.", "Use the practice mode to drill the moves without hints."], "${line.chapter.replace(/"/g, '\\"')}"),\n`;
 }
 fs.writeFileSync("/tmp/courses-block.ts", coursesTs);
 console.log("Wrote /tmp/courses-block.ts");
