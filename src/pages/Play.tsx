@@ -56,6 +56,8 @@ const Play = () => {
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
   const [hintsEnabled, setHintsEnabled] = useState(false);
   const [hintSquare, setHintSquare] = useState<Square | null>(null);
+  const [hintToSquare, setHintToSquare] = useState<Square | null>(null);
+  const [hintText, setHintText] = useState<string>("");
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [resignedBy, setResignedBy] = useState<"w" | "b" | null>(null);
   const [drawAgreed, setDrawAgreed] = useState(false);
