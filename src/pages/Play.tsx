@@ -1051,6 +1051,11 @@ const Play = () => {
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               )}
             </div>
+
+            {/* Rating change — directly under the board */}
+            {botRatingResult && mode === "ai" && isGameOver && (
+              <RatingChange result={botRatingResult} ratingType="bot" />
+            )}
           </div>
 
           {/* Controls column */}
@@ -1098,19 +1103,6 @@ const Play = () => {
               </div>
             )}
 
-            {isGameOver && gameResult && moveHistory.length >= 4 && (
-              <GameSummary
-                moveHistory={moveHistory}
-                result={gameResult}
-                playerColor={playerColor}
-                difficulty={difficulty}
-                playerMoveQuality={mode === "ai" ? playerMoveQuality : undefined}
-                botName={mode === "ai" ? currentBot.name : undefined}
-              />
-            )}
-            {botRatingResult && mode === "ai" && (
-              <RatingChange result={botRatingResult} ratingType="bot" />
-            )}
             {streakAfter && streakAfter.current_streak >= 2 && mode === "ai" && (
               <div className="rounded-xl border border-border/50 bg-card/70 backdrop-blur-sm p-3 flex items-center justify-between gap-3 flex-wrap">
                 <div>
@@ -1124,9 +1116,6 @@ const Play = () => {
             )}
             {unlockedBadges.length > 0 && mode === "ai" && (
               <BadgeUnlockToast badges={unlockedBadges} onDismiss={() => setUnlockedBadges([])} />
-            )}
-            {isGameOver && gameResult && pgn && mode === "ai" && (
-              <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />
             )}
 
             {/* Rematch / New Game */}
@@ -1142,6 +1131,25 @@ const Play = () => {
             )}
           </div>
         </div>
+
+        {/* Post-game analysis — full width, side by side on desktop */}
+        {isGameOver && gameResult && mode === "ai" && (moveHistory.length >= 4 || pgn) && (
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {moveHistory.length >= 4 && (
+              <GameSummary
+                moveHistory={moveHistory}
+                result={gameResult}
+                playerColor={playerColor}
+                difficulty={difficulty}
+                playerMoveQuality={playerMoveQuality}
+                botName={currentBot.name}
+              />
+            )}
+            {pgn && (
+              <AnalysisPanel pgn={pgn} playerColor={playerColor} result={gameResult} />
+            )}
+          </div>
+        )}
       </main>
 
       <PromotionDialog isOpen={!!pendingPromotion} color={game.turn()} onSelect={handlePromotionSelect} onCancel={() => setPendingPromotion(null)} />
