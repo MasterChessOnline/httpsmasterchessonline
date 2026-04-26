@@ -2856,13 +2856,13 @@ export const COURSES: Course[] = [
     ],
   },
   /* ════════════════════════════════════════════════════════════
-     MASTERKURS — JOBAVA LONDON SYSTEM (30 variations)
+     MASTERKURS — JOBAVA LONDON SYSTEM (100 lines · 7 chapters)
      A complete weapon for 1.d4 with full annotated lines.
      ════════════════════════════════════════════════════════════ */
   {
     id: "masterkurs-jobava-london",
     title: "MasterKurs: Jobava London System",
-    description: "A 30-variation masterclass on the Jobava London System (1.d4 + 2.Nc3 + 3.Bf4). Each variation comes with an interactive board, move-by-move annotations, and a Practice mode to test your recall.",
+    description: "A 100-line masterclass on the Jobava London System (1.d4 + 2.Nc3 + 3.Bf4), organized into 7 chapters covering every Black response: …c5, …e6, …g6, …a6/…Bf5, sidelines, deep theory, and structural refinements. Each line is fully interactive with move-by-move annotations and a Practice mode.",
     level: "Advanced",
     icon: "Crown",
     tier: "masterclass",
