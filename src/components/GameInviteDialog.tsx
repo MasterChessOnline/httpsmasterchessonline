@@ -220,6 +220,14 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
             <Switch checked={rated} onCheckedChange={setRated} disabled={waiting} />
           </div>
           <p className="text-[10px] text-muted-foreground text-center">Invite expires in 5 minutes</p>
+          {waiting && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 flex items-center gap-2.5">
+              <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />
+              <p className="text-xs text-foreground">
+                Waiting for <span className="font-semibold text-primary">{recipientName}</span> to accept...
+              </p>
+            </div>
+          )}
         </div>
         <DialogFooter>
           {waiting ? (
