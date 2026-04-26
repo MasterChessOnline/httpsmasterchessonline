@@ -152,10 +152,29 @@ const PlayOnline = () => {
         event: "INSERT", schema: "public", table: "game_messages",
         filter: `game_id=eq.${onlineGame.id}`,
       }, (payload) => {
-        setChatMessages(prev => [...prev, payload.new as ChatMessage]);
+        const msg = payload.new as ChatMessage;
+        setChatMessages(prev => [...prev, msg]);
+        // Handle draw offer signaling
+        if (msg.user_id !== user?.id) {
+          if (msg.message === "__draw_offer__") {
+            setDrawOfferedByOpponent(true);
+            toast({ title: "Draw offer", description: "Your opponent offers a draw." });
+          } else if (msg.message === "__draw_accept__") {
+            // Opponent accepted our offer
+            if (drawOfferedByMe) {
+              endGame("1/2-1/2");
+              playChessSound("gameOver");
+            }
+          } else if (msg.message === "__draw_decline__") {
+            if (drawOfferedByMe) {
+              setDrawOfferedByMe(false);
+              toast({ title: "Draw declined", description: "Your opponent declined the draw." });
+            }
+          }
+        }
       }).subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [onlineGame?.id, onlineStatus]);
+  }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
 
