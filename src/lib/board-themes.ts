@@ -96,6 +96,15 @@ export interface PieceStyle {
 export const PIECE_STYLES: PieceStyle[] = [
   // === REAL SVG PIECE SETS — authentic chess piece artwork ===
   {
+    key: "merida",
+    label: "Merida",
+    description: "Tournament classic — Italian competition style (default)",
+    mode: "svg",
+    svgFolder: "merida",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#ffffff", blackFill: "#000000" },
+  },
+  {
     key: "cburnett",
     label: "Cburnett Classic",
     description: "Iconic Staunton — hand-drawn tournament style",
@@ -110,15 +119,6 @@ export const PIECE_STYLES: PieceStyle[] = [
     description: "Bold silhouettes with strong outlines",
     mode: "svg",
     svgFolder: "cardinal",
-    glyphs: GLYPHS_STANDARD,
-    render: { whiteFill: "#ffffff", blackFill: "#000000" },
-  },
-  {
-    key: "merida",
-    label: "Merida",
-    description: "Tournament classic — Italian competition style",
-    mode: "svg",
-    svgFolder: "merida",
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#ffffff", blackFill: "#000000" },
   },
