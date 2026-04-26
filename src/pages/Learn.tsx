@@ -537,29 +537,25 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
 
       {/* Chapter List */}
       <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-        <BookOpen className="w-5 h-5 text-primary" /> Course Chapters
-      </h3>
-
-      {/* Chapter List */}
-      <h3 className="font-display text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
         <BookOpen className="w-5 h-5 text-primary" />
         {isMasterclass ? "Variations" : "Course Chapters"}
       </h3>
 
       {isMasterclass ? (
         /* ── MASTERCLASS: Card Grid ── */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {course.lessons.map((lesson, idx) => {
             const status = getLessonStatus(idx);
             const diff = variationDifficulty(idx);
             // Strip "Variation N: " prefix for clean card title
             const cleanTitle = lesson.title.replace(/^Variation\s+\d+:\s*/i, "");
+            const moveLine = lesson.content.match(/Sequence:\s*(.*?)\. Play through/)?.[1] || lesson.keyPoints[0]?.replace(/^Memorize the line:\s*/i, "");
 
             return (
               <motion.button
                 key={lesson.id}
                 onClick={() => onSelectLesson(idx)}
-                className={`group relative rounded-xl border p-4 text-left transition-all overflow-hidden ${
+                className={`group relative rounded-xl border p-5 text-left transition-all overflow-hidden ${
                   status.completed
                     ? "border-green-500/30 bg-card hover:border-green-500/50"
                     : "border-border/50 bg-card hover:border-primary/50 hover:shadow-[0_0_25px_hsl(var(--primary)/0.2)]"
@@ -590,6 +586,10 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
                 <h4 className="font-display text-sm font-bold text-foreground leading-tight mb-3 line-clamp-2 min-h-[2.4rem]">
                   {cleanTitle}
                 </h4>
+
+                <p className="mb-4 line-clamp-2 text-[11px] font-mono leading-relaxed text-muted-foreground">
+                  {moveLine}
+                </p>
 
                 {/* Start button */}
                 <Button

@@ -893,7 +893,7 @@ export const OPENINGS_DATABASE: Opening[] = [
   // ═══════════════════════════════════════════
   {
     id: "masterclass-jobava-london",
-    name: "Masterclass: Jobava London System",
+    name: "MasterKurs: Jobava London System",
     eco: "D00",
     category: "queen-pawn",
     description: "30-variation deep masterclass on the Jobava London System (1.d4 + 2.Nc3 + 3.Bf4). A complete weapon for White covering positional, tactical, and opposite-side attacking lines.",

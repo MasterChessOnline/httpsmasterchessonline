@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import { Opening, OpeningMove, getMainLine, getAllVariationPaths } from "@/lib/openings-data";
+import { LESSON_MOVES } from "@/lib/lesson-moves";
 import OpeningBoard from "./OpeningBoard";
 import VariationTree from "./VariationTree";
 import { playChessSound } from "@/lib/chess-sounds";
@@ -14,6 +15,21 @@ import {
 } from "lucide-react";
 
 type Mode = "explore" | "train";
+
+const JOBAVA_VARIATION_TITLES = [
+  "Main Solid System", "Early Center Break", "Anti ...c5 Tactical", "Opposite-side Attack", "King's Indian Setup",
+  "Fianchetto Control", "Nimzo Structure Exchange", "Benoni Structure", "Positional Squeeze", "Pawn Storm Attack",
+  "Queen's Indian Style", "Modern Dragon Structure", "Classical Jobava Setup", "Tactical Center Break", "Flexible Development",
+  "Early c5 Counterattack", "Queen Activity Line", "Central Exchange System", "Benoni Structure Active", "Early Tactical Explosion",
+  "Kingside Pressure", "Structural Pressure", "Modern Attack Plan", "Open Center Attack", "King Safety Pressure",
+  "Slow Build Attack", "Early Queen Activity", "Positional Edge", "King-Attack Speed", "Final Master Attack",
+];
+
+interface MasterclassLine {
+  id: string;
+  title: string;
+  moves: OpeningMove[];
+}
 
 interface OpeningTrainerViewProps {
   opening: Opening;
@@ -50,9 +66,11 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [currentPath, setCurrentPath] = useState<number[]>([0]); // path of indices into tree
   const [viewUpToIndex, setViewUpToIndex] = useState(0); // how many moves deep we're viewing
   const [flipped, setFlipped] = useState(false);
+  const [selectedMasterLine, setSelectedMasterLine] = useState(0);
 
   // Training state
   const [trainPath, setTrainPath] = useState<number[]>([]);
+  const [trainCustomMoves, setTrainCustomMoves] = useState<OpeningMove[] | null>(null);
   const [trainMoveIndex, setTrainMoveIndex] = useState(0);
   const [wrongSquare, setWrongSquare] = useState<Square | null>(null);
   const [correctSquare, setCorrectSquare] = useState<Square | null>(null);
@@ -62,11 +80,28 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [trainLegalMoves, setTrainLegalMoves] = useState<Square[]>([]);
   const [showHint, setShowHint] = useState(false);
 
+  const masterclassLines: MasterclassLine[] = useMemo(() => {
+    if (opening.id !== "masterclass-jobava-london") return [];
+    return Array.from({ length: 30 }, (_, index) => {
+      const lessonId = `jl-${index + 1}`;
+      const lessonMoves = LESSON_MOVES[lessonId]?.moves || [];
+      return {
+        id: lessonId,
+        title: JOBAVA_VARIATION_TITLES[index],
+        moves: lessonMoves.map((move) => ({ san: move.san, explanation: move.explanation, children: [], isMainLine: true })),
+      };
+    }).filter((line) => line.moves.length > 0);
+  }, [opening.id]);
+
+  const isMasterclassOpening = masterclassLines.length === 30;
+  const activeMasterLine = isMasterclassOpening ? masterclassLines[selectedMasterLine] : null;
+
   // Build the full path of moves for the current selection
   const fullMovePath = useMemo(() => {
+    if (activeMasterLine) return activeMasterLine.moves;
     // Walk from root, always taking index from currentPath
     return getMovesForPath(opening.tree, currentPath);
-  }, [opening.tree, currentPath]);
+  }, [activeMasterLine, opening.tree, currentPath]);
 
   // Clamp viewUpToIndex
   const clampedView = Math.min(viewUpToIndex, fullMovePath.length - 1);
@@ -120,6 +155,14 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
     playChessSound("move");
   }, []);
 
+  const handleSelectMasterLine = useCallback((index: number) => {
+    setSelectedMasterLine(index);
+    setViewUpToIndex(0);
+    setTrainCustomMoves(null);
+    setMode("explore");
+    playChessSound("move");
+  }, []);
+
   // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -135,6 +178,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
 
   // Extend path if we navigate deeper and need to pick children
   useEffect(() => {
+    if (activeMasterLine) return;
     // If viewUpToIndex goes past current path length, extend with main line (index 0)
     if (viewUpToIndex >= currentPath.length) {
       const node = getNodeAtPath(opening.tree, currentPath);
@@ -142,14 +186,28 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
         setCurrentPath([...currentPath, 0]);
       }
     }
-  }, [viewUpToIndex, currentPath, opening.tree]);
+  }, [activeMasterLine, viewUpToIndex, currentPath, opening.tree]);
 
   // ═══════ TRAINING MODE ═══════
-  const allPaths = useMemo(() => getAllVariationPaths(opening.tree), [opening.tree]);
-  const mainLineMoves = useMemo(() => getMainLine(opening.tree), [opening.tree]);
+  const allPaths = useMemo(() => isMasterclassOpening ? masterclassLines.map((line) => line.moves) : getAllVariationPaths(opening.tree), [isMasterclassOpening, masterclassLines, opening.tree]);
+  const mainLineMoves = useMemo(() => activeMasterLine?.moves || getMainLine(opening.tree), [activeMasterLine, opening.tree]);
 
   const startTraining = useCallback((pathMoves?: OpeningMove[]) => {
     const moves = pathMoves || mainLineMoves;
+    if (isMasterclassOpening) {
+      setTrainCustomMoves(moves);
+      setTrainPath([]);
+      setTrainMoveIndex(0);
+      setTrainCompleted(false);
+      setTrainFeedback(null);
+      setWrongSquare(null);
+      setCorrectSquare(null);
+      setSelectedSquare(null);
+      setTrainLegalMoves([]);
+      setShowHint(false);
+      setMode("train");
+      return;
+    }
     const pathIndices: number[] = [];
     let nodes = opening.tree;
     for (const mv of moves) {
@@ -160,6 +218,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
       }
     }
     setTrainPath(pathIndices);
+    setTrainCustomMoves(null);
     setTrainMoveIndex(0);
     setTrainCompleted(false);
     setTrainFeedback(null);
@@ -169,9 +228,9 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
     setTrainLegalMoves([]);
     setShowHint(false);
     setMode("train");
-  }, [mainLineMoves, opening.tree]);
+  }, [isMasterclassOpening, mainLineMoves, opening.tree]);
 
-  const trainMovesSequence = useMemo(() => getMovesForPath(opening.tree, trainPath), [opening.tree, trainPath]);
+  const trainMovesSequence = useMemo(() => trainCustomMoves || getMovesForPath(opening.tree, trainPath), [opening.tree, trainCustomMoves, trainPath]);
 
   const trainFen = useMemo(() => {
     const game = new Chess();
@@ -501,15 +560,50 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
             <div className="bg-card border border-border/50 rounded-xl p-4">
               <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-primary" />
-                Variation Tree
+                {isMasterclassOpening ? "30 Individual Variations" : "Variation Tree"}
               </h3>
-              <div className="max-h-[60vh] overflow-y-auto pr-1 scrollbar-thin">
-                <VariationTree
-                  tree={opening.tree}
-                  currentPath={currentPath.slice(0, clampedView + 1)}
-                  onSelectNode={handleSelectNode}
-                />
-              </div>
+              {isMasterclassOpening ? (
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-primary/25 bg-primary/10 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-semibold uppercase text-primary">Variation {selectedMasterLine + 1}</span>
+                      <span className="text-[11px] text-muted-foreground font-mono">{fullMovePath.length} moves</span>
+                    </div>
+                    <p className="mt-1 text-sm font-semibold text-foreground leading-snug">{activeMasterLine?.title}</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto pr-1 scrollbar-thin">
+                    {masterclassLines.map((line, index) => (
+                      <button
+                        key={line.id}
+                        onClick={() => handleSelectMasterLine(index)}
+                        className={`group w-full rounded-lg border p-3 text-left transition-all ${
+                          selectedMasterLine === index
+                            ? "border-primary bg-primary/10 shadow-[0_0_18px_hsl(var(--primary)/0.18)]"
+                            : "border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-primary/5"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-xs font-bold ${selectedMasterLine === index ? "bg-primary text-primary-foreground" : "bg-card text-primary border border-border/50"}`}>
+                            {index + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground leading-tight">{line.title}</p>
+                            <p className="mt-1 truncate text-[11px] font-mono text-muted-foreground">{line.moves.map((move) => move.san).join(" ")}</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="max-h-[60vh] overflow-y-auto pr-1 scrollbar-thin">
+                  <VariationTree
+                    tree={opening.tree}
+                    currentPath={currentPath.slice(0, clampedView + 1)}
+                    onSelectNode={handleSelectNode}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Train specific lines */}
@@ -526,10 +620,12 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                     className="w-full justify-start text-xs"
                     onClick={() => startTraining()}
                   >
-                    Main Line
+                    {isMasterclassOpening ? `Selected: ${selectedMasterLine + 1}. ${activeMasterLine?.title}` : "Main Line"}
                   </Button>
-                  {allPaths.slice(0, 6).map((path, i) => {
-                    const label = path.map(m => m.san).join(" ");
+                  {allPaths.slice(0, isMasterclassOpening ? 30 : 6).map((path, i) => {
+                    const label = isMasterclassOpening
+                      ? `${i + 1}. ${masterclassLines[i]?.title || "Variation"}`
+                      : `Line ${i + 1}: ${path.map(m => m.san).join(" ")}`;
                     return (
                       <Button
                         key={i}
@@ -538,7 +634,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                         className="w-full justify-start text-xs font-mono text-muted-foreground h-auto py-2 whitespace-normal text-left leading-snug break-words"
                         onClick={() => startTraining(path)}
                       >
-                        <span className="block w-full break-words">Line {i + 1}: {label}</span>
+                        <span className="block w-full break-words">{label}</span>
                       </Button>
                     );
                   })}
