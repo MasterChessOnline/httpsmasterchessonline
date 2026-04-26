@@ -38,6 +38,11 @@ function L(id: string, title: string, content: string, keyPoints: string[], fen?
   return { id, title, content, keyPoints, fen };
 }
 
+/** Lesson with chapter grouping (used by multi-chapter courses like masterclasses). */
+function LC(id: string, title: string, content: string, keyPoints: string[], chapter: string): Lesson {
+  return { id, title, content, keyPoints, chapter };
+}
+
 export const COURSES: Course[] = [
   /* ════════════════════════════════════════════════════════════
      CORE CURRICULUM — 50 lessons (Beginner 18 · Intermediate 16 · Advanced 16)
