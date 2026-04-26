@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import { Opening, OpeningMove, getMainLine, getAllVariationPaths } from "@/lib/openings-data";
 import { LESSON_MOVES } from "@/lib/lesson-moves";
+import { COURSES } from "@/lib/courses-data";
 import OpeningBoard from "./OpeningBoard";
 import VariationTree from "./VariationTree";
 import { playChessSound } from "@/lib/chess-sounds";
