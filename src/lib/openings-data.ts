@@ -1598,6 +1598,33 @@ export const OPENINGS_DATABASE: Opening[] = [
       ]),
     ],
   },
+  // ═══════════════════════════════════════════
+  // MASTERCLASS — KING'S INDIAN DEFENSE (50 variations, for Black)
+  // ═══════════════════════════════════════════
+  {
+    id: "masterclass-kid",
+    name: "MasterKurs: King's Indian Defense",
+    eco: "E60-E99",
+    category: "indian",
+    description: "50-variation deep masterclass on the King's Indian Defense for Black (1.d4 Nf6 2.c4 g6). Stockfish-vetted Classical Mainlines (Mar del Plata, Bayonet, Petrosian, Gligoric, Makogonov), the sharp Sämisch (5.f3), the Fianchetto, Four Knights, Averbakh, anti-KID sidelines (London, Trompowsky, Colle, Torre) and deep theoretical deviations — organized into 6 chapters with full move-by-move annotations and a Practice mode.",
+    difficulty: "advanced",
+    icon: "👑",
+    startingMoves: "1.d4 Nf6 2.c4 g6 3.Nc3 Bg7",
+    totalVariations: 50,
+    tree: [
+      m("d4", "1.d4 — White claims the center; Black aims for the King's Indian.", [
+        m("Nf6", "1...Nf6 — Hypermodern start, controlling e4 from afar.", [
+          m("c4", "2.c4 — White grabs more central space.", [
+            m("g6", "2...g6 — Preparing the King's Indian fianchetto!", [
+              m("Nc3", "3.Nc3 — Standard development.", [
+                m("Bg7", "3...Bg7 — The King's Indian bishop is born.", []),
+              ]),
+            ]),
+          ]),
+        ]),
+      ]),
+    ],
+  },
 ];
 
 // Utility: flatten all moves in a tree to get a list of variation paths
