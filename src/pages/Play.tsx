@@ -1047,6 +1047,14 @@ const Play = () => {
               </div>
             </motion.div>
           )}
+          {hintsEnabled && hintText && !isGameOver && game.turn() === playerColor && (
+            <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-center mb-2">
+              <div className="px-3 py-1.5 rounded-lg bg-accent/15 border border-accent/40 text-xs text-accent-foreground font-medium flex items-center gap-2">
+                <span className="text-accent">💡</span>
+                <span>Hint: {hintText}</span>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:justify-center">
