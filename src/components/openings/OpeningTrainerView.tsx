@@ -18,7 +18,7 @@ import {
 type Mode = "explore" | "train";
 
 // Total Jobava London masterclass lines (kept in sync with courses-data.ts).
-const JOBAVA_LINE_COUNT = 100;
+const JOBAVA_LINE_COUNT = 130;
 
 interface MasterclassLine {
   id: string;
