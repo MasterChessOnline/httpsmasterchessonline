@@ -491,45 +491,18 @@ const PlayOnline = () => {
             </div>
 
             {/* Board */}
-            <div className="aspect-square w-full max-w-[560px] mx-auto">
-              <div className="grid grid-cols-8 w-full h-full rounded-lg overflow-hidden border border-border/30 shadow-lg">
-                {displayRanks.map((rank, ri) =>
-                  displayFiles.map((file, fi) => {
-                    const square = `${file}${rank}` as Square;
-                    const isLight = (ri + fi) % 2 === 0;
-                    const piece = game.board()[boardFlipped ? 7 - ri : ri][boardFlipped ? 7 - fi : fi];
-                    const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-                    const pd = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
-                    const isSelected = selectedSquare === square;
-                    const isLegal = legalMoves.includes(square);
-                    const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
-                    const isKingInCheck = game.isCheck() && piece?.type === "k" && piece.color === game.turn();
-
-                    return (
-                      <div
-                        key={square}
-                        onClick={() => handleSquareClick(square)}
-                        className={`relative flex items-center justify-center cursor-pointer transition-colors
-                          ${isLight ? "bg-[hsl(35,30%,82%)]" : "bg-[hsl(145,32%,38%)]"}
-                          ${isSelected ? "ring-2 ring-inset ring-primary/70" : ""}
-                          ${isLastMove ? "bg-[hsl(50,80%,60%)]/40" : ""}
-                          ${isKingInCheck ? "bg-destructive/40" : ""}
-                        `}
-                      >
-                        {pd && (
-                          <span className={`text-[clamp(1.2rem,4vw,2.8rem)] leading-none select-none ${pd.className}`}>
-                            {pd.symbol}
-                          </span>
-                        )}
-                        {isLegal && !pd && <div className="absolute w-[25%] h-[25%] rounded-full bg-primary/30" />}
-                        {isLegal && pd && <div className="absolute inset-0 ring-2 ring-inset ring-primary/40 rounded-none" />}
-                        {fi === 0 && <span className="absolute top-0.5 left-0.5 text-[8px] text-muted-foreground/50 font-mono">{rank}</span>}
-                        {ri === 7 && <span className="absolute bottom-0.5 right-0.5 text-[8px] text-muted-foreground/50 font-mono">{file}</span>}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+            <div className="w-full max-w-[560px] mx-auto">
+              <ChessBoard
+                game={game}
+                flipped={boardFlipped}
+                selectedSquare={selectedSquare}
+                legalMoves={legalMoves}
+                lastMove={lastMove}
+                isGameOver={isGameOver}
+                isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
+                hintSquare={null}
+                onSquareClick={handleSquareClick}
+              />
             </div>
 
             {/* Player info */}
