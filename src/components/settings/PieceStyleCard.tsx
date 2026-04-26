@@ -47,7 +47,7 @@ export default function PieceStyleCard({ style, active, onSelect }: Props) {
       )}
 
       {/* Piece preview row — half white, half black to show contrast */}
-      <div className="flex items-center justify-between gap-0.5 rounded-lg bg-gradient-to-r from-[hsl(220,10%,82%)] via-[hsl(220,12%,40%)] to-[hsl(220,15%,15%)] px-2 py-2.5 mb-2.5 overflow-hidden transition-transform duration-300 group-hover:scale-[1.03]">
+      <div className="flex items-center justify-between gap-0 rounded-lg bg-gradient-to-r from-[hsl(220,10%,82%)] via-[hsl(220,12%,40%)] to-[hsl(220,15%,15%)] px-1 py-2 mb-2.5 overflow-hidden transition-transform duration-300 group-hover:scale-[1.03]">
         {samples.map((s, i) => {
           const svgUrl = svgUrlFor(style, s.white, s.type);
           if (svgUrl) {
@@ -57,7 +57,7 @@ export default function PieceStyleCard({ style, active, onSelect }: Props) {
                 src={svgUrl}
                 alt=""
                 draggable={false}
-                className="h-6 w-6 sm:h-7 sm:w-7 object-contain shrink-0"
+                className="h-5 w-5 sm:h-6 sm:w-6 object-contain shrink-0"
                 style={r.pixelated ? { imageRendering: "pixelated" } : undefined}
               />
             );
