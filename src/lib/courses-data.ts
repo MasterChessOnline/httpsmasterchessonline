@@ -9,6 +9,7 @@ export interface Lesson {
   content: string;
   keyPoints: string[];
   fen?: string;
+  chapter?: string;
   practiceLine?: {
     startFen?: string;
     playerColor: "w" | "b";
