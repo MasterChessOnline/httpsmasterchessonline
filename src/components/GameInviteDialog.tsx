@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -37,6 +37,38 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
   const [color, setColor] = useState<SenderColor>("random");
   const [sending, setSending] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  // Track the active invite + cleanup hooks so the user can cancel it before
+  // the recipient responds.
+  const [activeInviteId, setActiveInviteId] = useState<string | null>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  // Cancel the in-flight invite: mark it as cancelled in the DB so the
+  // recipient's listener stops showing it, and reset local UI state.
+  const cancelInvite = async () => {
+    if (!activeInviteId || cancelling) return;
+    setCancelling(true);
+    await supabase
+      .from("game_invites" as any)
+      .update({ status: "cancelled", responded_at: new Date().toISOString() })
+      .eq("id", activeInviteId)
+      .eq("sender_id", user?.id ?? "")
+      .eq("status", "pending");
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+    setActiveInviteId(null);
+    setWaiting(false);
+    setCancelling(false);
+    toast({ title: "Challenge cancelled", description: `You cancelled the challenge to ${recipientName}.` });
+    onOpenChange(false);
+  };
+
+  // Make sure we clean up subscriptions/poll if the component unmounts mid-wait.
+  useEffect(() => {
+    return () => {
+      cleanupRef.current?.();
+    };
+  }, []);
 
   const send = async () => {
     if (!user) return;
@@ -59,6 +91,7 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
     }
 
     const inviteId = (invite as any).id;
+    setActiveInviteId(inviteId);
     setWaiting(true);
     toast({ title: "Challenge sent!", description: `Waiting for ${recipientName} to accept...` });
 
@@ -73,13 +106,17 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
       }, (payload) => {
         const inv = payload.new as any;
         if (inv.status === "accepted" && inv.game_id) {
-          supabase.removeChannel(channel);
+          cleanupRef.current?.();
+          cleanupRef.current = null;
+          setActiveInviteId(null);
           setWaiting(false);
           onOpenChange(false);
           toast({ title: "Challenge accepted!", description: "Entering game..." });
           navigate(`/play/online?game=${inv.game_id}`);
         } else if (inv.status === "declined") {
-          supabase.removeChannel(channel);
+          cleanupRef.current?.();
+          cleanupRef.current = null;
+          setActiveInviteId(null);
           setWaiting(false);
           toast({ title: "Challenge declined", description: `${recipientName} declined your challenge.`, variant: "destructive" });
         }
@@ -95,20 +132,34 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
         .maybeSingle();
       const d = data as any;
       if (d?.status === "accepted" && d?.game_id) {
-        clearInterval(poll);
-        supabase.removeChannel(channel);
+        cleanupRef.current?.();
+        cleanupRef.current = null;
+        setActiveInviteId(null);
         setWaiting(false);
         onOpenChange(false);
         navigate(`/play/online?game=${d.game_id}`);
-      } else if (d?.status === "declined" || d?.status === "expired") {
-        clearInterval(poll);
-        supabase.removeChannel(channel);
+      } else if (d?.status === "declined" || d?.status === "expired" || d?.status === "cancelled") {
+        cleanupRef.current?.();
+        cleanupRef.current = null;
+        setActiveInviteId(null);
         setWaiting(false);
       }
     }, 2000);
 
     // Stop polling after 5 min (invite expiry)
-    setTimeout(() => { clearInterval(poll); supabase.removeChannel(channel); setWaiting(false); }, 5 * 60 * 1000);
+    const expiryTimer = setTimeout(() => {
+      cleanupRef.current?.();
+      cleanupRef.current = null;
+      setActiveInviteId(null);
+      setWaiting(false);
+    }, 5 * 60 * 1000);
+
+    // Single cleanup hook used by accept/decline/cancel/unmount.
+    cleanupRef.current = () => {
+      clearInterval(poll);
+      clearTimeout(expiryTimer);
+      supabase.removeChannel(channel);
+    };
   };
 
   return (
@@ -169,13 +220,40 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
             <Switch checked={rated} onCheckedChange={setRated} disabled={waiting} />
           </div>
           <p className="text-[10px] text-muted-foreground text-center">Invite expires in 5 minutes</p>
+          {waiting && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 flex items-center gap-2.5">
+              <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />
+              <p className="text-xs text-foreground">
+                Waiting for <span className="font-semibold text-primary">{recipientName}</span> to accept...
+              </p>
+            </div>
+          )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={waiting}>Cancel</Button>
-          <Button onClick={send} disabled={sending || waiting}>
-            {(sending || waiting) && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
-            {waiting ? "Waiting for response..." : "Send Challenge"}
-          </Button>
+          {waiting ? (
+            // While waiting for the recipient, allow the sender to retract the
+            // challenge. Marks the invite as cancelled in the DB so the
+            // recipient's listener stops showing it.
+            <Button
+              variant="destructive"
+              onClick={cancelInvite}
+              disabled={cancelling}
+              className="w-full sm:w-auto"
+            >
+              {cancelling ? (
+                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              ) : null}
+              {cancelling ? "Cancelling..." : "Cancel Challenge"}
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+              <Button onClick={send} disabled={sending}>
+                {sending && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+                Send Challenge
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

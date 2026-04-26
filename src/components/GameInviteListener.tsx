@@ -1,6 +1,6 @@
 // Listens for incoming game invites and shows a toast popup.
 // Mounted globally in App.tsx.
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 const GameInviteListener = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  // Map invite-id → toast.dismiss() so we can hide the popup if the sender
+  // cancels (or expires) the challenge before the recipient responds.
+  const activeToastsRef = useRef<Map<string, () => void>>(new Map());
 
   useEffect(() => {
     if (!user) return;
@@ -85,16 +88,20 @@ const GameInviteListener = () => {
         .maybeSingle();
       const senderName = prof?.display_name || prof?.username || "A friend";
 
-      toast({
+      const t = toast({
         title: `⚔️ ${senderName} challenges you!`,
         description: `${label} game — accept to play now.`,
         duration: 30000,
         action: (
           <div className="flex gap-1.5">
-            <Button size="sm" onClick={() => acceptInvite(inviteId)}>Accept</Button>
+            <Button size="sm" onClick={() => {
+              activeToastsRef.current.delete(inviteId);
+              acceptInvite(inviteId);
+            }}>Accept</Button>
             <Button
               size="sm" variant="outline"
               onClick={async () => {
+                activeToastsRef.current.delete(inviteId);
                 await supabase.from("game_invites" as any)
                   .update({ status: "declined", responded_at: new Date().toISOString() })
                   .eq("id", inviteId);
@@ -105,6 +112,7 @@ const GameInviteListener = () => {
           </div>
         ) as any,
       });
+      activeToastsRef.current.set(inviteId, t.dismiss);
     };
 
     const channel = supabase
@@ -116,6 +124,26 @@ const GameInviteListener = () => {
           const inv = payload.new as any;
           if (inv.status === "pending") {
             handleInvite(inv.id, inv.sender_id, inv.time_control_label);
+          }
+        }
+      )
+      // If the sender cancels (or invite expires) before we act on it,
+      // dismiss the popup so the recipient isn't left looking at a stale
+      // challenge they can no longer accept.
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "game_invites", filter: `recipient_id=eq.${user.id}` },
+        (payload) => {
+          const inv = payload.new as any;
+          if (inv.status === "cancelled" || inv.status === "expired") {
+            const dismiss = activeToastsRef.current.get(inv.id);
+            if (dismiss) {
+              dismiss();
+              activeToastsRef.current.delete(inv.id);
+              if (inv.status === "cancelled") {
+                toast({ title: "Challenge cancelled", description: "The challenger withdrew the invite." });
+              }
+            }
           }
         }
       )
