@@ -59,7 +59,8 @@ const GameInviteListener = () => {
           black_time: inv.time_control_seconds || 600,
           time_control_label: inv.time_control_label,
           increment: inv.time_control_increment || 0,
-        })
+          is_rated: inv.is_rated !== false,
+        } as any)
         .select()
         .single();
 

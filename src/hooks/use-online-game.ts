@@ -23,6 +23,7 @@ export interface OnlineGame {
   last_move_from: string | null;
   last_move_to: string | null;
   turn: string;
+  is_rated?: boolean;
 }
 
 export function useOnlineGame() {
@@ -42,8 +43,18 @@ export function useOnlineGame() {
     : null;
 
   // Helper: apply elo + log rating history + compute the user's RatingCalcResult
-  const applyEloAndLog = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string }) => {
+  const applyEloAndLog = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }) => {
     if (!user) return;
+
+    // Casual games: skip rating updates entirely.
+    if (g.is_rated === false) {
+      setRatingResult(null);
+      try {
+        await bumpMissionProgress(user.id, "games_played", 1);
+      } catch {}
+      return;
+    }
+
     // Snapshot opponent + my old rating BEFORE the RPC mutates them
     const isWhite = g.white_player_id === user.id;
     const opponentId = isWhite ? g.black_player_id : g.white_player_id;
@@ -116,6 +127,51 @@ export function useOnlineGame() {
   const subscribeToGame = useCallback((gameId: string) => {
     if (gameChannelRef.current) supabase.removeChannel(gameChannelRef.current);
 
+    // Track most-recent server timestamp we've already applied so that
+    // out-of-order realtime events / poll fetches can never overwrite a
+    // newer FEN with a stale one (which is what caused the "ghost duplicate
+    // move" effect for the local player).
+    let lastAppliedAt = 0;
+
+    const applyServerSnapshot = (incoming: OnlineGame) => {
+      const ts = incoming.last_move_at ? new Date(incoming.last_move_at).getTime() : 0;
+      // Allow status/clock updates even when last_move_at didn't move,
+      // but never roll FEN backwards.
+      setGame(prev => {
+        if (!prev) {
+          lastAppliedAt = ts;
+          return incoming;
+        }
+        // Stale snapshot — older move timestamp than what we already applied.
+        if (ts && ts < lastAppliedAt) return prev;
+        // No real change — keep referential equality so React doesn't re-render.
+        if (
+          prev.fen === incoming.fen &&
+          prev.status === incoming.status &&
+          prev.white_time === incoming.white_time &&
+          prev.black_time === incoming.black_time &&
+          prev.last_move_at === incoming.last_move_at
+        ) {
+          return prev;
+        }
+        lastAppliedAt = Math.max(lastAppliedAt, ts);
+        return incoming;
+      });
+
+      if (incoming.status === "finished") {
+        setStatus("finished");
+        if (!eloUpdatedRef.current && incoming.result) {
+          eloUpdatedRef.current = true;
+          applyEloAndLog({
+            white_player_id: incoming.white_player_id,
+            black_player_id: incoming.black_player_id,
+            result: incoming.result,
+            is_rated: incoming.is_rated,
+          });
+        }
+      }
+    };
+
     const channel = supabase
       .channel(`online-game-${gameId}-${Date.now()}`)
       .on("postgres_changes", {
@@ -124,25 +180,14 @@ export function useOnlineGame() {
         table: "online_games",
         filter: `id=eq.${gameId}`,
       }, (payload) => {
-        const updated = payload.new as OnlineGame;
-        setGame(updated);
-        if (updated.status === "finished") {
-          setStatus("finished");
-          if (!eloUpdatedRef.current && updated.result) {
-            eloUpdatedRef.current = true;
-            applyEloAndLog({
-              white_player_id: updated.white_player_id,
-              black_player_id: updated.black_player_id,
-              result: updated.result,
-            });
-          }
-        }
+        applyServerSnapshot(payload.new as OnlineGame);
       })
       .subscribe();
 
     gameChannelRef.current = channel;
 
-    // Also poll every 3s as backup for missed realtime events
+    // Backup poll — slightly slower so it doesn't fight realtime updates
+    // and never reverts a fresher local state.
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       const { data } = await supabase
@@ -150,29 +195,9 @@ export function useOnlineGame() {
         .select("*")
         .eq("id", gameId)
         .single();
-      if (data) {
-        setGame(prev => {
-          // Only update if something changed
-          if (!prev || prev.fen !== data.fen || prev.status !== data.status ||
-              prev.white_time !== data.white_time || prev.black_time !== data.black_time) {
-            if (data.status === "finished" && prev?.status !== "finished") {
-              setStatus("finished");
-              if (!eloUpdatedRef.current && data.result) {
-                eloUpdatedRef.current = true;
-                applyEloAndLog({
-                  white_player_id: data.white_player_id,
-                  black_player_id: data.black_player_id,
-                  result: data.result,
-                });
-              }
-            }
-            return data as OnlineGame;
-          }
-          return prev;
-        });
-      }
-    }, 3000);
-  }, [refreshProfile]);
+      if (data) applyServerSnapshot(data as OnlineGame);
+    }, 5000);
+  }, [applyEloAndLog]);
 
   // Recover active game on mount — prefer ?game=ID from URL if present
   useEffect(() => {
@@ -387,6 +412,7 @@ export function useOnlineGame() {
         white_player_id: game.white_player_id,
         black_player_id: game.black_player_id,
         result,
+        is_rated: game.is_rated,
       });
     }
   }, [game, applyEloAndLog]);

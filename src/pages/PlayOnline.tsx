@@ -489,9 +489,11 @@ const PlayOnline = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container mx-auto px-2 sm:px-6 pt-16 sm:pt-20 pb-16">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 lg:items-start">
+        {/* 3-col grid: left spacer mirrors sidebar so board stays horizontally centered on the viewport regardless of sidebar size. */}
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[20rem_minmax(0,1fr)_20rem] gap-4 lg:items-start">
+          <div className="hidden lg:block" aria-hidden="true" />
           {/* Board + Clocks */}
-          <div className="flex-1 min-w-0 flex flex-col items-center">
+          <div className="min-w-0 flex flex-col items-center">
             <div className="w-full max-w-[min(85vw,520px)] space-y-1.5">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
@@ -555,7 +557,7 @@ const PlayOnline = () => {
           </div>
 
           {/* Sidebar: Status, Moves, Chat, Controls */}
-          <div className="w-full lg:w-80 space-y-3">
+          <div className="w-full space-y-3">
             {/* Status */}
             <div className={`rounded-xl border p-3 text-center text-sm font-medium ${isGameOver ? "border-primary/30 bg-primary/5 text-primary" : "border-border/50 bg-card/80 text-foreground"}`}>
               {statusText}

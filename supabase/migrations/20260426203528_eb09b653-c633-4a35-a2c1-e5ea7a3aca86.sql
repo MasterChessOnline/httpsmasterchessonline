@@ -1,0 +1,1 @@
+ALTER TABLE public.online_games ADD COLUMN IF NOT EXISTS is_rated boolean NOT NULL DEFAULT true;
