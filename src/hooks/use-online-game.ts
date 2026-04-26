@@ -174,10 +174,30 @@ export function useOnlineGame() {
     }, 3000);
   }, [refreshProfile]);
 
-  // Recover active game on mount
+  // Recover active game on mount — prefer ?game=ID from URL if present
   useEffect(() => {
     if (!user) return;
     const recoverGame = async () => {
+      // 1) Try the explicit ?game=ID from the URL first (challenge accept flow)
+      const params = new URLSearchParams(window.location.search);
+      const requestedId = params.get("game");
+
+      if (requestedId) {
+        const { data: byId } = await supabase
+          .from("online_games")
+          .select("*")
+          .eq("id", requestedId)
+          .maybeSingle();
+        if (byId && (byId.white_player_id === user.id || byId.black_player_id === user.id)) {
+          eloUpdatedRef.current = false;
+          setGame(byId as OnlineGame);
+          setStatus(byId.status === "finished" ? "finished" : "playing");
+          subscribeToGame(byId.id);
+          return;
+        }
+      }
+
+      // 2) Fallback: most recent active game involving this user
       const { data: activeGames } = await supabase
         .from("online_games")
         .select("*")
