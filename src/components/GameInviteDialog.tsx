@@ -37,6 +37,38 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
   const [color, setColor] = useState<SenderColor>("random");
   const [sending, setSending] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  // Track the active invite + cleanup hooks so the user can cancel it before
+  // the recipient responds.
+  const [activeInviteId, setActiveInviteId] = useState<string | null>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  // Cancel the in-flight invite: mark it as cancelled in the DB so the
+  // recipient's listener stops showing it, and reset local UI state.
+  const cancelInvite = async () => {
+    if (!activeInviteId || cancelling) return;
+    setCancelling(true);
+    await supabase
+      .from("game_invites" as any)
+      .update({ status: "cancelled", responded_at: new Date().toISOString() })
+      .eq("id", activeInviteId)
+      .eq("sender_id", user?.id ?? "")
+      .eq("status", "pending");
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+    setActiveInviteId(null);
+    setWaiting(false);
+    setCancelling(false);
+    toast({ title: "Challenge cancelled", description: `You cancelled the challenge to ${recipientName}.` });
+    onOpenChange(false);
+  };
+
+  // Make sure we clean up subscriptions/poll if the component unmounts mid-wait.
+  useEffect(() => {
+    return () => {
+      cleanupRef.current?.();
+    };
+  }, []);
 
   const send = async () => {
     if (!user) return;
