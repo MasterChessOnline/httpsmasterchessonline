@@ -102,16 +102,17 @@ const Play = () => {
 
   const updateState = () => setFen(game.fen());
 
-  // Bot greeting
-  useEffect(() => {
-    if (mode === "ai" && gamePhase === "playing") {
-      showBotMessage(currentBot.taunts.greeting);
-    }
-  }, [currentBot.id, mode, gamePhase]);
+  // Bot only speaks on blunders & game end
+  const botMessageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (botMessageTimerRef.current) clearTimeout(botMessageTimerRef.current);
+  }, []);
 
   const showBotMessage = (msg: string) => {
+    if (!msg) return;
+    if (botMessageTimerRef.current) clearTimeout(botMessageTimerRef.current);
     setBotMessage(msg);
-    setTimeout(() => setBotMessage(""), 4000);
+    botMessageTimerRef.current = setTimeout(() => setBotMessage(""), 3500);
   };
 
   // Keyboard shortcuts
@@ -225,15 +226,14 @@ const Play = () => {
               showBotMessage(currentBot.taunts.onWin);
             } else if (game.isCheck()) {
               playChessSound("check");
-              showBotMessage(currentBot.taunts.onCheck);
             } else if (move.captured) {
               playChessSound("capture");
-              if (Math.random() < 0.3) showBotMessage(currentBot.taunts.onCapture);
             } else {
               playChessSound("move");
             }
 
-            if (decision.quality === "blunder" && Math.random() < 0.5) {
+            // Bot only "speaks" when it blunders mid-game
+            if (decision.quality === "blunder") {
               setTimeout(() => showBotMessage(currentBot.taunts.onBlunder), 500);
             }
           }
