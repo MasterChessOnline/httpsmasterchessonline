@@ -707,5 +707,13 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
         </div>
       </div>
     </div>
+
+    <PlayFromPositionDialog
+      open={playDialogOpen}
+      onOpenChange={setPlayDialogOpen}
+      fen={fen}
+      contextLabel={activeMasterLine?.title ?? opening.name}
+    />
+    </>
   );
 }
