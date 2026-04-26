@@ -12,8 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, ArrowRight, RotateCcw, Eye, Dumbbell,
   BookOpen, ChevronLeft, CheckCircle2, XCircle, Lightbulb,
-  SkipBack, SkipForward
+  SkipBack, SkipForward, Swords
 } from "lucide-react";
+import PlayFromPositionDialog from "./PlayFromPositionDialog";
 
 type Mode = "explore" | "train";
 
