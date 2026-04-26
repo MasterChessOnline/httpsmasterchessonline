@@ -2855,7 +2855,7 @@ export const COURSES: Course[] = [
      ════════════════════════════════════════════════════════════ */
   {
     id: "masterkurs-jobava-london",
-    title: "Masterclass: Jobava London System",
+    title: "MasterKurs: Jobava London System",
     description: "A 30-variation masterclass on the Jobava London System (1.d4 + 2.Nc3 + 3.Bf4). Each variation comes with an interactive board, move-by-move annotations, and a Practice mode to test your recall.",
     level: "Advanced",
     icon: "Crown",
