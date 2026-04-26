@@ -20,7 +20,7 @@ export interface Lesson {
 
 export type CourseCategory = "basics" | "openings" | "tactics" | "middlegame" | "endgame" | "strategy" | "mindset";
 
-export type CourseTier = "free" | "premium";
+export type CourseTier = "free" | "premium" | "masterclass";
 
 export interface Course {
   id: string;
