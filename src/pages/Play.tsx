@@ -461,9 +461,14 @@ const Play = () => {
     return () => clearTimeout(timer);
   }, [gamePhase]);
 
+  // When set, the next resetGameState() will start from this FEN instead of the standard start.
+  const pendingStartFenRef = useRef<string | null>(null);
+
   const resetGameState = () => {
-    gameRef.current = new Chess();
-    setFen("start");
+    const startFen = pendingStartFenRef.current;
+    pendingStartFenRef.current = null;
+    gameRef.current = startFen ? new Chess(startFen) : new Chess();
+    setFen(startFen ?? "start");
     setSelectedSquare(null);
     setLegalMoves([]);
     setMoveHistory([]);
@@ -489,6 +494,44 @@ const Play = () => {
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
   };
+
+  // Pick up "Play from position" handoff from Opening Trainer (one-shot).
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("play-from-position");
+      if (!raw) return;
+      sessionStorage.removeItem("play-from-position");
+      const data = JSON.parse(raw) as {
+        fen?: string;
+        botId?: string;
+        playerColor?: PlayerColor;
+        contextLabel?: string | null;
+      };
+      if (!data.fen) return;
+      // Validate the FEN before committing.
+      try { new Chess(data.fen); } catch { return; }
+
+      const bot = data.botId
+        ? BOT_PROFILES.find((b) => b.id === data.botId)
+        : undefined;
+      if (bot) {
+        setCurrentBot(bot);
+        setDifficulty(bot.difficulty);
+      }
+      if (data.playerColor === "w" || data.playerColor === "b") {
+        setPlayerColor(data.playerColor);
+      }
+      setMode("ai");
+      pendingStartFenRef.current = data.fen;
+      // Skip the searching animation — go straight to the matchup screen,
+      // which auto-transitions to "playing" and runs resetGameState().
+      setGamePhase("matchup");
+    } catch {
+      /* ignore */
+    }
+    // Run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const goToLobby = () => {
     resetGameState();
