@@ -20,7 +20,7 @@ export interface Lesson {
 
 export type CourseCategory = "basics" | "openings" | "tactics" | "middlegame" | "endgame" | "strategy" | "mindset";
 
-export type CourseTier = "free" | "premium";
+export type CourseTier = "free" | "premium" | "masterclass";
 
 export interface Course {
   id: string;
@@ -2855,11 +2855,11 @@ export const COURSES: Course[] = [
      ════════════════════════════════════════════════════════════ */
   {
     id: "masterkurs-jobava-london",
-    title: "MasterKurs: Jobava London",
+    title: "Masterclass: Jobava London System",
     description: "A 30-variation masterclass on the Jobava London System (1.d4 + 2.Nc3 + 3.Bf4). Each variation comes with an interactive board, move-by-move annotations, and a Practice mode to test your recall.",
     level: "Advanced",
     icon: "Crown",
-    tier: "free",
+    tier: "masterclass",
     category: "openings",
     lessons: [
       L("jl-1", "Variation 1: Main Solid System", "Variation 1: Main Solid System. A complete 30-line Jobava London masterclass. Sequence: 1.d4 d5 2.Nc3 Nf6 3.Bf4 e6 4.e3 Bd6 5.Bg3 O-O 6.Bd3 c5 7.Nf3 Nc6 8.O-O b6 9.Ne5 Bb7 10.f4. Play through the moves on the interactive board, then click \"Practice\" to test your recall.", ["Memorize the line: 1.d4 d5 2.Nc3 Nf6 3.Bf4 e6 4.e3 Bd6 5.Bg3 O-O 6.Bd3 c5 7.Nf3 Nc6 8.O-O b6 9.Ne5 …", "Understand the typical Jobava plans behind every move.", "Use the practice mode to drill the moves without hints."]),
