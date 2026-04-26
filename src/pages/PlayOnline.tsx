@@ -643,6 +643,12 @@ const PlayOnline = () => {
         </div>
       </main>
       <Footer />
+      <PromotionDialog
+        isOpen={!!pendingPromotion}
+        color={(myColor || "w") as "w" | "b"}
+        onSelect={handlePromotionSelect}
+        onCancel={() => setPendingPromotion(null)}
+      />
     </div>
   );
 };
