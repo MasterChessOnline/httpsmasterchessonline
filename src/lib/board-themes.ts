@@ -94,11 +94,11 @@ export interface PieceStyle {
 }
 
 export const PIECE_STYLES: PieceStyle[] = [
-  // === REAL SVG PIECE SETS — look like actual chess pieces (chess.com / lichess style) ===
+  // === REAL SVG PIECE SETS — authentic chess piece artwork ===
   {
     key: "cburnett",
-    label: "Cburnett (Classic)",
-    description: "Iconic Staunton — lichess default, hand-drawn",
+    label: "Cburnett Classic",
+    description: "Iconic Staunton — hand-drawn tournament style",
     mode: "svg",
     svgFolder: "cburnett",
     glyphs: GLYPHS_STANDARD,
@@ -106,8 +106,8 @@ export const PIECE_STYLES: PieceStyle[] = [
   },
   {
     key: "neo",
-    label: "Neo (Chess.com Style)",
-    description: "Modern bold silhouettes with strong outlines",
+    label: "Neo Modern",
+    description: "Bold silhouettes with strong outlines",
     mode: "svg",
     svgFolder: "cardinal",
     glyphs: GLYPHS_STANDARD,
