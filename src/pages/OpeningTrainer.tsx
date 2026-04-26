@@ -62,14 +62,27 @@ export default function OpeningTrainer() {
     });
   }, [search, category, difficulty]);
 
-  // Sort: favorites first
-  const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
+  // Detect masterclass openings (premium courses)
+  const isMasterclass = (o: Opening) =>
+    o.id.includes("masterclass") || o.name.toLowerCase().includes("masterclass") || o.name.toLowerCase().includes("masterkurs");
+
+  // Split: masterclasses first, then everything else (favorites prioritised within each)
+  const masterclassOpenings = useMemo(
+    () => filtered.filter(isMasterclass).sort((a, b) => {
       const aFav = favorites.has(a.id) ? 0 : 1;
       const bFav = favorites.has(b.id) ? 0 : 1;
       return aFav - bFav;
-    });
-  }, [filtered, favorites]);
+    }),
+    [filtered, favorites],
+  );
+  const regularOpenings = useMemo(
+    () => filtered.filter((o) => !isMasterclass(o)).sort((a, b) => {
+      const aFav = favorites.has(a.id) ? 0 : 1;
+      const bFav = favorites.has(b.id) ? 0 : 1;
+      return aFav - bFav;
+    }),
+    [filtered, favorites],
+  );
 
   if (selectedOpening) {
     return <OpeningTrainerView opening={selectedOpening} onBack={() => setSelectedOpening(null)} />;
