@@ -240,6 +240,33 @@ const PlayOnline = () => {
     }
   };
 
+  const offerDraw = async () => {
+    if (!user || !onlineGame || drawOfferedByMe) return;
+    setDrawOfferedByMe(true);
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__draw_offer__",
+    });
+    toast({ title: "Draw offered", description: "Waiting for opponent..." });
+  };
+
+  const acceptDraw = async () => {
+    if (!user || !onlineGame || !drawOfferedByOpponent) return;
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__draw_accept__",
+    });
+    setDrawOfferedByOpponent(false);
+    endGame("1/2-1/2");
+    playChessSound("gameOver");
+  };
+
+  const declineDraw = async () => {
+    if (!user || !onlineGame || !drawOfferedByOpponent) return;
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__draw_decline__",
+    });
+    setDrawOfferedByOpponent(false);
+  };
+
   const resetAll = () => {
     resetOnline();
     gameRef.current = new Chess();
@@ -252,6 +279,8 @@ const PlayOnline = () => {
     setWhiteTime(tc.seconds);
     setBlackTime(tc.seconds);
     setOpponentProfile(null);
+    setDrawOfferedByMe(false);
+    setDrawOfferedByOpponent(false);
   };
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
