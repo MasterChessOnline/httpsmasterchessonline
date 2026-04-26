@@ -487,6 +487,14 @@ const Friends = () => {
                 </>
               )}
             </TabsContent>
+
+            {/* Invite via link / social */}
+            <TabsContent value="invite">
+              <InviteFriendsCard
+                username={profile?.username}
+                displayName={profile?.display_name}
+              />
+            </TabsContent>
           </Tabs>
         </div>
       </main>
