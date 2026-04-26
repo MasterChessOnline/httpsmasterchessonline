@@ -1027,21 +1027,7 @@ const Play = () => {
           </h1>
         </div>
 
-        {/* Bot message */}
-        <AnimatePresence>
-          {botMessage && (
-            <motion.div initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }} className="flex justify-center mb-3">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-primary/30 shadow-lg max-w-md">
-                <span className="text-2xl">{currentBot.avatar}</span>
-                <div>
-                  <p className="text-xs font-semibold text-primary">{currentBot.name}</p>
-                  <p className="text-sm text-foreground">{botMessage}</p>
-                </div>
-                <MessageCircle className="w-4 h-4 text-primary/50 flex-shrink-0" />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Bot message — rendered absolutely below the board (see board column) so the layout never jumps */}
 
         {/* Premove indicator */}
         <AnimatePresence>
