@@ -24,8 +24,8 @@ export const BOARD_THEMES: BoardTheme[] = [
   { key: "forest",    label: "Forest",            description: "Earth & moss",                 light: "75 25% 70%",  dark: "120 30% 22%" },
   { key: "rose",      label: "Rose Quartz",       description: "Soft warm pink",               light: "350 60% 88%", dark: "345 30% 38%" },
 
-  // — Lichess-inspired —
-  { key: "brown",     label: "Lichess Brown",     description: "Iconic warm brown",            light: "32 47% 78%",  dark: "26 40% 38%" },
+  // — Classic warm tones —
+  { key: "brown",     label: "Classic Brown",     description: "Iconic warm brown",            light: "32 47% 78%",  dark: "26 40% 38%" },
   { key: "blue3",     label: "Sky Blue",          description: "Soft pastel sky",              light: "210 60% 88%", dark: "210 50% 48%" },
   { key: "purple",    label: "Royal Purple",      description: "Deep regal purple",            light: "275 35% 80%", dark: "275 45% 30%" },
 
