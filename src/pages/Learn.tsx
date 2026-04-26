@@ -450,11 +450,20 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const prog = getCourseProgress(course.id, course.lessons.length);
+  const isMasterclass = course.tier === "masterclass";
 
   const getLessonStatus = (idx: number) => {
     const completed = isCompleted(course.lessons[idx].id);
-    const sequentialLocked = idx > 0 && !isCompleted(course.lessons[idx - 1].id) && !completed;
+    // Masterclass: all variations unlocked (browse-anywhere card grid)
+    const sequentialLocked = !isMasterclass && idx > 0 && !isCompleted(course.lessons[idx - 1].id) && !completed;
     return { completed, premiumLocked: false, sequentialLocked, locked: sequentialLocked };
+  };
+
+  // Difficulty tag for masterclass cards (cycles Easy → Medium → Advanced based on variation index)
+  const variationDifficulty = (idx: number): { label: string; color: string; bg: string; border: string } => {
+    if (idx < 10) return { label: "Easy", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" };
+    if (idx < 20) return { label: "Medium", color: "text-primary", bg: "bg-primary/10", border: "border-primary/30" };
+    return { label: "Advanced", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30" };
   };
 
   const hasVideo = (_id: string) => false;
