@@ -41,10 +41,10 @@ export default function OpeningCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
       onClick={onSelect}
-      className={`group relative rounded-xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 overflow-hidden ${
+      className={`group relative rounded-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 overflow-hidden ${
         isMasterclass
-          ? "bg-gradient-to-br from-primary/15 via-card to-card border-2 border-primary/60 shadow-[0_0_30px_hsl(var(--primary)/0.22)] hover:border-primary hover:shadow-[0_0_55px_hsl(var(--primary)/0.4)]"
-          : "bg-card border border-border/50 hover:border-primary/40 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)]"
+          ? "pt-8 px-4 pb-4 bg-gradient-to-br from-primary/15 via-card to-card border-2 border-primary/60 shadow-[0_0_30px_hsl(var(--primary)/0.22)] hover:border-primary hover:shadow-[0_0_55px_hsl(var(--primary)/0.4)]"
+          : "p-4 bg-card border border-border/50 hover:border-primary/40 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)]"
       }`}
     >
       {/* Animated shimmer for masterclass cards */}
