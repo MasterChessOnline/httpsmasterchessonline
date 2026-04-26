@@ -1,7 +1,7 @@
 import { Opening } from "@/lib/openings-data";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Star, Lock } from "lucide-react";
+import { BookOpen, Star, Lock, Crown } from "lucide-react";
 
 interface OpeningCardProps {
   opening: Opening;
@@ -26,16 +26,28 @@ export default function OpeningCard({
   onToggleFavorite,
   index,
 }: OpeningCardProps) {
+  const isMasterclass = opening.name.toLowerCase().includes("masterclass") || opening.id.includes("masterclass");
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
       onClick={onSelect}
-      className="group relative bg-card border border-border/50 rounded-xl p-4 cursor-pointer
-        hover:border-primary/40 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)]
-        transition-all duration-300 hover:-translate-y-1"
+      className={`group relative rounded-xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 ${
+        isMasterclass
+          ? "bg-gradient-to-br from-primary/10 via-card to-card border border-primary/60 shadow-[0_0_25px_hsl(var(--primary)/0.18)] hover:border-primary hover:shadow-[0_0_45px_hsl(var(--primary)/0.35)]"
+          : "bg-card border border-border/50 hover:border-primary/40 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)]"
+      }`}
     >
+      {isMasterclass && (
+        <div className="absolute -top-2 -left-2 z-10">
+          <Badge className="bg-primary text-primary-foreground border border-primary/60 text-[9px] uppercase tracking-wider font-bold shadow-lg">
+            <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> Masterclass
+          </Badge>
+        </div>
+      )}
+
       {/* Favorite button */}
       {onToggleFavorite && (
         <button
@@ -54,7 +66,7 @@ export default function OpeningCard({
       <div className="flex items-start gap-3 mb-3">
         <span className="text-2xl">{opening.icon}</span>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+          <h3 className={`font-semibold transition-colors truncate ${isMasterclass ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
             {opening.name}
           </h3>
           <span className="text-xs text-muted-foreground font-mono">{opening.eco}</span>
