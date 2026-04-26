@@ -560,7 +560,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
             <div className="bg-card border border-border/50 rounded-xl p-4">
               <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-primary" />
-                Variation Tree
+                {isMasterclassOpening ? "30 Individual Variations" : "Variation Tree"}
               </h3>
               {isMasterclassOpening ? (
                 <div className="space-y-3">
@@ -620,7 +620,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                     className="w-full justify-start text-xs"
                     onClick={() => startTraining()}
                   >
-                    Main Line
+                    {isMasterclassOpening ? `Selected: ${selectedMasterLine + 1}. ${activeMasterLine?.title}` : "Main Line"}
                   </Button>
                   {allPaths.slice(0, isMasterclassOpening ? 30 : 6).map((path, i) => {
                     const label = isMasterclassOpening
