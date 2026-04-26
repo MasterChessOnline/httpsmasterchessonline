@@ -976,7 +976,7 @@ const Play = () => {
           <MonitorOff className="w-3.5 h-3.5 inline mr-1.5" /> Exit
         </button>
         <div className="w-full max-w-[min(90vw,600px)]">
-          <ChessBoard game={game} flipped={boardFlipped} selectedSquare={selectedSquare} legalMoves={legalMoves} lastMove={lastMove} isGameOver={isGameOver} isPlayerTurn={isPlayerTurn} hintSquare={null} onSquareClick={handleSquareClick} premove={premove} />
+          <ChessBoard game={game} flipped={boardFlipped} selectedSquare={selectedSquare} legalMoves={legalMoves} lastMove={lastMove} isGameOver={isGameOver} isPlayerTurn={isPlayerTurn} hintSquare={hintSquare} hintToSquare={hintToSquare} onSquareClick={handleSquareClick} premove={premove} />
         </div>
         <p className="mt-4 text-sm text-muted-foreground font-mono">{statusText}</p>
         <PromotionDialog isOpen={!!pendingPromotion} color={game.turn()} onSelect={handlePromotionSelect} onCancel={() => setPendingPromotion(null)} />
