@@ -493,7 +493,7 @@ const PlayOnline = () => {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[20rem_minmax(0,1fr)_20rem] gap-4 lg:items-start">
           <div className="hidden lg:block" aria-hidden="true" />
           {/* Board + Clocks */}
-          <div className="flex-1 min-w-0 flex flex-col items-center">
+          <div className="min-w-0 flex flex-col items-center">
             <div className="w-full max-w-[min(85vw,520px)] space-y-1.5">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
