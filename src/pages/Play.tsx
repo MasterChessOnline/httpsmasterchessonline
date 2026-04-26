@@ -1133,6 +1133,28 @@ const Play = () => {
             {botRatingResult && mode === "ai" && isGameOver && (
               <RatingChange result={botRatingResult} ratingType="bot" />
             )}
+
+            {/* Bot feedback bubble — absolutely positioned below the board so the layout never jumps */}
+            <AnimatePresence>
+              {botMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute left-1/2 -translate-x-1/2 -bottom-16 z-30 pointer-events-none"
+                >
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/95 backdrop-blur-sm border border-primary/30 shadow-lg max-w-sm">
+                    <span className="text-2xl">{currentBot.avatar}</span>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold text-primary leading-tight">{currentBot.name}</p>
+                      <p className="text-sm text-foreground leading-snug">{botMessage}</p>
+                    </div>
+                    <MessageCircle className="w-4 h-4 text-primary/50 flex-shrink-0" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Controls column */}
