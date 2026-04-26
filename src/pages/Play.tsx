@@ -1051,6 +1051,11 @@ const Play = () => {
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               )}
             </div>
+
+            {/* Rating change — directly under the board */}
+            {botRatingResult && mode === "ai" && isGameOver && (
+              <RatingChange result={botRatingResult} ratingType="bot" />
+            )}
           </div>
 
           {/* Controls column */}
