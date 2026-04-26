@@ -87,7 +87,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
       return {
         id: lessonId,
         title: JOBAVA_VARIATION_TITLES[index],
-        moves: lessonMoves.map((move) => ({ san: move.move, explanation: move.explanation, children: [], isMainLine: true })),
+        moves: lessonMoves.map((move) => ({ san: move.san, explanation: move.explanation, children: [], isMainLine: true })),
       };
     }).filter((line) => line.moves.length > 0);
   }, [opening.id]);
