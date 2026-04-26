@@ -79,12 +79,12 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   // variations from the move tree via getAllVariationPaths().
   const masterclassLines: MasterclassLine[] = useMemo(() => {
     if (opening.id === "masterclass-jobava-london") {
-      return Array.from({ length: 30 }, (_, index) => {
+      return Array.from({ length: JOBAVA_LINE_COUNT }, (_, index) => {
         const lessonId = `jl-${index + 1}`;
         const lessonMoves = LESSON_MOVES[lessonId]?.moves || [];
         return {
           id: lessonId,
-          title: JOBAVA_VARIATION_TITLES[index],
+          title: `Line ${index + 1}`,
           moves: lessonMoves.map((move) => ({ san: move.san, explanation: move.explanation, children: [], isMainLine: true })),
         };
       }).filter((line) => line.moves.length > 0);
