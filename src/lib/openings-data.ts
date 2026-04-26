@@ -888,6 +888,685 @@ export const OPENINGS_DATABASE: Opening[] = [
       ]),
     ],
   },
+  // ═══════════════════════════════════════════
+  // MASTERCLASS — JOBAVA LONDON SYSTEM (30 variations)
+  // ═══════════════════════════════════════════
+  {
+    id: "masterclass-jobava-london",
+    name: "Masterclass: Jobava London System",
+    eco: "D00",
+    category: "queen-pawn",
+    description: "30-variation deep masterclass on the Jobava London System (1.d4 + 2.Nc3 + 3.Bf4). A complete weapon for White covering positional, tactical, and opposite-side attacking lines.",
+    difficulty: "advanced",
+    icon: "👑",
+    startingMoves: "1.d4 2.Nc3 3.Bf4",
+    totalVariations: 30,
+    tree: [
+      m("d4", "1.d4 — White claims the center.", [
+        m("d5", "1...d5 — Continuing the line.", [
+          m("Nc3", "2.Nc3 — The Jobava signature: knight develops before c3.", [
+            m("Nf6", "2...Nf6 — Continuing the line.", [
+              m("Bf4", "3.Bf4 — The London bishop, eyeing c7.", [
+                m("e6", "3...e6 — Continuing the line.", [
+                  m("e3", "4.e3 — Continuing the line.", [
+                    m("Bd6", "4...Bd6 — Continuing the line.", [
+                      m("Bg3", "5.Bg3 — Continuing the line.", [
+                        m("O-O", "5...O-O — Continuing the line.", [
+                          m("Bd3", "6.Bd3 — Continuing the line.", [
+                            m("c5", "6...c5 — Continuing the line.", [
+                              m("Nf3", "7.Nf3 — Continuing the line.", [
+                                m("Nc6", "7...Nc6 — Continuing the line.", [
+                                  m("O-O", "8.O-O — Continuing the line.", [
+                                    m("b6", "8...b6 — Continuing the line.", [
+                                      m("Ne5", "9.Ne5 — Continuing the line.", [
+                                        m("Bb7", "9...Bb7 — Continuing the line.", [
+                                          m("f4", "Variation 1: Main Solid System", [])
+                                        ])
+                                      ]),
+                                      s("Re1", "9.Re1 — Continuing the line.", [
+                                        s("Bb7", "9...Bb7 — Continuing the line.", [
+                                          s("e4", "Variation 26: Slow Build Attack", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ]),
+                            s("b6", "6...b6 — Continuing the line.", [
+                              s("Nf3", "7.Nf3 — Continuing the line.", [
+                                s("Bb7", "7...Bb7 — Continuing the line.", [
+                                  s("Ne5", "8.Ne5 — Continuing the line.", [
+                                    s("Nbd7", "8...Nbd7 — Continuing the line.", [
+                                      s("f4", "9.f4 — Continuing the line.", [
+                                        s("c5", "9...c5 — Continuing the line.", [
+                                          s("Bh4", "Variation 13: Classical Jobava Setup", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ]),
+                    s("c5", "4...c5 — Continuing the line.", [
+                      s("Nb5", "5.Nb5 — Continuing the line.", [
+                        s("Na6", "5...Na6 — Continuing the line.", [
+                          s("Nf3", "6.Nf3 — Continuing the line.", [
+                            s("Bd7", "6...Bd7 — Continuing the line.", [
+                              s("c3", "7.c3 — Continuing the line.", [
+                                s("Be7", "7...Be7 — Continuing the line.", [
+                                  s("a4", "8.a4 — Continuing the line.", [
+                                    s("O-O", "8...O-O — Continuing the line.", [
+                                      s("Bd3", "9.Bd3 — Continuing the line.", [
+                                        s("Bd6", "9...Bd6 — Continuing the line.", [
+                                          s("O-O", "Variation 9: Positional Squeeze", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ]),
+                  s("f3", "4.f3 — Continuing the line.", [
+                    s("c5", "4...c5 — Continuing the line.", [
+                      s("e4", "5.e4 — Continuing the line.", [
+                        s("cxd4", "5...cxd4 — Continuing the line.", [
+                          s("Qxd4", "6.Qxd4 — Continuing the line.", [
+                            s("Nc6", "6...Nc6 — Continuing the line.", [
+                              s("Bb5", "7.Bb5 — Continuing the line.", [
+                                s("Bd7", "7...Bd7 — Continuing the line.", [
+                                  s("Bxc6", "8.Bxc6 — Continuing the line.", [
+                                    s("Bxc6", "8...Bxc6 — Continuing the line.", [
+                                      s("O-O-O", "Variation 2: Early Center Break", [])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ]),
+                        s("Nc6", "5...Nc6 — Continuing the line.", [
+                          s("Nb5", "6.Nb5 — Continuing the line.", [
+                            s("e5", "6...e5 — Continuing the line.", [
+                              s("dxe5", "7.dxe5 — Continuing the line.", [
+                                s("Nh5", "7...Nh5 — Continuing the line.", [
+                                  s("exd5", "8.exd5 — Continuing the line.", [
+                                    s("Nxf4", "8...Nxf4 — Continuing the line.", [
+                                      s("dxc6", "9.dxc6 — Continuing the line.", [
+                                        s("Qxd1+", "9...Qxd1+ — Continuing the line.", [
+                                          s("Rxd1", "Variation 24: Open Center Attack", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ]),
+                  s("Qd2", "4.Qd2 — Continuing the line.", [
+                    s("Be7", "4...Be7 — Continuing the line.", [
+                      s("O-O-O", "5.O-O-O — Continuing the line.", [
+                        s("O-O", "5...O-O — Continuing the line.", [
+                          s("h4", "6.h4 — Continuing the line.", [
+                            s("c5", "6...c5 — Continuing the line.", [
+                              s("e4", "7.e4 — Continuing the line.", [
+                                s("cxd4", "7...cxd4 — Continuing the line.", [
+                                  s("Qxd4", "8.Qxd4 — Continuing the line.", [
+                                    s("Nc6", "8...Nc6 — Continuing the line.", [
+                                      s("Qe3", "9.Qe3 — Continuing the line.", [
+                                        s("d4", "1.d4 — White claims the center.", [
+                                          s("Qg3", "Variation 4: Opposite-side Attack", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ]),
+                                s("Nc6", "7...Nc6 — Continuing the line.", [
+                                  s("dxc5", "8.dxc5 — Continuing the line.", [
+                                    s("Bxc5", "8...Bxc5 — Continuing the line.", [
+                                      s("h5", "9.h5 — Continuing the line.", [
+                                        s("Re8", "9...Re8 — Continuing the line.", [
+                                          s("h6", "Variation 21: Kingside Pressure", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ]),
+                            s("b6", "6...b6 — Continuing the line.", [
+                              s("h5", "7.h5 — Continuing the line.", [
+                                s("Bb7", "7...Bb7 — Continuing the line.", [
+                                  s("Nf3", "8.Nf3 — Continuing the line.", [
+                                    s("Nbd7", "8...Nbd7 — Continuing the line.", [
+                                      s("Ne5", "9.Ne5 — Continuing the line.", [
+                                        s("Nxe5", "9...Nxe5 — Continuing the line.", [
+                                          s("dxe5", "Variation 10: Pawn Storm Attack", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ]),
+                  s("Nf3", "4.Nf3 — Continuing the line.", [
+                    s("Bd6", "4...Bd6 — Continuing the line.", [
+                      s("Bg3", "5.Bg3 — Continuing the line.", [
+                        s("O-O", "5...O-O — Continuing the line.", [
+                          s("e3", "6.e3 — Continuing the line.", [
+                            s("c5", "6...c5 — Continuing the line.", [
+                              s("Bd3", "7.Bd3 — Continuing the line.", [
+                                s("Nc6", "7...Nc6 — Continuing the line.", [
+                                  s("O-O", "8.O-O — Continuing the line.", [
+                                    s("Nb4", "8...Nb4 — Continuing the line.", [
+                                      s("Nb5", "9.Nb5 — Continuing the line.", [
+                                        s("Bxg3", "9...Bxg3 — Continuing the line.", [
+                                          s("Bxh7+", "Variation 15: Flexible Development", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ]),
+                s("c5", "3...c5 — Continuing the line.", [
+                  s("e3", "4.e3 — Continuing the line.", [
+                    s("Nc6", "4...Nc6 — Continuing the line.", [
+                      s("Nb5", "5.Nb5 — Continuing the line.", [
+                        s("e5", "5...e5 — Continuing the line.", [
+                          s("dxe5", "6.dxe5 — Continuing the line.", [
+                            s("Ne4", "6...Ne4 — Continuing the line.", [
+                              s("Qxd5", "7.Qxd5 — Continuing the line.", [
+                                s("Qa5+", "7...Qa5+ — Continuing the line.", [
+                                  s("c3", "8.c3 — Continuing the line.", [
+                                    s("Bf5", "8...Bf5 — Continuing the line.", [
+                                      s("Nd6+", "9.Nd6+ — Continuing the line.", [
+                                        s("Nxd6", "9...Nxd6 — Continuing the line.", [
+                                          s("exd6", "Variation 3: Anti ...c5 Tactical", [])
+                                        ]),
+                                        s("Bxd6", "9...Bxd6 — Continuing the line.", [
+                                          s("exd6", "Variation 16: Early c5 Counterattack", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ]),
+                        s("Qa5+", "5...Qa5+ — Continuing the line.", [
+                          s("c3", "6.c3 — Continuing the line.", [
+                            s("cxd4", "6...cxd4 — Continuing the line.", [
+                              s("exd4", "7.exd4 — Continuing the line.", [
+                                s("e5", "7...e5 — Continuing the line.", [
+                                  s("dxe5", "8.dxe5 — Continuing the line.", [
+                                    s("Ne4", "8...Ne4 — Continuing the line.", [
+                                      s("Qxd5", "9.Qxd5 — Continuing the line.", [
+                                        s("Bf5", "9...Bf5 — Continuing the line.", [
+                                          s("Nd6+", "Variation 27: Early Queen Activity", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ]),
+                  s("dxc5", "4.dxc5 — Continuing the line.", [
+                    s("e6", "4...e6 — Continuing the line.", [
+                      s("e4", "5.e4 — Continuing the line.", [
+                        s("Bxc5", "5...Bxc5 — Continuing the line.", [
+                          s("exd5", "6.exd5 — Continuing the line.", [
+                            s("exd5", "6...exd5 — Continuing the line.", [
+                              s("Bb5+", "7.Bb5+ — Continuing the line.", [
+                                s("Nc6", "7...Nc6 — Continuing the line.", [
+                                  s("Nge2", "8.Nge2 — Continuing the line.", [
+                                    s("O-O", "8...O-O — Continuing the line.", [
+                                      s("O-O", "9.O-O — Continuing the line.", [
+                                        s("Bd6", "9...Bd6 — Continuing the line.", [
+                                          s("Bg5", "Variation 29: King-Attack Speed", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            ])
+          ])
+        ]),
+        s("Nf6", "1...Nf6 — Continuing the line.", [
+          s("Nc3", "2.Nc3 — The Jobava signature: knight develops before c3.", [
+            s("g6", "2...g6 — Continuing the line.", [
+              s("Bf4", "3.Bf4 — The London bishop, eyeing c7.", [
+                s("Bg7", "3...Bg7 — Continuing the line.", [
+                  s("e4", "4.e4 — Continuing the line.", [
+                    s("d6", "4...d6 — Continuing the line.", [
+                      s("Qd2", "5.Qd2 — Continuing the line.", [
+                        s("O-O", "5...O-O — Continuing the line.", [
+                          s("O-O-O", "6.O-O-O — Continuing the line.", [
+                            s("c6", "6...c6 — Continuing the line.", [
+                              s("Bh6", "7.Bh6 — Continuing the line.", [
+                                s("b5", "7...b5 — Continuing the line.", [
+                                  s("h4", "8.h4 — Continuing the line.", [
+                                    s("b4", "8...b4 — Continuing the line.", [
+                                      s("Nce2", "9.Nce2 — Continuing the line.", [
+                                        s("Nxe4", "9...Nxe4 — Continuing the line.", [
+                                          s("Qe3", "Variation 5: King's Indian Setup", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ]),
+                            s("a6", "6...a6 — Continuing the line.", [
+                              s("Bh6", "7.Bh6 — Continuing the line.", [
+                                s("b5", "7...b5 — Continuing the line.", [
+                                  s("h4", "8.h4 — Continuing the line.", [
+                                    s("Bb7", "8...Bb7 — Continuing the line.", [
+                                      s("h5", "9.h5 — Continuing the line.", [
+                                        s("Nxh5", "9...Nxh5 — Continuing the line.", [
+                                          s("Rxh5", "10.Rxh5 — Continuing the line.", [
+                                            s("gxh5", "Variation 30: Final Master Attack", [])
+                                          ])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ]),
+                        s("Nc6", "5...Nc6 — Continuing the line.", [
+                          s("O-O-O", "6.O-O-O — Continuing the line.", [
+                            s("O-O", "6...O-O — Continuing the line.", [
+                              s("f3", "7.f3 — Continuing the line.", [
+                                s("e5", "7...e5 — Continuing the line.", [
+                                  s("dxe5", "8.dxe5 — Continuing the line.", [
+                                    s("dxe5", "8...dxe5 — Continuing the line.", [
+                                      s("Be3", "9.Be3 — Continuing the line.", [
+                                        s("Qe7", "9...Qe7 — Continuing the line.", [
+                                          s("Nh3", "Variation 23: Modern Attack Plan", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ]),
+                  s("e3", "4.e3 — Continuing the line.", [
+                    s("d6", "4...d6 — Continuing the line.", [
+                      s("h4", "5.h4 — Continuing the line.", [
+                        s("h5", "5...h5 — Continuing the line.", [
+                          s("Nf3", "6.Nf3 — Continuing the line.", [
+                            s("O-O", "6...O-O — Continuing the line.", [
+                              s("Ng5", "7.Ng5 — Continuing the line.", [
+                                s("c5", "7...c5 — Continuing the line.", [
+                                  s("dxc5", "8.dxc5 — Continuing the line.", [
+                                    s("Qa5", "8...Qa5 — Continuing the line.", [
+                                      s("cxd6", "9.cxd6 — Continuing the line.", [
+                                        s("exd6", "9...exd6 — Continuing the line.", [
+                                          s("Qxd6", "Variation 6: Fianchetto Control", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ]),
+                        s("O-O", "5...O-O — Continuing the line.", [
+                          s("h5", "6.h5 — Continuing the line.", [
+                            s("c5", "6...c5 — Continuing the line.", [
+                              s("hxg6", "7.hxg6 — Continuing the line.", [
+                                s("fxg6", "7...fxg6 — Continuing the line.", [
+                                  s("Nf3", "8.Nf3 — Continuing the line.", [
+                                    s("Nc6", "8...Nc6 — Continuing the line.", [
+                                      s("Bc4+", "9.Bc4+ — Continuing the line.", [
+                                        s("Kh8", "9...Kh8 — Continuing the line.", [
+                                          s("Ng5", "Variation 25: King Safety Pressure", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            ]),
+            s("e6", "2...e6 — Continuing the line.", [
+              s("Bf4", "3.Bf4 — The London bishop, eyeing c7.", [
+                s("Bb4", "3...Bb4 — Continuing the line.", [
+                  s("e3", "4.e3 — Continuing the line.", [
+                    s("c5", "4...c5 — Continuing the line.", [
+                      s("a3", "5.a3 — Continuing the line.", [
+                        s("Bxc3+", "5...Bxc3+ — Continuing the line.", [
+                          s("bxc3", "6.bxc3 — Continuing the line.", [
+                            s("Qa5", "6...Qa5 — Continuing the line.", [
+                              s("Ne2", "7.Ne2 — Continuing the line.", [
+                                s("Nd5", "7...Nd5 — Continuing the line.", [
+                                  s("Qd2", "8.Qd2 — Continuing the line.", [
+                                    s("Nc6", "8...Nc6 — Continuing the line.", [
+                                      s("Bd6", "9.Bd6 — Continuing the line.", [
+                                        s("cxd4", "9...cxd4 — Continuing the line.", [
+                                          s("exd4", "Variation 7: Nimzo Structure Exchange", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ]),
+                s("c5", "3...c5 — Continuing the line.", [
+                  s("d5", "4.d5 — Continuing the line.", [
+                    s("exd5", "4...exd5 — Continuing the line.", [
+                      s("Nxd5", "5.Nxd5 — Continuing the line.", [
+                        s("Nxd5", "5...Nxd5 — Continuing the line.", [
+                          s("Qxd5", "6.Qxd5 — Continuing the line.", [
+                            s("Nc6", "6...Nc6 — Continuing the line.", [
+                              s("O-O-O", "7.O-O-O — Continuing the line.", [
+                                s("Be7", "7...Be7 — Continuing the line.", [
+                                  s("e4", "8.e4 — Continuing the line.", [
+                                    s("O-O", "8...O-O — Continuing the line.", [
+                                      s("Nf3", "9.Nf3 — Continuing the line.", [
+                                        s("d6", "9...d6 — Continuing the line.", [
+                                          s("Bd6", "Variation 18: Central Exchange System", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ]),
+                            s("d6", "6...d6 — Continuing the line.", [
+                              s("Nf3", "7.Nf3 — Continuing the line.", [
+                                s("Nc6", "7...Nc6 — Continuing the line.", [
+                                  s("O-O-O", "8.O-O-O — Continuing the line.", [
+                                    s("Be7", "8...Be7 — Continuing the line.", [
+                                      s("e4", "9.e4 — Continuing the line.", [
+                                        s("O-O", "9...O-O — Continuing the line.", [
+                                          s("Bd3", "Variation 20: Early Tactical Explosion", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ]),
+                s("d5", "3...d5 — Continuing the line.", [
+                  s("Nb5", "4.Nb5 — Continuing the line.", [
+                    s("Na6", "4...Na6 — Continuing the line.", [
+                      s("e3", "5.e3 — Continuing the line.", [
+                        s("c5", "5...c5 — Continuing the line.", [
+                          s("c3", "6.c3 — Continuing the line.", [
+                            s("Bd7", "6...Bd7 — Continuing the line.", [
+                              s("a4", "7.a4 — Continuing the line.", [
+                                s("Be7", "7...Be7 — Continuing the line.", [
+                                  s("Nf3", "8.Nf3 — Continuing the line.", [
+                                    s("O-O", "8...O-O — Continuing the line.", [
+                                      s("Bd3", "9.Bd3 — Continuing the line.", [
+                                        s("Bd6", "9...Bd6 — Continuing the line.", [
+                                          s("O-O", "Variation 28: Positional Edge", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            ]),
+            s("c5", "2...c5 — Continuing the line.", [
+              s("d5", "3.d5 — Continuing the line.", [
+                s("g6", "3...g6 — Continuing the line.", [
+                  s("Bf4", "4.Bf4 — Continuing the line.", [
+                    s("Bg7", "4...Bg7 — Continuing the line.", [
+                      s("e4", "5.e4 — Continuing the line.", [
+                        s("d6", "5...d6 — Continuing the line.", [
+                          s("Qd2", "6.Qd2 — Continuing the line.", [
+                            s("O-O", "6...O-O — Continuing the line.", [
+                              s("O-O-O", "7.O-O-O — Continuing the line.", [
+                                s("e6", "7...e6 — Continuing the line.", [
+                                  s("dxe6", "8.dxe6 — Continuing the line.", [
+                                    s("Bxe6", "8...Bxe6 — Continuing the line.", [
+                                      s("Bxd6", "9.Bxd6 — Continuing the line.", [
+                                        s("Re8", "9...Re8 — Continuing the line.", [
+                                          s("e5", "Variation 8: Benoni Structure", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ]),
+                s("e6", "3...e6 — Continuing the line.", [
+                  s("e4", "4.e4 — Continuing the line.", [
+                    s("exd5", "4...exd5 — Continuing the line.", [
+                      s("exd5", "5.exd5 — Continuing the line.", [
+                        s("d6", "5...d6 — Continuing the line.", [
+                          s("Nf3", "6.Nf3 — Continuing the line.", [
+                            s("Be7", "6...Be7 — Continuing the line.", [
+                              s("Bd3", "7.Bd3 — Continuing the line.", [
+                                s("O-O", "7...O-O — Continuing the line.", [
+                                  s("O-O", "8.O-O — Continuing the line.", [
+                                    s("a6", "8...a6 — Continuing the line.", [
+                                      s("Re1", "9.Re1 — Continuing the line.", [
+                                        s("b5", "9...b5 — Continuing the line.", [
+                                          s("a4", "Variation 19: Benoni Structure Active", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            ]),
+            s("b6", "2...b6 — Continuing the line.", [
+              s("Bf4", "3.Bf4 — The London bishop, eyeing c7.", [
+                s("Bb7", "3...Bb7 — Continuing the line.", [
+                  s("f3", "4.f3 — Continuing the line.", [
+                    s("e6", "4...e6 — Continuing the line.", [
+                      s("e4", "5.e4 — Continuing the line.", [
+                        s("Bb4", "5...Bb4 — Continuing the line.", [
+                          s("Bd3", "6.Bd3 — Continuing the line.", [
+                            s("c5", "6...c5 — Continuing the line.", [
+                              s("dxc5", "7.dxc5 — Continuing the line.", [
+                                s("bxc5", "7...bxc5 — Continuing the line.", [
+                                  s("Ne2", "8.Ne2 — Continuing the line.", [
+                                    s("O-O", "8...O-O — Continuing the line.", [
+                                      s("O-O", "9.O-O — Continuing the line.", [
+                                        s("d6", "9...d6 — Continuing the line.", [
+                                          s("Bd6", "Variation 11: Queen's Indian Style", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            ]),
+            s("d6", "2...d6 — Continuing the line.", [
+              s("Bf4", "3.Bf4 — The London bishop, eyeing c7.", [
+                s("g6", "3...g6 — Continuing the line.", [
+                  s("e4", "4.e4 — Continuing the line.", [
+                    s("Bg7", "4...Bg7 — Continuing the line.", [
+                      s("Qd2", "5.Qd2 — Continuing the line.", [
+                        s("O-O", "5...O-O — Continuing the line.", [
+                          s("O-O-O", "6.O-O-O — Continuing the line.", [
+                            s("c6", "6...c6 — Continuing the line.", [
+                              s("Bh6", "7.Bh6 — Continuing the line.", [
+                                s("b5", "7...b5 — Continuing the line.", [
+                                  s("h4", "8.h4 — Continuing the line.", [
+                                    s("Bxh6", "8...Bxh6 — Continuing the line.", [
+                                      s("Qxh6", "9.Qxh6 — Continuing the line.", [
+                                        s("Nbd7", "9...Nbd7 — Continuing the line.", [
+                                          s("h5", "Variation 12: Modern Dragon Structure", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            ]),
+            s("d5", "2...d5 — Continuing the line.", [
+              s("Bf4", "3.Bf4 — The London bishop, eyeing c7.", [
+                s("Ne4", "3...Ne4 — Continuing the line.", [
+                  s("Nxe4", "4.Nxe4 — Continuing the line.", [
+                    s("dxe4", "4...dxe4 — Continuing the line.", [
+                      s("e3", "5.e3 — Continuing the line.", [
+                        s("c5", "5...c5 — Continuing the line.", [
+                          s("c3", "6.c3 — Continuing the line.", [
+                            s("Nc6", "6...Nc6 — Continuing the line.", [
+                              s("Qc2", "7.Qc2 — Continuing the line.", [
+                                s("f5", "7...f5 — Continuing the line.", [
+                                  s("f3", "8.f3 — Continuing the line.", [
+                                    s("exf3", "8...exf3 — Continuing the line.", [
+                                      s("Nxf3", "9.Nxf3 — Continuing the line.", [
+                                        s("e6", "9...e6 — Continuing the line.", [
+                                          s("Bd3", "Variation 14: Tactical Center Break", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ]),
+                s("c5", "3...c5 — Continuing the line.", [
+                  s("dxc5", "4.dxc5 — Continuing the line.", [
+                    s("Nc6", "4...Nc6 — Continuing the line.", [
+                      s("e4", "5.e4 — Continuing the line.", [
+                        s("e5", "5...e5 — Continuing the line.", [
+                          s("Bg5", "6.Bg5 — Continuing the line.", [
+                            s("d4", "1.d4 — White claims the center.", [
+                              s("Nd5", "7.Nd5 — Continuing the line.", [
+                                s("Bxc5", "7...Bxc5 — Continuing the line.", [
+                                  s("Bxf6", "8.Bxf6 — Continuing the line.", [
+                                    s("gxf6", "8...gxf6 — Continuing the line.", [
+                                      s("Qf3", "9.Qf3 — Continuing the line.", [
+                                        s("Be6", "9...Be6 — Continuing the line.", [
+                                          s("Nxf6+", "Variation 17: Queen Activity Line", [])
+                                        ])
+                                      ])
+                                    ])
+                                  ])
+                                ])
+                              ])
+                            ])
+                          ])
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+    ],
+  },
 ];
 
 // Utility: flatten all moves in a tree to get a list of variation paths
