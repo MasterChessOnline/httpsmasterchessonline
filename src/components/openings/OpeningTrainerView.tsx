@@ -622,8 +622,10 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                   >
                     Main Line
                   </Button>
-                  {allPaths.slice(0, 6).map((path, i) => {
-                    const label = path.map(m => m.san).join(" ");
+                  {allPaths.slice(0, isMasterclassOpening ? 30 : 6).map((path, i) => {
+                    const label = isMasterclassOpening
+                      ? `${i + 1}. ${masterclassLines[i]?.title || "Variation"}`
+                      : `Line ${i + 1}: ${path.map(m => m.san).join(" ")}`;
                     return (
                       <Button
                         key={i}
@@ -632,7 +634,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                         className="w-full justify-start text-xs font-mono text-muted-foreground h-auto py-2 whitespace-normal text-left leading-snug break-words"
                         onClick={() => startTraining(path)}
                       >
-                        <span className="block w-full break-words">Line {i + 1}: {label}</span>
+                        <span className="block w-full break-words">{label}</span>
                       </Button>
                     );
                   })}
