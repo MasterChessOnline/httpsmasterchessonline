@@ -16,6 +16,11 @@ interface InviteFriendsCardProps {
   username?: string | null;
   /** Display name shown in the share copy. */
   displayName?: string | null;
+  /**
+   * "invite" → personal friend invite (default, used on /friends).
+   * "share"  → generic site-wide share card (used on the homepage).
+   */
+  variant?: "invite" | "share";
 }
 
 const INVITE_DOMAIN = "https://masterchess.live";
@@ -27,19 +32,26 @@ const PLATFORM_BTN =
 export default function InviteFriendsCard({
   username,
   displayName,
+  variant = "invite",
 }: InviteFriendsCardProps) {
   const [copied, setCopied] = useState(false);
 
   const inviteUrl = useMemo(() => {
-    if (username) {
+    if (variant === "invite" && username) {
       return `${INVITE_DOMAIN}/?ref=${encodeURIComponent(username)}`;
     }
     return `${INVITE_DOMAIN}/`;
-  }, [username]);
+  }, [username, variant]);
 
   const inviter = displayName || username || "A friend";
-  const message = `${inviter} invites you to play chess on MasterChess — train, learn openings, and play live games. Join now: ${inviteUrl}`;
-  const shortMessage = `Join me on MasterChess and let's play! ${inviteUrl}`;
+  const message =
+    variant === "share"
+      ? `♟️ Play, learn and compete on MasterChess — opening trainer, live games, tournaments and bots from 400 to 3200 ELO. Join free: ${inviteUrl}`
+      : `${inviter} invites you to play chess on MasterChess — train, learn openings, and play live games. Join now: ${inviteUrl}`;
+  const shortMessage =
+    variant === "share"
+      ? `Play, learn and compete on MasterChess ♟️ ${inviteUrl}`
+      : `Join me on MasterChess and let's play! ${inviteUrl}`;
 
   const copyLink = async () => {
     try {
