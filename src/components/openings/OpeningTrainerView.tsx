@@ -714,6 +714,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
       onOpenChange={setPlayDialogOpen}
       fen={fen}
       contextLabel={activeMasterLine?.title ?? opening.name}
+      returnOpeningId={opening.id}
     />
     </>
   );
