@@ -36,6 +36,12 @@ const MASTERCLASS_OPENINGS: Record<
     lineCount: 50,
     side: "black",
   },
+  "masterclass-kid": {
+    courseId: "masterkurs-kid",
+    lessonPrefix: "kid",
+    lineCount: 50,
+    side: "black",
+  },
 };
 
 interface MasterclassLine {
