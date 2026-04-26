@@ -210,7 +210,7 @@ const Friends = () => {
 
         <div className="max-w-2xl mx-auto">
           <Tabs value={tab} onValueChange={onTabChange} className="w-full">
-            <TabsList className="grid grid-cols-4 w-full mb-6">
+            <TabsList className="grid grid-cols-5 w-full mb-6">
               <TabsTrigger value="all" className="text-xs">
                 <UsersIcon className="h-3.5 w-3.5 mr-1.5" />
                 All ({accepted.length})
@@ -230,6 +230,10 @@ const Friends = () => {
               <TabsTrigger value="challenge" className="text-xs">
                 <Swords className="h-3.5 w-3.5 mr-1.5" />
                 Challenge
+              </TabsTrigger>
+              <TabsTrigger value="invite" className="text-xs">
+                <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                Invite
               </TabsTrigger>
             </TabsList>
 
