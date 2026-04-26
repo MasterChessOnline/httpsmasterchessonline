@@ -3065,7 +3065,7 @@ export const COURSES: Course[] = [
       LC("kal-49", "Sideline 5. Ne2 — Maneuver", "Sequence: 1.e4 c5 2.Nf3 Nc6 3.d4 cxd4 4.Nxd4 e5 5.Ne2 Nf6 6.Nbc3 Bb4 7.a3 Ba5 8.b4 Bb6 9.Ng3 d6 10.Bc4 Bd4 11.Bb2 O-O 12.O-O Be6 13.Bd3 d5 14.exd5 Nxd5 15.Na4 Bxb2 16.Nxb2 Nf4. Play through the moves on the interactive board, then click \"Practice\" to test your recall.", ["Memorize the line: 1.e4 c5 2.Nf3 Nc6 3.d4 cxd4 4.Nxd4 e5 5.Ne2 Nf6 6.Nbc3 Bb4 7.a3 Ba5 8.b4 Bb6 9.Ng3 d6 10.Bc4 Bd4 11.Bb2 O-O 12.O-O Be6 13.Bd3 d5 14.exd5 Nxd5 15.Na4 Bxb2 16.Nxb2 Nf4", "Understand the typical Kalashnikov plans behind every move.", "Use the practice mode to drill the moves without hints."], "VI. Sidelines: 5. Nf5 / Nf3 / Nb3 / Ne2"),
       LC("kal-50", "Sideline 5. Nc2 — Outpost", "Sequence: 1.e4 c5 2.Nf3 Nc6 3.d4 cxd4 4.Nxd4 e5. Play through the moves on the interactive board, then click \"Practice\" to test your recall.", ["Memorize the line: 1.e4 c5 2.Nf3 Nc6 3.d4 cxd4 4.Nxd4 e5", "Understand the typical Kalashnikov plans behind every move.", "Use the practice mode to drill the moves without hints."], "VI. Sidelines: 5. Nf5 / Nf3 / Nb3 / Ne2"),
     ],
-  },,
+  },
 
   /* ════════════════════════════════════════════════════════════
      MASTERKURS — KING'S INDIAN DEFENSE (50 lines · 6 chapters)
