@@ -65,7 +65,7 @@ export default function PieceStyleCard({ style, active, onSelect }: Props) {
           return (
             <span
               key={i}
-              className="text-xl sm:text-2xl leading-none inline-block shrink-0"
+              className="text-lg sm:text-xl leading-none inline-block shrink-0"
               style={{
                 color: s.white ? r.whiteFill : r.blackFill,
                 fontWeight: r.fontWeight || 400,
