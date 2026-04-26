@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, BookOpen, Filter } from "lucide-react";
+import { Search, BookOpen, Filter, Crown } from "lucide-react";
 
 type CategoryFilter = "all" | Opening["category"];
 type DifficultyFilter = "all" | Opening["difficulty"];
