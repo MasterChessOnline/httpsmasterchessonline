@@ -3,7 +3,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { Card } from "@/components/ui/card";
 import { getSetting } from "@/lib/user-settings";
 import type { RatingCalcResult } from "@/lib/rating-system";
@@ -13,7 +13,7 @@ interface RatingChangeProps {
   ratingType?: "online" | "bot";
 }
 
-export default function RatingChange({ result, ratingType = "online" }: RatingChangeProps) {
+const RatingChange = forwardRef<HTMLDivElement, RatingChangeProps>(function RatingChange({ result, ratingType = "online" }, ref) {
   const showChange = getSetting("showRatingChange", true);
   const showExpected = getSetting("showExpectedScore", true);
   const animate = getSetting("ratingAnimation", true);
