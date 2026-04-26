@@ -557,7 +557,7 @@ const PlayOnline = () => {
           </div>
 
           {/* Sidebar: Status, Moves, Chat, Controls */}
-          <div className="w-full lg:w-80 space-y-3">
+          <div className="w-full space-y-3">
             {/* Status */}
             <div className={`rounded-xl border p-3 text-center text-sm font-medium ${isGameOver ? "border-primary/30 bg-primary/5 text-primary" : "border-border/50 bg-card/80 text-foreground"}`}>
               {statusText}
