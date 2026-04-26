@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { OPENINGS_DATABASE, Opening } from "@/lib/openings-data";
 import OpeningCard from "@/components/openings/OpeningCard";
 import OpeningTrainerView from "@/components/openings/OpeningTrainerView";
@@ -30,6 +31,7 @@ const difficulties: { value: DifficultyFilter; label: string }[] = [
 ];
 
 export default function OpeningTrainer() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedOpening, setSelectedOpening] = useState<Opening | null>(null);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
@@ -40,6 +42,22 @@ export default function OpeningTrainer() {
       return saved ? new Set(JSON.parse(saved)) : new Set();
     } catch { return new Set(); }
   });
+
+  // Deep-link: open a specific course when ?openingId=... is present
+  // (used by "Continue course" from the Play page).
+  useEffect(() => {
+    const id = searchParams.get("openingId");
+    if (!id) return;
+    const found = OPENINGS_DATABASE.find((o) => o.id === id);
+    if (found) {
+      setSelectedOpening(found);
+      // Clean the query so a back/refresh doesn't re-trigger.
+      const next = new URLSearchParams(searchParams);
+      next.delete("openingId");
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleFavorite = (id: string) => {
     setFavorites(prev => {

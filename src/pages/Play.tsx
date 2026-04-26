@@ -18,7 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers } from "lucide-react";
+import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers, BookOpen } from "lucide-react";
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
 import { getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-profiles";
 import { BOT_PROFILES } from "@/lib/bots/profiles";
@@ -74,6 +74,7 @@ const Play = () => {
   // --- NEW: Game phase state (lobby → searching → matchup → playing) ---
   const [gamePhase, setGamePhase] = useState<GamePhaseState>("lobby");
   const [searchProgress, setSearchProgress] = useState(0);
+  const [returnToOpening, setReturnToOpening] = useState<{ id: string; label: string | null } | null>(null);
 
   // --- NEW: Premove system ---
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
@@ -507,6 +508,7 @@ const Play = () => {
         botId?: string;
         playerColor?: PlayerColor;
         contextLabel?: string | null;
+        returnOpeningId?: string | null;
       };
       if (!data.fen) return;
       // Validate the FEN before committing.
@@ -524,6 +526,9 @@ const Play = () => {
       }
       setMode("ai");
       pendingStartFenRef.current = data.fen;
+      if (data.returnOpeningId) {
+        setReturnToOpening({ id: data.returnOpeningId, label: data.contextLabel ?? null });
+      }
       // Skip the searching animation — go straight to the matchup screen,
       // which auto-transitions to "playing" and runs resetGameState().
       setGamePhase("matchup");
@@ -536,6 +541,7 @@ const Play = () => {
 
   const goToLobby = () => {
     resetGameState();
+    setReturnToOpening(null);
     setGamePhase("lobby");
   };
 
@@ -1104,6 +1110,23 @@ const Play = () => {
 
           {/* Controls column */}
           <div className="w-full lg:max-w-xs space-y-3">
+            {/* Continue course (when game was launched from Opening Trainer) */}
+            {returnToOpening && (
+              <Link
+                to={`/openings?openingId=${encodeURIComponent(returnToOpening.id)}`}
+                className="block rounded-xl border border-primary/40 bg-gradient-to-br from-primary/10 to-primary/5 p-3 hover:border-primary/70 hover:shadow-[0_0_12px_hsl(var(--primary)/0.3)] transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-primary">Continue course</p>
+                    {returnToOpening.label && (
+                      <p className="text-xs text-muted-foreground truncate">{returnToOpening.label}</p>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            )}
             {/* Game status */}
             <div className="rounded-xl border border-border/50 bg-card/60 p-3 text-center">
               <p className="text-sm font-medium text-foreground">{statusText}</p>
