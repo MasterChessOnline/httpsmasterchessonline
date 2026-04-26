@@ -150,25 +150,60 @@ function CourseCard({ course, onClick, progress }: {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const isMasterclass = course.tier === "masterclass";
+  // Detect repertoire side from course id (jobava → white, kalashnikov → black)
+  const masterclassSide: "white" | "black" | null = isMasterclass
+    ? course.id.includes("kalashnikov")
+      ? "black"
+      : course.id.includes("jobava") || course.id.includes("london")
+        ? "white"
+        : null
+    : null;
 
   return (
     <motion.article
       onClick={onClick}
       className={`group relative rounded-xl border overflow-hidden transition-all cursor-pointer ${
         isMasterclass
-          ? "border-primary/60 bg-gradient-to-br from-primary/10 via-card to-card shadow-[0_0_25px_hsl(43_90%_55%/0.15)] hover:shadow-[0_0_45px_hsl(43_90%_55%/0.3)]"
+          ? "border-2 border-primary/60 bg-gradient-to-br from-primary/15 via-card to-card shadow-[0_0_30px_hsl(43_90%_55%/0.2)] hover:shadow-[0_0_55px_hsl(43_90%_55%/0.4)]"
           : "border-border/50 hover:border-primary/40 bg-card"
       }`}
-      whileHover={{ y: -4, boxShadow: isMasterclass ? "0 0 50px hsl(43 90% 55% / 0.35)" : "0 0 30px hsl(43 90% 55% / 0.1)" }}
+      whileHover={{ y: -4, boxShadow: isMasterclass ? "0 0 60px hsl(43 90% 55% / 0.45)" : "0 0 30px hsl(43 90% 55% / 0.1)" }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
+      {/* Animated shimmer for masterclass cards */}
+      {isMasterclass && (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100"
+          initial={false}
+          animate={{ x: ["-30%", "130%"] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+          style={{
+            background:
+              "linear-gradient(110deg, transparent 30%, hsl(var(--primary) / 0.18) 50%, transparent 70%)",
+          }}
+        />
+      )}
+
       <div className={`h-1 w-full ${isMasterclass ? "bg-gradient-to-r from-primary via-primary/80 to-primary" : "bg-primary/50"}`} />
 
       {isMasterclass && (
-        <div className="absolute top-3 right-3 z-10">
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
           <Badge className="bg-primary text-primary-foreground border-primary/60 text-[9px] uppercase tracking-wider font-bold shadow-lg">
             <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> Masterclass
           </Badge>
+          {masterclassSide && (
+            <Badge
+              variant="outline"
+              className={`text-[9px] uppercase tracking-wider font-bold shadow-md ${
+                masterclassSide === "white"
+                  ? "bg-background text-foreground border-foreground/40"
+                  : "bg-foreground text-background border-foreground"
+              }`}
+            >
+              For {masterclassSide === "white" ? "White" : "Black"}
+            </Badge>
+          )}
         </div>
       )}
 
