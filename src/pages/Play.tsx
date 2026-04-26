@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers } from "lucide-react";
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
 import { getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-profiles";
+import { BOT_PROFILES } from "@/lib/bots/profiles";
 import { getBotMove, getBotThinkMs, classifyCpLoss, estimateMoveQuality } from "@/lib/bots/bot-engine";
 import { motion, AnimatePresence } from "framer-motion";
 import { applyBotRatingChange, type RatingCalcResult } from "@/lib/rating-system";
