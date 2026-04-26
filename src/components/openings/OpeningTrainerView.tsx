@@ -12,8 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, ArrowRight, RotateCcw, Eye, Dumbbell,
   BookOpen, ChevronLeft, CheckCircle2, XCircle, Lightbulb,
-  SkipBack, SkipForward
+  SkipBack, SkipForward, Swords
 } from "lucide-react";
+import PlayFromPositionDialog from "./PlayFromPositionDialog";
 
 type Mode = "explore" | "train";
 
@@ -98,6 +99,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [trainLegalMoves, setTrainLegalMoves] = useState<Square[]>([]);
   const [showHint, setShowHint] = useState(false);
+  const [playDialogOpen, setPlayDialogOpen] = useState(false);
 
   // Build a flat list of individual variations for ANY opening.
   // Masterclass openings (Jobava, Kalashnikov, …) use curated titles + LESSON_MOVES;
@@ -407,6 +409,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   }, [trainMoveIndex, trainMovesSequence]);
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-20">
@@ -492,6 +495,21 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setFlipped(!flipped)} className="ml-2">
                   <RotateCcw className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {/* Play vs Computer from current position */}
+            {mode === "explore" && (
+              <div className="flex justify-center">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setPlayDialogOpen(true)}
+                  className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary shadow-[0_0_14px_hsl(var(--primary)/0.35)]"
+                >
+                  <Swords className="h-4 w-4" />
+                  Play this position vs Computer
                 </Button>
               </div>
             )}
@@ -690,5 +708,13 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
         </div>
       </div>
     </div>
+
+    <PlayFromPositionDialog
+      open={playDialogOpen}
+      onOpenChange={setPlayDialogOpen}
+      fen={fen}
+      contextLabel={activeMasterLine?.title ?? opening.name}
+    />
+    </>
   );
 }
