@@ -109,9 +109,11 @@ const titles: Record<number, string> = {
 
 // Suggest titles based on chapter + first distinguishing move
 function makeTitle(num: number, sans: string[]): string {
-  // Use third black move as a discriminator (e.g., 3...c5 → c5)
-  const third = sans[5] || sans[sans.length - 1] || "Line";
-  return `Line ${num}: ${third}`;
+  // Use last move + a key intermediate move for context
+  const lastMove = sans[sans.length - 1] || "Line";
+  // Find a defining tactical/strategic move (capture, check, castling)
+  const keyMove = [...sans].slice(8).find(s => s.includes("x") || s.includes("+") || s.startsWith("O-O")) || sans[sans.length - 3] || lastMove;
+  return `Line ${num}: …${keyMove}`;
 }
 
 let coursesTs = "";
