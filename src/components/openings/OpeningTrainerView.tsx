@@ -562,13 +562,48 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                 <BookOpen className="h-4 w-4 text-primary" />
                 Variation Tree
               </h3>
-              <div className="max-h-[60vh] overflow-y-auto pr-1 scrollbar-thin">
-                <VariationTree
-                  tree={opening.tree}
-                  currentPath={currentPath.slice(0, clampedView + 1)}
-                  onSelectNode={handleSelectNode}
-                />
-              </div>
+              {isMasterclassOpening ? (
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-primary/25 bg-primary/10 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-semibold uppercase text-primary">Variation {selectedMasterLine + 1}</span>
+                      <span className="text-[11px] text-muted-foreground font-mono">{fullMovePath.length} moves</span>
+                    </div>
+                    <p className="mt-1 text-sm font-semibold text-foreground leading-snug">{activeMasterLine?.title}</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto pr-1 scrollbar-thin">
+                    {masterclassLines.map((line, index) => (
+                      <button
+                        key={line.id}
+                        onClick={() => handleSelectMasterLine(index)}
+                        className={`group w-full rounded-lg border p-3 text-left transition-all ${
+                          selectedMasterLine === index
+                            ? "border-primary bg-primary/10 shadow-[0_0_18px_hsl(var(--primary)/0.18)]"
+                            : "border-border/50 bg-muted/20 hover:border-primary/40 hover:bg-primary/5"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-xs font-bold ${selectedMasterLine === index ? "bg-primary text-primary-foreground" : "bg-card text-primary border border-border/50"}`}>
+                            {index + 1}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground leading-tight">{line.title}</p>
+                            <p className="mt-1 truncate text-[11px] font-mono text-muted-foreground">{line.moves.map((move) => move.san).join(" ")}</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="max-h-[60vh] overflow-y-auto pr-1 scrollbar-thin">
+                  <VariationTree
+                    tree={opening.tree}
+                    currentPath={currentPath.slice(0, clampedView + 1)}
+                    onSelectNode={handleSelectNode}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Train specific lines */}
