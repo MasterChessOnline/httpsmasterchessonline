@@ -542,8 +542,53 @@ function CourseDetail({ course, onBack, onSelectLesson, isCompleted, isBookmarke
         {isMasterclass ? "Variations" : "Chapters"}
       </h3>
 
-      {/* Unified Card Grid (same premium layout as Jobava London masterclass) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Group lessons by chapter (if defined). Otherwise: single flat grid. */}
+      {(() => {
+        const hasChapters = course.lessons.some((l) => l.chapter);
+        if (!hasChapters) {
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {course.lessons.map((lesson, idx) => renderLessonCard(lesson, idx))}
+            </div>
+          );
+        }
+        // Build ordered list of chapters preserving lesson order
+        const chapters: { name: string; items: { lesson: typeof course.lessons[number]; idx: number }[] }[] = [];
+        course.lessons.forEach((lesson, idx) => {
+          const name = lesson.chapter || "Other";
+          let group = chapters.find((c) => c.name === name);
+          if (!group) {
+            group = { name, items: [] };
+            chapters.push(group);
+          }
+          group.items.push({ lesson, idx });
+        });
+        return (
+          <div className="space-y-10">
+            {chapters.map((ch, ci) => (
+              <section key={ch.name}>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/15 text-primary text-xs font-bold">
+                    {ci + 1}
+                  </span>
+                  <h4 className="font-display text-base sm:text-lg font-semibold text-foreground">
+                    {ch.name}
+                  </h4>
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {ch.items.length} line{ch.items.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {ch.items.map(({ lesson, idx }) => renderLessonCard(lesson, idx))}
+                </div>
+              </section>
+            ))}
+          </div>
+        );
+      })()}
+
+      {/* Hidden: original flat grid replaced by chapter-aware grouping above. */}
+      <div className="hidden">
         {course.lessons.map((lesson, idx) => {
           const status = getLessonStatus(idx);
           const diff = variationDifficulty(idx);
