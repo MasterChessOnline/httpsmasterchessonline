@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 const GameInviteListener = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  // Map invite-id → toast.dismiss() so we can hide the popup if the sender
+  // cancels (or expires) the challenge before the recipient responds.
+  const activeToastsRef = useRef<Map<string, () => void>>(new Map());
 
   useEffect(() => {
     if (!user) return;
