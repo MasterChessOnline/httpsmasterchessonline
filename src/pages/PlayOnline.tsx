@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake, Zap, Eye, MonitorOff } from "lucide-react";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
+import ChessBoard from "@/components/chess/ChessBoard";
+import { useToast } from "@/hooks/use-toast";
 import RatingChange from "@/components/RatingChange";
 import { playChessSound } from "@/lib/chess-sounds";
 import { useAuth } from "@/contexts/AuthContext";
@@ -71,6 +73,9 @@ const PlayOnline = () => {
   const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number } | null>(null);
   const [gameMode, setGameMode] = useState<"rated" | "casual">("rated");
   const [focusMode, setFocusMode] = useState(false);
+  const [drawOfferedByMe, setDrawOfferedByMe] = useState(false);
+  const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
+  const { toast } = useToast();
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
@@ -147,10 +152,29 @@ const PlayOnline = () => {
         event: "INSERT", schema: "public", table: "game_messages",
         filter: `game_id=eq.${onlineGame.id}`,
       }, (payload) => {
-        setChatMessages(prev => [...prev, payload.new as ChatMessage]);
+        const msg = payload.new as ChatMessage;
+        setChatMessages(prev => [...prev, msg]);
+        // Handle draw offer signaling
+        if (msg.user_id !== user?.id) {
+          if (msg.message === "__draw_offer__") {
+            setDrawOfferedByOpponent(true);
+            toast({ title: "Draw offer", description: "Your opponent offers a draw." });
+          } else if (msg.message === "__draw_accept__") {
+            // Opponent accepted our offer
+            if (drawOfferedByMe) {
+              endGame("1/2-1/2");
+              playChessSound("gameOver");
+            }
+          } else if (msg.message === "__draw_decline__") {
+            if (drawOfferedByMe) {
+              setDrawOfferedByMe(false);
+              toast({ title: "Draw declined", description: "Your opponent declined the draw." });
+            }
+          }
+        }
       }).subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [onlineGame?.id, onlineStatus]);
+  }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
 
@@ -216,6 +240,33 @@ const PlayOnline = () => {
     }
   };
 
+  const offerDraw = async () => {
+    if (!user || !onlineGame || drawOfferedByMe) return;
+    setDrawOfferedByMe(true);
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__draw_offer__",
+    });
+    toast({ title: "Draw offered", description: "Waiting for opponent..." });
+  };
+
+  const acceptDraw = async () => {
+    if (!user || !onlineGame || !drawOfferedByOpponent) return;
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__draw_accept__",
+    });
+    setDrawOfferedByOpponent(false);
+    endGame("1/2-1/2");
+    playChessSound("gameOver");
+  };
+
+  const declineDraw = async () => {
+    if (!user || !onlineGame || !drawOfferedByOpponent) return;
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__draw_decline__",
+    });
+    setDrawOfferedByOpponent(false);
+  };
+
   const resetAll = () => {
     resetOnline();
     gameRef.current = new Chess();
@@ -228,6 +279,8 @@ const PlayOnline = () => {
     setWhiteTime(tc.seconds);
     setBlackTime(tc.seconds);
     setOpponentProfile(null);
+    setDrawOfferedByMe(false);
+    setDrawOfferedByOpponent(false);
   };
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
@@ -382,34 +435,17 @@ const PlayOnline = () => {
               </span>
             </div>
           )}
-          <div className="aspect-square w-full">
-            <div className="grid grid-cols-8 w-full h-full rounded-lg overflow-hidden border border-border/30 shadow-lg">
-              {displayRanks.map((rank, ri) =>
-                displayFiles.map((file, fi) => {
-                  const square = `${file}${rank}` as Square;
-                  const isLight = (ri + fi) % 2 === 0;
-                  const piece = game.board()[boardFlipped ? 7 - ri : ri][boardFlipped ? 7 - fi : fi];
-                  const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-                  const pd = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
-                  const isSelected = selectedSquare === square;
-                  const isLegal = legalMoves.includes(square);
-                  const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
-                  return (
-                    <div key={square} onClick={() => handleSquareClick(square)}
-                      className={`relative flex items-center justify-center cursor-pointer transition-colors
-                        ${isLight ? "bg-[hsl(35,30%,82%)]" : "bg-[hsl(145,32%,38%)]"}
-                        ${isSelected ? "ring-2 ring-inset ring-primary/70" : ""}
-                        ${isLastMove ? "bg-[hsl(50,80%,60%)]/40" : ""}
-                      `}>
-                      {pd && <span className={`text-[clamp(1.2rem,4vw,2.8rem)] leading-none select-none ${pd.className}`}>{pd.symbol}</span>}
-                      {isLegal && !pd && <div className="absolute w-[25%] h-[25%] rounded-full bg-primary/30" />}
-                      {isLegal && pd && <div className="absolute inset-0 ring-2 ring-inset ring-primary/40 rounded-none" />}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
+          <ChessBoard
+            game={game}
+            flipped={boardFlipped}
+            selectedSquare={selectedSquare}
+            legalMoves={legalMoves}
+            lastMove={lastMove}
+            isGameOver={isGameOver}
+            isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
+            hintSquare={null}
+            onSquareClick={handleSquareClick}
+          />
           {/* Player clock */}
           {!unlimited && (
             <div className="flex justify-end mt-2">
@@ -455,45 +491,18 @@ const PlayOnline = () => {
             </div>
 
             {/* Board */}
-            <div className="aspect-square w-full max-w-[560px] mx-auto">
-              <div className="grid grid-cols-8 w-full h-full rounded-lg overflow-hidden border border-border/30 shadow-lg">
-                {displayRanks.map((rank, ri) =>
-                  displayFiles.map((file, fi) => {
-                    const square = `${file}${rank}` as Square;
-                    const isLight = (ri + fi) % 2 === 0;
-                    const piece = game.board()[boardFlipped ? 7 - ri : ri][boardFlipped ? 7 - fi : fi];
-                    const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-                    const pd = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
-                    const isSelected = selectedSquare === square;
-                    const isLegal = legalMoves.includes(square);
-                    const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
-                    const isKingInCheck = game.isCheck() && piece?.type === "k" && piece.color === game.turn();
-
-                    return (
-                      <div
-                        key={square}
-                        onClick={() => handleSquareClick(square)}
-                        className={`relative flex items-center justify-center cursor-pointer transition-colors
-                          ${isLight ? "bg-[hsl(35,30%,82%)]" : "bg-[hsl(145,32%,38%)]"}
-                          ${isSelected ? "ring-2 ring-inset ring-primary/70" : ""}
-                          ${isLastMove ? "bg-[hsl(50,80%,60%)]/40" : ""}
-                          ${isKingInCheck ? "bg-destructive/40" : ""}
-                        `}
-                      >
-                        {pd && (
-                          <span className={`text-[clamp(1.2rem,4vw,2.8rem)] leading-none select-none ${pd.className}`}>
-                            {pd.symbol}
-                          </span>
-                        )}
-                        {isLegal && !pd && <div className="absolute w-[25%] h-[25%] rounded-full bg-primary/30" />}
-                        {isLegal && pd && <div className="absolute inset-0 ring-2 ring-inset ring-primary/40 rounded-none" />}
-                        {fi === 0 && <span className="absolute top-0.5 left-0.5 text-[8px] text-muted-foreground/50 font-mono">{rank}</span>}
-                        {ri === 7 && <span className="absolute bottom-0.5 right-0.5 text-[8px] text-muted-foreground/50 font-mono">{file}</span>}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+            <div className="w-full max-w-[560px] mx-auto">
+              <ChessBoard
+                game={game}
+                flipped={boardFlipped}
+                selectedSquare={selectedSquare}
+                legalMoves={legalMoves}
+                lastMove={lastMove}
+                isGameOver={isGameOver}
+                isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
+                hintSquare={null}
+                onSquareClick={handleSquareClick}
+              />
             </div>
 
             {/* Player info */}
@@ -545,11 +554,32 @@ const PlayOnline = () => {
               </div>
             </div>
 
+            {/* Draw Offer Banner */}
+            {drawOfferedByOpponent && !isGameOver && (
+              <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center space-y-2">
+                <p className="text-sm font-medium text-primary">Opponent offers a draw</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="default" className="flex-1" onClick={acceptDraw}>Accept</Button>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={declineDraw}>Decline</Button>
+                </div>
+              </div>
+            )}
+
             {/* Game Controls */}
             {!isGameOver && onlineStatus === "playing" && (
-              <div className="flex gap-2">
-                <Button variant="destructive" size="sm" className="flex-1 gap-1" onClick={resign}>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" onClick={resign}>
                   <Flag className="h-3.5 w-3.5" /> Resign
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 min-w-[100px] gap-1"
+                  onClick={offerDraw}
+                  disabled={drawOfferedByMe || drawOfferedByOpponent}
+                >
+                  <Handshake className="h-3.5 w-3.5" />
+                  {drawOfferedByMe ? "Draw offered…" : "Offer Draw"}
                 </Button>
                 <Button variant="outline" size="sm" className="gap-1" onClick={() => setFocusMode(true)}>
                   <Eye className="h-3.5 w-3.5" /> Focus
@@ -571,7 +601,7 @@ const PlayOnline = () => {
             <div className="rounded-xl border border-border/50 bg-card/80 p-3">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Chat</p>
               <div className="space-y-1 max-h-32 overflow-y-auto mb-2">
-                {chatMessages.map(msg => (
+                {chatMessages.filter(m => !m.message.startsWith("__")).map(msg => (
                   <div key={msg.id} className={`text-xs ${msg.user_id === user?.id ? "text-primary" : "text-foreground"}`}>
                     <span className="font-medium">{msg.user_id === user?.id ? "You" : "Opponent"}:</span> {msg.message}
                   </div>
