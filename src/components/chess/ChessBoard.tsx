@@ -60,7 +60,7 @@ function findKingSquare(board: ReturnType<Chess["board"]>, color: "w" | "b"): st
 
 export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
-  isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick, overlay,
+  isGameOver, isPlayerTurn, hintSquare, hintToSquare, premove, onSquareClick, overlay,
 }: ChessBoardProps) {
   const { get: getGlyph, style: pieceStyle } = usePieceGlyphs();
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
