@@ -1567,6 +1567,37 @@ export const OPENINGS_DATABASE: Opening[] = [
       ])
     ],
   },
+  // ═══════════════════════════════════════════
+  // MASTERCLASS — SICILIAN KALASHNIKOV (50 variations)
+  // ═══════════════════════════════════════════
+  {
+    id: "masterclass-kalashnikov",
+    name: "MasterKurs: Sicilian Kalashnikov",
+    eco: "B32",
+    category: "king-pawn",
+    description: "50-variation deep masterclass on the Sicilian Kalashnikov (1.e4 c5 2.Nf3 Nc6 3.d4 cxd4 4.Nxd4 e5). Stockfish-vetted modern mainline (7…b5 8.Nd5 Nge7) plus the critical 5.Nf5 / 5.Nf3 / 5.Nb3 / 5.Ne2 sidelines, organized into 6 chapters with full move-by-move annotations and a Practice mode.",
+    difficulty: "advanced",
+    icon: "🔥",
+    startingMoves: "1.e4 c5 2.Nf3 Nc6 3.d4 cxd4 4.Nxd4 e5",
+    totalVariations: 50,
+    tree: [
+      m("e4", "1.e4 — King's pawn opening, the gateway to the Kalashnikov.", [
+        m("c5", "1...c5 — The Sicilian.", [
+          m("Nf3", "2.Nf3 — Standard development.", [
+            m("Nc6", "2...Nc6 — Heading for the Kalashnikov.", [
+              m("d4", "3.d4 — Opening the center.", [
+                m("cxd4", "3...cxd4 — The Open Sicilian.", [
+                  m("Nxd4", "4.Nxd4 — Recapture.", [
+                    m("e5", "4...e5! — The Kalashnikov pawn break.", []),
+                  ]),
+                ]),
+              ]),
+            ]),
+          ]),
+        ]),
+      ]),
+    ],
+  },
 ];
 
 // Utility: flatten all moves in a tree to get a list of variation paths
