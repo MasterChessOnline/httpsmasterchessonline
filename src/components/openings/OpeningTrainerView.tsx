@@ -643,7 +643,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                   >
                     {isMasterclassOpening ? `Selected: ${selectedMasterLine + 1}. ${activeMasterLine?.title}` : "Main Line"}
                   </Button>
-                  {allPaths.slice(0, isMasterclassOpening ? 30 : 6).map((path, i) => {
+                  {allPaths.slice(0, isMasterclassOpening ? masterclassLines.length : 6).map((path, i) => {
                     const label = isMasterclassOpening
                       ? `${i + 1}. ${masterclassLines[i]?.title || "Variation"}`
                       : `Line ${i + 1}: ${path.map(m => m.san).join(" ")}`;
