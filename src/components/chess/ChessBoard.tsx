@@ -39,6 +39,7 @@ interface ChessBoardProps {
   isGameOver: boolean;
   isPlayerTurn: boolean;
   hintSquare?: Square | null;
+  hintToSquare?: Square | null;
   premove?: { from: Square; to: Square } | null;
   onSquareClick: (square: Square) => void;
   overlay?: React.ReactNode;
@@ -59,7 +60,7 @@ function findKingSquare(board: ReturnType<Chess["board"]>, color: "w" | "b"): st
 
 export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
-  isGameOver, isPlayerTurn, hintSquare, premove, onSquareClick, overlay,
+  isGameOver, isPlayerTurn, hintSquare, hintToSquare, premove, onSquareClick, overlay,
 }: ChessBoardProps) {
   const { get: getGlyph, style: pieceStyle } = usePieceGlyphs();
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
@@ -115,6 +116,7 @@ export default function ChessBoard({
                 const isLegal = legalMoves.includes(square);
                 const isLastMv = lastMove && (lastMove.from === square || lastMove.to === square);
                 const isHint = hintSquare === square;
+                const isHintTo = hintToSquare === square;
                 const isPremove = premove && (premove.from === square || premove.to === square);
                 const isCheckedKing = checkedKingSquare === square;
                 const pieceKey = piece ? `${piece.color}${piece.type}` : null;
@@ -128,7 +130,7 @@ export default function ChessBoard({
                 if (isPremove) bgClass = "bg-blue-500/30";
                 else if (isSelected) bgClass = "bg-primary/40";
                 else if (isLastMv) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
-                else if (isHint) bgClass = "bg-accent/40";
+                else if (isHint || isHintTo) bgClass = "bg-accent/50";
 
                 return (
                   <button
@@ -152,6 +154,13 @@ export default function ChessBoard({
                           background:
                             "radial-gradient(circle, hsl(38 92% 55% / 0.45) 0%, hsl(38 92% 55% / 0.18) 45%, transparent 70%)",
                         }}
+                      />
+                    )}
+                    {/* Hint indicator — pulsing accent ring on suggested from/to squares */}
+                    {(isHint || isHintTo) && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-[8%] rounded-full border-[3px] border-accent animate-pulse pointer-events-none z-20"
                       />
                     )}
                     {/* Legal move dot */}

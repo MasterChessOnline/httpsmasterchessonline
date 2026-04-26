@@ -56,6 +56,8 @@ const Play = () => {
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
   const [hintsEnabled, setHintsEnabled] = useState(false);
   const [hintSquare, setHintSquare] = useState<Square | null>(null);
+  const [hintToSquare, setHintToSquare] = useState<Square | null>(null);
+  const [hintText, setHintText] = useState<string>("");
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [resignedBy, setResignedBy] = useState<"w" | "b" | null>(null);
   const [drawAgreed, setDrawAgreed] = useState(false);
@@ -166,20 +168,37 @@ const Play = () => {
     playChessSound("gameOver");
   }, []);
 
-  // Hint
+  // Hint — suggests the engine's recommended move (from + to + reasoning)
   useEffect(() => {
     if (!hintsEnabled || mode !== "ai" || game.turn() !== playerColor || isGameOver || gamePhase !== "playing") {
       setHintSquare(null);
+      setHintToSquare(null);
+      setHintText("");
       return;
     }
     const timer = setTimeout(() => {
-      const bestMove = getAIMove(game, "intermediate");
-      if (bestMove) {
-        const tempGame = new Chess(game.fen());
-        const move = tempGame.move(bestMove);
-        if (move) setHintSquare(move.from as Square);
-      }
-    }, 1500);
+      // Use a stronger level for hints so suggestions are actually helpful
+      const bestMove = getAIMove(game, "advanced");
+      if (!bestMove) return;
+      const tempGame = new Chess(game.fen());
+      const move = tempGame.move(bestMove);
+      if (!move) return;
+      setHintSquare(move.from as Square);
+      setHintToSquare(move.to as Square);
+
+      // Build a friendly explanation
+      const pieceNames: Record<string, string> = { p: "Pawn", n: "Knight", b: "Bishop", r: "Rook", q: "Queen", k: "King" };
+      const pieceName = pieceNames[move.piece] || "Piece";
+      let reason = "";
+      if (move.flags.includes("c") || move.flags.includes("e")) reason = "captures material";
+      else if (tempGame.isCheckmate()) reason = "delivers checkmate!";
+      else if (tempGame.inCheck()) reason = "puts the king in check";
+      else if (move.flags.includes("k") || move.flags.includes("q")) reason = "castles to safety";
+      else if (move.flags.includes("p")) reason = "promotes the pawn";
+      else if (["e4","d4","e5","d5","c4","c5","f4","f5"].includes(move.to)) reason = "controls the center";
+      else reason = "improves your position";
+      setHintText(`${pieceName} ${move.from} → ${move.to} — ${reason}`);
+    }, 800);
     return () => clearTimeout(timer);
   }, [fen, hintsEnabled, mode, playerColor, isGameOver, gamePhase]);
 
@@ -957,7 +976,7 @@ const Play = () => {
           <MonitorOff className="w-3.5 h-3.5 inline mr-1.5" /> Exit
         </button>
         <div className="w-full max-w-[min(90vw,600px)]">
-          <ChessBoard game={game} flipped={boardFlipped} selectedSquare={selectedSquare} legalMoves={legalMoves} lastMove={lastMove} isGameOver={isGameOver} isPlayerTurn={isPlayerTurn} hintSquare={null} onSquareClick={handleSquareClick} premove={premove} />
+          <ChessBoard game={game} flipped={boardFlipped} selectedSquare={selectedSquare} legalMoves={legalMoves} lastMove={lastMove} isGameOver={isGameOver} isPlayerTurn={isPlayerTurn} hintSquare={hintSquare} hintToSquare={hintToSquare} onSquareClick={handleSquareClick} premove={premove} />
         </div>
         <p className="mt-4 text-sm text-muted-foreground font-mono">{statusText}</p>
         <PromotionDialog isOpen={!!pendingPromotion} color={game.turn()} onSelect={handlePromotionSelect} onCancel={() => setPendingPromotion(null)} />
@@ -1028,6 +1047,14 @@ const Play = () => {
               </div>
             </motion.div>
           )}
+          {hintsEnabled && hintText && !isGameOver && game.turn() === playerColor && (
+            <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-center mb-2">
+              <div className="px-3 py-1.5 rounded-lg bg-accent/15 border border-accent/40 text-xs text-accent-foreground font-medium flex items-center gap-2">
+                <span className="text-accent">💡</span>
+                <span>Hint: {hintText}</span>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:justify-center">
@@ -1074,6 +1101,7 @@ const Play = () => {
                 isGameOver={isGameOver}
                 isPlayerTurn={isPlayerTurn}
                 hintSquare={hintSquare}
+                hintToSquare={hintToSquare}
                 onSquareClick={handleSquareClick}
                 premove={premove}
                 overlay={gameOverInfo ? (
