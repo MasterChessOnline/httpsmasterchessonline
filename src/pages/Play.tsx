@@ -507,6 +507,7 @@ const Play = () => {
         botId?: string;
         playerColor?: PlayerColor;
         contextLabel?: string | null;
+        returnOpeningId?: string | null;
       };
       if (!data.fen) return;
       // Validate the FEN before committing.
@@ -524,6 +525,9 @@ const Play = () => {
       }
       setMode("ai");
       pendingStartFenRef.current = data.fen;
+      if (data.returnOpeningId) {
+        setReturnToOpening({ id: data.returnOpeningId, label: data.contextLabel ?? null });
+      }
       // Skip the searching animation — go straight to the matchup screen,
       // which auto-transitions to "playing" and runs resetGameState().
       setGamePhase("matchup");
