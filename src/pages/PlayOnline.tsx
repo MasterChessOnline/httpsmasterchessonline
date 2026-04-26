@@ -195,38 +195,50 @@ const PlayOnline = () => {
     if (onlineGame) endGame(result);
   }, [onlineGame, endGame]);
 
+  const executeMove = (from: Square, to: Square, promotion: PromotionPiece = "q") => {
+    const move = game.move({ from, to, promotion });
+    if (!move) return;
+    setMoveHistory(prev => [...prev, move.san]);
+    setGameStarted(true);
+
+    let wt = whiteTime, bt = blackTime;
+    const inc = onlineGame?.increment || 0;
+    if (!unlimited && inc > 0) {
+      if (move.color === "w") { wt += inc; setWhiteTime(wt); }
+      else { bt += inc; setBlackTime(bt); }
+    }
+
+    makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
+
+    if (game.isCheckmate()) {
+      endGame(game.turn() === "w" ? "0-1" : "1-0");
+      playChessSound("gameOver");
+    } else if (game.isDraw() || game.isStalemate()) {
+      endGame("1/2-1/2");
+      playChessSound("gameOver");
+    } else if (game.isCheck()) {
+      playChessSound("check");
+    } else if (move.captured) {
+      playChessSound("capture");
+    } else {
+      playChessSound("move");
+    }
+  };
+
   const handleSquareClick = (square: Square) => {
     if (isGameOver || game.turn() !== myColor || onlineStatus !== "playing") return;
 
     if (selectedSquare && legalMoves.includes(square)) {
-      const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
-      if (move) {
-        setMoveHistory(prev => [...prev, move.san]);
-        setGameStarted(true);
-
-        let wt = whiteTime, bt = blackTime;
-        const inc = onlineGame?.increment || 0;
-        if (!unlimited && inc > 0) {
-          if (move.color === "w") { wt += inc; setWhiteTime(wt); }
-          else { bt += inc; setBlackTime(bt); }
-        }
-
-        makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
-
-        if (game.isCheckmate()) {
-          endGame(game.turn() === "w" ? "0-1" : "1-0");
-          playChessSound("gameOver");
-        } else if (game.isDraw() || game.isStalemate()) {
-          endGame("1/2-1/2");
-          playChessSound("gameOver");
-        } else if (game.isCheck()) {
-          playChessSound("check");
-        } else if (move.captured) {
-          playChessSound("capture");
-        } else {
-          playChessSound("move");
-        }
+      // Detect promotion: pawn moving to last rank
+      const piece = game.get(selectedSquare);
+      const isPromotion = piece?.type === "p" && (square[1] === "8" || square[1] === "1");
+      if (isPromotion) {
+        setPendingPromotion({ from: selectedSquare, to: square });
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        return;
       }
+      executeMove(selectedSquare, square);
       setSelectedSquare(null);
       setLegalMoves([]);
       return;
@@ -240,6 +252,12 @@ const PlayOnline = () => {
       setSelectedSquare(null);
       setLegalMoves([]);
     }
+  };
+
+  const handlePromotionSelect = (piece: PromotionPiece) => {
+    if (!pendingPromotion) return;
+    executeMove(pendingPromotion.from, pendingPromotion.to, piece);
+    setPendingPromotion(null);
   };
 
   const offerDraw = async () => {
