@@ -7,6 +7,16 @@ import { bumpMissionProgress } from "@/hooks/use-daily-missions";
 
 export type OnlineGameStatus = "idle" | "searching" | "playing" | "finished";
 
+export type EndReason =
+  | "checkmate"
+  | "resignation"
+  | "timeout"
+  | "stalemate"
+  | "threefold"
+  | "fifty_move"
+  | "insufficient_material"
+  | "agreement";
+
 export interface OnlineGame {
   id: string;
   white_player_id: string;
@@ -24,6 +34,8 @@ export interface OnlineGame {
   last_move_to: string | null;
   turn: string;
   is_rated?: boolean;
+  end_reason?: EndReason | null;
+  elo_applied?: boolean;
 }
 
 export function useOnlineGame() {
