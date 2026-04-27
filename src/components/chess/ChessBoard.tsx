@@ -127,9 +127,13 @@ export default function ChessBoard({
                 const justMoved = lastMove?.to === square && pd;
                 const slideOffset = justMoved ? getSlideOffset(lastMove.from, lastMove.to, flipped) : null;
 
+                // When the player is queueing a premove (it's not their turn) we
+                // visualize selection + legal targets in BLUE instead of gold,
+                // so the user can clearly see which move is queued.
+                const premoveMode = !isPlayerTurn && !isGameOver;
                 let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
-                if (isPremove) bgClass = "bg-blue-500/30";
-                else if (isSelected) bgClass = "bg-primary/40";
+                if (isPremove) bgClass = "bg-blue-500/45";
+                else if (isSelected) bgClass = premoveMode ? "bg-blue-500/40" : "bg-primary/40";
                 else if (isLastMv) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
                 else if (isHint || isHintTo) bgClass = "bg-accent/50";
 
@@ -141,7 +145,7 @@ export default function ChessBoard({
                     className={`aspect-square w-[12.5%] flex items-center justify-center select-none transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset relative overflow-visible
                       ${bgClass}
                       ${isSelected ? "shadow-[inset_0_0_16px_hsl(43_80%_55%/0.3)]" : ""}
-                      ${isLegal || (isPlayerTurn && !isGameOver) ? "cursor-pointer active:scale-95" : "cursor-default"}
+                      ${isLegal || (isPlayerTurn && !isGameOver) || (premoveMode && (piece || isLegal)) ? "cursor-pointer active:scale-95" : "cursor-default"}
                     `}
                     onClick={() => onSquareClick(square)}
                     tabIndex={0}
@@ -166,11 +170,11 @@ export default function ChessBoard({
                     )}
                     {/* Legal move dot */}
                     {isLegal && !piece && (
-                      <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />
+                      <span className={`block h-[26%] w-[26%] rounded-full ${premoveMode ? "bg-blue-500/70" : "bg-foreground/20"}`} />
                     )}
                     {/* Legal capture ring */}
                     {isLegal && pd && (
-                      <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />
+                      <span className={`absolute inset-[6%] rounded-full border-[3px] ${premoveMode ? "border-blue-500/70" : "border-foreground/25"}`} />
                     )}
                     {/* Piece — SVG artwork or Unicode glyph depending on the active set */}
                     {pd && (
