@@ -685,6 +685,70 @@ export default function Analysis() {
                 </motion.div>
               )}
 
+              {/* ── MY GAMES ── */}
+              {bottomTab === "my-games" && (
+                <motion.div key="my-games-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4">
+                  {!user ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <Swords className="h-6 w-6 mb-2 text-primary/30" />
+                      <p className="text-sm">Log in to see your games</p>
+                    </div>
+                  ) : myGamesLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-12 rounded bg-muted/30 animate-pulse" />
+                      ))}
+                    </div>
+                  ) : myGames.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <Swords className="h-6 w-6 mb-2 text-primary/30" />
+                      <p className="text-sm">No finished games yet</p>
+                      <p className="text-[10px] mt-1">Play an online game and it will show up here</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
+                      {myGames.map((g) => {
+                        const isWhite = g.white_player_id === user.id;
+                        const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
+                        const drew = g.result === "1/2-1/2";
+                        const date = new Date(g.created_at);
+                        const moveCount = g.pgn ? g.pgn.split(/\d+\./).length - 1 : 0;
+                        const hasMoves = !!g.pgn && g.pgn.trim().length > 0;
+                        return (
+                          <button
+                            key={g.id}
+                            onClick={() => loadAndAnalyzeMyGame(g.pgn)}
+                            disabled={!hasMoves || analyzing}
+                            className="w-full flex items-center justify-between rounded-lg border border-border/30 bg-[hsl(220,18%,20%)] hover:border-primary/40 hover:bg-[hsl(220,18%,24%)] transition-all px-3 py-2 group disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                                won ? "bg-green-500/15 text-green-400"
+                                  : drew ? "bg-muted text-muted-foreground"
+                                  : "bg-red-500/15 text-red-400"
+                              }`}>
+                                {won ? "WIN" : drew ? "DRAW" : "LOSS"}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-medium text-foreground truncate">
+                                  {isWhite ? "White" : "Black"} · {g.time_control_label}
+                                  {moveCount > 0 && <span className="text-muted-foreground"> · {moveCount} moves</span>}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  <Calendar className="w-2.5 h-2.5" />
+                                  {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </p>
+                              </div>
+                            </div>
+                            <Brain className="h-3.5 w-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
               {/* ── IMPORT PGN ── */}
               {bottomTab === "import" && (
                 <motion.div key="import-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4">
