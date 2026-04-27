@@ -161,24 +161,26 @@ export default function Analysis() {
     const engine = getStockfishEngine();
     try {
       const [bestResult, posEval, multiLines] = await Promise.all([
-        engine.getBestMove(fen, 600, depth),
+        engine.getBestMove(fenBefore, 600, depth),
         engine.evaluate(fen, depth),
-        engine.getMultiPV(fen, 3, Math.min(depth, 12)),
+        engine.getMultiPV(fenBefore, 3, Math.min(depth, 12)),
       ]);
-      const evalCp = posEval.mate !== null ? (posEval.mate > 0 ? 10000 : -10000) : posEval.evaluation;
-      const bestMoveSan = bestResult.bestMove ? uciToSan(fen, bestResult.bestMove) : "";
+      const evalCp = scoreToWhitePov(fen, posEval.evaluation, posEval.mate);
+      const bestEvalCp = scoreToWhitePov(fenBefore, bestResult.evaluation ?? 0, bestResult.mate ?? null);
+      const bestMoveSan = bestResult.bestMove ? uciToSan(fenBefore, bestResult.bestMove) : "";
       const altLines = multiLines.slice(0, 3).map(line => ({
-        san: line.pv[0] ? uciToSan(fen, line.pv[0]) : "", eval: line.eval, mate: line.mate,
+        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: scoreToWhitePov(fenBefore, line.eval, line.mate), mate: line.mate,
       })).filter(l => l.san);
       setLiveCurrentEval({ cp: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan, altLines });
       const wasWhite = color === "w";
-      const prevFromSide = wasWhite ? prevEvalRef.current : -prevEvalRef.current;
+      const prevFromSide = wasWhite ? bestEvalCp : -bestEvalCp;
       const currFromSide = wasWhite ? evalCp : -evalCp;
       const evalDrop = prevFromSide - currFromSide;
+      const sanHistory = [...liveMoveHistory.map(m => m.san), moveSan];
       const moveEval: MoveEval = {
         san: moveSan, fen, fenBefore, from: moveFrom, to: moveTo, color, moveNumber: moveNum,
         eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan,
-        altLines, classification: classifyMove(evalDrop), evalDrop,
+        altLines, classification: classifyMove(evalDrop, isBookMove(sanHistory)), evalDrop,
       };
       prevEvalRef.current = evalCp;
       setLiveMoveHistory(prev => [...prev, moveEval]);
