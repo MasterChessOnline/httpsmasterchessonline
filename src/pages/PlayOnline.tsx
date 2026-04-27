@@ -548,16 +548,16 @@ const PlayOnline = () => {
   }
 
   // ── GAME VIEW ──
+  // Full-viewport play: board fills the entire screen height/width.
+  // Sidebar shrinks to a narrow column on desktop and collapses below on mobile.
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-2 sm:px-6 pt-16 sm:pt-20 pb-16">
-        {/* 3-col grid: left spacer mirrors sidebar so board stays horizontally centered on the viewport regardless of sidebar size. */}
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[20rem_minmax(0,1fr)_20rem] gap-4 lg:items-start">
-          <div className="hidden lg:block" aria-hidden="true" />
-          {/* Board + Clocks */}
+      <main className="px-2 sm:px-3 pt-14 sm:pt-16 pb-3">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-3 lg:items-start">
+          {/* Board + Clocks — fills the full viewport */}
           <div className="min-w-0 flex flex-col items-center">
-            <div className="w-full max-w-[min(95vw,640px)] space-y-1.5">
+            <div className="w-full max-w-[min(98vw,calc(100svh-7rem))] space-y-1.5">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
               <div className="flex items-center gap-2">
