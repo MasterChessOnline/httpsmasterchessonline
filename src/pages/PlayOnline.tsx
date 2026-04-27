@@ -592,14 +592,25 @@ const PlayOnline = () => {
                 className="w-full max-w-[min(98vw,calc(100svh-9rem))] mx-auto"
               />
               <GameStatusOverlay
-                kind={
-                  onlineStatus === "finished" || timeoutWinner
-                    ? (onlineGame?.result === "1/2-1/2" || game.isDraw() || game.isStalemate() ? "draw" : "checkmate")
-                    : game.isCheckmate() ? "checkmate"
-                    : game.isDraw() || game.isStalemate() ? "draw"
-                    : game.isCheck() ? "check"
-                    : null
-                }
+                kind={(() => {
+                  // When the game is finished, ALWAYS trust the server's result/end_reason.
+                  // Never fall back to local chess.js state — it can briefly say "checkmate"
+                  // for a position that actually ended by draw agreement / resignation / timeout,
+                  // which caused the "checkmate flashes before draw" bug.
+                  if (onlineStatus === "finished") {
+                    if (!onlineGame?.result) return null; // wait for server result
+                    if (onlineGame.result === "1/2-1/2") return "draw";
+                    if (endReason === "checkmate") return "checkmate";
+                    // resignation / timeout / other decisive endings: no big banner,
+                    // the result panel under the board explains it.
+                    return null;
+                  }
+                  if (timeoutWinner) return null;
+                  if (game.isCheckmate()) return "checkmate";
+                  if (game.isDraw() || game.isStalemate()) return "draw";
+                  if (game.isCheck()) return "check";
+                  return null;
+                })()}
                 subtitle={isGameOver ? statusText : undefined}
               />
             </div>
