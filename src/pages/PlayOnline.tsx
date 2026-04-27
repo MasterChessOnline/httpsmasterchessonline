@@ -157,7 +157,7 @@ const PlayOnline = () => {
   }, [onlineStatus]);
 
   useEffect(() => {
-    if (isGameOver || onlineStatus === "finished") {
+    if (isGameOver) {
       setDrawOfferedByMe(false);
       setDrawOfferedByOpponent(false);
       dismiss();
@@ -181,7 +181,7 @@ const PlayOnline = () => {
         // Handle draw offer signaling
         if (msg.user_id !== user?.id) {
           if (msg.message === "__draw_offer__") {
-            if (isGameOver || onlineStatus === "finished") return;
+            if (isGameOver) return;
             setDrawOfferedByOpponent(true);
             toast({ title: "Draw offer", description: "Your opponent offers a draw." });
           } else if (msg.message === "__draw_accept__") {
