@@ -127,9 +127,13 @@ export default function ChessBoard({
                 const justMoved = lastMove?.to === square && pd;
                 const slideOffset = justMoved ? getSlideOffset(lastMove.from, lastMove.to, flipped) : null;
 
+                // When the player is queueing a premove (it's not their turn) we
+                // visualize selection + legal targets in BLUE instead of gold,
+                // so the user can clearly see which move is queued.
+                const premoveMode = !isPlayerTurn && !isGameOver;
                 let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
-                if (isPremove) bgClass = "bg-blue-500/30";
-                else if (isSelected) bgClass = "bg-primary/40";
+                if (isPremove) bgClass = "bg-blue-500/45";
+                else if (isSelected) bgClass = premoveMode ? "bg-blue-500/40" : "bg-primary/40";
                 else if (isLastMv) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
                 else if (isHint || isHintTo) bgClass = "bg-accent/50";
 
