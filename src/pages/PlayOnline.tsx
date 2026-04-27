@@ -81,6 +81,10 @@ const PlayOnline = () => {
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
+  // Mirror premove in a ref so the FEN-sync effect can read the freshest value
+  // without waiting for a re-render. This makes premove execution instant.
+  const premoveRef = useRef<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
+  useEffect(() => { premoveRef.current = premove; }, [premove]);
   const [rematchOfferedByMe, setRematchOfferedByMe] = useState(false);
   const [rematchOfferedByOpponent, setRematchOfferedByOpponent] = useState(false);
   const [rematchInProgress, setRematchInProgress] = useState(false);
