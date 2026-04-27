@@ -458,6 +458,7 @@ const PlayOnline = () => {
     setOpponentProfile(null);
     setDrawOfferedByMe(false);
     setDrawOfferedByOpponent(false);
+    setPremove(null);
   };
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
