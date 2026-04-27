@@ -703,6 +703,60 @@ export type Database = {
         }
         Relationships: []
       }
+      online_game_moves: {
+        Row: {
+          black_time: number
+          color: string
+          created_at: string
+          fen_after: string
+          fen_before: string
+          from_square: string
+          game_id: string
+          id: string
+          pgn_after: string
+          player_id: string
+          ply: number
+          promotion: string | null
+          san: string
+          to_square: string
+          white_time: number
+        }
+        Insert: {
+          black_time: number
+          color: string
+          created_at?: string
+          fen_after: string
+          fen_before: string
+          from_square: string
+          game_id: string
+          id?: string
+          pgn_after?: string
+          player_id: string
+          ply: number
+          promotion?: string | null
+          san: string
+          to_square: string
+          white_time: number
+        }
+        Update: {
+          black_time?: number
+          color?: string
+          created_at?: string
+          fen_after?: string
+          fen_before?: string
+          from_square?: string
+          game_id?: string
+          id?: string
+          pgn_after?: string
+          player_id?: string
+          ply?: number
+          promotion?: string | null
+          san?: string
+          to_square?: string
+          white_time?: number
+        }
+        Relationships: []
+      }
       online_games: {
         Row: {
           black_player_id: string
@@ -717,6 +771,7 @@ export type Database = {
           last_move_at: string | null
           last_move_from: string | null
           last_move_to: string | null
+          move_number: number
           pgn: string
           result: string | null
           status: string
@@ -739,6 +794,7 @@ export type Database = {
           last_move_at?: string | null
           last_move_from?: string | null
           last_move_to?: string | null
+          move_number?: number
           pgn?: string
           result?: string | null
           status?: string
@@ -761,6 +817,7 @@ export type Database = {
           last_move_at?: string | null
           last_move_from?: string | null
           last_move_to?: string | null
+          move_number?: number
           pgn?: string
           result?: string | null
           status?: string
