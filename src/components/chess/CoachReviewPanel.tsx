@@ -1,7 +1,7 @@
-// Coach Review panel — shown on the GameReview page after a finished online game.
-// Pulls a structured AI review (opening assessment + key moments + repertoire
-// suggestions), and exposes two CTAs: open the matching opening in the trainer,
-// and generate a personalised lesson that gets saved to "My Lessons" in /learn.
+// Coach Review panel — runs honest per-move analysis with Stockfish locally
+// (book/best/good/inaccuracy/mistake/blunder/brilliant) and then asks the
+// AI for narrative comments on the moves WE classified — never the other
+// way around. This avoids "Brilliant!" on move 1.
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles, BookOpen, GraduationCap, Lightbulb, Target, Trophy, AlertCircle } from "lucide-react";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { OpeningEntry } from "@/lib/openings-detector";
+import { classifyGame, ClassifiedMove, Verdict } from "@/lib/move-classifier";
 
 export interface CoachReview {
   summary: string;
@@ -30,11 +31,19 @@ interface Props {
 }
 
 const VERDICT_STYLES: Record<string, string> = {
-  brilliant:   "text-amber-300 bg-amber-500/10 border-amber-500/30",
-  good:        "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
+  book:        "text-sky-300 bg-sky-500/10 border-sky-500/30",
+  best:        "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
+  excellent:   "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
+  good:        "text-emerald-200 bg-emerald-500/5 border-emerald-500/20",
   inaccuracy:  "text-yellow-300 bg-yellow-500/10 border-yellow-500/30",
   mistake:     "text-orange-300 bg-orange-500/10 border-orange-500/30",
   blunder:     "text-red-300 bg-red-500/10 border-red-500/30",
+  brilliant:   "text-amber-300 bg-amber-500/10 border-amber-500/30",
+};
+
+const VERDICT_LABEL: Record<Verdict, string> = {
+  book: "Book", best: "Best", excellent: "Excellent", good: "Good",
+  inaccuracy: "Inaccuracy", mistake: "Mistake", blunder: "Blunder", brilliant: "Brilliant",
 };
 
 export default function CoachReviewPanel({
@@ -42,18 +51,58 @@ export default function CoachReviewPanel({
 }: Props) {
   const [review, setReview] = useState<CoachReview | null>(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState({ done: 0, total: 0, phase: "" as "engine" | "ai" | "" });
+  const [classified, setClassified] = useState<ClassifiedMove[] | null>(null);
+  const [accuracy, setAccuracy] = useState<{ w: number; b: number } | null>(null);
   const [generating, setGenerating] = useState(false);
   const [savedLessonId, setSavedLessonId] = useState<string | null>(null);
 
   const runReview = async () => {
     setLoading(true);
+    setProgress({ done: 0, total: 0, phase: "engine" });
     try {
+      // Step 1 — local engine analysis (honest verdicts).
+      const result = await classifyGame(pgn, {
+        depth: 12,
+        onProgress: (done, total) => setProgress({ done, total, phase: "engine" }),
+      });
+      setClassified(result.moves);
+      setAccuracy({ w: result.accuracyWhite, b: result.accuracyBlack });
+
+      // Step 2 — pick the most interesting moments OUR side played
+      // (top blunders/mistakes/brilliants), and feed them to the AI for
+      // narrative coaching.
+      const myMoves = result.moves.filter(m => m.color === myColor);
+      const significant = myMoves
+        .filter(m => m.verdict !== "book" && m.verdict !== "best" && m.verdict !== "excellent")
+        .sort((a, b) => {
+          const rank: Record<Verdict, number> = {
+            blunder: 0, brilliant: 1, mistake: 2, inaccuracy: 3,
+            good: 4, excellent: 5, best: 6, book: 7,
+          };
+          return rank[a.verdict] - rank[b.verdict];
+        })
+        .slice(0, 5)
+        .map(m => ({
+          move_number: m.moveNumber,
+          color: m.color,
+          san: m.san,
+          verdict: m.verdict,
+          cp_loss: m.cpLoss,
+          best_move_san: m.bestMoveSan ?? null,
+        }));
+
+      setProgress({ done: 0, total: 0, phase: "ai" });
       const { data, error } = await supabase.functions.invoke("coach-game-review", {
         body: {
-          pgn, myColor, result, endReason,
+          pgn, myColor, result: result, endReason,
           openingName: opening?.name,
           openingEco: opening?.eco,
           myRating, opponentRating,
+          // NEW: pre-classified moments — AI must NOT invent verdicts.
+          accuracy: { white: result.accuracyWhite, black: result.accuracyBlack },
+          counts: result.counts,
+          key_moments_input: significant,
         },
       });
       if (error) throw error;
@@ -72,6 +121,7 @@ export default function CoachReviewPanel({
       });
     } finally {
       setLoading(false);
+      setProgress({ done: 0, total: 0, phase: "" });
     }
   };
 
@@ -113,7 +163,7 @@ export default function CoachReviewPanel({
           <div className="flex-1">
             <h3 className="font-display text-lg font-bold text-foreground">Coach Review</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Get a personalised breakdown of this game and repertoire tips.
+              Honest engine-backed analysis: book → best → inaccuracy → mistake → blunder.
             </p>
           </div>
         </div>
@@ -131,10 +181,23 @@ export default function CoachReviewPanel({
   }
 
   if (loading) {
+    const pct = progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
     return (
-      <div className="rounded-2xl border border-border/40 bg-card/80 p-8 text-center space-y-3">
+      <div className="rounded-2xl border border-border/40 bg-card/80 p-8 text-center space-y-4">
         <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto" />
-        <p className="text-sm text-muted-foreground">Coach is reviewing your game…</p>
+        <div className="space-y-2">
+          <p className="text-sm text-foreground font-medium">
+            {progress.phase === "engine" ? "Analysing every move with Stockfish…" : "Coach is summarising the key moments…"}
+          </p>
+          {progress.phase === "engine" && progress.total > 0 && (
+            <>
+              <div className="h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+              </div>
+              <p className="text-xs text-muted-foreground">{progress.done} / {progress.total} moves</p>
+            </>
+          )}
+        </div>
       </div>
     );
   }
@@ -143,6 +206,20 @@ export default function CoachReviewPanel({
 
   return (
     <div className="space-y-4">
+      {/* Accuracy + counts */}
+      {accuracy && classified && (
+        <div className="rounded-xl border border-border/40 bg-card/80 p-4 grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Accuracy White</p>
+            <p className="text-2xl font-display font-bold text-foreground">{accuracy.w}%</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Accuracy Black</p>
+            <p className="text-2xl font-display font-bold text-foreground">{accuracy.b}%</p>
+          </div>
+        </div>
+      )}
+
       {/* Summary */}
       <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-card/80 p-5">
         <div className="flex items-start gap-3">
@@ -164,7 +241,7 @@ export default function CoachReviewPanel({
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{review.opening_review}</p>
       </div>
 
-      {/* Key moments */}
+      {/* Key moments — these are SOURCED FROM ENGINE, AI only adds comment */}
       {review.key_moments.length > 0 && (
         <div className="rounded-xl border border-border/40 bg-card/80 p-4 space-y-3">
           <div className="flex items-center gap-2">
@@ -175,7 +252,7 @@ export default function CoachReviewPanel({
             {review.key_moments.map((m, i) => (
               <li key={i} className="text-xs sm:text-sm flex gap-2">
                 <span className={`shrink-0 px-2 py-0.5 rounded-md border text-[10px] font-medium uppercase tracking-wide ${VERDICT_STYLES[m.verdict] ?? "text-muted-foreground bg-muted/40 border-border/40"}`}>
-                  {m.verdict}
+                  {VERDICT_LABEL[m.verdict as Verdict] ?? m.verdict}
                 </span>
                 <span className="text-foreground/90">
                   <span className="font-mono text-muted-foreground mr-1">#{m.move_number}{m.san ? ` ${m.san}` : ""}</span>
