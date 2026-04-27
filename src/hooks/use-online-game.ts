@@ -54,20 +54,23 @@ export function useOnlineGame() {
     ? game.white_player_id === user?.id ? "w" : "b"
     : null;
 
-  // Helper: apply elo + log rating history + compute the user's RatingCalcResult
-  const applyEloAndLog = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }) => {
+  // Helper: log rating history + compute the user's RatingCalcResult.
+  // NOTE: Elo on the profiles table is now applied atomically by the
+  // `finalize_online_game` RPC (server-side, exactly once per game).
+  // This function ONLY snapshots ratings + writes a rating_history row + bumps missions.
+  const applyEloAndLog = useCallback(async (g: { id: string; white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }) => {
     if (!user) return;
 
-    // Casual games: skip rating updates entirely.
+    // Casual games: skip rating display entirely.
     if (g.is_rated === false) {
       setRatingResult(null);
-      try {
-        await bumpMissionProgress(user.id, "games_played", 1);
-      } catch {}
+      try { await bumpMissionProgress(user.id, "games_played", 1); } catch {}
       return;
     }
 
-    // Snapshot opponent + my old rating BEFORE the RPC mutates them
+    // Snapshot opponent + my OLD rating BEFORE the server RPC runs.
+    // Race-safe because finalize_online_game uses FOR UPDATE + elo_applied flag,
+    // so even if both clients call it, only ONE actually mutates the ratings.
     const isWhite = g.white_player_id === user.id;
     const opponentId = isWhite ? g.black_player_id : g.white_player_id;
     const [{ data: meBefore }, { data: oppBefore }] = await Promise.all([
@@ -78,12 +81,6 @@ export function useOnlineGame() {
     const oppRating = (oppBefore as any)?.rating ?? 1200;
     const myGames = (meBefore as any)?.games_played ?? 0;
     const oppLabel = (oppBefore as any)?.display_name ?? (oppBefore as any)?.username ?? "Player";
-
-    await supabase.rpc("update_elo_ratings", {
-      p_white_id: g.white_player_id,
-      p_black_id: g.black_player_id,
-      p_result: g.result,
-    });
 
     const myResult: "win" | "loss" | "draw" =
       g.result === "1/2-1/2" ? "draw"
@@ -98,22 +95,25 @@ export function useOnlineGame() {
     });
     setRatingResult(calc);
 
-    await logOnlineRatingChange({
-      userId: user.id,
-      oldRating: myOld,
-      newRating: calc.newRating,
-      opponentRating: oppRating,
-      opponentLabel: oppLabel,
-      result: myResult,
-    });
+    // Log to rating_history (idempotent? — checked by uniqueness on (user_id, created_at) in practice).
+    // Wrapped so a duplicate insert never crashes the UI.
+    try {
+      await logOnlineRatingChange({
+        userId: user.id,
+        oldRating: myOld,
+        newRating: calc.newRating,
+        opponentRating: oppRating,
+        opponentLabel: oppLabel,
+        result: myResult,
+      });
+    } catch (err) {
+      console.warn("rating_history log failed (likely duplicate)", err);
+    }
     await refreshProfile();
 
-    // Daily missions: increment counters for online games
     try {
       await bumpMissionProgress(user.id, "games_played", 1);
-      if (myResult === "win") {
-        await bumpMissionProgress(user.id, "games_won", 1);
-      }
+      if (myResult === "win") await bumpMissionProgress(user.id, "games_won", 1);
     } catch (err) {
       console.warn("Mission bump failed", err);
     }
