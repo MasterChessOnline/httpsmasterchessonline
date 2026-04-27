@@ -3,6 +3,7 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
+import { isBookMove } from "@/lib/move-classifier";
 import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,27 +28,35 @@ interface MoveEval {
   altLines: { san: string; eval: number; mate: number | null }[];
   classification: Classification; evalDrop: number;
 }
-type Classification = "brilliant" | "great" | "good" | "inaccuracy" | "mistake" | "blunder";
+type Classification = "book" | "best" | "excellent" | "good" | "inaccuracy" | "mistake" | "blunder" | "brilliant";
 
 // ── Helpers ──
-function classifyMove(evalDrop: number): Classification {
-  const abs = Math.abs(evalDrop);
-  if (abs <= 10) return "brilliant";
-  if (abs <= 25) return "great";
-  if (abs <= 50) return "good";
-  if (abs <= 100) return "inaccuracy";
-  if (abs <= 200) return "mistake";
+function classifyMove(evalDrop: number, isBook = false): Classification {
+  if (isBook) return "book";
+  const abs = Math.max(0, evalDrop);
+  if (abs <= 8) return "best";
+  if (abs <= 25) return "excellent";
+  if (abs <= 60) return "good";
+  if (abs <= 120) return "inaccuracy";
+  if (abs <= 250) return "mistake";
   return "blunder";
 }
 
 const CLASS_STYLES: Record<Classification, { color: string; bg: string; icon: typeof CheckCircle2; label: string; symbol: string }> = {
-  brilliant:   { color: "text-cyan-400",     bg: "bg-cyan-500/10",   icon: Zap,          label: "Brilliant",  symbol: "!!" },
-  great:       { color: "text-green-400",    bg: "bg-green-500/10",  icon: CheckCircle2, label: "Great",      symbol: "!" },
+  book:        { color: "text-sky-300",      bg: "bg-sky-500/10",    icon: BookOpen,     label: "Book",       symbol: "□" },
+  best:        { color: "text-emerald-300",  bg: "bg-emerald-500/10",icon: CheckCircle2, label: "Best",       symbol: "!" },
+  excellent:   { color: "text-green-400",    bg: "bg-green-500/10",  icon: CheckCircle2, label: "Excellent",  symbol: "!" },
   good:        { color: "text-green-300/70", bg: "bg-green-500/5",   icon: CheckCircle2, label: "Good",       symbol: "" },
   inaccuracy:  { color: "text-yellow-400",   bg: "bg-yellow-500/10", icon: AlertTriangle, label: "Inaccuracy", symbol: "?!" },
   mistake:     { color: "text-orange-400",   bg: "bg-orange-500/10", icon: XCircle,       label: "Mistake",    symbol: "?" },
   blunder:     { color: "text-red-500",      bg: "bg-red-500/10",    icon: XCircle,       label: "Blunder",    symbol: "??" },
+  brilliant:   { color: "text-cyan-400",     bg: "bg-cyan-500/10",   icon: Zap,          label: "Brilliant",  symbol: "!!" },
 };
+
+function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): number {
+  const raw = mate !== null ? (mate > 0 ? 10000 : -10000) : evaluation;
+  return new Chess(fen).turn() === "w" ? raw : -raw;
+}
 
 function formatEval(cp: number, mate: number | null): string {
   if (mate !== null) return mate > 0 ? `M${mate}` : `M${mate}`;
