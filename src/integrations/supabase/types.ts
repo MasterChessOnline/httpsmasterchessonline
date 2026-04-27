@@ -708,6 +708,8 @@ export type Database = {
           black_player_id: string
           black_time: number
           created_at: string
+          elo_applied: boolean
+          end_reason: string | null
           fen: string
           id: string
           increment: number
@@ -728,6 +730,8 @@ export type Database = {
           black_player_id: string
           black_time?: number
           created_at?: string
+          elo_applied?: boolean
+          end_reason?: string | null
           fen?: string
           id?: string
           increment?: number
@@ -748,6 +752,8 @@ export type Database = {
           black_player_id?: string
           black_time?: number
           created_at?: string
+          elo_applied?: boolean
+          end_reason?: string | null
           fen?: string
           id?: string
           increment?: number
@@ -1843,6 +1849,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      finalize_online_game: {
+        Args: { p_end_reason: string; p_game_id: string; p_result: string }
+        Returns: Json
       }
       get_club_role: { Args: { _club: string; _user: string }; Returns: string }
       has_role: {
