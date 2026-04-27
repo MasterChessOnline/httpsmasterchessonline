@@ -1899,6 +1899,26 @@ export type Database = {
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
+      commit_online_move: {
+        Args: {
+          p_black_time: number
+          p_color: string
+          p_end_reason?: string
+          p_expected_move_number: number
+          p_fen_after: string
+          p_fen_before: string
+          p_from: string
+          p_game_id: string
+          p_pgn_after: string
+          p_promotion: string
+          p_result?: string
+          p_san: string
+          p_to: string
+          p_turn_after: string
+          p_white_time: number
+        }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
