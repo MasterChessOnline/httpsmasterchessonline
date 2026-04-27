@@ -108,6 +108,36 @@ export default function Analysis() {
     engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
   }, []);
 
+  // If the URL contains ?game=<id>, fetch that game's PGN and auto-analyze it.
+  // Used by the "Analyze" button in Game History to deep-link directly.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gameId = params.get("game");
+    if (!gameId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("online_games")
+        .select("pgn")
+        .eq("id", gameId)
+        .maybeSingle();
+      if (cancelled) return;
+      const pgn = (data as any)?.pgn as string | undefined;
+      if (pgn && pgn.trim()) {
+        setPgnInput(pgn);
+        setBottomTab("import");
+        // Wait until stockfish is ready, then run.
+        const tryRun = () => {
+          if (stockfishReady.current) { void runAnalysisFromText(pgn); }
+          else setTimeout(tryRun, 200);
+        };
+        tryRun();
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fetch explorer data when position or db changes
   useEffect(() => {
     if (bottomTab !== "explorer") return;
