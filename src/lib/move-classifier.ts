@@ -53,16 +53,25 @@ export function isBookMove(playedHistorySan: string[]): boolean {
   return OPENINGS.some(o => o.moves.length >= len && o.moves.slice(0, len).every((m, i) => m === playedHistorySan[i]));
 }
 
+const _bookCache = new Map<string, boolean>();
 export async function isDatabaseBookMove(fenBefore: string, san: string, ply: number): Promise<boolean> {
-  if (ply > 24) return false;
+  if (ply > 16) return false; // most theory ends well before move 16
+  const key = `${fenBefore}|${san}`;
+  if (_bookCache.has(key)) return _bookCache.get(key)!;
   try {
     const master = await fetchMasterExplorerData(fenBefore);
     const masterMove = master.moves.find(m => m.san === san);
-    if (masterMove && (masterMove.games >= 2 || masterMove.frequency >= 0.5)) return true;
-
-    const lichess = await fetchExplorerData(fenBefore);
-    const lichessMove = lichess.moves.find(m => m.san === san);
-    return !!lichessMove && (lichessMove.games >= 50 || lichessMove.frequency >= 1);
+    if (masterMove && (masterMove.games >= 2 || masterMove.frequency >= 0.5)) {
+      _bookCache.set(key, true); return true;
+    }
+    // Skip the slower lichess fallback after ply 10 (saves a network round trip per move)
+    if (ply <= 10) {
+      const lichess = await fetchExplorerData(fenBefore);
+      const lichessMove = lichess.moves.find(m => m.san === san);
+      const ok = !!lichessMove && (lichessMove.games >= 50 || lichessMove.frequency >= 1);
+      _bookCache.set(key, ok); return ok;
+    }
+    _bookCache.set(key, false); return false;
   } catch {
     return false;
   }
