@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
+import { getCachedStockfishEvals, saveCachedStockfishEval } from "@/lib/stockfish-eval-cache";
 
 interface EvalPoint {
   /** Centipawns from White's POV. Clamped to ±1500 for display. */
@@ -39,7 +40,7 @@ function toWhitePov(fen: string, cp: number, mate: number | null): { cp: number;
   return { cp: -cp, mate: mate === null ? null : -mate };
 }
 
-export default function EvalReviewPanel({ moves, currentMove, depth = 10 }: Props) {
+export default function EvalReviewPanel({ moves, currentMove, depth = 8 }: Props) {
   const [evals, setEvals] = useState<(EvalPoint | null)[]>([]);
   const [analysing, setAnalysing] = useState(false);
   const [done, setDone] = useState(0);
@@ -78,11 +79,25 @@ export default function EvalReviewPanel({ moves, currentMove, depth = 10 }: Prop
         }
       }
 
+      const cached = await getCachedStockfishEvals(fens, depth);
       const next: (EvalPoint | null)[] = new Array(fens.length).fill(null);
+      for (let i = 0; i < fens.length; i++) {
+        const hit = cached.get(fens[i]);
+        if (!hit) continue;
+        const wp = toWhitePov(fens[i], hit.evaluation, hit.mate);
+        next[i] = { cp: Math.max(-CLAMP, Math.min(CLAMP, wp.cp)), mate: wp.mate };
+      }
+      if (cached.size > 0) {
+        setEvals([...next]);
+        setDone(Math.min(cached.size, fens.length));
+      }
+
       for (let i = 0; i < fens.length; i++) {
         if (cancelRef.current) return;
         const fen = fens[i];
+        if (next[i]) continue;
         const { evaluation, mate } = await engine.evaluate(fen, depth);
+        void saveCachedStockfishEval(fen, depth, evaluation, mate);
         const wp = toWhitePov(fen, evaluation, mate);
         next[i] = {
           cp: Math.max(-CLAMP, Math.min(CLAMP, wp.cp)),
