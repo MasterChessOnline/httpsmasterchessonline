@@ -78,8 +78,6 @@ const GameInviteListener = () => {
         })
         .eq("id", inviteId);
 
-      await supabase.rpc("dismiss_game_invite" as any, { p_invite_id: inviteId });
-
       navigate(`/play/online?game=${newGame.id}`);
     };
 
