@@ -400,12 +400,41 @@ export function useOnlineGame() {
   ) => {
     if (!game) return;
     const newPgn = game.pgn ? `${game.pgn} ${san}` : san;
-    await supabase.from("online_games").update({
+    const nowIso = new Date().toISOString();
+    const expectedTurn = game.turn; // turn that must still be on the server
+
+    // Optimistic local update so the board never feels laggy. The server echo
+    // (realtime + poll) will be deduped by applyServerSnapshot since the
+    // last_move_at is already set to nowIso below.
+    setGame(prev => prev ? {
+      ...prev,
       fen, pgn: newPgn, turn,
       last_move_from: from, last_move_to: to,
-      last_move_at: new Date().toISOString(),
+      last_move_at: nowIso,
       white_time: whiteTime, black_time: blackTime,
-    }).eq("id", game.id);
+    } : prev);
+
+    // Atomic guard: only apply if the server still has the previous turn.
+    // Stops the rare "both clients write to the same turn" race that produced
+    // duplicate moves in the PGN.
+    const { error: updErr } = await supabase
+      .from("online_games")
+      .update({
+        fen, pgn: newPgn, turn,
+        last_move_from: from, last_move_to: to,
+        last_move_at: nowIso,
+        white_time: whiteTime, black_time: blackTime,
+      })
+      .eq("id", game.id)
+      .eq("turn", expectedTurn);
+
+    if (updErr) {
+      // Re-fetch authoritative state — caller's local chess.js will be
+      // resynced by the existing FEN-sync effect.
+      const { data } = await supabase
+        .from("online_games").select("*").eq("id", game.id).single();
+      if (data) setGame(data as OnlineGame);
+    }
   }, [game]);
 
   const endGame = useCallback(async (result: string) => {
