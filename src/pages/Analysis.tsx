@@ -381,10 +381,11 @@ export default function Analysis() {
   const evalCpForBar = !pgnComplete ? liveCurrentEval.cp : (currentEval?.eval ?? 0);
   const evalMateForBar = !pgnComplete ? liveCurrentEval.mate : (currentEval?.mate ?? null);
   const evalPercent = evalToBarPct(evalCpForBar, evalMateForBar);
+  const bookMoves = activeEvals.filter(e => e.classification === "book").length;
+  const bestMoves = activeEvals.filter(e => e.classification === "best").length;
   const blunders = activeEvals.filter(e => e.classification === "blunder").length;
   const mistakes = activeEvals.filter(e => e.classification === "mistake").length;
   const inaccuracies = activeEvals.filter(e => e.classification === "inaccuracy").length;
-  const brilliant = activeEvals.filter(e => e.classification === "brilliant").length;
   const lastMoveDisplay = pgnComplete
     ? (pgnCurrentIdx >= 0 ? { from: pgnMoveEvals[pgnCurrentIdx].from, to: pgnMoveEvals[pgnCurrentIdx].to } : null)
     : liveLastMove;
@@ -393,7 +394,7 @@ export default function Analysis() {
   const blackEvals = activeEvals.filter(e => e.color === "b");
   const calcAccuracy = (evs: MoveEval[]) => {
     if (evs.length === 0) return 0;
-    return Math.round((evs.filter(e => ["brilliant", "great", "good"].includes(e.classification)).length / evs.length) * 100);
+    return Math.round((evs.filter(e => ["book", "best", "excellent", "good"].includes(e.classification)).length / evs.length) * 100);
   };
   const graphData = useMemo(() => activeEvals.map((ev) => ({
     eval: Math.max(-500, Math.min(500, ev.mate !== null ? (ev.mate > 0 ? 500 : -500) : ev.eval)),
@@ -537,7 +538,8 @@ export default function Analysis() {
             {activeEvals.length > 0 && (
               <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/20 text-[10px]">
                 <div className="flex gap-2">
-                  <span className="text-cyan-400">✦ {brilliant}</span>
+                  <span className="text-sky-300">□ {bookMoves}</span>
+                  <span className="text-emerald-300">! {bestMoves}</span>
                   <span className="text-yellow-400">?! {inaccuracies}</span>
                   <span className="text-orange-400">? {mistakes}</span>
                   <span className="text-red-500">?? {blunders}</span>
