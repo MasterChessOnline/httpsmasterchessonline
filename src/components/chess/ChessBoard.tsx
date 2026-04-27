@@ -43,6 +43,7 @@ interface ChessBoardProps {
   premove?: { from: Square; to: Square } | null;
   onSquareClick: (square: Square) => void;
   overlay?: React.ReactNode;
+  className?: string;
 }
 
 // Locate the square of the king of the given color
@@ -60,7 +61,7 @@ function findKingSquare(board: ReturnType<Chess["board"]>, color: "w" | "b"): st
 
 export default function ChessBoard({
   game, flipped, selectedSquare, legalMoves, lastMove,
-  isGameOver, isPlayerTurn, hintSquare, hintToSquare, premove, onSquareClick, overlay,
+  isGameOver, isPlayerTurn, hintSquare, hintToSquare, premove, onSquareClick, overlay, className,
 }: ChessBoardProps) {
   const { get: getGlyph, style: pieceStyle } = usePieceGlyphs();
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
@@ -82,7 +83,7 @@ export default function ChessBoard({
   }
 
   return (
-    <div className="w-full max-w-[min(90vw,520px)] mx-auto">
+    <div className={className ?? "w-full max-w-[min(90vw,520px)] mx-auto"}>
       {/* Coordinate labels top */}
       <div className="flex ml-6 mr-1 mb-0.5">
         {displayFiles.map((f) => (
