@@ -104,7 +104,14 @@ const PlayOnline = () => {
     });
   }, [opponentId]);
 
-  // Sync board from server state
+  // Sync board from server state.
+  // Two key invariants:
+  //   1. Only rebuild the chess.js instance when the FEN actually changed.
+  //   2. Only adopt the server clock when the server's last_move_at is newer
+  //      than what we last adopted — otherwise the locally ticking clock
+  //      gets jerked back every time we receive a no-op snapshot or our own
+  //      optimistic echo, causing the "trzanje" the user reported.
+  const lastAdoptedMoveAtRef = useRef<string | null>(null);
   useEffect(() => {
     if (!onlineGame || onlineStatus !== "playing") return;
     if (onlineGame.fen !== game.fen()) {
@@ -126,8 +133,12 @@ const PlayOnline = () => {
         }
       }
     }
-    setWhiteTime(onlineGame.white_time);
-    setBlackTime(onlineGame.black_time);
+    // Only adopt server clock when a NEW move was actually played.
+    if (onlineGame.last_move_at && onlineGame.last_move_at !== lastAdoptedMoveAtRef.current) {
+      lastAdoptedMoveAtRef.current = onlineGame.last_move_at;
+      setWhiteTime(onlineGame.white_time);
+      setBlackTime(onlineGame.black_time);
+    }
   }, [onlineGame]);
 
   // Initial game setup
