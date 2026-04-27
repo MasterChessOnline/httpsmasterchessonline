@@ -19,6 +19,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import DynamicBackground from "@/components/DynamicBackground";
 import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
+import { detectOpening } from "@/lib/openings-detector";
+import { BookOpen, Sparkles } from "lucide-react";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -90,6 +92,15 @@ const PlayOnline = () => {
   const game = gameRef.current;
   const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
   const boardFlipped = myColor === "b";
+
+  // Live opening detection — recomputed on every move from the SAN history.
+  // Cheap, runs against an in-memory table; updates the banner instantly.
+  const detectedOpening = (() => {
+    const sans = moveHistory.length > 0
+      ? moveHistory
+      : (onlineGame?.pgn?.split(/\s+/).filter(t => t && !/^\d+\./.test(t)) ?? []);
+    return detectOpening(sans);
+  })();
 
   const displayFiles = boardFlipped ? [...FILES].reverse() : FILES;
   const displayRanks = boardFlipped ? [...RANKS].reverse() : RANKS;
@@ -587,6 +598,17 @@ const PlayOnline = () => {
               )}
             </div>
 
+            {/* Opening name banner — instant, offline detection */}
+            {detectedOpening && (
+              <div className="flex items-center justify-center gap-2 rounded-lg border border-primary/25 bg-primary/5 px-3 py-1.5">
+                <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span className="text-[11px] sm:text-xs font-medium text-primary truncate">
+                  <span className="font-mono opacity-70 mr-1.5">{detectedOpening.eco}</span>
+                  {detectedOpening.name}
+                </span>
+              </div>
+            )}
+
             {/* Board — same component & sizing used everywhere on the site,
                 so it always picks up the user's chosen piece set + theme. */}
             <div ref={boardFocusRef} className="relative w-full flex justify-center">
@@ -715,9 +737,19 @@ const PlayOnline = () => {
             )}
 
             {isGameOver && (
-              <Button className="w-full" onClick={resetAll}>
-                <RotateCcw className="h-4 w-4 mr-2" /> New Game
-              </Button>
+              <div className="space-y-2">
+                <Button className="w-full" onClick={resetAll}>
+                  <RotateCcw className="h-4 w-4 mr-2" /> New Game
+                </Button>
+                {onlineGame?.id && (
+                  <Button asChild variant="outline" className="w-full border-primary/40 hover:bg-primary/5">
+                    <Link to={`/game-review?game=${onlineGame.id}`}>
+                      <Sparkles className="h-4 w-4 mr-2 text-primary" />
+                      Coach Review &amp; Lessons
+                    </Link>
+                  </Button>
+                )}
+              </div>
             )}
 
             {/* Chat */}

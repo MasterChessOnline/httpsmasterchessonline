@@ -17,6 +17,7 @@ import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/cours
 import { useAuth } from "@/contexts/AuthContext";
 
 import InteractiveBoard from "@/components/learn/InteractiveBoard";
+import MyLessonsPanel from "@/components/learn/MyLessonsPanel";
 import VariationsExercise from "@/components/learn/VariationsExercise";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
@@ -924,6 +925,7 @@ const Learn = () => {
         {view === "list" && user && !loading && (
           <>
             <StatsDashboard streak={streak} totalCourses={COURSES.length} completedCourses={completedCourses} />
+            <MyLessonsPanel />
             <BookmarkedPanel bookmarks={bookmarkData} onGoToLesson={goToLesson} />
           </>
         )}

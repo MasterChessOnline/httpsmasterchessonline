@@ -272,6 +272,51 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_lessons: {
+        Row: {
+          created_at: string
+          id: string
+          key_ideas: Json
+          opening_eco: string | null
+          opening_name: string
+          pgn: string | null
+          practice_lines: Json
+          recommended_moves: Json
+          source_game_id: string | null
+          summary: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_ideas?: Json
+          opening_eco?: string | null
+          opening_name: string
+          pgn?: string | null
+          practice_lines?: Json
+          recommended_moves?: Json
+          source_game_id?: string | null
+          summary: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_ideas?: Json
+          opening_eco?: string | null
+          opening_name?: string
+          pgn?: string | null
+          practice_lines?: Json
+          recommended_moves?: Json
+          source_game_id?: string | null
+          summary?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_missions: {
         Row: {
           created_at: string
