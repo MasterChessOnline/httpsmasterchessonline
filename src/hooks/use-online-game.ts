@@ -191,7 +191,7 @@ export function useOnlineGame() {
     };
 
     const channel = supabase
-      .channel(`online-game-${gameId}-${Date.now()}`)
+      .channel(`online-game-${gameId}`, { config: { broadcast: { self: false, ack: false } } })
       .on("postgres_changes", {
         event: "UPDATE",
         schema: "public",
@@ -200,13 +200,18 @@ export function useOnlineGame() {
       }, (payload) => {
         applyServerSnapshot(payload.new as OnlineGame);
       })
+      // Instant peer-to-peer move broadcast (~50-150ms vs DB realtime ~300-800ms).
+      // Sender broadcasts a snapshot immediately after the optimistic update;
+      // receiver applies it via the same dedupe path (lastAppliedAt).
+      .on("broadcast", { event: "move" }, (payload) => {
+        const snap = (payload as any).payload as Partial<OnlineGame>;
+        if (snap && snap.fen) applyServerSnapshot(snap as OnlineGame);
+      })
       .subscribe();
 
     gameChannelRef.current = channel;
 
-    // Backup poll — slower so it doesn't fight realtime updates and never
-    // reverts a fresher local state. The applyServerSnapshot guard above also
-    // discards stale rows, so this is purely a recovery net.
+    // Backup poll — 1.5s so even if realtime stalls, both sides converge fast.
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       const { data } = await supabase
@@ -215,7 +220,7 @@ export function useOnlineGame() {
         .eq("id", gameId)
         .single();
       if (data) applyServerSnapshot(data as OnlineGame);
-    }, 2500);
+    }, 1500);
   }, [applyEloAndLog]);
 
   // Recover active game on mount — prefer ?game=ID from URL if present
