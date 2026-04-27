@@ -221,22 +221,22 @@ const Navbar = () => {
           aria-label="Main navigation"
         >
           <div
-            className={`container mx-auto flex items-center justify-between gap-4 px-5 transition-all duration-500 ${
+            className={`container mx-auto flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-5 transition-all duration-500 ${
               shrunk ? "h-14" : "h-16"
             }`}
           >
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group shrink-0" aria-label="MasterChess home">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 min-w-0" aria-label="MasterChess home">
               <motion.div
-                className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:border-primary/40 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] transition-all duration-300"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:border-primary/40 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] transition-all duration-300 shrink-0"
                 whileHover={{ rotate: 12, scale: 1.08 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Crown className="h-5 w-5 text-primary" />
+                <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </motion.div>
               <span
-                className="font-display font-bold tracking-wide text-foreground uppercase text-lg sm:text-2xl whitespace-nowrap"
-                style={{ wordBreak: "keep-all", overflowWrap: "normal" }}
+                className="font-display font-bold tracking-wide text-foreground uppercase text-base sm:text-2xl whitespace-nowrap shrink-0"
+                style={{ wordBreak: "keep-all", overflowWrap: "normal", whiteSpace: "nowrap" }}
               >
                 Master<span className="text-gradient-gold">Chess</span>
               </span>
