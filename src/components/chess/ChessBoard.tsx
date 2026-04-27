@@ -170,11 +170,11 @@ export default function ChessBoard({
                     )}
                     {/* Legal move dot */}
                     {isLegal && !piece && (
-                      <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />
+                      <span className={`block h-[26%] w-[26%] rounded-full ${premoveMode ? "bg-blue-500/70" : "bg-foreground/20"}`} />
                     )}
                     {/* Legal capture ring */}
                     {isLegal && pd && (
-                      <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />
+                      <span className={`absolute inset-[6%] rounded-full border-[3px] ${premoveMode ? "border-blue-500/70" : "border-foreground/25"}`} />
                     )}
                     {/* Piece — SVG artwork or Unicode glyph depending on the active set */}
                     {pd && (
