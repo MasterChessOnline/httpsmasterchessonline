@@ -3,7 +3,7 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
-import { isBookMove } from "@/lib/move-classifier";
+import { isBookMove, isDatabaseBookMove } from "@/lib/move-classifier";
 import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -177,10 +177,11 @@ export default function Analysis() {
       const currFromSide = wasWhite ? evalCp : -evalCp;
       const evalDrop = prevFromSide - currFromSide;
       const sanHistory = [...liveMoveHistory.map(m => m.san), moveSan];
+      const bookMove = isBookMove(sanHistory) || await isDatabaseBookMove(fenBefore, moveSan, liveMoveHistory.length + 1);
       const moveEval: MoveEval = {
         san: moveSan, fen, fenBefore, from: moveFrom, to: moveTo, color, moveNumber: moveNum,
         eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan,
-        altLines, classification: classifyMove(evalDrop, isBookMove(sanHistory)), evalDrop,
+        altLines, classification: classifyMove(evalDrop, bookMove), evalDrop,
       };
       prevEvalRef.current = evalCp;
       setLiveMoveHistory(prev => [...prev, moveEval]);
@@ -341,7 +342,7 @@ export default function Analysis() {
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
         color: move.color, moveNumber: Math.floor(i / 2) + 1,
         eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "",
-        bestMoveSan, altLines, classification: classifyMove(evalDrop, isBookMove(sanSoFar)), evalDrop,
+        bestMoveSan, altLines, classification: classifyMove(evalDrop, isBookMove(sanSoFar) || await isDatabaseBookMove(fenBefore, move.san, i + 1)), evalDrop,
       });
     }
     setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
