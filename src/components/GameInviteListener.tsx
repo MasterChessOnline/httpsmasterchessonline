@@ -110,7 +110,6 @@ const GameInviteListener = () => {
                 await supabase.from("game_invites" as any)
                   .update({ status: "declined", responded_at: new Date().toISOString() })
                   .eq("id", inviteId);
-                await supabase.rpc("dismiss_game_invite" as any, { p_invite_id: inviteId });
               }}
             >
               Decline
@@ -149,9 +148,6 @@ const GameInviteListener = () => {
               if (inv.status === "cancelled") {
                 toast({ title: "Challenge cancelled", description: "The challenger withdrew the invite." });
               }
-                if (inv.status === "declined") {
-                  supabase.rpc("dismiss_game_invite" as any, { p_invite_id: inv.id });
-                }
             }
           }
         }
