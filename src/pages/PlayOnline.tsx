@@ -81,6 +81,9 @@ const PlayOnline = () => {
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
+  const [rematchOfferedByMe, setRematchOfferedByMe] = useState(false);
+  const [rematchOfferedByOpponent, setRematchOfferedByOpponent] = useState(false);
+  const [rematchInProgress, setRematchInProgress] = useState(false);
   const { toast, dismiss } = useToast();
   const boardFocusRef = useRef<HTMLDivElement>(null);
 
