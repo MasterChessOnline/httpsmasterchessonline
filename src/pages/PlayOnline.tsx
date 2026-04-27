@@ -329,11 +329,33 @@ const PlayOnline = () => {
   const lastMove = onlineGame?.last_move_from && onlineGame?.last_move_to
     ? { from: onlineGame.last_move_from, to: onlineGame.last_move_to } : null;
 
+  // Detailed end-of-game label.
+  // Honors end_reason from the server (resignation/timeout/agreement/etc) so the
+  // banner says exactly WHY the game ended, not just who won.
+  const winnerWord = onlineGame?.result === "1-0" ? "White" : onlineGame?.result === "0-1" ? "Black" : null;
+  const endReason = (onlineGame as any)?.end_reason as string | undefined;
+  const endReasonLabel: Record<string, string> = {
+    checkmate: "by checkmate",
+    resignation: "by resignation",
+    timeout: "on time",
+    stalemate: "by stalemate",
+    threefold: "by threefold repetition",
+    fifty_move: "by fifty-move rule",
+    insufficient_material: "by insufficient material",
+    agreement: "by agreement",
+  };
+  const endReasonText = endReason ? endReasonLabel[endReason] ?? "" : "";
+
   const statusText = onlineGame?.status === "finished"
-    ? onlineGame.result === "1-0" ? "White wins!" : onlineGame.result === "0-1" ? "Black wins!" : "Draw!"
+    ? onlineGame.result === "1/2-1/2"
+      ? `Draw ${endReasonText}`.trim()
+      : `${winnerWord} wins ${endReasonText}`.trim()
     : timeoutWinner ? `${timeoutWinner} wins on time!`
     : game.isCheckmate() ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
-    : game.isDraw() ? "Draw!" : game.isStalemate() ? "Stalemate!"
+    : game.isStalemate() ? "Stalemate"
+    : game.isThreefoldRepetition() ? "Draw by threefold repetition"
+    : game.isInsufficientMaterial() ? "Draw by insufficient material"
+    : game.isDraw() ? "Draw by fifty-move rule"
     : game.isCheck() ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
     : onlineStatus === "playing" && game.turn() === myColor ? "Your turn"
     : onlineStatus === "playing" ? "Opponent's turn" : "";
