@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import CoachReviewPanel from "@/components/chess/CoachReviewPanel";
+import EvalReviewPanel from "@/components/chess/EvalReviewPanel";
 import { detectOpening } from "@/lib/openings-detector";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -260,27 +260,9 @@ const GameReview = () => {
             </Button>
           </div>
 
-          {/* Coach Review (only when we have full context: a real game from DB) */}
+          {/* Stockfish eval — pure engine, no labels, no AI */}
           <div className="w-full">
-            {meta && myColor && gameRef.current.pgn() ? (
-              <CoachReviewPanel
-                pgn={gameRef.current.pgn()}
-                myColor={myColor}
-                result={meta.result ?? "*"}
-                endReason={meta.end_reason ?? undefined}
-                opening={opening}
-                myRating={myRating}
-                opponentRating={opponentRating}
-                sourceGameId={meta.id}
-              />
-            ) : user && gameRef.current.pgn() ? (
-              <CoachReviewPanel
-                pgn={gameRef.current.pgn()}
-                myColor="w"
-                result="*"
-                opening={opening}
-              />
-            ) : null}
+            <EvalReviewPanel moves={moves} currentMove={currentMove} />
           </div>
         </div>
       </main>
