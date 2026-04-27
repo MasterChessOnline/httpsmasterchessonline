@@ -161,6 +161,18 @@ const Friends = () => {
     loadFriendships();
   };
 
+  // Map of relationships involving the current user, keyed by other-user id
+  // NOTE: Hooks must run before any early return — keep this above the auth gates.
+  const relationByUserId = useMemo(() => {
+    const map = new Map<string, FriendRow>();
+    if (!user) return map;
+    friendships.forEach((f) => {
+      const other = f.user_id === user.id ? f.friend_id : f.user_id;
+      map.set(other, f);
+    });
+    return map;
+  }, [friendships, user]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -180,16 +192,6 @@ const Friends = () => {
   const getOtherId = (f: FriendRow) => (f.user_id === user.id ? f.friend_id : f.user_id);
   const getName = (uid: string) =>
     profiles[uid]?.display_name || profiles[uid]?.username || "Player";
-
-  // Map of relationships involving the current user, keyed by other-user id
-  const relationByUserId = useMemo(() => {
-    const map = new Map<string, FriendRow>();
-    friendships.forEach((f) => {
-      const other = getOtherId(f);
-      map.set(other, f);
-    });
-    return map;
-  }, [friendships]);
 
   const onTabChange = (v: string) => {
     setTab(v);
