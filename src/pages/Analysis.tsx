@@ -13,9 +13,11 @@ import { Slider } from "@/components/ui/slider";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Upload, Trash2, Download, MousePointerClick, RotateCcw,
-  Globe, Database, Trophy, FlipVertical
+  Globe, Database, Trophy, FlipVertical, Swords, Calendar
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ── Types ──
 interface MoveEval {
