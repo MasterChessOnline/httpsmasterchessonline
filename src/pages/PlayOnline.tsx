@@ -598,6 +598,17 @@ const PlayOnline = () => {
               )}
             </div>
 
+            {/* Opening name banner — instant, offline detection */}
+            {detectedOpening && (
+              <div className="flex items-center justify-center gap-2 rounded-lg border border-primary/25 bg-primary/5 px-3 py-1.5">
+                <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span className="text-[11px] sm:text-xs font-medium text-primary truncate">
+                  <span className="font-mono opacity-70 mr-1.5">{detectedOpening.eco}</span>
+                  {detectedOpening.name}
+                </span>
+              </div>
+            )}
+
             {/* Board — same component & sizing used everywhere on the site,
                 so it always picks up the user's chosen piece set + theme. */}
             <div ref={boardFocusRef} className="relative w-full flex justify-center">
