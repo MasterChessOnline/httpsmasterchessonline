@@ -19,6 +19,7 @@
 import { Chess } from "chess.js";
 import { getStockfishEngine } from "./stockfish-engine";
 import { OPENINGS } from "./openings-detector";
+import { fetchExplorerData, fetchMasterExplorerData } from "./lichess-explorer";
 
 export type Verdict =
   | "book"
@@ -46,10 +47,30 @@ export interface ClassifiedMove {
 
 const PIECE_VALUE: Record<string, number> = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 0 };
 
-function isBookMove(playedHistorySan: string[]): boolean {
+export function isBookMove(playedHistorySan: string[]): boolean {
   // We're still in book if our prefix exactly matches some catalogue entry.
   const len = playedHistorySan.length;
   return OPENINGS.some(o => o.moves.length >= len && o.moves.slice(0, len).every((m, i) => m === playedHistorySan[i]));
+}
+
+export async function isDatabaseBookMove(fenBefore: string, san: string, ply: number): Promise<boolean> {
+  if (ply > 24) return false;
+  try {
+    const master = await fetchMasterExplorerData(fenBefore);
+    const masterMove = master.moves.find(m => m.san === san);
+    if (masterMove && (masterMove.games >= 2 || masterMove.frequency >= 0.5)) return true;
+
+    const lichess = await fetchExplorerData(fenBefore);
+    const lichessMove = lichess.moves.find(m => m.san === san);
+    return !!lichessMove && (lichessMove.games >= 50 || lichessMove.frequency >= 1);
+  } catch {
+    return false;
+  }
+}
+
+function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): number {
+  const raw = mate != null ? (mate > 0 ? 10000 : -10000) : evaluation;
+  return new Chess(fen).turn() === "w" ? raw : -raw;
 }
 
 function classifyByCpLoss(cpLoss: number): Verdict {
@@ -125,7 +146,7 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
   // First call we do need: get eval at start so first cp loss is meaningful.
   try {
     const r0 = await engine.evaluate(replay.fen(), depth);
-    evalBeforeWhitePov = r0.mate != null ? (r0.mate > 0 ? 10000 : -10000) : r0.evaluation;
+    evalBeforeWhitePov = scoreToWhitePov(replay.fen(), r0.evaluation, r0.mate);
   } catch { /* keep 0 */ }
 
   for (let i = 0; i < history.length; i++) {
@@ -149,16 +170,13 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
     replay.move(move.san);
     sanSoFar.push(move.san);
     const fenAfter = replay.fen();
+    const bookMove = isBookMove(sanSoFar) || await isDatabaseBookMove(fenBefore, move.san, i + 1);
 
     // Eval AFTER the played move (from White POV).
     let evalAfterWhitePov = evalBeforeWhitePov;
     try {
       const after = await engine.evaluate(fenAfter, depth);
-      // After the move, side-to-move flipped. evaluate() returns score from
-      // the new side-to-move POV. Convert to White POV.
-      const evalNewStm = after.mate != null ? (after.mate > 0 ? 10000 : -10000) : after.evaluation;
-      const newStm = moverColor === "w" ? "b" : "w";
-      evalAfterWhitePov = newStm === "w" ? evalNewStm : -evalNewStm;
+      evalAfterWhitePov = scoreToWhitePov(fenAfter, after.evaluation, after.mate);
     } catch { /* keep previous */ }
 
     // CP loss from the mover's POV.
@@ -170,7 +188,7 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
 
     // Classify.
     let verdict: Verdict;
-    if (isBookMove(sanSoFar)) {
+    if (bookMove) {
       verdict = "book";
     } else {
       verdict = classifyByCpLoss(cpLoss);

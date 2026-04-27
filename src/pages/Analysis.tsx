@@ -3,6 +3,7 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
+import { isBookMove, isDatabaseBookMove } from "@/lib/move-classifier";
 import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,27 +28,35 @@ interface MoveEval {
   altLines: { san: string; eval: number; mate: number | null }[];
   classification: Classification; evalDrop: number;
 }
-type Classification = "brilliant" | "great" | "good" | "inaccuracy" | "mistake" | "blunder";
+type Classification = "book" | "best" | "excellent" | "good" | "inaccuracy" | "mistake" | "blunder" | "brilliant";
 
 // ── Helpers ──
-function classifyMove(evalDrop: number): Classification {
-  const abs = Math.abs(evalDrop);
-  if (abs <= 10) return "brilliant";
-  if (abs <= 25) return "great";
-  if (abs <= 50) return "good";
-  if (abs <= 100) return "inaccuracy";
-  if (abs <= 200) return "mistake";
+function classifyMove(evalDrop: number, isBook = false): Classification {
+  if (isBook) return "book";
+  const abs = Math.max(0, evalDrop);
+  if (abs <= 8) return "best";
+  if (abs <= 25) return "excellent";
+  if (abs <= 60) return "good";
+  if (abs <= 120) return "inaccuracy";
+  if (abs <= 250) return "mistake";
   return "blunder";
 }
 
 const CLASS_STYLES: Record<Classification, { color: string; bg: string; icon: typeof CheckCircle2; label: string; symbol: string }> = {
-  brilliant:   { color: "text-cyan-400",     bg: "bg-cyan-500/10",   icon: Zap,          label: "Brilliant",  symbol: "!!" },
-  great:       { color: "text-green-400",    bg: "bg-green-500/10",  icon: CheckCircle2, label: "Great",      symbol: "!" },
+  book:        { color: "text-sky-300",      bg: "bg-sky-500/10",    icon: BookOpen,     label: "Book",       symbol: "□" },
+  best:        { color: "text-emerald-300",  bg: "bg-emerald-500/10",icon: CheckCircle2, label: "Best",       symbol: "!" },
+  excellent:   { color: "text-green-400",    bg: "bg-green-500/10",  icon: CheckCircle2, label: "Excellent",  symbol: "!" },
   good:        { color: "text-green-300/70", bg: "bg-green-500/5",   icon: CheckCircle2, label: "Good",       symbol: "" },
   inaccuracy:  { color: "text-yellow-400",   bg: "bg-yellow-500/10", icon: AlertTriangle, label: "Inaccuracy", symbol: "?!" },
   mistake:     { color: "text-orange-400",   bg: "bg-orange-500/10", icon: XCircle,       label: "Mistake",    symbol: "?" },
   blunder:     { color: "text-red-500",      bg: "bg-red-500/10",    icon: XCircle,       label: "Blunder",    symbol: "??" },
+  brilliant:   { color: "text-cyan-400",     bg: "bg-cyan-500/10",   icon: Zap,          label: "Brilliant",  symbol: "!!" },
 };
+
+function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): number {
+  const raw = mate !== null ? (mate > 0 ? 10000 : -10000) : evaluation;
+  return new Chess(fen).turn() === "w" ? raw : -raw;
+}
 
 function formatEval(cp: number, mate: number | null): string {
   if (mate !== null) return mate > 0 ? `M${mate}` : `M${mate}`;
@@ -152,24 +161,27 @@ export default function Analysis() {
     const engine = getStockfishEngine();
     try {
       const [bestResult, posEval, multiLines] = await Promise.all([
-        engine.getBestMove(fen, 600, depth),
+        engine.getBestMove(fenBefore, 600, depth),
         engine.evaluate(fen, depth),
-        engine.getMultiPV(fen, 3, Math.min(depth, 12)),
+        engine.getMultiPV(fenBefore, 3, Math.min(depth, 12)),
       ]);
-      const evalCp = posEval.mate !== null ? (posEval.mate > 0 ? 10000 : -10000) : posEval.evaluation;
-      const bestMoveSan = bestResult.bestMove ? uciToSan(fen, bestResult.bestMove) : "";
+      const evalCp = scoreToWhitePov(fen, posEval.evaluation, posEval.mate);
+      const bestEvalCp = scoreToWhitePov(fenBefore, bestResult.evaluation ?? 0, bestResult.mate ?? null);
+      const bestMoveSan = bestResult.bestMove ? uciToSan(fenBefore, bestResult.bestMove) : "";
       const altLines = multiLines.slice(0, 3).map(line => ({
-        san: line.pv[0] ? uciToSan(fen, line.pv[0]) : "", eval: line.eval, mate: line.mate,
+        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: scoreToWhitePov(fenBefore, line.eval, line.mate), mate: line.mate,
       })).filter(l => l.san);
       setLiveCurrentEval({ cp: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan, altLines });
       const wasWhite = color === "w";
-      const prevFromSide = wasWhite ? prevEvalRef.current : -prevEvalRef.current;
+      const prevFromSide = wasWhite ? bestEvalCp : -bestEvalCp;
       const currFromSide = wasWhite ? evalCp : -evalCp;
       const evalDrop = prevFromSide - currFromSide;
+      const sanHistory = [...liveMoveHistory.map(m => m.san), moveSan];
+      const bookMove = isBookMove(sanHistory) || await isDatabaseBookMove(fenBefore, moveSan, liveMoveHistory.length + 1);
       const moveEval: MoveEval = {
         san: moveSan, fen, fenBefore, from: moveFrom, to: moveTo, color, moveNumber: moveNum,
         eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan,
-        altLines, classification: classifyMove(evalDrop), evalDrop,
+        altLines, classification: classifyMove(evalDrop, bookMove), evalDrop,
       };
       prevEvalRef.current = evalCp;
       setLiveMoveHistory(prev => [...prev, moveEval]);
@@ -305,7 +317,7 @@ export default function Analysis() {
     const engine = getStockfishEngine(); engine.newGame();
     const evals: MoveEval[] = [];
     const evalGame = new Chess();
-    let prevEval = 0;
+    const sanSoFar: string[] = [];
     for (let i = 0; i < history.length; i++) {
       setProgress(Math.round(((i + 1) / history.length) * 100));
       const move = history[i];
@@ -313,24 +325,25 @@ export default function Analysis() {
       const bestResult = await engine.getBestMove(fenBefore, 600, depth);
       const multiLines = await engine.getMultiPV(fenBefore, 3, Math.min(depth, 12));
       evalGame.move(move.san);
+      sanSoFar.push(move.san);
       const fenAfter = evalGame.fen();
       const posEval = await engine.evaluate(fenAfter, depth);
-      const evalCp = posEval.mate !== null ? (posEval.mate > 0 ? 10000 : -10000) : posEval.evaluation;
+      const evalCp = scoreToWhitePov(fenAfter, posEval.evaluation, posEval.mate);
+      const bestEvalCp = scoreToWhitePov(fenBefore, bestResult.evaluation ?? 0, bestResult.mate ?? null);
       const wasWhite = move.color === "w";
-      const prevFromSide = wasWhite ? prevEval : -prevEval;
+      const prevFromSide = wasWhite ? bestEvalCp : -bestEvalCp;
       const currFromSide = wasWhite ? evalCp : -evalCp;
       const evalDrop = prevFromSide - currFromSide;
       const bestMoveSan = bestResult.bestMove ? uciToSan(fenBefore, bestResult.bestMove) : "";
       const altLines = multiLines.slice(0, 3).map(line => ({
-        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: line.eval, mate: line.mate,
+        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: scoreToWhitePov(fenBefore, line.eval, line.mate), mate: line.mate,
       })).filter(l => l.san && l.san !== move.san);
       evals.push({
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
         color: move.color, moveNumber: Math.floor(i / 2) + 1,
         eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "",
-        bestMoveSan, altLines, classification: classifyMove(evalDrop), evalDrop,
+        bestMoveSan, altLines, classification: classifyMove(evalDrop, isBookMove(sanSoFar) || await isDatabaseBookMove(fenBefore, move.san, i + 1)), evalDrop,
       });
-      prevEval = evalCp;
     }
     setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
   };
@@ -368,10 +381,11 @@ export default function Analysis() {
   const evalCpForBar = !pgnComplete ? liveCurrentEval.cp : (currentEval?.eval ?? 0);
   const evalMateForBar = !pgnComplete ? liveCurrentEval.mate : (currentEval?.mate ?? null);
   const evalPercent = evalToBarPct(evalCpForBar, evalMateForBar);
+  const bookMoves = activeEvals.filter(e => e.classification === "book").length;
+  const bestMoves = activeEvals.filter(e => e.classification === "best").length;
   const blunders = activeEvals.filter(e => e.classification === "blunder").length;
   const mistakes = activeEvals.filter(e => e.classification === "mistake").length;
   const inaccuracies = activeEvals.filter(e => e.classification === "inaccuracy").length;
-  const brilliant = activeEvals.filter(e => e.classification === "brilliant").length;
   const lastMoveDisplay = pgnComplete
     ? (pgnCurrentIdx >= 0 ? { from: pgnMoveEvals[pgnCurrentIdx].from, to: pgnMoveEvals[pgnCurrentIdx].to } : null)
     : liveLastMove;
@@ -380,7 +394,7 @@ export default function Analysis() {
   const blackEvals = activeEvals.filter(e => e.color === "b");
   const calcAccuracy = (evs: MoveEval[]) => {
     if (evs.length === 0) return 0;
-    return Math.round((evs.filter(e => ["brilliant", "great", "good"].includes(e.classification)).length / evs.length) * 100);
+    return Math.round((evs.filter(e => ["book", "best", "excellent", "good"].includes(e.classification)).length / evs.length) * 100);
   };
   const graphData = useMemo(() => activeEvals.map((ev) => ({
     eval: Math.max(-500, Math.min(500, ev.mate !== null ? (ev.mate > 0 ? 500 : -500) : ev.eval)),
@@ -524,7 +538,8 @@ export default function Analysis() {
             {activeEvals.length > 0 && (
               <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/20 text-[10px]">
                 <div className="flex gap-2">
-                  <span className="text-cyan-400">✦ {brilliant}</span>
+                  <span className="text-sky-300">□ {bookMoves}</span>
+                  <span className="text-emerald-300">! {bestMoves}</span>
                   <span className="text-yellow-400">?! {inaccuracies}</span>
                   <span className="text-orange-400">? {mistakes}</span>
                   <span className="text-red-500">?? {blunders}</span>
