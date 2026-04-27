@@ -340,9 +340,27 @@ const PlayOnline = () => {
   }, [onlineGame, endGame]);
 
   const executeMove = (from: Square, to: Square, promotion: PromotionPiece = "q") => {
-    const fenBefore = game.fen();
-    const move = game.move({ from, to, promotion });
+    // Always use the LIVE chess instance via ref — never the captured `game`
+    // const, which may be stale when called from a setTimeout (e.g. premove
+    // execution) after gameRef.current was just replaced by the FEN-sync effect.
+    const live = gameRef.current;
+    const fenBefore = live.fen();
+
+    // Validate before calling .move() — chess.js v1 throws on invalid input.
+    // Detect promotion from the legal-moves list so we don't pass a bogus
+    // promotion piece for non-promotion moves (which can also throw).
+    let move;
+    try {
+      const legal = live.moves({ square: from, verbose: true }) as Array<{ to: Square; flags: string; promotion?: string }>;
+      const candidate = legal.find((m) => m.to === to);
+      if (!candidate) return;
+      const needsPromotion = candidate.flags.includes("p");
+      move = live.move(needsPromotion ? { from, to, promotion } : { from, to });
+    } catch {
+      return;
+    }
     if (!move) return;
+
     setMoveHistory(prev => [...prev, move.san]);
     setGameStarted(true);
 
@@ -354,23 +372,22 @@ const PlayOnline = () => {
     }
 
     let finish: { result: string; endReason: Parameters<typeof endGame>[1] } | undefined;
-    if (game.isCheckmate()) {
-      finish = { result: game.turn() === "w" ? "0-1" : "1-0", endReason: "checkmate" };
+    if (live.isCheckmate()) {
+      finish = { result: live.turn() === "w" ? "0-1" : "1-0", endReason: "checkmate" };
       playChessSound("move");
-    } else if (game.isStalemate()) {
+    } else if (live.isStalemate()) {
       finish = { result: "1/2-1/2", endReason: "stalemate" };
       playChessSound("move");
-    } else if (game.isThreefoldRepetition()) {
+    } else if (live.isThreefoldRepetition()) {
       finish = { result: "1/2-1/2", endReason: "threefold" };
       playChessSound("move");
-    } else if (game.isInsufficientMaterial()) {
+    } else if (live.isInsufficientMaterial()) {
       finish = { result: "1/2-1/2", endReason: "insufficient_material" };
       playChessSound("move");
-    } else if (game.isDraw()) {
-      // Catch-all: most often the 50-move rule when none of the above hit.
+    } else if (live.isDraw()) {
       finish = { result: "1/2-1/2", endReason: "fifty_move" };
       playChessSound("move");
-    } else if (game.isCheck()) {
+    } else if (live.isCheck()) {
       playChessSound("check");
     } else if (move.captured) {
       playChessSound("capture");
@@ -378,7 +395,7 @@ const PlayOnline = () => {
       playChessSound("move");
     }
 
-    makeMove(fenBefore, game.fen(), move.san, move.from, move.to, game.turn(), wt, bt, promotion, finish);
+    makeMove(fenBefore, live.fen(), move.san, move.from, move.to, live.turn(), wt, bt, promotion, finish);
   };
 
   const handleSquareClick = (square: Square) => {
