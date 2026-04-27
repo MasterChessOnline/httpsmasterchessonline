@@ -135,24 +135,29 @@ export function useOnlineGame() {
 
     const applyServerSnapshot = (incoming: OnlineGame) => {
       const ts = incoming.last_move_at ? new Date(incoming.last_move_at).getTime() : 0;
-      // Allow status/clock updates even when last_move_at didn't move,
-      // but never roll FEN backwards.
       setGame(prev => {
         if (!prev) {
           lastAppliedAt = ts;
           return incoming;
         }
         // Stale snapshot — older move timestamp than what we already applied.
+        // This is the main defense against echo-overwrite ("ghost double move").
         if (ts && ts < lastAppliedAt) return prev;
-        // No real change — keep referential equality so React doesn't re-render.
+        // Same timestamp & same FEN as what we already have → it's our own
+        // optimistic write coming back. Keep referential equality so React
+        // doesn't re-render the board (which would briefly flicker pieces).
         if (
           prev.fen === incoming.fen &&
+          prev.pgn === incoming.pgn &&
           prev.status === incoming.status &&
-          prev.white_time === incoming.white_time &&
-          prev.black_time === incoming.black_time &&
           prev.last_move_at === incoming.last_move_at
         ) {
-          return prev;
+          // Adopt clock values even on a no-op snapshot so increment lands,
+          // but only if they actually changed — otherwise return prev.
+          if (prev.white_time === incoming.white_time && prev.black_time === incoming.black_time) {
+            return prev;
+          }
+          return { ...prev, white_time: incoming.white_time, black_time: incoming.black_time };
         }
         lastAppliedAt = Math.max(lastAppliedAt, ts);
         return incoming;
@@ -186,8 +191,9 @@ export function useOnlineGame() {
 
     gameChannelRef.current = channel;
 
-    // Backup poll — slightly slower so it doesn't fight realtime updates
-    // and never reverts a fresher local state.
+    // Backup poll — slower so it doesn't fight realtime updates and never
+    // reverts a fresher local state. The applyServerSnapshot guard above also
+    // discards stale rows, so this is purely a recovery net.
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       const { data } = await supabase
@@ -196,7 +202,7 @@ export function useOnlineGame() {
         .eq("id", gameId)
         .single();
       if (data) applyServerSnapshot(data as OnlineGame);
-    }, 5000);
+    }, 8000);
   }, [applyEloAndLog]);
 
   // Recover active game on mount — prefer ?game=ID from URL if present
@@ -394,12 +400,41 @@ export function useOnlineGame() {
   ) => {
     if (!game) return;
     const newPgn = game.pgn ? `${game.pgn} ${san}` : san;
-    await supabase.from("online_games").update({
+    const nowIso = new Date().toISOString();
+    const expectedTurn = game.turn; // turn that must still be on the server
+
+    // Optimistic local update so the board never feels laggy. The server echo
+    // (realtime + poll) will be deduped by applyServerSnapshot since the
+    // last_move_at is already set to nowIso below.
+    setGame(prev => prev ? {
+      ...prev,
       fen, pgn: newPgn, turn,
       last_move_from: from, last_move_to: to,
-      last_move_at: new Date().toISOString(),
+      last_move_at: nowIso,
       white_time: whiteTime, black_time: blackTime,
-    }).eq("id", game.id);
+    } : prev);
+
+    // Atomic guard: only apply if the server still has the previous turn.
+    // Stops the rare "both clients write to the same turn" race that produced
+    // duplicate moves in the PGN.
+    const { error: updErr } = await supabase
+      .from("online_games")
+      .update({
+        fen, pgn: newPgn, turn,
+        last_move_from: from, last_move_to: to,
+        last_move_at: nowIso,
+        white_time: whiteTime, black_time: blackTime,
+      })
+      .eq("id", game.id)
+      .eq("turn", expectedTurn);
+
+    if (updErr) {
+      // Re-fetch authoritative state — caller's local chess.js will be
+      // resynced by the existing FEN-sync effect.
+      const { data } = await supabase
+        .from("online_games").select("*").eq("id", game.id).single();
+      if (data) setGame(data as OnlineGame);
+    }
   }, [game]);
 
   const endGame = useCallback(async (result: string) => {

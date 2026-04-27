@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import DynamicBackground from "@/components/DynamicBackground";
+import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -104,7 +105,14 @@ const PlayOnline = () => {
     });
   }, [opponentId]);
 
-  // Sync board from server state
+  // Sync board from server state.
+  // Two key invariants:
+  //   1. Only rebuild the chess.js instance when the FEN actually changed.
+  //   2. Only adopt the server clock when the server's last_move_at is newer
+  //      than what we last adopted — otherwise the locally ticking clock
+  //      gets jerked back every time we receive a no-op snapshot or our own
+  //      optimistic echo, causing the "trzanje" the user reported.
+  const lastAdoptedMoveAtRef = useRef<string | null>(null);
   useEffect(() => {
     if (!onlineGame || onlineStatus !== "playing") return;
     if (onlineGame.fen !== game.fen()) {
@@ -126,8 +134,12 @@ const PlayOnline = () => {
         }
       }
     }
-    setWhiteTime(onlineGame.white_time);
-    setBlackTime(onlineGame.black_time);
+    // Only adopt server clock when a NEW move was actually played.
+    if (onlineGame.last_move_at && onlineGame.last_move_at !== lastAdoptedMoveAtRef.current) {
+      lastAdoptedMoveAtRef.current = onlineGame.last_move_at;
+      setWhiteTime(onlineGame.white_time);
+      setBlackTime(onlineGame.black_time);
+    }
   }, [onlineGame]);
 
   // Initial game setup
@@ -515,17 +527,36 @@ const PlayOnline = () => {
 
             {/* Board — same component & sizing used everywhere on the site,
                 so it always picks up the user's chosen piece set + theme. */}
-            <ChessBoard
-              game={game}
-              flipped={boardFlipped}
-              selectedSquare={selectedSquare}
-              legalMoves={legalMoves}
-              lastMove={lastMove}
-              isGameOver={isGameOver}
-              isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
-              hintSquare={null}
-              onSquareClick={handleSquareClick}
-            />
+            <div className="relative">
+              <ChessBoard
+                game={game}
+                flipped={boardFlipped}
+                selectedSquare={selectedSquare}
+                legalMoves={legalMoves}
+                lastMove={lastMove}
+                isGameOver={isGameOver}
+                isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
+                hintSquare={null}
+                onSquareClick={handleSquareClick}
+              />
+              <GameStatusOverlay
+                kind={
+                  onlineStatus === "finished" || timeoutWinner
+                    ? (onlineGame?.result === "1/2-1/2" || game.isDraw() || game.isStalemate() ? "draw" : "checkmate")
+                    : game.isCheckmate() ? "checkmate"
+                    : game.isDraw() || game.isStalemate() ? "draw"
+                    : game.isCheck() ? "check"
+                    : null
+                }
+                subtitle={
+                  timeoutWinner ? `${timeoutWinner} wins on time`
+                  : onlineGame?.result === "1-0" ? "White wins"
+                  : onlineGame?.result === "0-1" ? "Black wins"
+                  : onlineGame?.result === "1/2-1/2" ? "Game drawn"
+                  : undefined
+                }
+              />
+            </div>
 
             {/* Player info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
