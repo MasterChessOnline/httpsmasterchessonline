@@ -79,6 +79,7 @@ const PlayOnline = () => {
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const { toast, dismiss } = useToast();
+  const boardFocusRef = useRef<HTMLDivElement>(null);
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
@@ -151,8 +152,17 @@ const PlayOnline = () => {
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
       setGameStarted(true);
       playChessSound("start");
+      requestAnimationFrame(() => boardFocusRef.current?.scrollIntoView({ block: "center", inline: "center" }));
     }
   }, [onlineStatus]);
+
+  useEffect(() => {
+    if (isGameOver || onlineStatus === "finished") {
+      setDrawOfferedByMe(false);
+      setDrawOfferedByOpponent(false);
+      dismiss();
+    }
+  }, [isGameOver, onlineStatus, dismiss]);
 
   // Chat subscription
   useEffect(() => {
@@ -171,6 +181,7 @@ const PlayOnline = () => {
         // Handle draw offer signaling
         if (msg.user_id !== user?.id) {
           if (msg.message === "__draw_offer__") {
+            if (isGameOver || onlineStatus === "finished") return;
             setDrawOfferedByOpponent(true);
             toast({ title: "Draw offer", description: "Your opponent offers a draw." });
           } else if (msg.message === "__draw_accept__") {
