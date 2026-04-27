@@ -20,6 +20,9 @@ export interface MultiPvLine {
 
 type MessageCallback = (msg: string) => void;
 
+const STOCKFISH_ENGINE_JS = "/engine/stockfish-18-lite-single.js";
+const STOCKFISH_ENGINE_WASM = "/engine/stockfish-18-lite-single.wasm";
+
 class StockfishEngine {
   private worker: Worker | null = null;
   private ready = false;
@@ -32,12 +35,15 @@ class StockfishEngine {
 
     this.initPromise = new Promise<void>((resolve, reject) => {
       try {
-        this.worker = new Worker("/engine/stockfish.js#/engine/stockfish-nnue-16-single.wasm");
+        this.worker = new Worker(`${STOCKFISH_ENGINE_JS}#${STOCKFISH_ENGINE_WASM}`);
 
         const onReady = (e: MessageEvent) => {
           const msg = typeof e.data === "string" ? e.data : "";
           if (msg.includes("uciok")) {
-            this.send("setoption name Use NNUE value true");
+            this.send("setoption name UCI_LimitStrength value false");
+            this.send("setoption name Skill Level value 20");
+            this.send("setoption name Hash value 64");
+            this.send("setoption name Move Overhead value 10");
             this.send("isready");
           }
           if (msg.includes("readyok")) {
@@ -88,6 +94,7 @@ class StockfishEngine {
 
   newGame() {
     this.send("ucinewgame");
+    this.send("setoption name Clear Hash value true");
     this.send("isready");
   }
 
@@ -135,7 +142,7 @@ class StockfishEngine {
     }));
   }
 
-  evaluate(fen: string, depth = 15): Promise<{ evaluation: number; mate: number | null }> {
+  evaluate(fen: string, depth = 12): Promise<{ evaluation: number; mate: number | null }> {
     return this.runExclusive(() => new Promise((resolve) => {
       if (!this.worker || !this.ready) {
         resolve({ evaluation: 0, mate: null });
@@ -144,6 +151,15 @@ class StockfishEngine {
 
       let evaluation = 0;
       let mate: number | null = null;
+      let settled = false;
+
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        this.messageCallbacks = this.messageCallbacks.filter((cb) => cb !== handler);
+        resolve({ evaluation, mate });
+      };
 
       const handler: MessageCallback = (msg) => {
         if (msg.startsWith("info") && msg.includes("score")) {
@@ -154,10 +170,14 @@ class StockfishEngine {
         }
 
         if (msg.startsWith("bestmove")) {
-          this.messageCallbacks = this.messageCallbacks.filter((cb) => cb !== handler);
-          resolve({ evaluation, mate });
+          finish();
         }
       };
+
+      const timeoutId = window.setTimeout(() => {
+        this.send("stop");
+        window.setTimeout(finish, 250);
+      }, Math.max(2500, depth * 900));
 
       this.messageCallbacks.push(handler);
       this.send(`position fen ${fen}`);
