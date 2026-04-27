@@ -53,25 +53,16 @@ export function isBookMove(playedHistorySan: string[]): boolean {
   return OPENINGS.some(o => o.moves.length >= len && o.moves.slice(0, len).every((m, i) => m === playedHistorySan[i]));
 }
 
-const _bookCache = new Map<string, boolean>();
 export async function isDatabaseBookMove(fenBefore: string, san: string, ply: number): Promise<boolean> {
-  if (ply > 16) return false; // most theory ends well before move 16
-  const key = `${fenBefore}|${san}`;
-  if (_bookCache.has(key)) return _bookCache.get(key)!;
+  if (ply > 24) return false;
   try {
     const master = await fetchMasterExplorerData(fenBefore);
     const masterMove = master.moves.find(m => m.san === san);
-    if (masterMove && (masterMove.games >= 2 || masterMove.frequency >= 0.5)) {
-      _bookCache.set(key, true); return true;
-    }
-    // Skip the slower lichess fallback after ply 10 (saves a network round trip per move)
-    if (ply <= 10) {
-      const lichess = await fetchExplorerData(fenBefore);
-      const lichessMove = lichess.moves.find(m => m.san === san);
-      const ok = !!lichessMove && (lichessMove.games >= 50 || lichessMove.frequency >= 1);
-      _bookCache.set(key, ok); return ok;
-    }
-    _bookCache.set(key, false); return false;
+    if (masterMove && (masterMove.games >= 2 || masterMove.frequency >= 0.5)) return true;
+
+    const lichess = await fetchExplorerData(fenBefore);
+    const lichessMove = lichess.moves.find(m => m.san === san);
+    return !!lichessMove && (lichessMove.games >= 50 || lichessMove.frequency >= 1);
   } catch {
     return false;
   }
@@ -135,7 +126,7 @@ export interface ClassifiedGame {
  * plus simple per-side accuracy numbers (0-100).
  */
 export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Promise<ClassifiedGame> {
-  const depth = opts.depth ?? 10; // depth 10 NNUE is strong enough for classification and ~3-4× faster than 12
+  const depth = opts.depth ?? 12;
 
   const game = new Chess();
   game.loadPgn(pgn);
@@ -150,66 +141,61 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
   const sanSoFar: string[] = [];
   const out: ClassifiedMove[] = [];
 
+  // Eval before move 1 = 0 (start position is equal).
   let evalBeforeWhitePov = 0;
+  // First call we do need: get eval at start so first cp loss is meaningful.
+  try {
+    const r0 = await engine.evaluate(replay.fen(), depth);
+    evalBeforeWhitePov = scoreToWhitePov(replay.fen(), r0.evaluation, r0.mate);
+  } catch { /* keep 0 */ }
 
   for (let i = 0; i < history.length; i++) {
     const move = history[i];
     const fenBefore = replay.fen();
     const moverColor = move.color as "w" | "b";
 
-    // Fast path: opening book moves don't need engine analysis at all.
-    const inLocalBook = isBookMove([...sanSoFar, move.san]);
-    const inDbBook = inLocalBook ? true : await isDatabaseBookMove(fenBefore, move.san, i + 1);
+    // Best move at this position (for cpLoss + bestMoveSan).
+    let bestUci = "";
+    let bestEvalAfterWhitePov = evalBeforeWhitePov;
+    try {
+      const best = await engine.getBestMove(fenBefore, undefined, depth);
+      bestUci = best.bestMove;
+      // The "evaluation" returned by getBestMove is from the side-to-move POV
+      // (chess.js / UCI convention). Convert to White POV for consistency.
+      const evalSideToMove = best.mate != null ? (best.mate > 0 ? 10000 : -10000) : (best.evaluation ?? 0);
+      bestEvalAfterWhitePov = moverColor === "w" ? evalSideToMove : -evalSideToMove;
+    } catch { /* fallback below */ }
 
-    // Apply the actual move first.
+    // Apply the actual move.
     replay.move(move.san);
     sanSoFar.push(move.san);
     const fenAfter = replay.fen();
+    const bookMove = isBookMove(sanSoFar) || await isDatabaseBookMove(fenBefore, move.san, i + 1);
 
-    let bestUci = "";
+    // Eval AFTER the played move (from White POV).
     let evalAfterWhitePov = evalBeforeWhitePov;
-    let cpLoss = 0;
+    try {
+      const after = await engine.evaluate(fenAfter, depth);
+      evalAfterWhitePov = scoreToWhitePov(fenAfter, after.evaluation, after.mate);
+    } catch { /* keep previous */ }
 
-    if (inDbBook) {
-      // Skip engine for book moves – huge speed win in opening phase.
-      // Carry previous eval forward; book moves are by definition ~0 cp loss.
-    } else {
-      // Single engine call: Multi-PV gives us best move + best eval AND the
-      // played move's eval (if it's in top lines). Otherwise we evaluate the
-      // resulting position once. Net = max 2 engine calls per move (was 3).
-      try {
-        const lines = await engine.getMultiPV(fenBefore, 2, depth);
-        const top = lines[0];
-        if (top) {
-          bestUci = top.pv[0] ?? "";
-          const bestEvalSideToMove = top.mate != null ? (top.mate > 0 ? 10000 : -10000) : top.eval;
-          const bestEvalAfterWhitePov = moverColor === "w" ? bestEvalSideToMove : -bestEvalSideToMove;
+    // CP loss from the mover's POV.
+    // mover wants their POV eval to be as high as possible. Best move
+    // produces bestEvalAfterWhitePov; played move produces evalAfterWhitePov.
+    const moverPovBest = moverColor === "w" ? bestEvalAfterWhitePov : -bestEvalAfterWhitePov;
+    const moverPovPlayed = moverColor === "w" ? evalAfterWhitePov : -evalAfterWhitePov;
+    const cpLoss = Math.max(0, Math.round(moverPovBest - moverPovPlayed));
 
-          const playedUci = `${move.from}${move.to}${move.promotion ?? ""}`;
-          const playedLine = lines.find(l => l.pv[0] === playedUci);
-          if (playedLine) {
-            const playedEvalSideToMove = playedLine.mate != null ? (playedLine.mate > 0 ? 10000 : -10000) : playedLine.eval;
-            evalAfterWhitePov = moverColor === "w" ? playedEvalSideToMove : -playedEvalSideToMove;
-          } else {
-            // Played move wasn't in top 2 → evaluate the resulting position.
-            const after = await engine.evaluate(fenAfter, depth);
-            evalAfterWhitePov = scoreToWhitePov(fenAfter, after.evaluation, after.mate);
-          }
-
-          const moverPovBest = moverColor === "w" ? bestEvalAfterWhitePov : -bestEvalAfterWhitePov;
-          const moverPovPlayed = moverColor === "w" ? evalAfterWhitePov : -evalAfterWhitePov;
-          cpLoss = Math.max(0, Math.round(moverPovBest - moverPovPlayed));
-        }
-      } catch { /* fallback values */ }
-    }
-
+    // Classify.
     let verdict: Verdict;
-    if (inDbBook) {
+    if (bookMove) {
       verdict = "book";
     } else {
       verdict = classifyByCpLoss(cpLoss);
+      // Brilliant heuristic: sacrificed material AND still played near-best.
       const sacrificed = materialDelta(fenBefore, fenAfter, moverColor);
       const isCapture = /x/.test(move.san);
+      // Real sac: lost ≥ minor piece worth and didn't just trade equally.
       if (sacrificed >= 200 && cpLoss <= 10 && !isCapture && i >= 6) {
         verdict = "brilliant";
       }
@@ -233,11 +219,13 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
     opts.onProgress?.(i + 1, total);
   }
 
+  // Accuracy = simple harmonic-ish formula based on average cp loss per side.
   const cpLossesW = out.filter(m => m.color === "w" && m.verdict !== "book").map(m => m.cpLoss);
   const cpLossesB = out.filter(m => m.color === "b" && m.verdict !== "book").map(m => m.cpLoss);
   const acc = (losses: number[]) => {
     if (losses.length === 0) return 100;
     const avg = losses.reduce((a, b) => a + b, 0) / losses.length;
+    // 0 cp loss → 100, 50 → ~85, 100 → ~70, 200 → ~50, 400+ → <30
     return Math.max(0, Math.min(100, Math.round(100 - Math.sqrt(avg) * 5)));
   };
 
