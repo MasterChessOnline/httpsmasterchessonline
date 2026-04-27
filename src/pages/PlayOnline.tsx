@@ -93,6 +93,15 @@ const PlayOnline = () => {
   const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
   const boardFlipped = myColor === "b";
 
+  // Live opening detection — recomputed on every move from the SAN history.
+  // Cheap, runs against an in-memory table; updates the banner instantly.
+  const detectedOpening = (() => {
+    const sans = moveHistory.length > 0
+      ? moveHistory
+      : (onlineGame?.pgn?.split(/\s+/).filter(t => t && !/^\d+\./.test(t)) ?? []);
+    return detectOpening(sans);
+  })();
+
   const displayFiles = boardFlipped ? [...FILES].reverse() : FILES;
   const displayRanks = boardFlipped ? [...RANKS].reverse() : RANKS;
 
