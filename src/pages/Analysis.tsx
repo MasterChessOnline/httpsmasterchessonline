@@ -405,24 +405,7 @@ export default function Analysis() {
             <div className="px-3 py-2 border-b border-border/20">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-mono font-bold text-foreground">{formatEval(evalCpForBar, evalMateForBar)}</span>
-                {liveCurrentEval.bestMoveSan && !pgnComplete && (
-                  <span className="text-xs text-muted-foreground">Best: <span className="text-foreground font-mono font-semibold">{liveCurrentEval.bestMoveSan}</span></span>
-                )}
               </div>
-              {currentEval && ["blunder", "mistake", "inaccuracy"].includes(currentEval.classification) && (
-                <div className="flex items-center gap-1.5 mt-1 text-xs">
-                  <span className={CLASS_STYLES[currentEval.classification].color}>{CLASS_STYLES[currentEval.classification].label}</span>
-                  <span className="text-muted-foreground">— Best was</span>
-                  <span className="text-foreground font-mono font-semibold">{currentEval.bestMoveSan}</span>
-                </div>
-              )}
-              {/* Alt lines */}
-              {(pgnComplete ? currentEval?.altLines : liveCurrentEval.altLines)?.slice(0, 3).map((line, li) => (
-                <div key={li} className="flex items-center justify-between text-[11px] mt-0.5">
-                  <span className="font-mono text-foreground/70">{line.san}</span>
-                  <span className="font-mono text-muted-foreground">{formatEval(line.eval, line.mate)}</span>
-                </div>
-              ))}
               {/* Depth slider */}
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-[9px] text-muted-foreground">Depth</span>
@@ -443,9 +426,7 @@ export default function Analysis() {
                       const height = Math.abs(50 - y);
                       const isAbove = y < 50;
                       const isActive = activeIdx === i;
-                      const isBad = d.classification === "blunder" || d.classification === "mistake";
                       let fill = "hsl(0, 0%, 45%)";
-                      if (isBad) fill = d.classification === "blunder" ? "hsl(0, 70%, 50%)" : "hsl(30, 80%, 50%)";
                       if (isActive) fill = "hsl(120, 50%, 50%)";
                       return <rect key={i} x={i} y={isAbove ? y : 50} width={0.8} height={Math.max(1, height)} fill={fill} className="cursor-pointer" onClick={() => goFn(i)} rx={0.2} />;
                     })}
@@ -453,23 +434,6 @@ export default function Analysis() {
                   {activeIdx >= 0 && (
                     <div className="absolute top-0 bottom-0 w-0.5 bg-primary/60" style={{ left: `${(activeIdx / graphData.length) * 100}%` }} />
                   )}
-                </div>
-              </div>
-            )}
-
-            {/* Summary bar */}
-            {activeEvals.length > 0 && (
-              <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/20 text-[10px]">
-                <div className="flex gap-2">
-                  <span className="text-sky-300">□ {bookMoves}</span>
-                  <span className="text-emerald-300">! {bestMoves}</span>
-                  <span className="text-yellow-400">?! {inaccuracies}</span>
-                  <span className="text-orange-400">? {mistakes}</span>
-                  <span className="text-red-500">?? {blunders}</span>
-                </div>
-                <div className="flex gap-2 text-muted-foreground">
-                  <span>W: {calcAccuracy(whiteEvals)}%</span>
-                  <span>B: {calcAccuracy(blackEvals)}%</span>
                 </div>
               </div>
             )}
@@ -485,7 +449,6 @@ export default function Analysis() {
               ) : (
                 <div className="grid grid-cols-2 gap-x-1 gap-y-0.5">
                   {activeEvals.map((mv, i) => {
-                    const s = CLASS_STYLES[mv.classification];
                     const isActive = activeIdx === i;
                     const showNum = mv.color === "w";
                     return (
@@ -496,7 +459,6 @@ export default function Analysis() {
                         {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
                         {!showNum && <span className="w-5 shrink-0" />}
                         <span className="font-mono font-medium">{mv.san}</span>
-                        {s.symbol && <span className={`text-[9px] font-bold ${isActive ? "text-white/80" : s.color}`}>{s.symbol}</span>}
                       </button>
                     );
                   })}
