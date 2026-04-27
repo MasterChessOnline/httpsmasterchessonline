@@ -128,15 +128,15 @@ const GameInviteListener = () => {
           }
         }
       )
-      // If the sender cancels (or invite expires) before we act on it,
-      // dismiss the popup so the recipient isn't left looking at a stale
-      // challenge they can no longer accept.
+      // Dismiss the recipient's incoming-challenge toast as soon as the invite
+      // moves out of "pending" — whether the sender cancelled, it expired, OR
+      // the recipient already responded from another device/tab.
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "game_invites", filter: `recipient_id=eq.${user.id}` },
         (payload) => {
           const inv = payload.new as any;
-          if (inv.status === "cancelled" || inv.status === "expired") {
+          if (inv.status !== "pending") {
             const dismiss = activeToastsRef.current.get(inv.id);
             if (dismiss) {
               dismiss();

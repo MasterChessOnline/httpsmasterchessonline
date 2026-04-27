@@ -70,16 +70,16 @@ const Signup = () => {
       return;
     }
 
-    // Seed the new profile with the chosen starting bot rating.
-    // The handle_new_user trigger creates the row with defaults; we bump it.
+    // Seed the new profile with the chosen starting ONLINE rating.
+    // (handle_new_user trigger creates the row with defaults; we bump it.)
     const newUserId = data.user?.id;
     if (newUserId) {
       await new Promise((r) => setTimeout(r, 400));
       await supabase
         .from("profiles")
         .update({
-          bot_rating: startingLevel.rating,
-          bot_peak_rating: startingLevel.rating,
+          rating: startingLevel.rating,
+          peak_rating: startingLevel.rating,
         })
         .eq("user_id", newUserId);
     }
@@ -228,7 +228,7 @@ const Signup = () => {
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
                 Starting Level
-                <span className="ml-1 text-[10px] text-muted-foreground/70">(sets your bot rating)</span>
+                <span className="ml-1 text-[10px] text-muted-foreground/70">(sets your online rating)</span>
               </Label>
               <div className="grid grid-cols-5 gap-1.5">
                 {STARTING_LEVELS.map((lvl) => {

@@ -634,9 +634,10 @@ const PlayOnline = () => {
               </div>
             </div>
 
-            {/* Draw Offer Banner */}
+            {/* Draw Offer — fixed floating chip so the page never shifts when offered.
+                Positioned next to the board (top-right of viewport on desktop, top on mobile). */}
             {drawOfferedByOpponent && !isGameOver && (
-              <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-center space-y-2">
+              <div className="fixed top-20 left-1/2 -translate-x-1/2 sm:left-auto sm:right-4 sm:translate-x-0 z-50 rounded-xl border border-primary/40 bg-card/95 backdrop-blur-md shadow-2xl p-3 w-[min(92vw,320px)] space-y-2 animate-in fade-in slide-in-from-top-2">
                 <p className="text-sm font-medium text-primary">Opponent offers a draw</p>
                 <div className="flex gap-2">
                   <Button size="sm" variant="default" className="flex-1" onClick={acceptDraw}>Accept</Button>
