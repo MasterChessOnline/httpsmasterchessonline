@@ -179,14 +179,14 @@ const Play = () => {
     if (drawCheck.isDraw) {
       setDrawAgreed(true);
       setDrawReason(drawCheck.reason);
-      playChessSound("gameOver");
+      // end melody fired centrally with 1s delay
       if (mode === "ai") showBotMessage(currentBot.taunts.onDraw);
     }
   };
 
   const handleTimeOut = useCallback((color: "w" | "b") => {
     setTimeoutWinner(color === "w" ? "Black" : "White");
-    playChessSound("gameOver");
+    // end melody fired centrally with 1s delay
   }, []);
 
   // Hint — suggests the engine's recommended move (from + to + reasoning)
@@ -262,7 +262,7 @@ const Play = () => {
             updateState();
 
             if (game.isCheckmate()) {
-              playChessSound("gameOver");
+              // end melody fired centrally with 1s delay
               showBotMessage(currentBot.taunts.onWin);
             } else if (game.isCheck()) {
               playChessSound("check");
@@ -353,7 +353,7 @@ const Play = () => {
       updateState();
 
       if (game.isCheckmate()) {
-        playChessSound("gameOver");
+        // end melody fired centrally with 1s delay
         if (mode === "ai") showBotMessage(currentBot.taunts.onLose);
       } else if (game.isCheck()) {
         playChessSound("check");
@@ -447,7 +447,7 @@ const Play = () => {
     } else {
       setResignedBy(game.turn());
     }
-    playChessSound("gameOver");
+    // end melody fired centrally with 1s delay
   };
 
   const handleOfferDraw = () => {
@@ -465,7 +465,7 @@ const Play = () => {
           setDrawAgreed(true);
           setDrawReason("by agreement");
           showBotMessage(currentBot.taunts.onDrawOffer);
-          playChessSound("gameOver");
+          // end melody fired centrally with 1s delay
         } else {
           setDrawDeclined(true);
           showBotMessage(currentBot.taunts.onDrawDecline);
@@ -475,7 +475,7 @@ const Play = () => {
     } else {
       setDrawAgreed(true);
       setDrawReason("by agreement");
-      playChessSound("gameOver");
+      // end melody fired centrally with 1s delay
     }
   };
 
