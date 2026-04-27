@@ -34,7 +34,7 @@ export async function getCachedStockfishEvals(fens: string[], depth: number): Pr
       continue;
     }
 
-    for (const row of (data || []) as CachedStockfishEval[]) {
+    for (const row of (data || []) as unknown as CachedStockfishEval[]) {
       cache.set(row.fen, row);
     }
   }
