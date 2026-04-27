@@ -176,7 +176,7 @@ const PlayOnline = () => {
           } else if (msg.message === "__draw_accept__") {
             // Opponent accepted our offer
             if (drawOfferedByMe) {
-              endGame("1/2-1/2");
+              endGame("1/2-1/2", "agreement");
               playChessSound("gameOver");
             }
           } else if (msg.message === "__draw_decline__") {
@@ -297,7 +297,7 @@ const PlayOnline = () => {
       game_id: onlineGame.id, user_id: user.id, message: "__draw_accept__",
     });
     setDrawOfferedByOpponent(false);
-    endGame("1/2-1/2");
+    endGame("1/2-1/2", "agreement");
     playChessSound("gameOver");
   };
 
