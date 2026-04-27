@@ -444,12 +444,14 @@ export function useOnlineGame() {
   }, [cleanupChannels]);
 
   const makeMove = useCallback(async (
-    fen: string, san: string, from: string, to: string, turn: string, whiteTime: number, blackTime: number
+    fenBefore: string, fen: string, san: string, from: string, to: string, turn: string, whiteTime: number, blackTime: number,
+    promotion?: string, finish?: { result: string; endReason: EndReason }
   ) => {
     if (!game) return;
     const newPgn = game.pgn ? `${game.pgn} ${san}` : san;
     const nowIso = new Date().toISOString();
-    const expectedTurn = game.turn; // turn that must still be on the server
+    const expectedMoveNumber = game.move_number ?? 0;
+    const movingColor = game.turn;
 
     // Optimistic local update so the board never feels laggy. The server echo
     // (realtime + poll) will be deduped by applyServerSnapshot since the
@@ -457,16 +459,24 @@ export function useOnlineGame() {
     setGame(prev => prev ? {
       ...prev,
       fen, pgn: newPgn, turn,
+      move_number: expectedMoveNumber + 1,
       last_move_from: from, last_move_to: to,
       last_move_at: nowIso,
       white_time: whiteTime, black_time: blackTime,
+      status: finish ? "finished" : prev.status,
+      result: finish?.result ?? prev.result,
+      end_reason: finish?.endReason ?? prev.end_reason,
     } : prev);
 
     const updatePayload = {
       fen, pgn: newPgn, turn,
+      move_number: expectedMoveNumber + 1,
       last_move_from: from, last_move_to: to,
       last_move_at: nowIso,
       white_time: whiteTime, black_time: blackTime,
+      status: finish ? "finished" : game.status,
+      result: finish?.result ?? game.result,
+      end_reason: finish?.endReason ?? game.end_reason,
     };
 
     // Fire instant broadcast to opponent BEFORE awaiting DB write so the
@@ -479,21 +489,33 @@ export function useOnlineGame() {
       });
     }
 
-    // Atomic guard: only apply if the server still has the previous turn.
-    // Stops the rare "both clients write to the same turn" race that produced
-    // duplicate moves in the PGN.
-    const { error: updErr } = await supabase
-      .from("online_games")
-      .update(updatePayload)
-      .eq("id", game.id)
-      .eq("turn", expectedTurn);
+    const { data, error: moveErr } = await supabase.rpc("commit_online_move" as any, {
+      p_game_id: game.id,
+      p_expected_move_number: expectedMoveNumber,
+      p_fen_before: fenBefore,
+      p_fen_after: fen,
+      p_san: san,
+      p_pgn_after: newPgn,
+      p_from: from,
+      p_to: to,
+      p_promotion: promotion ?? null,
+      p_color: movingColor,
+      p_turn_after: turn,
+      p_white_time: whiteTime,
+      p_black_time: blackTime,
+      p_result: finish?.result ?? null,
+      p_end_reason: finish?.endReason ?? null,
+    });
 
-    if (updErr) {
-      // Re-fetch authoritative state — caller's local chess.js will be
-      // resynced by the existing FEN-sync effect.
-      const { data } = await supabase
-        .from("online_games").select("*").eq("id", game.id).single();
-      if (data) setGame(data as OnlineGame);
+    const rpcGame = (data as any)?.game as OnlineGame | undefined;
+    if (rpcGame) setGame(rpcGame);
+    if (moveErr || (data as any)?.ok === false) {
+      const fallbackGame = (data as any)?.game as OnlineGame | undefined;
+      if (fallbackGame) setGame(fallbackGame);
+      else {
+        const { data: fresh } = await supabase.from("online_games").select("*").eq("id", game.id).single();
+        if (fresh) setGame(fresh as OnlineGame);
+      }
     }
   }, [game]);
 
