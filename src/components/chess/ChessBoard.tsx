@@ -145,7 +145,7 @@ export default function ChessBoard({
                     className={`aspect-square w-[12.5%] flex items-center justify-center select-none transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset relative overflow-visible
                       ${bgClass}
                       ${isSelected ? "shadow-[inset_0_0_16px_hsl(43_80%_55%/0.3)]" : ""}
-                      ${isLegal || (isPlayerTurn && !isGameOver) ? "cursor-pointer active:scale-95" : "cursor-default"}
+                      ${isLegal || (isPlayerTurn && !isGameOver) || (premoveMode && (piece || isLegal)) ? "cursor-pointer active:scale-95" : "cursor-default"}
                     `}
                     onClick={() => onSquareClick(square)}
                     tabIndex={0}
