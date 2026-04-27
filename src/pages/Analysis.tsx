@@ -316,7 +316,7 @@ export default function Analysis() {
     const engine = getStockfishEngine(); engine.newGame();
     const evals: MoveEval[] = [];
     const evalGame = new Chess();
-    let prevEval = 0;
+    const sanSoFar: string[] = [];
     for (let i = 0; i < history.length; i++) {
       setProgress(Math.round(((i + 1) / history.length) * 100));
       const move = history[i];
@@ -324,24 +324,25 @@ export default function Analysis() {
       const bestResult = await engine.getBestMove(fenBefore, 600, depth);
       const multiLines = await engine.getMultiPV(fenBefore, 3, Math.min(depth, 12));
       evalGame.move(move.san);
+      sanSoFar.push(move.san);
       const fenAfter = evalGame.fen();
       const posEval = await engine.evaluate(fenAfter, depth);
-      const evalCp = posEval.mate !== null ? (posEval.mate > 0 ? 10000 : -10000) : posEval.evaluation;
+      const evalCp = scoreToWhitePov(fenAfter, posEval.evaluation, posEval.mate);
+      const bestEvalCp = scoreToWhitePov(fenBefore, bestResult.evaluation ?? 0, bestResult.mate ?? null);
       const wasWhite = move.color === "w";
-      const prevFromSide = wasWhite ? prevEval : -prevEval;
+      const prevFromSide = wasWhite ? bestEvalCp : -bestEvalCp;
       const currFromSide = wasWhite ? evalCp : -evalCp;
       const evalDrop = prevFromSide - currFromSide;
       const bestMoveSan = bestResult.bestMove ? uciToSan(fenBefore, bestResult.bestMove) : "";
       const altLines = multiLines.slice(0, 3).map(line => ({
-        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: line.eval, mate: line.mate,
+        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: scoreToWhitePov(fenBefore, line.eval, line.mate), mate: line.mate,
       })).filter(l => l.san && l.san !== move.san);
       evals.push({
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
         color: move.color, moveNumber: Math.floor(i / 2) + 1,
         eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "",
-        bestMoveSan, altLines, classification: classifyMove(evalDrop), evalDrop,
+        bestMoveSan, altLines, classification: classifyMove(evalDrop, isBookMove(sanSoFar)), evalDrop,
       });
-      prevEval = evalCp;
     }
     setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
   };
