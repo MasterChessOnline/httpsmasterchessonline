@@ -108,6 +108,7 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
         if (inv.status === "accepted" && inv.game_id) {
           cleanupRef.current?.();
           cleanupRef.current = null;
+          supabase.rpc("dismiss_game_invite" as any, { p_invite_id: inviteId });
           setActiveInviteId(null);
           setWaiting(false);
           onOpenChange(false);
@@ -116,6 +117,7 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
         } else if (inv.status === "declined") {
           cleanupRef.current?.();
           cleanupRef.current = null;
+          supabase.rpc("dismiss_game_invite" as any, { p_invite_id: inviteId });
           setActiveInviteId(null);
           setWaiting(false);
           toast({ title: "Challenge declined", description: `${recipientName} declined your challenge.`, variant: "destructive" });
@@ -134,6 +136,7 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
       if (d?.status === "accepted" && d?.game_id) {
         cleanupRef.current?.();
         cleanupRef.current = null;
+        await supabase.rpc("dismiss_game_invite" as any, { p_invite_id: inviteId });
         setActiveInviteId(null);
         setWaiting(false);
         onOpenChange(false);
@@ -141,6 +144,7 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
       } else if (d?.status === "declined" || d?.status === "expired" || d?.status === "cancelled") {
         cleanupRef.current?.();
         cleanupRef.current = null;
+        await supabase.rpc("dismiss_game_invite" as any, { p_invite_id: inviteId });
         setActiveInviteId(null);
         setWaiting(false);
       }

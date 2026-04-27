@@ -96,6 +96,8 @@ const GameInviteListener = () => {
         action: (
           <div className="flex gap-1.5">
             <Button size="sm" onClick={() => {
+              const dismiss = activeToastsRef.current.get(inviteId);
+              dismiss?.();
               activeToastsRef.current.delete(inviteId);
               acceptInvite(inviteId);
             }}>Accept</Button>
