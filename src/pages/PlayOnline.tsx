@@ -737,9 +737,19 @@ const PlayOnline = () => {
             )}
 
             {isGameOver && (
-              <Button className="w-full" onClick={resetAll}>
-                <RotateCcw className="h-4 w-4 mr-2" /> New Game
-              </Button>
+              <div className="space-y-2">
+                <Button className="w-full" onClick={resetAll}>
+                  <RotateCcw className="h-4 w-4 mr-2" /> New Game
+                </Button>
+                {onlineGame?.id && (
+                  <Button asChild variant="outline" className="w-full border-primary/40 hover:bg-primary/5">
+                    <Link to={`/game-review?game=${onlineGame.id}`}>
+                      <Sparkles className="h-4 w-4 mr-2 text-primary" />
+                      Coach Review &amp; Lessons
+                    </Link>
+                  </Button>
+                )}
+              </div>
             )}
 
             {/* Chat */}
