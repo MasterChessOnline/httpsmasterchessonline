@@ -251,7 +251,7 @@ const PlayOnline = () => {
             // Opponent accepted our offer
             if (drawOfferedByMe) {
               endGame("1/2-1/2", "agreement");
-              playChessSound("gameOver");
+              // end melody fired centrally with 1s delay
             }
           } else if (msg.message === "__draw_decline__") {
             if (drawOfferedByMe) {
