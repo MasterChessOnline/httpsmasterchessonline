@@ -94,6 +94,28 @@ const PlayOnline = () => {
   const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
   const boardFlipped = myColor === "b";
 
+  // End-of-game audio: small 1s delay so the final move is fully shown to both
+  // players before any victory/draw melody plays. The melody is chosen based on
+  // the player's POV (win → victory, lose → soft gameOver, draw → drawMelody).
+  const endSoundFiredRef = useRef(false);
+  const playEndSound = useCallback((result: string) => {
+    if (endSoundFiredRef.current) return;
+    endSoundFiredRef.current = true;
+    setTimeout(() => {
+      if (result === "1/2-1/2") {
+        playChessSound("drawMelody");
+      } else {
+        const winnerColor = result === "1-0" ? "w" : "b";
+        if (winnerColor === myColor) playChessSound("victory");
+        else playChessSound("gameOver");
+      }
+    }, 1000);
+  }, [myColor]);
+  // Reset the latch when a fresh game starts.
+  useEffect(() => {
+    if (onlineStatus === "playing") endSoundFiredRef.current = false;
+  }, [onlineStatus]);
+
   // Live opening detection — recomputed on every move from the SAN history.
   // Cheap, runs against an in-memory table; updates the banner instantly.
   const detectedOpening = (() => {
