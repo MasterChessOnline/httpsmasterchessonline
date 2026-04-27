@@ -1,0 +1,2 @@
+ALTER TABLE public.online_games REPLICA IDENTITY FULL;
+ALTER TABLE public.game_messages REPLICA IDENTITY FULL;
