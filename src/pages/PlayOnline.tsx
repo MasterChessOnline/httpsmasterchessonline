@@ -303,20 +303,20 @@ const PlayOnline = () => {
     let finish: { result: string; endReason: Parameters<typeof endGame>[1] } | undefined;
     if (game.isCheckmate()) {
       finish = { result: game.turn() === "w" ? "0-1" : "1-0", endReason: "checkmate" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isStalemate()) {
       finish = { result: "1/2-1/2", endReason: "stalemate" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isThreefoldRepetition()) {
       finish = { result: "1/2-1/2", endReason: "threefold" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isInsufficientMaterial()) {
       finish = { result: "1/2-1/2", endReason: "insufficient_material" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isDraw()) {
       // Catch-all: most often the 50-move rule when none of the above hit.
       finish = { result: "1/2-1/2", endReason: "fifty_move" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isCheck()) {
       playChessSound("check");
     } else if (move.captured) {
