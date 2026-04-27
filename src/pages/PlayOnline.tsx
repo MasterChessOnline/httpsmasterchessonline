@@ -78,7 +78,7 @@ const PlayOnline = () => {
   const [drawOfferedByMe, setDrawOfferedByMe] = useState(false);
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
 
   const tc = TIME_CONTROLS[timeControlIdx];
   const unlimited = tc.seconds === 0;
@@ -190,7 +190,12 @@ const PlayOnline = () => {
     return () => { supabase.removeChannel(channel); };
   }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe]);
 
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
+  useEffect(() => {
+    if (onlineStatus !== "playing") return;
+    const last = chatMessages[chatMessages.length - 1];
+    if (!last || last.message.startsWith("__")) return;
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [chatMessages, onlineStatus]);
 
   const sendChat = async () => {
     if (!chatInput.trim() || !user || !onlineGame) return;
@@ -208,6 +213,7 @@ const PlayOnline = () => {
   }, [onlineGame, endGame]);
 
   const executeMove = (from: Square, to: Square, promotion: PromotionPiece = "q") => {
+    const fenBefore = game.fen();
     const move = game.move({ from, to, promotion });
     if (!move) return;
     setMoveHistory(prev => [...prev, move.san]);
@@ -220,23 +226,22 @@ const PlayOnline = () => {
       else { bt += inc; setBlackTime(bt); }
     }
 
-    makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
-
+    let finish: { result: string; endReason: Parameters<typeof endGame>[1] } | undefined;
     if (game.isCheckmate()) {
-      endGame(game.turn() === "w" ? "0-1" : "1-0", "checkmate");
+      finish = { result: game.turn() === "w" ? "0-1" : "1-0", endReason: "checkmate" };
       playChessSound("gameOver");
     } else if (game.isStalemate()) {
-      endGame("1/2-1/2", "stalemate");
+      finish = { result: "1/2-1/2", endReason: "stalemate" };
       playChessSound("gameOver");
     } else if (game.isThreefoldRepetition()) {
-      endGame("1/2-1/2", "threefold");
+      finish = { result: "1/2-1/2", endReason: "threefold" };
       playChessSound("gameOver");
     } else if (game.isInsufficientMaterial()) {
-      endGame("1/2-1/2", "insufficient_material");
+      finish = { result: "1/2-1/2", endReason: "insufficient_material" };
       playChessSound("gameOver");
     } else if (game.isDraw()) {
       // Catch-all: most often the 50-move rule when none of the above hit.
-      endGame("1/2-1/2", "fifty_move");
+      finish = { result: "1/2-1/2", endReason: "fifty_move" };
       playChessSound("gameOver");
     } else if (game.isCheck()) {
       playChessSound("check");
@@ -245,6 +250,8 @@ const PlayOnline = () => {
     } else {
       playChessSound("move");
     }
+
+    makeMove(fenBefore, game.fen(), move.san, move.from, move.to, game.turn(), wt, bt, promotion, finish);
   };
 
   const handleSquareClick = (square: Square) => {
