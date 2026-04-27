@@ -432,17 +432,29 @@ export function useOnlineGame() {
       white_time: whiteTime, black_time: blackTime,
     } : prev);
 
+    const updatePayload = {
+      fen, pgn: newPgn, turn,
+      last_move_from: from, last_move_to: to,
+      last_move_at: nowIso,
+      white_time: whiteTime, black_time: blackTime,
+    };
+
+    // Fire instant broadcast to opponent BEFORE awaiting DB write so the
+    // opponent's board updates in ~50-150ms instead of waiting for DB realtime.
+    if (gameChannelRef.current) {
+      gameChannelRef.current.send({
+        type: "broadcast",
+        event: "move",
+        payload: { ...game, ...updatePayload },
+      });
+    }
+
     // Atomic guard: only apply if the server still has the previous turn.
     // Stops the rare "both clients write to the same turn" race that produced
     // duplicate moves in the PGN.
     const { error: updErr } = await supabase
       .from("online_games")
-      .update({
-        fen, pgn: newPgn, turn,
-        last_move_from: from, last_move_to: to,
-        last_move_at: nowIso,
-        white_time: whiteTime, black_time: blackTime,
-      })
+      .update(updatePayload)
       .eq("id", game.id)
       .eq("turn", expectedTurn);
 
