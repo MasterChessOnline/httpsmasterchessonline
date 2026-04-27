@@ -88,7 +88,7 @@ export default function Analysis() {
   const [liveMoveHistory, setLiveMoveHistory] = useState<MoveEval[]>([]);
   const [liveLastMove, setLiveLastMove] = useState<{ from: string; to: string } | null>(null);
   const [liveEvaluating, setLiveEvaluating] = useState(false);
-  const [liveCurrentEval, setLiveCurrentEval] = useState<{ cp: number; mate: number | null; bestMove: string; bestMoveSan: string; altLines: { san: string; eval: number; mate: number | null }[] }>({ cp: 0, mate: null, bestMove: "", bestMoveSan: "", altLines: [] });
+  const [liveCurrentEval, setLiveCurrentEval] = useState<{ cp: number; mate: number | null }>({ cp: 0, mate: null });
   const [liveViewIdx, setLiveViewIdx] = useState(-1);
   const prevEvalRef = useRef(0);
 
@@ -131,28 +131,12 @@ export default function Analysis() {
     setLiveEvaluating(true);
     const engine = getStockfishEngine();
     try {
-      const [bestResult, posEval, multiLines] = await Promise.all([
-        engine.getBestMove(fenBefore, 600, depth),
-        engine.evaluate(fen, depth),
-        engine.getMultiPV(fenBefore, 3, Math.min(depth, 12)),
-      ]);
+      const posEval = await engine.evaluate(fen, depth);
       const evalCp = scoreToWhitePov(fen, posEval.evaluation, posEval.mate);
-      const bestEvalCp = scoreToWhitePov(fenBefore, bestResult.evaluation ?? 0, bestResult.mate ?? null);
-      const bestMoveSan = bestResult.bestMove ? uciToSan(fenBefore, bestResult.bestMove) : "";
-      const altLines = multiLines.slice(0, 3).map(line => ({
-        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: scoreToWhitePov(fenBefore, line.eval, line.mate), mate: line.mate,
-      })).filter(l => l.san);
-      setLiveCurrentEval({ cp: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan, altLines });
-      const wasWhite = color === "w";
-      const prevFromSide = wasWhite ? bestEvalCp : -bestEvalCp;
-      const currFromSide = wasWhite ? evalCp : -evalCp;
-      const evalDrop = prevFromSide - currFromSide;
-      const sanHistory = [...liveMoveHistory.map(m => m.san), moveSan];
-      const bookMove = isBookMove(sanHistory) || await isDatabaseBookMove(fenBefore, moveSan, liveMoveHistory.length + 1);
+      setLiveCurrentEval({ cp: evalCp, mate: posEval.mate });
       const moveEval: MoveEval = {
         san: moveSan, fen, fenBefore, from: moveFrom, to: moveTo, color, moveNumber: moveNum,
-        eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan,
-        altLines, classification: classifyMove(evalDrop, bookMove), evalDrop,
+        eval: evalCp, mate: posEval.mate,
       };
       prevEvalRef.current = evalCp;
       setLiveMoveHistory(prev => [...prev, moveEval]);
@@ -203,7 +187,7 @@ export default function Analysis() {
     const fresh = new Chess();
     setLiveGame(fresh); setLiveFen("start"); setSelectedSquare(null); setLegalMoves([]);
     setLiveMoveHistory([]); setLiveLastMove(null); setLiveEvaluating(false);
-    setLiveCurrentEval({ cp: 0, mate: null, bestMove: "", bestMoveSan: "", altLines: [] });
+    setLiveCurrentEval({ cp: 0, mate: null });
     setLiveViewIdx(-1); prevEvalRef.current = 0;
     setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     setExplorerData(null);
@@ -220,8 +204,8 @@ export default function Analysis() {
     prevEvalRef.current = newHistory.length > 0 ? newHistory[newHistory.length - 1].eval : 0;
     if (newHistory.length > 0) {
       const last = newHistory[newHistory.length - 1];
-      setLiveCurrentEval({ cp: last.eval, mate: last.mate, bestMove: last.bestMove, bestMoveSan: last.bestMoveSan, altLines: last.altLines });
-    } else { setLiveCurrentEval({ cp: 0, mate: null, bestMove: "", bestMoveSan: "", altLines: [] }); }
+      setLiveCurrentEval({ cp: last.eval, mate: last.mate });
+    } else { setLiveCurrentEval({ cp: 0, mate: null }); }
   }, [liveMoveHistory]);
 
   const goToLiveMove = useCallback((idx: number) => {
@@ -288,32 +272,18 @@ export default function Analysis() {
     const engine = getStockfishEngine(); engine.newGame();
     const evals: MoveEval[] = [];
     const evalGame = new Chess();
-    const sanSoFar: string[] = [];
     for (let i = 0; i < history.length; i++) {
       setProgress(Math.round(((i + 1) / history.length) * 100));
       const move = history[i];
       const fenBefore = evalGame.fen();
-      const bestResult = await engine.getBestMove(fenBefore, 600, depth);
-      const multiLines = await engine.getMultiPV(fenBefore, 3, Math.min(depth, 12));
       evalGame.move(move.san);
-      sanSoFar.push(move.san);
       const fenAfter = evalGame.fen();
       const posEval = await engine.evaluate(fenAfter, depth);
       const evalCp = scoreToWhitePov(fenAfter, posEval.evaluation, posEval.mate);
-      const bestEvalCp = scoreToWhitePov(fenBefore, bestResult.evaluation ?? 0, bestResult.mate ?? null);
-      const wasWhite = move.color === "w";
-      const prevFromSide = wasWhite ? bestEvalCp : -bestEvalCp;
-      const currFromSide = wasWhite ? evalCp : -evalCp;
-      const evalDrop = prevFromSide - currFromSide;
-      const bestMoveSan = bestResult.bestMove ? uciToSan(fenBefore, bestResult.bestMove) : "";
-      const altLines = multiLines.slice(0, 3).map(line => ({
-        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: scoreToWhitePov(fenBefore, line.eval, line.mate), mate: line.mate,
-      })).filter(l => l.san && l.san !== move.san);
       evals.push({
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
         color: move.color, moveNumber: Math.floor(i / 2) + 1,
-        eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "",
-        bestMoveSan, altLines, classification: classifyMove(evalDrop, isBookMove(sanSoFar) || await isDatabaseBookMove(fenBefore, move.san, i + 1)), evalDrop,
+        eval: evalCp, mate: posEval.mate,
       });
     }
     setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
@@ -331,13 +301,7 @@ export default function Analysis() {
     let pgn = `[Event "Game Analysis"]\n\n`;
     evals.forEach((mv) => {
       if (mv.color === "w") pgn += `${mv.moveNumber}. `;
-      pgn += mv.san;
-      const s = CLASS_STYLES[mv.classification];
-      if (s.symbol) pgn += s.symbol;
-      if (["blunder", "mistake", "inaccuracy"].includes(mv.classification)) {
-        pgn += ` {${s.label}: best was ${mv.bestMoveSan} (${formatEval(mv.eval, mv.mate)})}`;
-      }
-      pgn += " ";
+      pgn += `${mv.san} `;
     });
     const blob = new Blob([pgn.trim()], { type: "application/x-chess-pgn" });
     const url = URL.createObjectURL(blob);
@@ -352,24 +316,12 @@ export default function Analysis() {
   const evalCpForBar = !pgnComplete ? liveCurrentEval.cp : (currentEval?.eval ?? 0);
   const evalMateForBar = !pgnComplete ? liveCurrentEval.mate : (currentEval?.mate ?? null);
   const evalPercent = evalToBarPct(evalCpForBar, evalMateForBar);
-  const bookMoves = activeEvals.filter(e => e.classification === "book").length;
-  const bestMoves = activeEvals.filter(e => e.classification === "best").length;
-  const blunders = activeEvals.filter(e => e.classification === "blunder").length;
-  const mistakes = activeEvals.filter(e => e.classification === "mistake").length;
-  const inaccuracies = activeEvals.filter(e => e.classification === "inaccuracy").length;
   const lastMoveDisplay = pgnComplete
     ? (pgnCurrentIdx >= 0 ? { from: pgnMoveEvals[pgnCurrentIdx].from, to: pgnMoveEvals[pgnCurrentIdx].to } : null)
     : liveLastMove;
   const boardGame = pgnComplete ? pgnDisplayGame.current : liveGame;
-  const whiteEvals = activeEvals.filter(e => e.color === "w");
-  const blackEvals = activeEvals.filter(e => e.color === "b");
-  const calcAccuracy = (evs: MoveEval[]) => {
-    if (evs.length === 0) return 0;
-    return Math.round((evs.filter(e => ["book", "best", "excellent", "good"].includes(e.classification)).length / evs.length) * 100);
-  };
   const graphData = useMemo(() => activeEvals.map((ev) => ({
     eval: Math.max(-500, Math.min(500, ev.mate !== null ? (ev.mate > 0 ? 500 : -500) : ev.eval)),
-    classification: ev.classification,
   })), [activeEvals]);
   const goFn = pgnComplete ? goToPgnMove : goToLiveMove;
 
