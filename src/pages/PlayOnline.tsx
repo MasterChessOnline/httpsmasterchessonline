@@ -210,9 +210,22 @@ const PlayOnline = () => {
     if (isGameOver) {
       setDrawOfferedByMe(false);
       setDrawOfferedByOpponent(false);
+      setPremove(null);
       dismiss();
     }
   }, [isGameOver, onlineStatus, dismiss]);
+
+  // Centralized end-of-game melody — fires once with a 1s delay so the final
+  // move animates in fully before any winner/draw sound plays.
+  useEffect(() => {
+    if (!isGameOver) return;
+    let result: string | null = null;
+    if (onlineGame?.result) result = onlineGame.result;
+    else if (timeoutWinner) result = timeoutWinner === "White" ? "1-0" : "0-1";
+    else if (game.isCheckmate()) result = game.turn() === "w" ? "0-1" : "1-0";
+    else if (game.isDraw() || game.isStalemate()) result = "1/2-1/2";
+    if (result) playEndSound(result);
+  }, [isGameOver, onlineGame?.result, timeoutWinner, playEndSound, game]);
 
   // Chat subscription
   useEffect(() => {
