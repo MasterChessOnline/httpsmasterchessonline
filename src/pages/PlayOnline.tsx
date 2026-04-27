@@ -81,6 +81,10 @@ const PlayOnline = () => {
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
+  // Mirror premove in a ref so the FEN-sync effect can read the freshest value
+  // without waiting for a re-render. This makes premove execution instant.
+  const premoveRef = useRef<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
+  useEffect(() => { premoveRef.current = premove; }, [premove]);
   const [rematchOfferedByMe, setRematchOfferedByMe] = useState(false);
   const [rematchOfferedByOpponent, setRematchOfferedByOpponent] = useState(false);
   const [rematchInProgress, setRematchInProgress] = useState(false);
@@ -174,6 +178,35 @@ const PlayOnline = () => {
           const moves = onlineGame.pgn?.split(" ").filter(Boolean) || [];
           const lastSan = moves[moves.length - 1] || "";
           playChessSound(lastSan.includes("x") ? "capture" : "move");
+        }
+      }
+
+      // ⚡ PREMOVE EXECUTION — fire IMMEDIATELY after adopting opponent's move.
+      // We use a ref (premoveRef) so we always read the freshest queued move,
+      // and we run inside this same effect to avoid any extra render delay.
+      const queued = premoveRef.current;
+      if (queued && myColor && gameRef.current.turn() === myColor && !gameRef.current.isGameOver()) {
+        try {
+          const legal = gameRef.current.moves({ square: queued.from, verbose: true }) as Array<{ to: Square; flags: string }>;
+          const match = legal.find((m) => m.to === queued.to);
+          if (match) {
+            const needsPromotion = match.flags.includes("p");
+            premoveRef.current = null;
+            setPremove(null);
+            if (needsPromotion && !queued.promotion) {
+              setPendingPromotion({ from: queued.from, to: queued.to });
+            } else {
+              // Defer one tick so React commits the new game state first.
+              setTimeout(() => executeMove(queued.from, queued.to, queued.promotion ?? "q"), 0);
+            }
+          } else {
+            // Illegal in the new position — silently discard.
+            premoveRef.current = null;
+            setPremove(null);
+          }
+        } catch {
+          premoveRef.current = null;
+          setPremove(null);
         }
       }
     }
