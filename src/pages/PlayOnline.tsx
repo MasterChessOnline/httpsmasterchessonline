@@ -526,17 +526,36 @@ const PlayOnline = () => {
 
             {/* Board — same component & sizing used everywhere on the site,
                 so it always picks up the user's chosen piece set + theme. */}
-            <ChessBoard
-              game={game}
-              flipped={boardFlipped}
-              selectedSquare={selectedSquare}
-              legalMoves={legalMoves}
-              lastMove={lastMove}
-              isGameOver={isGameOver}
-              isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
-              hintSquare={null}
-              onSquareClick={handleSquareClick}
-            />
+            <div className="relative">
+              <ChessBoard
+                game={game}
+                flipped={boardFlipped}
+                selectedSquare={selectedSquare}
+                legalMoves={legalMoves}
+                lastMove={lastMove}
+                isGameOver={isGameOver}
+                isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
+                hintSquare={null}
+                onSquareClick={handleSquareClick}
+              />
+              <GameStatusOverlay
+                kind={
+                  onlineStatus === "finished" || timeoutWinner
+                    ? (onlineGame?.result === "1/2-1/2" || game.isDraw() || game.isStalemate() ? "draw" : "checkmate")
+                    : game.isCheckmate() ? "checkmate"
+                    : game.isDraw() || game.isStalemate() ? "draw"
+                    : game.isCheck() ? "check"
+                    : null
+                }
+                subtitle={
+                  timeoutWinner ? `${timeoutWinner} wins on time`
+                  : onlineGame?.result === "1-0" ? "White wins"
+                  : onlineGame?.result === "0-1" ? "Black wins"
+                  : onlineGame?.result === "1/2-1/2" ? "Game drawn"
+                  : undefined
+                }
+              />
+            </div>
 
             {/* Player info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
