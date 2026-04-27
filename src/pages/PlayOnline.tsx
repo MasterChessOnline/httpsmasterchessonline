@@ -917,6 +917,30 @@ const PlayOnline = () => {
 
             {isGameOver && (
               <div className="space-y-2">
+                {/* Rematch — accept incoming offer, or send our own */}
+                {rematchOfferedByOpponent ? (
+                  <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 space-y-2">
+                    <p className="text-xs font-medium text-primary text-center">Opponent wants a rematch</p>
+                    <div className="flex gap-2">
+                      <Button size="sm" className="flex-1" onClick={acceptRematch} disabled={rematchInProgress}>
+                        {rematchInProgress ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Accept Rematch"}
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={declineRematch} disabled={rematchInProgress}>
+                        Decline
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full border-primary/50 hover:bg-primary/10"
+                    onClick={offerRematch}
+                    disabled={rematchOfferedByMe || rematchInProgress}
+                  >
+                    <Swords className="h-4 w-4 mr-2 text-primary" />
+                    {rematchOfferedByMe ? "Rematch offered…" : "Rematch"}
+                  </Button>
+                )}
                 <Button className="w-full" onClick={resetAll}>
                   <RotateCcw className="h-4 w-4 mr-2" /> New Game
                 </Button>
