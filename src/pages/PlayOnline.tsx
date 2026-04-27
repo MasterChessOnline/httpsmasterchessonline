@@ -329,7 +329,43 @@ const PlayOnline = () => {
   };
 
   const handleSquareClick = (square: Square) => {
-    if (isGameOver || game.turn() !== myColor || onlineStatus !== "playing") return;
+    if (isGameOver || onlineStatus !== "playing" || pendingPromotion) return;
+
+    // --- PREMOVE: opponent's turn → set/cancel a queued legal move ---
+    if (myColor && game.turn() !== myColor) {
+      if (premove && premove.from === square) {
+        setPremove(null);
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        return;
+      }
+      if (selectedSquare) {
+        if (legalMoves.includes(square)) {
+          setPremove({ from: selectedSquare, to: square });
+        }
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        return;
+      }
+      const piece = game.get(square);
+      if (piece && piece.color === myColor) {
+        setSelectedSquare(square);
+        // Hypothetical position with our side to move so chess.js gives us
+        // only the actually-legal piece moves (knight L-shapes only, etc.)
+        try {
+          const parts = game.fen().split(" ");
+          parts[1] = myColor;
+          parts[3] = "-";
+          const hypo = new Chess();
+          hypo.load(parts.join(" "));
+          const moves = hypo.moves({ square, verbose: true }) as Array<{ to: Square }>;
+          setLegalMoves(moves.map((m) => m.to));
+        } catch {
+          setLegalMoves([]);
+        }
+      }
+      return;
+    }
 
     if (selectedSquare && legalMoves.includes(square)) {
       // Detect promotion: pawn moving to last rank
@@ -356,6 +392,24 @@ const PlayOnline = () => {
       setLegalMoves([]);
     }
   };
+
+  // Execute a queued premove the moment it becomes our turn — but only if
+  // it's still a legal move in the new position (otherwise silently discard).
+  useEffect(() => {
+    if (!premove || isGameOver || onlineStatus !== "playing") return;
+    if (game.turn() !== myColor) return;
+    const { from, to, promotion } = premove;
+    const legal = game.moves({ square: from, verbose: true }) as Array<{ to: Square; flags: string }>;
+    const match = legal.find((m) => m.to === to);
+    setPremove(null);
+    if (!match) return;
+    const needsPromotion = match.flags.includes("p");
+    if (needsPromotion && !promotion) {
+      setPendingPromotion({ from, to });
+      return;
+    }
+    executeMove(from, to, promotion ?? "q");
+  }, [onlineGame?.fen, premove, myColor, isGameOver, onlineStatus]);
 
   const handlePromotionSelect = (piece: PromotionPiece) => {
     if (!pendingPromotion) return;
