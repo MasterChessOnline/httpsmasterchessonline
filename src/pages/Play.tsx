@@ -102,6 +102,27 @@ const Play = () => {
   const isGameOver = game.isGameOver() || !!timeoutWinner || !!resignedBy || drawAgreed;
   const aiColor = playerColor === "w" ? "b" : "w";
 
+  // End-of-game audio: 1s delay so the final move is fully shown before any
+  // winner/draw melody plays. Uses a calm warm "victory" cadence on a win,
+  // a soft "drawMelody" on a draw, and the existing "gameOver" thump on a loss.
+  const endSoundFiredRef = useRef(false);
+  useEffect(() => {
+    if (!isGameOver) { endSoundFiredRef.current = false; return; }
+    if (endSoundFiredRef.current) return;
+    endSoundFiredRef.current = true;
+    let result: "win" | "loss" | "draw" = "draw";
+    if (drawAgreed || game.isDraw() || game.isStalemate()) result = "draw";
+    else if (resignedBy) result = resignedBy === playerColor ? "loss" : "win";
+    else if (timeoutWinner) result = (timeoutWinner === "White" ? "w" : "b") === playerColor ? "win" : "loss";
+    else if (game.isCheckmate()) {
+      // turn() now belongs to the side that has been mated.
+      result = game.turn() === playerColor ? "loss" : "win";
+    }
+    const sound = result === "win" ? "victory" : result === "draw" ? "drawMelody" : "gameOver";
+    const t = setTimeout(() => playChessSound(sound), 1000);
+    return () => clearTimeout(t);
+  }, [isGameOver, drawAgreed, resignedBy, timeoutWinner, playerColor, game]);
+
   const updateState = () => setFen(game.fen());
 
   // Bot only speaks on blunders & game end
@@ -158,14 +179,14 @@ const Play = () => {
     if (drawCheck.isDraw) {
       setDrawAgreed(true);
       setDrawReason(drawCheck.reason);
-      playChessSound("gameOver");
+      // end melody fired centrally with 1s delay
       if (mode === "ai") showBotMessage(currentBot.taunts.onDraw);
     }
   };
 
   const handleTimeOut = useCallback((color: "w" | "b") => {
     setTimeoutWinner(color === "w" ? "Black" : "White");
-    playChessSound("gameOver");
+    // end melody fired centrally with 1s delay
   }, []);
 
   // Hint — suggests the engine's recommended move (from + to + reasoning)
@@ -241,7 +262,7 @@ const Play = () => {
             updateState();
 
             if (game.isCheckmate()) {
-              playChessSound("gameOver");
+              // end melody fired centrally with 1s delay
               showBotMessage(currentBot.taunts.onWin);
             } else if (game.isCheck()) {
               playChessSound("check");
@@ -332,7 +353,7 @@ const Play = () => {
       updateState();
 
       if (game.isCheckmate()) {
-        playChessSound("gameOver");
+        // end melody fired centrally with 1s delay
         if (mode === "ai") showBotMessage(currentBot.taunts.onLose);
       } else if (game.isCheck()) {
         playChessSound("check");
@@ -426,7 +447,7 @@ const Play = () => {
     } else {
       setResignedBy(game.turn());
     }
-    playChessSound("gameOver");
+    // end melody fired centrally with 1s delay
   };
 
   const handleOfferDraw = () => {
@@ -444,7 +465,7 @@ const Play = () => {
           setDrawAgreed(true);
           setDrawReason("by agreement");
           showBotMessage(currentBot.taunts.onDrawOffer);
-          playChessSound("gameOver");
+          // end melody fired centrally with 1s delay
         } else {
           setDrawDeclined(true);
           showBotMessage(currentBot.taunts.onDrawDecline);
@@ -454,7 +475,7 @@ const Play = () => {
     } else {
       setDrawAgreed(true);
       setDrawReason("by agreement");
-      playChessSound("gameOver");
+      // end melody fired centrally with 1s delay
     }
   };
 

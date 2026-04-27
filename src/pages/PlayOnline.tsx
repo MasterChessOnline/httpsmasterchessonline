@@ -80,6 +80,7 @@ const PlayOnline = () => {
   const [drawOfferedByMe, setDrawOfferedByMe] = useState(false);
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
+  const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
   const { toast, dismiss } = useToast();
   const boardFocusRef = useRef<HTMLDivElement>(null);
 
@@ -92,6 +93,28 @@ const PlayOnline = () => {
   const game = gameRef.current;
   const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
   const boardFlipped = myColor === "b";
+
+  // End-of-game audio: small 1s delay so the final move is fully shown to both
+  // players before any victory/draw melody plays. The melody is chosen based on
+  // the player's POV (win → victory, lose → soft gameOver, draw → drawMelody).
+  const endSoundFiredRef = useRef(false);
+  const playEndSound = useCallback((result: string) => {
+    if (endSoundFiredRef.current) return;
+    endSoundFiredRef.current = true;
+    setTimeout(() => {
+      if (result === "1/2-1/2") {
+        playChessSound("drawMelody");
+      } else {
+        const winnerColor = result === "1-0" ? "w" : "b";
+        if (winnerColor === myColor) playChessSound("victory");
+        else playChessSound("gameOver");
+      }
+    }, 1000);
+  }, [myColor]);
+  // Reset the latch when a fresh game starts.
+  useEffect(() => {
+    if (onlineStatus === "playing") endSoundFiredRef.current = false;
+  }, [onlineStatus]);
 
   // Live opening detection — recomputed on every move from the SAN history.
   // Cheap, runs against an in-memory table; updates the banner instantly.
@@ -134,11 +157,16 @@ const PlayOnline = () => {
       setLegalMoves([]);
       setGameStarted(true);
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
-      // Play sound for opponent's move
+      // Play sound for opponent's move (regular move sounds only — the
+      // end-of-game melody is fired centrally with a 1s delay so the move is
+      // visible to both players first).
       if (prevFen !== "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" && gameRef.current.turn() === myColor) {
         const g = gameRef.current;
-        if (g.isCheckmate() || g.isDraw() || g.isStalemate()) playChessSound("gameOver");
-        else if (g.isCheck()) playChessSound("check");
+        if (g.isCheckmate() || g.isDraw() || g.isStalemate()) {
+          // Soft "move" tick so the last move still has audible feedback;
+          // the victory/draw melody is queued separately by the end-game effect.
+          playChessSound("move");
+        } else if (g.isCheck()) playChessSound("check");
         else {
           const moves = onlineGame.pgn?.split(" ").filter(Boolean) || [];
           const lastSan = moves[moves.length - 1] || "";
@@ -182,9 +210,22 @@ const PlayOnline = () => {
     if (isGameOver) {
       setDrawOfferedByMe(false);
       setDrawOfferedByOpponent(false);
+      setPremove(null);
       dismiss();
     }
   }, [isGameOver, onlineStatus, dismiss]);
+
+  // Centralized end-of-game melody — fires once with a 1s delay so the final
+  // move animates in fully before any winner/draw sound plays.
+  useEffect(() => {
+    if (!isGameOver) return;
+    let result: string | null = null;
+    if (onlineGame?.result) result = onlineGame.result;
+    else if (timeoutWinner) result = timeoutWinner === "White" ? "1-0" : "0-1";
+    else if (game.isCheckmate()) result = game.turn() === "w" ? "0-1" : "1-0";
+    else if (game.isDraw() || game.isStalemate()) result = "1/2-1/2";
+    if (result) playEndSound(result);
+  }, [isGameOver, onlineGame?.result, timeoutWinner, playEndSound, game]);
 
   // Chat subscription
   useEffect(() => {
@@ -210,7 +251,7 @@ const PlayOnline = () => {
             // Opponent accepted our offer
             if (drawOfferedByMe) {
               endGame("1/2-1/2", "agreement");
-              playChessSound("gameOver");
+              // end melody fired centrally with 1s delay
             }
           } else if (msg.message === "__draw_decline__") {
             if (drawOfferedByMe) {
@@ -241,7 +282,7 @@ const PlayOnline = () => {
   const handleTimeOut = useCallback((color: "w" | "b") => {
     const result = color === "w" ? "0-1" : "1-0";
     setTimeoutWinner(color === "w" ? "Black" : "White");
-    playChessSound("gameOver");
+    // end melody fired centrally with 1s delay
     if (onlineGame) endGame(result, "timeout");
   }, [onlineGame, endGame]);
 
@@ -262,20 +303,20 @@ const PlayOnline = () => {
     let finish: { result: string; endReason: Parameters<typeof endGame>[1] } | undefined;
     if (game.isCheckmate()) {
       finish = { result: game.turn() === "w" ? "0-1" : "1-0", endReason: "checkmate" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isStalemate()) {
       finish = { result: "1/2-1/2", endReason: "stalemate" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isThreefoldRepetition()) {
       finish = { result: "1/2-1/2", endReason: "threefold" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isInsufficientMaterial()) {
       finish = { result: "1/2-1/2", endReason: "insufficient_material" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isDraw()) {
       // Catch-all: most often the 50-move rule when none of the above hit.
       finish = { result: "1/2-1/2", endReason: "fifty_move" };
-      playChessSound("gameOver");
+      playChessSound("move");
     } else if (game.isCheck()) {
       playChessSound("check");
     } else if (move.captured) {
@@ -288,7 +329,43 @@ const PlayOnline = () => {
   };
 
   const handleSquareClick = (square: Square) => {
-    if (isGameOver || game.turn() !== myColor || onlineStatus !== "playing") return;
+    if (isGameOver || onlineStatus !== "playing" || pendingPromotion) return;
+
+    // --- PREMOVE: opponent's turn → set/cancel a queued legal move ---
+    if (myColor && game.turn() !== myColor) {
+      if (premove && premove.from === square) {
+        setPremove(null);
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        return;
+      }
+      if (selectedSquare) {
+        if (legalMoves.includes(square)) {
+          setPremove({ from: selectedSquare, to: square });
+        }
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        return;
+      }
+      const piece = game.get(square);
+      if (piece && piece.color === myColor) {
+        setSelectedSquare(square);
+        // Hypothetical position with our side to move so chess.js gives us
+        // only the actually-legal piece moves (knight L-shapes only, etc.)
+        try {
+          const parts = game.fen().split(" ");
+          parts[1] = myColor;
+          parts[3] = "-";
+          const hypo = new Chess();
+          hypo.load(parts.join(" "));
+          const moves = hypo.moves({ square, verbose: true }) as Array<{ to: Square }>;
+          setLegalMoves(moves.map((m) => m.to));
+        } catch {
+          setLegalMoves([]);
+        }
+      }
+      return;
+    }
 
     if (selectedSquare && legalMoves.includes(square)) {
       // Detect promotion: pawn moving to last rank
@@ -316,6 +393,24 @@ const PlayOnline = () => {
     }
   };
 
+  // Execute a queued premove the moment it becomes our turn — but only if
+  // it's still a legal move in the new position (otherwise silently discard).
+  useEffect(() => {
+    if (!premove || isGameOver || onlineStatus !== "playing") return;
+    if (game.turn() !== myColor) return;
+    const { from, to, promotion } = premove;
+    const legal = game.moves({ square: from, verbose: true }) as Array<{ to: Square; flags: string }>;
+    const match = legal.find((m) => m.to === to);
+    setPremove(null);
+    if (!match) return;
+    const needsPromotion = match.flags.includes("p");
+    if (needsPromotion && !promotion) {
+      setPendingPromotion({ from, to });
+      return;
+    }
+    executeMove(from, to, promotion ?? "q");
+  }, [onlineGame?.fen, premove, myColor, isGameOver, onlineStatus]);
+
   const handlePromotionSelect = (piece: PromotionPiece) => {
     if (!pendingPromotion) return;
     executeMove(pendingPromotion.from, pendingPromotion.to, piece);
@@ -338,7 +433,7 @@ const PlayOnline = () => {
     });
     setDrawOfferedByOpponent(false);
     endGame("1/2-1/2", "agreement");
-    playChessSound("gameOver");
+    // end melody fired centrally with 1s delay
   };
 
   const declineDraw = async () => {
@@ -363,6 +458,7 @@ const PlayOnline = () => {
     setOpponentProfile(null);
     setDrawOfferedByMe(false);
     setDrawOfferedByOpponent(false);
+    setPremove(null);
   };
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
@@ -549,6 +645,7 @@ const PlayOnline = () => {
             isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
             hintSquare={null}
             onSquareClick={handleSquareClick}
+            premove={premove}
             className="w-full max-w-[min(94vw,calc(100svh-8rem),620px)] mx-auto"
           />
           {/* Player clock */}
@@ -622,6 +719,7 @@ const PlayOnline = () => {
                 isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
                 hintSquare={null}
                 onSquareClick={handleSquareClick}
+                premove={premove}
                 className="w-full max-w-[min(98vw,calc(100svh-9rem))] mx-auto"
               />
               <GameStatusOverlay

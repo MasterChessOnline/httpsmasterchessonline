@@ -203,6 +203,69 @@ async function play(key: SampleKey, options: PlayOptions = {}) {
   }
 }
 
+// --- Synthesized end-of-game melodies ---------------------------------
+// Short, warm, "wooden" mini-cadences played through the same master bus
+// so they share the EQ + compressor character of the move samples
+// (no arcade beeps, no synth pads — just soft sine bells with a bit of body).
+
+function playToneSequence(notes: Array<{ freq: number; start: number; dur: number; gain?: number }>) {
+  try {
+    const ctx = getCtx();
+    const bus = getBus(ctx);
+    const t0 = ctx.currentTime + 0.02;
+    for (const n of notes) {
+      const start = t0 + n.start;
+      const end = start + n.dur;
+
+      // Fundamental — soft sine bell.
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(n.freq, start);
+
+      // Gentle wooden body — a quieter triangle one octave below.
+      const body = ctx.createOscillator();
+      body.type = "triangle";
+      body.frequency.setValueAtTime(n.freq / 2, start);
+
+      const g = ctx.createGain();
+      const peak = (n.gain ?? 0.18) * activePack.masterGain;
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.exponentialRampToValueAtTime(peak, start + 0.025);
+      g.gain.exponentialRampToValueAtTime(0.0001, end);
+
+      const bodyGain = ctx.createGain();
+      bodyGain.gain.setValueAtTime(0.0001, start);
+      bodyGain.gain.exponentialRampToValueAtTime(peak * 0.45, start + 0.04);
+      bodyGain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+      osc.connect(g); g.connect(bus);
+      body.connect(bodyGain); bodyGain.connect(bus);
+
+      osc.start(start); osc.stop(end + 0.02);
+      body.start(start); body.stop(end + 0.02);
+    }
+  } catch {
+    // never block gameplay on audio
+  }
+}
+
+// Soft rising arpeggio — C major triad, gentle and triumphant, no fanfare.
+export function playVictoryMelody() {
+  playToneSequence([
+    { freq: 523.25, start: 0.00, dur: 0.32, gain: 0.20 }, // C5
+    { freq: 659.25, start: 0.16, dur: 0.32, gain: 0.20 }, // E5
+    { freq: 783.99, start: 0.32, dur: 0.55, gain: 0.22 }, // G5
+  ]);
+}
+
+// Calm two-note resolution for draws — equal, peaceful.
+export function playDrawMelody() {
+  playToneSequence([
+    { freq: 587.33, start: 0.00, dur: 0.40, gain: 0.16 }, // D5
+    { freq: 587.33, start: 0.22, dur: 0.55, gain: 0.16 }, // D5 (echo)
+  ]);
+}
+
 // --- Public API ---------------------------------------------------------
 
 export function playMoveSound() {
@@ -230,7 +293,7 @@ export function preloadChessSounds() {
   (Object.keys(SAMPLE_PATHS) as SampleKey[]).forEach((k) => void loadSample(k));
 }
 
-export type MoveSound = "move" | "capture" | "check" | "gameOver" | "start";
+export type MoveSound = "move" | "capture" | "check" | "gameOver" | "start" | "victory" | "drawMelody";
 
 export function playChessSound(type: MoveSound) {
   switch (type) {
@@ -239,5 +302,7 @@ export function playChessSound(type: MoveSound) {
     case "check": return playCheckSound();
     case "gameOver": return playGameOverSound();
     case "start": return playGameStartSound();
+    case "victory": return playVictoryMelody();
+    case "drawMelody": return playDrawMelody();
   }
 }
