@@ -108,11 +108,28 @@ export default function Analysis() {
     engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
   }, []);
 
-  // If the URL contains ?game=<id>, fetch that game's PGN and auto-analyze it.
-  // Used by the "Analyze" button in Game History to deep-link directly.
+  // Deep-link support:
+  //  • ?game=<id>   → fetch PGN of an online game and auto-analyze it
+  //  • ?pgn=<text>  → load a raw PGN (used by bot/local games where no game row exists)
+  // Both flows switch the bottom tab to "Import PGN" so the user lands directly
+  // on their game in the Learn → Analysis area.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get("game");
+    const pgnParam = params.get("pgn");
+
+    if (pgnParam && pgnParam.trim()) {
+      const pgn = pgnParam;
+      setPgnInput(pgn);
+      setBottomTab("import");
+      const tryRun = () => {
+        if (stockfishReady.current) { void runAnalysisFromText(pgn); }
+        else setTimeout(tryRun, 200);
+      };
+      tryRun();
+      return;
+    }
+
     if (!gameId) return;
     let cancelled = false;
     (async () => {
@@ -126,7 +143,6 @@ export default function Analysis() {
       if (pgn && pgn.trim()) {
         setPgnInput(pgn);
         setBottomTab("import");
-        // Wait until stockfish is ready, then run.
         const tryRun = () => {
           if (stockfishReady.current) { void runAnalysisFromText(pgn); }
           else setTimeout(tryRun, 200);
