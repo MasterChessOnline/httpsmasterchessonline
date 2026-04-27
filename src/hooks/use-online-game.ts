@@ -268,6 +268,9 @@ export function useOnlineGame() {
           .eq("id", requestedId)
           .maybeSingle();
         if (byId && (byId.white_player_id === user.id || byId.black_player_id === user.id)) {
+          // Don't auto-resume a finished game — that would re-show the old
+          // result on the lobby and block the user from starting a new match.
+          if (byId.status === "finished") return;
           eloUpdatedRef.current = false;
           setGame(byId as OnlineGame);
           setStatus(byId.status === "finished" ? "finished" : "playing");
