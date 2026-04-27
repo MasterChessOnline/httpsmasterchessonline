@@ -191,8 +191,9 @@ export function useOnlineGame() {
 
     gameChannelRef.current = channel;
 
-    // Backup poll — slightly slower so it doesn't fight realtime updates
-    // and never reverts a fresher local state.
+    // Backup poll — slower so it doesn't fight realtime updates and never
+    // reverts a fresher local state. The applyServerSnapshot guard above also
+    // discards stale rows, so this is purely a recovery net.
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       const { data } = await supabase
@@ -201,7 +202,7 @@ export function useOnlineGame() {
         .eq("id", gameId)
         .single();
       if (data) applyServerSnapshot(data as OnlineGame);
-    }, 5000);
+    }, 8000);
   }, [applyEloAndLog]);
 
   // Recover active game on mount — prefer ?game=ID from URL if present
