@@ -3,7 +3,7 @@
 // No verdicts, no AI commentary, no "Brilliant" tags — just the engine.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess } from "chess.js";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
@@ -20,7 +20,7 @@ interface Props {
   moves: { san: string }[];
   /** Currently displayed ply (-1 = starting position, 0..moves.length-1 = after that move). */
   currentMove: number;
-  /** Analysis depth per position (default 14 — fast & accurate enough for review). */
+  /** Fast pure Stockfish pass for the eval bar. */
   depth?: number;
 }
 
@@ -39,7 +39,7 @@ function toWhitePov(fen: string, cp: number, mate: number | null): { cp: number;
   return { cp: -cp, mate: mate === null ? null : -mate };
 }
 
-export default function EvalReviewPanel({ moves, currentMove, depth = 14 }: Props) {
+export default function EvalReviewPanel({ moves, currentMove, depth = 10 }: Props) {
   const [evals, setEvals] = useState<(EvalPoint | null)[]>([]);
   const [analysing, setAnalysing] = useState(false);
   const [done, setDone] = useState(0);
@@ -119,30 +119,20 @@ export default function EvalReviewPanel({ moves, currentMove, depth = 14 }: Prop
 
   if (!started) {
     return (
-      <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/80 to-card/80 p-5 space-y-4">
-        <div className="flex items-start gap-3">
-          <div className="rounded-xl bg-primary/15 border border-primary/30 p-2.5">
-            <Sparkles className="h-5 w-5 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-display text-lg font-bold text-foreground">Stockfish Eval</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Pure engine evaluation for every move. No labels, no coaching — just the bar.
-            </p>
-          </div>
-        </div>
+      <div className="rounded-lg border border-border/40 bg-card/80 p-4 space-y-3">
+        <h3 className="font-display text-lg font-bold text-foreground">Stockfish 18</h3>
         <Button onClick={runAnalysis} className="w-full" disabled={moves.length === 0}>
-          <Sparkles className="h-4 w-4 mr-2" /> Run Stockfish
+          Run Stockfish
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-border/40 bg-card/80 p-4 space-y-4">
+    <div className="rounded-lg border border-border/40 bg-card/80 p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-display text-base font-bold text-foreground">Stockfish Eval</h3>
+          <h3 className="font-display text-base font-bold text-foreground">Stockfish 18</h3>
           <p className="text-[11px] text-muted-foreground">
             Move {Math.max(0, currentMove + 1)} of {moves.length}
           </p>
@@ -155,51 +145,21 @@ export default function EvalReviewPanel({ moves, currentMove, depth = 14 }: Prop
         </div>
       </div>
 
-      {/* Vertical eval bar */}
-      <div className="flex items-stretch gap-3 h-[280px]">
-        <div className="w-8 rounded-md overflow-hidden relative flex flex-col border border-border/40">
+      <div className="flex items-stretch justify-center h-[360px]">
+        <div className="w-12 rounded-md overflow-hidden relative flex flex-col border border-border/40 bg-muted/30">
           <motion.div
-            className="bg-[hsl(220,15%,18%)]"
+            className="bg-foreground"
             animate={{ flexBasis: `${100 - evalPercent}%` }}
             transition={{ type: "spring", stiffness: 180, damping: 22 }}
             style={{ flexShrink: 0 }}
           />
           <motion.div
-            className="bg-[hsl(60,10%,90%)]"
+            className="bg-background"
             animate={{ flexBasis: `${evalPercent}%` }}
             transition={{ type: "spring", stiffness: 180, damping: 22 }}
             style={{ flexShrink: 0 }}
           />
-          {/* Midline */}
           <div className="absolute left-0 right-0 top-1/2 h-px bg-primary/40 pointer-events-none" />
-        </div>
-
-        {/* Per-move sparkline */}
-        <div className="flex-1 relative rounded-md border border-border/40 bg-[hsl(220,15%,10%)]/40 overflow-hidden">
-          <div className="absolute inset-0 flex">
-            {evals.map((p, i) => {
-              const pct = !p
-                ? 50
-                : p.mate !== null
-                ? (p.mate > 0 ? 100 : 0)
-                : 50 + 50 * (2 / (1 + Math.exp(-0.4 * (p.cp / 100))) - 1);
-              const isCurrent = i === idx;
-              return (
-                <div key={i} className="flex-1 flex flex-col justify-end relative">
-                  <div
-                    className={`w-full ${isCurrent ? "bg-primary" : "bg-[hsl(60,10%,90%)]/70"}`}
-                    style={{ height: `${pct}%` }}
-                  />
-                  <div
-                    className={`w-full ${isCurrent ? "bg-primary/40" : "bg-[hsl(220,15%,22%)]"}`}
-                    style={{ height: `${100 - pct}%`, position: "absolute", top: 0, left: 0 }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-          {/* Midline */}
-          <div className="absolute left-0 right-0 top-1/2 h-px bg-primary/30 pointer-events-none" />
         </div>
       </div>
 

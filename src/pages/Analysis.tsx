@@ -3,19 +3,15 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
-import { isBookMove, isDatabaseBookMove } from "@/lib/move-classifier";
 import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  Upload, Trash2, Zap, AlertTriangle, CheckCircle2, XCircle, ArrowRight,
-  Download, BarChart3, Settings2, TrendingUp, MousePointerClick, RotateCcw,
-  Play, ChevronDown, History, FileText, Plus, Search, Save, BookOpen,
+  Upload, Trash2, Download, MousePointerClick, RotateCcw,
   Globe, Database, Trophy, FlipVertical
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,34 +20,9 @@ import { motion, AnimatePresence } from "framer-motion";
 interface MoveEval {
   san: string; fen: string; fenBefore: string; from: string; to: string;
   color: "w" | "b"; moveNumber: number; eval: number; mate: number | null;
-  bestMove: string; bestMoveSan: string;
-  altLines: { san: string; eval: number; mate: number | null }[];
-  classification: Classification; evalDrop: number;
 }
-type Classification = "book" | "best" | "excellent" | "good" | "inaccuracy" | "mistake" | "blunder" | "brilliant";
 
 // ── Helpers ──
-function classifyMove(evalDrop: number, isBook = false): Classification {
-  if (isBook) return "book";
-  const abs = Math.max(0, evalDrop);
-  if (abs <= 8) return "best";
-  if (abs <= 25) return "excellent";
-  if (abs <= 60) return "good";
-  if (abs <= 120) return "inaccuracy";
-  if (abs <= 250) return "mistake";
-  return "blunder";
-}
-
-const CLASS_STYLES: Record<Classification, { color: string; bg: string; icon: typeof CheckCircle2; label: string; symbol: string }> = {
-  book:        { color: "text-sky-300",      bg: "bg-sky-500/10",    icon: BookOpen,     label: "Book",       symbol: "□" },
-  best:        { color: "text-emerald-300",  bg: "bg-emerald-500/10",icon: CheckCircle2, label: "Best",       symbol: "!" },
-  excellent:   { color: "text-green-400",    bg: "bg-green-500/10",  icon: CheckCircle2, label: "Excellent",  symbol: "!" },
-  good:        { color: "text-green-300/70", bg: "bg-green-500/5",   icon: CheckCircle2, label: "Good",       symbol: "" },
-  inaccuracy:  { color: "text-yellow-400",   bg: "bg-yellow-500/10", icon: AlertTriangle, label: "Inaccuracy", symbol: "?!" },
-  mistake:     { color: "text-orange-400",   bg: "bg-orange-500/10", icon: XCircle,       label: "Mistake",    symbol: "?" },
-  blunder:     { color: "text-red-500",      bg: "bg-red-500/10",    icon: XCircle,       label: "Blunder",    symbol: "??" },
-  brilliant:   { color: "text-cyan-400",     bg: "bg-cyan-500/10",   icon: Zap,          label: "Brilliant",  symbol: "!!" },
-};
 
 function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): number {
   const raw = mate !== null ? (mate > 0 ? 10000 : -10000) : evaluation;
@@ -117,7 +88,7 @@ export default function Analysis() {
   const [liveMoveHistory, setLiveMoveHistory] = useState<MoveEval[]>([]);
   const [liveLastMove, setLiveLastMove] = useState<{ from: string; to: string } | null>(null);
   const [liveEvaluating, setLiveEvaluating] = useState(false);
-  const [liveCurrentEval, setLiveCurrentEval] = useState<{ cp: number; mate: number | null; bestMove: string; bestMoveSan: string; altLines: { san: string; eval: number; mate: number | null }[] }>({ cp: 0, mate: null, bestMove: "", bestMoveSan: "", altLines: [] });
+  const [liveCurrentEval, setLiveCurrentEval] = useState<{ cp: number; mate: number | null }>({ cp: 0, mate: null });
   const [liveViewIdx, setLiveViewIdx] = useState(-1);
   const prevEvalRef = useRef(0);
 
@@ -160,28 +131,12 @@ export default function Analysis() {
     setLiveEvaluating(true);
     const engine = getStockfishEngine();
     try {
-      const [bestResult, posEval, multiLines] = await Promise.all([
-        engine.getBestMove(fenBefore, 600, depth),
-        engine.evaluate(fen, depth),
-        engine.getMultiPV(fenBefore, 3, Math.min(depth, 12)),
-      ]);
+      const posEval = await engine.evaluate(fen, depth);
       const evalCp = scoreToWhitePov(fen, posEval.evaluation, posEval.mate);
-      const bestEvalCp = scoreToWhitePov(fenBefore, bestResult.evaluation ?? 0, bestResult.mate ?? null);
-      const bestMoveSan = bestResult.bestMove ? uciToSan(fenBefore, bestResult.bestMove) : "";
-      const altLines = multiLines.slice(0, 3).map(line => ({
-        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: scoreToWhitePov(fenBefore, line.eval, line.mate), mate: line.mate,
-      })).filter(l => l.san);
-      setLiveCurrentEval({ cp: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan, altLines });
-      const wasWhite = color === "w";
-      const prevFromSide = wasWhite ? bestEvalCp : -bestEvalCp;
-      const currFromSide = wasWhite ? evalCp : -evalCp;
-      const evalDrop = prevFromSide - currFromSide;
-      const sanHistory = [...liveMoveHistory.map(m => m.san), moveSan];
-      const bookMove = isBookMove(sanHistory) || await isDatabaseBookMove(fenBefore, moveSan, liveMoveHistory.length + 1);
+      setLiveCurrentEval({ cp: evalCp, mate: posEval.mate });
       const moveEval: MoveEval = {
         san: moveSan, fen, fenBefore, from: moveFrom, to: moveTo, color, moveNumber: moveNum,
-        eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "", bestMoveSan,
-        altLines, classification: classifyMove(evalDrop, bookMove), evalDrop,
+        eval: evalCp, mate: posEval.mate,
       };
       prevEvalRef.current = evalCp;
       setLiveMoveHistory(prev => [...prev, moveEval]);
@@ -232,7 +187,7 @@ export default function Analysis() {
     const fresh = new Chess();
     setLiveGame(fresh); setLiveFen("start"); setSelectedSquare(null); setLegalMoves([]);
     setLiveMoveHistory([]); setLiveLastMove(null); setLiveEvaluating(false);
-    setLiveCurrentEval({ cp: 0, mate: null, bestMove: "", bestMoveSan: "", altLines: [] });
+    setLiveCurrentEval({ cp: 0, mate: null });
     setLiveViewIdx(-1); prevEvalRef.current = 0;
     setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     setExplorerData(null);
@@ -249,8 +204,8 @@ export default function Analysis() {
     prevEvalRef.current = newHistory.length > 0 ? newHistory[newHistory.length - 1].eval : 0;
     if (newHistory.length > 0) {
       const last = newHistory[newHistory.length - 1];
-      setLiveCurrentEval({ cp: last.eval, mate: last.mate, bestMove: last.bestMove, bestMoveSan: last.bestMoveSan, altLines: last.altLines });
-    } else { setLiveCurrentEval({ cp: 0, mate: null, bestMove: "", bestMoveSan: "", altLines: [] }); }
+      setLiveCurrentEval({ cp: last.eval, mate: last.mate });
+    } else { setLiveCurrentEval({ cp: 0, mate: null }); }
   }, [liveMoveHistory]);
 
   const goToLiveMove = useCallback((idx: number) => {
@@ -317,32 +272,18 @@ export default function Analysis() {
     const engine = getStockfishEngine(); engine.newGame();
     const evals: MoveEval[] = [];
     const evalGame = new Chess();
-    const sanSoFar: string[] = [];
     for (let i = 0; i < history.length; i++) {
       setProgress(Math.round(((i + 1) / history.length) * 100));
       const move = history[i];
       const fenBefore = evalGame.fen();
-      const bestResult = await engine.getBestMove(fenBefore, 600, depth);
-      const multiLines = await engine.getMultiPV(fenBefore, 3, Math.min(depth, 12));
       evalGame.move(move.san);
-      sanSoFar.push(move.san);
       const fenAfter = evalGame.fen();
       const posEval = await engine.evaluate(fenAfter, depth);
       const evalCp = scoreToWhitePov(fenAfter, posEval.evaluation, posEval.mate);
-      const bestEvalCp = scoreToWhitePov(fenBefore, bestResult.evaluation ?? 0, bestResult.mate ?? null);
-      const wasWhite = move.color === "w";
-      const prevFromSide = wasWhite ? bestEvalCp : -bestEvalCp;
-      const currFromSide = wasWhite ? evalCp : -evalCp;
-      const evalDrop = prevFromSide - currFromSide;
-      const bestMoveSan = bestResult.bestMove ? uciToSan(fenBefore, bestResult.bestMove) : "";
-      const altLines = multiLines.slice(0, 3).map(line => ({
-        san: line.pv[0] ? uciToSan(fenBefore, line.pv[0]) : "", eval: scoreToWhitePov(fenBefore, line.eval, line.mate), mate: line.mate,
-      })).filter(l => l.san && l.san !== move.san);
       evals.push({
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
         color: move.color, moveNumber: Math.floor(i / 2) + 1,
-        eval: evalCp, mate: posEval.mate, bestMove: bestResult.bestMove || "",
-        bestMoveSan, altLines, classification: classifyMove(evalDrop, isBookMove(sanSoFar) || await isDatabaseBookMove(fenBefore, move.san, i + 1)), evalDrop,
+        eval: evalCp, mate: posEval.mate,
       });
     }
     setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
@@ -360,13 +301,7 @@ export default function Analysis() {
     let pgn = `[Event "Game Analysis"]\n\n`;
     evals.forEach((mv) => {
       if (mv.color === "w") pgn += `${mv.moveNumber}. `;
-      pgn += mv.san;
-      const s = CLASS_STYLES[mv.classification];
-      if (s.symbol) pgn += s.symbol;
-      if (["blunder", "mistake", "inaccuracy"].includes(mv.classification)) {
-        pgn += ` {${s.label}: best was ${mv.bestMoveSan} (${formatEval(mv.eval, mv.mate)})}`;
-      }
-      pgn += " ";
+      pgn += `${mv.san} `;
     });
     const blob = new Blob([pgn.trim()], { type: "application/x-chess-pgn" });
     const url = URL.createObjectURL(blob);
@@ -381,24 +316,12 @@ export default function Analysis() {
   const evalCpForBar = !pgnComplete ? liveCurrentEval.cp : (currentEval?.eval ?? 0);
   const evalMateForBar = !pgnComplete ? liveCurrentEval.mate : (currentEval?.mate ?? null);
   const evalPercent = evalToBarPct(evalCpForBar, evalMateForBar);
-  const bookMoves = activeEvals.filter(e => e.classification === "book").length;
-  const bestMoves = activeEvals.filter(e => e.classification === "best").length;
-  const blunders = activeEvals.filter(e => e.classification === "blunder").length;
-  const mistakes = activeEvals.filter(e => e.classification === "mistake").length;
-  const inaccuracies = activeEvals.filter(e => e.classification === "inaccuracy").length;
   const lastMoveDisplay = pgnComplete
     ? (pgnCurrentIdx >= 0 ? { from: pgnMoveEvals[pgnCurrentIdx].from, to: pgnMoveEvals[pgnCurrentIdx].to } : null)
     : liveLastMove;
   const boardGame = pgnComplete ? pgnDisplayGame.current : liveGame;
-  const whiteEvals = activeEvals.filter(e => e.color === "w");
-  const blackEvals = activeEvals.filter(e => e.color === "b");
-  const calcAccuracy = (evs: MoveEval[]) => {
-    if (evs.length === 0) return 0;
-    return Math.round((evs.filter(e => ["book", "best", "excellent", "good"].includes(e.classification)).length / evs.length) * 100);
-  };
   const graphData = useMemo(() => activeEvals.map((ev) => ({
     eval: Math.max(-500, Math.min(500, ev.mate !== null ? (ev.mate > 0 ? 500 : -500) : ev.eval)),
-    classification: ev.classification,
   })), [activeEvals]);
   const goFn = pgnComplete ? goToPgnMove : goToLiveMove;
 
@@ -482,24 +405,7 @@ export default function Analysis() {
             <div className="px-3 py-2 border-b border-border/20">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-mono font-bold text-foreground">{formatEval(evalCpForBar, evalMateForBar)}</span>
-                {liveCurrentEval.bestMoveSan && !pgnComplete && (
-                  <span className="text-xs text-muted-foreground">Best: <span className="text-foreground font-mono font-semibold">{liveCurrentEval.bestMoveSan}</span></span>
-                )}
               </div>
-              {currentEval && ["blunder", "mistake", "inaccuracy"].includes(currentEval.classification) && (
-                <div className="flex items-center gap-1.5 mt-1 text-xs">
-                  <span className={CLASS_STYLES[currentEval.classification].color}>{CLASS_STYLES[currentEval.classification].label}</span>
-                  <span className="text-muted-foreground">— Best was</span>
-                  <span className="text-foreground font-mono font-semibold">{currentEval.bestMoveSan}</span>
-                </div>
-              )}
-              {/* Alt lines */}
-              {(pgnComplete ? currentEval?.altLines : liveCurrentEval.altLines)?.slice(0, 3).map((line, li) => (
-                <div key={li} className="flex items-center justify-between text-[11px] mt-0.5">
-                  <span className="font-mono text-foreground/70">{line.san}</span>
-                  <span className="font-mono text-muted-foreground">{formatEval(line.eval, line.mate)}</span>
-                </div>
-              ))}
               {/* Depth slider */}
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-[9px] text-muted-foreground">Depth</span>
@@ -520,9 +426,7 @@ export default function Analysis() {
                       const height = Math.abs(50 - y);
                       const isAbove = y < 50;
                       const isActive = activeIdx === i;
-                      const isBad = d.classification === "blunder" || d.classification === "mistake";
                       let fill = "hsl(0, 0%, 45%)";
-                      if (isBad) fill = d.classification === "blunder" ? "hsl(0, 70%, 50%)" : "hsl(30, 80%, 50%)";
                       if (isActive) fill = "hsl(120, 50%, 50%)";
                       return <rect key={i} x={i} y={isAbove ? y : 50} width={0.8} height={Math.max(1, height)} fill={fill} className="cursor-pointer" onClick={() => goFn(i)} rx={0.2} />;
                     })}
@@ -530,23 +434,6 @@ export default function Analysis() {
                   {activeIdx >= 0 && (
                     <div className="absolute top-0 bottom-0 w-0.5 bg-primary/60" style={{ left: `${(activeIdx / graphData.length) * 100}%` }} />
                   )}
-                </div>
-              </div>
-            )}
-
-            {/* Summary bar */}
-            {activeEvals.length > 0 && (
-              <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/20 text-[10px]">
-                <div className="flex gap-2">
-                  <span className="text-sky-300">□ {bookMoves}</span>
-                  <span className="text-emerald-300">! {bestMoves}</span>
-                  <span className="text-yellow-400">?! {inaccuracies}</span>
-                  <span className="text-orange-400">? {mistakes}</span>
-                  <span className="text-red-500">?? {blunders}</span>
-                </div>
-                <div className="flex gap-2 text-muted-foreground">
-                  <span>W: {calcAccuracy(whiteEvals)}%</span>
-                  <span>B: {calcAccuracy(blackEvals)}%</span>
                 </div>
               </div>
             )}
@@ -562,7 +449,6 @@ export default function Analysis() {
               ) : (
                 <div className="grid grid-cols-2 gap-x-1 gap-y-0.5">
                   {activeEvals.map((mv, i) => {
-                    const s = CLASS_STYLES[mv.classification];
                     const isActive = activeIdx === i;
                     const showNum = mv.color === "w";
                     return (
@@ -573,7 +459,6 @@ export default function Analysis() {
                         {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
                         {!showNum && <span className="w-5 shrink-0" />}
                         <span className="font-mono font-medium">{mv.san}</span>
-                        {s.symbol && <span className={`text-[9px] font-bold ${isActive ? "text-white/80" : s.color}`}>{s.symbol}</span>}
                       </button>
                     );
                   })}
