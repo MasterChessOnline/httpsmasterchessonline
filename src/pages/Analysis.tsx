@@ -3,6 +3,7 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
+import { getCachedStockfishEvals, saveCachedStockfishEval } from "@/lib/stockfish-eval-cache";
 import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,17 +40,6 @@ function evalToBarPct(cp: number, mate: number | null): number {
   if (mate !== null) return mate > 0 ? 95 : 5;
   const x = cp / 100;
   return Math.max(5, Math.min(95, 50 + 50 * (2 / (1 + Math.exp(-0.4 * x)) - 1)));
-}
-
-function uciToSan(fen: string, uci: string): string {
-  try {
-    const g = new Chess(fen);
-    const from = uci.substring(0, 2) as Square;
-    const to = uci.substring(2, 4) as Square;
-    const promo = uci.length > 4 ? uci[4] as any : undefined;
-    const m = g.move({ from, to, promotion: promo });
-    return m ? m.san : uci;
-  } catch { return uci; }
 }
 
 function formatGames(n: number): string {
