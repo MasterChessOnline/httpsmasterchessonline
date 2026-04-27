@@ -527,6 +527,7 @@ const PlayOnline = () => {
             isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
             hintSquare={null}
             onSquareClick={handleSquareClick}
+            className="w-full max-w-[min(94vw,calc(100svh-8rem),620px)] mx-auto"
           />
           {/* Player clock */}
           {!unlimited && (
@@ -577,7 +578,7 @@ const PlayOnline = () => {
 
             {/* Board — same component & sizing used everywhere on the site,
                 so it always picks up the user's chosen piece set + theme. */}
-            <div className="relative">
+            <div ref={boardFocusRef} className="relative w-full flex justify-center">
               <ChessBoard
                 game={game}
                 flipped={boardFlipped}
@@ -588,6 +589,7 @@ const PlayOnline = () => {
                 isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
                 hintSquare={null}
                 onSquareClick={handleSquareClick}
+                className="w-full max-w-[min(96vw,calc(100svh-10rem),680px)] mx-auto"
               />
               <GameStatusOverlay
                 kind={
