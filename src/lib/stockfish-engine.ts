@@ -31,7 +31,7 @@ class StockfishEngine {
 
     this.initPromise = new Promise<void>((resolve, reject) => {
       try {
-        this.worker = new Worker("/engine/stockfish.js");
+        this.worker = new Worker("/engine/sf-worker.js");
 
         const onReady = (e: MessageEvent) => {
           const msg = typeof e.data === "string" ? e.data : "";
