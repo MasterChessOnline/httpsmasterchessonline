@@ -180,6 +180,7 @@ export function useOnlineGame() {
         if (!eloUpdatedRef.current && incoming.result) {
           eloUpdatedRef.current = true;
           applyEloAndLog({
+            id: incoming.id,
             white_player_id: incoming.white_player_id,
             black_player_id: incoming.black_player_id,
             result: incoming.result,
