@@ -379,7 +379,7 @@ const PlayOnline = () => {
     });
     setDrawOfferedByOpponent(false);
     endGame("1/2-1/2", "agreement");
-    playChessSound("gameOver");
+    // end melody fired centrally with 1s delay
   };
 
   const declineDraw = async () => {
