@@ -1255,6 +1255,39 @@ export type Database = {
         }
         Relationships: []
       }
+      stockfish_eval_cache: {
+        Row: {
+          created_at: string
+          depth: number
+          engine: string
+          evaluation: number
+          fen: string
+          id: string
+          mate: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          depth: number
+          engine?: string
+          evaluation?: number
+          fen: string
+          id?: string
+          mate?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          depth?: number
+          engine?: string
+          evaluation?: number
+          fen?: string
+          id?: string
+          mate?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       story_progress: {
         Row: {
           chapter_key: string
