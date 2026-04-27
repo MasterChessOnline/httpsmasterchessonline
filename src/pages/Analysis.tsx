@@ -581,6 +581,7 @@ export default function Analysis() {
             {/* Tab bar */}
             <div className="flex border-b border-border/20">
               <BottomTabButton active={bottomTab === "explorer"} onClick={() => setBottomTab("explorer")} icon={<Globe className="h-3.5 w-3.5" />} label="Opening Explorer" />
+              <BottomTabButton active={bottomTab === "my-games"} onClick={() => setBottomTab("my-games")} icon={<Swords className="h-3.5 w-3.5" />} label="My Games" />
               <BottomTabButton active={bottomTab === "import"} onClick={() => setBottomTab("import")} icon={<Upload className="h-3.5 w-3.5" />} label="Import PGN" />
             </div>
 
