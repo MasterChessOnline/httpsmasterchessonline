@@ -13,9 +13,11 @@ import { Slider } from "@/components/ui/slider";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Upload, Trash2, Download, MousePointerClick, RotateCcw,
-  Globe, Database, Trophy, FlipVertical
+  Globe, Database, Trophy, FlipVertical, Swords, Calendar
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ── Types ──
 interface MoveEval {
@@ -55,7 +57,10 @@ export default function Analysis() {
   // sidebar is always analysis now
   const [depth, setDepth] = useState(8);
   const [flipped, setFlipped] = useState(false);
-  const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
+  const [bottomTab, setBottomTab] = useState<"explorer" | "import" | "my-games">("explorer");
+  const { user } = useAuth();
+  const [myGames, setMyGames] = useState<Array<{ id: string; pgn: string; result: string | null; created_at: string; time_control_label: string; white_player_id: string; black_player_id: string }>>([]);
+  const [myGamesLoading, setMyGamesLoading] = useState(false);
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
 
@@ -101,6 +106,36 @@ export default function Analysis() {
   useEffect(() => {
     const engine = getStockfishEngine();
     engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
+  }, []);
+
+  // If the URL contains ?game=<id>, fetch that game's PGN and auto-analyze it.
+  // Used by the "Analyze" button in Game History to deep-link directly.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gameId = params.get("game");
+    if (!gameId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("online_games")
+        .select("pgn")
+        .eq("id", gameId)
+        .maybeSingle();
+      if (cancelled) return;
+      const pgn = (data as any)?.pgn as string | undefined;
+      if (pgn && pgn.trim()) {
+        setPgnInput(pgn);
+        setBottomTab("import");
+        // Wait until stockfish is ready, then run.
+        const tryRun = () => {
+          if (stockfishReady.current) { void runAnalysisFromText(pgn); }
+          else setTimeout(tryRun, 200);
+        };
+        tryRun();
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch explorer data when position or db changes
@@ -290,6 +325,81 @@ export default function Analysis() {
     setPgnInput(""); setPgnMoveEvals([]); setPgnComplete(false);
     setPgnCurrentIdx(-1); setError(""); setProgress(0);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
+  };
+
+  // Load this user's finished online games when the My Games tab opens.
+  useEffect(() => {
+    if (bottomTab !== "my-games" || !user) return;
+    setMyGamesLoading(true);
+    supabase
+      .from("online_games")
+      .select("id, pgn, result, created_at, time_control_label, white_player_id, black_player_id")
+      .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
+      .eq("status", "finished")
+      .order("created_at", { ascending: false })
+      .limit(50)
+      .then(({ data }) => {
+        setMyGames((data as any) || []);
+        setMyGamesLoading(false);
+      });
+  }, [bottomTab, user]);
+
+  // Load a saved game's PGN into the import box and immediately run analysis.
+  const loadAndAnalyzeMyGame = (pgn: string) => {
+    if (!pgn || !pgn.trim()) {
+      setError("This game has no recorded moves.");
+      setBottomTab("import");
+      return;
+    }
+    setPgnInput(pgn);
+    setBottomTab("import");
+    // Run on next tick so state has flushed before runAnalysis reads pgnInput.
+    setTimeout(() => { void runAnalysisFromText(pgn); }, 30);
+  };
+
+  // Variant of runAnalysis that takes the PGN text directly (avoids React state lag).
+  const runAnalysisFromText = async (pgnText: string) => {
+    setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
+    pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
+    const parseGame = new Chess();
+    const trimmed = pgnText.trim();
+    if (!trimmed) { setError("Empty game."); return; }
+    try { parseGame.loadPgn(trimmed); } catch {
+      parseGame.reset();
+      const moves = trimmed.replace(/\d+\.\s*/g, "").split(/\s+/).filter(Boolean);
+      for (const m of moves) {
+        try { parseGame.move(m); } catch { setError(`Invalid move: "${m}".`); return; }
+      }
+    }
+    const history = parseGame.history({ verbose: true });
+    if (history.length === 0) { setError("No moves found."); return; }
+    if (!stockfishReady.current) {
+      const engine = getStockfishEngine(); await engine.init(); stockfishReady.current = true;
+    }
+    setAnalyzing(true);
+    const engine = getStockfishEngine(); engine.newGame();
+    const fens: { move: typeof history[number]; fenBefore: string; fenAfter: string }[] = [];
+    const evalGame = new Chess();
+    for (const move of history) {
+      const fenBefore = evalGame.fen();
+      evalGame.move(move.san);
+      fens.push({ move, fenBefore, fenAfter: evalGame.fen() });
+    }
+    const cached = await getCachedStockfishEvals(fens.map(f => f.fenAfter), depth);
+    const evals: MoveEval[] = [];
+    for (let i = 0; i < fens.length; i++) {
+      setProgress(Math.round(((i + 1) / fens.length) * 100));
+      const { move, fenBefore, fenAfter } = fens[i];
+      const posEval = cached.get(fenAfter) ?? await engine.evaluate(fenAfter, depth);
+      if (!cached.has(fenAfter)) void saveCachedStockfishEval(fenAfter, depth, posEval.evaluation, posEval.mate);
+      const evalCp = scoreToWhitePov(fenAfter, posEval.evaluation, posEval.mate);
+      evals.push({
+        san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
+        color: move.color, moveNumber: Math.floor(i / 2) + 1,
+        eval: evalCp, mate: posEval.mate,
+      });
+    }
+    setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
   };
 
   const downloadPGN = () => {
@@ -501,6 +611,7 @@ export default function Analysis() {
             {/* Tab bar */}
             <div className="flex border-b border-border/20">
               <BottomTabButton active={bottomTab === "explorer"} onClick={() => setBottomTab("explorer")} icon={<Globe className="h-3.5 w-3.5" />} label="Opening Explorer" />
+              <BottomTabButton active={bottomTab === "my-games"} onClick={() => setBottomTab("my-games")} icon={<Swords className="h-3.5 w-3.5" />} label="My Games" />
               <BottomTabButton active={bottomTab === "import"} onClick={() => setBottomTab("import")} icon={<Upload className="h-3.5 w-3.5" />} label="Import PGN" />
             </div>
 
@@ -599,6 +710,70 @@ export default function Analysis() {
                       <Database className="h-6 w-6 mb-2 text-primary/30" />
                       <p className="text-sm">No games found for this position</p>
                       <p className="text-[10px] mt-1">Make moves on the board to explore openings</p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* ── MY GAMES ── */}
+              {bottomTab === "my-games" && (
+                <motion.div key="my-games-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4">
+                  {!user ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <Swords className="h-6 w-6 mb-2 text-primary/30" />
+                      <p className="text-sm">Log in to see your games</p>
+                    </div>
+                  ) : myGamesLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-12 rounded bg-muted/30 animate-pulse" />
+                      ))}
+                    </div>
+                  ) : myGames.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <Swords className="h-6 w-6 mb-2 text-primary/30" />
+                      <p className="text-sm">No finished games yet</p>
+                      <p className="text-[10px] mt-1">Play an online game and it will show up here</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
+                      {myGames.map((g) => {
+                        const isWhite = g.white_player_id === user.id;
+                        const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
+                        const drew = g.result === "1/2-1/2";
+                        const date = new Date(g.created_at);
+                        const moveCount = g.pgn ? g.pgn.split(/\d+\./).length - 1 : 0;
+                        const hasMoves = !!g.pgn && g.pgn.trim().length > 0;
+                        return (
+                          <button
+                            key={g.id}
+                            onClick={() => loadAndAnalyzeMyGame(g.pgn)}
+                            disabled={!hasMoves || analyzing}
+                            className="w-full flex items-center justify-between rounded-lg border border-border/30 bg-[hsl(220,18%,20%)] hover:border-primary/40 hover:bg-[hsl(220,18%,24%)] transition-all px-3 py-2 group disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                                won ? "bg-green-500/15 text-green-400"
+                                  : drew ? "bg-muted text-muted-foreground"
+                                  : "bg-red-500/15 text-red-400"
+                              }`}>
+                                {won ? "WIN" : drew ? "DRAW" : "LOSS"}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-medium text-foreground truncate">
+                                  {isWhite ? "White" : "Black"} · {g.time_control_label}
+                                  {moveCount > 0 && <span className="text-muted-foreground"> · {moveCount} moves</span>}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                  <Calendar className="w-2.5 h-2.5" />
+                                  {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </p>
+                              </div>
+                            </div>
+                            <Brain className="h-3.5 w-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </motion.div>

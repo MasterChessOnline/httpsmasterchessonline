@@ -81,6 +81,9 @@ const PlayOnline = () => {
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
+  const [rematchOfferedByMe, setRematchOfferedByMe] = useState(false);
+  const [rematchOfferedByOpponent, setRematchOfferedByOpponent] = useState(false);
+  const [rematchInProgress, setRematchInProgress] = useState(false);
   const { toast, dismiss } = useToast();
   const boardFocusRef = useRef<HTMLDivElement>(null);
 
@@ -227,9 +230,10 @@ const PlayOnline = () => {
     if (result) playEndSound(result);
   }, [isGameOver, onlineGame?.result, timeoutWinner, playEndSound, game]);
 
-  // Chat subscription
+  // Chat subscription — kept active during BOTH `playing` and `finished` states
+  // so post-game rematch signaling works on the game-over screen too.
   useEffect(() => {
-    if (!onlineGame || onlineStatus !== "playing") return;
+    if (!onlineGame || (onlineStatus !== "playing" && onlineStatus !== "finished")) return;
     supabase.from("game_messages").select("*").eq("game_id", onlineGame.id)
       .order("created_at", { ascending: true }).then(({ data }) => {
         if (data) setChatMessages(data as ChatMessage[]);
@@ -241,28 +245,44 @@ const PlayOnline = () => {
       }, (payload) => {
         const msg = payload.new as ChatMessage;
         setChatMessages(prev => [...prev, msg]);
-        // Handle draw offer signaling
+        // Handle draw + rematch signaling
         if (msg.user_id !== user?.id) {
           if (msg.message === "__draw_offer__") {
             if (isGameOver) return;
             setDrawOfferedByOpponent(true);
             toast({ title: "Draw offer", description: "Your opponent offers a draw." });
           } else if (msg.message === "__draw_accept__") {
-            // Opponent accepted our offer
             if (drawOfferedByMe) {
               endGame("1/2-1/2", "agreement");
-              // end melody fired centrally with 1s delay
             }
           } else if (msg.message === "__draw_decline__") {
             if (drawOfferedByMe) {
               setDrawOfferedByMe(false);
               toast({ title: "Draw declined", description: "Your opponent declined the draw." });
             }
+          } else if (msg.message === "__rematch_offer__") {
+            setRematchOfferedByOpponent(true);
+            toast({ title: "Rematch offer", description: "Your opponent wants a rematch." });
+          } else if (msg.message === "__rematch_decline__") {
+            if (rematchOfferedByMe) {
+              setRematchOfferedByMe(false);
+              toast({ title: "Rematch declined", description: "Your opponent declined the rematch." });
+            }
+          } else if (msg.message.startsWith("__rematch_start__:")) {
+            // The accepter created the new game and broadcast its id.
+            const newId = msg.message.split(":")[1];
+            if (newId) {
+              setRematchOfferedByMe(false);
+              setRematchOfferedByOpponent(false);
+              navigate(`/play/online?game=${newId}`, { replace: true });
+              // Force a clean reload so use-online-game picks up the fresh ?game=
+              setTimeout(() => window.location.reload(), 50);
+            }
           }
         }
       }).subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe]);
+  }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe, rematchOfferedByMe, isGameOver, navigate]);
 
   useEffect(() => {
     if (onlineStatus !== "playing") return;
@@ -458,7 +478,68 @@ const PlayOnline = () => {
     setOpponentProfile(null);
     setDrawOfferedByMe(false);
     setDrawOfferedByOpponent(false);
+    setRematchOfferedByMe(false);
+    setRematchOfferedByOpponent(false);
     setPremove(null);
+    // Strip ?game=... from the URL so the recovery effect in use-online-game
+    // doesn't immediately reload the just-finished game on the lobby screen
+    // (which would re-display the old result and block "New Game").
+    if (searchParams.get("game")) {
+      navigate("/play/online", { replace: true });
+    }
+  };
+
+  // ── REMATCH ──
+  // Either player can offer; when the opponent accepts, the accepter creates the
+  // new online_games row (swapping colors so it's fair) and broadcasts its id.
+  const offerRematch = async () => {
+    if (!user || !onlineGame || rematchOfferedByMe) return;
+    setRematchOfferedByMe(true);
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__rematch_offer__",
+    });
+    toast({ title: "Rematch offered", description: "Waiting for opponent…" });
+  };
+
+  const acceptRematch = async () => {
+    if (!user || !onlineGame || !rematchOfferedByOpponent || rematchInProgress) return;
+    setRematchInProgress(true);
+    // Swap colors for fairness
+    const newWhite = onlineGame.black_player_id;
+    const newBlack = onlineGame.white_player_id;
+    const { data: created, error: createErr } = await supabase
+      .from("online_games")
+      .insert({
+        white_player_id: newWhite,
+        black_player_id: newBlack,
+        white_time: tc.seconds || 600,
+        black_time: tc.seconds || 600,
+        time_control_label: onlineGame.time_control_label,
+        increment: onlineGame.increment,
+        is_rated: onlineGame.is_rated ?? true,
+      })
+      .select()
+      .single();
+    if (createErr || !created) {
+      setRematchInProgress(false);
+      toast({ title: "Rematch failed", description: "Could not create the new game.", variant: "destructive" });
+      return;
+    }
+    // Tell the opponent which game id to join
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: `__rematch_start__:${created.id}`,
+    });
+    setRematchOfferedByOpponent(false);
+    navigate(`/play/online?game=${created.id}`, { replace: true });
+    setTimeout(() => window.location.reload(), 50);
+  };
+
+  const declineRematch = async () => {
+    if (!user || !onlineGame || !rematchOfferedByOpponent) return;
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__rematch_decline__",
+    });
+    setRematchOfferedByOpponent(false);
   };
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
@@ -836,6 +917,30 @@ const PlayOnline = () => {
 
             {isGameOver && (
               <div className="space-y-2">
+                {/* Rematch — accept incoming offer, or send our own */}
+                {rematchOfferedByOpponent ? (
+                  <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 space-y-2">
+                    <p className="text-xs font-medium text-primary text-center">Opponent wants a rematch</p>
+                    <div className="flex gap-2">
+                      <Button size="sm" className="flex-1" onClick={acceptRematch} disabled={rematchInProgress}>
+                        {rematchInProgress ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Accept Rematch"}
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={declineRematch} disabled={rematchInProgress}>
+                        Decline
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full border-primary/50 hover:bg-primary/10"
+                    onClick={offerRematch}
+                    disabled={rematchOfferedByMe || rematchInProgress}
+                  >
+                    <Swords className="h-4 w-4 mr-2 text-primary" />
+                    {rematchOfferedByMe ? "Rematch offered…" : "Rematch"}
+                  </Button>
+                )}
                 <Button className="w-full" onClick={resetAll}>
                   <RotateCcw className="h-4 w-4 mr-2" /> New Game
                 </Button>

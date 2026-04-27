@@ -132,9 +132,9 @@ const GameHistory = () => {
                 return (
                   <div
                     key={g.id}
-                    className="flex items-center justify-between rounded-xl border border-border/30 bg-card hover:border-primary/20 transition-all px-4 py-3 group"
+                    className="flex items-center justify-between rounded-xl border border-border/30 bg-card hover:border-primary/20 transition-all px-4 py-3 group gap-2"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <span
                         className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
                           won
@@ -146,7 +146,7 @@ const GameHistory = () => {
                       >
                         {won ? "WIN" : drew ? "DRAW" : "LOSS"}
                       </span>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground">
                           {isWhite ? "White" : "Black"} · {g.time_control_label}
                         </p>
@@ -157,10 +157,15 @@ const GameHistory = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <Badge variant="outline" className="text-[10px]">
                         {g.result || "N/A"}
                       </Badge>
+                      <Link to={`/analysis?game=${g.id}`}>
+                        <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1 text-primary hover:bg-primary/10">
+                          <Eye className="w-3 h-3" /> Analyze
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 );
