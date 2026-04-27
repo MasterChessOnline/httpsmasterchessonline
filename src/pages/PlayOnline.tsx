@@ -227,9 +227,10 @@ const PlayOnline = () => {
     if (result) playEndSound(result);
   }, [isGameOver, onlineGame?.result, timeoutWinner, playEndSound, game]);
 
-  // Chat subscription
+  // Chat subscription — kept active during BOTH `playing` and `finished` states
+  // so post-game rematch signaling works on the game-over screen too.
   useEffect(() => {
-    if (!onlineGame || onlineStatus !== "playing") return;
+    if (!onlineGame || (onlineStatus !== "playing" && onlineStatus !== "finished")) return;
     supabase.from("game_messages").select("*").eq("game_id", onlineGame.id)
       .order("created_at", { ascending: true }).then(({ data }) => {
         if (data) setChatMessages(data as ChatMessage[]);
@@ -241,28 +242,44 @@ const PlayOnline = () => {
       }, (payload) => {
         const msg = payload.new as ChatMessage;
         setChatMessages(prev => [...prev, msg]);
-        // Handle draw offer signaling
+        // Handle draw + rematch signaling
         if (msg.user_id !== user?.id) {
           if (msg.message === "__draw_offer__") {
             if (isGameOver) return;
             setDrawOfferedByOpponent(true);
             toast({ title: "Draw offer", description: "Your opponent offers a draw." });
           } else if (msg.message === "__draw_accept__") {
-            // Opponent accepted our offer
             if (drawOfferedByMe) {
               endGame("1/2-1/2", "agreement");
-              // end melody fired centrally with 1s delay
             }
           } else if (msg.message === "__draw_decline__") {
             if (drawOfferedByMe) {
               setDrawOfferedByMe(false);
               toast({ title: "Draw declined", description: "Your opponent declined the draw." });
             }
+          } else if (msg.message === "__rematch_offer__") {
+            setRematchOfferedByOpponent(true);
+            toast({ title: "Rematch offer", description: "Your opponent wants a rematch." });
+          } else if (msg.message === "__rematch_decline__") {
+            if (rematchOfferedByMe) {
+              setRematchOfferedByMe(false);
+              toast({ title: "Rematch declined", description: "Your opponent declined the rematch." });
+            }
+          } else if (msg.message.startsWith("__rematch_start__:")) {
+            // The accepter created the new game and broadcast its id.
+            const newId = msg.message.split(":")[1];
+            if (newId) {
+              setRematchOfferedByMe(false);
+              setRematchOfferedByOpponent(false);
+              navigate(`/play/online?game=${newId}`, { replace: true });
+              // Force a clean reload so use-online-game picks up the fresh ?game=
+              setTimeout(() => window.location.reload(), 50);
+            }
           }
         }
       }).subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe]);
+  }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe, rematchOfferedByMe, isGameOver, navigate]);
 
   useEffect(() => {
     if (onlineStatus !== "playing") return;
