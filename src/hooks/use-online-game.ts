@@ -450,13 +450,25 @@ export function useOnlineGame() {
     }
   }, [game]);
 
-  const endGame = useCallback(async (result: string) => {
+  // Atomic finalize via RPC: marks finished + sets end_reason + applies Elo exactly once.
+  // Safe to call from BOTH players concurrently — only one mutation actually lands.
+  const endGame = useCallback(async (result: string, endReason: EndReason = "checkmate") => {
     if (!game) return;
-    await supabase.from("online_games").update({ status: "finished", result }).eq("id", game.id);
+    const { data, error: rpcErr } = await supabase.rpc("finalize_online_game" as any, {
+      p_game_id: game.id,
+      p_result: result,
+      p_end_reason: endReason,
+    });
+    if (rpcErr) {
+      console.warn("finalize_online_game failed, falling back to direct update", rpcErr);
+      await supabase.from("online_games").update({ status: "finished", result, end_reason: endReason }).eq("id", game.id);
+    }
 
+    // Mark locally so realtime echo doesn't re-trigger applyEloAndLog.
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
       await applyEloAndLog({
+        id: game.id,
         white_player_id: game.white_player_id,
         black_player_id: game.black_player_id,
         result,
@@ -467,7 +479,7 @@ export function useOnlineGame() {
 
   const resign = useCallback(async () => {
     if (!game || !myColor) return;
-    await endGame(myColor === "w" ? "0-1" : "1-0");
+    await endGame(myColor === "w" ? "0-1" : "1-0", "resignation");
   }, [game, myColor, endGame]);
 
   const reset = useCallback(() => {
