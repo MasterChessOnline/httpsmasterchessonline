@@ -789,7 +789,21 @@ const PlayOnline = () => {
 
             {/* Board — same component & sizing used everywhere on the site,
                 so it always picks up the user's chosen piece set + theme. */}
-            <div ref={boardFocusRef} className="relative w-full flex justify-center">
+            <div
+              ref={boardFocusRef}
+              className="relative w-full flex justify-center"
+              onContextMenu={(e) => {
+                // Right-click anywhere on the board cancels a queued premove
+                // (Chess.com-style). We always preventDefault so the native
+                // context menu never appears over the board.
+                e.preventDefault();
+                if (premove) {
+                  setPremove(null);
+                  setSelectedSquare(null);
+                  setLegalMoves([]);
+                }
+              }}
+            >
               <ChessBoard
                 game={game}
                 flipped={boardFlipped}
@@ -862,6 +876,22 @@ const PlayOnline = () => {
             <div className={`rounded-xl border p-3 text-center text-sm font-medium ${isGameOver ? "border-primary/30 bg-primary/5 text-primary" : "border-border/50 bg-card/80 text-foreground"}`}>
               {statusText}
             </div>
+
+            {/* Premove indicator — shown while a queued premove is pending.
+                Right-click the board (or click the queued from-square) to cancel. */}
+            {premove && !isGameOver && (
+              <div className="rounded-lg border border-blue-500/40 bg-blue-500/10 px-3 py-2 flex items-center justify-between gap-2 animate-in fade-in slide-in-from-top-1">
+                <span className="text-xs font-medium text-blue-400">
+                  ⚡ Premove: <span className="font-mono">{premove.from} → {premove.to}</span>
+                </span>
+                <button
+                  onClick={() => { setPremove(null); setSelectedSquare(null); setLegalMoves([]); }}
+                  className="text-[10px] text-blue-300/80 hover:text-blue-200 underline"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
 
             {/* Move History */}
             <div className="rounded-xl border border-border/50 bg-card/80 p-3 max-h-48 overflow-y-auto">
