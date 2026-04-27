@@ -152,7 +152,18 @@ const PlayOnline = () => {
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
       setGameStarted(true);
       playChessSound("start");
-      requestAnimationFrame(() => boardFocusRef.current?.scrollIntoView({ block: "center", inline: "center" }));
+      // Gently bring the board into view WITHOUT yanking the whole page.
+      // We only scroll if the board is actually off-screen; otherwise we leave
+      // the viewport alone so the page doesn't visibly "jump" when a match starts.
+      requestAnimationFrame(() => {
+        const el = boardFocusRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const fullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+        if (!fullyVisible) {
+          window.scrollTo({ top: Math.max(0, window.scrollY + rect.top - 80), behavior: "smooth" });
+        }
+      });
     }
   }, [onlineStatus]);
 
