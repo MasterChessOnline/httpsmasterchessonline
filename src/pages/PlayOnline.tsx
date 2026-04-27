@@ -580,13 +580,7 @@ const PlayOnline = () => {
                     : game.isCheck() ? "check"
                     : null
                 }
-                subtitle={
-                  timeoutWinner ? `${timeoutWinner} wins on time`
-                  : onlineGame?.result === "1-0" ? "White wins"
-                  : onlineGame?.result === "0-1" ? "Black wins"
-                  : onlineGame?.result === "1/2-1/2" ? "Game drawn"
-                  : undefined
-                }
+                subtitle={isGameOver ? statusText : undefined}
               />
             </div>
 
