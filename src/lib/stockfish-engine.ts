@@ -25,23 +25,33 @@ class StockfishEngine {
   private ready = false;
   private messageCallbacks: MessageCallback[] = [];
   private initPromise: Promise<void> | null = null;
+  private taskQueue: Promise<void> = Promise.resolve();
 
   async init(): Promise<void> {
     if (this.initPromise) return this.initPromise;
 
     this.initPromise = new Promise<void>((resolve, reject) => {
       try {
-        this.worker = new Worker("/engine/sf-worker.js");
+        this.worker = new Worker("/engine/stockfish.js#/engine/stockfish-nnue-16-single.wasm");
 
         const onReady = (e: MessageEvent) => {
           const msg = typeof e.data === "string" ? e.data : "";
           if (msg.includes("uciok")) {
+            this.send("setoption name Use NNUE value true");
+            this.send("isready");
+          }
+          if (msg.includes("readyok")) {
+            this.worker?.removeEventListener("message", onReady);
             this.ready = true;
             resolve();
           }
         };
 
         this.worker.addEventListener("message", onReady);
+        this.worker.addEventListener("error", (err) => {
+          this.initPromise = null;
+          reject(err);
+        }, { once: true });
         this.worker.addEventListener("message", (e) => {
           const msg = typeof e.data === "string" ? e.data : "";
           for (const cb of this.messageCallbacks) cb(msg);
@@ -61,6 +71,12 @@ class StockfishEngine {
     this.worker?.postMessage(cmd);
   }
 
+  private runExclusive<T>(task: () => Promise<T>): Promise<T> {
+    const run = this.taskQueue.then(task, task);
+    this.taskQueue = run.then(() => undefined, () => undefined);
+    return run;
+  }
+
   setSkillLevel(level: number) {
     const clamped = Math.max(0, Math.min(20, level));
     this.send(`setoption name Skill Level value ${clamped}`);
@@ -76,7 +92,7 @@ class StockfishEngine {
   }
 
   getBestMove(fen: string, moveTimeMs = 1000, depth?: number): Promise<StockfishResult> {
-    return new Promise((resolve) => {
+    return this.runExclusive(() => new Promise((resolve) => {
       if (!this.worker || !this.ready) {
         resolve({ bestMove: "" });
         return;
@@ -116,11 +132,11 @@ class StockfishEngine {
       } else {
         this.send(`go movetime ${moveTimeMs}`);
       }
-    });
+    }));
   }
 
   evaluate(fen: string, depth = 15): Promise<{ evaluation: number; mate: number | null }> {
-    return new Promise((resolve) => {
+    return this.runExclusive(() => new Promise((resolve) => {
       if (!this.worker || !this.ready) {
         resolve({ evaluation: 0, mate: null });
         return;
@@ -146,12 +162,12 @@ class StockfishEngine {
       this.messageCallbacks.push(handler);
       this.send(`position fen ${fen}`);
       this.send(`go depth ${depth}`);
-    });
+    }));
   }
 
   /** Get top N lines (Multi-PV) for a position. */
   getMultiPV(fen: string, numLines: number, depth: number): Promise<MultiPvLine[]> {
-    return new Promise((resolve) => {
+    return this.runExclusive(() => new Promise((resolve) => {
       if (!this.worker || !this.ready) {
         resolve([]);
         return;
@@ -185,17 +201,14 @@ class StockfishEngine {
           this.messageCallbacks = this.messageCallbacks.filter((cb) => cb !== handler);
           // Reset MultiPV to 1
           this.setMultiPV(1);
-          resolve(Array.from(lines.values()).sort((a, b) => {
-            // Sort by PV index (already keyed)
-            return 0;
-          }));
+          resolve(Array.from(lines.entries()).sort(([a], [b]) => a - b).map(([, line]) => line));
         }
       };
 
       this.messageCallbacks.push(handler);
       this.send(`position fen ${fen}`);
       this.send(`go depth ${depth}`);
-    });
+    }));
   }
 
   destroy() {
@@ -203,6 +216,7 @@ class StockfishEngine {
     this.worker = null;
     this.ready = false;
     this.initPromise = null;
+    this.taskQueue = Promise.resolve();
     this.messageCallbacks = [];
   }
 }
