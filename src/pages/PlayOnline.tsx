@@ -204,7 +204,7 @@ const PlayOnline = () => {
     const result = color === "w" ? "0-1" : "1-0";
     setTimeoutWinner(color === "w" ? "Black" : "White");
     playChessSound("gameOver");
-    if (onlineGame) endGame(result);
+    if (onlineGame) endGame(result, "timeout");
   }, [onlineGame, endGame]);
 
   const executeMove = (from: Square, to: Square, promotion: PromotionPiece = "q") => {
