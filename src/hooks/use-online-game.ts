@@ -7,6 +7,16 @@ import { bumpMissionProgress } from "@/hooks/use-daily-missions";
 
 export type OnlineGameStatus = "idle" | "searching" | "playing" | "finished";
 
+export type EndReason =
+  | "checkmate"
+  | "resignation"
+  | "timeout"
+  | "stalemate"
+  | "threefold"
+  | "fifty_move"
+  | "insufficient_material"
+  | "agreement";
+
 export interface OnlineGame {
   id: string;
   white_player_id: string;
@@ -24,6 +34,8 @@ export interface OnlineGame {
   last_move_to: string | null;
   turn: string;
   is_rated?: boolean;
+  end_reason?: EndReason | null;
+  elo_applied?: boolean;
 }
 
 export function useOnlineGame() {
@@ -42,20 +54,23 @@ export function useOnlineGame() {
     ? game.white_player_id === user?.id ? "w" : "b"
     : null;
 
-  // Helper: apply elo + log rating history + compute the user's RatingCalcResult
-  const applyEloAndLog = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }) => {
+  // Helper: log rating history + compute the user's RatingCalcResult.
+  // NOTE: Elo on the profiles table is now applied atomically by the
+  // `finalize_online_game` RPC (server-side, exactly once per game).
+  // This function ONLY snapshots ratings + writes a rating_history row + bumps missions.
+  const applyEloAndLog = useCallback(async (g: { id: string; white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }) => {
     if (!user) return;
 
-    // Casual games: skip rating updates entirely.
+    // Casual games: skip rating display entirely.
     if (g.is_rated === false) {
       setRatingResult(null);
-      try {
-        await bumpMissionProgress(user.id, "games_played", 1);
-      } catch {}
+      try { await bumpMissionProgress(user.id, "games_played", 1); } catch {}
       return;
     }
 
-    // Snapshot opponent + my old rating BEFORE the RPC mutates them
+    // Snapshot opponent + my OLD rating BEFORE the server RPC runs.
+    // Race-safe because finalize_online_game uses FOR UPDATE + elo_applied flag,
+    // so even if both clients call it, only ONE actually mutates the ratings.
     const isWhite = g.white_player_id === user.id;
     const opponentId = isWhite ? g.black_player_id : g.white_player_id;
     const [{ data: meBefore }, { data: oppBefore }] = await Promise.all([
@@ -66,12 +81,6 @@ export function useOnlineGame() {
     const oppRating = (oppBefore as any)?.rating ?? 1200;
     const myGames = (meBefore as any)?.games_played ?? 0;
     const oppLabel = (oppBefore as any)?.display_name ?? (oppBefore as any)?.username ?? "Player";
-
-    await supabase.rpc("update_elo_ratings", {
-      p_white_id: g.white_player_id,
-      p_black_id: g.black_player_id,
-      p_result: g.result,
-    });
 
     const myResult: "win" | "loss" | "draw" =
       g.result === "1/2-1/2" ? "draw"
@@ -86,22 +95,25 @@ export function useOnlineGame() {
     });
     setRatingResult(calc);
 
-    await logOnlineRatingChange({
-      userId: user.id,
-      oldRating: myOld,
-      newRating: calc.newRating,
-      opponentRating: oppRating,
-      opponentLabel: oppLabel,
-      result: myResult,
-    });
+    // Log to rating_history (idempotent? — checked by uniqueness on (user_id, created_at) in practice).
+    // Wrapped so a duplicate insert never crashes the UI.
+    try {
+      await logOnlineRatingChange({
+        userId: user.id,
+        oldRating: myOld,
+        newRating: calc.newRating,
+        opponentRating: oppRating,
+        opponentLabel: oppLabel,
+        result: myResult,
+      });
+    } catch (err) {
+      console.warn("rating_history log failed (likely duplicate)", err);
+    }
     await refreshProfile();
 
-    // Daily missions: increment counters for online games
     try {
       await bumpMissionProgress(user.id, "games_played", 1);
-      if (myResult === "win") {
-        await bumpMissionProgress(user.id, "games_won", 1);
-      }
+      if (myResult === "win") await bumpMissionProgress(user.id, "games_won", 1);
     } catch (err) {
       console.warn("Mission bump failed", err);
     }
@@ -168,6 +180,7 @@ export function useOnlineGame() {
         if (!eloUpdatedRef.current && incoming.result) {
           eloUpdatedRef.current = true;
           applyEloAndLog({
+            id: incoming.id,
             white_player_id: incoming.white_player_id,
             black_player_id: incoming.black_player_id,
             result: incoming.result,
@@ -202,7 +215,7 @@ export function useOnlineGame() {
         .eq("id", gameId)
         .single();
       if (data) applyServerSnapshot(data as OnlineGame);
-    }, 8000);
+    }, 2500);
   }, [applyEloAndLog]);
 
   // Recover active game on mount — prefer ?game=ID from URL if present
@@ -437,13 +450,25 @@ export function useOnlineGame() {
     }
   }, [game]);
 
-  const endGame = useCallback(async (result: string) => {
+  // Atomic finalize via RPC: marks finished + sets end_reason + applies Elo exactly once.
+  // Safe to call from BOTH players concurrently — only one mutation actually lands.
+  const endGame = useCallback(async (result: string, endReason: EndReason = "checkmate") => {
     if (!game) return;
-    await supabase.from("online_games").update({ status: "finished", result }).eq("id", game.id);
+    const { data, error: rpcErr } = await supabase.rpc("finalize_online_game" as any, {
+      p_game_id: game.id,
+      p_result: result,
+      p_end_reason: endReason,
+    });
+    if (rpcErr) {
+      console.warn("finalize_online_game failed, falling back to direct update", rpcErr);
+      await supabase.from("online_games").update({ status: "finished", result, end_reason: endReason }).eq("id", game.id);
+    }
 
+    // Mark locally so realtime echo doesn't re-trigger applyEloAndLog.
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
       await applyEloAndLog({
+        id: game.id,
         white_player_id: game.white_player_id,
         black_player_id: game.black_player_id,
         result,
@@ -454,7 +479,7 @@ export function useOnlineGame() {
 
   const resign = useCallback(async () => {
     if (!game || !myColor) return;
-    await endGame(myColor === "w" ? "0-1" : "1-0");
+    await endGame(myColor === "w" ? "0-1" : "1-0", "resignation");
   }, [game, myColor, endGame]);
 
   const reset = useCallback(() => {

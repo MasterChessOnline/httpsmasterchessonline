@@ -176,7 +176,7 @@ const PlayOnline = () => {
           } else if (msg.message === "__draw_accept__") {
             // Opponent accepted our offer
             if (drawOfferedByMe) {
-              endGame("1/2-1/2");
+              endGame("1/2-1/2", "agreement");
               playChessSound("gameOver");
             }
           } else if (msg.message === "__draw_decline__") {
@@ -204,7 +204,7 @@ const PlayOnline = () => {
     const result = color === "w" ? "0-1" : "1-0";
     setTimeoutWinner(color === "w" ? "Black" : "White");
     playChessSound("gameOver");
-    if (onlineGame) endGame(result);
+    if (onlineGame) endGame(result, "timeout");
   }, [onlineGame, endGame]);
 
   const executeMove = (from: Square, to: Square, promotion: PromotionPiece = "q") => {
@@ -223,10 +223,20 @@ const PlayOnline = () => {
     makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
 
     if (game.isCheckmate()) {
-      endGame(game.turn() === "w" ? "0-1" : "1-0");
+      endGame(game.turn() === "w" ? "0-1" : "1-0", "checkmate");
       playChessSound("gameOver");
-    } else if (game.isDraw() || game.isStalemate()) {
-      endGame("1/2-1/2");
+    } else if (game.isStalemate()) {
+      endGame("1/2-1/2", "stalemate");
+      playChessSound("gameOver");
+    } else if (game.isThreefoldRepetition()) {
+      endGame("1/2-1/2", "threefold");
+      playChessSound("gameOver");
+    } else if (game.isInsufficientMaterial()) {
+      endGame("1/2-1/2", "insufficient_material");
+      playChessSound("gameOver");
+    } else if (game.isDraw()) {
+      // Catch-all: most often the 50-move rule when none of the above hit.
+      endGame("1/2-1/2", "fifty_move");
       playChessSound("gameOver");
     } else if (game.isCheck()) {
       playChessSound("check");
@@ -287,7 +297,7 @@ const PlayOnline = () => {
       game_id: onlineGame.id, user_id: user.id, message: "__draw_accept__",
     });
     setDrawOfferedByOpponent(false);
-    endGame("1/2-1/2");
+    endGame("1/2-1/2", "agreement");
     playChessSound("gameOver");
   };
 
@@ -319,11 +329,33 @@ const PlayOnline = () => {
   const lastMove = onlineGame?.last_move_from && onlineGame?.last_move_to
     ? { from: onlineGame.last_move_from, to: onlineGame.last_move_to } : null;
 
+  // Detailed end-of-game label.
+  // Honors end_reason from the server (resignation/timeout/agreement/etc) so the
+  // banner says exactly WHY the game ended, not just who won.
+  const winnerWord = onlineGame?.result === "1-0" ? "White" : onlineGame?.result === "0-1" ? "Black" : null;
+  const endReason = (onlineGame as any)?.end_reason as string | undefined;
+  const endReasonLabel: Record<string, string> = {
+    checkmate: "by checkmate",
+    resignation: "by resignation",
+    timeout: "on time",
+    stalemate: "by stalemate",
+    threefold: "by threefold repetition",
+    fifty_move: "by fifty-move rule",
+    insufficient_material: "by insufficient material",
+    agreement: "by agreement",
+  };
+  const endReasonText = endReason ? endReasonLabel[endReason] ?? "" : "";
+
   const statusText = onlineGame?.status === "finished"
-    ? onlineGame.result === "1-0" ? "White wins!" : onlineGame.result === "0-1" ? "Black wins!" : "Draw!"
+    ? onlineGame.result === "1/2-1/2"
+      ? `Draw ${endReasonText}`.trim()
+      : `${winnerWord} wins ${endReasonText}`.trim()
     : timeoutWinner ? `${timeoutWinner} wins on time!`
     : game.isCheckmate() ? `Checkmate! ${game.turn() === "w" ? "Black" : "White"} wins!`
-    : game.isDraw() ? "Draw!" : game.isStalemate() ? "Stalemate!"
+    : game.isStalemate() ? "Stalemate"
+    : game.isThreefoldRepetition() ? "Draw by threefold repetition"
+    : game.isInsufficientMaterial() ? "Draw by insufficient material"
+    : game.isDraw() ? "Draw by fifty-move rule"
     : game.isCheck() ? `${game.turn() === "w" ? "White" : "Black"} is in check!`
     : onlineStatus === "playing" && game.turn() === myColor ? "Your turn"
     : onlineStatus === "playing" ? "Opponent's turn" : "";
@@ -506,7 +538,7 @@ const PlayOnline = () => {
           <div className="hidden lg:block" aria-hidden="true" />
           {/* Board + Clocks */}
           <div className="min-w-0 flex flex-col items-center">
-            <div className="w-full max-w-[min(85vw,520px)] space-y-1.5">
+            <div className="w-full max-w-[min(95vw,640px)] space-y-1.5">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
               <div className="flex items-center gap-2">
@@ -548,13 +580,7 @@ const PlayOnline = () => {
                     : game.isCheck() ? "check"
                     : null
                 }
-                subtitle={
-                  timeoutWinner ? `${timeoutWinner} wins on time`
-                  : onlineGame?.result === "1-0" ? "White wins"
-                  : onlineGame?.result === "0-1" ? "Black wins"
-                  : onlineGame?.result === "1/2-1/2" ? "Game drawn"
-                  : undefined
-                }
+                subtitle={isGameOver ? statusText : undefined}
               />
             </div>
 

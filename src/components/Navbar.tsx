@@ -234,7 +234,7 @@ const Navbar = () => {
               >
                 <Crown className="h-5 w-5 text-primary" />
               </motion.div>
-              <span className="font-display font-bold tracking-wide text-foreground hidden sm:inline uppercase text-2xl">
+              <span className="font-display font-bold tracking-wide text-foreground hidden sm:inline uppercase text-2xl whitespace-nowrap">
                 Master<span className="text-gradient-gold">Chess</span>
               </span>
             </Link>
