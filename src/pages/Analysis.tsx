@@ -53,7 +53,7 @@ type SidebarTab = "analysis" | "explorer" | "pgn";
 // ── Component ──
 export default function Analysis() {
   // sidebar is always analysis now
-  const [depth, setDepth] = useState(15);
+  const [depth, setDepth] = useState(8);
   const [flipped, setFlipped] = useState(false);
   const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
   const moveListRef = useRef<HTMLDivElement>(null);
@@ -121,7 +121,9 @@ export default function Analysis() {
     setLiveEvaluating(true);
     const engine = getStockfishEngine();
     try {
-      const posEval = await engine.evaluate(fen, depth);
+      const cached = await getCachedStockfishEvals([fen], depth);
+      const posEval = cached.get(fen) ?? await engine.evaluate(fen, depth);
+      if (!cached.has(fen)) void saveCachedStockfishEval(fen, depth, posEval.evaluation, posEval.mate);
       const evalCp = scoreToWhitePov(fen, posEval.evaluation, posEval.mate);
       setLiveCurrentEval({ cp: evalCp, mate: posEval.mate });
       const moveEval: MoveEval = {
@@ -260,15 +262,21 @@ export default function Analysis() {
     }
     setAnalyzing(true);
     const engine = getStockfishEngine(); engine.newGame();
-    const evals: MoveEval[] = [];
+    const fens: { move: typeof history[number]; fenBefore: string; fenAfter: string }[] = [];
     const evalGame = new Chess();
-    for (let i = 0; i < history.length; i++) {
-      setProgress(Math.round(((i + 1) / history.length) * 100));
+    for (const move of history) {
       const move = history[i];
       const fenBefore = evalGame.fen();
       evalGame.move(move.san);
-      const fenAfter = evalGame.fen();
-      const posEval = await engine.evaluate(fenAfter, depth);
+      fens.push({ move, fenBefore, fenAfter: evalGame.fen() });
+    }
+    const cached = await getCachedStockfishEvals(fens.map(f => f.fenAfter), depth);
+    const evals: MoveEval[] = [];
+    for (let i = 0; i < fens.length; i++) {
+      setProgress(Math.round(((i + 1) / fens.length) * 100));
+      const { move, fenBefore, fenAfter } = fens[i];
+      const posEval = cached.get(fenAfter) ?? await engine.evaluate(fenAfter, depth);
+      if (!cached.has(fenAfter)) void saveCachedStockfishEval(fenAfter, depth, posEval.evaluation, posEval.mate);
       const evalCp = scoreToWhitePov(fenAfter, posEval.evaluation, posEval.mate);
       evals.push({
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
