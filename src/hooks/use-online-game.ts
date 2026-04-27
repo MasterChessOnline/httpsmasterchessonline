@@ -33,6 +33,7 @@ export interface OnlineGame {
   last_move_from: string | null;
   last_move_to: string | null;
   turn: string;
+  move_number?: number;
   is_rated?: boolean;
   end_reason?: EndReason | null;
   elo_applied?: boolean;
@@ -207,6 +208,35 @@ export function useOnlineGame() {
         const snap = (payload as any).payload as Partial<OnlineGame>;
         if (snap && snap.fen) applyServerSnapshot(snap as OnlineGame);
       })
+      // Authoritative move-log insert lands before/with the game row update and
+      // gives the opponent an instant, server-confirmed snapshot. This avoids
+      // relying on the sender's optimistic broadcast after move #1.
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "online_game_moves",
+        filter: `game_id=eq.${gameId}`,
+      }, (payload) => {
+        const move = payload.new as any;
+        setGame(prev => {
+          if (!prev) return prev;
+          const nextMoveNumber = move.ply ?? (prev.move_number ?? 0) + 1;
+          if ((prev.move_number ?? 0) >= nextMoveNumber) return prev;
+          const snapshot: OnlineGame = {
+            ...prev,
+            fen: move.fen_after,
+            pgn: move.pgn_after,
+            turn: move.color === "w" ? "b" : "w",
+            move_number: nextMoveNumber,
+            last_move_from: move.from_square,
+            last_move_to: move.to_square,
+            last_move_at: move.created_at,
+            white_time: move.white_time,
+            black_time: move.black_time,
+          };
+          return snapshot;
+        });
+      })
       .subscribe();
 
     gameChannelRef.current = channel;
@@ -220,7 +250,7 @@ export function useOnlineGame() {
         .eq("id", gameId)
         .single();
       if (data) applyServerSnapshot(data as OnlineGame);
-    }, 1500);
+    }, 750);
   }, [applyEloAndLog]);
 
   // Recover active game on mount — prefer ?game=ID from URL if present
