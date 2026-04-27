@@ -644,6 +644,7 @@ const PlayOnline = () => {
             isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
             hintSquare={null}
             onSquareClick={handleSquareClick}
+            premove={premove}
             className="w-full max-w-[min(94vw,calc(100svh-8rem),620px)] mx-auto"
           />
           {/* Player clock */}
