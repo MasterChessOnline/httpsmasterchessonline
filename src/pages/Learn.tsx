@@ -924,6 +924,7 @@ const Learn = () => {
         {view === "list" && user && !loading && (
           <>
             <StatsDashboard streak={streak} totalCourses={COURSES.length} completedCourses={completedCourses} />
+            <MyLessonsPanel />
             <BookmarkedPanel bookmarks={bookmarkData} onGoToLesson={goToLesson} />
           </>
         )}
