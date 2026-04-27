@@ -57,7 +57,10 @@ export default function Analysis() {
   // sidebar is always analysis now
   const [depth, setDepth] = useState(8);
   const [flipped, setFlipped] = useState(false);
-  const [bottomTab, setBottomTab] = useState<"explorer" | "import">("explorer");
+  const [bottomTab, setBottomTab] = useState<"explorer" | "import" | "my-games">("explorer");
+  const { user } = useAuth();
+  const [myGames, setMyGames] = useState<Array<{ id: string; pgn: string; result: string | null; created_at: string; time_control_label: string; white_player_id: string; black_player_id: string }>>([]);
+  const [myGamesLoading, setMyGamesLoading] = useState(false);
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
 
