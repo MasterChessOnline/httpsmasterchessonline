@@ -53,7 +53,7 @@ export function isBookMove(playedHistorySan: string[]): boolean {
   return OPENINGS.some(o => o.moves.length >= len && o.moves.slice(0, len).every((m, i) => m === playedHistorySan[i]));
 }
 
-async function isDatabaseBookMove(fenBefore: string, san: string, ply: number): Promise<boolean> {
+export async function isDatabaseBookMove(fenBefore: string, san: string, ply: number): Promise<boolean> {
   if (ply > 24) return false;
   try {
     const master = await fetchMasterExplorerData(fenBefore);
