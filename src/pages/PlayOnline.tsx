@@ -589,7 +589,7 @@ const PlayOnline = () => {
                 isPlayerTurn={onlineStatus === "playing" && game.turn() === myColor}
                 hintSquare={null}
                 onSquareClick={handleSquareClick}
-                className="w-full max-w-[min(96vw,calc(100svh-10rem),680px)] mx-auto"
+                className="w-full max-w-[min(98vw,calc(100svh-9rem))] mx-auto"
               />
               <GameStatusOverlay
                 kind={
