@@ -223,10 +223,20 @@ const PlayOnline = () => {
     makeMove(game.fen(), move.san, move.from, move.to, game.turn(), wt, bt);
 
     if (game.isCheckmate()) {
-      endGame(game.turn() === "w" ? "0-1" : "1-0");
+      endGame(game.turn() === "w" ? "0-1" : "1-0", "checkmate");
       playChessSound("gameOver");
-    } else if (game.isDraw() || game.isStalemate()) {
-      endGame("1/2-1/2");
+    } else if (game.isStalemate()) {
+      endGame("1/2-1/2", "stalemate");
+      playChessSound("gameOver");
+    } else if (game.isThreefoldRepetition()) {
+      endGame("1/2-1/2", "threefold");
+      playChessSound("gameOver");
+    } else if (game.isInsufficientMaterial()) {
+      endGame("1/2-1/2", "insufficient_material");
+      playChessSound("gameOver");
+    } else if (game.isDraw()) {
+      // Catch-all: most often the 50-move rule when none of the above hit.
+      endGame("1/2-1/2", "fifty_move");
       playChessSound("gameOver");
     } else if (game.isCheck()) {
       playChessSound("check");
