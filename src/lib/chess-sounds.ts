@@ -293,7 +293,7 @@ export function preloadChessSounds() {
   (Object.keys(SAMPLE_PATHS) as SampleKey[]).forEach((k) => void loadSample(k));
 }
 
-export type MoveSound = "move" | "capture" | "check" | "gameOver" | "start";
+export type MoveSound = "move" | "capture" | "check" | "gameOver" | "start" | "victory" | "drawMelody";
 
 export function playChessSound(type: MoveSound) {
   switch (type) {
@@ -302,5 +302,7 @@ export function playChessSound(type: MoveSound) {
     case "check": return playCheckSound();
     case "gameOver": return playGameOverSound();
     case "start": return playGameStartSound();
+    case "victory": return playVictoryMelody();
+    case "drawMelody": return playDrawMelody();
   }
 }
