@@ -180,6 +180,35 @@ const PlayOnline = () => {
           playChessSound(lastSan.includes("x") ? "capture" : "move");
         }
       }
+
+      // ⚡ PREMOVE EXECUTION — fire IMMEDIATELY after adopting opponent's move.
+      // We use a ref (premoveRef) so we always read the freshest queued move,
+      // and we run inside this same effect to avoid any extra render delay.
+      const queued = premoveRef.current;
+      if (queued && myColor && gameRef.current.turn() === myColor && !gameRef.current.isGameOver()) {
+        try {
+          const legal = gameRef.current.moves({ square: queued.from, verbose: true }) as Array<{ to: Square; flags: string }>;
+          const match = legal.find((m) => m.to === queued.to);
+          if (match) {
+            const needsPromotion = match.flags.includes("p");
+            premoveRef.current = null;
+            setPremove(null);
+            if (needsPromotion && !queued.promotion) {
+              setPendingPromotion({ from: queued.from, to: queued.to });
+            } else {
+              // Defer one tick so React commits the new game state first.
+              setTimeout(() => executeMove(queued.from, queued.to, queued.promotion ?? "q"), 0);
+            }
+          } else {
+            // Illegal in the new position — silently discard.
+            premoveRef.current = null;
+            setPremove(null);
+          }
+        } catch {
+          premoveRef.current = null;
+          setPremove(null);
+        }
+      }
     }
     // Only adopt server clock when a NEW move was actually played.
     if (onlineGame.last_move_at && onlineGame.last_move_at !== lastAdoptedMoveAtRef.current) {
