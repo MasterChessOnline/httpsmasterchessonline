@@ -1,6 +1,8 @@
 // Coach review of a finished human-vs-human game.
-// Returns a structured analysis: opening review, key moments, repertoire
-// recommendations. Uses Lovable AI Gateway (Gemini Flash) — fast & cheap.
+// IMPORTANT: verdicts (book/best/inaccuracy/mistake/blunder/brilliant) come
+// from the client-side Stockfish classifier. The AI here ONLY narrates the
+// pre-classified moments — it must not invent or change verdicts, and must
+// never call move 1 "Brilliant".
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -8,6 +10,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+interface KeyMomentInput {
+  move_number: number;
+  color: "w" | "b";
+  san: string;
+  verdict: "book" | "best" | "excellent" | "good" | "inaccuracy" | "mistake" | "blunder" | "brilliant";
+  cp_loss: number;
+  best_move_san: string | null;
+}
 
 interface ReviewBody {
   pgn: string;
@@ -18,6 +29,9 @@ interface ReviewBody {
   openingEco?: string;
   myRating?: number;
   opponentRating?: number;
+  accuracy?: { white: number; black: number };
+  counts?: Record<string, number>;
+  key_moments_input?: KeyMomentInput[];
 }
 
 serve(async (req) => {
@@ -42,12 +56,19 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const sideWord = body.myColor === "w" ? "White" : "Black";
+    const myAcc = body.accuracy ? (body.myColor === "w" ? body.accuracy.white : body.accuracy.black) : null;
+    const oppAcc = body.accuracy ? (body.myColor === "w" ? body.accuracy.black : body.accuracy.white) : null;
+
     const sys = [
-      "You are a friendly, encouraging chess coach for an online amateur platform (no engine eval bars).",
-      "Speak directly TO the player ('you played...', 'your opening...').",
-      "Keep advice concrete, short, and actionable. Avoid jargon when possible.",
-      "Never make up moves that did not happen in the supplied PGN.",
-      "When recommending repertoire moves, give SAN moves that fit the opening that was actually played.",
+      "You are a precise, encouraging chess coach.",
+      "You will receive a PGN AND a list of pre-classified key moments produced by an actual chess engine (Stockfish).",
+      "STRICT RULES:",
+      "1. NEVER change a move's verdict. Use exactly the verdict provided in key_moments_input.",
+      "2. NEVER call any move 'brilliant' unless it is already labelled 'brilliant' in the input.",
+      "3. NEVER label opening moves as anything other than 'book' if they are still in theory — those are already filtered out for you.",
+      "4. Keep each comment short (max ~25 words), concrete, and addressed to the player ('you played…', 'a stronger move was…').",
+      "5. If best_move_san is provided, mention it naturally in the comment.",
+      "6. Speak about repertoire only for the actually-played opening; do not invent moves.",
     ].join(" ");
 
     const userPrompt = [
@@ -55,9 +76,14 @@ serve(async (req) => {
       `Player to coach: ${sideWord}${body.myRating ? ` (rating ${body.myRating})` : ""}`,
       body.opponentRating ? `Opponent rating: ${body.opponentRating}` : "",
       `Result: ${body.result}${body.endReason ? ` (${body.endReason})` : ""}`,
-      body.openingName ? `Detected opening: ${body.openingEco ?? ""} ${body.openingName}`.trim() : "",
+      body.openingName ? `Opening played: ${body.openingEco ?? ""} ${body.openingName}`.trim() : "",
+      myAcc != null && oppAcc != null ? `Engine accuracy — you: ${myAcc}%, opponent: ${oppAcc}%.` : "",
+      body.counts ? `Move count breakdown: ${JSON.stringify(body.counts)}` : "",
+      body.key_moments_input && body.key_moments_input.length
+        ? `Pre-classified key moments (DO NOT change verdicts):\n${JSON.stringify(body.key_moments_input, null, 2)}`
+        : "No significant mistakes were detected by the engine — focus the review on positives and what to drill next.",
       "",
-      "Produce a structured review with: opening assessment, 2-4 key moments (with move number), 3 concrete repertoire suggestions for this opening, and one focus area for the next game.",
+      "Produce: a 1-2 sentence summary, an opening assessment, narrated key_moments (one per pre-classified moment, keeping its verdict), 3 repertoire suggestions for the played opening, and a single 'next focus' sentence.",
     ].filter(Boolean).join("\n");
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -77,7 +103,7 @@ serve(async (req) => {
           type: "function",
           function: {
             name: "emit_review",
-            description: "Return a structured chess game review.",
+            description: "Return a structured chess game review. Verdicts must mirror the engine input exactly.",
             parameters: {
               type: "object",
               properties: {
@@ -90,7 +116,7 @@ serve(async (req) => {
                     properties: {
                       move_number: { type: "integer" },
                       san: { type: "string" },
-                      verdict: { type: "string", enum: ["good", "inaccuracy", "mistake", "blunder", "brilliant"] },
+                      verdict: { type: "string", enum: ["book", "best", "excellent", "good", "inaccuracy", "mistake", "blunder", "brilliant"] },
                       comment: { type: "string" },
                     },
                     required: ["move_number", "verdict", "comment"],
@@ -140,6 +166,31 @@ serve(async (req) => {
       });
     }
     const review = typeof args === "string" ? JSON.parse(args) : args;
+
+    // ── Defensive guard: enforce that AI did not invent a "brilliant"
+    // verdict. If the input never marked a move as brilliant, downgrade
+    // any AI-emitted brilliant to its honest classification (good/best).
+    const inputBrilliantKeys = new Set(
+      (body.key_moments_input ?? [])
+        .filter(m => m.verdict === "brilliant")
+        .map(m => `${m.move_number}-${m.san}`)
+    );
+    if (Array.isArray(review?.key_moments)) {
+      const allowedByMove = new Map<string, string>();
+      for (const km of body.key_moments_input ?? []) {
+        allowedByMove.set(`${km.move_number}-${km.san}`, km.verdict);
+      }
+      review.key_moments = review.key_moments.map((m: any) => {
+        const key = `${m.move_number}-${m.san ?? ""}`;
+        // Force the engine's verdict where we have one.
+        if (allowedByMove.has(key)) {
+          m.verdict = allowedByMove.get(key);
+        } else if (m.verdict === "brilliant" && !inputBrilliantKeys.has(key)) {
+          m.verdict = "good";
+        }
+        return m;
+      });
+    }
 
     return new Response(JSON.stringify({ ok: true, review }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
