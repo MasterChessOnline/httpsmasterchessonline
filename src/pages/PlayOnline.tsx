@@ -282,7 +282,7 @@ const PlayOnline = () => {
   const handleTimeOut = useCallback((color: "w" | "b") => {
     const result = color === "w" ? "0-1" : "1-0";
     setTimeoutWinner(color === "w" ? "Black" : "White");
-    playChessSound("gameOver");
+    // end melody fired centrally with 1s delay
     if (onlineGame) endGame(result, "timeout");
   }, [onlineGame, endGame]);
 
