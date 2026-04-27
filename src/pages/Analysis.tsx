@@ -265,7 +265,6 @@ export default function Analysis() {
     const fens: { move: typeof history[number]; fenBefore: string; fenAfter: string }[] = [];
     const evalGame = new Chess();
     for (const move of history) {
-      const move = history[i];
       const fenBefore = evalGame.fen();
       evalGame.move(move.san);
       fens.push({ move, fenBefore, fenAfter: evalGame.fen() });
