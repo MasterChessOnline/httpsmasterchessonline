@@ -157,11 +157,16 @@ const PlayOnline = () => {
       setLegalMoves([]);
       setGameStarted(true);
       if (onlineGame.pgn) setMoveHistory(onlineGame.pgn.split(" ").filter(Boolean));
-      // Play sound for opponent's move
+      // Play sound for opponent's move (regular move sounds only — the
+      // end-of-game melody is fired centrally with a 1s delay so the move is
+      // visible to both players first).
       if (prevFen !== "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" && gameRef.current.turn() === myColor) {
         const g = gameRef.current;
-        if (g.isCheckmate() || g.isDraw() || g.isStalemate()) playChessSound("gameOver");
-        else if (g.isCheck()) playChessSound("check");
+        if (g.isCheckmate() || g.isDraw() || g.isStalemate()) {
+          // Soft "move" tick so the last move still has audible feedback;
+          // the victory/draw melody is queued separately by the end-game effect.
+          playChessSound("move");
+        } else if (g.isCheck()) playChessSound("check");
         else {
           const moves = onlineGame.pgn?.split(" ").filter(Boolean) || [];
           const lastSan = moves[moves.length - 1] || "";
