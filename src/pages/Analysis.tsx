@@ -297,6 +297,81 @@ export default function Analysis() {
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
   };
 
+  // Load this user's finished online games when the My Games tab opens.
+  useEffect(() => {
+    if (bottomTab !== "my-games" || !user) return;
+    setMyGamesLoading(true);
+    supabase
+      .from("online_games")
+      .select("id, pgn, result, created_at, time_control_label, white_player_id, black_player_id")
+      .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
+      .eq("status", "finished")
+      .order("created_at", { ascending: false })
+      .limit(50)
+      .then(({ data }) => {
+        setMyGames((data as any) || []);
+        setMyGamesLoading(false);
+      });
+  }, [bottomTab, user]);
+
+  // Load a saved game's PGN into the import box and immediately run analysis.
+  const loadAndAnalyzeMyGame = (pgn: string) => {
+    if (!pgn || !pgn.trim()) {
+      setError("This game has no recorded moves.");
+      setBottomTab("import");
+      return;
+    }
+    setPgnInput(pgn);
+    setBottomTab("import");
+    // Run on next tick so state has flushed before runAnalysis reads pgnInput.
+    setTimeout(() => { void runAnalysisFromText(pgn); }, 30);
+  };
+
+  // Variant of runAnalysis that takes the PGN text directly (avoids React state lag).
+  const runAnalysisFromText = async (pgnText: string) => {
+    setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
+    pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
+    const parseGame = new Chess();
+    const trimmed = pgnText.trim();
+    if (!trimmed) { setError("Empty game."); return; }
+    try { parseGame.loadPgn(trimmed); } catch {
+      parseGame.reset();
+      const moves = trimmed.replace(/\d+\.\s*/g, "").split(/\s+/).filter(Boolean);
+      for (const m of moves) {
+        try { parseGame.move(m); } catch { setError(`Invalid move: "${m}".`); return; }
+      }
+    }
+    const history = parseGame.history({ verbose: true });
+    if (history.length === 0) { setError("No moves found."); return; }
+    if (!stockfishReady.current) {
+      const engine = getStockfishEngine(); await engine.init(); stockfishReady.current = true;
+    }
+    setAnalyzing(true);
+    const engine = getStockfishEngine(); engine.newGame();
+    const fens: { move: typeof history[number]; fenBefore: string; fenAfter: string }[] = [];
+    const evalGame = new Chess();
+    for (const move of history) {
+      const fenBefore = evalGame.fen();
+      evalGame.move(move.san);
+      fens.push({ move, fenBefore, fenAfter: evalGame.fen() });
+    }
+    const cached = await getCachedStockfishEvals(fens.map(f => f.fenAfter), depth);
+    const evals: MoveEval[] = [];
+    for (let i = 0; i < fens.length; i++) {
+      setProgress(Math.round(((i + 1) / fens.length) * 100));
+      const { move, fenBefore, fenAfter } = fens[i];
+      const posEval = cached.get(fenAfter) ?? await engine.evaluate(fenAfter, depth);
+      if (!cached.has(fenAfter)) void saveCachedStockfishEval(fenAfter, depth, posEval.evaluation, posEval.mate);
+      const evalCp = scoreToWhitePov(fenAfter, posEval.evaluation, posEval.mate);
+      evals.push({
+        san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
+        color: move.color, moveNumber: Math.floor(i / 2) + 1,
+        eval: evalCp, mate: posEval.mate,
+      });
+    }
+    setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
+  };
+
   const downloadPGN = () => {
     const evals = pgnComplete ? pgnMoveEvals : liveMoveHistory;
     if (evals.length === 0) return;
