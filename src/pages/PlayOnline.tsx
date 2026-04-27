@@ -478,7 +478,68 @@ const PlayOnline = () => {
     setOpponentProfile(null);
     setDrawOfferedByMe(false);
     setDrawOfferedByOpponent(false);
+    setRematchOfferedByMe(false);
+    setRematchOfferedByOpponent(false);
     setPremove(null);
+    // Strip ?game=... from the URL so the recovery effect in use-online-game
+    // doesn't immediately reload the just-finished game on the lobby screen
+    // (which would re-display the old result and block "New Game").
+    if (searchParams.get("game")) {
+      navigate("/play/online", { replace: true });
+    }
+  };
+
+  // ── REMATCH ──
+  // Either player can offer; when the opponent accepts, the accepter creates the
+  // new online_games row (swapping colors so it's fair) and broadcasts its id.
+  const offerRematch = async () => {
+    if (!user || !onlineGame || rematchOfferedByMe) return;
+    setRematchOfferedByMe(true);
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__rematch_offer__",
+    });
+    toast({ title: "Rematch offered", description: "Waiting for opponent…" });
+  };
+
+  const acceptRematch = async () => {
+    if (!user || !onlineGame || !rematchOfferedByOpponent || rematchInProgress) return;
+    setRematchInProgress(true);
+    // Swap colors for fairness
+    const newWhite = onlineGame.black_player_id;
+    const newBlack = onlineGame.white_player_id;
+    const { data: created, error: createErr } = await supabase
+      .from("online_games")
+      .insert({
+        white_player_id: newWhite,
+        black_player_id: newBlack,
+        white_time: tc.seconds || 600,
+        black_time: tc.seconds || 600,
+        time_control_label: onlineGame.time_control_label,
+        increment: onlineGame.increment,
+        is_rated: onlineGame.is_rated ?? true,
+      })
+      .select()
+      .single();
+    if (createErr || !created) {
+      setRematchInProgress(false);
+      toast({ title: "Rematch failed", description: "Could not create the new game.", variant: "destructive" });
+      return;
+    }
+    // Tell the opponent which game id to join
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: `__rematch_start__:${created.id}`,
+    });
+    setRematchOfferedByOpponent(false);
+    navigate(`/play/online?game=${created.id}`, { replace: true });
+    setTimeout(() => window.location.reload(), 50);
+  };
+
+  const declineRematch = async () => {
+    if (!user || !onlineGame || !rematchOfferedByOpponent) return;
+    await supabase.from("game_messages").insert({
+      game_id: onlineGame.id, user_id: user.id, message: "__rematch_decline__",
+    });
+    setRematchOfferedByOpponent(false);
   };
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
