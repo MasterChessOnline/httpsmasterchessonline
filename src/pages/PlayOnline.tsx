@@ -1026,9 +1026,9 @@ const PlayOnline = () => {
                 </Button>
                 {onlineGame?.id && (
                   <Button asChild variant="outline" className="w-full border-primary/40 hover:bg-primary/5">
-                    <Link to={`/game-review?game=${onlineGame.id}`}>
+                    <Link to={`/analysis?game=${onlineGame.id}`}>
                       <Sparkles className="h-4 w-4 mr-2 text-primary" />
-                      Coach Review &amp; Lessons
+                      Game Review
                     </Link>
                   </Button>
                 )}
