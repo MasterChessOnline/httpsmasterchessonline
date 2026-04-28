@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,10 +6,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  Swords, Trophy, TrendingUp, Calendar, ArrowLeft, ChevronRight,
-  Clock, Eye,
+  Swords, Trophy, TrendingUp, Calendar, ArrowLeft,
+  Clock, Eye, Search, Star, X,
 } from "lucide-react";
+import { detectOpening, formatOpeningLabel } from "@/lib/openings-detector";
+import { Chess } from "chess.js";
 
 interface GameRecord {
   id: string;
@@ -22,11 +27,63 @@ interface GameRecord {
   pgn: string;
 }
 
+interface OpponentProfile {
+  user_id: string;
+  display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  rating: number;
+  country_flag: string | null;
+}
+
+const FAV_KEY = "chess-fav-games";
+const FILTER_KEY = "chess-history-filters";
+
+type ResultFilter = "all" | "wins" | "losses" | "draws" | "favorites";
+type SortMode = "newest" | "oldest";
+
+const PAGE_SIZE = 10;
+
 const GameHistory = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [games, setGames] = useState<GameRecord[]>([]);
+  const [opponents, setOpponents] = useState<Record<string, OpponentProfile>>({});
   const [fetching, setFetching] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Filters (persisted)
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
+  const [sort, setSort] = useState<SortMode>("newest");
+
+  // Favorites
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  // Load persisted filters + favorites
+  useEffect(() => {
+    try {
+      const f = JSON.parse(localStorage.getItem(FILTER_KEY) || "{}");
+      if (f.resultFilter) setResultFilter(f.resultFilter);
+      if (f.sort) setSort(f.sort);
+    } catch {}
+    try {
+      const fav = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
+      setFavorites(new Set(fav));
+    } catch {}
+  }, []);
+
+  // Persist filters
+  useEffect(() => {
+    localStorage.setItem(FILTER_KEY, JSON.stringify({ resultFilter, sort }));
+  }, [resultFilter, sort]);
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
   useEffect(() => {
     if (!loading && !user) navigate("/login");
@@ -41,12 +98,102 @@ const GameHistory = () => {
       .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
       .eq("status", "finished")
       .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        setGames((data as GameRecord[]) || []);
+      .limit(200)
+      .then(async ({ data }) => {
+        const list = (data as GameRecord[]) || [];
+        setGames(list);
+
+        // Fetch opponent profiles in one shot
+        const opponentIds = Array.from(
+          new Set(list.map((g) => (g.white_player_id === user.id ? g.black_player_id : g.white_player_id)))
+        );
+        if (opponentIds.length) {
+          const { data: profs } = await supabase
+            .from("profiles")
+            .select("user_id, display_name, username, avatar_url, rating, country_flag")
+            .in("user_id", opponentIds);
+          const map: Record<string, OpponentProfile> = {};
+          (profs || []).forEach((p: any) => { map[p.user_id] = p; });
+          setOpponents(map);
+        }
         setFetching(false);
       });
   }, [user]);
+
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(next)));
+      return next;
+    });
+  };
+
+  const getOpening = (pgn: string): string | null => {
+    if (!pgn) return null;
+    try {
+      const c = new Chess();
+      c.loadPgn(pgn);
+      const moves = c.history();
+      const op = detectOpening(moves.slice(0, 12));
+      return op ? formatOpeningLabel(op) : null;
+    } catch { return null; }
+  };
+
+  const enriched = useMemo(() => {
+    if (!user) return [];
+    return games.map((g) => {
+      const isWhite = g.white_player_id === user.id;
+      const opponentId = isWhite ? g.black_player_id : g.white_player_id;
+      const opponent = opponents[opponentId];
+      const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
+      const drew = g.result === "1/2-1/2";
+      const lost = !won && !drew;
+      const opening = getOpening(g.pgn);
+      return { g, isWhite, opponent, won, drew, lost, opening };
+    });
+  }, [games, opponents, user]);
+
+  const filtered = useMemo(() => {
+    let list = enriched;
+    if (resultFilter === "wins") list = list.filter((e) => e.won);
+    else if (resultFilter === "losses") list = list.filter((e) => e.lost);
+    else if (resultFilter === "draws") list = list.filter((e) => e.drew);
+    else if (resultFilter === "favorites") list = list.filter((e) => favorites.has(e.g.id));
+
+    if (debouncedSearch) {
+      list = list.filter((e) => {
+        const name = (e.opponent?.display_name || e.opponent?.username || "").toLowerCase();
+        const op = (e.opening || "").toLowerCase();
+        return name.includes(debouncedSearch) || op.includes(debouncedSearch) ||
+          e.g.time_control_label.toLowerCase().includes(debouncedSearch);
+      });
+    }
+
+    if (sort === "oldest") list = [...list].reverse();
+    return list;
+  }, [enriched, resultFilter, debouncedSearch, sort, favorites]);
+
+  // Group by Today / Yesterday / Older
+  const groups = useMemo(() => {
+    const today: typeof filtered = [];
+    const yesterday: typeof filtered = [];
+    const older: typeof filtered = [];
+    const now = new Date();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startYesterday = startToday - 86400000;
+    filtered.slice(0, visibleCount).forEach((e) => {
+      const t = new Date(e.g.created_at).getTime();
+      if (t >= startToday) today.push(e);
+      else if (t >= startYesterday) yesterday.push(e);
+      else older.push(e);
+    });
+    return { today, yesterday, older };
+  }, [filtered, visibleCount]);
+
+  const winCount = enriched.filter((e) => e.won).length;
+  const lossCount = enriched.filter((e) => e.lost).length;
+  const drawCount = enriched.filter((e) => e.drew).length;
 
   if (loading || !user || !profile) {
     return (
@@ -63,17 +210,90 @@ const GameHistory = () => {
     );
   }
 
-  const winCount = games.filter((g) => {
-    const isWhite = g.white_player_id === user.id;
-    return (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
-  }).length;
+  const renderCard = (e: typeof filtered[number]) => {
+    const { g, isWhite, opponent, won, drew, opening } = e;
+    const date = new Date(g.created_at);
+    const isFav = favorites.has(g.id);
+    const initials = (opponent?.display_name || opponent?.username || "?").slice(0, 2).toUpperCase();
 
-  const lossCount = games.filter((g) => {
-    const isWhite = g.white_player_id === user.id;
-    return (isWhite && g.result === "0-1") || (!isWhite && g.result === "1-0");
-  }).length;
+    return (
+      <Link
+        to={`/analysis?game=${g.id}`}
+        key={g.id}
+        className="group flex items-center justify-between rounded-xl border border-border/40 bg-card hover:border-primary/40 hover:bg-card/80 hover:shadow-[0_0_20px_-8px_hsl(var(--primary)/0.4)] transition-all px-3 sm:px-4 py-3 gap-3"
+      >
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <span
+            className={`text-[10px] font-bold px-2 py-1 rounded-md shrink-0 ${
+              won
+                ? "bg-green-500/15 text-green-400"
+                : drew
+                ? "bg-muted text-muted-foreground"
+                : "bg-red-500/15 text-red-400"
+            }`}
+          >
+            {won ? "WIN" : drew ? "DRAW" : "LOSS"}
+          </span>
 
-  const drawCount = games.filter((g) => g.result === "1/2-1/2").length;
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/50">
+                  <AvatarImage src={opponent?.avatar_url || undefined} />
+                  <AvatarFallback className="text-[10px] bg-muted">{initials}</AvatarFallback>
+                </Avatar>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs font-medium">{opponent?.display_name || opponent?.username || "Unknown"}</p>
+                <p className="text-[10px] text-muted-foreground">Rating {opponent?.rating ?? "—"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+              {opponent?.country_flag && <span className="text-sm">{opponent.country_flag}</span>}
+              <span className="truncate">{opponent?.display_name || opponent?.username || "Opponent"}</span>
+              {opponent?.rating != null && (
+                <span className="text-[10px] text-muted-foreground font-mono">({opponent.rating})</span>
+              )}
+            </p>
+            <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 flex-wrap">
+              <span className="px-1.5 py-0.5 rounded bg-muted/50">{g.time_control_label}</span>
+              <span>· {isWhite ? "♔ White" : "♚ Black"}</span>
+              <Calendar className="w-2.5 h-2.5" />
+              {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              {opening && <span className="truncate">· {opening}</span>}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={(ev) => { ev.preventDefault(); toggleFavorite(g.id); }}
+            className={`p-1.5 rounded-md hover:bg-muted/60 transition-all ${isFav ? "text-yellow-400" : "text-muted-foreground/50 hover:text-yellow-400"}`}
+            aria-label="Favorite"
+          >
+            <Star className={`w-3.5 h-3.5 ${isFav ? "fill-current" : ""}`} />
+          </button>
+          <Badge variant="outline" className="text-[10px] hidden sm:inline-flex">{g.result || "N/A"}</Badge>
+          <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1 text-primary hover:bg-primary/10 group-hover:bg-primary/10">
+            <Eye className="w-3 h-3" /> Review
+          </Button>
+        </div>
+      </Link>
+    );
+  };
+
+  const renderGroup = (label: string, items: typeof filtered) => {
+    if (!items.length) return null;
+    return (
+      <div className="space-y-2">
+        <h3 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold pl-1 mt-4 first:mt-0">{label}</h3>
+        {items.map(renderCard)}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -87,12 +307,12 @@ const GameHistory = () => {
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">
             Game <span className="text-gradient-gold">History</span>
           </h1>
-          <p className="text-muted-foreground text-sm mb-6">Your past online games and results.</p>
+          <p className="text-muted-foreground text-sm mb-6">Your past online games · click any card to review.</p>
 
           {/* Stats summary */}
-          <div className="grid grid-cols-4 gap-3 mb-8">
+          <div className="grid grid-cols-4 gap-3 mb-6">
             {[
-              { label: "Games", value: games.length, icon: Swords, color: "text-primary" },
+              { label: "Games", value: enriched.length, icon: Swords, color: "text-primary" },
               { label: "Wins", value: winCount, icon: Trophy, color: "text-green-400" },
               { label: "Losses", value: lossCount, icon: TrendingUp, color: "text-red-400" },
               { label: "Draws", value: drawCount, icon: Clock, color: "text-muted-foreground" },
@@ -105,6 +325,58 @@ const GameHistory = () => {
             ))}
           </div>
 
+          {/* Search + filters */}
+          <div className="space-y-3 mb-5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search opponent, opening, or time control…"
+                className="pl-9 pr-9 bg-card/60 border-border/50"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {([
+                { key: "all", label: "All" },
+                { key: "wins", label: "Wins" },
+                { key: "losses", label: "Losses" },
+                { key: "draws", label: "Draws" },
+                { key: "favorites", label: "★ Favorites" },
+              ] as { key: ResultFilter; label: string }[]).map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setResultFilter(f.key)}
+                  className={`text-[11px] px-3 py-1.5 rounded-lg border transition-all ${
+                    resultFilter === f.key
+                      ? "border-primary bg-primary/15 text-primary"
+                      : "border-border/40 bg-card/40 text-muted-foreground hover:text-foreground hover:border-border"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+              <div className="ml-auto flex items-center gap-1 text-[11px]">
+                <span className="text-muted-foreground">Sort:</span>
+                <button
+                  onClick={() => setSort(sort === "newest" ? "oldest" : "newest")}
+                  className="px-2 py-1 rounded-md border border-border/40 hover:border-primary/40 transition-colors"
+                >
+                  {sort === "newest" ? "Newest first" : "Oldest first"}
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Game list */}
           {fetching ? (
             <div className="space-y-3">
@@ -112,7 +384,7 @@ const GameHistory = () => {
                 <div key={i} className="h-16 rounded-xl bg-muted/30 animate-pulse" />
               ))}
             </div>
-          ) : games.length === 0 ? (
+          ) : enriched.length === 0 ? (
             <div className="text-center py-16">
               <Swords className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground mb-4">No games played yet.</p>
@@ -120,57 +392,35 @@ const GameHistory = () => {
                 <Button>Play Your First Game</Button>
               </Link>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {games.map((g) => {
-                const isWhite = g.white_player_id === user.id;
-                const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
-                const drew = g.result === "1/2-1/2";
-                const date = new Date(g.created_at);
-                const moveCount = g.pgn ? g.pgn.split(/\d+\./).length - 1 : 0;
-
-                return (
-                  <div
-                    key={g.id}
-                    className="flex items-center justify-between rounded-xl border border-border/30 bg-card hover:border-primary/20 transition-all px-4 py-3 group gap-2"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span
-                        className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
-                          won
-                            ? "bg-green-500/15 text-green-400"
-                            : drew
-                            ? "bg-muted text-muted-foreground"
-                            : "bg-red-500/15 text-red-400"
-                        }`}
-                      >
-                        {won ? "WIN" : drew ? "DRAW" : "LOSS"}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground">
-                          {isWhite ? "White" : "Black"} · {g.time_control_label}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-2">
-                          <Calendar className="w-2.5 h-2.5" />
-                          {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          {moveCount > 0 && <span>· {moveCount} moves</span>}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Badge variant="outline" className="text-[10px]">
-                        {g.result || "N/A"}
-                      </Badge>
-                      <Link to={`/analysis?game=${g.id}`}>
-                        <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1 text-primary hover:bg-primary/10">
-                          <Eye className="w-3 h-3" /> Analyze
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12 rounded-xl border border-dashed border-border/40">
+              <p className="text-sm text-muted-foreground">No games match your filters.</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2 text-[11px]"
+                onClick={() => { setSearch(""); setResultFilter("all"); }}
+              >
+                Clear filters
+              </Button>
             </div>
+          ) : (
+            <>
+              {renderGroup("Today", groups.today)}
+              {renderGroup("Yesterday", groups.yesterday)}
+              {renderGroup("Older", groups.older)}
+
+              {visibleCount < filtered.length && (
+                <div className="mt-6 text-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  >
+                    Load more ({filtered.length - visibleCount} left)
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
