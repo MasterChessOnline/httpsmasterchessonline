@@ -25,6 +25,23 @@ interface MoveEval {
   color: "w" | "b"; moveNumber: number; eval: number; mate: number | null;
 }
 
+interface PlayerInfo {
+  user_id: string;
+  display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  rating: number;
+  country_flag: string | null;
+}
+
+interface GameMeta {
+  white: PlayerInfo | null;
+  black: PlayerInfo | null;
+  result: string | null;
+  time_control_label: string;
+  created_at: string;
+}
+
 // ── Helpers ──
 
 function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): number {
@@ -74,6 +91,7 @@ export default function Analysis() {
   const [error, setError] = useState("");
   const pgnDisplayGame = useRef(new Chess());
   const [pgnDisplayFen, setPgnDisplayFen] = useState("start");
+  const [gameMeta, setGameMeta] = useState<GameMeta | null>(null);
 
   // Interactive mode
   const [liveGame, setLiveGame] = useState(new Chess());
@@ -135,11 +153,32 @@ export default function Analysis() {
     (async () => {
       const { data } = await supabase
         .from("online_games")
-        .select("pgn")
+        .select("pgn, result, time_control_label, created_at, white_player_id, black_player_id")
         .eq("id", gameId)
         .maybeSingle();
       if (cancelled) return;
-      const pgn = (data as any)?.pgn as string | undefined;
+      const row = data as any;
+      const pgn = row?.pgn as string | undefined;
+
+      // Fetch both player profiles for the header banner
+      if (row?.white_player_id && row?.black_player_id) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, display_name, username, avatar_url, rating, country_flag")
+          .in("user_id", [row.white_player_id, row.black_player_id]);
+        const map: Record<string, PlayerInfo> = {};
+        (profs || []).forEach((p: any) => { map[p.user_id] = p; });
+        if (!cancelled) {
+          setGameMeta({
+            white: map[row.white_player_id] || null,
+            black: map[row.black_player_id] || null,
+            result: row.result || null,
+            time_control_label: row.time_control_label || "—",
+            created_at: row.created_at,
+          });
+        }
+      }
+
       if (pgn && pgn.trim()) {
         setPgnInput(pgn);
         setBottomTab("import");
@@ -455,6 +494,24 @@ export default function Analysis() {
     <div className="min-h-screen bg-[hsl(220,20%,12%)]">
       <Navbar />
       <main className="flex flex-col items-center pt-4 pb-8 px-2 lg:px-4 min-h-[calc(100vh-64px)]">
+        {/* ── PLAYER BANNER (when reviewing a saved game) ── */}
+        {gameMeta && (gameMeta.white || gameMeta.black) && (
+          <div className="w-full max-w-[920px] mb-3 rounded-lg border border-border/30 bg-[hsl(220,18%,16%)] px-4 py-3 flex items-center justify-between gap-3">
+            <PlayerSide info={gameMeta.white} side="white" result={gameMeta.result} />
+            <div className="flex flex-col items-center gap-1 px-2 text-center shrink-0">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">vs</span>
+              <Badge variant="outline" className="text-[10px] font-mono">{gameMeta.time_control_label}</Badge>
+              {gameMeta.result && (
+                <span className="text-[10px] text-muted-foreground font-mono">{gameMeta.result}</span>
+              )}
+              <span className="text-[9px] text-muted-foreground">
+                {new Date(gameMeta.created_at).toLocaleDateString()}
+              </span>
+            </div>
+            <PlayerSide info={gameMeta.black} side="black" result={gameMeta.result} alignRight />
+          </div>
+        )}
+
         {/* ── TOP ROW: Board + Analysis Sidebar ── */}
         <div className="flex justify-center items-start gap-0 w-full max-w-[920px]">
           {/* ── LEFT: Eval Bar + Board ── */}
@@ -846,5 +903,41 @@ function BottomTabButton({ active, onClick, icon, label }: { active: boolean; on
       {icon}
       {label}
     </button>
+  );
+}
+
+function PlayerSide({ info, side, result, alignRight }: { info: PlayerInfo | null; side: "white" | "black"; result: string | null; alignRight?: boolean }) {
+  const won = (side === "white" && result === "1-0") || (side === "black" && result === "0-1");
+  const drew = result === "1/2-1/2";
+  const initials = (info?.display_name || info?.username || "?").slice(0, 2).toUpperCase();
+  return (
+    <div className={`flex items-center gap-3 min-w-0 flex-1 ${alignRight ? "flex-row-reverse text-right" : ""}`}>
+      <div className="relative shrink-0">
+        <div className="h-11 w-11 rounded-full overflow-hidden ring-2 ring-border/50 bg-muted flex items-center justify-center">
+          {info?.avatar_url ? (
+            <img src={info.avatar_url} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-xs font-bold text-muted-foreground">{initials}</span>
+          )}
+        </div>
+        <span className={`absolute -bottom-0.5 ${alignRight ? "-left-0.5" : "-right-0.5"} h-3 w-3 rounded-full border-2 border-[hsl(220,18%,16%)] ${
+          side === "white" ? "bg-[hsl(60,10%,90%)]" : "bg-[hsl(220,15%,20%)]"
+        }`} />
+      </div>
+      <div className="min-w-0">
+        <div className={`flex items-center gap-1.5 ${alignRight ? "justify-end" : ""}`}>
+          {info?.country_flag && <span className="text-sm">{info.country_flag}</span>}
+          <span className="text-sm font-semibold text-foreground truncate">
+            {info?.display_name || info?.username || (side === "white" ? "White" : "Black")}
+          </span>
+          {won && <span className="text-[9px] font-bold text-green-400 bg-green-500/15 px-1.5 py-0.5 rounded">WIN</span>}
+          {drew && <span className="text-[9px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">DRAW</span>}
+          {!won && !drew && result && <span className="text-[9px] font-bold text-red-400 bg-red-500/15 px-1.5 py-0.5 rounded">LOSS</span>}
+        </div>
+        <p className="text-[10px] text-muted-foreground font-mono">
+          {side === "white" ? "♔ White" : "♚ Black"} · {info?.rating ?? "—"}
+        </p>
+      </div>
+    </div>
   );
 }
