@@ -905,3 +905,39 @@ function BottomTabButton({ active, onClick, icon, label }: { active: boolean; on
     </button>
   );
 }
+
+function PlayerSide({ info, side, result, alignRight }: { info: PlayerInfo | null; side: "white" | "black"; result: string | null; alignRight?: boolean }) {
+  const won = (side === "white" && result === "1-0") || (side === "black" && result === "0-1");
+  const drew = result === "1/2-1/2";
+  const initials = (info?.display_name || info?.username || "?").slice(0, 2).toUpperCase();
+  return (
+    <div className={`flex items-center gap-3 min-w-0 flex-1 ${alignRight ? "flex-row-reverse text-right" : ""}`}>
+      <div className="relative shrink-0">
+        <div className="h-11 w-11 rounded-full overflow-hidden ring-2 ring-border/50 bg-muted flex items-center justify-center">
+          {info?.avatar_url ? (
+            <img src={info.avatar_url} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-xs font-bold text-muted-foreground">{initials}</span>
+          )}
+        </div>
+        <span className={`absolute -bottom-0.5 ${alignRight ? "-left-0.5" : "-right-0.5"} h-3 w-3 rounded-full border-2 border-[hsl(220,18%,16%)] ${
+          side === "white" ? "bg-[hsl(60,10%,90%)]" : "bg-[hsl(220,15%,20%)]"
+        }`} />
+      </div>
+      <div className="min-w-0">
+        <div className={`flex items-center gap-1.5 ${alignRight ? "justify-end" : ""}`}>
+          {info?.country_flag && <span className="text-sm">{info.country_flag}</span>}
+          <span className="text-sm font-semibold text-foreground truncate">
+            {info?.display_name || info?.username || (side === "white" ? "White" : "Black")}
+          </span>
+          {won && <span className="text-[9px] font-bold text-green-400 bg-green-500/15 px-1.5 py-0.5 rounded">WIN</span>}
+          {drew && <span className="text-[9px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">DRAW</span>}
+          {!won && !drew && result && <span className="text-[9px] font-bold text-red-400 bg-red-500/15 px-1.5 py-0.5 rounded">LOSS</span>}
+        </div>
+        <p className="text-[10px] text-muted-foreground font-mono">
+          {side === "white" ? "♔ White" : "♚ Black"} · {info?.rating ?? "—"}
+        </p>
+      </div>
+    </div>
+  );
+}
