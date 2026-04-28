@@ -68,6 +68,17 @@ export default function ChessBoard({
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
 
+  // ── Annotations: right-click square highlights + drag arrows ──
+  // Pure visual aid; cleared on left-click or when a new move is made.
+  const [highlights, setHighlights] = useState<Set<string>>(new Set());
+  const [arrows, setArrows] = useState<Array<{ from: string; to: string; color: string }>>([]);
+  const dragStartRef = useRef<{ square: string; modifiers: { shift: boolean; ctrl: boolean } } | null>(null);
+
+  const arrowColor = (mods: { shift: boolean; ctrl: boolean }) => {
+    if (mods.ctrl) return "hsl(220 90% 60%)"; // blue
+    if (mods.shift) return "hsl(140 70% 45%)"; // green
+    return "hsl(35 95% 55%)"; // gold/orange (default)
+  };
 
   // Subtle indicator: which king is currently in check?
   const inCheck = game.inCheck();
@@ -80,7 +91,60 @@ export default function ChessBoard({
   if (lastMoveKey !== prevLastMoveRef.current) {
     prevLastMoveRef.current = lastMoveKey;
     if (lastMoveKey) moveCountRef.current++;
+    // Clear annotations whenever a new move lands
+    if (highlights.size || arrows.length) {
+      setHighlights(new Set());
+      setArrows([]);
+    }
   }
+
+  // Convert square name (e.g. "e4") to centroid coords in the SVG viewBox (0–800)
+  const squareToXY = (sq: string): { x: number; y: number } => {
+    const f = displayFiles.indexOf(sq[0]);
+    const r = displayRanks.indexOf(parseInt(sq[1]));
+    return { x: f * 100 + 50, y: r * 100 + 50 };
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, square: string) => {
+    e.preventDefault();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent, square: string) => {
+    if (e.button === 2) {
+      // Start tracking right-click drag
+      dragStartRef.current = { square, modifiers: { shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey } };
+    } else if (e.button === 0) {
+      // Left-click clears all annotations
+      if (highlights.size || arrows.length) {
+        setHighlights(new Set());
+        setArrows([]);
+      }
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent, square: string) => {
+    if (e.button !== 2 || !dragStartRef.current) return;
+    const start = dragStartRef.current;
+    dragStartRef.current = null;
+    const color = arrowColor(start.modifiers);
+    if (start.square === square) {
+      // Toggle square highlight
+      setHighlights(prev => {
+        const next = new Set(prev);
+        if (next.has(square)) next.delete(square);
+        else next.add(square);
+        return next;
+      });
+    } else {
+      // Toggle arrow
+      setArrows(prev => {
+        const exists = prev.findIndex(a => a.from === start.square && a.to === square);
+        if (exists >= 0) return prev.filter((_, i) => i !== exists);
+        return [...prev, { from: start.square, to: square, color }];
+      });
+    }
+  };
+
 
   return (
     <div className={className ?? "w-full max-w-[min(90vw,520px)] mx-auto"}>
