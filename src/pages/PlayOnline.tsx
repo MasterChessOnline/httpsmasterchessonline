@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import DynamicBackground from "@/components/DynamicBackground";
 import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
+import QuickChat from "@/components/chess/QuickChat";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
 
@@ -1046,7 +1047,16 @@ const PlayOnline = () => {
                 ))}
                 <div ref={chatEndRef} />
               </div>
-              <div className="flex gap-1.5">
+              <QuickChat
+                disabled={!user || !onlineGame}
+                onSend={async (msg) => {
+                  if (!user || !onlineGame) return;
+                  await supabase.from("game_messages").insert({
+                    game_id: onlineGame.id, user_id: user.id, message: msg,
+                  });
+                }}
+              />
+              <div className="flex gap-1.5 mt-2">
                 <Input value={chatInput} onChange={e => setChatInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && sendChat()}
                   placeholder="Type a message…" className="h-8 text-xs" />
