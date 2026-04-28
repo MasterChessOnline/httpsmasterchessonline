@@ -18,6 +18,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import EvalGraph from "@/components/chess/EvalGraph";
 
 // ── Types ──
 interface MoveEval {
@@ -597,24 +598,12 @@ export default function Analysis() {
             {/* Eval graph */}
             {activeEvals.length > 1 && (
               <div className="px-3 py-2 border-b border-border/20">
-                <div className="relative h-14 w-full">
-                  <div className="absolute top-1/2 left-0 right-0 h-px bg-border/40" />
-                  <svg viewBox={`0 0 ${graphData.length} 100`} className="w-full h-full" preserveAspectRatio="none">
-                    {graphData.map((d, i) => {
-                      const normalized = (d.eval + 500) / 1000;
-                      const y = Math.max(0, Math.min(100, (1 - normalized) * 100));
-                      const height = Math.abs(50 - y);
-                      const isAbove = y < 50;
-                      const isActive = activeIdx === i;
-                      let fill = "hsl(0, 0%, 45%)";
-                      if (isActive) fill = "hsl(120, 50%, 50%)";
-                      return <rect key={i} x={i} y={isAbove ? y : 50} width={0.8} height={Math.max(1, height)} fill={fill} className="cursor-pointer" onClick={() => goFn(i)} rx={0.2} />;
-                    })}
-                  </svg>
-                  {activeIdx >= 0 && (
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-primary/60" style={{ left: `${(activeIdx / graphData.length) * 100}%` }} />
-                  )}
-                </div>
+                <EvalGraph
+                  evals={activeEvals.map(e => ({ san: e.san, eval: e.eval, mate: e.mate, color: e.color }))}
+                  currentIdx={activeIdx}
+                  onSelect={(i) => goFn(i)}
+                  height={64}
+                />
               </div>
             )}
 
