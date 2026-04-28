@@ -202,6 +202,8 @@ export default function ChessBoard({
                 else if (isLastMv) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
                 else if (isHint || isHintTo) bgClass = "bg-accent/50";
 
+                const isHighlighted = highlights.has(square);
+
                 return (
                   <button
                     key={square}
@@ -213,8 +215,19 @@ export default function ChessBoard({
                       ${isLegal || (isPlayerTurn && !isGameOver) || (premoveMode && (piece || isLegal)) ? "cursor-pointer active:scale-95" : "cursor-default"}
                     `}
                     onClick={() => onSquareClick(square)}
+                    onMouseDown={(e) => handleMouseDown(e, square)}
+                    onMouseUp={(e) => handleMouseUp(e, square)}
+                    onContextMenu={(e) => handleContextMenu(e, square)}
                     tabIndex={0}
                   >
+                    {/* Right-click highlight ring */}
+                    {isHighlighted && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 pointer-events-none ring-4 ring-inset"
+                        style={{ boxShadow: "inset 0 0 0 4px hsl(35 95% 55% / 0.7)" }}
+                      />
+                    )}
                     {/* Subtle check indicator on the king (warm amber radial — not red) */}
                     {isCheckedKing && (
                       <span
