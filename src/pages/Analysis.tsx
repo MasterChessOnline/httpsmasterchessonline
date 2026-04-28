@@ -25,6 +25,23 @@ interface MoveEval {
   color: "w" | "b"; moveNumber: number; eval: number; mate: number | null;
 }
 
+interface PlayerInfo {
+  user_id: string;
+  display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  rating: number;
+  country_flag: string | null;
+}
+
+interface GameMeta {
+  white: PlayerInfo | null;
+  black: PlayerInfo | null;
+  result: string | null;
+  time_control_label: string;
+  created_at: string;
+}
+
 // ── Helpers ──
 
 function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): number {
