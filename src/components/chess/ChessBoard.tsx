@@ -168,6 +168,7 @@ export default function ChessBoard({
           className="flex-1 rounded-lg overflow-hidden shadow-card border border-border/30 relative"
           role="grid"
           aria-label="Chess board"
+          onContextMenu={(e) => e.preventDefault()}
         >
           {displayRanks.map((rank) => (
             <div key={rank} className="flex" role="row">
