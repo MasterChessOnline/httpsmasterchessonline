@@ -153,11 +153,32 @@ export default function Analysis() {
     (async () => {
       const { data } = await supabase
         .from("online_games")
-        .select("pgn")
+        .select("pgn, result, time_control_label, created_at, white_player_id, black_player_id")
         .eq("id", gameId)
         .maybeSingle();
       if (cancelled) return;
-      const pgn = (data as any)?.pgn as string | undefined;
+      const row = data as any;
+      const pgn = row?.pgn as string | undefined;
+
+      // Fetch both player profiles for the header banner
+      if (row?.white_player_id && row?.black_player_id) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, display_name, username, avatar_url, rating, country_flag")
+          .in("user_id", [row.white_player_id, row.black_player_id]);
+        const map: Record<string, PlayerInfo> = {};
+        (profs || []).forEach((p: any) => { map[p.user_id] = p; });
+        if (!cancelled) {
+          setGameMeta({
+            white: map[row.white_player_id] || null,
+            black: map[row.black_player_id] || null,
+            result: row.result || null,
+            time_control_label: row.time_control_label || "—",
+            created_at: row.created_at,
+          });
+        }
+      }
+
       if (pgn && pgn.trim()) {
         setPgnInput(pgn);
         setBottomTab("import");
@@ -168,6 +189,9 @@ export default function Analysis() {
         tryRun();
       }
     })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
