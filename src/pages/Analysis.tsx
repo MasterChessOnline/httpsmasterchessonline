@@ -91,6 +91,7 @@ export default function Analysis() {
   const [error, setError] = useState("");
   const pgnDisplayGame = useRef(new Chess());
   const [pgnDisplayFen, setPgnDisplayFen] = useState("start");
+  const [gameMeta, setGameMeta] = useState<GameMeta | null>(null);
 
   // Interactive mode
   const [liveGame, setLiveGame] = useState(new Chess());
