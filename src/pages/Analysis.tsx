@@ -494,6 +494,24 @@ export default function Analysis() {
     <div className="min-h-screen bg-[hsl(220,20%,12%)]">
       <Navbar />
       <main className="flex flex-col items-center pt-4 pb-8 px-2 lg:px-4 min-h-[calc(100vh-64px)]">
+        {/* ── PLAYER BANNER (when reviewing a saved game) ── */}
+        {gameMeta && (gameMeta.white || gameMeta.black) && (
+          <div className="w-full max-w-[920px] mb-3 rounded-lg border border-border/30 bg-[hsl(220,18%,16%)] px-4 py-3 flex items-center justify-between gap-3">
+            <PlayerSide info={gameMeta.white} side="white" result={gameMeta.result} />
+            <div className="flex flex-col items-center gap-1 px-2 text-center shrink-0">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">vs</span>
+              <Badge variant="outline" className="text-[10px] font-mono">{gameMeta.time_control_label}</Badge>
+              {gameMeta.result && (
+                <span className="text-[10px] text-muted-foreground font-mono">{gameMeta.result}</span>
+              )}
+              <span className="text-[9px] text-muted-foreground">
+                {new Date(gameMeta.created_at).toLocaleDateString()}
+              </span>
+            </div>
+            <PlayerSide info={gameMeta.black} side="black" result={gameMeta.result} alignRight />
+          </div>
+        )}
+
         {/* ── TOP ROW: Board + Analysis Sidebar ── */}
         <div className="flex justify-center items-start gap-0 w-full max-w-[920px]">
           {/* ── LEFT: Eval Bar + Board ── */}
