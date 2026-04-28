@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -411,14 +411,10 @@ const GameHistory = () => {
               {renderGroup("Older", groups.older)}
 
               {visibleCount < filtered.length && (
-                <div className="mt-6 text-center">
-                  <Button
-                    variant="outline"
-                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                  >
-                    Load more ({filtered.length - visibleCount} left)
-                  </Button>
-                </div>
+                <InfiniteScrollSentinel
+                  onIntersect={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  remaining={filtered.length - visibleCount}
+                />
               )}
             </>
           )}
@@ -428,5 +424,27 @@ const GameHistory = () => {
     </div>
   );
 };
+
+function InfiniteScrollSentinel({ onIntersect, remaining }: { onIntersect: () => void; remaining: number }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) onIntersect();
+      },
+      { rootMargin: "200px" }
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, [onIntersect]);
+  return (
+    <div ref={ref} className="mt-6 flex flex-col items-center gap-2 py-4">
+      <div className="h-6 w-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+      <p className="text-[10px] text-muted-foreground">Loading more… ({remaining} left)</p>
+    </div>
+  );
+}
 
 export default GameHistory;
