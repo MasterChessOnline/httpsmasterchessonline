@@ -315,6 +315,52 @@ export default function ChessBoard({
               })}
             </div>
           ))}
+
+          {/* Right-click drag arrows (Shift = green, Ctrl/Cmd = blue, default = gold) */}
+          {arrows.length > 0 && (
+            <svg
+              viewBox="0 0 800 800"
+              preserveAspectRatio="none"
+              className="absolute inset-0 w-full h-full pointer-events-none z-30"
+              aria-hidden
+            >
+              <defs>
+                {arrows.map((a, i) => (
+                  <marker
+                    key={i}
+                    id={`arrowhead-${i}`}
+                    viewBox="0 0 10 10"
+                    refX="6"
+                    refY="5"
+                    markerWidth="4"
+                    markerHeight="4"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill={a.color} />
+                  </marker>
+                ))}
+              </defs>
+              {arrows.map((a, i) => {
+                const p1 = squareToXY(a.from);
+                const p2 = squareToXY(a.to);
+                return (
+                  <line
+                    key={`${a.from}-${a.to}-${i}`}
+                    x1={p1.x}
+                    y1={p1.y}
+                    x2={p2.x}
+                    y2={p2.y}
+                    stroke={a.color}
+                    strokeWidth={14}
+                    strokeLinecap="round"
+                    opacity={0.85}
+                    markerEnd={`url(#arrowhead-${i})`}
+                  />
+                );
+              })}
+            </svg>
+          )}
+
           {/* Game-over / status overlay */}
           {overlay}
         </div>
