@@ -192,9 +192,6 @@ export default function Analysis() {
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Fetch explorer data when position or db changes
   useEffect(() => {
