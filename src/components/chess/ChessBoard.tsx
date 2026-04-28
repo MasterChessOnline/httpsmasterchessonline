@@ -68,6 +68,17 @@ export default function ChessBoard({
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
 
+  // ── Annotations: right-click square highlights + drag arrows ──
+  // Pure visual aid; cleared on left-click or when a new move is made.
+  const [highlights, setHighlights] = useState<Set<string>>(new Set());
+  const [arrows, setArrows] = useState<Array<{ from: string; to: string; color: string }>>([]);
+  const dragStartRef = useRef<{ square: string; modifiers: { shift: boolean; ctrl: boolean } } | null>(null);
+
+  const arrowColor = (mods: { shift: boolean; ctrl: boolean }) => {
+    if (mods.ctrl) return "hsl(220 90% 60%)"; // blue
+    if (mods.shift) return "hsl(140 70% 45%)"; // green
+    return "hsl(35 95% 55%)"; // gold/orange (default)
+  };
 
   // Subtle indicator: which king is currently in check?
   const inCheck = game.inCheck();
@@ -80,7 +91,60 @@ export default function ChessBoard({
   if (lastMoveKey !== prevLastMoveRef.current) {
     prevLastMoveRef.current = lastMoveKey;
     if (lastMoveKey) moveCountRef.current++;
+    // Clear annotations whenever a new move lands
+    if (highlights.size || arrows.length) {
+      setHighlights(new Set());
+      setArrows([]);
+    }
   }
+
+  // Convert square name (e.g. "e4") to centroid coords in the SVG viewBox (0–800)
+  const squareToXY = (sq: string): { x: number; y: number } => {
+    const f = displayFiles.indexOf(sq[0]);
+    const r = displayRanks.indexOf(parseInt(sq[1]));
+    return { x: f * 100 + 50, y: r * 100 + 50 };
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, square: string) => {
+    e.preventDefault();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent, square: string) => {
+    if (e.button === 2) {
+      // Start tracking right-click drag
+      dragStartRef.current = { square, modifiers: { shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey } };
+    } else if (e.button === 0) {
+      // Left-click clears all annotations
+      if (highlights.size || arrows.length) {
+        setHighlights(new Set());
+        setArrows([]);
+      }
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent, square: string) => {
+    if (e.button !== 2 || !dragStartRef.current) return;
+    const start = dragStartRef.current;
+    dragStartRef.current = null;
+    const color = arrowColor(start.modifiers);
+    if (start.square === square) {
+      // Toggle square highlight
+      setHighlights(prev => {
+        const next = new Set(prev);
+        if (next.has(square)) next.delete(square);
+        else next.add(square);
+        return next;
+      });
+    } else {
+      // Toggle arrow
+      setArrows(prev => {
+        const exists = prev.findIndex(a => a.from === start.square && a.to === square);
+        if (exists >= 0) return prev.filter((_, i) => i !== exists);
+        return [...prev, { from: start.square, to: square, color }];
+      });
+    }
+  };
+
 
   return (
     <div className={className ?? "w-full max-w-[min(90vw,520px)] mx-auto"}>
@@ -104,6 +168,7 @@ export default function ChessBoard({
           className="flex-1 rounded-lg overflow-hidden shadow-card border border-border/30 relative"
           role="grid"
           aria-label="Chess board"
+          onContextMenu={(e) => e.preventDefault()}
         >
           {displayRanks.map((rank) => (
             <div key={rank} className="flex" role="row">
@@ -137,6 +202,8 @@ export default function ChessBoard({
                 else if (isLastMv) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
                 else if (isHint || isHintTo) bgClass = "bg-accent/50";
 
+                const isHighlighted = highlights.has(square);
+
                 return (
                   <button
                     key={square}
@@ -148,8 +215,19 @@ export default function ChessBoard({
                       ${isLegal || (isPlayerTurn && !isGameOver) || (premoveMode && (piece || isLegal)) ? "cursor-pointer active:scale-95" : "cursor-default"}
                     `}
                     onClick={() => onSquareClick(square)}
+                    onMouseDown={(e) => handleMouseDown(e, square)}
+                    onMouseUp={(e) => handleMouseUp(e, square)}
+                    onContextMenu={(e) => handleContextMenu(e, square)}
                     tabIndex={0}
                   >
+                    {/* Right-click highlight ring */}
+                    {isHighlighted && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 pointer-events-none ring-4 ring-inset"
+                        style={{ boxShadow: "inset 0 0 0 4px hsl(35 95% 55% / 0.7)" }}
+                      />
+                    )}
                     {/* Subtle check indicator on the king (warm amber radial — not red) */}
                     {isCheckedKing && (
                       <span
@@ -237,6 +315,52 @@ export default function ChessBoard({
               })}
             </div>
           ))}
+
+          {/* Right-click drag arrows (Shift = green, Ctrl/Cmd = blue, default = gold) */}
+          {arrows.length > 0 && (
+            <svg
+              viewBox="0 0 800 800"
+              preserveAspectRatio="none"
+              className="absolute inset-0 w-full h-full pointer-events-none z-30"
+              aria-hidden
+            >
+              <defs>
+                {arrows.map((a, i) => (
+                  <marker
+                    key={i}
+                    id={`arrowhead-${i}`}
+                    viewBox="0 0 10 10"
+                    refX="6"
+                    refY="5"
+                    markerWidth="4"
+                    markerHeight="4"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill={a.color} />
+                  </marker>
+                ))}
+              </defs>
+              {arrows.map((a, i) => {
+                const p1 = squareToXY(a.from);
+                const p2 = squareToXY(a.to);
+                return (
+                  <line
+                    key={`${a.from}-${a.to}-${i}`}
+                    x1={p1.x}
+                    y1={p1.y}
+                    x2={p2.x}
+                    y2={p2.y}
+                    stroke={a.color}
+                    strokeWidth={14}
+                    strokeLinecap="round"
+                    opacity={0.85}
+                    markerEnd={`url(#arrowhead-${i})`}
+                  />
+                );
+              })}
+            </svg>
+          )}
+
           {/* Game-over / status overlay */}
           {overlay}
         </div>
