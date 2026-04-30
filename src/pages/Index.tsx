@@ -43,14 +43,14 @@ interface TopPlayer {
 const SectionHeader = ({ title, icon: Icon, action, children, delay = 0 }: {
   title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; delay?: number;
 }) => (
-  <motion.section
-    className="space-y-5"
-    initial={{ opacity: 0, y: 24 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-  >
-    <div className="flex items-center justify-between">
+  <section className="space-y-5">
+    <motion.div
+      className="flex items-center justify-between"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
       <h2 className="font-display text-base sm:text-lg font-bold text-foreground flex items-center gap-2.5 tracking-wide">
         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
           <Icon className="h-4 w-4 text-primary" />
@@ -58,9 +58,9 @@ const SectionHeader = ({ title, icon: Icon, action, children, delay = 0 }: {
         {title}
       </h2>
       {action}
-    </div>
+    </motion.div>
     {children}
-  </motion.section>
+  </section>
 );
 
 /* ── User Preference Toggles ── */
