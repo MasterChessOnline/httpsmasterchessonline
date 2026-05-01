@@ -95,6 +95,54 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_games: {
+        Row: {
+          bot_key: string | null
+          bot_name: string
+          bot_rating: number
+          created_at: string
+          id: string
+          move_count: number
+          outcome: string
+          pgn: string
+          player_color: string
+          rating_change: number | null
+          result: string
+          time_control_label: string
+          user_id: string
+        }
+        Insert: {
+          bot_key?: string | null
+          bot_name: string
+          bot_rating: number
+          created_at?: string
+          id?: string
+          move_count?: number
+          outcome: string
+          pgn?: string
+          player_color: string
+          rating_change?: number | null
+          result: string
+          time_control_label?: string
+          user_id: string
+        }
+        Update: {
+          bot_key?: string | null
+          bot_name?: string
+          bot_rating?: number
+          created_at?: string
+          id?: string
+          move_count?: number
+          outcome?: string
+          pgn?: string
+          player_color?: string
+          rating_change?: number | null
+          result?: string
+          time_control_label?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       club_members: {
         Row: {
           club_id: string

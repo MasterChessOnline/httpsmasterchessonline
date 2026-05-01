@@ -27,6 +27,20 @@ interface GameRecord {
   pgn: string;
 }
 
+interface BotGameRecord {
+  id: string;
+  bot_name: string;
+  bot_rating: number;
+  player_color: "w" | "b";
+  result: string;
+  outcome: "win" | "loss" | "draw";
+  pgn: string;
+  move_count: number;
+  time_control_label: string;
+  rating_change: number | null;
+  created_at: string;
+}
+
 interface OpponentProfile {
   user_id: string;
   display_name: string | null;
@@ -38,9 +52,11 @@ interface OpponentProfile {
 
 const FAV_KEY = "chess-fav-games";
 const FILTER_KEY = "chess-history-filters";
+const SOURCE_KEY = "chess-history-source";
 
 type ResultFilter = "all" | "wins" | "losses" | "draws" | "favorites";
 type SortMode = "newest" | "oldest";
+type HistorySource = "online" | "bot";
 
 const PAGE_SIZE = 10;
 
@@ -48,9 +64,24 @@ const GameHistory = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [games, setGames] = useState<GameRecord[]>([]);
+  const [botGames, setBotGames] = useState<BotGameRecord[]>([]);
   const [opponents, setOpponents] = useState<Record<string, OpponentProfile>>({});
   const [fetching, setFetching] = useState(true);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [source, setSource] = useState<HistorySource>(() => {
+    try {
+      const v = localStorage.getItem(SOURCE_KEY);
+      if (v === "bot" || v === "online") return v;
+    } catch {}
+    return "online";
+  });
+
+  // Persist source tab
+  useEffect(() => {
+    try { localStorage.setItem(SOURCE_KEY, source); } catch {}
+    // Reset paging whenever the user switches tabs
+    setVisibleCount(PAGE_SIZE);
+  }, [source]);
 
   // Filters (persisted)
   const [search, setSearch] = useState("");
@@ -92,32 +123,42 @@ const GameHistory = () => {
   useEffect(() => {
     if (!user) return;
     setFetching(true);
-    supabase
-      .from("online_games")
-      .select("id, result, status, created_at, time_control_label, white_player_id, black_player_id, pgn")
-      .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
-      .eq("status", "finished")
-      .order("created_at", { ascending: false })
-      .limit(200)
-      .then(async ({ data }) => {
-        const list = (data as GameRecord[]) || [];
-        setGames(list);
 
-        // Fetch opponent profiles in one shot
-        const opponentIds = Array.from(
-          new Set(list.map((g) => (g.white_player_id === user.id ? g.black_player_id : g.white_player_id)))
-        );
-        if (opponentIds.length) {
-          const { data: profs } = await supabase
-            .from("profiles")
-            .select("user_id, display_name, username, avatar_url, rating, country_flag")
-            .in("user_id", opponentIds);
-          const map: Record<string, OpponentProfile> = {};
-          (profs || []).forEach((p: any) => { map[p.user_id] = p; });
-          setOpponents(map);
-        }
-        setFetching(false);
-      });
+    // Fetch both online + bot games in parallel so switching tabs is instant.
+    Promise.all([
+      supabase
+        .from("online_games")
+        .select("id, result, status, created_at, time_control_label, white_player_id, black_player_id, pgn")
+        .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
+        .eq("status", "finished")
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase
+        .from("bot_games" as any)
+        .select("id, bot_name, bot_rating, player_color, result, outcome, pgn, move_count, time_control_label, rating_change, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(200),
+    ]).then(async ([online, bots]) => {
+      const list = (online.data as GameRecord[]) || [];
+      setGames(list);
+      setBotGames(((bots.data as unknown) as BotGameRecord[]) || []);
+
+      // Fetch opponent profiles (only for online games)
+      const opponentIds = Array.from(
+        new Set(list.map((g) => (g.white_player_id === user.id ? g.black_player_id : g.white_player_id)))
+      );
+      if (opponentIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, display_name, username, avatar_url, rating, country_flag")
+          .in("user_id", opponentIds);
+        const map: Record<string, OpponentProfile> = {};
+        (profs || []).forEach((p: any) => { map[p.user_id] = p; });
+        setOpponents(map);
+      }
+      setFetching(false);
+    });
   }, [user]);
 
   const toggleFavorite = (id: string) => {
@@ -140,7 +181,7 @@ const GameHistory = () => {
     } catch { return null; }
   };
 
-  const enriched = useMemo(() => {
+  const enrichedOnline = useMemo(() => {
     if (!user) return [];
     return games.map((g) => {
       const isWhite = g.white_player_id === user.id;
@@ -150,23 +191,64 @@ const GameHistory = () => {
       const drew = g.result === "1/2-1/2";
       const lost = !won && !drew;
       const opening = getOpening(g.pgn);
-      return { g, isWhite, opponent, won, drew, lost, opening };
+      return {
+        kind: "online" as const,
+        id: g.id,
+        created_at: g.created_at,
+        time_control_label: g.time_control_label,
+        result_str: g.result,
+        won, drew, lost, opening,
+        isWhite,
+        opponent,
+        pgn: g.pgn,
+      };
     });
   }, [games, opponents, user]);
+
+  const enrichedBot = useMemo(() => {
+    return botGames.map((b) => {
+      const won = b.outcome === "win";
+      const drew = b.outcome === "draw";
+      const lost = b.outcome === "loss";
+      const opening = getOpening(b.pgn);
+      return {
+        kind: "bot" as const,
+        id: b.id,
+        created_at: b.created_at,
+        time_control_label: b.time_control_label,
+        result_str: b.result,
+        won, drew, lost, opening,
+        isWhite: b.player_color === "w",
+        bot_name: b.bot_name,
+        bot_rating: b.bot_rating,
+        rating_change: b.rating_change,
+        move_count: b.move_count,
+        pgn: b.pgn,
+      };
+    });
+  }, [botGames]);
+
+  type EnrichedEntry =
+    | typeof enrichedOnline[number]
+    | typeof enrichedBot[number];
+  const enriched: EnrichedEntry[] =
+    source === "online" ? enrichedOnline : enrichedBot;
 
   const filtered = useMemo(() => {
     let list = enriched;
     if (resultFilter === "wins") list = list.filter((e) => e.won);
     else if (resultFilter === "losses") list = list.filter((e) => e.lost);
     else if (resultFilter === "draws") list = list.filter((e) => e.drew);
-    else if (resultFilter === "favorites") list = list.filter((e) => favorites.has(e.g.id));
+    else if (resultFilter === "favorites") list = list.filter((e) => favorites.has(e.id));
 
     if (debouncedSearch) {
       list = list.filter((e) => {
-        const name = (e.opponent?.display_name || e.opponent?.username || "").toLowerCase();
+        const name = e.kind === "online"
+          ? (e.opponent?.display_name || e.opponent?.username || "").toLowerCase()
+          : e.bot_name.toLowerCase();
         const op = (e.opening || "").toLowerCase();
         return name.includes(debouncedSearch) || op.includes(debouncedSearch) ||
-          e.g.time_control_label.toLowerCase().includes(debouncedSearch);
+          e.time_control_label.toLowerCase().includes(debouncedSearch);
       });
     }
 
@@ -183,7 +265,7 @@ const GameHistory = () => {
     const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const startYesterday = startToday - 86400000;
     filtered.slice(0, visibleCount).forEach((e) => {
-      const t = new Date(e.g.created_at).getTime();
+      const t = new Date(e.created_at).getTime();
       if (t >= startToday) today.push(e);
       else if (t >= startYesterday) yesterday.push(e);
       else older.push(e);
@@ -210,16 +292,31 @@ const GameHistory = () => {
     );
   }
 
-  const renderCard = (e: typeof filtered[number]) => {
-    const { g, isWhite, opponent, won, drew, opening } = e;
-    const date = new Date(g.created_at);
-    const isFav = favorites.has(g.id);
-    const initials = (opponent?.display_name || opponent?.username || "?").slice(0, 2).toUpperCase();
+  const renderCard = (e: EnrichedEntry) => {
+    const { won, drew, opening, isWhite } = e;
+    const date = new Date(e.created_at);
+    const isFav = favorites.has(e.id);
+
+    // Bot game vs Online game — different metadata, same shell
+    const isBot = e.kind === "bot";
+    const opponent = !isBot ? e.opponent : null;
+    const initials = isBot
+      ? "🤖"
+      : (opponent?.display_name || opponent?.username || "?").slice(0, 2).toUpperCase();
+    const displayName = isBot
+      ? e.bot_name
+      : (opponent?.display_name || opponent?.username || "Opponent");
+    const displayRating = isBot ? e.bot_rating : opponent?.rating;
+
+    // Bot games go to /analysis?pgn=… (no DB row id mapping); online go to ?game=
+    const href = isBot
+      ? `/analysis?pgn=${encodeURIComponent(e.pgn || "")}`
+      : `/analysis?game=${e.id}`;
 
     return (
       <Link
-        to={`/analysis?game=${g.id}`}
-        key={g.id}
+        to={href}
+        key={e.id}
         className="group flex items-center justify-between rounded-xl border border-border/40 bg-card hover:border-primary/40 hover:bg-card/80 hover:shadow-[0_0_20px_-8px_hsl(var(--primary)/0.4)] transition-all px-3 sm:px-4 py-3 gap-3"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -235,48 +332,48 @@ const GameHistory = () => {
             {won ? "WIN" : drew ? "DRAW" : "LOSS"}
           </span>
 
-          <TooltipProvider delayDuration={150}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/50">
-                  <AvatarImage src={opponent?.avatar_url || undefined} />
-                  <AvatarFallback className="text-[10px] bg-muted">{initials}</AvatarFallback>
-                </Avatar>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs font-medium">{opponent?.display_name || opponent?.username || "Unknown"}</p>
-                <p className="text-[10px] text-muted-foreground">Rating {opponent?.rating ?? "—"}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Avatar className="h-9 w-9 shrink-0 ring-1 ring-border/50">
+            {!isBot && opponent?.avatar_url && <AvatarImage src={opponent.avatar_url} />}
+            <AvatarFallback className="text-[10px] bg-muted">{initials}</AvatarFallback>
+          </Avatar>
 
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
-              {opponent?.country_flag && <span className="text-sm">{opponent.country_flag}</span>}
-              <span className="truncate">{opponent?.display_name || opponent?.username || "Opponent"}</span>
-              {opponent?.rating != null && (
-                <span className="text-[10px] text-muted-foreground font-mono">({opponent.rating})</span>
+              {!isBot && opponent?.country_flag && <span className="text-sm">{opponent.country_flag}</span>}
+              <span className="truncate">{displayName}</span>
+              {displayRating != null && (
+                <span className="text-[10px] text-muted-foreground font-mono">({displayRating})</span>
+              )}
+              {isBot && (
+                <span className="text-[9px] uppercase tracking-wider text-primary/70 font-bold border border-primary/30 rounded px-1 py-0">
+                  Bot
+                </span>
               )}
             </p>
             <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 flex-wrap">
-              <span className="px-1.5 py-0.5 rounded bg-muted/50">{g.time_control_label}</span>
+              <span className="px-1.5 py-0.5 rounded bg-muted/50">{e.time_control_label}</span>
               <span>· {isWhite ? "♔ White" : "♚ Black"}</span>
               <Calendar className="w-2.5 h-2.5" />
               {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               {opening && <span className="truncate">· {opening}</span>}
+              {isBot && typeof e.rating_change === "number" && (
+                <span className={`font-mono ${e.rating_change >= 0 ? "text-green-400" : "text-red-400"}`}>
+                  · {e.rating_change >= 0 ? "+" : ""}{e.rating_change}
+                </span>
+              )}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
           <button
-            onClick={(ev) => { ev.preventDefault(); toggleFavorite(g.id); }}
+            onClick={(ev) => { ev.preventDefault(); toggleFavorite(e.id); }}
             className={`p-1.5 rounded-md hover:bg-muted/60 transition-all ${isFav ? "text-yellow-400" : "text-muted-foreground/50 hover:text-yellow-400"}`}
             aria-label="Favorite"
           >
             <Star className={`w-3.5 h-3.5 ${isFav ? "fill-current" : ""}`} />
           </button>
-          <Badge variant="outline" className="text-[10px] hidden sm:inline-flex">{g.result || "N/A"}</Badge>
+          <Badge variant="outline" className="text-[10px] hidden sm:inline-flex">{e.result_str || "N/A"}</Badge>
           <Button size="sm" variant="ghost" className="h-7 text-[10px] gap-1 text-primary hover:bg-primary/10 group-hover:bg-primary/10">
             <Eye className="w-3 h-3" /> Review
           </Button>
