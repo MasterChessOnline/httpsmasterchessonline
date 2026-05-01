@@ -63,6 +63,7 @@ import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
+import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
 import GameInviteListener from "@/components/GameInviteListener";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
@@ -155,6 +156,7 @@ const App = () => (
             </div>
             <AntiTiltWatcher />
             <TitleUnlockGate />
+            <WelcomeIntroPopup />
             <GameInviteListener />
             <MobileBottomNav />
           </Suspense>
