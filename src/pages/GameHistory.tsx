@@ -228,7 +228,11 @@ const GameHistory = () => {
     });
   }, [botGames]);
 
-  const enriched = source === "online" ? enrichedOnline : enrichedBot;
+  type EnrichedEntry =
+    | typeof enrichedOnline[number]
+    | typeof enrichedBot[number];
+  const enriched: EnrichedEntry[] =
+    source === "online" ? enrichedOnline : enrichedBot;
 
   const filtered = useMemo(() => {
     let list = enriched;
