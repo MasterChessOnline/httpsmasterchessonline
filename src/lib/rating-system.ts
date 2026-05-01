@@ -81,16 +81,24 @@ export function calculateRatingChange(input: RatingCalcInput): RatingCalcResult 
 
 /** Apply a bot-game result: updates profiles.bot_rating + bot stats and logs to rating_history.
  *  Optionally factors in streak bonus (extra Elo for win streaks) and rating protection
- *  (reduced loss on losing streaks). Caller passes pre-fetched streak counters. */
+ *  (reduced loss on losing streaks). Caller passes pre-fetched streak counters.
+ *  When `pgn` is provided, the full bot game is also saved to public.bot_games so it
+ *  shows up in the user's Bot game history and Analysis "My Games" picker. */
 export async function applyBotRatingChange(opts: {
   userId: string;
   currentRating: number;
   botRating: number;
   botLabel: string;
+  botKey?: string;
   gamesPlayed: number;
   result: GameResult;
   streakBonus?: number;       // extra rating points for win-streak milestones
   lossStreak?: number;        // current consecutive losses (for protection calc)
+  pgn?: string;               // optional — when set, persist the game
+  playerColor?: "w" | "b";    // required if pgn is provided
+  resultString?: "1-0" | "0-1" | "1/2-1/2"; // raw chess result; required if pgn is provided
+  moveCount?: number;
+  timeControlLabel?: string;
 }): Promise<RatingCalcResult> {
   const calc = calculateRatingChange({
     playerRating: opts.currentRating,
@@ -140,6 +148,27 @@ export async function applyBotRatingChange(opts: {
     opponent_label: opts.botLabel,
     result: opts.result,
   });
+
+  // Persist the full bot game so it appears in Bot game history & Analysis.
+  if (opts.pgn && opts.playerColor && opts.resultString) {
+    try {
+      await supabase.from("bot_games" as any).insert({
+        user_id: opts.userId,
+        bot_key: opts.botKey ?? null,
+        bot_name: opts.botLabel,
+        bot_rating: opts.botRating,
+        player_color: opts.playerColor,
+        result: opts.resultString,
+        outcome: opts.result,
+        pgn: opts.pgn,
+        move_count: opts.moveCount ?? 0,
+        time_control_label: opts.timeControlLabel ?? "Casual",
+        rating_change: finalCalc.change,
+      } as any);
+    } catch (e) {
+      console.warn("Failed to save bot game:", e);
+    }
+  }
 
   return finalCalc;
 }
