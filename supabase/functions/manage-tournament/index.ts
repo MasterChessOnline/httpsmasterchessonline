@@ -41,10 +41,10 @@ Deno.serve(async (req) => {
       return await handleLeave(supabase, user.id, tournament_id);
     }
     if (action === "start") {
-      return await handleStart(supabase, tournament_id);
+      return await handleStart(supabase, tournament_id, user.id);
     }
     if (action === "report_result") {
-      return await handleReportResult(supabase, game_id, result);
+      return await handleReportResult(supabase, game_id, result, user.id);
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {
@@ -170,7 +170,7 @@ async function handleLeave(supabase: any, userId: string, tournament_id: string)
 }
 
 // ===================== START =====================
-async function handleStart(supabase: any, tournament_id: string) {
+async function handleStart(supabase: any, tournament_id: string, callerId: string) {
   const { data: tournament } = await supabase
     .from("tournaments")
     .select("*")
@@ -179,6 +179,18 @@ async function handleStart(supabase: any, tournament_id: string) {
 
   if (!tournament || tournament.status !== "registering") {
     return jsonRes({ error: "Cannot start" }, 400);
+  }
+
+  // Authorization: only the creator or an admin/organizer can start a tournament
+  const { data: roleRows } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", callerId);
+  const isAdminOrOrganizer = (roleRows || []).some(
+    (r: any) => r.role === "admin" || r.role === "organizer"
+  );
+  if (tournament.created_by !== callerId && !isAdminOrOrganizer) {
+    return jsonRes({ error: "Forbidden" }, 403);
   }
 
   const { data: players } = await supabase
@@ -245,7 +257,40 @@ async function handleStart(supabase: any, tournament_id: string) {
 }
 
 // ===================== REPORT RESULT =====================
-async function handleReportResult(supabase: any, game_id: string, result: string) {
+async function handleReportResult(supabase: any, game_id: string, result: string, callerId: string) {
+  if (!["1-0", "0-1", "1/2-1/2"].includes(result)) {
+    return jsonRes({ error: "Invalid result" }, 400);
+  }
+
+  // Authorization: caller must be one of the two players in this pairing,
+  // OR an admin/organizer.
+  const { data: pairingCheck } = await supabase
+    .from("tournament_pairings")
+    .select("white_player_id, black_player_id")
+    .eq("game_id", game_id)
+    .single();
+
+  if (!pairingCheck) {
+    return jsonRes({ error: "Pairing not found" }, 404);
+  }
+
+  const isPlayer =
+    pairingCheck.white_player_id === callerId ||
+    pairingCheck.black_player_id === callerId;
+
+  if (!isPlayer) {
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", callerId);
+    const isAdminOrOrganizer = (roleRows || []).some(
+      (r: any) => r.role === "admin" || r.role === "organizer"
+    );
+    if (!isAdminOrOrganizer) {
+      return jsonRes({ error: "Forbidden" }, 403);
+    }
+  }
+
   await supabase
     .from("tournament_pairings")
     .update({ result })
