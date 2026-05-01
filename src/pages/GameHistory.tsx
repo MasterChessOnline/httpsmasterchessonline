@@ -181,7 +181,7 @@ const GameHistory = () => {
     } catch { return null; }
   };
 
-  const enriched = useMemo(() => {
+  const enrichedOnline = useMemo(() => {
     if (!user) return [];
     return games.map((g) => {
       const isWhite = g.white_player_id === user.id;
@@ -191,23 +191,60 @@ const GameHistory = () => {
       const drew = g.result === "1/2-1/2";
       const lost = !won && !drew;
       const opening = getOpening(g.pgn);
-      return { g, isWhite, opponent, won, drew, lost, opening };
+      return {
+        kind: "online" as const,
+        id: g.id,
+        created_at: g.created_at,
+        time_control_label: g.time_control_label,
+        result_str: g.result,
+        won, drew, lost, opening,
+        isWhite,
+        opponent,
+        pgn: g.pgn,
+      };
     });
   }, [games, opponents, user]);
+
+  const enrichedBot = useMemo(() => {
+    return botGames.map((b) => {
+      const won = b.outcome === "win";
+      const drew = b.outcome === "draw";
+      const lost = b.outcome === "loss";
+      const opening = getOpening(b.pgn);
+      return {
+        kind: "bot" as const,
+        id: b.id,
+        created_at: b.created_at,
+        time_control_label: b.time_control_label,
+        result_str: b.result,
+        won, drew, lost, opening,
+        isWhite: b.player_color === "w",
+        bot_name: b.bot_name,
+        bot_rating: b.bot_rating,
+        rating_change: b.rating_change,
+        move_count: b.move_count,
+        pgn: b.pgn,
+      };
+    });
+  }, [botGames]);
+
+  const enriched = source === "online" ? enrichedOnline : enrichedBot;
 
   const filtered = useMemo(() => {
     let list = enriched;
     if (resultFilter === "wins") list = list.filter((e) => e.won);
     else if (resultFilter === "losses") list = list.filter((e) => e.lost);
     else if (resultFilter === "draws") list = list.filter((e) => e.drew);
-    else if (resultFilter === "favorites") list = list.filter((e) => favorites.has(e.g.id));
+    else if (resultFilter === "favorites") list = list.filter((e) => favorites.has(e.id));
 
     if (debouncedSearch) {
       list = list.filter((e) => {
-        const name = (e.opponent?.display_name || e.opponent?.username || "").toLowerCase();
+        const name = e.kind === "online"
+          ? (e.opponent?.display_name || e.opponent?.username || "").toLowerCase()
+          : e.bot_name.toLowerCase();
         const op = (e.opening || "").toLowerCase();
         return name.includes(debouncedSearch) || op.includes(debouncedSearch) ||
-          e.g.time_control_label.toLowerCase().includes(debouncedSearch);
+          e.time_control_label.toLowerCase().includes(debouncedSearch);
       });
     }
 
@@ -224,7 +261,7 @@ const GameHistory = () => {
     const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const startYesterday = startToday - 86400000;
     filtered.slice(0, visibleCount).forEach((e) => {
-      const t = new Date(e.g.created_at).getTime();
+      const t = new Date(e.created_at).getTime();
       if (t >= startToday) today.push(e);
       else if (t >= startYesterday) yesterday.push(e);
       else older.push(e);
