@@ -699,10 +699,17 @@ const Play = () => {
           currentRating: currentBotRating,
           botRating,
           botLabel: currentBot.name,
+          botKey: (currentBot as any).key ?? (currentBot as any).id ?? null,
           gamesPlayed: botGames,
           result,
           streakBonus,
           lossStreak: prevStreak.loss_streak,
+          // Persist the full game to bot_games so it shows in history & Analysis
+          pgn,
+          playerColor,
+          resultString: gameResult as "1-0" | "0-1" | "1/2-1/2",
+          moveCount: moveHistory.length,
+          timeControlLabel: TIME_CONTROLS[timeControlIdx]?.label ?? "Casual",
         });
         setBotRatingResult(calc);
 
