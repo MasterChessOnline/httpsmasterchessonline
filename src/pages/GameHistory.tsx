@@ -27,6 +27,20 @@ interface GameRecord {
   pgn: string;
 }
 
+interface BotGameRecord {
+  id: string;
+  bot_name: string;
+  bot_rating: number;
+  player_color: "w" | "b";
+  result: string;
+  outcome: "win" | "loss" | "draw";
+  pgn: string;
+  move_count: number;
+  time_control_label: string;
+  rating_change: number | null;
+  created_at: string;
+}
+
 interface OpponentProfile {
   user_id: string;
   display_name: string | null;
@@ -38,9 +52,11 @@ interface OpponentProfile {
 
 const FAV_KEY = "chess-fav-games";
 const FILTER_KEY = "chess-history-filters";
+const SOURCE_KEY = "chess-history-source";
 
 type ResultFilter = "all" | "wins" | "losses" | "draws" | "favorites";
 type SortMode = "newest" | "oldest";
+type HistorySource = "online" | "bot";
 
 const PAGE_SIZE = 10;
 
