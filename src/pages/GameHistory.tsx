@@ -64,9 +64,24 @@ const GameHistory = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [games, setGames] = useState<GameRecord[]>([]);
+  const [botGames, setBotGames] = useState<BotGameRecord[]>([]);
   const [opponents, setOpponents] = useState<Record<string, OpponentProfile>>({});
   const [fetching, setFetching] = useState(true);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [source, setSource] = useState<HistorySource>(() => {
+    try {
+      const v = localStorage.getItem(SOURCE_KEY);
+      if (v === "bot" || v === "online") return v;
+    } catch {}
+    return "online";
+  });
+
+  // Persist source tab
+  useEffect(() => {
+    try { localStorage.setItem(SOURCE_KEY, source); } catch {}
+    // Reset paging whenever the user switches tabs
+    setVisibleCount(PAGE_SIZE);
+  }, [source]);
 
   // Filters (persisted)
   const [search, setSearch] = useState("");
@@ -108,32 +123,42 @@ const GameHistory = () => {
   useEffect(() => {
     if (!user) return;
     setFetching(true);
-    supabase
-      .from("online_games")
-      .select("id, result, status, created_at, time_control_label, white_player_id, black_player_id, pgn")
-      .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
-      .eq("status", "finished")
-      .order("created_at", { ascending: false })
-      .limit(200)
-      .then(async ({ data }) => {
-        const list = (data as GameRecord[]) || [];
-        setGames(list);
 
-        // Fetch opponent profiles in one shot
-        const opponentIds = Array.from(
-          new Set(list.map((g) => (g.white_player_id === user.id ? g.black_player_id : g.white_player_id)))
-        );
-        if (opponentIds.length) {
-          const { data: profs } = await supabase
-            .from("profiles")
-            .select("user_id, display_name, username, avatar_url, rating, country_flag")
-            .in("user_id", opponentIds);
-          const map: Record<string, OpponentProfile> = {};
-          (profs || []).forEach((p: any) => { map[p.user_id] = p; });
-          setOpponents(map);
-        }
-        setFetching(false);
-      });
+    // Fetch both online + bot games in parallel so switching tabs is instant.
+    Promise.all([
+      supabase
+        .from("online_games")
+        .select("id, result, status, created_at, time_control_label, white_player_id, black_player_id, pgn")
+        .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
+        .eq("status", "finished")
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase
+        .from("bot_games" as any)
+        .select("id, bot_name, bot_rating, player_color, result, outcome, pgn, move_count, time_control_label, rating_change, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(200),
+    ]).then(async ([online, bots]) => {
+      const list = (online.data as GameRecord[]) || [];
+      setGames(list);
+      setBotGames(((bots.data as unknown) as BotGameRecord[]) || []);
+
+      // Fetch opponent profiles (only for online games)
+      const opponentIds = Array.from(
+        new Set(list.map((g) => (g.white_player_id === user.id ? g.black_player_id : g.white_player_id)))
+      );
+      if (opponentIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, display_name, username, avatar_url, rating, country_flag")
+          .in("user_id", opponentIds);
+        const map: Record<string, OpponentProfile> = {};
+        (profs || []).forEach((p: any) => { map[p.user_id] = p; });
+        setOpponents(map);
+      }
+      setFetching(false);
+    });
   }, [user]);
 
   const toggleFavorite = (id: string) => {
