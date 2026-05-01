@@ -11,6 +11,14 @@ Deno.serve(async (req) => {
   try {
     const { name, email, message } = await req.json();
 
+    const esc = (s: string) =>
+      String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
     if (!name || !email || !message) {
       return new Response(JSON.stringify({ error: "Missing fields" }), {
         status: 400,
@@ -37,12 +45,12 @@ Deno.serve(async (req) => {
         subject: `Chess Contact: ${name}`,
         html: `
           <h2>New Contact Message</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Name:</strong> ${esc(name)}</p>
+          <p><strong>Email:</strong> ${esc(email)}</p>
           <hr />
-          <p>${message.replace(/\n/g, "<br />")}</p>
+          <p>${esc(message).replace(/\n/g, "<br />")}</p>
         `,
-        reply_to: email,
+        reply_to: esc(email),
       }),
     });
 
