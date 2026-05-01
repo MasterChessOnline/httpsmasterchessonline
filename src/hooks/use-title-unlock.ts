@@ -12,6 +12,15 @@ export function useTitleUnlock() {
 
   useEffect(() => {
     if (!user || !profile) return;
+
+    // Don't pop a title on a brand-new account. Wait until the user has actually
+    // played at least one game (bot or online) — otherwise new signups instantly
+    // see "Bot Hunter" because the default bot_rating is already above the
+    // first threshold. Show a small intro experience first; titles come later.
+    const botGames = (profile as any).bot_games_played ?? 0;
+    const onlineGames = (profile as any).games_played ?? 0;
+    if (botGames + onlineGames < 1) return;
+
     // Titles are driven by BOT rating and should use AI bot title labels/thresholds.
     const botRating = (profile as any).bot_rating ?? 1200;
     const currentTitle = getTitle(botRating, "bot");
