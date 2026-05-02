@@ -213,6 +213,40 @@ export default function Analysis() {
     return () => { cancelled = true; };
   }, [currentFen, explorerDb, bottomTab]);
 
+  // Compute top engine variations (MultiPV) for the current position.
+  // Re-runs whenever the position, requested line count, or analysis depth changes.
+  useEffect(() => {
+    if (!stockfishReady.current) return;
+    let cancelled = false;
+    setLinesLoading(true);
+    const engine = getStockfishEngine();
+    // Use a slightly capped depth for snappy multi-line search
+    const lineDepth = Math.min(depth, 16);
+    engine.getMultiPV(currentFen, multiPvCount, lineDepth).then((lines) => {
+      if (cancelled) return;
+      // Convert UCI moves → SAN for display
+      const enriched = lines.map((ln) => {
+        const san: string[] = [];
+        try {
+          const g = new Chess(currentFen);
+          for (const uci of ln.pv.slice(0, 8)) {
+            if (!uci || uci.length < 4) break;
+            const from = uci.slice(0, 2);
+            const to = uci.slice(2, 4);
+            const promotion = uci.length > 4 ? uci[4] : undefined;
+            const mv = g.move({ from, to, promotion });
+            if (!mv) break;
+            san.push(mv.san);
+          }
+        } catch { /* ignore */ }
+        return { ...ln, pvSan: san };
+      });
+      setTopLines(enriched);
+      setLinesLoading(false);
+    }).catch(() => { if (!cancelled) setLinesLoading(false); });
+    return () => { cancelled = true; };
+  }, [currentFen, multiPvCount, depth]);
+
   // ── Interactive logic ──
   const evaluatePosition = useCallback(async (fen: string, fenBefore: string, moveSan: string, moveFrom: string, moveTo: string, color: "w" | "b", moveNum: number) => {
     if (!stockfishReady.current) return;
