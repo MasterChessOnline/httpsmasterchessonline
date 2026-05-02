@@ -426,21 +426,29 @@ export default function Analysis() {
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
   };
 
-  // Load this user's finished online games when the My Games tab opens.
+  // Load this user's finished online + bot games when the My Games tab opens.
   useEffect(() => {
     if (bottomTab !== "my-games" || !user) return;
     setMyGamesLoading(true);
-    supabase
-      .from("online_games")
-      .select("id, pgn, result, created_at, time_control_label, white_player_id, black_player_id")
-      .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
-      .eq("status", "finished")
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        setMyGames((data as any) || []);
-        setMyGamesLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("online_games")
+        .select("id, pgn, result, created_at, time_control_label, white_player_id, black_player_id")
+        .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
+        .eq("status", "finished")
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("bot_games" as any)
+        .select("id, pgn, result, outcome, bot_name, bot_rating, player_color, created_at, time_control_label, move_count")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50),
+    ]).then(([online, bots]) => {
+      setMyGames((online.data as any) || []);
+      setMyBotGames(((bots.data as unknown) as any[]) || []);
+      setMyGamesLoading(false);
+    });
   }, [bottomTab, user]);
 
   // Load a saved game's PGN into the import box and immediately run analysis.
