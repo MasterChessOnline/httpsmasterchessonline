@@ -13,12 +13,14 @@ import { Slider } from "@/components/ui/slider";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Upload, Trash2, Download, MousePointerClick, RotateCcw,
-  Globe, Database, Trophy, FlipVertical, Swords, Calendar
+  Globe, Database, Trophy, FlipVertical, Swords, Calendar, Sparkles, History
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import EvalGraph from "@/components/chess/EvalGraph";
+import type { MultiPvLine } from "@/lib/stockfish-engine";
 
 // ── Types ──
 interface MoveEval {
