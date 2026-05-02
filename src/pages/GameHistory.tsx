@@ -516,9 +516,11 @@ const GameHistory = () => {
           ) : enriched.length === 0 ? (
             <div className="text-center py-16">
               <Swords className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground mb-4">No games played yet.</p>
-              <Link to="/play/online">
-                <Button>Play Your First Game</Button>
+              <p className="text-muted-foreground mb-4">
+                {source === "online" ? "No online games played yet." : "No bot games played yet."}
+              </p>
+              <Link to={source === "online" ? "/play/online" : "/play"}>
+                <Button>{source === "online" ? "Play Your First Online Game" : "Challenge a Bot"}</Button>
               </Link>
             </div>
           ) : filtered.length === 0 ? (
