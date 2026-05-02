@@ -648,6 +648,78 @@ export default function Analysis() {
               </div>
             )}
 
+            {/* Top engine lines (MultiPV) */}
+            <div className="px-3 py-2 border-b border-border/20 bg-[hsl(220,18%,15%)]">
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="h-3 w-3 text-primary" />
+                  <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Top Lines</span>
+                  {linesLoading && <Loader2 className="h-3 w-3 text-muted-foreground animate-spin" />}
+                </div>
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setMultiPvCount(n)}
+                      className={`w-5 h-5 text-[10px] font-mono rounded transition-colors ${
+                        multiPvCount === n
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-[hsl(220,18%,22%)] text-muted-foreground hover:text-foreground"
+                      }`}
+                      title={`Show top ${n} ${n === 1 ? "line" : "lines"}`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {topLines.length === 0 && !linesLoading ? (
+                <p className="text-[10px] text-muted-foreground py-1">Calculating best moves…</p>
+              ) : (
+                <div className="space-y-0.5 max-h-[120px] overflow-y-auto">
+                  {topLines.map((ln, i) => {
+                    const isWhiteToMove = (() => {
+                      try { return new Chess(currentFen).turn() === "w"; } catch { return true; }
+                    })();
+                    const evalCp = isWhiteToMove ? ln.eval : -ln.eval;
+                    const evalMate = ln.mate !== null ? (isWhiteToMove ? ln.mate : -ln.mate) : null;
+                    const evalDisplay = formatEval(evalCp, evalMate);
+                    const canClick = !pgnComplete && liveViewIdx < 0 && ln.pvSan.length > 0;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          if (!canClick) return;
+                          const first = ln.pvSan[0];
+                          if (first) playExplorerMove(first);
+                        }}
+                        disabled={!canClick}
+                        className="w-full flex items-start gap-2 text-left px-1.5 py-1 rounded hover:bg-[hsl(220,18%,22%)] transition-colors disabled:cursor-default disabled:hover:bg-transparent"
+                      >
+                        <span className={`text-[10px] font-mono font-bold shrink-0 w-12 text-right ${
+                          evalMate !== null
+                            ? "text-yellow-400"
+                            : evalCp >= 30
+                              ? "text-green-400"
+                              : evalCp <= -30
+                                ? "text-red-400"
+                                : "text-foreground/80"
+                        }`}>
+                          {evalDisplay}
+                        </span>
+                        <span className="text-[11px] font-mono text-foreground/80 leading-tight flex-1 min-w-0 break-words">
+                          {ln.pvSan.length ? ln.pvSan.join(" ") : <span className="text-muted-foreground">…</span>}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {(pgnComplete || liveViewIdx >= 0) && topLines.length > 0 && (
+                <p className="text-[9px] text-muted-foreground/70 mt-1 italic">Suggestions only — exit review mode to play a line.</p>
+              )}
+            </div>
+
             {/* Move list */}
             <div className="flex-1 overflow-y-auto px-2 py-1 max-h-[240px]" ref={moveListRef}>
               {activeEvals.length === 0 ? (
