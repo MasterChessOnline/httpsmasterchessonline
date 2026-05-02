@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Swords, Trophy, TrendingUp, Calendar, ArrowLeft,
-  Clock, Eye, Search, Star, X,
+  Clock, Eye, Search, Star, X, Brain,
 } from "lucide-react";
 import { detectOpening, formatOpeningLabel } from "@/lib/openings-detector";
 import { Chess } from "chess.js";
@@ -404,7 +404,39 @@ const GameHistory = () => {
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">
             Game <span className="text-gradient-gold">History</span>
           </h1>
-          <p className="text-muted-foreground text-sm mb-6">Your past online games · click any card to review.</p>
+          <p className="text-muted-foreground text-sm mb-4">
+            {source === "online"
+              ? "Your past online matches · click any card to review."
+              : "Your matches against bots · click any card to review."}
+          </p>
+
+          {/* Online / Bot source tabs */}
+          <div className="inline-flex items-center gap-1 rounded-xl border border-border/40 bg-card/40 p-1 mb-6">
+            {([
+              { key: "online", label: "Online", icon: Swords, count: enrichedOnline.length },
+              { key: "bot", label: "vs Bots", icon: Brain, count: enrichedBot.length },
+            ] as { key: HistorySource; label: string; icon: any; count: number }[]).map((t) => {
+              const active = source === t.key;
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setSource(t.key)}
+                  className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all ${
+                    active
+                      ? "bg-primary text-primary-foreground shadow-[0_0_12px_-4px_hsl(var(--primary)/0.6)]"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {t.label}
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${active ? "bg-primary-foreground/15" : "bg-muted/40"}`}>
+                    {t.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
           {/* Stats summary */}
           <div className="grid grid-cols-4 gap-3 mb-6">
@@ -484,9 +516,11 @@ const GameHistory = () => {
           ) : enriched.length === 0 ? (
             <div className="text-center py-16">
               <Swords className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground mb-4">No games played yet.</p>
-              <Link to="/play/online">
-                <Button>Play Your First Game</Button>
+              <p className="text-muted-foreground mb-4">
+                {source === "online" ? "No online games played yet." : "No bot games played yet."}
+              </p>
+              <Link to={source === "online" ? "/play/online" : "/play"}>
+                <Button>{source === "online" ? "Play Your First Online Game" : "Challenge a Bot"}</Button>
               </Link>
             </div>
           ) : filtered.length === 0 ? (

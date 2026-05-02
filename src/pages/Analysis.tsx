@@ -13,12 +13,14 @@ import { Slider } from "@/components/ui/slider";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Upload, Trash2, Download, MousePointerClick, RotateCcw,
-  Globe, Database, Trophy, FlipVertical, Swords, Calendar
+  Globe, Database, Trophy, FlipVertical, Swords, Calendar, Sparkles, History
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import EvalGraph from "@/components/chess/EvalGraph";
+import type { MultiPvLine } from "@/lib/stockfish-engine";
 
 // ── Types ──
 interface MoveEval {
@@ -78,7 +80,9 @@ export default function Analysis() {
   const [bottomTab, setBottomTab] = useState<"explorer" | "import" | "my-games">("explorer");
   const { user } = useAuth();
   const [myGames, setMyGames] = useState<Array<{ id: string; pgn: string; result: string | null; created_at: string; time_control_label: string; white_player_id: string; black_player_id: string }>>([]);
+  const [myBotGames, setMyBotGames] = useState<Array<{ id: string; pgn: string; result: string; outcome: "win" | "loss" | "draw"; bot_name: string; bot_rating: number; player_color: "w" | "b"; created_at: string; time_control_label: string; move_count: number }>>([]);
   const [myGamesLoading, setMyGamesLoading] = useState(false);
+  const [myGamesSource, setMyGamesSource] = useState<"online" | "bot">("online");
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
 
@@ -110,6 +114,11 @@ export default function Analysis() {
   const [explorerData, setExplorerData] = useState<ExplorerData | null>(null);
   const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("lichess");
   const [explorerLoading, setExplorerLoading] = useState(false);
+
+  // MultiPV (top lines suggestions) state
+  const [multiPvCount, setMultiPvCount] = useState<number>(3);
+  const [topLines, setTopLines] = useState<MultiPvLine[]>([]);
+  const [linesLoading, setLinesLoading] = useState(false);
 
   // Current FEN for explorer
   const currentFen = useMemo(() => {
@@ -205,6 +214,40 @@ export default function Analysis() {
     });
     return () => { cancelled = true; };
   }, [currentFen, explorerDb, bottomTab]);
+
+  // Compute top engine variations (MultiPV) for the current position.
+  // Re-runs whenever the position, requested line count, or analysis depth changes.
+  useEffect(() => {
+    if (!stockfishReady.current) return;
+    let cancelled = false;
+    setLinesLoading(true);
+    const engine = getStockfishEngine();
+    // Use a slightly capped depth for snappy multi-line search
+    const lineDepth = Math.min(depth, 16);
+    engine.getMultiPV(currentFen, multiPvCount, lineDepth).then((lines) => {
+      if (cancelled) return;
+      // Convert UCI moves → SAN for display
+      const enriched = lines.map((ln) => {
+        const san: string[] = [];
+        try {
+          const g = new Chess(currentFen);
+          for (const uci of ln.pv.slice(0, 8)) {
+            if (!uci || uci.length < 4) break;
+            const from = uci.slice(0, 2);
+            const to = uci.slice(2, 4);
+            const promotion = uci.length > 4 ? uci[4] : undefined;
+            const mv = g.move({ from, to, promotion });
+            if (!mv) break;
+            san.push(mv.san);
+          }
+        } catch { /* ignore */ }
+        return { ...ln, pvSan: san };
+      });
+      setTopLines(enriched);
+      setLinesLoading(false);
+    }).catch(() => { if (!cancelled) setLinesLoading(false); });
+    return () => { cancelled = true; };
+  }, [currentFen, multiPvCount, depth]);
 
   // ── Interactive logic ──
   const evaluatePosition = useCallback(async (fen: string, fenBefore: string, moveSan: string, moveFrom: string, moveTo: string, color: "w" | "b", moveNum: number) => {
@@ -383,21 +426,29 @@ export default function Analysis() {
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
   };
 
-  // Load this user's finished online games when the My Games tab opens.
+  // Load this user's finished online + bot games when the My Games tab opens.
   useEffect(() => {
     if (bottomTab !== "my-games" || !user) return;
     setMyGamesLoading(true);
-    supabase
-      .from("online_games")
-      .select("id, pgn, result, created_at, time_control_label, white_player_id, black_player_id")
-      .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
-      .eq("status", "finished")
-      .order("created_at", { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        setMyGames((data as any) || []);
-        setMyGamesLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("online_games")
+        .select("id, pgn, result, created_at, time_control_label, white_player_id, black_player_id")
+        .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
+        .eq("status", "finished")
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("bot_games" as any)
+        .select("id, pgn, result, outcome, bot_name, bot_rating, player_color, created_at, time_control_label, move_count")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50),
+    ]).then(([online, bots]) => {
+      setMyGames((online.data as any) || []);
+      setMyBotGames(((bots.data as unknown) as any[]) || []);
+      setMyGamesLoading(false);
+    });
   }, [bottomTab, user]);
 
   // Load a saved game's PGN into the import box and immediately run analysis.
@@ -607,6 +658,78 @@ export default function Analysis() {
               </div>
             )}
 
+            {/* Top engine lines (MultiPV) */}
+            <div className="px-3 py-2 border-b border-border/20 bg-[hsl(220,18%,15%)]">
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="h-3 w-3 text-primary" />
+                  <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Top Lines</span>
+                  {linesLoading && <Loader2 className="h-3 w-3 text-muted-foreground animate-spin" />}
+                </div>
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setMultiPvCount(n)}
+                      className={`w-5 h-5 text-[10px] font-mono rounded transition-colors ${
+                        multiPvCount === n
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-[hsl(220,18%,22%)] text-muted-foreground hover:text-foreground"
+                      }`}
+                      title={`Show top ${n} ${n === 1 ? "line" : "lines"}`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {topLines.length === 0 && !linesLoading ? (
+                <p className="text-[10px] text-muted-foreground py-1">Calculating best moves…</p>
+              ) : (
+                <div className="space-y-0.5 max-h-[120px] overflow-y-auto">
+                  {topLines.map((ln, i) => {
+                    const isWhiteToMove = (() => {
+                      try { return new Chess(currentFen).turn() === "w"; } catch { return true; }
+                    })();
+                    const evalCp = isWhiteToMove ? ln.eval : -ln.eval;
+                    const evalMate = ln.mate !== null ? (isWhiteToMove ? ln.mate : -ln.mate) : null;
+                    const evalDisplay = formatEval(evalCp, evalMate);
+                    const canClick = !pgnComplete && liveViewIdx < 0 && ln.pvSan.length > 0;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          if (!canClick) return;
+                          const first = ln.pvSan[0];
+                          if (first) playExplorerMove(first);
+                        }}
+                        disabled={!canClick}
+                        className="w-full flex items-start gap-2 text-left px-1.5 py-1 rounded hover:bg-[hsl(220,18%,22%)] transition-colors disabled:cursor-default disabled:hover:bg-transparent"
+                      >
+                        <span className={`text-[10px] font-mono font-bold shrink-0 w-12 text-right ${
+                          evalMate !== null
+                            ? "text-yellow-400"
+                            : evalCp >= 30
+                              ? "text-green-400"
+                              : evalCp <= -30
+                                ? "text-red-400"
+                                : "text-foreground/80"
+                        }`}>
+                          {evalDisplay}
+                        </span>
+                        <span className="text-[11px] font-mono text-foreground/80 leading-tight flex-1 min-w-0 break-words">
+                          {ln.pvSan.length ? ln.pvSan.join(" ") : <span className="text-muted-foreground">…</span>}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {(pgnComplete || liveViewIdx >= 0) && topLines.length > 0 && (
+                <p className="text-[9px] text-muted-foreground/70 mt-1 italic">Suggestions only — exit review mode to play a line.</p>
+              )}
+            </div>
+
             {/* Move list */}
             <div className="flex-1 overflow-y-auto px-2 py-1 max-h-[240px]" ref={moveListRef}>
               {activeEvals.length === 0 ? (
@@ -780,6 +903,38 @@ export default function Analysis() {
               {/* ── MY GAMES ── */}
               {bottomTab === "my-games" && (
                 <motion.div key="my-games-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4">
+                  {/* Sub-tabs Online / Bot + Full History link */}
+                  <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                    <div className="inline-flex items-center gap-1 rounded-lg border border-border/30 bg-[hsl(220,18%,20%)] p-0.5">
+                      {([
+                        { key: "online", label: "Online", count: myGames.length, icon: Swords },
+                        { key: "bot", label: "vs Bots", count: myBotGames.length, icon: Brain },
+                      ] as const).map((t) => {
+                        const active = myGamesSource === t.key;
+                        const Icon = t.icon;
+                        return (
+                          <button
+                            key={t.key}
+                            onClick={() => setMyGamesSource(t.key)}
+                            className={`flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-md transition-colors ${
+                              active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <Icon className="h-3 w-3" />
+                            {t.label}
+                            <span className={`text-[9px] font-mono px-1 rounded ${active ? "bg-primary-foreground/20" : "bg-muted/40"}`}>{t.count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <Link
+                      to="/history"
+                      className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                    >
+                      <History className="h-3 w-3" /> Full Game History →
+                    </Link>
+                  </div>
+
                   {!user ? (
                     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                       <Swords className="h-6 w-6 mb-2 text-primary/30" />
@@ -791,52 +946,103 @@ export default function Analysis() {
                         <div key={i} className="h-12 rounded bg-muted/30 animate-pulse" />
                       ))}
                     </div>
-                  ) : myGames.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                      <Swords className="h-6 w-6 mb-2 text-primary/30" />
-                      <p className="text-sm">No finished games yet</p>
-                      <p className="text-[10px] mt-1">Play an online game and it will show up here</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
-                      {myGames.map((g) => {
-                        const isWhite = g.white_player_id === user.id;
-                        const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
-                        const drew = g.result === "1/2-1/2";
-                        const date = new Date(g.created_at);
-                        const moveCount = g.pgn ? g.pgn.split(/\d+\./).length - 1 : 0;
-                        const hasMoves = !!g.pgn && g.pgn.trim().length > 0;
-                        return (
-                          <button
-                            key={g.id}
-                            onClick={() => loadAndAnalyzeMyGame(g.pgn)}
-                            disabled={!hasMoves || analyzing}
-                            className="w-full flex items-center justify-between rounded-lg border border-border/30 bg-[hsl(220,18%,20%)] hover:border-primary/40 hover:bg-[hsl(220,18%,24%)] transition-all px-3 py-2 group disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                                won ? "bg-green-500/15 text-green-400"
-                                  : drew ? "bg-muted text-muted-foreground"
-                                  : "bg-red-500/15 text-red-400"
-                              }`}>
-                                {won ? "WIN" : drew ? "DRAW" : "LOSS"}
-                              </span>
-                              <div className="min-w-0">
-                                <p className="text-xs font-medium text-foreground truncate">
-                                  {isWhite ? "White" : "Black"} · {g.time_control_label}
-                                  {moveCount > 0 && <span className="text-muted-foreground"> · {moveCount} moves</span>}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                                  <Calendar className="w-2.5 h-2.5" />
-                                  {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                </p>
+                  ) : myGamesSource === "online" ? (
+                    myGames.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                        <Swords className="h-6 w-6 mb-2 text-primary/30" />
+                        <p className="text-sm">No finished online games yet</p>
+                        <p className="text-[10px] mt-1">Play an online game and it will show up here</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
+                        {myGames.map((g) => {
+                          const isWhite = g.white_player_id === user.id;
+                          const won = (isWhite && g.result === "1-0") || (!isWhite && g.result === "0-1");
+                          const drew = g.result === "1/2-1/2";
+                          const date = new Date(g.created_at);
+                          const moveCount = g.pgn ? g.pgn.split(/\d+\./).length - 1 : 0;
+                          const hasMoves = !!g.pgn && g.pgn.trim().length > 0;
+                          return (
+                            <button
+                              key={g.id}
+                              onClick={() => loadAndAnalyzeMyGame(g.pgn)}
+                              disabled={!hasMoves || analyzing}
+                              className="w-full flex items-center justify-between rounded-lg border border-border/30 bg-[hsl(220,18%,20%)] hover:border-primary/40 hover:bg-[hsl(220,18%,24%)] transition-all px-3 py-2 group disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                                  won ? "bg-green-500/15 text-green-400"
+                                    : drew ? "bg-muted text-muted-foreground"
+                                    : "bg-red-500/15 text-red-400"
+                                }`}>
+                                  {won ? "WIN" : drew ? "DRAW" : "LOSS"}
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-medium text-foreground truncate">
+                                    {isWhite ? "White" : "Black"} · {g.time_control_label}
+                                    {moveCount > 0 && <span className="text-muted-foreground"> · {moveCount} moves</span>}
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                    <Calendar className="w-2.5 h-2.5" />
+                                    {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            <Brain className="h-3.5 w-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
-                          </button>
-                        );
-                      })}
-                    </div>
+                              <Brain className="h-3.5 w-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )
+                  ) : (
+                    myBotGames.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                        <Brain className="h-6 w-6 mb-2 text-primary/30" />
+                        <p className="text-sm">No bot games yet</p>
+                        <p className="text-[10px] mt-1">Beat a bot and it will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
+                        {myBotGames.map((b) => {
+                          const won = b.outcome === "win";
+                          const drew = b.outcome === "draw";
+                          const date = new Date(b.created_at);
+                          const hasMoves = !!b.pgn && b.pgn.trim().length > 0;
+                          return (
+                            <button
+                              key={b.id}
+                              onClick={() => loadAndAnalyzeMyGame(b.pgn)}
+                              disabled={!hasMoves || analyzing}
+                              className="w-full flex items-center justify-between rounded-lg border border-border/30 bg-[hsl(220,18%,20%)] hover:border-primary/40 hover:bg-[hsl(220,18%,24%)] transition-all px-3 py-2 group disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                                  won ? "bg-green-500/15 text-green-400"
+                                    : drew ? "bg-muted text-muted-foreground"
+                                    : "bg-red-500/15 text-red-400"
+                                }`}>
+                                  {won ? "WIN" : drew ? "DRAW" : "LOSS"}
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-medium text-foreground truncate flex items-center gap-1.5">
+                                    🤖 {b.bot_name}
+                                    <span className="text-[9px] text-muted-foreground font-mono">({b.bot_rating})</span>
+                                    <span className="text-muted-foreground">· {b.player_color === "w" ? "White" : "Black"}</span>
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                    <Calendar className="w-2.5 h-2.5" />
+                                    {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                    <span>· {b.time_control_label}</span>
+                                    {b.move_count > 0 && <span>· {b.move_count} moves</span>}
+                                  </p>
+                                </div>
+                              </div>
+                              <Brain className="h-3.5 w-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )
                   )}
                 </motion.div>
               )}
