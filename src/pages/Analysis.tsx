@@ -80,7 +80,9 @@ export default function Analysis() {
   const [bottomTab, setBottomTab] = useState<"explorer" | "import" | "my-games">("explorer");
   const { user } = useAuth();
   const [myGames, setMyGames] = useState<Array<{ id: string; pgn: string; result: string | null; created_at: string; time_control_label: string; white_player_id: string; black_player_id: string }>>([]);
+  const [myBotGames, setMyBotGames] = useState<Array<{ id: string; pgn: string; result: string; outcome: "win" | "loss" | "draw"; bot_name: string; bot_rating: number; player_color: "w" | "b"; created_at: string; time_control_label: string; move_count: number }>>([]);
   const [myGamesLoading, setMyGamesLoading] = useState(false);
+  const [myGamesSource, setMyGamesSource] = useState<"online" | "bot">("online");
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
 
