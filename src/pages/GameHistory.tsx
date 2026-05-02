@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Swords, Trophy, TrendingUp, Calendar, ArrowLeft,
-  Clock, Eye, Search, Star, X,
+  Clock, Eye, Search, Star, X, Brain,
 } from "lucide-react";
 import { detectOpening, formatOpeningLabel } from "@/lib/openings-detector";
 import { Chess } from "chess.js";
