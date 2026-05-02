@@ -113,6 +113,11 @@ export default function Analysis() {
   const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("lichess");
   const [explorerLoading, setExplorerLoading] = useState(false);
 
+  // MultiPV (top lines suggestions) state
+  const [multiPvCount, setMultiPvCount] = useState<number>(3);
+  const [topLines, setTopLines] = useState<MultiPvLine[]>([]);
+  const [linesLoading, setLinesLoading] = useState(false);
+
   // Current FEN for explorer
   const currentFen = useMemo(() => {
     if (pgnComplete && pgnCurrentIdx >= 0 && pgnCurrentIdx < pgnMoveEvals.length) {
