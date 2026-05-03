@@ -84,6 +84,44 @@ function formatGames(n: number): string {
   return String(n);
 }
 
+// Robust PGN/move-list loader that respects [FEN "..."] start positions.
+function loadPgnRobust(input: string): Chess | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  // Try chess.js loadPgn first (handles tags + FEN)
+  try {
+    const g = new Chess();
+    g.loadPgn(trimmed);
+    if (g.history().length > 0) return g;
+  } catch { /* fall through */ }
+  // Extract optional [FEN "..."] header
+  const fenMatch = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
+  const startFen = fenMatch ? fenMatch[1] : undefined;
+  // Strip headers and comments
+  const body = trimmed
+    .replace(/\[[^\]]*\]/g, " ")
+    .replace(/\{[^}]*\}/g, " ")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\$\d+/g, " ")
+    .replace(/\d+\.(\.\.)?/g, " ")
+    .replace(/(1-0|0-1|1\/2-1\/2|\*)/g, " ")
+    .trim();
+  const tokens = body.split(/\s+/).filter(Boolean);
+  let g: Chess;
+  try { g = startFen ? new Chess(startFen) : new Chess(); }
+  catch { g = new Chess(); }
+  for (const tok of tokens) {
+    try {
+      const mv = g.move(tok, { strict: false } as never);
+      if (!mv) return null;
+    } catch { return null; }
+  }
+  return g.history().length > 0 ? g : null;
+}
+
+// (legacy helper kept for callers below)
+function _placeholder() { return null; }
+
 type SidebarTab = "analysis" | "explorer" | "pgn";
 
 // ── Component ──
