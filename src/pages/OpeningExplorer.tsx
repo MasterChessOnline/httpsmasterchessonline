@@ -71,8 +71,26 @@ export default function OpeningExplorer() {
 
   // Lichess explorer state
   const [explorerData, setExplorerData] = useState<ExplorerData | null>(null);
-  const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("lichess");
+  const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("masters");
   const [explorerLoading, setExplorerLoading] = useState(false);
+
+  // Player search state
+  const [playerQuery, setPlayerQuery] = useState("");
+  const [playerLoading, setPlayerLoading] = useState(false);
+  const [playerResults, setPlayerResults] = useState<PlayerSummary[]>([]);
+
+  const searchPlayer = useCallback(async () => {
+    const q = playerQuery.trim();
+    if (!q) return;
+    setPlayerLoading(true);
+    setPlayerResults([]);
+    const [lichess, chesscom] = await Promise.all([fetchLichessPlayer(q), fetchChessComPlayer(q)]);
+    const out: PlayerSummary[] = [];
+    if (lichess) out.push(lichess);
+    if (chesscom) out.push(chesscom);
+    setPlayerResults(out);
+    setPlayerLoading(false);
+  }, [playerQuery]);
 
   const engineRef = useRef(getStockfishEngine());
   const abortRef = useRef(0);
