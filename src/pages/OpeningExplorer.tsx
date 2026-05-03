@@ -441,7 +441,58 @@ export default function OpeningExplorer() {
               )}
             </div>
 
-            {/* Move History */}
+            {/* Player Search (Lichess + Chess.com) */}
+            <div className="rounded-lg border border-border bg-card p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <User className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold">Player Search</span>
+                <span className="text-[10px] text-muted-foreground">Lichess + Chess.com</span>
+              </div>
+              <div className="flex gap-2 mb-2">
+                <input
+                  value={playerQuery}
+                  onChange={(e) => setPlayerQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") searchPlayer(); }}
+                  placeholder="username (e.g. MagnusCarlsen, DrNykterstein)"
+                  className="flex-1 px-2.5 py-1 rounded-md bg-muted/30 border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+                <Button size="sm" onClick={searchPlayer} disabled={playerLoading} className="h-7 px-3 text-xs">
+                  {playerLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Search"}
+                </Button>
+              </div>
+              {playerResults.length === 0 && !playerLoading && (
+                <div className="text-[11px] text-muted-foreground">Enter a Lichess or Chess.com username to view ratings, recent games, and PGNs.</div>
+              )}
+              {playerResults.map((p) => (
+                <div key={p.source} className="mb-2 pb-2 border-b border-border/40 last:border-b-0 last:pb-0 last:mb-0">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" className="font-bold text-foreground hover:text-primary inline-flex items-center gap-1">
+                      {p.title && <Badge variant="secondary" className="text-[9px] px-1 py-0 mr-1">{p.title}</Badge>}
+                      {p.username}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                    <span className="text-[10px] uppercase text-muted-foreground">{p.source}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mb-1.5">
+                    {p.ratings.bullet && <Badge variant="outline" className="text-[9px]">Bullet {p.ratings.bullet}</Badge>}
+                    {p.ratings.blitz && <Badge variant="outline" className="text-[9px]">Blitz {p.ratings.blitz}</Badge>}
+                    {p.ratings.rapid && <Badge variant="outline" className="text-[9px]">Rapid {p.ratings.rapid}</Badge>}
+                    {p.ratings.classical && <Badge variant="outline" className="text-[9px]">Classical {p.ratings.classical}</Badge>}
+                  </div>
+                  {p.recentGames.slice(0, 5).map((g) => (
+                    <div key={g.id} className="flex items-center justify-between text-[10px] py-0.5">
+                      <a href={g.url} target="_blank" rel="noopener noreferrer" className="text-foreground/80 hover:text-primary truncate flex-1">
+                        vs {g.opponent} <span className="text-muted-foreground">({g.timeControl})</span>
+                      </a>
+                      <span className={`shrink-0 ml-2 font-semibold ${g.result === "Win" ? "text-green-400" : g.result === "Loss" ? "text-red-400" : "text-muted-foreground"}`}>
+                        {g.result}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+
             <div className="rounded-lg border border-border bg-card p-3">
               <div className="flex items-center gap-2 mb-2">
                 <BarChart3 className="w-4 h-4 text-primary" />
