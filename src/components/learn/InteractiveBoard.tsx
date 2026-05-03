@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import EngineAnalysis from "./EngineAnalysis";
+import { usePieceGlyphs } from "@/lib/piece-glyphs";
 
 /**
  * A single move in a guided sequence.
@@ -58,6 +59,7 @@ const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 const DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export default function InteractiveBoard({ startFen, moves }: InteractiveBoardProps) {
+  const { get: getGlyph } = usePieceGlyphs();
   const baseFen = startFen || DEFAULT_FEN;
   const hasMoves = moves.length > 0;
 
@@ -384,7 +386,7 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
               const isLight = (ri + fi) % 2 === 0;
               const piece = board[ri]?.[fi];
               const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-              const pieceDisplay = pieceKey ? PIECE_DISPLAY[pieceKey] : null;
+              const pd = pieceKey ? getGlyph(pieceKey) : null;
               const sq = `${file}${rank}` as Square;
               const isSelected = selectedSquare === sq;
               const isLegal = legalMoveSquares.includes(sq);
@@ -407,8 +409,31 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
                   disabled={mode === "guided"}
                 >
                   {isLegal && !piece && <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />}
-                  {isLegal && pieceDisplay && <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />}
-                  {pieceDisplay && <span className={pieceDisplay.className}>{pieceDisplay.symbol}</span>}
+                  {isLegal && pd && <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />}
+                  {pd && (
+                    pd.svgUrl ? (
+                      <img
+                        src={pd.svgUrl}
+                        alt=""
+                        draggable={false}
+                        className="w-[88%] h-[88%] object-contain pointer-events-none"
+                        style={pd.pixelated ? { imageRendering: "pixelated" } : undefined}
+                      />
+                    ) : (
+                      <span
+                        className={`leading-none ${
+                          pd.white
+                            ? "drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
+                            : "drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
+                        }`}
+                        style={{
+                          color: pd.white ? "var(--piece-white, #ffffff)" : "var(--piece-black, hsl(220,15%,8%))",
+                        }}
+                      >
+                        {pd.symbol}
+                      </span>
+                    )
+                  )}
                   {isHint && !isSelected && (
                     <span className="absolute inset-[6%] rounded-full border-2 border-amber-400/60 animate-pulse" />
                   )}

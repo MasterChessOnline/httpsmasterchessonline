@@ -3,18 +3,10 @@ import { Chess, Square } from "chess.js";
 import { OpeningMove } from "@/lib/openings-data";
 import { playChessSound } from "@/lib/chess-sounds";
 import { motion } from "framer-motion";
+import { usePieceGlyphs } from "@/lib/piece-glyphs";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
-
-const PIECE_UNICODE: Record<string, { symbol: string; white: boolean }> = {
-  wk: { symbol: "♚", white: true }, wq: { symbol: "♛", white: true },
-  wr: { symbol: "♜", white: true }, wb: { symbol: "♝", white: true },
-  wn: { symbol: "♞", white: true }, wp: { symbol: "♟", white: true },
-  bk: { symbol: "♚", white: false }, bq: { symbol: "♛", white: false },
-  br: { symbol: "♜", white: false }, bb: { symbol: "♝", white: false },
-  bn: { symbol: "♞", white: false }, bp: { symbol: "♟", white: false },
-};
 
 interface OpeningBoardProps {
   fen: string;
@@ -39,6 +31,7 @@ export default function OpeningBoard({
   wrongSquare,
   correctSquare,
 }: OpeningBoardProps) {
+  const { get: getGlyph } = usePieceGlyphs();
   const game = useMemo(() => {
     const g = new Chess();
     try { g.load(fen); } catch { /* keep default */ }
@@ -80,7 +73,7 @@ export default function OpeningBoard({
                 const isWrong = wrongSquare === square;
                 const isCorrect = correctSquare === square;
                 const pieceKey = piece ? `${piece.color}${piece.type}` : null;
-                const pd = pieceKey ? PIECE_UNICODE[pieceKey] : null;
+                const pd = pieceKey ? getGlyph(pieceKey) : null;
 
                 let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
                 if (isWrong) bgClass = "bg-destructive/40";
@@ -111,13 +104,26 @@ export default function OpeningBoard({
                         initial={{ scale: 0.8, opacity: 0.5 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.15 }}
-                        className={`text-[min(6vw,2.8rem)] leading-none ${
+                        className={`leading-none flex items-center justify-center ${
+                          pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(6vw,2.8rem)]"
+                        } ${
                           pd.white
-                            ? "text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-                            : "text-[hsl(220,20%,12%)] drop-shadow-[0_0_3px_rgba(255,255,255,0.35)]"
+                            ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                            : "drop-shadow-[0_0_3px_rgba(255,255,255,0.35)]"
                         }`}
+                        style={pd.svgUrl ? undefined : {
+                          color: pd.white ? "var(--piece-white, #ffffff)" : "var(--piece-black, hsl(220,15%,8%))",
+                        }}
                       >
-                        {pd.symbol}
+                        {pd.svgUrl ? (
+                          <img
+                            src={pd.svgUrl}
+                            alt=""
+                            draggable={false}
+                            className="w-full h-full object-contain pointer-events-none"
+                            style={pd.pixelated ? { imageRendering: "pixelated" } : undefined}
+                          />
+                        ) : pd.symbol}
                       </motion.span>
                     )}
                     {isWrong && (
