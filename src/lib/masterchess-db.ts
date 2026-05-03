@@ -92,25 +92,36 @@ function buildIndex() {
   if (GAMES.length > 0) return;
   RAW_GAMES.forEach((rg, idx) => {
     const id = `mc-${idx + 1}`;
-    const game: MasterGame = { ...rg, id, source: "masterchess" };
-    GAMES.push(game);
+
+    // Parse moves token-by-token so a single bad SAN doesn't drop the whole game.
+    const tokens = rg.pgn
+      .replace(/\{[^}]*\}/g, " ")
+      .replace(/\([^)]*\)/g, " ")
+      .replace(/\d+\.(\.\.)?/g, " ")
+      .split(/\s+/)
+      .filter(t => t && !["1-0", "0-1", "1/2-1/2", "*"].includes(t));
 
     const c = new Chess();
-    let ok = true;
-    try { c.loadPgn(rg.pgn); } catch { ok = false; }
-    if (!ok) return;
+    const validHistory: { san: string; from: string; to: string; promotion?: string }[] = [];
+    for (const tok of tokens) {
+      try {
+        const mv = c.move(tok, { strict: false } as never);
+        if (!mv) break;
+        validHistory.push({ san: mv.san, from: mv.from, to: mv.to, promotion: mv.promotion });
+      } catch { break; }
+    }
+    if (validHistory.length === 0) return;
 
-    const history = c.history({ verbose: true });
+    // Re-emit a clean PGN of the validated prefix so the viewer can replay it.
+    const cleanPgn = validHistory.map(m => m.san).join(" ");
+    const game: MasterGame = { ...rg, pgn: cleanPgn, id, source: "masterchess" };
+    GAMES.push(game);
+
     const replay = new Chess();
     const avgRating = Math.round((rg.white.rating + rg.black.rating) / 2);
-
-    // Record starting position too
     let prevKey = fenKey(replay.fen());
-    if (!POSITION_INDEX.has(prevKey)) {
-      POSITION_INDEX.set(prevKey, { white: 0, draws: 0, black: 0, ratingSum: 0, ratingCount: 0, moves: new Map(), topGameIds: [] });
-    }
 
-    for (const mv of history) {
+    for (const mv of validHistory) {
       if (!POSITION_INDEX.has(prevKey)) {
         POSITION_INDEX.set(prevKey, { white: 0, draws: 0, black: 0, ratingSum: 0, ratingCount: 0, moves: new Map(), topGameIds: [] });
       }
