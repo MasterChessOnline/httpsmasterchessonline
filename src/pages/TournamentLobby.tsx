@@ -221,9 +221,13 @@ const TournamentLobby = () => {
         {isRegistering && tournament.starts_at && (() => {
           const ms = new Date(tournament.starts_at).getTime() - now;
           const sec = Math.max(0, Math.floor(ms / 1000));
-          const m = Math.floor(sec / 60);
+          const h = Math.floor(sec / 3600);
+          const m = Math.floor((sec % 3600) / 60);
           const s = sec % 60;
           const enough = registrations.length >= 2;
+          const fmt = h > 0
+            ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+            : `${m}:${String(s).padStart(2,"0")}`;
           return (
             <div className={`rounded-lg border p-3 mb-6 flex items-center justify-between gap-2 ${
               ms <= 0 ? "border-accent/40 bg-accent/10" : "border-primary/30 bg-primary/10"
@@ -233,9 +237,9 @@ const TournamentLobby = () => {
                 <div>
                   <p className="text-sm font-medium text-foreground">
                     {ms > 0 ? (
-                      <>Auto-starts in <span className="font-mono">{m}:{String(s).padStart(2, "0")}</span></>
+                      <>Auto-starts in <span className="font-mono">{fmt}</span></>
                     ) : enough ? (
-                      "Starting now…"
+                      "Pairing players & starting round 1…"
                     ) : (
                       "Waiting for more players (need at least 2)"
                     )}
