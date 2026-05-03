@@ -169,13 +169,17 @@ export async function fetchExplorerData(fen: string, ratings: string[] = ["1600"
       };
     });
 
-    const topGames = (raw.topGames || []).slice(0, 3).map((g: any) => ({
+    const mapGame = (g: any) => ({
       id: g.id,
       white: { name: g.white?.name || "?", rating: g.white?.rating || 0 },
       black: { name: g.black?.name || "?", rating: g.black?.rating || 0 },
       year: g.year || 0,
+      month: g.month,
       winner: g.winner,
-    }));
+      source: "lichess" as const,
+    });
+    const topGames = (raw.topGames || []).slice(0, 5).map(mapGame);
+    const recentGames = (raw.recentGames || []).slice(0, 5).map(mapGame);
 
     const data: ExplorerData = {
       moves,
@@ -185,6 +189,7 @@ export async function fetchExplorerData(fen: string, ratings: string[] = ["1600"
       totalGames,
       opening: raw.opening ? { eco: raw.opening.eco, name: raw.opening.name } : undefined,
       topGames,
+      recentGames,
     };
 
     CACHE.set(key, { data, ts: Date.now() });
