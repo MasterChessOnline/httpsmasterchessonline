@@ -469,7 +469,7 @@ export default function Analysis() {
             setSelectedSquare(null); setLegalMoves([]);
             return;
           }
-        } catch {}
+        } catch { /* ignore illegal variation move */ }
       }
       const piece = g.get(square);
       if (piece && piece.color === g.turn()) {
@@ -491,7 +491,7 @@ export default function Analysis() {
           evaluatePosition(newFen, fenBefore, move.san, move.from, move.to, move.color, Math.ceil(liveMoveHistory.length / 2) + 1);
           return;
         }
-      } catch {}
+      } catch { /* ignore illegal board move */ }
     }
     const piece = game.get(square);
     if (piece && piece.color === game.turn()) {
@@ -514,7 +514,7 @@ export default function Analysis() {
         setSelectedSquare(null); setLegalMoves([]); setLiveGame(new Chess(newFen));
         evaluatePosition(newFen, fenBefore, move.san, move.from, move.to, move.color, Math.ceil(liveMoveHistory.length / 2) + 1);
       }
-    } catch {}
+    } catch { /* ignore illegal explorer move */ }
   }, [liveGame, evaluatePosition, liveMoveHistory.length, liveViewIdx, pgnComplete]);
 
   const resetInteractive = useCallback(() => {
@@ -590,7 +590,7 @@ export default function Analysis() {
           const posEval = await engine.evaluate(vm.fen, depth);
           evalCp = scoreToWhitePov(vm.fen, posEval.evaluation, posEval.mate);
           mateW = mateToWhitePov(vm.fen, posEval.mate);
-        } catch {}
+        } catch { /* keep unevaluated variation move if engine fails */ }
       }
       newEvals.push({
         san: vm.san, fen: vm.fen, fenBefore, from: vm.from, to: vm.to,
