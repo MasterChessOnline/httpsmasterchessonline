@@ -701,7 +701,7 @@ export default function Analysis() {
         .order("created_at", { ascending: false })
         .limit(50),
       supabase
-        .from("bot_games" as any)
+        .from("bot_games")
         .select("id, pgn, result, outcome, bot_name, bot_rating, player_color, created_at, time_control_label, move_count")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
