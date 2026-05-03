@@ -111,6 +111,9 @@ function buildIndex() {
     }
 
     for (const mv of history) {
+      if (!POSITION_INDEX.has(prevKey)) {
+        POSITION_INDEX.set(prevKey, { white: 0, draws: 0, black: 0, ratingSum: 0, ratingCount: 0, moves: new Map(), topGameIds: [] });
+      }
       const stats = POSITION_INDEX.get(prevKey)!;
       // Tally aggregate (per game appearance)
       if (rg.winner === "white") stats.white += 1;
