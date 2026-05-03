@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
-import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData, fetchLichessPlayer, fetchChessComPlayer, PlayerSummary } from "@/lib/lichess-explorer";
+import { fetchMasterChessExplorer, MasterMove, MasterExplorerData } from "@/lib/masterchess-db";
 import { OPENINGS_DATABASE } from "@/lib/openings-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,8 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Brain, BookOpen, RotateCcw, ChevronLeft, ChevronRight,
   ChevronsLeft, ChevronsRight, Zap, Star, BarChart3, FlipVertical,
-  Globe, Database, Trophy, Loader2, Filter, Swords, Shield, Play, Search,
-  ExternalLink, User, Calendar
+  Globe, Database, Trophy, Loader2, Swords, Shield, Play, Search, Calendar
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -69,28 +68,9 @@ export default function OpeningExplorer() {
   const [analyzing, setAnalyzing] = useState(false);
   const [bestMoveUci, setBestMoveUci] = useState("");
 
-  // Lichess explorer state
-  const [explorerData, setExplorerData] = useState<ExplorerData | null>(null);
-  const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("masters");
+  // MasterChess explorer state
+  const [explorerData, setExplorerData] = useState<MasterExplorerData | null>(null);
   const [explorerLoading, setExplorerLoading] = useState(false);
-
-  // Player search state
-  const [playerQuery, setPlayerQuery] = useState("");
-  const [playerLoading, setPlayerLoading] = useState(false);
-  const [playerResults, setPlayerResults] = useState<PlayerSummary[]>([]);
-
-  const searchPlayer = useCallback(async () => {
-    const q = playerQuery.trim();
-    if (!q) return;
-    setPlayerLoading(true);
-    setPlayerResults([]);
-    const [lichess, chesscom] = await Promise.all([fetchLichessPlayer(q), fetchChessComPlayer(q)]);
-    const out: PlayerSummary[] = [];
-    if (lichess) out.push(lichess);
-    if (chesscom) out.push(chesscom);
-    setPlayerResults(out);
-    setPlayerLoading(false);
-  }, [playerQuery]);
 
   const engineRef = useRef(getStockfishEngine());
   const abortRef = useRef(0);
@@ -124,16 +104,13 @@ export default function OpeningExplorer() {
     });
   }, []);
 
-  // Fetch Lichess explorer data when position changes
+  // Fetch MasterChess DB data when position changes
   useEffect(() => {
-    let cancelled = false;
     setExplorerLoading(true);
-    const fetchFn = explorerDb === "masters" ? fetchMasterExplorerData : fetchExplorerData;
-    fetchFn(currentFen).then(data => {
-      if (!cancelled) { setExplorerData(data); setExplorerLoading(false); }
-    });
-    return () => { cancelled = true; };
-  }, [currentFen, explorerDb]);
+    const data = fetchMasterChessExplorer(currentFen);
+    setExplorerData(data);
+    setExplorerLoading(false);
+  }, [currentFen]);
 
   // Run Stockfish when position changes
   useEffect(() => {
@@ -220,23 +197,14 @@ export default function OpeningExplorer() {
             )}
             {analyzing && <Brain className="w-4 h-4 text-primary animate-pulse" />}
           </div>
-          {explorerData?.opening && (
-            <div className="flex items-center gap-2">
-              <a
-                href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(history.map(h => h.san).join(" "))}`}
-                target="_blank" rel="noopener noreferrer"
-              >
-                <Button size="sm" variant="outline" className="gap-1.5">
-                  <ExternalLink className="w-4 h-4" /> ChessBase DB
-                </Button>
-              </a>
-              <Link to="/play">
-                <Button size="sm" className="gap-1.5">
-                  <Play className="w-4 h-4" /> Play this Opening
-                </Button>
-              </Link>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Badge className="bg-primary/15 text-primary border border-primary/30 text-[10px]">MasterChess DB</Badge>
+            <Link to="/play">
+              <Button size="sm" className="gap-1.5">
+                <Play className="w-4 h-4" /> Play this Opening
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Search + Filters */}
@@ -337,23 +305,14 @@ export default function OpeningExplorer() {
               </div>
             </div>
 
-            {/* Lichess Explorer – Real Data */}
+            {/* MasterChess DB Explorer */}
             <div className="rounded-lg border border-border bg-card p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold">Opening Explorer</span>
+                  <Database className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold">MasterChess Database</span>
                 </div>
-                <div className="flex gap-0.5">
-                  <button onClick={() => setExplorerDb("lichess")}
-                    className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "lichess" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
-                    Lichess
-                  </button>
-                  <button onClick={() => setExplorerDb("masters")}
-                    className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "masters" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
-                    Masters
-                  </button>
-                </div>
+                <Badge variant="secondary" className="text-[9px]">Local · Curated</Badge>
               </div>
 
               {explorerLoading ? (
@@ -416,81 +375,24 @@ export default function OpeningExplorer() {
                         <Trophy className="h-3 w-3 text-primary" />
                         <span className="text-[10px] font-bold text-muted-foreground uppercase">Top Games</span>
                       </div>
-                      {explorerData.topGames.map((g, i) => {
-                        const href = g.source === "masters"
-                          ? `https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(history.map(h => h.san).join(" "))}`
-                          : `https://lichess.org/${g.id}`;
-                        return (
-                          <a key={i} href={href} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center justify-between text-[10px] py-0.5 hover:text-primary transition-colors gap-2">
-                            <span className="text-foreground/80 truncate flex-1">
-                              <span className="font-semibold">{g.white.name}</span> ({g.white.rating}) <span className="text-muted-foreground">vs</span> <span className="font-semibold">{g.black.name}</span> ({g.black.rating})
-                            </span>
-                            <span className="text-muted-foreground shrink-0 inline-flex items-center gap-1">
-                              {g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"}
-                              <Calendar className="w-2.5 h-2.5" />{g.year}
-                            </span>
-                          </a>
-                        );
-                      })}
+                      {explorerData.topGames.map((g, i) => (
+                        <Link key={i} to={`/master-game/${g.id}`}
+                          className="flex items-center justify-between text-[10px] py-0.5 hover:text-primary transition-colors gap-2">
+                          <span className="text-foreground/80 truncate flex-1">
+                            <span className="font-semibold">{g.white.name}</span> ({g.white.rating}) <span className="text-muted-foreground">vs</span> <span className="font-semibold">{g.black.name}</span> ({g.black.rating})
+                          </span>
+                          <span className="text-muted-foreground shrink-0 inline-flex items-center gap-1">
+                            {g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"}
+                            <Calendar className="w-2.5 h-2.5" />{g.year}
+                          </span>
+                        </Link>
+                      ))}
                     </div>
                   )}
                 </>
               ) : (
                 <div className="text-xs text-muted-foreground py-2">Out of book — Stockfish is your guide.</div>
               )}
-            </div>
-
-            {/* Player Search (Lichess + Chess.com) */}
-            <div className="rounded-lg border border-border bg-card p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <User className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold">Player Search</span>
-                <span className="text-[10px] text-muted-foreground">Lichess + Chess.com</span>
-              </div>
-              <div className="flex gap-2 mb-2">
-                <input
-                  value={playerQuery}
-                  onChange={(e) => setPlayerQuery(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") searchPlayer(); }}
-                  placeholder="username (e.g. MagnusCarlsen, DrNykterstein)"
-                  className="flex-1 px-2.5 py-1 rounded-md bg-muted/30 border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-                <Button size="sm" onClick={searchPlayer} disabled={playerLoading} className="h-7 px-3 text-xs">
-                  {playerLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Search"}
-                </Button>
-              </div>
-              {playerResults.length === 0 && !playerLoading && (
-                <div className="text-[11px] text-muted-foreground">Enter a Lichess or Chess.com username to view ratings, recent games, and PGNs.</div>
-              )}
-              {playerResults.map((p) => (
-                <div key={p.source} className="mb-2 pb-2 border-b border-border/40 last:border-b-0 last:pb-0 last:mb-0">
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <a href={p.url} target="_blank" rel="noopener noreferrer" className="font-bold text-foreground hover:text-primary inline-flex items-center gap-1">
-                      {p.title && <Badge variant="secondary" className="text-[9px] px-1 py-0 mr-1">{p.title}</Badge>}
-                      {p.username}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <span className="text-[10px] uppercase text-muted-foreground">{p.source}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mb-1.5">
-                    {p.ratings.bullet && <Badge variant="outline" className="text-[9px]">Bullet {p.ratings.bullet}</Badge>}
-                    {p.ratings.blitz && <Badge variant="outline" className="text-[9px]">Blitz {p.ratings.blitz}</Badge>}
-                    {p.ratings.rapid && <Badge variant="outline" className="text-[9px]">Rapid {p.ratings.rapid}</Badge>}
-                    {p.ratings.classical && <Badge variant="outline" className="text-[9px]">Classical {p.ratings.classical}</Badge>}
-                  </div>
-                  {p.recentGames.slice(0, 5).map((g) => (
-                    <div key={g.id} className="flex items-center justify-between text-[10px] py-0.5">
-                      <a href={g.url} target="_blank" rel="noopener noreferrer" className="text-foreground/80 hover:text-primary truncate flex-1">
-                        vs {g.opponent} <span className="text-muted-foreground">({g.timeControl})</span>
-                      </a>
-                      <span className={`shrink-0 ml-2 font-semibold ${g.result === "Win" ? "text-green-400" : g.result === "Loss" ? "text-red-400" : "text-muted-foreground"}`}>
-                        {g.result}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ))}
             </div>
 
             <div className="rounded-lg border border-border bg-card p-3">
