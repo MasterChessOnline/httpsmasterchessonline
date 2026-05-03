@@ -446,7 +446,7 @@ export default function Analysis() {
       evals.push({
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
         color: move.color, moveNumber: Math.floor(i / 2) + 1,
-        eval: evalCp, mate: posEval.mate,
+        eval: evalCp, mate: mateToWhitePov(fenAfter, posEval.mate),
       });
     }
     setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
