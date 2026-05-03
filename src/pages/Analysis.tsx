@@ -779,10 +779,10 @@ export default function Analysis() {
         )}
 
         {/* ── TOP ROW: Board + Analysis Sidebar ── */}
-        <div className="flex justify-center items-start gap-0 w-full max-w-[920px]">
+        <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-3 w-full max-w-[920px]">
           {/* ── LEFT: Eval Bar + Board ── */}
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-2 mb-1 self-start ml-10">
+          <div className="flex flex-col items-center w-full lg:w-auto">
+            <div className="flex items-center gap-2 mb-1 self-start ml-8 sm:ml-10">
               <div className="w-4 h-4 rounded-sm bg-[hsl(220,15%,20%)] border border-border/30" />
               <span className="text-xs font-semibold text-foreground/80">Black</span>
               {explorerData?.opening && (
@@ -790,9 +790,9 @@ export default function Analysis() {
               )}
             </div>
 
-            <div className="flex items-stretch">
+            <div className="flex items-stretch w-full justify-center">
               {/* Eval Bar */}
-              <div className="w-7 shrink-0 rounded-sm overflow-hidden mr-1.5 relative flex flex-col" style={{ minHeight: 420 }}>
+              <div className="w-6 sm:w-7 shrink-0 rounded-sm overflow-hidden mr-1.5 relative flex flex-col" style={{ minHeight: 320 }}>
                 <motion.div className="bg-[hsl(220,15%,18%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${100 - evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
                 <motion.div className="bg-[hsl(60,10%,90%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -808,7 +808,7 @@ export default function Analysis() {
               </div>
 
               {/* Board */}
-              <div className="w-[min(50vw,460px)]">
+              <div className="w-[min(88vw,460px)] lg:w-[min(50vw,460px)]">
                 <ChessBoard
                   game={boardGame}
                   flipped={flipped}
@@ -822,7 +822,7 @@ export default function Analysis() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 mt-1 self-start ml-10">
+            <div className="flex items-center gap-2 mt-1 self-start ml-8 sm:ml-10">
               <div className="w-4 h-4 rounded-sm bg-[hsl(60,10%,90%)] border border-border/30" />
               <span className="text-xs font-semibold text-foreground/80">White</span>
             </div>
@@ -839,7 +839,7 @@ export default function Analysis() {
           </div>
 
           {/* ── RIGHT: Analysis Sidebar ── */}
-          <div className="w-[340px] lg:w-[380px] shrink-0 ml-3 flex flex-col bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden" style={{ minHeight: 500 }}>
+          <div className="w-full lg:w-[340px] xl:w-[380px] lg:shrink-0 lg:ml-3 flex flex-col bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden" style={{ minHeight: 320 }}>
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/20 bg-[hsl(220,18%,14%)]">
               <Brain className="h-4 w-4 text-primary" />
