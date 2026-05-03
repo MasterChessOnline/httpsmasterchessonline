@@ -17,6 +17,24 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
+  // Require authentication
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const token = authHeader.replace("Bearer ", "");
+  const { data: claims, error: authErr } = await supabaseClient.auth.getClaims(token);
+  if (authErr || !claims?.claims?.sub) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const callerId = claims.claims.sub;
+
   try {
     const { sessionId } = await req.json();
     if (!sessionId) throw new Error("No session ID provided");
@@ -29,7 +47,15 @@ serve(async (req) => {
     
     if (session.payment_status === "paid") {
       const { itemType, itemId, userId } = session.metadata || {};
-      
+
+      // Verify the session belongs to the caller (or is guest)
+      if (userId && userId !== "guest" && userId !== callerId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Upsert to purchases table to avoid duplicates
       const { error } = await supabaseClient
         .from('purchases')

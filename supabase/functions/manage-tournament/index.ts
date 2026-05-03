@@ -32,6 +32,18 @@ Deno.serve(async (req) => {
 
   try {
     if (action === "create") {
+      // Only admins/organizers can create tournaments
+      const { data: roleRows } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      const allowed = (roleRows || []).some((r: any) => ["admin", "organizer"].includes(r.role));
+      if (!allowed) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return await handleCreate(supabase, { category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment });
     }
     if (action === "join") {
