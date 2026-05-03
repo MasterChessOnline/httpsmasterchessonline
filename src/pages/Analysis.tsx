@@ -563,7 +563,7 @@ export default function Analysis() {
 
   const discardVariation = useCallback(() => {
     if (!variation) return;
-    setVariation(null);
+    setVariations(prev => prev.filter(v => v.fromIdx !== variation.fromIdx));
     variationGameRef.current = null;
     if (pgnCurrentIdx === -1) {
       pgnDisplayGame.current = new Chess();
