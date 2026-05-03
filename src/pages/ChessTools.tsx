@@ -1,13 +1,17 @@
+import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Calculator, BarChart3, BookOpen, Swords, Target, Crown,
   Play, Video, Map, Trophy, Brain, Flame, Puzzle, Clock,
-  GraduationCap, Compass, History, Users, Sparkles,
+  GraduationCap, Compass, History, Users, Sparkles, ArrowRight,
 } from "lucide-react";
 
 const TOOLS = [
@@ -63,6 +67,69 @@ const TOOLS = [
   },
 ];
 
+function QuickEloWidget() {
+  const [yourRating, setYourRating] = useState(1200);
+  const [oppRating, setOppRating] = useState(1200);
+  const [k, setK] = useState(32);
+
+  const { expected, win, draw, loss } = useMemo(() => {
+    const exp = 1 / (1 + Math.pow(10, (oppRating - yourRating) / 400));
+    return {
+      expected: exp,
+      win: Math.round(k * (1 - exp)),
+      draw: Math.round(k * (0.5 - exp)),
+      loss: Math.round(k * (0 - exp)),
+    };
+  }, [yourRating, oppRating, k]);
+
+  return (
+    <Card className="border-primary/30 bg-card mb-8">
+      <CardContent className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="rounded-lg bg-primary/10 p-2">
+            <Calculator className="w-4 h-4 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm">Quick ELO Calculator</h3>
+            <p className="text-[11px] text-muted-foreground">See your rating change in real time.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+          <div>
+            <Label className="text-[11px]">Your rating</Label>
+            <Input type="number" value={yourRating} onChange={(e) => setYourRating(parseInt(e.target.value) || 0)} />
+          </div>
+          <div>
+            <Label className="text-[11px]">Opponent rating</Label>
+            <Input type="number" value={oppRating} onChange={(e) => setOppRating(parseInt(e.target.value) || 0)} />
+          </div>
+          <div>
+            <Label className="text-[11px]">K-factor</Label>
+            <Input type="number" value={k} onChange={(e) => setK(parseInt(e.target.value) || 0)} />
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-2">
+            <p className="text-[10px] text-muted-foreground">Win</p>
+            <p className="text-lg font-bold text-green-400">+{win}</p>
+          </div>
+          <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-2">
+            <p className="text-[10px] text-muted-foreground">Draw</p>
+            <p className="text-lg font-bold text-yellow-400">{draw >= 0 ? "+" : ""}{draw}</p>
+          </div>
+          <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-2">
+            <p className="text-[10px] text-muted-foreground">Loss</p>
+            <p className="text-lg font-bold text-red-400">{loss}</p>
+          </div>
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-2 text-center">
+          Expected score: {(expected * 100).toFixed(1)}%
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 const ChessTools = () => (
   <div className="min-h-screen bg-background text-foreground">
     <Navbar />
@@ -76,6 +143,8 @@ const ChessTools = () => (
         </h1>
         <p className="text-muted-foreground mt-2">Everything you need to play, learn, and improve — all in one place.</p>
       </motion.div>
+
+      <QuickEloWidget />
 
       {TOOLS.map((section, si) => (
         <motion.div

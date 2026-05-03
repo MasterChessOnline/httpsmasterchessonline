@@ -43,7 +43,13 @@ const TournamentLobby = () => {
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState<"standings" | "rounds" | "chat">("standings");
   const [dismissedBanners, setDismissedBanners] = useState<Record<string, number>>({});
+  const [now, setNow] = useState(Date.now());
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const currentRound = tournament?.current_round ?? 0;
   const isReadyDismissed = dismissedBanners.ready === currentRound;
@@ -193,6 +199,38 @@ const TournamentLobby = () => {
             </div>
           </div>
         </div>
+
+        {/* Auto-start countdown */}
+        {isRegistering && tournament.starts_at && (() => {
+          const ms = new Date(tournament.starts_at).getTime() - now;
+          const sec = Math.max(0, Math.floor(ms / 1000));
+          const m = Math.floor(sec / 60);
+          const s = sec % 60;
+          const enough = registrations.length >= 2;
+          return (
+            <div className={`rounded-lg border p-3 mb-6 flex items-center justify-between gap-2 ${
+              ms <= 0 ? "border-accent/40 bg-accent/10" : "border-primary/30 bg-primary/10"
+            }`}>
+              <div className="flex items-center gap-2">
+                <Timer className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {ms > 0 ? (
+                      <>Auto-starts in <span className="font-mono">{m}:{String(s).padStart(2, "0")}</span></>
+                    ) : enough ? (
+                      "Starting now…"
+                    ) : (
+                      "Waiting for more players (need at least 2)"
+                    )}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {registrations.length} player{registrations.length === 1 ? "" : "s"} registered · {tournament.time_control_label}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Notification banner for active round */}
         {isActive && myPairing && !myPairing.result && myPairing.game_id && !isReadyDismissed && (

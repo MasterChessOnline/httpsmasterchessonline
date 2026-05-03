@@ -20,6 +20,22 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader || "" } },
   });
 
+  let body: any = {};
+  try { body = await req.json(); } catch { body = {}; }
+  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes } = body;
+
+  // Public action: auto-start due tournaments (called by cron). No user required.
+  if (action === "auto_start_due") {
+    try {
+      return await handleAutoStartDue(supabase);
+    } catch (err) {
+      return new Response(JSON.stringify({ error: (err as Error).message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
   const { data: { user } } = await userClient.auth.getUser();
   if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -28,23 +44,10 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players } = await req.json();
-
   try {
     if (action === "create") {
-      // Only admins/organizers can create tournaments
-      const { data: roleRows } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-      const allowed = (roleRows || []).some((r: any) => ["admin", "organizer"].includes(r.role));
-      if (!allowed) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return await handleCreate(supabase, { category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment });
+      // Any authenticated user can create a tournament (they become the creator).
+      return await handleCreate(supabase, user.id, { name, category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment, starts_in_minutes });
     }
     if (action === "join") {
       return await handleJoin(supabase, user.id, tournament_id);
@@ -72,27 +75,124 @@ Deno.serve(async (req) => {
 });
 
 // ===================== CREATE =====================
-async function handleCreate(supabase: any, opts: any) {
+async function handleCreate(supabase: any, userId: string, opts: any) {
+  const startsInMin = Math.max(2, Number(opts.starts_in_minutes) || 5);
+  const startsAt = new Date(Date.now() + startsInMin * 60 * 1000).toISOString();
+  const cat = opts.category || "blitz";
+  const baseName = opts.name?.trim() || `${cat.charAt(0).toUpperCase() + cat.slice(1)} Arena`;
+
   const { data: tournament, error } = await supabase
     .from("tournaments")
     .insert({
-      name: `${opts.category?.charAt(0).toUpperCase() + opts.category?.slice(1) || "Blitz"} Arena`,
-      description: `Auto-created ${opts.format || "swiss"} tournament`,
-      category: opts.category || "blitz",
+      name: baseName,
+      description: `${opts.format || "swiss"} tournament — auto-starts at scheduled time`,
+      category: cat,
       format: opts.format || "swiss",
+      tournament_type: opts.format === "round-robin" ? "round_robin" : "swiss",
       total_rounds: opts.total_rounds || 5,
       max_players: opts.max_players || 32,
       time_control_label: opts.time_control_label || "5+3",
       time_control_seconds: opts.time_control_seconds || 300,
       time_control_increment: opts.time_control_increment || 3,
       status: "registering",
-      starts_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      starts_at: startsAt,
+      created_by: userId,
+      start_time_locked: false,
     })
     .select()
     .single();
 
   if (error) throw error;
   return jsonRes({ tournament });
+}
+
+// ===================== AUTO-START DUE =====================
+async function handleAutoStartDue(supabase: any) {
+  // Find all registering tournaments whose starts_at has passed and have >=2 players.
+  const { data: due } = await supabase
+    .from("tournaments")
+    .select("id, starts_at, max_players, time_control_seconds, time_control_label, time_control_increment")
+    .eq("status", "registering")
+    .lte("starts_at", new Date().toISOString());
+
+  const started: string[] = [];
+  const cancelled: string[] = [];
+
+  for (const t of due || []) {
+    const { count } = await supabase
+      .from("tournament_registrations")
+      .select("id", { count: "exact", head: true })
+      .eq("tournament_id", t.id);
+
+    if ((count || 0) < 2) {
+      // Not enough players — cancel
+      await supabase.from("tournaments").update({ status: "finished", auto_started: true }).eq("id", t.id);
+      cancelled.push(t.id);
+      continue;
+    }
+
+    const { data: players } = await supabase
+      .from("tournament_registrations")
+      .select("user_id, rating_at_join, score")
+      .eq("tournament_id", t.id)
+      .order("rating_at_join", { ascending: false });
+
+    if (!players || players.length < 2) continue;
+
+    const pairings = generateSwissPairings(players, 1);
+    for (const pairing of pairings) {
+      const { data: onlineGame } = await supabase
+        .from("online_games")
+        .insert({
+          white_player_id: pairing.white,
+          black_player_id: pairing.black,
+          white_time: t.time_control_seconds,
+          black_time: t.time_control_seconds,
+          time_control_label: t.time_control_label,
+          increment: t.time_control_increment,
+        })
+        .select()
+        .single();
+
+      await supabase.from("tournament_pairings").insert({
+        tournament_id: t.id,
+        round: 1,
+        white_player_id: pairing.white,
+        black_player_id: pairing.black,
+        game_id: onlineGame?.id || null,
+      });
+    }
+
+    if (players.length % 2 === 1) {
+      const byePlayer = players[players.length - 1];
+      await supabase.from("tournament_pairings").insert({
+        tournament_id: t.id,
+        round: 1,
+        white_player_id: byePlayer.user_id,
+        black_player_id: null,
+        result: "1-0",
+      });
+      await supabase
+        .from("tournament_registrations")
+        .update({ score: 1 })
+        .eq("tournament_id", t.id)
+        .eq("user_id", byePlayer.user_id);
+    }
+
+    await supabase
+      .from("tournaments")
+      .update({
+        status: "active",
+        current_round: 1,
+        round_started_at: new Date().toISOString(),
+        auto_started: true,
+      })
+      .eq("id", t.id);
+
+    started.push(t.id);
+  }
+
+  return jsonRes({ ok: true, started, cancelled });
 }
 
 // ===================== JOIN =====================

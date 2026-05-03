@@ -17,6 +17,7 @@ import { toast } from "@/hooks/use-toast";
 import { useStreak } from "@/hooks/use-streak";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
 import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
+import { CreateTournamentDialog } from "@/components/tournaments/CreateTournamentDialog";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
@@ -117,6 +118,7 @@ const Tournaments = () => {
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [myRegistrations, setMyRegistrations] = useState<Set<string>>(new Set());
   const [onlyMine, setOnlyMine] = useState(filterParam === "mine");
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const [lbPlayers, setLbPlayers] = useState<LeaderboardEntry[]>([]);
   const [lbLoading, setLbLoading] = useState(false);
@@ -172,10 +174,8 @@ const Tournaments = () => {
     if (filterParam === "starting") {
       setStatusFilter("registering");
     }
-    if (filterParam === "create" && user && !creating) {
-      // auto-trigger create flow once
-      handleCreateTournament();
-      // strip the param so we don't loop on re-render
+    if (filterParam === "create" && user) {
+      setCreateDialogOpen(true);
       setSearchParams({}, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -213,34 +213,7 @@ const Tournaments = () => {
     setJoiningId(null);
   };
 
-  const handleCreateTournament = async () => {
-    if (!user) { navigate("/login"); return; }
-    setCreating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("manage-tournament", {
-        body: {
-          action: "create",
-          time_control_label: "5+3",
-          time_control_seconds: 300,
-          time_control_increment: 3,
-          category: "blitz",
-          format: "swiss",
-          total_rounds: 5,
-          max_players: 32,
-        },
-      });
-      if (error) throw error;
-      if (data?.tournament?.id) {
-        await supabase.functions.invoke("manage-tournament", {
-          body: { action: "join", tournament_id: data.tournament.id },
-        });
-        navigate(`/tournaments/${data.tournament.id}`);
-      }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
-    }
-    setCreating(false);
-  };
+  // Create flow handled by CreateTournamentDialog
 
   // Filter tournaments
   const filtered = dbTournaments.filter(t => {
@@ -445,10 +418,8 @@ const Tournaments = () => {
                   </button>
                 ))}
               </div>
-              <Button onClick={handleCreateTournament} disabled={creating} size="sm">
-                {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-                Create
-              </Button>
+              <CreateTournamentDialog onCreated={fetchTournaments} />
+
             </div>
 
             <div className="flex gap-1.5 mb-3 flex-wrap">
@@ -520,9 +491,10 @@ const Tournaments = () => {
               <div className="text-center py-16">
                 <Swords className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground mb-4">No tournaments match your filters.</p>
-                <Button onClick={handleCreateTournament} disabled={creating}>
-                  <Plus className="h-4 w-4 mr-1" /> Create One
-                </Button>
+                <CreateTournamentDialog
+                  trigger={<Button><Plus className="h-4 w-4 mr-1" /> Create One</Button>}
+                  onCreated={fetchTournaments}
+                />
               </div>
             ) : (
               <div className="space-y-3">
