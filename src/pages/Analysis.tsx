@@ -985,6 +985,11 @@ export default function Analysis() {
                           {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
                           {!showNum && <span className="w-5 shrink-0" />}
                           <span className="font-mono font-medium">{mv.san}</span>
+                          {pgnComplete && reviewClassifications[i] && (
+                            <span className={`ml-auto text-[10px] font-bold ${CLASS_META[reviewClassifications[i]].color}`}>
+                              {CLASS_META[reviewClassifications[i]].symbol}
+                            </span>
+                          )}
                         </button>
                         {showVarHere && (
                           <div className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
