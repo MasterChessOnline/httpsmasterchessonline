@@ -15,6 +15,7 @@ import PromotionDialog, { type PromotionPiece } from "@/components/chess/Promoti
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { getAIMove, evaluateBoard, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
 import { playChessSound } from "@/lib/chess-sounds";
+import { findCountry } from "@/lib/countries";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
