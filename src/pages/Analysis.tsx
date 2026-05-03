@@ -874,19 +874,59 @@ export default function Analysis() {
               ) : (
                 <div className="grid grid-cols-2 gap-x-1 gap-y-0.5">
                   {activeEvals.map((mv, i) => {
-                    const isActive = activeIdx === i;
+                    const isActive = activeIdx === i && !variation;
                     const showNum = mv.color === "w";
+                    const showVarHere = pgnComplete && variation && variation.fromIdx === i;
                     return (
-                      <button key={i} onClick={() => goFn(i)}
-                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors ${
-                          isActive ? "bg-[hsl(120,40%,35%)] text-white" : "hover:bg-[hsl(220,18%,22%)] text-foreground/80"
-                        } ${mv.color === "w" ? "col-start-1" : "col-start-2"}`}>
-                        {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
-                        {!showNum && <span className="w-5 shrink-0" />}
-                        <span className="font-mono font-medium">{mv.san}</span>
-                      </button>
+                      <div key={i} className={`contents`}>
+                        <button onClick={() => goFn(i)}
+                          className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors ${
+                            isActive ? "bg-[hsl(120,40%,35%)] text-white" : "hover:bg-[hsl(220,18%,22%)] text-foreground/80"
+                          } ${mv.color === "w" ? "col-start-1" : "col-start-2"}`}>
+                          {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
+                          {!showNum && <span className="w-5 shrink-0" />}
+                          <span className="font-mono font-medium">{mv.san}</span>
+                        </button>
+                        {showVarHere && (
+                          <div className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
+                            <span className="text-primary font-mono">(</span>
+                            {variation.moves.map((vm, vi) => (
+                              <span key={vi} className="font-mono">
+                                {vm.color === "w" && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}.</span>}
+                                {vm.color === "b" && vi === 0 && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}…</span>}
+                                {vm.san}
+                                {vi < variation.moves.length - 1 ? " " : ""}
+                              </span>
+                            ))}
+                            <span className="text-primary font-mono">)</span>
+                            <Button size="sm" variant="default" className="ml-2 h-5 px-2 text-[9px] bg-primary text-primary-foreground" onClick={promoteVariation}>
+                              Promote
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-5 px-2 text-[9px]" onClick={discardVariation}>
+                              ✕
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
+                  {/* Variation starting from the very beginning (fromIdx === -1) */}
+                  {pgnComplete && variation && variation.fromIdx === -1 && (
+                    <div className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
+                      <span className="text-primary font-mono">(</span>
+                      {variation.moves.map((vm, vi) => (
+                        <span key={vi} className="font-mono">
+                          {vm.color === "w" && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}.</span>}
+                          {vm.color === "b" && vi === 0 && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}…</span>}
+                          {vm.san}
+                          {vi < variation.moves.length - 1 ? " " : ""}
+                        </span>
+                      ))}
+                      <span className="text-primary font-mono">)</span>
+                      <Button size="sm" variant="default" className="ml-2 h-5 px-2 text-[9px] bg-primary text-primary-foreground" onClick={promoteVariation}>Promote</Button>
+                      <Button size="sm" variant="ghost" className="h-5 px-2 text-[9px]" onClick={discardVariation}>✕</Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
