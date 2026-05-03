@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import EngineAnalysis from "./EngineAnalysis";
 
 /**
  * A single move in a guided sequence.
@@ -486,7 +487,9 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
         ) : null}
       </div>
 
-      {/* Branch picker — appears when current position has alternative continuations */}
+      {/* Stockfish engine analysis (toggleable) */}
+      <EngineAnalysis fen={currentFen} />
+
       {availableBranches && (
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 mb-3">
           <div className="flex items-center gap-1.5 mb-2 text-[11px] font-medium text-amber-400/90 uppercase tracking-wider">
