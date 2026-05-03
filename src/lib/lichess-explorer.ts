@@ -26,7 +26,84 @@ export interface ExplorerData {
   black: number;
   totalGames: number;
   opening?: { eco: string; name: string };
-  topGames?: { id: string; white: { name: string; rating: number }; black: { name: string; rating: number }; year: number; winner?: string }[];
+  topGames?: { id: string; white: { name: string; rating: number }; black: { name: string; rating: number }; year: number; month?: string; winner?: string; source: "lichess" | "masters" }[];
+  recentGames?: { id: string; white: { name: string; rating: number }; black: { name: string; rating: number }; year: number; month?: string; winner?: string; source: "lichess" | "masters" }[];
+}
+
+// ── Player search (Chess.com PubAPI + Lichess) ──
+export interface PlayerSummary {
+  source: "lichess" | "chesscom";
+  username: string;
+  url: string;
+  title?: string;
+  ratings: { bullet?: number; blitz?: number; rapid?: number; classical?: number };
+  recentGames: { id: string; url: string; pgn?: string; opponent: string; result: string; timeControl: string; endedAt: number }[];
+}
+
+export async function fetchLichessPlayer(username: string): Promise<PlayerSummary | null> {
+  try {
+    const u = await fetch(`https://lichess.org/api/user/${encodeURIComponent(username)}`).then(r => r.ok ? r.json() : null);
+    if (!u) return null;
+    const perfs = u.perfs || {};
+    const games: PlayerSummary["recentGames"] = [];
+    try {
+      const txt = await fetch(`https://lichess.org/api/games/user/${encodeURIComponent(username)}?max=10&pgnInJson=true&clocks=false&evals=false`, {
+        headers: { Accept: "application/x-ndjson" },
+      }).then(r => r.text());
+      for (const line of txt.split("\n").filter(Boolean).slice(0, 10)) {
+        try {
+          const g = JSON.parse(line);
+          const isWhite = g.players?.white?.user?.name?.toLowerCase() === username.toLowerCase();
+          const opp = isWhite ? g.players?.black?.user?.name : g.players?.white?.user?.name;
+          const result = g.winner ? (g.winner === (isWhite ? "white" : "black") ? "Win" : "Loss") : "Draw";
+          games.push({ id: g.id, url: `https://lichess.org/${g.id}`, pgn: g.pgn, opponent: opp || "?", result, timeControl: g.speed || "?", endedAt: g.lastMoveAt || g.createdAt || 0 });
+        } catch {}
+      }
+    } catch {}
+    return {
+      source: "lichess", username: u.username, url: `https://lichess.org/@/${u.username}`,
+      title: u.title,
+      ratings: { bullet: perfs.bullet?.rating, blitz: perfs.blitz?.rating, rapid: perfs.rapid?.rating, classical: perfs.classical?.rating },
+      recentGames: games,
+    };
+  } catch { return null; }
+}
+
+export async function fetchChessComPlayer(username: string): Promise<PlayerSummary | null> {
+  try {
+    const [profileRes, statsRes] = await Promise.all([
+      fetch(`https://api.chess.com/pub/player/${encodeURIComponent(username.toLowerCase())}`),
+      fetch(`https://api.chess.com/pub/player/${encodeURIComponent(username.toLowerCase())}/stats`),
+    ]);
+    if (!profileRes.ok) return null;
+    const profile = await profileRes.json();
+    const stats = statsRes.ok ? await statsRes.json() : {};
+    // Latest archive
+    const archivesRes = await fetch(`https://api.chess.com/pub/player/${encodeURIComponent(username.toLowerCase())}/games/archives`);
+    const archives = archivesRes.ok ? (await archivesRes.json()).archives as string[] : [];
+    const latest = archives[archives.length - 1];
+    const games: PlayerSummary["recentGames"] = [];
+    if (latest) {
+      const gRes = await fetch(latest);
+      if (gRes.ok) {
+        const gData = await gRes.json();
+        const arr = (gData.games || []).slice(-10).reverse();
+        for (const g of arr) {
+          const isWhite = g.white?.username?.toLowerCase() === username.toLowerCase();
+          const opp = isWhite ? g.black?.username : g.white?.username;
+          const me = isWhite ? g.white : g.black;
+          const result = me?.result === "win" ? "Win" : (me?.result === "agreed" || me?.result === "stalemate" || me?.result === "repetition" || me?.result === "insufficient" || me?.result === "50move" || me?.result === "timevsinsufficient") ? "Draw" : "Loss";
+          games.push({ id: g.uuid || g.url, url: g.url, pgn: g.pgn, opponent: opp || "?", result, timeControl: g.time_class || "?", endedAt: (g.end_time || 0) * 1000 });
+        }
+      }
+    }
+    return {
+      source: "chesscom", username: profile.username, url: profile.url,
+      title: profile.title,
+      ratings: { bullet: stats.chess_bullet?.last?.rating, blitz: stats.chess_blitz?.last?.rating, rapid: stats.chess_rapid?.last?.rating },
+      recentGames: games,
+    };
+  } catch { return null; }
 }
 
 const CACHE = new Map<string, { data: ExplorerData; ts: number }>();
