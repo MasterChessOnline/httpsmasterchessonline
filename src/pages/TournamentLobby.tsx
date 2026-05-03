@@ -14,6 +14,13 @@ import {
   Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { findCountry } from "@/lib/countries";
+
+function CountryFlag({ country, country_flag }: { country?: string | null; country_flag?: string | null }) {
+  const emoji = country_flag || findCountry(country)?.flag;
+  if (!emoji) return null;
+  return <span className="mr-1 text-base leading-none" aria-label={country || "flag"}>{emoji}</span>;
+}
 
 function getSkillLabel(rating: number) {
   if (rating < 1000) return "Beginner";
