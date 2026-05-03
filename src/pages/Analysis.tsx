@@ -131,6 +131,23 @@ export default function Analysis() {
     return liveGame.fen();
   }, [pgnComplete, pgnCurrentIdx, pgnMoveEvals, liveViewIdx, liveMoveHistory, liveGame]);
 
+  // SAN move sequence up to the current view position (used to deep-link to ChessBase DB)
+  const currentMovesSan = useMemo(() => {
+    try {
+      const g = new Chess();
+      g.load(currentFen);
+      // load() doesn't replay moves; we instead reconstruct from PGN/live history
+      const moves: string[] = [];
+      if (pgnComplete) {
+        for (let i = 0; i <= pgnCurrentIdx && i < pgnMoveEvals.length; i++) moves.push(pgnMoveEvals[i].san);
+      } else {
+        const limit = liveViewIdx >= 0 ? liveViewIdx + 1 : liveMoveHistory.length;
+        for (let i = 0; i < limit; i++) moves.push(liveMoveHistory[i].san);
+      }
+      return moves.join(" ");
+    } catch { return ""; }
+  }, [currentFen, pgnComplete, pgnCurrentIdx, pgnMoveEvals, liveViewIdx, liveMoveHistory]);
+
   useEffect(() => {
     const engine = getStockfishEngine();
     engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
