@@ -161,11 +161,17 @@ export default function Analysis() {
   const [liveViewIdx, setLiveViewIdx] = useState(-1);
   const prevEvalRef = useRef(0);
 
-  // Variation builder (PGN review mode): allow alternative moves at the current
-  // position, displayed inline as (sanA sanB ...) with a Promote-to-mainline
-  // button. variation.fromIdx === N means "after pgnMoveEvals[N]".
-  const [variation, setVariation] = useState<{ fromIdx: number; moves: { san: string; from: string; to: string; fen: string; color: "w" | "b"; moveNumber: number }[] } | null>(null);
+  // Variation builder (PGN review mode): allow alternative moves at any position,
+  // displayed inline as (sanA sanB ...) with a Promote-to-mainline button.
+  // Multiple variations can coexist — each anchored at its own `fromIdx`.
+  // `fromIdx === -1` means "before the first move" (starting position).
+  type VariationMove = { san: string; from: string; to: string; fen: string; color: "w" | "b"; moveNumber: number };
+  type VariationT = { fromIdx: number; moves: VariationMove[] };
+  const [variations, setVariations] = useState<VariationT[]>([]);
   const variationGameRef = useRef<Chess | null>(null);
+
+  // Active variation = the one anchored at the current PGN index, if any.
+  const variation = variations.find(v => v.fromIdx === pgnCurrentIdx) ?? null;
 
   // Explorer state
   const [explorerData, setExplorerData] = useState<MasterExplorerData | null>(null);
@@ -409,7 +415,10 @@ export default function Analysis() {
             const next = (variation && variation.fromIdx === pgnCurrentIdx)
               ? { fromIdx: pgnCurrentIdx, moves: [...variation.moves, entry] }
               : { fromIdx: pgnCurrentIdx, moves: [entry] };
-            setVariation(next);
+            setVariations(prev => {
+              const without = prev.filter(v => v.fromIdx !== pgnCurrentIdx);
+              return [...without, next];
+            });
             variationGameRef.current = g;
             pgnDisplayGame.current = new Chess(g.fen());
             setPgnDisplayFen(g.fen());
@@ -511,43 +520,43 @@ export default function Analysis() {
     setPgnCurrentIdx(clamped);
     pgnDisplayGame.current = clamped === -1 ? new Chess() : new Chess(pgnMoveEvals[clamped].fen);
     setPgnDisplayFen(pgnDisplayGame.current.fen());
-    // Navigating away from the variation start clears it
-    if (variation && variation.fromIdx !== clamped) {
-      setVariation(null);
-      variationGameRef.current = null;
-    }
+    // Variations persist across navigation — they remain visible inline so the
+    // user can browse the main line and still see all the alt lines they built.
     setSelectedSquare(null); setLegalMoves([]);
-  }, [pgnMoveEvals, variation]);
+  }, [pgnMoveEvals]);
 
-  // Promote the current variation into the main line, replacing any tail moves.
-  const promoteVariation = useCallback(async () => {
-    if (!variation || variation.moves.length === 0) return;
-    const baseLen = variation.fromIdx + 1;
+  // Promote a specific variation into the main line, replacing any tail moves.
+  const promoteVariation = useCallback(async (target?: VariationT) => {
+    const v = target ?? variation;
+    if (!v || v.moves.length === 0) return;
+    const baseLen = v.fromIdx + 1;
     const baseEvals = pgnMoveEvals.slice(0, baseLen);
 
     // Evaluate each variation move with the engine if ready
     const engine = stockfishReady.current ? getStockfishEngine() : null;
     const newEvals: MoveEval[] = [...baseEvals];
-    for (let i = 0; i < variation.moves.length; i++) {
-      const v = variation.moves[i];
+    for (let i = 0; i < v.moves.length; i++) {
+      const vm = v.moves[i];
       const fenBefore = i === 0
-        ? (variation.fromIdx === -1 ? new Chess().fen() : pgnMoveEvals[variation.fromIdx].fen)
-        : variation.moves[i - 1].fen;
+        ? (v.fromIdx === -1 ? new Chess().fen() : pgnMoveEvals[v.fromIdx].fen)
+        : v.moves[i - 1].fen;
       let evalCp = 0; let mateW: number | null = null;
       if (engine) {
         try {
-          const posEval = await engine.evaluate(v.fen, depth);
-          evalCp = scoreToWhitePov(v.fen, posEval.evaluation, posEval.mate);
-          mateW = mateToWhitePov(v.fen, posEval.mate);
+          const posEval = await engine.evaluate(vm.fen, depth);
+          evalCp = scoreToWhitePov(vm.fen, posEval.evaluation, posEval.mate);
+          mateW = mateToWhitePov(vm.fen, posEval.mate);
         } catch {}
       }
       newEvals.push({
-        san: v.san, fen: v.fen, fenBefore, from: v.from, to: v.to,
-        color: v.color, moveNumber: v.moveNumber, eval: evalCp, mate: mateW,
+        san: vm.san, fen: vm.fen, fenBefore, from: vm.from, to: vm.to,
+        color: vm.color, moveNumber: vm.moveNumber, eval: evalCp, mate: mateW,
       });
     }
     setPgnMoveEvals(newEvals);
-    setVariation(null);
+    // After promotion, drop the promoted variation; other variations whose
+    // anchor index now exceeds the new main line length are also dropped.
+    setVariations(prev => prev.filter(x => x.fromIdx !== v.fromIdx && x.fromIdx < newEvals.length));
     variationGameRef.current = null;
     const newIdx = newEvals.length - 1;
     setPgnCurrentIdx(newIdx);
@@ -555,9 +564,10 @@ export default function Analysis() {
     setPgnDisplayFen(newEvals[newIdx].fen);
   }, [variation, pgnMoveEvals, depth]);
 
-  const discardVariation = useCallback(() => {
-    if (!variation) return;
-    setVariation(null);
+  const discardVariation = useCallback((target?: VariationT) => {
+    const v = target ?? variation;
+    if (!v) return;
+    setVariations(prev => prev.filter(x => x.fromIdx !== v.fromIdx));
     variationGameRef.current = null;
     if (pgnCurrentIdx === -1) {
       pgnDisplayGame.current = new Chess();
@@ -975,7 +985,7 @@ export default function Analysis() {
                   {activeEvals.map((mv, i) => {
                     const isActive = activeIdx === i && !variation;
                     const showNum = mv.color === "w";
-                    const showVarHere = pgnComplete && variation && variation.fromIdx === i;
+                    const varsHere = pgnComplete ? variations.filter(v => v.fromIdx === i) : [];
                     return (
                       <div key={i} className={`contents`}>
                         <button onClick={() => goFn(i)}
@@ -991,46 +1001,46 @@ export default function Analysis() {
                             </span>
                           )}
                         </button>
-                        {showVarHere && (
-                          <div className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
+                        {varsHere.map((v, vk) => (
+                          <div key={vk} className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
                             <span className="text-primary font-mono">(</span>
-                            {variation.moves.map((vm, vi) => (
+                            {v.moves.map((vm, vi) => (
                               <span key={vi} className="font-mono">
                                 {vm.color === "w" && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}.</span>}
                                 {vm.color === "b" && vi === 0 && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}…</span>}
                                 {vm.san}
-                                {vi < variation.moves.length - 1 ? " " : ""}
+                                {vi < v.moves.length - 1 ? " " : ""}
                               </span>
                             ))}
                             <span className="text-primary font-mono">)</span>
-                            <Button size="sm" variant="default" className="ml-2 h-5 px-2 text-[9px] bg-primary text-primary-foreground" onClick={promoteVariation}>
+                            <Button size="sm" variant="default" className="ml-2 h-5 px-2 text-[9px] bg-primary text-primary-foreground" onClick={() => promoteVariation(v)}>
                               Promote
                             </Button>
-                            <Button size="sm" variant="ghost" className="h-5 px-2 text-[9px]" onClick={discardVariation}>
+                            <Button size="sm" variant="ghost" className="h-5 px-2 text-[9px]" onClick={() => discardVariation(v)}>
                               ✕
                             </Button>
                           </div>
-                        )}
+                        ))}
                       </div>
                     );
                   })}
-                  {/* Variation starting from the very beginning (fromIdx === -1) */}
-                  {pgnComplete && variation && variation.fromIdx === -1 && (
-                    <div className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
+                  {/* Variations starting from the very beginning (fromIdx === -1) */}
+                  {pgnComplete && variations.filter(v => v.fromIdx === -1).map((v, vk) => (
+                    <div key={`pre-${vk}`} className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
                       <span className="text-primary font-mono">(</span>
-                      {variation.moves.map((vm, vi) => (
+                      {v.moves.map((vm, vi) => (
                         <span key={vi} className="font-mono">
                           {vm.color === "w" && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}.</span>}
                           {vm.color === "b" && vi === 0 && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}…</span>}
                           {vm.san}
-                          {vi < variation.moves.length - 1 ? " " : ""}
+                          {vi < v.moves.length - 1 ? " " : ""}
                         </span>
                       ))}
                       <span className="text-primary font-mono">)</span>
-                      <Button size="sm" variant="default" className="ml-2 h-5 px-2 text-[9px] bg-primary text-primary-foreground" onClick={promoteVariation}>Promote</Button>
-                      <Button size="sm" variant="ghost" className="h-5 px-2 text-[9px]" onClick={discardVariation}>✕</Button>
+                      <Button size="sm" variant="default" className="ml-2 h-5 px-2 text-[9px] bg-primary text-primary-foreground" onClick={() => promoteVariation(v)}>Promote</Button>
+                      <Button size="sm" variant="ghost" className="h-5 px-2 text-[9px]" onClick={() => discardVariation(v)}>✕</Button>
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
