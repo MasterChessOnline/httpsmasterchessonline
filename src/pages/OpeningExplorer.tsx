@@ -221,11 +221,21 @@ export default function OpeningExplorer() {
             {analyzing && <Brain className="w-4 h-4 text-primary animate-pulse" />}
           </div>
           {explorerData?.opening && (
-            <Link to="/play">
-              <Button size="sm" className="gap-1.5">
-                <Play className="w-4 h-4" /> Play this Opening
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <a
+                href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(history.map(h => h.san).join(" "))}`}
+                target="_blank" rel="noopener noreferrer"
+              >
+                <Button size="sm" variant="outline" className="gap-1.5">
+                  <ExternalLink className="w-4 h-4" /> ChessBase DB
+                </Button>
+              </a>
+              <Link to="/play">
+                <Button size="sm" className="gap-1.5">
+                  <Play className="w-4 h-4" /> Play this Opening
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
 
