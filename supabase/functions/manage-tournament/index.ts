@@ -293,16 +293,15 @@ async function handleStart(supabase: any, tournament_id: string, callerId: strin
     return jsonRes({ error: "Cannot start" }, 400);
   }
 
-  // Authorization: only the creator or an admin/organizer can start a tournament
+  // Authorization: ONLY admins can manually start a tournament.
+  // Regular users (including organizer/creator) must wait for the auto-start timer.
   const { data: roleRows } = await supabase
     .from("user_roles")
     .select("role")
     .eq("user_id", callerId);
-  const isAdminOrOrganizer = (roleRows || []).some(
-    (r: any) => r.role === "admin" || r.role === "organizer"
-  );
-  if (tournament.created_by !== callerId && !isAdminOrOrganizer) {
-    return jsonRes({ error: "Forbidden" }, 403);
+  const isAdmin = (roleRows || []).some((r: any) => r.role === "admin");
+  if (!isAdmin) {
+    return jsonRes({ error: "Tournaments start automatically when the timer ends." }, 403);
   }
 
   const { data: players } = await supabase
