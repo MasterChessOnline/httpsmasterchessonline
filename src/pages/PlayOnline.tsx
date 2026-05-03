@@ -812,6 +812,11 @@ const PlayOnline = () => {
           )}
         </div>
         <p className="mt-4 text-sm text-muted-foreground font-mono">{statusText}</p>
+        {!isGameOver && onlineGame && !opponentOnline && (
+          <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            Opponent disconnected — they have until their clock runs out to return, or they forfeit on time.
+          </div>
+        )}
         <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor} isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
         {isGameOver && (
           <Button className="mt-4" onClick={resetAll}><RotateCcw className="h-4 w-4 mr-2" /> New Game</Button>
