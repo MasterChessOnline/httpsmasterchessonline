@@ -1149,7 +1149,7 @@ const Play = () => {
                 premove={premove}
                 overlay={
                   <>
-                    <GameStatusOverlay kind={statusKind} subtitle={statusSubtitle} />
+                    {!gameOverInfo && <GameStatusOverlay kind={statusKind} subtitle={statusSubtitle} />}
                     {gameOverInfo && (
                       <GameOverOverlay
                         type={gameOverInfo.type}
