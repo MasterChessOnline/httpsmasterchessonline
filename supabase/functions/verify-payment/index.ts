@@ -47,7 +47,15 @@ serve(async (req) => {
     
     if (session.payment_status === "paid") {
       const { itemType, itemId, userId } = session.metadata || {};
-      
+
+      // Verify the session belongs to the caller (or is guest)
+      if (userId && userId !== "guest" && userId !== callerId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Upsert to purchases table to avoid duplicates
       const { error } = await supabaseClient
         .from('purchases')
