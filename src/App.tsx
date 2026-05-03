@@ -33,6 +33,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 
 import TournamentLobby from "./pages/TournamentLobby";
+import TournamentSync from "./pages/TournamentSync";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
 import OpeningExplorer from "./pages/OpeningExplorer";
