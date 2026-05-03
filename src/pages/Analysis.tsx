@@ -636,25 +636,21 @@ export default function Analysis() {
   const runAnalysisFromText = async (pgnText: string) => {
     setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
-    const parseGame = new Chess();
     const trimmed = pgnText.trim();
     if (!trimmed) { setError("Empty game."); return; }
-    try { parseGame.loadPgn(trimmed); } catch {
-      parseGame.reset();
-      const moves = trimmed.replace(/\d+\.\s*/g, "").split(/\s+/).filter(Boolean);
-      for (const m of moves) {
-        try { parseGame.move(m); } catch { setError(`Invalid move: "${m}".`); return; }
-      }
-    }
+    const parseGame = loadPgnRobust(trimmed);
+    if (!parseGame) { setError("Could not parse PGN."); return; }
     const history = parseGame.history({ verbose: true });
     if (history.length === 0) { setError("No moves found."); return; }
+    const fenTag = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
+    const startFen = fenTag ? fenTag[1] : undefined;
     if (!stockfishReady.current) {
       const engine = getStockfishEngine(); await engine.init(); stockfishReady.current = true;
     }
     setAnalyzing(true);
     const engine = getStockfishEngine(); engine.newGame();
     const fens: { move: typeof history[number]; fenBefore: string; fenAfter: string }[] = [];
-    const evalGame = new Chess();
+    const evalGame = startFen ? new Chess(startFen) : new Chess();
     for (const move of history) {
       const fenBefore = evalGame.fen();
       evalGame.move(move.san);
