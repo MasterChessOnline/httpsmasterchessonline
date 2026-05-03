@@ -731,12 +731,12 @@ export default function Analysis() {
                 <ChessBoard
                   game={boardGame}
                   flipped={flipped}
-                  selectedSquare={!pgnComplete ? selectedSquare : null}
-                  legalMoves={!pgnComplete ? legalMoves : []}
+                  selectedSquare={selectedSquare}
+                  legalMoves={legalMoves}
                   lastMove={lastMoveDisplay}
                   isGameOver={false}
-                  isPlayerTurn={!pgnComplete && liveViewIdx < 0}
-                  onSquareClick={!pgnComplete ? handleInteractiveSquareClick : () => {}}
+                  isPlayerTurn={(!pgnComplete && liveViewIdx < 0) || pgnComplete}
+                  onSquareClick={handleInteractiveSquareClick}
                 />
               </div>
             </div>
