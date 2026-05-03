@@ -415,7 +415,10 @@ export default function Analysis() {
             const next = (variation && variation.fromIdx === pgnCurrentIdx)
               ? { fromIdx: pgnCurrentIdx, moves: [...variation.moves, entry] }
               : { fromIdx: pgnCurrentIdx, moves: [entry] };
-            setVariation(next);
+            setVariations(prev => {
+              const without = prev.filter(v => v.fromIdx !== pgnCurrentIdx);
+              return [...without, next];
+            });
             variationGameRef.current = g;
             pgnDisplayGame.current = new Chess(g.fen());
             setPgnDisplayFen(g.fen());
