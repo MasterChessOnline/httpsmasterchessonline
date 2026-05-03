@@ -27,6 +27,8 @@ export interface Registration {
   rating_at_join: number;
   display_name?: string;
   username?: string;
+  country?: string | null;
+  country_flag?: string | null;
 }
 
 export interface Pairing {
