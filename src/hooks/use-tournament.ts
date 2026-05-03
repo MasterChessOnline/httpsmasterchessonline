@@ -27,6 +27,8 @@ export interface Registration {
   rating_at_join: number;
   display_name?: string;
   username?: string;
+  country?: string | null;
+  country_flag?: string | null;
 }
 
 export interface Pairing {
@@ -75,7 +77,7 @@ export function useTournament(tournamentId: string | undefined) {
       const userIds = regs.map(r => r.user_id);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, display_name, username")
+        .select("user_id, display_name, username, country, country_flag")
         .in("user_id", userIds);
 
       const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
@@ -84,6 +86,8 @@ export function useTournament(tournamentId: string | undefined) {
         if (p) {
           reg.display_name = p.display_name || undefined;
           reg.username = p.username || undefined;
+          reg.country = p.country;
+          reg.country_flag = p.country_flag;
         }
       }
     }

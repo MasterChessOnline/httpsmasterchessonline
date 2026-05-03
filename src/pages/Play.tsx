@@ -15,6 +15,7 @@ import PromotionDialog, { type PromotionPiece } from "@/components/chess/Promoti
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { getAIMove, evaluateBoard, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
 import { playChessSound } from "@/lib/chess-sounds";
+import { findCountry } from "@/lib/countries";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1173,7 +1174,13 @@ const Play = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <p className="text-xs font-bold text-foreground truncate">{profile?.display_name || profile?.username || "You"}</p>
+                  <p className="text-xs font-bold text-foreground truncate flex items-center">
+                    {(() => {
+                      const f = (profile as any)?.country_flag || findCountry((profile as any)?.country)?.flag;
+                      return f ? <span className="mr-1 text-sm leading-none">{f}</span> : null;
+                    })()}
+                    {profile?.display_name || profile?.username || "You"}
+                  </p>
                   <TitleBadge rating={(profile as any)?.bot_rating ?? 1200} mode="bot" size="xs" />
                 </div>
                 <p className="text-[10px] text-muted-foreground">{(profile as any)?.bot_rating ?? 1200} Elo · {playerColor === "w" ? "⬜ White" : "⬛ Black"}</p>

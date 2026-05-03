@@ -22,6 +22,13 @@ import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
 import QuickChat from "@/components/chess/QuickChat";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
+import { findCountry } from "@/lib/countries";
+
+function CountryFlag({ country, country_flag }: { country?: string | null; country_flag?: string | null }) {
+  const emoji = country_flag || findCountry(country)?.flag;
+  if (!emoji) return null;
+  return <span className="mr-1 text-base leading-none" aria-label={country || "flag"}>{emoji}</span>;
+}
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -75,7 +82,7 @@ const PlayOnline = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number } | null>(null);
+  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number; country: string | null; country_flag: string | null } | null>(null);
   const [gameMode, setGameMode] = useState<"rated" | "casual">("rated");
   const [focusMode, setFocusMode] = useState(false);
   const [drawOfferedByMe, setDrawOfferedByMe] = useState(false);
@@ -143,8 +150,8 @@ const PlayOnline = () => {
   // Fetch opponent profile
   useEffect(() => {
     if (!opponentId) return;
-    supabase.from("profiles").select("display_name, rating").eq("user_id", opponentId).single().then(({ data }) => {
-      if (data) setOpponentProfile(data);
+    supabase.from("profiles").select("display_name, rating, country, country_flag").eq("user_id", opponentId).single().then(({ data }) => {
+      if (data) setOpponentProfile(data as any);
     });
   }, [opponentId]);
 
@@ -843,7 +850,7 @@ const PlayOnline = () => {
                   {boardFlipped ? "♔" : "♚"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">{opponentProfile?.display_name || "Opponent"}</p>
+                  <p className="text-sm font-medium text-foreground flex items-center"><CountryFlag country={opponentProfile?.country} country_flag={opponentProfile?.country_flag} />{opponentProfile?.display_name || "Opponent"}</p>
                   <p className="text-[10px] text-muted-foreground">{opponentProfile?.rating || "?"} ELO</p>
                 </div>
               </div>
@@ -926,7 +933,7 @@ const PlayOnline = () => {
                   {boardFlipped ? "♚" : "♔"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-primary">{profile?.display_name || "You"}</p>
+                  <p className="text-sm font-medium text-primary flex items-center"><CountryFlag country={(profile as any)?.country} country_flag={(profile as any)?.country_flag} />{profile?.display_name || "You"}</p>
                   <p className="text-[10px] text-muted-foreground">{profile?.rating || 1200} ELO</p>
                 </div>
               </div>

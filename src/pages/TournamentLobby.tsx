@@ -14,6 +14,13 @@ import {
   Loader2, ArrowLeft, Play, UserCheck, LogOut, ChevronRight, Medal, Zap, Flame, X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { findCountry } from "@/lib/countries";
+
+function CountryFlag({ country, country_flag }: { country?: string | null; country_flag?: string | null }) {
+  const emoji = country_flag || findCountry(country)?.flag;
+  if (!emoji) return null;
+  return <span className="mr-1 text-base leading-none" aria-label={country || "flag"}>{emoji}</span>;
+}
 
 function getSkillLabel(rating: number) {
   if (rating < 1000) return "Beginner";
@@ -345,7 +352,8 @@ const TournamentLobby = () => {
                   <span className="w-6 text-center">
                     {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : <span className="text-xs text-muted-foreground">{i + 1}</span>}
                   </span>
-                  <span className="font-medium text-foreground truncate">
+                  <span className="font-medium text-foreground truncate flex items-center">
+                    <CountryFlag country={reg.country} country_flag={reg.country_flag} />
                     {getPlayerName(reg)}
                     {user && reg.user_id === user.id && <span className="text-primary text-xs ml-1">(you)</span>}
                   </span>
@@ -385,12 +393,18 @@ const TournamentLobby = () => {
                       <div key={p.id} className={`px-4 py-3 border-b border-border/20 last:border-0 flex items-center justify-between ${isMyGame ? "bg-primary/5" : ""}`}>
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-sm font-medium text-foreground truncate">
+                            <span className="text-sm font-medium text-foreground truncate flex items-center">
+                              {white && <CountryFlag country={white.country} country_flag={white.country_flag} />}
                               {white ? getPlayerName(white) : "?"}
                             </span>
                             <span className="text-xs text-muted-foreground">vs</span>
-                            <span className="text-sm font-medium text-foreground truncate">
-                              {isBye ? <span className="text-muted-foreground italic">BYE</span> : black ? getPlayerName(black) : "?"}
+                            <span className="text-sm font-medium text-foreground truncate flex items-center">
+                              {isBye ? <span className="text-muted-foreground italic">BYE</span> : (
+                                <>
+                                  {black && <CountryFlag country={black.country} country_flag={black.country_flag} />}
+                                  {black ? getPlayerName(black) : "?"}
+                                </>
+                              )}
                             </span>
                           </div>
                         </div>
