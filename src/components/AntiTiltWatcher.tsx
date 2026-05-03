@@ -29,13 +29,15 @@ const AntiTiltWatcher = () => {
 
   if (!tilt.isTilting || !shown || isAuthPage) return null;
 
-  const close = () => {
+  const close = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     if (tiltKey) setDismissedKey(tiltKey);
     setShown(null);
-    dismissTiltWarning(30);
+    dismissTiltWarning(60);
   };
-  const goTraining = () => { close(); navigate("/training"); };
-  const goBreak = () => { close(); navigate("/dashboard"); };
+  const goTraining = (e?: React.MouseEvent) => { close(e); navigate("/training"); };
+  const goBreak = (e?: React.MouseEvent) => { close(e); navigate("/dashboard"); };
 
   return (
     <AnimatePresence>
