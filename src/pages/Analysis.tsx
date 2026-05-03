@@ -84,6 +84,42 @@ function formatGames(n: number): string {
   return String(n);
 }
 
+// Robust PGN/move-list loader that respects [FEN "..."] start positions.
+function loadPgnRobust(input: string): Chess | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  // Try chess.js loadPgn first (handles tags + FEN)
+  try {
+    const g = new Chess();
+    g.loadPgn(trimmed);
+    if (g.history().length > 0) return g;
+  } catch { /* fall through */ }
+  // Extract optional [FEN "..."] header
+  const fenMatch = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
+  const startFen = fenMatch ? fenMatch[1] : undefined;
+  // Strip headers and comments
+  const body = trimmed
+    .replace(/\[[^\]]*\]/g, " ")
+    .replace(/\{[^}]*\}/g, " ")
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\$\d+/g, " ")
+    .replace(/\d+\.(\.\.)?/g, " ")
+    .replace(/(1-0|0-1|1\/2-1\/2|\*)/g, " ")
+    .trim();
+  const tokens = body.split(/\s+/).filter(Boolean);
+  let g: Chess;
+  try { g = startFen ? new Chess(startFen) : new Chess(); }
+  catch { g = new Chess(); }
+  for (const tok of tokens) {
+    try {
+      const mv = g.move(tok, { strict: false } as never);
+      if (!mv) return null;
+    } catch { return null; }
+  }
+  return g.history().length > 0 ? g : null;
+}
+
+
 type SidebarTab = "analysis" | "explorer" | "pgn";
 
 // ── Component ──
@@ -512,25 +548,22 @@ export default function Analysis() {
   const runAnalysis = async () => {
     setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
-    const parseGame = new Chess();
     const trimmed = pgnInput.trim();
     if (!trimmed) { setError("Please enter a PGN or move list."); return; }
-    try { parseGame.loadPgn(trimmed); } catch {
-      parseGame.reset();
-      const moves = trimmed.replace(/\d+\.\s*/g, "").split(/\s+/).filter(Boolean);
-      for (const m of moves) {
-        try { parseGame.move(m); } catch { setError(`Invalid move: "${m}".`); return; }
-      }
-    }
+    const parseGame = loadPgnRobust(trimmed);
+    if (!parseGame) { setError("Could not parse PGN or move list."); return; }
     const history = parseGame.history({ verbose: true });
     if (history.length === 0) { setError("No moves found."); return; }
+    // Determine starting FEN (respect [FEN] tag if present)
+    const fenTag = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
+    const startFen = fenTag ? fenTag[1] : undefined;
     if (!stockfishReady.current) {
       const engine = getStockfishEngine(); await engine.init(); stockfishReady.current = true;
     }
     setAnalyzing(true);
     const engine = getStockfishEngine(); engine.newGame();
     const fens: { move: typeof history[number]; fenBefore: string; fenAfter: string }[] = [];
-    const evalGame = new Chess();
+    const evalGame = startFen ? new Chess(startFen) : new Chess();
     for (const move of history) {
       const fenBefore = evalGame.fen();
       evalGame.move(move.san);
@@ -601,25 +634,21 @@ export default function Analysis() {
   const runAnalysisFromText = async (pgnText: string) => {
     setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
-    const parseGame = new Chess();
     const trimmed = pgnText.trim();
     if (!trimmed) { setError("Empty game."); return; }
-    try { parseGame.loadPgn(trimmed); } catch {
-      parseGame.reset();
-      const moves = trimmed.replace(/\d+\.\s*/g, "").split(/\s+/).filter(Boolean);
-      for (const m of moves) {
-        try { parseGame.move(m); } catch { setError(`Invalid move: "${m}".`); return; }
-      }
-    }
+    const parseGame = loadPgnRobust(trimmed);
+    if (!parseGame) { setError("Could not parse PGN."); return; }
     const history = parseGame.history({ verbose: true });
     if (history.length === 0) { setError("No moves found."); return; }
+    const fenTag = trimmed.match(/\[FEN\s+"([^"]+)"\]/i);
+    const startFen = fenTag ? fenTag[1] : undefined;
     if (!stockfishReady.current) {
       const engine = getStockfishEngine(); await engine.init(); stockfishReady.current = true;
     }
     setAnalyzing(true);
     const engine = getStockfishEngine(); engine.newGame();
     const fens: { move: typeof history[number]; fenBefore: string; fenAfter: string }[] = [];
-    const evalGame = new Chess();
+    const evalGame = startFen ? new Chess(startFen) : new Chess();
     for (const move of history) {
       const fenBefore = evalGame.fen();
       evalGame.move(move.san);
