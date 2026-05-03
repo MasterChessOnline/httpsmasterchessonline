@@ -290,10 +290,11 @@ export default function Analysis() {
       const posEval = cached.get(fen) ?? await engine.evaluate(fen, depth);
       if (!cached.has(fen)) void saveCachedStockfishEval(fen, depth, posEval.evaluation, posEval.mate);
       const evalCp = scoreToWhitePov(fen, posEval.evaluation, posEval.mate);
-      setLiveCurrentEval({ cp: evalCp, mate: posEval.mate });
+      const mateW = mateToWhitePov(fen, posEval.mate);
+      setLiveCurrentEval({ cp: evalCp, mate: mateW });
       const moveEval: MoveEval = {
         san: moveSan, fen, fenBefore, from: moveFrom, to: moveTo, color, moveNumber: moveNum,
-        eval: evalCp, mate: posEval.mate,
+        eval: evalCp, mate: mateW,
       };
       prevEvalRef.current = evalCp;
       setLiveMoveHistory(prev => [...prev, moveEval]);
