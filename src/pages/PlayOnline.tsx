@@ -318,6 +318,28 @@ const PlayOnline = () => {
     return () => { supabase.removeChannel(channel); };
   }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe, rematchOfferedByMe, isGameOver, navigate]);
 
+  // Presence tracking — detect opponent disconnect.
+  // The local clock keeps ticking the active player's time even if they're
+  // offline, so when it hits 0 the existing timeout flow auto-forfeits them.
+  // Here we just surface a UI banner with their remaining time.
+  const [opponentOnline, setOpponentOnline] = useState(true);
+  useEffect(() => {
+    if (!onlineGame || !user?.id || onlineStatus !== "playing") return;
+    const ch = supabase.channel(`presence-${onlineGame.id}`, {
+      config: { presence: { key: user.id } },
+    });
+    const refresh = () => {
+      const state = ch.presenceState() as Record<string, unknown[]>;
+      setOpponentOnline(opponentId ? Boolean(state[opponentId]?.length) : true);
+    };
+    ch.on("presence", { event: "sync" }, refresh)
+      .on("presence", { event: "join" }, refresh)
+      .on("presence", { event: "leave" }, refresh)
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") await ch.track({ online_at: new Date().toISOString() });
+      });
+    return () => { supabase.removeChannel(ch); };
+  }, [onlineGame?.id, user?.id, opponentId, onlineStatus]);
   useEffect(() => {
     if (onlineStatus !== "playing") return;
     const last = chatMessages[chatMessages.length - 1];
