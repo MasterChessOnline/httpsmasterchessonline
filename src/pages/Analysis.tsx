@@ -124,6 +124,12 @@ export default function Analysis() {
   const [liveViewIdx, setLiveViewIdx] = useState(-1);
   const prevEvalRef = useRef(0);
 
+  // Variation builder (PGN review mode): allow alternative moves at the current
+  // position, displayed inline as (sanA sanB ...) with a Promote-to-mainline
+  // button. variation.fromIdx === N means "after pgnMoveEvals[N]".
+  const [variation, setVariation] = useState<{ fromIdx: number; moves: { san: string; from: string; to: string; fen: string; color: "w" | "b"; moveNumber: number }[] } | null>(null);
+  const variationGameRef = useRef<Chess | null>(null);
+
   // Explorer state
   const [explorerData, setExplorerData] = useState<MasterExplorerData | null>(null);
   const [explorerLoading, setExplorerLoading] = useState(false);
