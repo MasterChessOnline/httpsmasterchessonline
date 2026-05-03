@@ -1,13 +1,17 @@
+import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Calculator, BarChart3, BookOpen, Swords, Target, Crown,
   Play, Video, Map, Trophy, Brain, Flame, Puzzle, Clock,
-  GraduationCap, Compass, History, Users, Sparkles,
+  GraduationCap, Compass, History, Users, Sparkles, ArrowRight,
 } from "lucide-react";
 
 const TOOLS = [
