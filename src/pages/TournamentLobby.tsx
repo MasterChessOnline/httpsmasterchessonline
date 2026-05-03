@@ -51,6 +51,23 @@ const TournamentLobby = () => {
     return () => clearInterval(t);
   }, []);
 
+  // Client-side fallback: when countdown elapsed and tournament still registering,
+  // trigger the auto_start_due edge action so pairings are generated immediately
+  // (without waiting up to 60s for the cron).
+  const startsAtMs = tournament?.starts_at ? new Date(tournament.starts_at).getTime() : null;
+  const isOverdue = startsAtMs !== null && now >= startsAtMs;
+  useEffect(() => {
+    if (!tournament || tournament.status !== "registering") return;
+    if (!isOverdue) return;
+    if (registrations.length < 2) return;
+    (async () => {
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        await supabase.functions.invoke("manage-tournament", { body: { action: "auto_start_due" } });
+      } catch {}
+    })();
+  }, [tournament?.status, isOverdue, registrations.length]);
+
   const currentRound = tournament?.current_round ?? 0;
   const isReadyDismissed = dismissedBanners.ready === currentRound;
   const isCompleteDismissed = dismissedBanners.complete === currentRound;
