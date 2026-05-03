@@ -1145,13 +1145,18 @@ const Play = () => {
                 hintToSquare={hintToSquare}
                 onSquareClick={handleSquareClick}
                 premove={premove}
-                overlay={gameOverInfo ? (
-                  <GameOverOverlay
-                    type={gameOverInfo.type}
-                    winner={gameOverInfo.winner}
-                    reason={gameOverInfo.reason}
-                  />
-                ) : undefined}
+                overlay={
+                  <>
+                    <GameStatusOverlay kind={statusKind} subtitle={statusSubtitle} />
+                    {gameOverInfo && (
+                      <GameOverOverlay
+                        type={gameOverInfo.type}
+                        winner={gameOverInfo.winner}
+                        reason={gameOverInfo.reason}
+                      />
+                    )}
+                  </>
+                }
               />
             </ChessBoard4D>
 
