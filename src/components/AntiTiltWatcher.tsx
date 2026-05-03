@@ -12,23 +12,28 @@ import { AlertTriangle, Coffee, Brain, X } from "lucide-react";
 const AntiTiltWatcher = () => {
   const tilt = useAntiTilt();
   const [shown, setShown] = useState<string | null>(null);
+  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
   // Don't show on auth pages or settings
   const isAuthPage = ["/login", "/signup", "/forgot-password", "/reset-password"].includes(location.pathname);
 
+  const tiltKey = tilt.isTilting ? `${tilt.reason}-${tilt.consecutiveLosses}-${tilt.ratingDrop}` : null;
+
   useEffect(() => {
-    if (isAuthPage) return;
-    if (!tilt.isTilting) { setShown(null); return; }
-    // Use reason as key so it only re-shows when condition changes
-    const key = `${tilt.reason}-${tilt.consecutiveLosses}-${tilt.ratingDrop}`;
-    if (shown !== key) setShown(key);
-  }, [tilt, isAuthPage, shown]);
+    if (isAuthPage || !tiltKey) { setShown(null); return; }
+    if (dismissedKey === tiltKey) { setShown(null); return; }
+    setShown(tiltKey);
+  }, [tiltKey, isAuthPage, dismissedKey]);
 
   if (!tilt.isTilting || !shown || isAuthPage) return null;
 
-  const close = () => { setShown(null); dismissTiltWarning(30); };
+  const close = () => {
+    if (tiltKey) setDismissedKey(tiltKey);
+    setShown(null);
+    dismissTiltWarning(30);
+  };
   const goTraining = () => { close(); navigate("/training"); };
   const goBreak = () => { close(); navigate("/dashboard"); };
 
