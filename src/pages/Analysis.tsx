@@ -308,6 +308,45 @@ export default function Analysis() {
   }, [depth]);
 
   const handleInteractiveSquareClick = useCallback((square: Square) => {
+    // PGN review mode: clicking pieces builds an alternative variation
+    if (pgnComplete) {
+      // Build / extend a variation starting from the current pgnCurrentIdx position
+      let g: Chess;
+      if (variation && variation.fromIdx === pgnCurrentIdx) {
+        g = variationGameRef.current ?? new Chess();
+      } else {
+        g = pgnCurrentIdx === -1 ? new Chess() : new Chess(pgnMoveEvals[pgnCurrentIdx].fen);
+        variationGameRef.current = g;
+      }
+      // If a variation is already in progress and the user clicked back to a deeper index,
+      // ensure the on-screen board matches g.fen()
+      if (selectedSquare) {
+        try {
+          const move = g.move({ from: selectedSquare, to: square, promotion: "q" });
+          if (move) {
+            const baseLen = pgnCurrentIdx + 1; // half-moves played in the main line
+            const totalPly = baseLen + (variation && variation.fromIdx === pgnCurrentIdx ? variation.moves.length : 0);
+            const moveNumber = Math.floor(totalPly / 2) + 1;
+            const entry = { san: move.san, from: move.from, to: move.to, fen: g.fen(), color: move.color as "w" | "b", moveNumber };
+            const next = (variation && variation.fromIdx === pgnCurrentIdx)
+              ? { fromIdx: pgnCurrentIdx, moves: [...variation.moves, entry] }
+              : { fromIdx: pgnCurrentIdx, moves: [entry] };
+            setVariation(next);
+            variationGameRef.current = g;
+            pgnDisplayGame.current = new Chess(g.fen());
+            setPgnDisplayFen(g.fen());
+            setSelectedSquare(null); setLegalMoves([]);
+            return;
+          }
+        } catch {}
+      }
+      const piece = g.get(square);
+      if (piece && piece.color === g.turn()) {
+        setSelectedSquare(square);
+        setLegalMoves(g.moves({ square, verbose: true }).map(m => m.to as Square));
+      } else { setSelectedSquare(null); setLegalMoves([]); }
+      return;
+    }
     if (liveViewIdx >= 0) return;
     const game = liveGame;
     if (selectedSquare) {
@@ -328,7 +367,7 @@ export default function Analysis() {
       setSelectedSquare(square);
       setLegalMoves(game.moves({ square, verbose: true }).map(m => m.to as Square));
     } else { setSelectedSquare(null); setLegalMoves([]); }
-  }, [liveGame, selectedSquare, evaluatePosition, liveMoveHistory.length, liveViewIdx]);
+  }, [liveGame, selectedSquare, evaluatePosition, liveMoveHistory.length, liveViewIdx, pgnComplete, pgnCurrentIdx, pgnMoveEvals, variation]);
 
   // Play an explorer move
   const playExplorerMove = useCallback((san: string) => {
