@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-export default function CursorGlow() {
+const CursorGlow = React.forwardRef<HTMLDivElement>((_p, _r) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [visible, setVisible] = useState(false);
 
@@ -60,4 +60,6 @@ export default function CursorGlow() {
       </motion.div>
     </>
   );
-}
+});
+CursorGlow.displayName = "CursorGlow";
+export default CursorGlow;

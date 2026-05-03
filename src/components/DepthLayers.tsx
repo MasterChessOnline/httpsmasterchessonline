@@ -1,17 +1,7 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
 
-/**
- * Global 4D depth system — three layered planes that respond to mouse
- * movement at different speeds, creating an in-space, floating feeling.
- *
- *  - Background layer: drifts slowly (depth ≈ -200)
- *  - Mid layer: ambient orbs (depth ≈ -50)
- *  - Front layer: cursor-following light (depth ≈ +50)
- *
- * Disabled on low-end devices / reduced-motion.
- */
-export default function DepthLayers() {
+const DepthLayers = React.forwardRef<HTMLDivElement>((_p, _r) => {
   const bgRef = useRef<HTMLDivElement>(null);
   const midRef = useRef<HTMLDivElement>(null);
   const frontRef = useRef<HTMLDivElement>(null);
@@ -116,4 +106,6 @@ export default function DepthLayers() {
       />
     </div>
   );
-}
+});
+DepthLayers.displayName = "DepthLayers";
+export default DepthLayers;
