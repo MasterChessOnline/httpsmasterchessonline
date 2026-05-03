@@ -92,6 +92,7 @@ function AnimatedRoutes() {
           <Route path="/learn" element={<Learn />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
+          <Route path="/tournament-sync" element={<TournamentSync />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<ProfileRedirect />} />
           <Route path="/profile/:userId" element={<Profile />} />
