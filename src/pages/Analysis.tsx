@@ -520,13 +520,10 @@ export default function Analysis() {
     setPgnCurrentIdx(clamped);
     pgnDisplayGame.current = clamped === -1 ? new Chess() : new Chess(pgnMoveEvals[clamped].fen);
     setPgnDisplayFen(pgnDisplayGame.current.fen());
-    // Navigating away from the variation start clears it
-    if (variation && variation.fromIdx !== clamped) {
-      setVariation(null);
-      variationGameRef.current = null;
-    }
+    // Variations persist across navigation — they remain visible inline so the
+    // user can browse the main line and still see all the alt lines they built.
     setSelectedSquare(null); setLegalMoves([]);
-  }, [pgnMoveEvals, variation]);
+  }, [pgnMoveEvals]);
 
   // Promote the current variation into the main line, replacing any tail moves.
   const promoteVariation = useCallback(async () => {
