@@ -416,15 +416,23 @@ export default function OpeningExplorer() {
                         <Trophy className="h-3 w-3 text-primary" />
                         <span className="text-[10px] font-bold text-muted-foreground uppercase">Top Games</span>
                       </div>
-                      {explorerData.topGames.map((g, i) => (
-                        <a key={i} href={`https://lichess.org/${g.id}`} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center justify-between text-[10px] py-0.5 hover:text-primary transition-colors">
-                          <span className="text-foreground/80 truncate">{g.white.name} ({g.white.rating}) vs {g.black.name} ({g.black.rating})</span>
-                          <span className="text-muted-foreground ml-2 shrink-0">
-                            {g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"} · {g.year}
-                          </span>
-                        </a>
-                      ))}
+                      {explorerData.topGames.map((g, i) => {
+                        const href = g.source === "masters"
+                          ? `https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(history.map(h => h.san).join(" "))}`
+                          : `https://lichess.org/${g.id}`;
+                        return (
+                          <a key={i} href={href} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center justify-between text-[10px] py-0.5 hover:text-primary transition-colors gap-2">
+                            <span className="text-foreground/80 truncate flex-1">
+                              <span className="font-semibold">{g.white.name}</span> ({g.white.rating}) <span className="text-muted-foreground">vs</span> <span className="font-semibold">{g.black.name}</span> ({g.black.rating})
+                            </span>
+                            <span className="text-muted-foreground shrink-0 inline-flex items-center gap-1">
+                              {g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"}
+                              <Calendar className="w-2.5 h-2.5" />{g.year}
+                            </span>
+                          </a>
+                        );
+                      })}
                     </div>
                   )}
                 </>
