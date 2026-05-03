@@ -56,6 +56,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_game_reviews: {
+        Row: {
+          created_at: string
+          game_id: string
+          id: string
+          moment_caption: string | null
+          moment_ply: number | null
+          moment_san: string | null
+          narrative: string
+        }
+        Insert: {
+          created_at?: string
+          game_id: string
+          id?: string
+          moment_caption?: string | null
+          moment_ply?: number | null
+          moment_san?: string | null
+          narrative: string
+        }
+        Update: {
+          created_at?: string
+          game_id?: string
+          id?: string
+          moment_caption?: string | null
+          moment_ply?: number | null
+          moment_san?: string | null
+          narrative?: string
+        }
+        Relationships: []
+      }
       badges_catalog: {
         Row: {
           category: string
@@ -140,6 +170,42 @@ export type Database = {
           result?: string
           time_control_label?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      cities: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          flag: string
+          key: string
+          lat: number | null
+          lng: number | null
+          name: string
+          region: string
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          flag: string
+          key: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          region: string
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          flag?: string
+          key?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          region?: string
         }
         Relationships: []
       }
@@ -685,6 +751,36 @@ export type Database = {
           },
         ]
       }
+      hand_brain_roles: {
+        Row: {
+          black_brain_id: string
+          black_hand_id: string
+          created_at: string
+          game_id: string
+          id: string
+          white_brain_id: string
+          white_hand_id: string
+        }
+        Insert: {
+          black_brain_id: string
+          black_hand_id: string
+          created_at?: string
+          game_id: string
+          id?: string
+          white_brain_id: string
+          white_hand_id: string
+        }
+        Update: {
+          black_brain_id?: string
+          black_hand_id?: string
+          created_at?: string
+          game_id?: string
+          id?: string
+          white_brain_id?: string
+          white_hand_id?: string
+        }
+        Relationships: []
+      }
       learning_streaks: {
         Row: {
           current_streak: number
@@ -858,16 +954,19 @@ export type Database = {
           elo_applied: boolean
           end_reason: string | null
           fen: string
+          hand_brain_meta: Json
           id: string
           increment: number
           is_rated: boolean
           last_move_at: string | null
           last_move_from: string | null
           last_move_to: string | null
+          mode: string
           move_number: number
           pgn: string
           result: string | null
           status: string
+          streamer_only: boolean
           time_control_label: string
           turn: string
           updated_at: string
@@ -881,16 +980,19 @@ export type Database = {
           elo_applied?: boolean
           end_reason?: string | null
           fen?: string
+          hand_brain_meta?: Json
           id?: string
           increment?: number
           is_rated?: boolean
           last_move_at?: string | null
           last_move_from?: string | null
           last_move_to?: string | null
+          mode?: string
           move_number?: number
           pgn?: string
           result?: string | null
           status?: string
+          streamer_only?: boolean
           time_control_label?: string
           turn?: string
           updated_at?: string
@@ -904,16 +1006,19 @@ export type Database = {
           elo_applied?: boolean
           end_reason?: string | null
           fen?: string
+          hand_brain_meta?: Json
           id?: string
           increment?: number
           is_rated?: boolean
           last_move_at?: string | null
           last_move_from?: string | null
           last_move_to?: string | null
+          mode?: string
           move_number?: number
           pgn?: string
           result?: string | null
           status?: string
+          streamer_only?: boolean
           time_control_label?: string
           turn?: string
           updated_at?: string
@@ -1038,6 +1143,7 @@ export type Database = {
           bot_games_won: number
           bot_peak_rating: number
           bot_rating: number
+          city_key: string | null
           country: string | null
           country_flag: string | null
           created_at: string
@@ -1051,6 +1157,8 @@ export type Database = {
           games_won: number
           highest_title_key: string | null
           id: string
+          is_streamer: boolean
+          master_coins: number
           peak_rating: number
           rating: number
           updated_at: string
@@ -1066,6 +1174,7 @@ export type Database = {
           bot_games_won?: number
           bot_peak_rating?: number
           bot_rating?: number
+          city_key?: string | null
           country?: string | null
           country_flag?: string | null
           created_at?: string
@@ -1079,6 +1188,8 @@ export type Database = {
           games_won?: number
           highest_title_key?: string | null
           id?: string
+          is_streamer?: boolean
+          master_coins?: number
           peak_rating?: number
           rating?: number
           updated_at?: string
@@ -1094,6 +1205,7 @@ export type Database = {
           bot_games_won?: number
           bot_peak_rating?: number
           bot_rating?: number
+          city_key?: string | null
           country?: string | null
           country_flag?: string | null
           created_at?: string
@@ -1107,13 +1219,30 @@ export type Database = {
           games_won?: number
           highest_title_key?: string | null
           id?: string
+          is_streamer?: boolean
+          master_coins?: number
           peak_rating?: number
           rating?: number
           updated_at?: string
           user_id?: string
           username?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_city_key_fkey"
+            columns: ["city_key"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "profiles_city_key_fkey"
+            columns: ["city_key"]
+            isOneToOne: false
+            referencedRelation: "city_leaderboard"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       purchases: {
         Row: {
@@ -1300,6 +1429,45 @@ export type Database = {
           season_number?: number
           starts_at?: string
           status?: string
+        }
+        Relationships: []
+      }
+      spectator_bets: {
+        Row: {
+          created_at: string
+          game_id: string
+          id: string
+          odds_at_bet: number
+          payout: number | null
+          resolved_at: string | null
+          side: string
+          stake: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          game_id: string
+          id?: string
+          odds_at_bet: number
+          payout?: number | null
+          resolved_at?: string | null
+          side: string
+          stake: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          game_id?: string
+          id?: string
+          odds_at_bet?: number
+          payout?: number | null
+          resolved_at?: string | null
+          side?: string
+          stake?: number
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2004,6 +2172,21 @@ export type Database = {
       }
     }
     Views: {
+      city_leaderboard: {
+        Row: {
+          avg_rating: number | null
+          country_name: string | null
+          flag: string | null
+          key: string | null
+          name: string | null
+          players: number | null
+          region: string | null
+          top_rating: number | null
+          total_games: number | null
+          total_wins: number | null
+        }
+        Relationships: []
+      }
       tournament_played_pairs: {
         Row: {
           player_a: string | null
@@ -2079,6 +2262,15 @@ export type Database = {
         }
         Returns: number
       }
+      place_spectator_bet: {
+        Args: {
+          p_game_id: string
+          p_odds: number
+          p_side: string
+          p_stake: number
+        }
+        Returns: Json
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -2092,6 +2284,7 @@ export type Database = {
         Returns: undefined
       }
       server_now: { Args: never; Returns: string }
+      settle_bets_for_game: { Args: { p_game_id: string }; Returns: Json }
       tournament_color_balance: {
         Args: { _tournament_id: string }
         Returns: {
