@@ -1,9 +1,10 @@
+import React from "react";
 import { Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const Footer = () => (
-  <footer className="relative border-t border-border/30 bg-card/40 backdrop-blur-sm py-12 overflow-hidden">
+const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
+  <footer ref={ref} className="relative border-t border-border/30 bg-card/40 backdrop-blur-sm py-12 overflow-hidden">
     {/* Subtle ambient glow */}
     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, hsl(43 90% 55% / 0.02), transparent 70%)" }} />
     {/* Gold edge line */}
@@ -79,6 +80,7 @@ const Footer = () => (
       </div>
     </div>
   </footer>
-);
+));
+Footer.displayName = "Footer";
 
 export default Footer;

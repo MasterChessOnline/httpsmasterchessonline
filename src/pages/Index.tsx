@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
@@ -40,10 +40,10 @@ interface TopPlayer {
 }
 
 /* ── Section Header — clear hierarchy ── */
-const SectionHeader = ({ title, icon: Icon, action, children, delay = 0 }: {
+const SectionHeader = React.forwardRef<HTMLElement, {
   title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; delay?: number;
-}) => (
-  <section className="space-y-5">
+}>(({ title, icon: Icon, action, children, delay = 0 }, ref) => (
+  <section ref={ref} className="space-y-5">
     <motion.div
       className="flex items-center justify-between"
       initial={{ opacity: 0, y: 24 }}
@@ -61,7 +61,8 @@ const SectionHeader = ({ title, icon: Icon, action, children, delay = 0 }: {
     </motion.div>
     {children}
   </section>
-);
+));
+SectionHeader.displayName = "SectionHeader";
 
 /* ── User Preference Toggles ── */
 const PreferenceToggles = () => {
