@@ -11,7 +11,13 @@ import { getMasterGameById } from "@/lib/masterchess-db";
 
 export default function MasterGameView() {
   const { id } = useParams();
-  const game = useMemo(() => (id ? getMasterGameById(id) : undefined), [id]);
+  const [game, setGame] = useState<Awaited<ReturnType<typeof getMasterGameById>>>(undefined);
+  useEffect(() => {
+    let cancelled = false;
+    if (!id) { setGame(undefined); return; }
+    getMasterGameById(id).then(g => { if (!cancelled) setGame(g); });
+    return () => { cancelled = true; };
+  }, [id]);
 
   const moves = useMemo(() => {
     if (!game) return [] as { san: string; from: string; to: string }[];
