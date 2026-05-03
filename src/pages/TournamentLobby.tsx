@@ -352,7 +352,8 @@ const TournamentLobby = () => {
                   <span className="w-6 text-center">
                     {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : <span className="text-xs text-muted-foreground">{i + 1}</span>}
                   </span>
-                  <span className="font-medium text-foreground truncate">
+                  <span className="font-medium text-foreground truncate flex items-center">
+                    <CountryFlag country={reg.country} country_flag={reg.country_flag} />
                     {getPlayerName(reg)}
                     {user && reg.user_id === user.id && <span className="text-primary text-xs ml-1">(you)</span>}
                   </span>
