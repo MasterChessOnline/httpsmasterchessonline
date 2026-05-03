@@ -934,6 +934,34 @@ export default function Analysis() {
               )}
             </div>
 
+            {/* Game Review summary (Stockfish-style) */}
+            {pgnComplete && pgnMoveEvals.length > 0 && (
+              <div className="px-3 py-2 border-b border-border/20 bg-[hsl(220,18%,15%)]">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Game Review</span>
+                  <span className="text-[9px] text-muted-foreground">Stockfish</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-1.5">
+                  <div className="rounded bg-[hsl(220,18%,22%)] px-2 py-1.5 text-center">
+                    <div className="text-[9px] text-muted-foreground uppercase">White Acc</div>
+                    <div className="text-sm font-bold font-mono text-foreground">{reviewAccuracy.white.toFixed(1)}%</div>
+                  </div>
+                  <div className="rounded bg-[hsl(220,18%,22%)] px-2 py-1.5 text-center">
+                    <div className="text-[9px] text-muted-foreground uppercase">Black Acc</div>
+                    <div className="text-sm font-bold font-mono text-foreground">{reviewAccuracy.black.toFixed(1)}%</div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 gap-1 text-[9px]">
+                  {(["best", "book", "inaccuracy", "mistake", "blunder"] as MoveClass[]).map(k => (
+                    <div key={k} className={`rounded border px-1 py-0.5 ${CLASS_META[k].bg} ${CLASS_META[k].color}`}>
+                      <div className="font-bold uppercase tracking-wider truncate">{CLASS_META[k].label}</div>
+                      <div className="font-mono">W{reviewSummary[k].w} · B{reviewSummary[k].b}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Move list */}
             <div className="flex-1 overflow-y-auto px-2 py-1 max-h-[240px]" ref={moveListRef}>
               {activeEvals.length === 0 ? (
