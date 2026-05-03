@@ -708,7 +708,7 @@ export default function Analysis() {
         .limit(50),
     ]).then(([online, bots]) => {
       setMyGames((online.data as SavedOnlineGame[] | null) || []);
-      setMyBotGames((bots.data as SavedBotGame[] | null) || []);
+      setMyBotGames(((bots.data as unknown) as SavedBotGame[] | null) || []);
       setMyGamesLoading(false);
     });
   }, [bottomTab, user]);
