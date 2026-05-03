@@ -106,10 +106,14 @@ export default function OpeningExplorer() {
 
   // Fetch MasterChess DB data when position changes
   useEffect(() => {
+    let cancelled = false;
     setExplorerLoading(true);
-    const data = fetchMasterChessExplorer(currentFen);
-    setExplorerData(data);
-    setExplorerLoading(false);
+    fetchMasterChessExplorer(currentFen).then(data => {
+      if (cancelled) return;
+      setExplorerData(data);
+      setExplorerLoading(false);
+    }).catch(() => { if (!cancelled) setExplorerLoading(false); });
+    return () => { cancelled = true; };
   }, [currentFen]);
 
   // Run Stockfish when position changes

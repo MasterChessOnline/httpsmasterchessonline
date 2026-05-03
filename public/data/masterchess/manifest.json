@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "totalGames": 110341,
+  "referencedGames": 75936,
+  "totalPositions": 182491,
+  "indexShards": 256,
+  "gameShards": 221,
+  "gameShardSize": 500,
+  "maxPlies": 16
+}

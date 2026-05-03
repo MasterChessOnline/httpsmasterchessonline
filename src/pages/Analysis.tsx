@@ -52,16 +52,30 @@ function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): 
   return new Chess(fen).turn() === "w" ? raw : -raw;
 }
 
-function formatEval(cp: number, mate: number | null): string {
-  if (mate !== null) return mate > 0 ? `M${mate}` : `M${mate}`;
+// Convert engine's side-to-move mate distance to a white-POV signed mate value.
+// e.g. white-to-move with M5 → +5; black-to-move with M5 → -5.
+function mateToWhitePov(fen: string, mate: number | null): number | null {
+  if (mate === null) return null;
+  return new Chess(fen).turn() === "w" ? mate : -mate;
+}
+
+function formatEval(cp: number, mateWhitePov: number | null): string {
+  if (mateWhitePov !== null) {
+    if (mateWhitePov === 0) return cp >= 0 ? "1-0" : "0-1";
+    return mateWhitePov > 0 ? `M${mateWhitePov}` : `-M${Math.abs(mateWhitePov)}`;
+  }
   const val = cp / 100;
   return val >= 0 ? `+${val.toFixed(1)}` : val.toFixed(1);
 }
 
-function evalToBarPct(cp: number, mate: number | null): number {
-  if (mate !== null) return mate > 0 ? 95 : 5;
+function evalToBarPct(cp: number, mateWhitePov: number | null): number {
+  // Lock 100% (or 0%) on forced mate so the bar never wobbles during a mating sequence.
+  if (mateWhitePov !== null) return mateWhitePov >= 0 ? 100 : 0;
+  // Hard pin on extreme cp (e.g. cached mate stored as ±10000)
+  if (cp >= 9000) return 100;
+  if (cp <= -9000) return 0;
   const x = cp / 100;
-  return Math.max(5, Math.min(95, 50 + 50 * (2 / (1 + Math.exp(-0.4 * x)) - 1)));
+  return Math.max(2, Math.min(98, 50 + 50 * (2 / (1 + Math.exp(-0.4 * x)) - 1)));
 }
 
 function formatGames(n: number): string {
@@ -109,6 +123,12 @@ export default function Analysis() {
   const [liveCurrentEval, setLiveCurrentEval] = useState<{ cp: number; mate: number | null }>({ cp: 0, mate: null });
   const [liveViewIdx, setLiveViewIdx] = useState(-1);
   const prevEvalRef = useRef(0);
+
+  // Variation builder (PGN review mode): allow alternative moves at the current
+  // position, displayed inline as (sanA sanB ...) with a Promote-to-mainline
+  // button. variation.fromIdx === N means "after pgnMoveEvals[N]".
+  const [variation, setVariation] = useState<{ fromIdx: number; moves: { san: string; from: string; to: string; fen: string; color: "w" | "b"; moveNumber: number }[] } | null>(null);
+  const variationGameRef = useRef<Chess | null>(null);
 
   // Explorer state
   const [explorerData, setExplorerData] = useState<MasterExplorerData | null>(null);
@@ -222,9 +242,14 @@ export default function Analysis() {
   // Fetch MasterChess DB data when position changes
   useEffect(() => {
     if (bottomTab !== "explorer") return;
+    let cancelled = false;
     setExplorerLoading(true);
-    setExplorerData(fetchMasterChessExplorer(currentFen));
-    setExplorerLoading(false);
+    fetchMasterChessExplorer(currentFen).then(data => {
+      if (cancelled) return;
+      setExplorerData(data);
+      setExplorerLoading(false);
+    }).catch(() => { if (!cancelled) setExplorerLoading(false); });
+    return () => { cancelled = true; };
   }, [currentFen, bottomTab]);
 
   // Compute top engine variations (MultiPV) for the current position.
@@ -271,10 +296,11 @@ export default function Analysis() {
       const posEval = cached.get(fen) ?? await engine.evaluate(fen, depth);
       if (!cached.has(fen)) void saveCachedStockfishEval(fen, depth, posEval.evaluation, posEval.mate);
       const evalCp = scoreToWhitePov(fen, posEval.evaluation, posEval.mate);
-      setLiveCurrentEval({ cp: evalCp, mate: posEval.mate });
+      const mateW = mateToWhitePov(fen, posEval.mate);
+      setLiveCurrentEval({ cp: evalCp, mate: mateW });
       const moveEval: MoveEval = {
         san: moveSan, fen, fenBefore, from: moveFrom, to: moveTo, color, moveNumber: moveNum,
-        eval: evalCp, mate: posEval.mate,
+        eval: evalCp, mate: mateW,
       };
       prevEvalRef.current = evalCp;
       setLiveMoveHistory(prev => [...prev, moveEval]);
@@ -282,6 +308,45 @@ export default function Analysis() {
   }, [depth]);
 
   const handleInteractiveSquareClick = useCallback((square: Square) => {
+    // PGN review mode: clicking pieces builds an alternative variation
+    if (pgnComplete) {
+      // Build / extend a variation starting from the current pgnCurrentIdx position
+      let g: Chess;
+      if (variation && variation.fromIdx === pgnCurrentIdx) {
+        g = variationGameRef.current ?? new Chess();
+      } else {
+        g = pgnCurrentIdx === -1 ? new Chess() : new Chess(pgnMoveEvals[pgnCurrentIdx].fen);
+        variationGameRef.current = g;
+      }
+      // If a variation is already in progress and the user clicked back to a deeper index,
+      // ensure the on-screen board matches g.fen()
+      if (selectedSquare) {
+        try {
+          const move = g.move({ from: selectedSquare, to: square, promotion: "q" });
+          if (move) {
+            const baseLen = pgnCurrentIdx + 1; // half-moves played in the main line
+            const totalPly = baseLen + (variation && variation.fromIdx === pgnCurrentIdx ? variation.moves.length : 0);
+            const moveNumber = Math.floor(totalPly / 2) + 1;
+            const entry = { san: move.san, from: move.from, to: move.to, fen: g.fen(), color: move.color as "w" | "b", moveNumber };
+            const next = (variation && variation.fromIdx === pgnCurrentIdx)
+              ? { fromIdx: pgnCurrentIdx, moves: [...variation.moves, entry] }
+              : { fromIdx: pgnCurrentIdx, moves: [entry] };
+            setVariation(next);
+            variationGameRef.current = g;
+            pgnDisplayGame.current = new Chess(g.fen());
+            setPgnDisplayFen(g.fen());
+            setSelectedSquare(null); setLegalMoves([]);
+            return;
+          }
+        } catch {}
+      }
+      const piece = g.get(square);
+      if (piece && piece.color === g.turn()) {
+        setSelectedSquare(square);
+        setLegalMoves(g.moves({ square, verbose: true }).map(m => m.to as Square));
+      } else { setSelectedSquare(null); setLegalMoves([]); }
+      return;
+    }
     if (liveViewIdx >= 0) return;
     const game = liveGame;
     if (selectedSquare) {
@@ -302,7 +367,7 @@ export default function Analysis() {
       setSelectedSquare(square);
       setLegalMoves(game.moves({ square, verbose: true }).map(m => m.to as Square));
     } else { setSelectedSquare(null); setLegalMoves([]); }
-  }, [liveGame, selectedSquare, evaluatePosition, liveMoveHistory.length, liveViewIdx]);
+  }, [liveGame, selectedSquare, evaluatePosition, liveMoveHistory.length, liveViewIdx, pgnComplete, pgnCurrentIdx, pgnMoveEvals, variation]);
 
   // Play an explorer move
   const playExplorerMove = useCallback((san: string) => {
@@ -368,7 +433,63 @@ export default function Analysis() {
     setPgnCurrentIdx(clamped);
     pgnDisplayGame.current = clamped === -1 ? new Chess() : new Chess(pgnMoveEvals[clamped].fen);
     setPgnDisplayFen(pgnDisplayGame.current.fen());
-  }, [pgnMoveEvals]);
+    // Navigating away from the variation start clears it
+    if (variation && variation.fromIdx !== clamped) {
+      setVariation(null);
+      variationGameRef.current = null;
+    }
+    setSelectedSquare(null); setLegalMoves([]);
+  }, [pgnMoveEvals, variation]);
+
+  // Promote the current variation into the main line, replacing any tail moves.
+  const promoteVariation = useCallback(async () => {
+    if (!variation || variation.moves.length === 0) return;
+    const baseLen = variation.fromIdx + 1;
+    const baseEvals = pgnMoveEvals.slice(0, baseLen);
+
+    // Evaluate each variation move with the engine if ready
+    const engine = stockfishReady.current ? getStockfishEngine() : null;
+    const newEvals: MoveEval[] = [...baseEvals];
+    for (let i = 0; i < variation.moves.length; i++) {
+      const v = variation.moves[i];
+      const fenBefore = i === 0
+        ? (variation.fromIdx === -1 ? new Chess().fen() : pgnMoveEvals[variation.fromIdx].fen)
+        : variation.moves[i - 1].fen;
+      let evalCp = 0; let mateW: number | null = null;
+      if (engine) {
+        try {
+          const posEval = await engine.evaluate(v.fen, depth);
+          evalCp = scoreToWhitePov(v.fen, posEval.evaluation, posEval.mate);
+          mateW = mateToWhitePov(v.fen, posEval.mate);
+        } catch {}
+      }
+      newEvals.push({
+        san: v.san, fen: v.fen, fenBefore, from: v.from, to: v.to,
+        color: v.color, moveNumber: v.moveNumber, eval: evalCp, mate: mateW,
+      });
+    }
+    setPgnMoveEvals(newEvals);
+    setVariation(null);
+    variationGameRef.current = null;
+    const newIdx = newEvals.length - 1;
+    setPgnCurrentIdx(newIdx);
+    pgnDisplayGame.current = new Chess(newEvals[newIdx].fen);
+    setPgnDisplayFen(newEvals[newIdx].fen);
+  }, [variation, pgnMoveEvals, depth]);
+
+  const discardVariation = useCallback(() => {
+    if (!variation) return;
+    setVariation(null);
+    variationGameRef.current = null;
+    if (pgnCurrentIdx === -1) {
+      pgnDisplayGame.current = new Chess();
+      setPgnDisplayFen("start");
+    } else {
+      pgnDisplayGame.current = new Chess(pgnMoveEvals[pgnCurrentIdx].fen);
+      setPgnDisplayFen(pgnMoveEvals[pgnCurrentIdx].fen);
+    }
+    setSelectedSquare(null); setLegalMoves([]);
+  }, [variation, pgnCurrentIdx, pgnMoveEvals]);
 
   useEffect(() => {
     if (!pgnComplete && liveMoveHistory.length === 0) return;
@@ -426,7 +547,7 @@ export default function Analysis() {
       evals.push({
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
         color: move.color, moveNumber: Math.floor(i / 2) + 1,
-        eval: evalCp, mate: posEval.mate,
+        eval: evalCp, mate: mateToWhitePov(fenAfter, posEval.mate),
       });
     }
     setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
@@ -515,7 +636,7 @@ export default function Analysis() {
       evals.push({
         san: move.san, fen: fenAfter, fenBefore, from: move.from, to: move.to,
         color: move.color, moveNumber: Math.floor(i / 2) + 1,
-        eval: evalCp, mate: posEval.mate,
+        eval: evalCp, mate: mateToWhitePov(fenAfter, posEval.mate),
       });
     }
     setPgnMoveEvals(evals); setPgnComplete(true); setAnalyzing(false); setProgress(100); goToPgnMove(0);
@@ -610,12 +731,12 @@ export default function Analysis() {
                 <ChessBoard
                   game={boardGame}
                   flipped={flipped}
-                  selectedSquare={!pgnComplete ? selectedSquare : null}
-                  legalMoves={!pgnComplete ? legalMoves : []}
+                  selectedSquare={selectedSquare}
+                  legalMoves={legalMoves}
                   lastMove={lastMoveDisplay}
                   isGameOver={false}
-                  isPlayerTurn={!pgnComplete && liveViewIdx < 0}
-                  onSquareClick={!pgnComplete ? handleInteractiveSquareClick : () => {}}
+                  isPlayerTurn={(!pgnComplete && liveViewIdx < 0) || pgnComplete}
+                  onSquareClick={handleInteractiveSquareClick}
                 />
               </div>
             </div>
@@ -753,19 +874,59 @@ export default function Analysis() {
               ) : (
                 <div className="grid grid-cols-2 gap-x-1 gap-y-0.5">
                   {activeEvals.map((mv, i) => {
-                    const isActive = activeIdx === i;
+                    const isActive = activeIdx === i && !variation;
                     const showNum = mv.color === "w";
+                    const showVarHere = pgnComplete && variation && variation.fromIdx === i;
                     return (
-                      <button key={i} onClick={() => goFn(i)}
-                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors ${
-                          isActive ? "bg-[hsl(120,40%,35%)] text-white" : "hover:bg-[hsl(220,18%,22%)] text-foreground/80"
-                        } ${mv.color === "w" ? "col-start-1" : "col-start-2"}`}>
-                        {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
-                        {!showNum && <span className="w-5 shrink-0" />}
-                        <span className="font-mono font-medium">{mv.san}</span>
-                      </button>
+                      <div key={i} className={`contents`}>
+                        <button onClick={() => goFn(i)}
+                          className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition-colors ${
+                            isActive ? "bg-[hsl(120,40%,35%)] text-white" : "hover:bg-[hsl(220,18%,22%)] text-foreground/80"
+                          } ${mv.color === "w" ? "col-start-1" : "col-start-2"}`}>
+                          {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
+                          {!showNum && <span className="w-5 shrink-0" />}
+                          <span className="font-mono font-medium">{mv.san}</span>
+                        </button>
+                        {showVarHere && (
+                          <div className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
+                            <span className="text-primary font-mono">(</span>
+                            {variation.moves.map((vm, vi) => (
+                              <span key={vi} className="font-mono">
+                                {vm.color === "w" && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}.</span>}
+                                {vm.color === "b" && vi === 0 && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}…</span>}
+                                {vm.san}
+                                {vi < variation.moves.length - 1 ? " " : ""}
+                              </span>
+                            ))}
+                            <span className="text-primary font-mono">)</span>
+                            <Button size="sm" variant="default" className="ml-2 h-5 px-2 text-[9px] bg-primary text-primary-foreground" onClick={promoteVariation}>
+                              Promote
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-5 px-2 text-[9px]" onClick={discardVariation}>
+                              ✕
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
+                  {/* Variation starting from the very beginning (fromIdx === -1) */}
+                  {pgnComplete && variation && variation.fromIdx === -1 && (
+                    <div className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
+                      <span className="text-primary font-mono">(</span>
+                      {variation.moves.map((vm, vi) => (
+                        <span key={vi} className="font-mono">
+                          {vm.color === "w" && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}.</span>}
+                          {vm.color === "b" && vi === 0 && <span className="text-muted-foreground/60 mr-0.5">{vm.moveNumber}…</span>}
+                          {vm.san}
+                          {vi < variation.moves.length - 1 ? " " : ""}
+                        </span>
+                      ))}
+                      <span className="text-primary font-mono">)</span>
+                      <Button size="sm" variant="default" className="ml-2 h-5 px-2 text-[9px] bg-primary text-primary-foreground" onClick={promoteVariation}>Promote</Button>
+                      <Button size="sm" variant="ghost" className="h-5 px-2 text-[9px]" onClick={discardVariation}>✕</Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
