@@ -781,8 +781,9 @@ export default function Analysis() {
   const activeEvals = pgnComplete ? pgnMoveEvals : liveMoveHistory;
   const activeIdx = pgnComplete ? pgnCurrentIdx : (liveViewIdx >= 0 ? liveViewIdx : liveMoveHistory.length - 1);
   const currentEval = activeIdx >= 0 && activeIdx < activeEvals.length ? activeEvals[activeIdx] : null;
-  const evalCpForBar = !pgnComplete ? liveCurrentEval.cp : (currentEval?.eval ?? 0);
-  const evalMateForBar = !pgnComplete ? liveCurrentEval.mate : (currentEval?.mate ?? null);
+  const exactPositionEval = positionEval?.fen === currentFen ? positionEval : null;
+  const evalCpForBar = exactPositionEval?.cp ?? (!pgnComplete ? liveCurrentEval.cp : (currentEval?.eval ?? 0));
+  const evalMateForBar = exactPositionEval?.mate ?? (!pgnComplete ? liveCurrentEval.mate : (currentEval?.mate ?? null));
   const evalPercent = evalToBarPct(evalCpForBar, evalMateForBar);
   const lastMoveDisplay = pgnComplete
     ? (pgnCurrentIdx >= 0 ? { from: pgnMoveEvals[pgnCurrentIdx].from, to: pgnMoveEvals[pgnCurrentIdx].to } : null)
