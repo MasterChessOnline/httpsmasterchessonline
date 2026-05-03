@@ -161,11 +161,17 @@ export default function Analysis() {
   const [liveViewIdx, setLiveViewIdx] = useState(-1);
   const prevEvalRef = useRef(0);
 
-  // Variation builder (PGN review mode): allow alternative moves at the current
-  // position, displayed inline as (sanA sanB ...) with a Promote-to-mainline
-  // button. variation.fromIdx === N means "after pgnMoveEvals[N]".
-  const [variation, setVariation] = useState<{ fromIdx: number; moves: { san: string; from: string; to: string; fen: string; color: "w" | "b"; moveNumber: number }[] } | null>(null);
+  // Variation builder (PGN review mode): allow alternative moves at any position,
+  // displayed inline as (sanA sanB ...) with a Promote-to-mainline button.
+  // Multiple variations can coexist — each anchored at its own `fromIdx`.
+  // `fromIdx === -1` means "before the first move" (starting position).
+  type VariationMove = { san: string; from: string; to: string; fen: string; color: "w" | "b"; moveNumber: number };
+  type VariationT = { fromIdx: number; moves: VariationMove[] };
+  const [variations, setVariations] = useState<VariationT[]>([]);
   const variationGameRef = useRef<Chess | null>(null);
+
+  // Active variation = the one anchored at the current PGN index, if any.
+  const variation = variations.find(v => v.fromIdx === pgnCurrentIdx) ?? null;
 
   // Explorer state
   const [explorerData, setExplorerData] = useState<MasterExplorerData | null>(null);
