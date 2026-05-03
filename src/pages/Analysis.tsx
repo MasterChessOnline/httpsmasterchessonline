@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Upload, Trash2, Download, MousePointerClick, RotateCcw,
-  Globe, Database, Trophy, FlipVertical, Swords, Calendar, Sparkles, History
+  Globe, Database, Trophy, FlipVertical, Swords, Calendar, Sparkles, History, ExternalLink
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
