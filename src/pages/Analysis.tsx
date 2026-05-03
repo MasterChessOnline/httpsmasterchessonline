@@ -770,14 +770,50 @@ export default function Analysis() {
   const downloadPGN = () => {
     const evals = pgnComplete ? pgnMoveEvals : liveMoveHistory;
     if (evals.length === 0) return;
-    let pgn = `[Event "Game Analysis"]\n\n`;
-    evals.forEach((mv) => {
-      if (mv.color === "w") pgn += `${mv.moveNumber}. `;
-      pgn += `${mv.san} `;
-    });
-    const blob = new Blob([pgn.trim()], { type: "application/x-chess-pgn" });
+
+    // Try to preserve any headers already present in the source PGN (e.g. bot games
+    // exported from Play.tsx already carry full ChessBase-friendly tags).
+    const sourceHeaders: Record<string, string> = {};
+    const headerRe = /\[(\w+)\s+"([^"]*)"\]/g;
+    let m: RegExpExecArray | null;
+    while ((m = headerRe.exec(pgnInput)) !== null) sourceHeaders[m[1]] = m[2];
+
+    // Build a fresh game so chess.js renders headers + moves cleanly.
+    const out = new Chess();
+    for (const mv of evals) {
+      try { out.move(mv.san); } catch { /* ignore */ }
+    }
+
+    const today = new Date();
+    const dateTag = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(today.getDate()).padStart(2, "0")}`;
+    const whiteName = sourceHeaders.White || gameMeta?.white?.display_name || gameMeta?.white?.username || "White";
+    const blackName = sourceHeaders.Black || gameMeta?.black?.display_name || gameMeta?.black?.username || "Black";
+    const whiteElo = sourceHeaders.WhiteElo || (gameMeta?.white?.rating != null ? String(gameMeta.white.rating) : "");
+    const blackElo = sourceHeaders.BlackElo || (gameMeta?.black?.rating != null ? String(gameMeta.black.rating) : "");
+    const tcLabel = sourceHeaders.TimeControl || gameMeta?.time_control_label || "-";
+    const resultTag = sourceHeaders.Result || gameMeta?.result || "*";
+    const dateOut = sourceHeaders.Date || (gameMeta?.created_at ? new Date(gameMeta.created_at).toISOString().slice(0, 10).replace(/-/g, ".") : dateTag);
+    const eventOut = sourceHeaders.Event || "MasterChess Game";
+    const siteOut = sourceHeaders.Site || "masterchess.live";
+
+    out.header(
+      "Event", eventOut,
+      "Site", siteOut,
+      "Date", dateOut,
+      "Round", sourceHeaders.Round || "-",
+      "White", whiteName,
+      "Black", blackName,
+      "Result", resultTag,
+      ...(whiteElo ? ["WhiteElo", whiteElo] : []),
+      ...(blackElo ? ["BlackElo", blackElo] : []),
+      "TimeControl", tcLabel,
+    );
+
+    const pgn = out.pgn();
+    const blob = new Blob([pgn], { type: "application/x-chess-pgn" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "analysis.pgn"; a.click();
+    const safe = `${whiteName}_vs_${blackName}_${dateOut}`.replace(/[^a-z0-9_.-]/gi, "_");
+    const a = document.createElement("a"); a.href = url; a.download = `${safe}.pgn`; a.click();
     URL.revokeObjectURL(url);
   };
 
