@@ -46,6 +46,10 @@ interface GameMeta {
   created_at: string;
 }
 
+type SavedOnlineGame = { id: string; pgn: string; result: string | null; created_at: string; time_control_label: string; white_player_id: string; black_player_id: string };
+type SavedBotGame = { id: string; pgn: string; result: string; outcome: "win" | "loss" | "draw"; bot_name: string; bot_rating: number; player_color: "w" | "b"; created_at: string; time_control_label: string; move_count: number };
+type OnlineGameMetaRow = { pgn: string | null; result: string | null; time_control_label: string | null; created_at: string; white_player_id: string; black_player_id: string };
+
 // ── Helpers ──
 
 function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): number {
@@ -130,12 +134,13 @@ export default function Analysis() {
   const [flipped, setFlipped] = useState(false);
   const [bottomTab, setBottomTab] = useState<"explorer" | "import" | "my-games">("explorer");
   const { user } = useAuth();
-  const [myGames, setMyGames] = useState<Array<{ id: string; pgn: string; result: string | null; created_at: string; time_control_label: string; white_player_id: string; black_player_id: string }>>([]);
-  const [myBotGames, setMyBotGames] = useState<Array<{ id: string; pgn: string; result: string; outcome: "win" | "loss" | "draw"; bot_name: string; bot_rating: number; player_color: "w" | "b"; created_at: string; time_control_label: string; move_count: number }>>([]);
+  const [myGames, setMyGames] = useState<SavedOnlineGame[]>([]);
+  const [myBotGames, setMyBotGames] = useState<SavedBotGame[]>([]);
   const [myGamesLoading, setMyGamesLoading] = useState(false);
   const [myGamesSource, setMyGamesSource] = useState<"online" | "bot">("online");
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
+  const [engineReady, setEngineReady] = useState(false);
 
   // PGN mode
   const [pgnInput, setPgnInput] = useState("");
@@ -181,6 +186,8 @@ export default function Analysis() {
   const [multiPvCount, setMultiPvCount] = useState<number>(3);
   const [topLines, setTopLines] = useState<MultiPvLine[]>([]);
   const [linesLoading, setLinesLoading] = useState(false);
+  const [positionEval, setPositionEval] = useState<{ fen: string; cp: number; mate: number | null } | null>(null);
+  const [positionEvaluating, setPositionEvaluating] = useState(false);
 
   // Current FEN for explorer
   const currentFen = useMemo(() => {
@@ -220,8 +227,37 @@ export default function Analysis() {
 
   useEffect(() => {
     const engine = getStockfishEngine();
-    engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
+    engine.init().then(() => { stockfishReady.current = true; setEngineReady(true); }).catch(() => setError("Failed to load analysis engine"));
   }, []);
+
+  // Keep the visible eval bar tied to the exact board FEN, including side variations.
+  useEffect(() => {
+    if (!engineReady) return;
+    let cancelled = false;
+    setPositionEval(prev => (prev?.fen === currentFen ? prev : null));
+    setPositionEvaluating(true);
+
+    (async () => {
+      try {
+        const cached = await getCachedStockfishEvals([currentFen], depth);
+        const engine = getStockfishEngine();
+        const posEval = cached.get(currentFen) ?? await engine.evaluate(currentFen, depth);
+        if (!cached.has(currentFen)) void saveCachedStockfishEval(currentFen, depth, posEval.evaluation, posEval.mate);
+        if (cancelled) return;
+        setPositionEval({
+          fen: currentFen,
+          cp: scoreToWhitePov(currentFen, posEval.evaluation, posEval.mate),
+          mate: mateToWhitePov(currentFen, posEval.mate),
+        });
+      } catch (e) {
+        console.error("Position eval error:", e);
+      } finally {
+        if (!cancelled) setPositionEvaluating(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [currentFen, depth, engineReady]);
 
   // ── Game Review: classify each PGN move and compute accuracy ──
   const reviewClassifications = useMemo<MoveClass[]>(() => {
@@ -295,8 +331,8 @@ export default function Analysis() {
         .eq("id", gameId)
         .maybeSingle();
       if (cancelled) return;
-      const row = data as any;
-      const pgn = row?.pgn as string | undefined;
+      const row = data as OnlineGameMetaRow | null;
+      const pgn = row?.pgn ?? undefined;
 
       // Fetch both player profiles for the header banner
       if (row?.white_player_id && row?.black_player_id) {
@@ -305,7 +341,7 @@ export default function Analysis() {
           .select("user_id, display_name, username, avatar_url, rating, country_flag")
           .in("user_id", [row.white_player_id, row.black_player_id]);
         const map: Record<string, PlayerInfo> = {};
-        (profs || []).forEach((p: any) => { map[p.user_id] = p; });
+        ((profs as PlayerInfo[] | null) || []).forEach((p) => { map[p.user_id] = p; });
         if (!cancelled) {
           setGameMeta({
             white: map[row.white_player_id] || null,
@@ -347,7 +383,7 @@ export default function Analysis() {
   // Compute top engine variations (MultiPV) for the current position.
   // Re-runs whenever the position, requested line count, or analysis depth changes.
   useEffect(() => {
-    if (!stockfishReady.current) return;
+    if (!engineReady) return;
     let cancelled = false;
     setLinesLoading(true);
     const engine = getStockfishEngine();
@@ -376,7 +412,7 @@ export default function Analysis() {
       setLinesLoading(false);
     }).catch(() => { if (!cancelled) setLinesLoading(false); });
     return () => { cancelled = true; };
-  }, [currentFen, multiPvCount, depth]);
+  }, [currentFen, multiPvCount, depth, engineReady]);
 
   // ── Interactive logic ──
   const evaluatePosition = useCallback(async (fen: string, fenBefore: string, moveSan: string, moveFrom: string, moveTo: string, color: "w" | "b", moveNum: number) => {
@@ -433,7 +469,7 @@ export default function Analysis() {
             setSelectedSquare(null); setLegalMoves([]);
             return;
           }
-        } catch {}
+        } catch { /* ignore illegal variation move */ }
       }
       const piece = g.get(square);
       if (piece && piece.color === g.turn()) {
@@ -455,7 +491,7 @@ export default function Analysis() {
           evaluatePosition(newFen, fenBefore, move.san, move.from, move.to, move.color, Math.ceil(liveMoveHistory.length / 2) + 1);
           return;
         }
-      } catch {}
+      } catch { /* ignore illegal board move */ }
     }
     const piece = game.get(square);
     if (piece && piece.color === game.turn()) {
@@ -478,7 +514,7 @@ export default function Analysis() {
         setSelectedSquare(null); setLegalMoves([]); setLiveGame(new Chess(newFen));
         evaluatePosition(newFen, fenBefore, move.san, move.from, move.to, move.color, Math.ceil(liveMoveHistory.length / 2) + 1);
       }
-    } catch {}
+    } catch { /* ignore illegal explorer move */ }
   }, [liveGame, evaluatePosition, liveMoveHistory.length, liveViewIdx, pgnComplete]);
 
   const resetInteractive = useCallback(() => {
@@ -554,7 +590,7 @@ export default function Analysis() {
           const posEval = await engine.evaluate(vm.fen, depth);
           evalCp = scoreToWhitePov(vm.fen, posEval.evaluation, posEval.mate);
           mateW = mateToWhitePov(vm.fen, posEval.mate);
-        } catch {}
+        } catch { /* keep unevaluated variation move if engine fails */ }
       }
       newEvals.push({
         san: vm.san, fen: vm.fen, fenBefore, from: vm.from, to: vm.to,
@@ -665,14 +701,14 @@ export default function Analysis() {
         .order("created_at", { ascending: false })
         .limit(50),
       supabase
-        .from("bot_games" as any)
+        .from("bot_games")
         .select("id, pgn, result, outcome, bot_name, bot_rating, player_color, created_at, time_control_label, move_count")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(50),
     ]).then(([online, bots]) => {
-      setMyGames((online.data as any) || []);
-      setMyBotGames(((bots.data as unknown) as any[]) || []);
+      setMyGames((online.data as SavedOnlineGame[] | null) || []);
+      setMyBotGames(((bots.data as unknown) as SavedBotGame[] | null) || []);
       setMyGamesLoading(false);
     });
   }, [bottomTab, user]);
@@ -749,8 +785,9 @@ export default function Analysis() {
   const activeEvals = pgnComplete ? pgnMoveEvals : liveMoveHistory;
   const activeIdx = pgnComplete ? pgnCurrentIdx : (liveViewIdx >= 0 ? liveViewIdx : liveMoveHistory.length - 1);
   const currentEval = activeIdx >= 0 && activeIdx < activeEvals.length ? activeEvals[activeIdx] : null;
-  const evalCpForBar = !pgnComplete ? liveCurrentEval.cp : (currentEval?.eval ?? 0);
-  const evalMateForBar = !pgnComplete ? liveCurrentEval.mate : (currentEval?.mate ?? null);
+  const exactPositionEval = positionEval?.fen === currentFen ? positionEval : null;
+  const evalCpForBar = exactPositionEval?.cp ?? (!pgnComplete ? liveCurrentEval.cp : (currentEval?.eval ?? 0));
+  const evalMateForBar = exactPositionEval?.mate ?? (!pgnComplete ? liveCurrentEval.mate : (currentEval?.mate ?? null));
   const evalPercent = evalToBarPct(evalCpForBar, evalMateForBar);
   const lastMoveDisplay = pgnComplete
     ? (pgnCurrentIdx >= 0 ? { from: pgnMoveEvals[pgnCurrentIdx].from, to: pgnMoveEvals[pgnCurrentIdx].to } : null)
@@ -808,7 +845,7 @@ export default function Analysis() {
                     {formatEval(evalCpForBar, evalMateForBar)}
                   </span>
                 </div>
-                {liveEvaluating && !pgnComplete && (
+                {(positionEvaluating || (liveEvaluating && !pgnComplete)) && (
                   <div className="absolute inset-0 flex items-center justify-center z-20">
                     <Loader2 className="h-3 w-3 text-primary animate-spin" />
                   </div>
@@ -852,7 +889,7 @@ export default function Analysis() {
             <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/20 bg-[hsl(220,18%,14%)]">
               <Brain className="h-4 w-4 text-primary" />
               <span className="text-xs font-bold text-foreground">Analysis</span>
-              <span className="text-[10px] text-muted-foreground ml-auto">Stockfish · D{depth}</span>
+                <span className="text-[10px] text-muted-foreground ml-auto">Stockfish · D{depth}{positionEvaluating ? " · analyzing" : ""}</span>
             </div>
 
             {/* Engine eval */}
