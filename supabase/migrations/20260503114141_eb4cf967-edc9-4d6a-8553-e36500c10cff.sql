@@ -1,0 +1,1 @@
+ALTER VIEW public.city_leaderboard SET (security_invoker = on);
