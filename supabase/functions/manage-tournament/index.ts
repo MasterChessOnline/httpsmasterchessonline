@@ -20,6 +20,22 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader || "" } },
   });
 
+  let body: any = {};
+  try { body = await req.json(); } catch { body = {}; }
+  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes } = body;
+
+  // Public action: auto-start due tournaments (called by cron). No user required.
+  if (action === "auto_start_due") {
+    try {
+      return await handleAutoStartDue(supabase);
+    } catch (err) {
+      return new Response(JSON.stringify({ error: (err as Error).message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
   const { data: { user } } = await userClient.auth.getUser();
   if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -28,15 +44,10 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes } = await req.json();
-
   try {
     if (action === "create") {
       // Any authenticated user can create a tournament (they become the creator).
       return await handleCreate(supabase, user.id, { name, category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment, starts_in_minutes });
-    }
-    if (action === "auto_start_due") {
-      return await handleAutoStartDue(supabase);
     }
     if (action === "join") {
       return await handleJoin(supabase, user.id, tournament_id);
