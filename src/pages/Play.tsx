@@ -10,6 +10,7 @@ import GameControls from "@/components/chess/GameControls";
 import AnalysisPanel from "@/components/chess/AnalysisPanel";
 import GameSummary from "@/components/chess/GameSummary";
 import GameOverOverlay from "@/components/chess/GameOverOverlay";
+import GameStatusOverlay, { type GameStatusKind } from "@/components/chess/GameStatusOverlay";
 import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { getAIMove, evaluateBoard, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
@@ -667,6 +668,26 @@ const Play = () => {
     return null;
   })();
 
+  // Live status banner (CHECK / CHECKMATE / DRAW) overlay info
+  const statusKind: GameStatusKind = (() => {
+    if (game.isCheckmate()) return "checkmate";
+    if (game.isStalemate() || game.isDraw() || drawAgreed) return "draw";
+    if (game.isCheck()) return "check";
+    return null;
+  })();
+  const statusSubtitle: string | undefined = (() => {
+    if (statusKind === "checkmate") return `${game.turn() === "w" ? "Black" : "White"} wins`;
+    if (statusKind === "draw") {
+      if (drawAgreed) return drawReason || "by agreement";
+      if (game.isStalemate()) return "by stalemate";
+      if (game.isThreefoldRepetition?.()) return "by threefold repetition";
+      if (game.isInsufficientMaterial()) return "by insufficient material";
+      if (game.isDraw()) return "by fifty-move rule";
+    }
+    if (statusKind === "check") return `${game.turn() === "w" ? "White" : "Black"} king`;
+    return undefined;
+  })();
+
   const pgn = game.pgn();
 
   // --- Apply bot rating change + streak + badges once when an AI game finishes ---
@@ -1124,13 +1145,18 @@ const Play = () => {
                 hintToSquare={hintToSquare}
                 onSquareClick={handleSquareClick}
                 premove={premove}
-                overlay={gameOverInfo ? (
-                  <GameOverOverlay
-                    type={gameOverInfo.type}
-                    winner={gameOverInfo.winner}
-                    reason={gameOverInfo.reason}
-                  />
-                ) : undefined}
+                overlay={
+                  <>
+                    <GameStatusOverlay kind={statusKind} subtitle={statusSubtitle} />
+                    {gameOverInfo && (
+                      <GameOverOverlay
+                        type={gameOverInfo.type}
+                        winner={gameOverInfo.winner}
+                        reason={gameOverInfo.reason}
+                      />
+                    )}
+                  </>
+                }
               />
             </ChessBoard4D>
 
