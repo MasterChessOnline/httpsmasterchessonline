@@ -433,7 +433,63 @@ export default function Analysis() {
     setPgnCurrentIdx(clamped);
     pgnDisplayGame.current = clamped === -1 ? new Chess() : new Chess(pgnMoveEvals[clamped].fen);
     setPgnDisplayFen(pgnDisplayGame.current.fen());
-  }, [pgnMoveEvals]);
+    // Navigating away from the variation start clears it
+    if (variation && variation.fromIdx !== clamped) {
+      setVariation(null);
+      variationGameRef.current = null;
+    }
+    setSelectedSquare(null); setLegalMoves([]);
+  }, [pgnMoveEvals, variation]);
+
+  // Promote the current variation into the main line, replacing any tail moves.
+  const promoteVariation = useCallback(async () => {
+    if (!variation || variation.moves.length === 0) return;
+    const baseLen = variation.fromIdx + 1;
+    const baseEvals = pgnMoveEvals.slice(0, baseLen);
+
+    // Evaluate each variation move with the engine if ready
+    const engine = stockfishReady.current ? getStockfishEngine() : null;
+    const newEvals: MoveEval[] = [...baseEvals];
+    for (let i = 0; i < variation.moves.length; i++) {
+      const v = variation.moves[i];
+      const fenBefore = i === 0
+        ? (variation.fromIdx === -1 ? new Chess().fen() : pgnMoveEvals[variation.fromIdx].fen)
+        : variation.moves[i - 1].fen;
+      let evalCp = 0; let mateW: number | null = null;
+      if (engine) {
+        try {
+          const posEval = await engine.evaluate(v.fen, depth);
+          evalCp = scoreToWhitePov(v.fen, posEval.evaluation, posEval.mate);
+          mateW = mateToWhitePov(v.fen, posEval.mate);
+        } catch {}
+      }
+      newEvals.push({
+        san: v.san, fen: v.fen, fenBefore, from: v.from, to: v.to,
+        color: v.color, moveNumber: v.moveNumber, eval: evalCp, mate: mateW,
+      });
+    }
+    setPgnMoveEvals(newEvals);
+    setVariation(null);
+    variationGameRef.current = null;
+    const newIdx = newEvals.length - 1;
+    setPgnCurrentIdx(newIdx);
+    pgnDisplayGame.current = new Chess(newEvals[newIdx].fen);
+    setPgnDisplayFen(newEvals[newIdx].fen);
+  }, [variation, pgnMoveEvals, depth]);
+
+  const discardVariation = useCallback(() => {
+    if (!variation) return;
+    setVariation(null);
+    variationGameRef.current = null;
+    if (pgnCurrentIdx === -1) {
+      pgnDisplayGame.current = new Chess();
+      setPgnDisplayFen("start");
+    } else {
+      pgnDisplayGame.current = new Chess(pgnMoveEvals[pgnCurrentIdx].fen);
+      setPgnDisplayFen(pgnMoveEvals[pgnCurrentIdx].fen);
+    }
+    setSelectedSquare(null); setLegalMoves([]);
+  }, [variation, pgnCurrentIdx, pgnMoveEvals]);
 
   useEffect(() => {
     if (!pgnComplete && liveMoveHistory.length === 0) return;
