@@ -173,10 +173,8 @@ const Tournaments = () => {
     if (filterParam === "starting") {
       setStatusFilter("registering");
     }
-    if (filterParam === "create" && user && !creating) {
-      // auto-trigger create flow once
-      handleCreateTournament();
-      // strip the param so we don't loop on re-render
+    if (filterParam === "create" && user) {
+      setCreateDialogOpen(true);
       setSearchParams({}, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
