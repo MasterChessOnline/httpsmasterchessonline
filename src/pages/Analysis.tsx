@@ -209,6 +209,47 @@ export default function Analysis() {
     engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
   }, []);
 
+  // ── Game Review: classify each PGN move and compute accuracy ──
+  const reviewClassifications = useMemo<MoveClass[]>(() => {
+    if (!pgnComplete || pgnMoveEvals.length === 0) return [];
+    const out: MoveClass[] = [];
+    for (let i = 0; i < pgnMoveEvals.length; i++) {
+      const cur = pgnMoveEvals[i];
+      const prev = i === 0 ? { eval: 0, mate: null as number | null } : pgnMoveEvals[i - 1];
+      // First ~12 plies treated as book (rough heuristic — replaces network book lookup)
+      const isBookMove = i < 12;
+      out.push(classifyMove({
+        beforeEval: { cp: prev.eval, mate: prev.mate },
+        afterEval: { cp: cur.eval, mate: cur.mate },
+        color: cur.color,
+        isBookMove,
+      }).classification);
+    }
+    return out;
+  }, [pgnComplete, pgnMoveEvals]);
+
+  const reviewAccuracy = useMemo(() => {
+    if (!pgnComplete || pgnMoveEvals.length === 0) return { white: 0, black: 0 };
+    return computeAccuracy(pgnMoveEvals.map((m, i) => ({
+      color: m.color,
+      before: { cp: i === 0 ? 0 : pgnMoveEvals[i - 1].eval, mate: i === 0 ? null : pgnMoveEvals[i - 1].mate },
+      after: { cp: m.eval, mate: m.mate },
+    })));
+  }, [pgnComplete, pgnMoveEvals]);
+
+  const reviewSummary = useMemo(() => {
+    const counts: Record<MoveClass, { w: number; b: number }> = {
+      brilliant: { w: 0, b: 0 }, great: { w: 0, b: 0 }, best: { w: 0, b: 0 },
+      book: { w: 0, b: 0 }, good: { w: 0, b: 0 }, inaccuracy: { w: 0, b: 0 },
+      mistake: { w: 0, b: 0 }, blunder: { w: 0, b: 0 },
+    };
+    reviewClassifications.forEach((c, i) => {
+      const color = pgnMoveEvals[i].color;
+      counts[c][color === "w" ? "w" : "b"]++;
+    });
+    return counts;
+  }, [reviewClassifications, pgnMoveEvals]);
+
   // Deep-link support:
   //  • ?game=<id>   → fetch PGN of an online game and auto-analyze it
   //  • ?pgn=<text>  → load a raw PGN (used by bot/local games where no game row exists)
