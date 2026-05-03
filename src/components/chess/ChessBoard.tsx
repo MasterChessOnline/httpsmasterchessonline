@@ -228,14 +228,15 @@ export default function ChessBoard({
                         style={{ boxShadow: "inset 0 0 0 4px hsl(35 95% 55% / 0.7)" }}
                       />
                     )}
-                    {/* Subtle check indicator on the king (warm amber radial — not red) */}
+                    {/* Check indicator on the king — pulsing red glow */}
                     {isCheckedKing && (
                       <span
                         aria-hidden
-                        className="absolute inset-0 pointer-events-none rounded-sm"
+                        className="absolute inset-0 pointer-events-none rounded-sm animate-pulse"
                         style={{
                           background:
-                            "radial-gradient(circle, hsl(38 92% 55% / 0.45) 0%, hsl(38 92% 55% / 0.18) 45%, transparent 70%)",
+                            "radial-gradient(circle, hsl(0 90% 55% / 0.65) 0%, hsl(0 90% 50% / 0.3) 45%, transparent 72%)",
+                          boxShadow: "inset 0 0 0 3px hsl(0 90% 55% / 0.7)",
                         }}
                       />
                     )}
