@@ -17,6 +17,7 @@ import { toast } from "@/hooks/use-toast";
 import { useStreak } from "@/hooks/use-streak";
 import { useActiveTournament } from "@/hooks/use-active-tournament";
 import { useTournamentReminder } from "@/hooks/use-tournament-reminder";
+import { CreateTournamentDialog } from "@/components/tournaments/CreateTournamentDialog";
 
 const CATEGORY_OPTIONS = [
   { value: "all", label: "All", icon: Trophy },
