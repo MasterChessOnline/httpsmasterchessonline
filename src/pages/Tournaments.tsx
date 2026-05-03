@@ -213,34 +213,7 @@ const Tournaments = () => {
     setJoiningId(null);
   };
 
-  const handleCreateTournament = async () => {
-    if (!user) { navigate("/login"); return; }
-    setCreating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("manage-tournament", {
-        body: {
-          action: "create",
-          time_control_label: "5+3",
-          time_control_seconds: 300,
-          time_control_increment: 3,
-          category: "blitz",
-          format: "swiss",
-          total_rounds: 5,
-          max_players: 32,
-        },
-      });
-      if (error) throw error;
-      if (data?.tournament?.id) {
-        await supabase.functions.invoke("manage-tournament", {
-          body: { action: "join", tournament_id: data.tournament.id },
-        });
-        navigate(`/tournaments/${data.tournament.id}`);
-      }
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
-    }
-    setCreating(false);
-  };
+  // Create flow handled by CreateTournamentDialog
 
   // Filter tournaments
   const filtered = dbTournaments.filter(t => {
