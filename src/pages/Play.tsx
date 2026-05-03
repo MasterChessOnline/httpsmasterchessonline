@@ -668,6 +668,26 @@ const Play = () => {
     return null;
   })();
 
+  // Live status banner (CHECK / CHECKMATE / DRAW) overlay info
+  const statusKind: GameStatusKind = (() => {
+    if (game.isCheckmate()) return "checkmate";
+    if (game.isStalemate() || game.isDraw() || drawAgreed) return "draw";
+    if (game.isCheck()) return "check";
+    return null;
+  })();
+  const statusSubtitle: string | undefined = (() => {
+    if (statusKind === "checkmate") return `${game.turn() === "w" ? "Black" : "White"} wins`;
+    if (statusKind === "draw") {
+      if (drawAgreed) return drawReason || "by agreement";
+      if (game.isStalemate()) return "by stalemate";
+      if (game.isThreefoldRepetition?.()) return "by threefold repetition";
+      if (game.isInsufficientMaterial()) return "by insufficient material";
+      if (game.isDraw()) return "by fifty-move rule";
+    }
+    if (statusKind === "check") return `${game.turn() === "w" ? "White" : "Black"} king`;
+    return undefined;
+  })();
+
   const pgn = game.pgn();
 
   // --- Apply bot rating change + streak + badges once when an AI game finishes ---
