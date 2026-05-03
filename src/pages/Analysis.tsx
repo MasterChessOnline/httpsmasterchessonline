@@ -119,8 +119,6 @@ function loadPgnRobust(input: string): Chess | null {
   return g.history().length > 0 ? g : null;
 }
 
-// (legacy helper kept for callers below)
-function _placeholder() { return null; }
 
 type SidebarTab = "analysis" | "explorer" | "pgn";
 
