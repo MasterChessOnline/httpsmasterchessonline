@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
 import { getCachedStockfishEvals, saveCachedStockfishEval } from "@/lib/stockfish-eval-cache";
-import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
+import { fetchMasterChessExplorer, MasterMove, MasterExplorerData } from "@/lib/masterchess-db";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Upload, Trash2, Download, MousePointerClick, RotateCcw,
-  Globe, Database, Trophy, FlipVertical, Swords, Calendar, Sparkles, History, ExternalLink
+  Database, Trophy, FlipVertical, Swords, Calendar, Sparkles, History
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -111,8 +111,7 @@ export default function Analysis() {
   const prevEvalRef = useRef(0);
 
   // Explorer state
-  const [explorerData, setExplorerData] = useState<ExplorerData | null>(null);
-  const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("lichess");
+  const [explorerData, setExplorerData] = useState<MasterExplorerData | null>(null);
   const [explorerLoading, setExplorerLoading] = useState(false);
 
   // MultiPV (top lines suggestions) state
@@ -220,17 +219,13 @@ export default function Analysis() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch explorer data when position or db changes
+  // Fetch MasterChess DB data when position changes
   useEffect(() => {
     if (bottomTab !== "explorer") return;
-    let cancelled = false;
     setExplorerLoading(true);
-    const fetchFn = explorerDb === "masters" ? fetchMasterExplorerData : fetchExplorerData;
-    fetchFn(currentFen).then(data => {
-      if (!cancelled) { setExplorerData(data); setExplorerLoading(false); }
-    });
-    return () => { cancelled = true; };
-  }, [currentFen, explorerDb, bottomTab]);
+    setExplorerData(fetchMasterChessExplorer(currentFen));
+    setExplorerLoading(false);
+  }, [currentFen, bottomTab]);
 
   // Compute top engine variations (MultiPV) for the current position.
   // Re-runs whenever the position, requested line count, or analysis depth changes.
@@ -818,19 +813,11 @@ export default function Analysis() {
             </div>
 
             <AnimatePresence mode="wait">
-              {/* ── EXPLORER ── */}
+              {/* ── EXPLORER (MasterChess DB only) ── */}
               {bottomTab === "explorer" && (
                 <motion.div key="explorer-bottom" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  {/* DB selector */}
                   <div className="flex items-center gap-3 px-4 py-2 border-b border-border/10">
-                    <div className="flex gap-1">
-                      <button onClick={() => setExplorerDb("lichess")} className={`text-[11px] px-3 py-1 rounded transition-colors ${explorerDb === "lichess" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-[hsl(220,18%,22%)]"}`}>
-                        Lichess DB
-                      </button>
-                      <button onClick={() => setExplorerDb("masters")} className={`text-[11px] px-3 py-1 rounded transition-colors ${explorerDb === "masters" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-[hsl(220,18%,22%)]"}`}>
-                        Masters DB
-                      </button>
-                    </div>
+                    <Badge className="bg-primary/15 text-primary border border-primary/30 text-[10px]">MasterChess Database</Badge>
                     {explorerData && (
                       <span className="text-[10px] text-muted-foreground ml-auto flex items-center gap-1">
                         <Database className="h-3 w-3" />
@@ -864,7 +851,6 @@ export default function Analysis() {
                         </div>
                       )}
 
-                      {/* Move table */}
                       <div className="grid grid-cols-[60px_1fr_50px_50px_50px_60px] gap-0 text-[9px] text-muted-foreground px-4 py-1.5 border-b border-border/10 uppercase tracking-wider font-semibold">
                         <span>Move</span><span>Win bar</span><span className="text-center">W%</span><span className="text-center">D%</span><span className="text-center">L%</span><span className="text-right">Games</span>
                       </div>
@@ -888,42 +874,25 @@ export default function Analysis() {
                         ))}
                       </div>
 
-                      {/* Top games */}
                       {explorerData.topGames && explorerData.topGames.length > 0 && (
                         <div className="px-4 py-2 border-t border-border/20">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <div className="flex items-center gap-1.5">
-                              <Trophy className="h-3 w-3 text-primary" />
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Top Games · {explorerDb === "masters" ? "Masters DB" : "Lichess DB"}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <a href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(currentMovesSan)}`}
-                                target="_blank" rel="noopener noreferrer"
-                                className="text-[10px] inline-flex items-center gap-1 text-primary hover:underline">
-                                <ExternalLink className="h-3 w-3" /> ChessBase DB
-                              </a>
-                              <a href={`https://lichess.org/analysis/${currentFen.replace(/ /g, "_")}`}
-                                target="_blank" rel="noopener noreferrer"
-                                className="text-[10px] inline-flex items-center gap-1 text-primary hover:underline">
-                                <ExternalLink className="h-3 w-3" /> Lichess
-                              </a>
-                            </div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Trophy className="h-3 w-3 text-primary" />
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Top Games · MasterChess DB</span>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-0.5">
-                            {explorerData.topGames.map((g, i) => {
-                              const href = (g as any).source === "masters"
-                                ? `https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(currentMovesSan)}`
-                                : `https://lichess.org/${g.id}`;
-                              return (
-                                <a key={i} href={href} target="_blank" rel="noopener noreferrer"
-                                  className="flex items-center justify-between gap-2 text-[10px] py-0.5 hover:text-primary transition-colors">
-                                  <span className="text-foreground/80 truncate">
-                                    <span className="font-semibold">{g.white.name}</span> ({g.white.rating}) <span className="text-muted-foreground">vs</span> <span className="font-semibold">{g.black.name}</span> ({g.black.rating})
-                                  </span>
-                                  <span className="text-muted-foreground shrink-0">{g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"} · {g.year}</span>
-                                </a>
-                              );
-                            })}
+                            {explorerData.topGames.map((g, i) => (
+                              <Link key={i} to={`/master-game/${g.id}`}
+                                className="flex items-center justify-between gap-2 text-[10px] py-0.5 hover:text-primary transition-colors">
+                                <span className="text-foreground/80 truncate">
+                                  <span className="font-semibold">{g.white.name}</span> ({g.white.rating}) <span className="text-muted-foreground">vs</span> <span className="font-semibold">{g.black.name}</span> ({g.black.rating})
+                                </span>
+                                <span className="text-muted-foreground shrink-0 inline-flex items-center gap-1">
+                                  <Calendar className="h-2.5 w-2.5" />
+                                  {g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½"} · {g.year}
+                                </span>
+                              </Link>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -931,25 +900,8 @@ export default function Analysis() {
                   ) : (
                     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                       <Database className="h-6 w-6 mb-2 text-primary/30" />
-                      <p className="text-sm">No games found for this position in {explorerDb === "masters" ? "Masters DB" : "Lichess DB"}</p>
-                      <p className="text-[10px] mt-1 mb-3">Try the other database or browse external archives:</p>
-                      <div className="flex flex-wrap gap-2 justify-center">
-                        <a href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(currentMovesSan)}`}
-                          target="_blank" rel="noopener noreferrer"
-                          className="text-[10px] inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-border hover:bg-primary/10 hover:text-primary transition-colors">
-                          <ExternalLink className="h-3 w-3" /> ChessBase DB
-                        </a>
-                        <a href={`https://lichess.org/analysis/${currentFen.replace(/ /g, "_")}`}
-                          target="_blank" rel="noopener noreferrer"
-                          className="text-[10px] inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-border hover:bg-primary/10 hover:text-primary transition-colors">
-                          <ExternalLink className="h-3 w-3" /> Lichess Analysis
-                        </a>
-                        <a href={`https://www.chess.com/analysis?fen=${encodeURIComponent(currentFen)}`}
-                          target="_blank" rel="noopener noreferrer"
-                          className="text-[10px] inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-border hover:bg-primary/10 hover:text-primary transition-colors">
-                          <ExternalLink className="h-3 w-3" /> Chess.com Analysis
-                        </a>
-                      </div>
+                      <p className="text-sm">No master games found for this position</p>
+                      <p className="text-[10px] mt-1">Stockfish is your guide from here.</p>
                     </div>
                   )}
                 </motion.div>
