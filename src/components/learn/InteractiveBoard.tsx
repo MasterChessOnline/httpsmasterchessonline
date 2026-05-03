@@ -59,6 +59,7 @@ const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 const DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export default function InteractiveBoard({ startFen, moves }: InteractiveBoardProps) {
+  const { get: getGlyph } = usePieceGlyphs();
   const baseFen = startFen || DEFAULT_FEN;
   const hasMoves = moves.length > 0;
 
