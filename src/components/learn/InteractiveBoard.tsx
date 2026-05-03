@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import EngineAnalysis from "./EngineAnalysis";
+import { usePieceGlyphs } from "@/lib/piece-glyphs";
 
 /**
  * A single move in a guided sequence.
