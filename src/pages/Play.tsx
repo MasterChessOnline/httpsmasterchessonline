@@ -10,6 +10,7 @@ import GameControls from "@/components/chess/GameControls";
 import AnalysisPanel from "@/components/chess/AnalysisPanel";
 import GameSummary from "@/components/chess/GameSummary";
 import GameOverOverlay from "@/components/chess/GameOverOverlay";
+import GameStatusOverlay, { type GameStatusKind } from "@/components/chess/GameStatusOverlay";
 import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { getAIMove, evaluateBoard, type Difficulty, AI_LEVELS } from "@/lib/chess-ai";
