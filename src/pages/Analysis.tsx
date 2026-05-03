@@ -222,9 +222,14 @@ export default function Analysis() {
   // Fetch MasterChess DB data when position changes
   useEffect(() => {
     if (bottomTab !== "explorer") return;
+    let cancelled = false;
     setExplorerLoading(true);
-    setExplorerData(fetchMasterChessExplorer(currentFen));
-    setExplorerLoading(false);
+    fetchMasterChessExplorer(currentFen).then(data => {
+      if (cancelled) return;
+      setExplorerData(data);
+      setExplorerLoading(false);
+    }).catch(() => { if (!cancelled) setExplorerLoading(false); });
+    return () => { cancelled = true; };
   }, [currentFen, bottomTab]);
 
   // Compute top engine variations (MultiPV) for the current position.
