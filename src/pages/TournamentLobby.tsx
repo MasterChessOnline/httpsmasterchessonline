@@ -43,7 +43,13 @@ const TournamentLobby = () => {
   const [starting, setStarting] = useState(false);
   const [activeTab, setActiveTab] = useState<"standings" | "rounds" | "chat">("standings");
   const [dismissedBanners, setDismissedBanners] = useState<Record<string, number>>({});
+  const [now, setNow] = useState(Date.now());
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const currentRound = tournament?.current_round ?? 0;
   const isReadyDismissed = dismissedBanners.ready === currentRound;
