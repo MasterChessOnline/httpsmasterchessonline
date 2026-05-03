@@ -28,23 +28,15 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players } = await req.json();
+  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes } = await req.json();
 
   try {
     if (action === "create") {
-      // Only admins/organizers can create tournaments
-      const { data: roleRows } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-      const allowed = (roleRows || []).some((r: any) => ["admin", "organizer"].includes(r.role));
-      if (!allowed) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return await handleCreate(supabase, { category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment });
+      // Any authenticated user can create a tournament (they become the creator).
+      return await handleCreate(supabase, user.id, { name, category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment, starts_in_minutes });
+    }
+    if (action === "auto_start_due") {
+      return await handleAutoStartDue(supabase);
     }
     if (action === "join") {
       return await handleJoin(supabase, user.id, tournament_id);
