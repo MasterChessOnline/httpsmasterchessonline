@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://masterchess.live/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://masterchess.live/play</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://masterchess.live/play/online</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://masterchess.live/learn</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://masterchess.live/tournaments</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://masterchess.live/leaderboard</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://masterchess.live/analysis</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://masterchess.live/openings</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://masterchess.live/opening-explorer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://masterchess.live/community</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://masterchess.live/live</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://masterchess.live/stats</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://masterchess.live/about</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://masterchess.live/contact</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://masterchess.live/privacy</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://masterchess.live/terms</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://masterchess.live/login</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://masterchess.live/signup</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+</urlset>
