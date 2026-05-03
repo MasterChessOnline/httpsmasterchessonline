@@ -393,12 +393,18 @@ const TournamentLobby = () => {
                       <div key={p.id} className={`px-4 py-3 border-b border-border/20 last:border-0 flex items-center justify-between ${isMyGame ? "bg-primary/5" : ""}`}>
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <span className="text-sm font-medium text-foreground truncate">
+                            <span className="text-sm font-medium text-foreground truncate flex items-center">
+                              {white && <CountryFlag country={white.country} country_flag={white.country_flag} />}
                               {white ? getPlayerName(white) : "?"}
                             </span>
                             <span className="text-xs text-muted-foreground">vs</span>
-                            <span className="text-sm font-medium text-foreground truncate">
-                              {isBye ? <span className="text-muted-foreground italic">BYE</span> : black ? getPlayerName(black) : "?"}
+                            <span className="text-sm font-medium text-foreground truncate flex items-center">
+                              {isBye ? <span className="text-muted-foreground italic">BYE</span> : (
+                                <>
+                                  {black && <CountryFlag country={black.country} country_flag={black.country_flag} />}
+                                  {black ? getPlayerName(black) : "?"}
+                                </>
+                              )}
                             </span>
                           </div>
                         </div>
