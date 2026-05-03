@@ -61,7 +61,8 @@ const SectionHeader = React.forwardRef<HTMLElement, {
     </motion.div>
     {children}
   </section>
-);
+));
+SectionHeader.displayName = "SectionHeader";
 
 /* ── User Preference Toggles ── */
 const PreferenceToggles = () => {
