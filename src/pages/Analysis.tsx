@@ -379,7 +379,7 @@ export default function Analysis() {
   // Compute top engine variations (MultiPV) for the current position.
   // Re-runs whenever the position, requested line count, or analysis depth changes.
   useEffect(() => {
-    if (!stockfishReady.current) return;
+    if (!engineReady) return;
     let cancelled = false;
     setLinesLoading(true);
     const engine = getStockfishEngine();
@@ -408,7 +408,7 @@ export default function Analysis() {
       setLinesLoading(false);
     }).catch(() => { if (!cancelled) setLinesLoading(false); });
     return () => { cancelled = true; };
-  }, [currentFen, multiPvCount, depth]);
+  }, [currentFen, multiPvCount, depth, engineReady]);
 
   // ── Interactive logic ──
   const evaluatePosition = useCallback(async (fen: string, fenBefore: string, moveSan: string, moveFrom: string, moveTo: string, color: "w" | "b", moveNum: number) => {
