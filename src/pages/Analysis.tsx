@@ -184,14 +184,22 @@ export default function Analysis() {
 
   // Current FEN for explorer
   const currentFen = useMemo(() => {
-    if (pgnComplete && pgnCurrentIdx >= 0 && pgnCurrentIdx < pgnMoveEvals.length) {
-      return pgnMoveEvals[pgnCurrentIdx].fen;
+    if (pgnComplete) {
+      // If a side variation is active at the current index, analyze its tip position
+      const v = variations.find(x => x.fromIdx === pgnCurrentIdx);
+      if (v && v.moves.length > 0) {
+        return v.moves[v.moves.length - 1].fen;
+      }
+      if (pgnCurrentIdx >= 0 && pgnCurrentIdx < pgnMoveEvals.length) {
+        return pgnMoveEvals[pgnCurrentIdx].fen;
+      }
+      return new Chess().fen();
     }
     if (liveViewIdx >= 0 && liveViewIdx < liveMoveHistory.length) {
       return liveMoveHistory[liveViewIdx].fen;
     }
     return liveGame.fen();
-  }, [pgnComplete, pgnCurrentIdx, pgnMoveEvals, liveViewIdx, liveMoveHistory, liveGame]);
+  }, [pgnComplete, pgnCurrentIdx, pgnMoveEvals, liveViewIdx, liveMoveHistory, liveGame, variations]);
 
   // SAN move sequence up to the current view position (used to deep-link to ChessBase DB)
   const currentMovesSan = useMemo(() => {
