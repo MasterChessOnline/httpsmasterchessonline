@@ -850,7 +850,7 @@ const PlayOnline = () => {
                   {boardFlipped ? "♔" : "♚"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">{opponentProfile?.display_name || "Opponent"}</p>
+                  <p className="text-sm font-medium text-foreground flex items-center"><CountryFlag country={opponentProfile?.country} country_flag={opponentProfile?.country_flag} />{opponentProfile?.display_name || "Opponent"}</p>
                   <p className="text-[10px] text-muted-foreground">{opponentProfile?.rating || "?"} ELO</p>
                 </div>
               </div>
