@@ -52,16 +52,30 @@ function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): 
   return new Chess(fen).turn() === "w" ? raw : -raw;
 }
 
-function formatEval(cp: number, mate: number | null): string {
-  if (mate !== null) return mate > 0 ? `M${mate}` : `M${mate}`;
+// Convert engine's side-to-move mate distance to a white-POV signed mate value.
+// e.g. white-to-move with M5 → +5; black-to-move with M5 → -5.
+function mateToWhitePov(fen: string, mate: number | null): number | null {
+  if (mate === null) return null;
+  return new Chess(fen).turn() === "w" ? mate : -mate;
+}
+
+function formatEval(cp: number, mateWhitePov: number | null): string {
+  if (mateWhitePov !== null) {
+    if (mateWhitePov === 0) return cp >= 0 ? "1-0" : "0-1";
+    return mateWhitePov > 0 ? `M${mateWhitePov}` : `-M${Math.abs(mateWhitePov)}`;
+  }
   const val = cp / 100;
   return val >= 0 ? `+${val.toFixed(1)}` : val.toFixed(1);
 }
 
-function evalToBarPct(cp: number, mate: number | null): number {
-  if (mate !== null) return mate > 0 ? 95 : 5;
+function evalToBarPct(cp: number, mateWhitePov: number | null): number {
+  // Lock 100% (or 0%) on forced mate so the bar never wobbles during a mating sequence.
+  if (mateWhitePov !== null) return mateWhitePov >= 0 ? 100 : 0;
+  // Hard pin on extreme cp (e.g. cached mate stored as ±10000)
+  if (cp >= 9000) return 100;
+  if (cp <= -9000) return 0;
   const x = cp / 100;
-  return Math.max(5, Math.min(95, 50 + 50 * (2 / (1 + Math.exp(-0.4 * x)) - 1)));
+  return Math.max(2, Math.min(98, 50 + 50 * (2 / (1 + Math.exp(-0.4 * x)) - 1)));
 }
 
 function formatGames(n: number): string {
