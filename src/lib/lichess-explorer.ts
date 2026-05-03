@@ -211,7 +211,7 @@ export async function fetchMasterExplorerData(fen: string): Promise<ExplorerData
   const encodedFen = encodeURIComponent(fen);
 
   try {
-    const url = `https://explorer.lichess.org/masters?fen=${encodedFen}&topGames=3`;
+    const url = `https://explorer.lichess.org/masters?fen=${encodedFen}&topGames=5`;
     const response = await rateLimitedFetch(url);
     if (!response.ok) throw new Error(`Master API error: ${response.status}`);
 
@@ -233,10 +233,21 @@ export async function fetchMasterExplorerData(fen: string): Promise<ExplorerData
       };
     });
 
+    const topGames = (raw.topGames || []).slice(0, 5).map((g: any) => ({
+      id: g.id,
+      white: { name: g.white?.name || "?", rating: g.white?.rating || 0 },
+      black: { name: g.black?.name || "?", rating: g.black?.rating || 0 },
+      year: g.year || 0,
+      month: g.month,
+      winner: g.winner,
+      source: "masters" as const,
+    }));
+
     const data: ExplorerData = {
       moves, white: raw.white || 0, draws: raw.draws || 0, black: raw.black || 0,
       totalGames,
       opening: raw.opening ? { eco: raw.opening.eco, name: raw.opening.name } : undefined,
+      topGames,
     };
     CACHE.set(key, { data, ts: Date.now() });
     return data;
