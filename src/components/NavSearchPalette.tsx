@@ -90,10 +90,19 @@ const ENTRIES: SearchEntry[] = [
   { label: "Appearance",   href: "/settings",  icon: Palette,   desc: "Themes & board styles",              category: "profile" },
 
   // TOOLS / EXTRAS
-  { label: "Chess Tools",      href: "/chess-tools",       icon: Crosshair,   desc: "Utilities collection",  category: "tools" },
-  { label: "Rating Calculator", href: "/rating-calculator", icon: BarChart3, desc: "Estimate rating change", category: "tools" },
-  { label: "About",            href: "/about",             icon: FileText,    desc: "About MasterChess",     category: "tools" },
-  { label: "Contact",          href: "/contact",           icon: FileText,    desc: "Get in touch",          category: "tools" },
+  { label: "Chess Tools",        href: "/chess-tools",       icon: Crosshair, desc: "All-in-one utilities hub",        category: "tools", keywords: "tools utilities hub" },
+  { label: "ELO Calculator",     href: "/rating-calculator", icon: BarChart3, desc: "Calculate rating changes",        category: "tools", keywords: "elo rating calculator" },
+  { label: "Performance Rating", href: "/rating-calculator", icon: BarChart3, desc: "Tournament performance rating",   category: "tools", keywords: "performance tournament rating" },
+  { label: "Quick ELO Widget",   href: "/chess-tools",       icon: BarChart3, desc: "See rating change in real time",  category: "tools", keywords: "quick elo widget" },
+  { label: "Daily Challenge",    href: "/daily-challenge",   icon: Target,    desc: "Today's puzzle challenge",        category: "tools", keywords: "daily challenge puzzle" },
+  { label: "Skill Tree",         href: "/skill-tree",        icon: Target,    desc: "Unlock tactics & strategy nodes", category: "tools", keywords: "skill tree improve" },
+  { label: "Advanced Stats",     href: "/stats",             icon: BarChart3, desc: "Win rate, streaks, time control", category: "tools", keywords: "stats analytics improve" },
+  { label: "1v1 Challenge Link", href: "/challenge",         icon: Swords,    desc: "Shareable challenge link",        category: "tools", keywords: "challenge friend link" },
+  { label: "Game Analysis",      href: "/analysis",          icon: Target,    desc: "Stockfish engine review",         category: "tools", keywords: "analyze engine stockfish" },
+  { label: "Game History",       href: "/history",           icon: History,   desc: "Review your past games",          category: "tools", keywords: "history past games" },
+  { label: "Coming Soon",        href: "/coming-soon",       icon: Clock,     desc: "Upcoming features",               category: "tools", keywords: "coming soon roadmap" },
+  { label: "About",              href: "/about",             icon: FileText,  desc: "About MasterChess",               category: "tools" },
+  { label: "Contact",            href: "/contact",           icon: FileText,  desc: "Get in touch",                    category: "tools" },
 ];
 
 interface Props {
