@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import EngineAnalysis from "./EngineAnalysis";
 
 /**
  * A single move in a guided sequence.
