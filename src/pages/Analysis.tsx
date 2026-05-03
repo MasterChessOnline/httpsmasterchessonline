@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import EvalGraph from "@/components/chess/EvalGraph";
 import type { MultiPvLine } from "@/lib/stockfish-engine";
+import { classifyMove, computeAccuracy, CLASS_META, type MoveClass } from "@/lib/game-review";
 
 // ── Types ──
 interface MoveEval {
@@ -207,6 +208,47 @@ export default function Analysis() {
     const engine = getStockfishEngine();
     engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
   }, []);
+
+  // ── Game Review: classify each PGN move and compute accuracy ──
+  const reviewClassifications = useMemo<MoveClass[]>(() => {
+    if (!pgnComplete || pgnMoveEvals.length === 0) return [];
+    const out: MoveClass[] = [];
+    for (let i = 0; i < pgnMoveEvals.length; i++) {
+      const cur = pgnMoveEvals[i];
+      const prev = i === 0 ? { eval: 0, mate: null as number | null } : pgnMoveEvals[i - 1];
+      // First ~12 plies treated as book (rough heuristic — replaces network book lookup)
+      const isBookMove = i < 12;
+      out.push(classifyMove({
+        beforeEval: { cp: prev.eval, mate: prev.mate },
+        afterEval: { cp: cur.eval, mate: cur.mate },
+        color: cur.color,
+        isBookMove,
+      }).classification);
+    }
+    return out;
+  }, [pgnComplete, pgnMoveEvals]);
+
+  const reviewAccuracy = useMemo(() => {
+    if (!pgnComplete || pgnMoveEvals.length === 0) return { white: 0, black: 0 };
+    return computeAccuracy(pgnMoveEvals.map((m, i) => ({
+      color: m.color,
+      before: { cp: i === 0 ? 0 : pgnMoveEvals[i - 1].eval, mate: i === 0 ? null : pgnMoveEvals[i - 1].mate },
+      after: { cp: m.eval, mate: m.mate },
+    })));
+  }, [pgnComplete, pgnMoveEvals]);
+
+  const reviewSummary = useMemo(() => {
+    const counts: Record<MoveClass, { w: number; b: number }> = {
+      brilliant: { w: 0, b: 0 }, great: { w: 0, b: 0 }, best: { w: 0, b: 0 },
+      book: { w: 0, b: 0 }, good: { w: 0, b: 0 }, inaccuracy: { w: 0, b: 0 },
+      mistake: { w: 0, b: 0 }, blunder: { w: 0, b: 0 },
+    };
+    reviewClassifications.forEach((c, i) => {
+      const color = pgnMoveEvals[i].color;
+      counts[c][color === "w" ? "w" : "b"]++;
+    });
+    return counts;
+  }, [reviewClassifications, pgnMoveEvals]);
 
   // Deep-link support:
   //  • ?game=<id>   → fetch PGN of an online game and auto-analyze it
@@ -892,6 +934,34 @@ export default function Analysis() {
               )}
             </div>
 
+            {/* Game Review summary (Stockfish-style) */}
+            {pgnComplete && pgnMoveEvals.length > 0 && (
+              <div className="px-3 py-2 border-b border-border/20 bg-[hsl(220,18%,15%)]">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] font-bold text-foreground uppercase tracking-wider">Game Review</span>
+                  <span className="text-[9px] text-muted-foreground">Stockfish</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-1.5">
+                  <div className="rounded bg-[hsl(220,18%,22%)] px-2 py-1.5 text-center">
+                    <div className="text-[9px] text-muted-foreground uppercase">White Acc</div>
+                    <div className="text-sm font-bold font-mono text-foreground">{reviewAccuracy.white.toFixed(1)}%</div>
+                  </div>
+                  <div className="rounded bg-[hsl(220,18%,22%)] px-2 py-1.5 text-center">
+                    <div className="text-[9px] text-muted-foreground uppercase">Black Acc</div>
+                    <div className="text-sm font-bold font-mono text-foreground">{reviewAccuracy.black.toFixed(1)}%</div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 gap-1 text-[9px]">
+                  {(["best", "book", "inaccuracy", "mistake", "blunder"] as MoveClass[]).map(k => (
+                    <div key={k} className={`rounded border px-1 py-0.5 ${CLASS_META[k].bg} ${CLASS_META[k].color}`}>
+                      <div className="font-bold uppercase tracking-wider truncate">{CLASS_META[k].label}</div>
+                      <div className="font-mono">W{reviewSummary[k].w} · B{reviewSummary[k].b}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Move list */}
             <div className="flex-1 overflow-y-auto px-2 py-1 max-h-[240px]" ref={moveListRef}>
               {activeEvals.length === 0 ? (
@@ -915,6 +985,11 @@ export default function Analysis() {
                           {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
                           {!showNum && <span className="w-5 shrink-0" />}
                           <span className="font-mono font-medium">{mv.san}</span>
+                          {pgnComplete && reviewClassifications[i] && (
+                            <span className={`ml-auto text-[10px] font-bold ${CLASS_META[reviewClassifications[i]].color}`}>
+                              {CLASS_META[reviewClassifications[i]].symbol}
+                            </span>
+                          )}
                         </button>
                         {showVarHere && (
                           <div className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
