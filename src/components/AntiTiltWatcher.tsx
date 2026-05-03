@@ -25,14 +25,14 @@ const AntiTiltWatcher = () => {
     if (isAuthPage || !tiltKey) { setShown(null); return; }
     if (Date.now() - dismissedAt < 60 * 60_000) { setShown(null); return; }
     setShown(tiltKey);
-  }, [tiltKey, isAuthPage, dismissedKey]);
+  }, [tiltKey, isAuthPage, dismissedAt]);
 
   if (!tilt.isTilting || !shown || isAuthPage) return null;
 
   const close = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
-    if (tiltKey) setDismissedKey(tiltKey);
+    setDismissedAt(Date.now());
     setShown(null);
     dismissTiltWarning(60);
   };
