@@ -197,17 +197,9 @@ const TournamentLobby = () => {
                 </Button>
               )}
               {isRegistering && isRegistered && (
-                <>
-                  <Button variant="outline" onClick={handleLeave}>
-                    <LogOut className="h-4 w-4 mr-1" /> Leave
-                  </Button>
-                  {registrations.length >= 2 && (
-                    <Button onClick={handleStart} disabled={starting}>
-                      {starting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Play className="h-4 w-4 mr-1" />}
-                      Start Now
-                    </Button>
-                  )}
-                </>
+                <Button variant="outline" onClick={handleLeave}>
+                  <LogOut className="h-4 w-4 mr-1" /> Leave
+                </Button>
               )}
               {isActive && myPairing?.game_id && (
                 <Button onClick={() => navigate(`/play/online?game=${myPairing.game_id}`)}>
