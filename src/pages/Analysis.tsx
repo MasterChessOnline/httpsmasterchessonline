@@ -525,35 +525,38 @@ export default function Analysis() {
     setSelectedSquare(null); setLegalMoves([]);
   }, [pgnMoveEvals]);
 
-  // Promote the current variation into the main line, replacing any tail moves.
-  const promoteVariation = useCallback(async () => {
-    if (!variation || variation.moves.length === 0) return;
-    const baseLen = variation.fromIdx + 1;
+  // Promote a specific variation into the main line, replacing any tail moves.
+  const promoteVariation = useCallback(async (target?: VariationT) => {
+    const v = target ?? variation;
+    if (!v || v.moves.length === 0) return;
+    const baseLen = v.fromIdx + 1;
     const baseEvals = pgnMoveEvals.slice(0, baseLen);
 
     // Evaluate each variation move with the engine if ready
     const engine = stockfishReady.current ? getStockfishEngine() : null;
     const newEvals: MoveEval[] = [...baseEvals];
-    for (let i = 0; i < variation.moves.length; i++) {
-      const v = variation.moves[i];
+    for (let i = 0; i < v.moves.length; i++) {
+      const vm = v.moves[i];
       const fenBefore = i === 0
-        ? (variation.fromIdx === -1 ? new Chess().fen() : pgnMoveEvals[variation.fromIdx].fen)
-        : variation.moves[i - 1].fen;
+        ? (v.fromIdx === -1 ? new Chess().fen() : pgnMoveEvals[v.fromIdx].fen)
+        : v.moves[i - 1].fen;
       let evalCp = 0; let mateW: number | null = null;
       if (engine) {
         try {
-          const posEval = await engine.evaluate(v.fen, depth);
-          evalCp = scoreToWhitePov(v.fen, posEval.evaluation, posEval.mate);
-          mateW = mateToWhitePov(v.fen, posEval.mate);
+          const posEval = await engine.evaluate(vm.fen, depth);
+          evalCp = scoreToWhitePov(vm.fen, posEval.evaluation, posEval.mate);
+          mateW = mateToWhitePov(vm.fen, posEval.mate);
         } catch {}
       }
       newEvals.push({
-        san: v.san, fen: v.fen, fenBefore, from: v.from, to: v.to,
-        color: v.color, moveNumber: v.moveNumber, eval: evalCp, mate: mateW,
+        san: vm.san, fen: vm.fen, fenBefore, from: vm.from, to: vm.to,
+        color: vm.color, moveNumber: vm.moveNumber, eval: evalCp, mate: mateW,
       });
     }
     setPgnMoveEvals(newEvals);
-    setVariations(prev => prev.filter(v => v.fromIdx !== variation.fromIdx));
+    // After promotion, drop the promoted variation; other variations whose
+    // anchor index now exceeds the new main line length are also dropped.
+    setVariations(prev => prev.filter(x => x.fromIdx !== v.fromIdx && x.fromIdx < newEvals.length));
     variationGameRef.current = null;
     const newIdx = newEvals.length - 1;
     setPgnCurrentIdx(newIdx);
@@ -561,9 +564,10 @@ export default function Analysis() {
     setPgnDisplayFen(newEvals[newIdx].fen);
   }, [variation, pgnMoveEvals, depth]);
 
-  const discardVariation = useCallback(() => {
-    if (!variation) return;
-    setVariations(prev => prev.filter(v => v.fromIdx !== variation.fromIdx));
+  const discardVariation = useCallback((target?: VariationT) => {
+    const v = target ?? variation;
+    if (!v) return;
+    setVariations(prev => prev.filter(x => x.fromIdx !== v.fromIdx));
     variationGameRef.current = null;
     if (pgnCurrentIdx === -1) {
       pgnDisplayGame.current = new Chess();
