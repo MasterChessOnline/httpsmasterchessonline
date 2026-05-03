@@ -143,8 +143,8 @@ const PlayOnline = () => {
   // Fetch opponent profile
   useEffect(() => {
     if (!opponentId) return;
-    supabase.from("profiles").select("display_name, rating").eq("user_id", opponentId).single().then(({ data }) => {
-      if (data) setOpponentProfile(data);
+    supabase.from("profiles").select("display_name, rating, country, country_flag").eq("user_id", opponentId).single().then(({ data }) => {
+      if (data) setOpponentProfile(data as any);
     });
   }, [opponentId]);
 
