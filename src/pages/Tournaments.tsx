@@ -418,10 +418,8 @@ const Tournaments = () => {
                   </button>
                 ))}
               </div>
-              <Button onClick={handleCreateTournament} disabled={creating} size="sm">
-                {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
-                Create
-              </Button>
+              <CreateTournamentDialog onCreated={fetchTournaments} />
+
             </div>
 
             <div className="flex gap-1.5 mb-3 flex-wrap">
