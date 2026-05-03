@@ -197,23 +197,14 @@ export default function OpeningExplorer() {
             )}
             {analyzing && <Brain className="w-4 h-4 text-primary animate-pulse" />}
           </div>
-          {explorerData?.opening && (
-            <div className="flex items-center gap-2">
-              <a
-                href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(history.map(h => h.san).join(" "))}`}
-                target="_blank" rel="noopener noreferrer"
-              >
-                <Button size="sm" variant="outline" className="gap-1.5">
-                  <ExternalLink className="w-4 h-4" /> ChessBase DB
-                </Button>
-              </a>
-              <Link to="/play">
-                <Button size="sm" className="gap-1.5">
-                  <Play className="w-4 h-4" /> Play this Opening
-                </Button>
-              </Link>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Badge className="bg-primary/15 text-primary border border-primary/30 text-[10px]">MasterChess DB</Badge>
+            <Link to="/play">
+              <Button size="sm" className="gap-1.5">
+                <Play className="w-4 h-4" /> Play this Opening
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Search + Filters */}
@@ -314,23 +305,14 @@ export default function OpeningExplorer() {
               </div>
             </div>
 
-            {/* Lichess Explorer – Real Data */}
+            {/* MasterChess DB Explorer */}
             <div className="rounded-lg border border-border bg-card p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold">Opening Explorer</span>
+                  <Database className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold">MasterChess Database</span>
                 </div>
-                <div className="flex gap-0.5">
-                  <button onClick={() => setExplorerDb("lichess")}
-                    className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "lichess" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
-                    Lichess
-                  </button>
-                  <button onClick={() => setExplorerDb("masters")}
-                    className={`text-[10px] px-2 py-0.5 rounded transition-colors ${explorerDb === "masters" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
-                    Masters
-                  </button>
-                </div>
+                <Badge variant="secondary" className="text-[9px]">Local · Curated</Badge>
               </div>
 
               {explorerLoading ? (
