@@ -104,16 +104,13 @@ export default function OpeningExplorer() {
     });
   }, []);
 
-  // Fetch Lichess explorer data when position changes
+  // Fetch MasterChess DB data when position changes
   useEffect(() => {
-    let cancelled = false;
     setExplorerLoading(true);
-    const fetchFn = explorerDb === "masters" ? fetchMasterExplorerData : fetchExplorerData;
-    fetchFn(currentFen).then(data => {
-      if (!cancelled) { setExplorerData(data); setExplorerLoading(false); }
-    });
-    return () => { cancelled = true; };
-  }, [currentFen, explorerDb]);
+    const data = fetchMasterChessExplorer(currentFen);
+    setExplorerData(data);
+    setExplorerLoading(false);
+  }, [currentFen]);
 
   // Run Stockfish when position changes
   useEffect(() => {
