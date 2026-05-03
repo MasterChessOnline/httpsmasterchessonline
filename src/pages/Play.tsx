@@ -690,7 +690,46 @@ const Play = () => {
     return undefined;
   })();
 
-  const pgn = game.pgn();
+  // Attach standard PGN headers so exports (ChessBase etc.) show full game info.
+  const pgn = useMemo(() => {
+    if (mode !== "ai" || moveHistory.length === 0) return game.pgn();
+    try {
+      const playerName = profile?.display_name || profile?.username || "Player";
+      const whiteName = playerColor === "w" ? playerName : currentBot.name;
+      const blackName = playerColor === "b" ? playerName : currentBot.name;
+      const playerElo = String((profile as { rating?: number } | null)?.rating ?? "");
+      const whiteElo = playerColor === "w" ? playerElo : String(currentBot.rating);
+      const blackElo = playerColor === "b" ? playerElo : String(currentBot.rating);
+      const tc = TIME_CONTROLS[timeControlIdx];
+      const tcTag = tc?.seconds ? `${tc.seconds}+${tc.increment ?? 0}` : "-";
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const dd = String(today.getDate()).padStart(2, "0");
+      const resultTag = game.isCheckmate()
+        ? (game.turn() === "w" ? "0-1" : "1-0")
+        : (drawAgreed || game.isDraw() || game.isStalemate()) ? "1/2-1/2"
+        : resignedBy ? (resignedBy === "w" ? "0-1" : "1-0")
+        : timeoutWinner ? (timeoutWinner === "White" ? "1-0" : "0-1")
+        : "*";
+      game.header(
+        "Event", "MasterChess Bot Game",
+        "Site", "masterchess.live",
+        "Date", `${yyyy}.${mm}.${dd}`,
+        "Round", "-",
+        "White", whiteName,
+        "Black", blackName,
+        "Result", resultTag,
+        "WhiteElo", whiteElo,
+        "BlackElo", blackElo,
+        "TimeControl", tcTag,
+      );
+      return game.pgn();
+    } catch {
+      return game.pgn();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fen, moveHistory.length, isGameOver, mode, playerColor, currentBot, profile, timeControlIdx, drawAgreed, resignedBy, timeoutWinner]);
 
   // --- Apply bot rating change + streak + badges once when an AI game finishes ---
   useEffect(() => {
