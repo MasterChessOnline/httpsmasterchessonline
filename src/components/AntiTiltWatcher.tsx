@@ -12,18 +12,18 @@ import { AlertTriangle, Coffee, Brain, X } from "lucide-react";
 const AntiTiltWatcher = () => {
   const tilt = useAntiTilt();
   const [shown, setShown] = useState<string | null>(null);
-  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
+  const [dismissedAt, setDismissedAt] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
   // Don't show on auth pages or settings
   const isAuthPage = ["/login", "/signup", "/forgot-password", "/reset-password"].includes(location.pathname);
 
-  const tiltKey = tilt.isTilting ? `${tilt.reason}-${tilt.consecutiveLosses}-${tilt.ratingDrop}` : null;
+  const tiltKey = tilt.isTilting ? tilt.reason : null;
 
   useEffect(() => {
     if (isAuthPage || !tiltKey) { setShown(null); return; }
-    if (dismissedKey === tiltKey) { setShown(null); return; }
+    if (Date.now() - dismissedAt < 60 * 60_000) { setShown(null); return; }
     setShown(tiltKey);
   }, [tiltKey, isAuthPage, dismissedKey]);
 
