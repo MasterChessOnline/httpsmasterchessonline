@@ -13,7 +13,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Brain, BookOpen, RotateCcw, ChevronLeft, ChevronRight,
   ChevronsLeft, ChevronsRight, Zap, Star, BarChart3, FlipVertical,
-  Globe, Database, Trophy, Loader2, Filter, Swords, Shield, Play, Search
+  Globe, Database, Trophy, Loader2, Filter, Swords, Shield, Play, Search,
+  ExternalLink, User, Calendar
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
