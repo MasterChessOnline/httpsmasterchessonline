@@ -108,36 +108,72 @@ async function handleCreate(supabase: any, userId: string, opts: any) {
 
 // ===================== AUTO-START DUE =====================
 async function handleAutoStartDue(supabase: any) {
-  // Find all registering tournaments whose starts_at has passed and have >=2 players.
+  // Find all registering tournaments whose starts_at has passed.
   const { data: due } = await supabase
     .from("tournaments")
-    .select("id, starts_at, max_players, time_control_seconds, time_control_label, time_control_increment")
+    .select("id, name, category, format, starts_at, max_players, time_control_seconds, time_control_label, time_control_increment, total_rounds")
     .eq("status", "registering")
     .lte("starts_at", new Date().toISOString());
 
   const started: string[] = [];
   const cancelled: string[] = [];
+  const recreated: string[] = [];
+
+  // Helper: fitting round count by player count
+  const roundsForPlayers = (n: number, requested: number): number => {
+    let max: number;
+    if (n <= 2) max = 1;
+    else if (n <= 4) max = 3;
+    else if (n <= 8) max = 5;
+    else if (n <= 16) max = 7;
+    else max = 9;
+    return Math.min(requested || max, max);
+  };
 
   for (const t of due || []) {
-    const { count } = await supabase
-      .from("tournament_registrations")
-      .select("id", { count: "exact", head: true })
-      .eq("tournament_id", t.id);
-
-    if ((count || 0) < 2) {
-      // Not enough players — cancel
-      await supabase.from("tournaments").update({ status: "finished", auto_started: true }).eq("id", t.id);
-      cancelled.push(t.id);
-      continue;
-    }
-
-    const { data: players } = await supabase
+    const { data: regs } = await supabase
       .from("tournament_registrations")
       .select("user_id, rating_at_join, score")
       .eq("tournament_id", t.id)
       .order("rating_at_join", { ascending: false });
 
-    if (!players || players.length < 2) continue;
+    const players = regs || [];
+
+    if (players.length < 2) {
+      // No / not enough players → delete this tournament and recreate a fresh one
+      await supabase.from("tournament_pairings").delete().eq("tournament_id", t.id);
+      await supabase.from("tournament_registrations").delete().eq("tournament_id", t.id);
+      await supabase.from("tournament_chat_messages").delete().eq("tournament_id", t.id);
+      await supabase.from("tournaments").delete().eq("id", t.id);
+      cancelled.push(t.id);
+
+      // Recreate the same kind of tournament starting in 10 minutes
+      const newStartsAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      const { data: fresh } = await supabase
+        .from("tournaments")
+        .insert({
+          name: t.name,
+          description: `${t.format || "swiss"} tournament — auto-starts at scheduled time`,
+          category: t.category || "blitz",
+          format: t.format || "swiss",
+          tournament_type: t.format === "round-robin" ? "round_robin" : "swiss",
+          total_rounds: t.total_rounds || 5,
+          max_players: t.max_players || 32,
+          time_control_label: t.time_control_label,
+          time_control_seconds: t.time_control_seconds,
+          time_control_increment: t.time_control_increment,
+          status: "registering",
+          starts_at: newStartsAt,
+          start_time_locked: false,
+        })
+        .select()
+        .single();
+      if (fresh?.id) recreated.push(fresh.id);
+      continue;
+    }
+
+    // Adjust round count to fit the number of players
+    const adjustedRounds = roundsForPlayers(players.length, t.total_rounds);
 
     const pairings = generateSwissPairings(players, 1);
     for (const pairing of pairings) {
@@ -184,6 +220,7 @@ async function handleAutoStartDue(supabase: any) {
       .update({
         status: "active",
         current_round: 1,
+        total_rounds: adjustedRounds,
         round_started_at: new Date().toISOString(),
         auto_started: true,
       })
@@ -192,7 +229,7 @@ async function handleAutoStartDue(supabase: any) {
     started.push(t.id);
   }
 
-  return jsonRes({ ok: true, started, cancelled });
+  return jsonRes({ ok: true, started, cancelled, recreated });
 }
 
 // ===================== JOIN =====================
