@@ -75,7 +75,7 @@ const PlayOnline = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number } | null>(null);
+  const [opponentProfile, setOpponentProfile] = useState<{ display_name: string | null; rating: number; country: string | null; country_flag: string | null } | null>(null);
   const [gameMode, setGameMode] = useState<"rated" | "casual">("rated");
   const [focusMode, setFocusMode] = useState(false);
   const [drawOfferedByMe, setDrawOfferedByMe] = useState(false);
