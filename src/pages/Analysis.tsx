@@ -841,7 +841,7 @@ export default function Analysis() {
                     {formatEval(evalCpForBar, evalMateForBar)}
                   </span>
                 </div>
-                {liveEvaluating && !pgnComplete && (
+                {(positionEvaluating || (liveEvaluating && !pgnComplete)) && (
                   <div className="absolute inset-0 flex items-center justify-center z-20">
                     <Loader2 className="h-3 w-3 text-primary animate-spin" />
                   </div>
@@ -885,7 +885,7 @@ export default function Analysis() {
             <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/20 bg-[hsl(220,18%,14%)]">
               <Brain className="h-4 w-4 text-primary" />
               <span className="text-xs font-bold text-foreground">Analysis</span>
-              <span className="text-[10px] text-muted-foreground ml-auto">Stockfish · D{depth}</span>
+                <span className="text-[10px] text-muted-foreground ml-auto">Stockfish · D{depth}{positionEvaluating ? " · analyzing" : ""}</span>
             </div>
 
             {/* Engine eval */}
