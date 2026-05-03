@@ -118,6 +118,7 @@ const Tournaments = () => {
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [myRegistrations, setMyRegistrations] = useState<Set<string>>(new Set());
   const [onlyMine, setOnlyMine] = useState(filterParam === "mine");
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const [lbPlayers, setLbPlayers] = useState<LeaderboardEntry[]>([]);
   const [lbLoading, setLbLoading] = useState(false);
