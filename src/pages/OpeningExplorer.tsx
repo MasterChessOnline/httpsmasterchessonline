@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
-import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData } from "@/lib/lichess-explorer";
+import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData, fetchLichessPlayer, fetchChessComPlayer, PlayerSummary } from "@/lib/lichess-explorer";
 import { OPENINGS_DATABASE } from "@/lib/openings-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
