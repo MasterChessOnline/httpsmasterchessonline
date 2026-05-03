@@ -491,9 +491,10 @@ const Tournaments = () => {
               <div className="text-center py-16">
                 <Swords className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground mb-4">No tournaments match your filters.</p>
-                <Button onClick={handleCreateTournament} disabled={creating}>
-                  <Plus className="h-4 w-4 mr-1" /> Create One
-                </Button>
+                <CreateTournamentDialog
+                  trigger={<Button><Plus className="h-4 w-4 mr-1" /> Create One</Button>}
+                  onCreated={fetchTournaments}
+                />
               </div>
             ) : (
               <div className="space-y-3">
