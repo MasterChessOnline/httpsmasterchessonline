@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import EvalGraph from "@/components/chess/EvalGraph";
 import type { MultiPvLine } from "@/lib/stockfish-engine";
+import { classifyMove, computeAccuracy, CLASS_META, type MoveClass } from "@/lib/game-review";
 
 // ── Types ──
 interface MoveEval {
