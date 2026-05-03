@@ -331,8 +331,8 @@ export default function Analysis() {
         .eq("id", gameId)
         .maybeSingle();
       if (cancelled) return;
-      const row = data as any;
-      const pgn = row?.pgn as string | undefined;
+      const row = data as OnlineGameMetaRow | null;
+      const pgn = row?.pgn ?? undefined;
 
       // Fetch both player profiles for the header banner
       if (row?.white_player_id && row?.black_player_id) {
@@ -341,7 +341,7 @@ export default function Analysis() {
           .select("user_id, display_name, username, avatar_url, rating, country_flag")
           .in("user_id", [row.white_player_id, row.black_player_id]);
         const map: Record<string, PlayerInfo> = {};
-        (profs || []).forEach((p: any) => { map[p.user_id] = p; });
+        ((profs as PlayerInfo[] | null) || []).forEach((p) => { map[p.user_id] = p; });
         if (!cancelled) {
           setGameMeta({
             white: map[row.white_player_id] || null,
