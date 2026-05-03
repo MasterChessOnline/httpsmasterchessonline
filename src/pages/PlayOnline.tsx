@@ -24,7 +24,7 @@ import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
 import { findCountry } from "@/lib/countries";
 
-function Flag({ country, country_flag }: { country?: string | null; country_flag?: string | null }) {
+function CountryFlag({ country, country_flag }: { country?: string | null; country_flag?: string | null }) {
   const emoji = country_flag || findCountry(country)?.flag;
   if (!emoji) return null;
   return <span className="mr-1 text-base leading-none" aria-label={country || "flag"}>{emoji}</span>;
