@@ -897,7 +897,7 @@ export default function Analysis() {
                               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Top Games · {explorerDb === "masters" ? "Masters DB" : "Lichess DB"}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <a href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(history.map(h => h.san).join(" "))}`}
+                              <a href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(currentMovesSan)}`}
                                 target="_blank" rel="noopener noreferrer"
                                 className="text-[10px] inline-flex items-center gap-1 text-primary hover:underline">
                                 <ExternalLink className="h-3 w-3" /> ChessBase DB
@@ -912,7 +912,7 @@ export default function Analysis() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-0.5">
                             {explorerData.topGames.map((g, i) => {
                               const href = (g as any).source === "masters"
-                                ? `https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(history.map(h => h.san).join(" "))}`
+                                ? `https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(currentMovesSan)}`
                                 : `https://lichess.org/${g.id}`;
                               return (
                                 <a key={i} href={href} target="_blank" rel="noopener noreferrer"
@@ -934,7 +934,7 @@ export default function Analysis() {
                       <p className="text-sm">No games found for this position in {explorerDb === "masters" ? "Masters DB" : "Lichess DB"}</p>
                       <p className="text-[10px] mt-1 mb-3">Try the other database or browse external archives:</p>
                       <div className="flex flex-wrap gap-2 justify-center">
-                        <a href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(history.map(h => h.san).join(" "))}`}
+                        <a href={`https://database.chessbase.com/?lang=en#pgn|${encodeURIComponent(currentMovesSan)}`}
                           target="_blank" rel="noopener noreferrer"
                           className="text-[10px] inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-border hover:bg-primary/10 hover:text-primary transition-colors">
                           <ExternalLink className="h-3 w-3" /> ChessBase DB
