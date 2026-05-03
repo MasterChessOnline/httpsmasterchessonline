@@ -237,9 +237,9 @@ const TournamentLobby = () => {
                 <div>
                   <p className="text-sm font-medium text-foreground">
                     {ms > 0 ? (
-                      <>Auto-starts in <span className="font-mono">{m}:{String(s).padStart(2, "0")}</span></>
+                      <>Auto-starts in <span className="font-mono">{fmt}</span></>
                     ) : enough ? (
-                      "Starting now…"
+                      "Pairing players & starting round 1…"
                     ) : (
                       "Waiting for more players (need at least 2)"
                     )}
