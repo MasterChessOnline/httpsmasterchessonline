@@ -553,7 +553,7 @@ export default function Analysis() {
       });
     }
     setPgnMoveEvals(newEvals);
-    setVariation(null);
+    setVariations(prev => prev.filter(v => v.fromIdx !== variation.fromIdx));
     variationGameRef.current = null;
     const newIdx = newEvals.length - 1;
     setPgnCurrentIdx(newIdx);
