@@ -46,6 +46,10 @@ interface GameMeta {
   created_at: string;
 }
 
+type SavedOnlineGame = { id: string; pgn: string; result: string | null; created_at: string; time_control_label: string; white_player_id: string; black_player_id: string };
+type SavedBotGame = { id: string; pgn: string; result: string; outcome: "win" | "loss" | "draw"; bot_name: string; bot_rating: number; player_color: "w" | "b"; created_at: string; time_control_label: string; move_count: number };
+type OnlineGameMetaRow = { pgn: string | null; result: string | null; time_control_label: string | null; created_at: string; white_player_id: string; black_player_id: string };
+
 // ── Helpers ──
 
 function scoreToWhitePov(fen: string, evaluation: number, mate: number | null): number {
@@ -130,8 +134,8 @@ export default function Analysis() {
   const [flipped, setFlipped] = useState(false);
   const [bottomTab, setBottomTab] = useState<"explorer" | "import" | "my-games">("explorer");
   const { user } = useAuth();
-  const [myGames, setMyGames] = useState<Array<{ id: string; pgn: string; result: string | null; created_at: string; time_control_label: string; white_player_id: string; black_player_id: string }>>([]);
-  const [myBotGames, setMyBotGames] = useState<Array<{ id: string; pgn: string; result: string; outcome: "win" | "loss" | "draw"; bot_name: string; bot_rating: number; player_color: "w" | "b"; created_at: string; time_control_label: string; move_count: number }>>([]);
+  const [myGames, setMyGames] = useState<SavedOnlineGame[]>([]);
+  const [myBotGames, setMyBotGames] = useState<SavedBotGame[]>([]);
   const [myGamesLoading, setMyGamesLoading] = useState(false);
   const [myGamesSource, setMyGamesSource] = useState<"online" | "bot">("online");
   const moveListRef = useRef<HTMLDivElement>(null);
