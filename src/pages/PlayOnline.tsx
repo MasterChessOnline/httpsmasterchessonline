@@ -22,6 +22,13 @@ import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
 import QuickChat from "@/components/chess/QuickChat";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
+import { findCountry } from "@/lib/countries";
+
+function Flag({ country, country_flag }: { country?: string | null; country_flag?: string | null }) {
+  const emoji = country_flag || findCountry(country)?.flag;
+  if (!emoji) return null;
+  return <span className="mr-1 text-base leading-none" aria-label={country || "flag"}>{emoji}</span>;
+}
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
