@@ -40,10 +40,10 @@ interface TopPlayer {
 }
 
 /* ── Section Header — clear hierarchy ── */
-const SectionHeader = ({ title, icon: Icon, action, children, delay = 0 }: {
+const SectionHeader = React.forwardRef<HTMLElement, {
   title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; delay?: number;
-}) => (
-  <section className="space-y-5">
+}>(({ title, icon: Icon, action, children, delay = 0 }, ref) => (
+  <section ref={ref} className="space-y-5">
     <motion.div
       className="flex items-center justify-between"
       initial={{ opacity: 0, y: 24 }}
