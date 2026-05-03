@@ -707,8 +707,8 @@ export default function Analysis() {
         .order("created_at", { ascending: false })
         .limit(50),
     ]).then(([online, bots]) => {
-      setMyGames((online.data as any) || []);
-      setMyBotGames(((bots.data as unknown) as any[]) || []);
+      setMyGames((online.data as SavedOnlineGame[] | null) || []);
+      setMyBotGames((bots.data as SavedBotGame[] | null) || []);
       setMyGamesLoading(false);
     });
   }, [bottomTab, user]);
