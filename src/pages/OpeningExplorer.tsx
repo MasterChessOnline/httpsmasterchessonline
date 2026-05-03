@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { getStockfishEngine } from "@/lib/stockfish-engine";
-import { fetchExplorerData, fetchMasterExplorerData, ExplorerMove, ExplorerData, fetchLichessPlayer, fetchChessComPlayer, PlayerSummary } from "@/lib/lichess-explorer";
+import { fetchMasterChessExplorer, MasterMove, MasterExplorerData } from "@/lib/masterchess-db";
 import { OPENINGS_DATABASE } from "@/lib/openings-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,8 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Brain, BookOpen, RotateCcw, ChevronLeft, ChevronRight,
   ChevronsLeft, ChevronsRight, Zap, Star, BarChart3, FlipVertical,
-  Globe, Database, Trophy, Loader2, Filter, Swords, Shield, Play, Search,
-  ExternalLink, User, Calendar
+  Globe, Database, Trophy, Loader2, Swords, Shield, Play, Search, Calendar
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -69,28 +68,9 @@ export default function OpeningExplorer() {
   const [analyzing, setAnalyzing] = useState(false);
   const [bestMoveUci, setBestMoveUci] = useState("");
 
-  // Lichess explorer state
-  const [explorerData, setExplorerData] = useState<ExplorerData | null>(null);
-  const [explorerDb, setExplorerDb] = useState<"lichess" | "masters">("masters");
+  // MasterChess explorer state
+  const [explorerData, setExplorerData] = useState<MasterExplorerData | null>(null);
   const [explorerLoading, setExplorerLoading] = useState(false);
-
-  // Player search state
-  const [playerQuery, setPlayerQuery] = useState("");
-  const [playerLoading, setPlayerLoading] = useState(false);
-  const [playerResults, setPlayerResults] = useState<PlayerSummary[]>([]);
-
-  const searchPlayer = useCallback(async () => {
-    const q = playerQuery.trim();
-    if (!q) return;
-    setPlayerLoading(true);
-    setPlayerResults([]);
-    const [lichess, chesscom] = await Promise.all([fetchLichessPlayer(q), fetchChessComPlayer(q)]);
-    const out: PlayerSummary[] = [];
-    if (lichess) out.push(lichess);
-    if (chesscom) out.push(chesscom);
-    setPlayerResults(out);
-    setPlayerLoading(false);
-  }, [playerQuery]);
 
   const engineRef = useRef(getStockfishEngine());
   const abortRef = useRef(0);
