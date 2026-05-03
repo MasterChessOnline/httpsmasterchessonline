@@ -136,6 +136,7 @@ export default function Analysis() {
   const [myGamesSource, setMyGamesSource] = useState<"online" | "bot">("online");
   const moveListRef = useRef<HTMLDivElement>(null);
   const stockfishReady = useRef(false);
+  const [engineReady, setEngineReady] = useState(false);
 
   // PGN mode
   const [pgnInput, setPgnInput] = useState("");
@@ -181,6 +182,8 @@ export default function Analysis() {
   const [multiPvCount, setMultiPvCount] = useState<number>(3);
   const [topLines, setTopLines] = useState<MultiPvLine[]>([]);
   const [linesLoading, setLinesLoading] = useState(false);
+  const [positionEval, setPositionEval] = useState<{ fen: string; cp: number; mate: number | null } | null>(null);
+  const [positionEvaluating, setPositionEvaluating] = useState(false);
 
   // Current FEN for explorer
   const currentFen = useMemo(() => {
@@ -220,8 +223,37 @@ export default function Analysis() {
 
   useEffect(() => {
     const engine = getStockfishEngine();
-    engine.init().then(() => { stockfishReady.current = true; }).catch(() => setError("Failed to load analysis engine"));
+    engine.init().then(() => { stockfishReady.current = true; setEngineReady(true); }).catch(() => setError("Failed to load analysis engine"));
   }, []);
+
+  // Keep the visible eval bar tied to the exact board FEN, including side variations.
+  useEffect(() => {
+    if (!engineReady) return;
+    let cancelled = false;
+    setPositionEval(prev => (prev?.fen === currentFen ? prev : null));
+    setPositionEvaluating(true);
+
+    (async () => {
+      try {
+        const cached = await getCachedStockfishEvals([currentFen], depth);
+        const engine = getStockfishEngine();
+        const posEval = cached.get(currentFen) ?? await engine.evaluate(currentFen, depth);
+        if (!cached.has(currentFen)) void saveCachedStockfishEval(currentFen, depth, posEval.evaluation, posEval.mate);
+        if (cancelled) return;
+        setPositionEval({
+          fen: currentFen,
+          cp: scoreToWhitePov(currentFen, posEval.evaluation, posEval.mate),
+          mate: mateToWhitePov(currentFen, posEval.mate),
+        });
+      } catch (e) {
+        console.error("Position eval error:", e);
+      } finally {
+        if (!cancelled) setPositionEvaluating(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [currentFen, depth, engineReady]);
 
   // ── Game Review: classify each PGN move and compute accuracy ──
   const reviewClassifications = useMemo<MoveClass[]>(() => {
