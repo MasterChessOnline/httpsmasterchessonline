@@ -10,10 +10,10 @@ interface PromotionOption {
 }
 
 const PROMOTION_OPTIONS: PromotionOption[] = [
-  { piece: "q", label: "Dama (Queen)", symbol: "♛" },
-  { piece: "r", label: "Top (Rook)", symbol: "♜" },
-  { piece: "b", label: "Lovac (Bishop)", symbol: "♝" },
-  { piece: "n", label: "Konj (Knight)", symbol: "♞" },
+  { piece: "q", label: "Queen", symbol: "♛" },
+  { piece: "r", label: "Rook", symbol: "♜" },
+  { piece: "b", label: "Bishop", symbol: "♝" },
+  { piece: "n", label: "Knight", symbol: "♞" },
 ];
 
 interface PromotionDialogProps {
