@@ -221,8 +221,17 @@ const Training = () => {
     toast("Time's up! Take a breath next time.", { description: "Real chess always has a clock." });
   }
 
-  function nextPosition() {
-    const pool = source === "curated" ? getCuratedByMode(mode) : personalPositions.length > 0 ? personalPositions : getCuratedByMode(mode);
+  async function nextPosition() {
+    let pool: TrainingPosition[] = [];
+    if (source === "curated") {
+      try {
+        const lichess = await loadLichessPuzzles();
+        pool = lichess.filter(p => p.mode === mode);
+      } catch { pool = []; }
+      if (pool.length === 0) pool = getCuratedByMode(mode);
+    } else {
+      pool = personalPositions.length > 0 ? personalPositions : getCuratedByMode(mode);
+    }
     const choices = pool.filter(p => p.id !== position?.id);
     if (choices.length === 0) { setPhase("select"); return; }
     loadPosition(choices[Math.floor(Math.random() * choices.length)]);
