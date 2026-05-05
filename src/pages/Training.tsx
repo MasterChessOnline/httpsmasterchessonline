@@ -134,12 +134,22 @@ const Training = () => {
   async function startSession() {
     let pool: TrainingPosition[] = [];
     if (source === "curated") {
-      pool = getCuratedByMode(mode);
+      // Lichess Stockfish-vetted puzzles (150 total) + curated GM positions as fallback.
+      try {
+        const lichess = await loadLichessPuzzles();
+        pool = lichess.filter(p => p.mode === mode);
+      } catch {
+        pool = [];
+      }
+      if (pool.length === 0) pool = getCuratedByMode(mode);
     } else {
       pool = await loadPersonalPositions(mode);
       if (pool.length === 0) {
-        toast.error("Not enough finished games yet — switching to curated positions.");
-        pool = getCuratedByMode(mode);
+        toast.error("Not enough finished games yet — switching to Stockfish puzzles.");
+        try {
+          const lichess = await loadLichessPuzzles();
+          pool = lichess.filter(p => p.mode === mode);
+        } catch { pool = getCuratedByMode(mode); }
         setSource("curated");
       }
     }
