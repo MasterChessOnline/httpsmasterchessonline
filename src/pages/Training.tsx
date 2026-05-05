@@ -292,7 +292,7 @@ const Training = () => {
                   <h3 className="text-sm font-display font-semibold text-foreground mb-3">Position source</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {([
-                      { key: "curated" as const, title: "Curated GM positions", desc: "Hand-picked classics" },
+                      { key: "curated" as const, title: "150 Stockfish puzzles", desc: "Lichess-vetted positions across all modes" },
                       { key: "personal" as const, title: "Your own past games", desc: "Train on real moments from your history" },
                     ]).map(s => {
                       const active = source === s.key;
