@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Target, Shield, Crown, Clock, RotateCcw, ArrowRight, Lightbulb, CheckCircle2, XCircle } from "lucide-react";
 import { TRAINING_MODES, CURATED_POSITIONS, getCuratedByMode, type TrainingMode, type TrainingPosition } from "@/lib/training-positions";
+import { loadLichessPuzzles } from "@/lib/lichess-puzzles";
 import { toast } from "sonner";
 
 type Source = "curated" | "personal";
