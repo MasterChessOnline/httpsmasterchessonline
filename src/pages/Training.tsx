@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Target, Shield, Crown, Clock, RotateCcw, ArrowRight, Lightbulb, CheckCircle2, XCircle } from "lucide-react";
 import { TRAINING_MODES, CURATED_POSITIONS, getCuratedByMode, type TrainingMode, type TrainingPosition } from "@/lib/training-positions";
+import { loadLichessPuzzles } from "@/lib/lichess-puzzles";
 import { toast } from "sonner";
 
 type Source = "curated" | "personal";
@@ -133,12 +134,22 @@ const Training = () => {
   async function startSession() {
     let pool: TrainingPosition[] = [];
     if (source === "curated") {
-      pool = getCuratedByMode(mode);
+      // Lichess Stockfish-vetted puzzles (150 total) + curated GM positions as fallback.
+      try {
+        const lichess = await loadLichessPuzzles();
+        pool = lichess.filter(p => p.mode === mode);
+      } catch {
+        pool = [];
+      }
+      if (pool.length === 0) pool = getCuratedByMode(mode);
     } else {
       pool = await loadPersonalPositions(mode);
       if (pool.length === 0) {
-        toast.error("Not enough finished games yet — switching to curated positions.");
-        pool = getCuratedByMode(mode);
+        toast.error("Not enough finished games yet — switching to Stockfish puzzles.");
+        try {
+          const lichess = await loadLichessPuzzles();
+          pool = lichess.filter(p => p.mode === mode);
+        } catch { pool = getCuratedByMode(mode); }
         setSource("curated");
       }
     }
@@ -210,8 +221,17 @@ const Training = () => {
     toast("Time's up! Take a breath next time.", { description: "Real chess always has a clock." });
   }
 
-  function nextPosition() {
-    const pool = source === "curated" ? getCuratedByMode(mode) : personalPositions.length > 0 ? personalPositions : getCuratedByMode(mode);
+  async function nextPosition() {
+    let pool: TrainingPosition[] = [];
+    if (source === "curated") {
+      try {
+        const lichess = await loadLichessPuzzles();
+        pool = lichess.filter(p => p.mode === mode);
+      } catch { pool = []; }
+      if (pool.length === 0) pool = getCuratedByMode(mode);
+    } else {
+      pool = personalPositions.length > 0 ? personalPositions : getCuratedByMode(mode);
+    }
     const choices = pool.filter(p => p.id !== position?.id);
     if (choices.length === 0) { setPhase("select"); return; }
     loadPosition(choices[Math.floor(Math.random() * choices.length)]);
@@ -272,7 +292,7 @@ const Training = () => {
                   <h3 className="text-sm font-display font-semibold text-foreground mb-3">Position source</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {([
-                      { key: "curated" as const, title: "Curated GM positions", desc: "Hand-picked classics" },
+                      { key: "curated" as const, title: "150 Stockfish puzzles", desc: "Lichess-vetted positions across all modes" },
                       { key: "personal" as const, title: "Your own past games", desc: "Train on real moments from your history" },
                     ]).map(s => {
                       const active = source === s.key;
