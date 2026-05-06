@@ -151,11 +151,11 @@ function CourseCard({ course, onClick, progress }: {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const isMasterclass = course.tier === "masterclass";
-  // Detect repertoire side from course id (jobava → white, kalashnikov → black)
+  // Detect repertoire side from course id
   const masterclassSide: "white" | "black" | null = isMasterclass
-    ? course.id.includes("kalashnikov")
+    ? (course.id.includes("kalashnikov") || course.id.includes("kid") || course.id.includes("najdorf") || course.id.includes("caro-kann"))
       ? "black"
-      : course.id.includes("jobava") || course.id.includes("london")
+      : (course.id.includes("jobava") || course.id.includes("london") || course.id.includes("ruy-lopez") || course.id.includes("queens-gambit"))
         ? "white"
         : null
     : null;
