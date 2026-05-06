@@ -213,7 +213,7 @@ function CourseCard({ course, onClick, progress }: {
         </div>
       )}
 
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-1">
         <div className="flex items-start gap-3 mb-3">
           <motion.div
             className={`rounded-lg ${isMasterclass ? "bg-primary/15" : lvl.bg} p-2.5 shrink-0`}
@@ -223,7 +223,7 @@ function CourseCard({ course, onClick, progress }: {
             <Icon className={`h-5 w-5 ${isMasterclass ? "text-primary" : lvl.color}`} />
           </motion.div>
           <div className="flex-1 min-w-0">
-            <h2 className={`font-display text-base font-bold text-foreground leading-tight ${isMasterclass ? "pr-32" : "pr-20"}`}>{course.title}</h2>
+            <h2 className={`font-display text-base font-bold text-foreground leading-tight line-clamp-2 min-h-[2.5rem] ${isMasterclass ? "pr-32" : "pr-20"}`}>{course.title}</h2>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
@@ -238,9 +238,9 @@ function CourseCard({ course, onClick, progress }: {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed mb-4 break-words">{course.description}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed mb-4 break-words line-clamp-3 min-h-[3.6rem]">{course.description}</p>
 
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 mt-auto">
           <div className="flex justify-between text-[10px]">
             <span className="text-muted-foreground">{progress.completed} of {progress.total} chapters</span>
             <span className="font-mono font-bold text-primary">{progress.percent}%</span>
@@ -252,7 +252,7 @@ function CourseCard({ course, onClick, progress }: {
           {progress.completed > 0 ? (
             <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           ) : (
-            <>{isMasterclass ? "Enter Masterclass" : "Start Course"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
+            <>{isMasterclass ? "Enter MasterKurs" : "Start Course"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           )}
         </Button>
       </div>
