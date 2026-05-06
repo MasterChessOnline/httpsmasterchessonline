@@ -31,16 +31,16 @@ export default function StreakIndicator() {
       <Link
         to="/missions"
         title={`Streak frozen at ${data.current_streak} days — play today to keep it alive!`}
-        className="hidden sm:flex items-center gap-1.5 rounded-xl border border-sky-400/40 bg-gradient-to-br from-sky-500/15 to-card/50 backdrop-blur-sm px-2.5 py-1.5 hover:border-sky-300/70 transition-all duration-300"
+        className="hidden sm:flex items-center gap-2 rounded-xl border border-sky-400/40 bg-gradient-to-br from-sky-500/15 to-card/50 backdrop-blur-sm px-3 py-2 hover:border-sky-300/70 transition-all duration-300"
       >
         <motion.span
           animate={{ rotate: [0, 360] }}
           transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
           className="inline-flex"
         >
-          <Snowflake className="h-4 w-4 text-sky-300 drop-shadow-[0_0_6px_rgb(125_211_252/0.7)]" />
+          <Snowflake className="h-6 w-6 text-sky-300 drop-shadow-[0_0_8px_rgb(125_211_252/0.85)]" />
         </motion.span>
-        <span className="font-display text-xs font-bold text-sky-200 tabular-nums">
+        <span className="font-display text-xl font-extrabold text-sky-100 tabular-nums leading-none">
           {data.current_streak}
         </span>
       </Link>
