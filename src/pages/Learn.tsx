@@ -163,9 +163,9 @@ function CourseCard({ course, onClick, progress }: {
   return (
     <motion.article
       onClick={onClick}
-      className={`group relative rounded-xl border overflow-hidden transition-all cursor-pointer ${
+      className={`group relative rounded-xl border-2 overflow-hidden transition-all cursor-pointer h-full flex flex-col ${
         isMasterclass
-          ? "border-2 border-primary/60 bg-gradient-to-br from-primary/15 via-card to-card shadow-[0_0_30px_hsl(43_90%_55%/0.2)] hover:shadow-[0_0_55px_hsl(43_90%_55%/0.4)]"
+          ? "border-primary/60 bg-gradient-to-br from-primary/15 via-card to-card shadow-[0_0_30px_hsl(43_90%_55%/0.2)] hover:shadow-[0_0_55px_hsl(43_90%_55%/0.4)]"
           : "border-border/50 hover:border-primary/40 bg-card"
       }`}
       whileHover={{ y: -4, boxShadow: isMasterclass ? "0 0 60px hsl(43 90% 55% / 0.45)" : "0 0 30px hsl(43 90% 55% / 0.1)" }}
