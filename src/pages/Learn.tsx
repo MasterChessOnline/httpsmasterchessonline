@@ -151,21 +151,24 @@ function CourseCard({ course, onClick, progress }: {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const isMasterclass = course.tier === "masterclass";
-  // Detect repertoire side from course id (jobava → white, kalashnikov → black)
-  const masterclassSide: "white" | "black" | null = isMasterclass
-    ? course.id.includes("kalashnikov")
+  // Detect repertoire side: BLACK for Najdorf/Caro-Kann/KID/Kalashnikov, WHITE for Jobava London,
+  // BOTH (null badge) for Queen's Gambit and Ruy Lopez.
+  const masterclassSide: "white" | "black" | "both" | null = isMasterclass
+    ? (course.id.includes("kalashnikov") || course.id.includes("kid") || course.id.includes("najdorf") || course.id.includes("caro-kann"))
       ? "black"
-      : course.id.includes("jobava") || course.id.includes("london")
+      : (course.id.includes("jobava") || course.id.includes("london"))
         ? "white"
-        : null
+        : (course.id.includes("queens-gambit") || course.id.includes("ruy-lopez"))
+          ? "both"
+          : null
     : null;
 
   return (
     <motion.article
       onClick={onClick}
-      className={`group relative rounded-xl border overflow-hidden transition-all cursor-pointer ${
+      className={`group relative rounded-xl border-2 overflow-hidden transition-all cursor-pointer h-full flex flex-col ${
         isMasterclass
-          ? "border-2 border-primary/60 bg-gradient-to-br from-primary/15 via-card to-card shadow-[0_0_30px_hsl(43_90%_55%/0.2)] hover:shadow-[0_0_55px_hsl(43_90%_55%/0.4)]"
+          ? "border-primary/60 bg-gradient-to-br from-primary/15 via-card to-card shadow-[0_0_30px_hsl(43_90%_55%/0.2)] hover:shadow-[0_0_55px_hsl(43_90%_55%/0.4)]"
           : "border-border/50 hover:border-primary/40 bg-card"
       }`}
       whileHover={{ y: -4, boxShadow: isMasterclass ? "0 0 60px hsl(43 90% 55% / 0.45)" : "0 0 30px hsl(43 90% 55% / 0.1)" }}
@@ -191,7 +194,7 @@ function CourseCard({ course, onClick, progress }: {
       {isMasterclass && (
         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
           <Badge className="bg-primary text-primary-foreground border-primary/60 text-[9px] uppercase tracking-wider font-bold shadow-lg">
-            <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> Masterclass
+            <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> MasterKurs
           </Badge>
           {masterclassSide && (
             <Badge
@@ -199,16 +202,18 @@ function CourseCard({ course, onClick, progress }: {
               className={`text-[9px] uppercase tracking-wider font-bold shadow-md ${
                 masterclassSide === "white"
                   ? "bg-background text-foreground border-foreground/40"
-                  : "bg-foreground text-background border-foreground"
+                  : masterclassSide === "black"
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-gradient-to-r from-background to-foreground text-primary border-primary/60"
               }`}
             >
-              For {masterclassSide === "white" ? "White" : "Black"}
+              For {masterclassSide === "white" ? "White" : masterclassSide === "black" ? "Black" : "Both"}
             </Badge>
           )}
         </div>
       )}
 
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-1">
         <div className="flex items-start gap-3 mb-3">
           <motion.div
             className={`rounded-lg ${isMasterclass ? "bg-primary/15" : lvl.bg} p-2.5 shrink-0`}
@@ -218,7 +223,7 @@ function CourseCard({ course, onClick, progress }: {
             <Icon className={`h-5 w-5 ${isMasterclass ? "text-primary" : lvl.color}`} />
           </motion.div>
           <div className="flex-1 min-w-0">
-            <h2 className={`font-display text-base font-bold text-foreground leading-tight ${isMasterclass ? "pr-32" : "pr-20"}`}>{course.title}</h2>
+            <h2 className={`font-display text-base font-bold text-foreground leading-tight line-clamp-2 min-h-[2.5rem] ${isMasterclass ? "pr-32" : "pr-20"}`}>{course.title}</h2>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${lvl.color}`}>{course.level}</span>
               <span className="text-[10px] text-muted-foreground">·</span>
@@ -233,9 +238,9 @@ function CourseCard({ course, onClick, progress }: {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed mb-4 break-words">{course.description}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed mb-4 break-words line-clamp-3 min-h-[3.6rem]">{course.description}</p>
 
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 mt-auto">
           <div className="flex justify-between text-[10px]">
             <span className="text-muted-foreground">{progress.completed} of {progress.total} chapters</span>
             <span className="font-mono font-bold text-primary">{progress.percent}%</span>
@@ -247,7 +252,7 @@ function CourseCard({ course, onClick, progress }: {
           {progress.completed > 0 ? (
             <>{progress.percent === 100 ? "Review" : "Continue"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           ) : (
-            <>{isMasterclass ? "Enter Masterclass" : "Start Course"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
+            <>{isMasterclass ? "Enter MasterKurs" : "Start Course"} <ChevronRight className="ml-1 h-3.5 w-3.5" /></>
           )}
         </Button>
       </div>

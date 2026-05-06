@@ -388,11 +388,11 @@ export const COURSES: Course[] = [
     ],
   },
   {
-    id: "queens-gambit",
-    title: "The Queen's Gambit",
-    description: "Master the most classical 1.d4 opening system with both White and Black.",
+    id: "masterkurs-queens-gambit",
+    title: "MasterKurs: Queen's Gambit",
+    description: "Master the most classical 1.d4 opening system — both White and Black sides covered with deep, annotated lines.",
     level: "Intermediate",
-    tier: "free",
+    tier: "masterclass",
     icon: "Crown",
     category: "openings",
     lessons: [
@@ -908,11 +908,11 @@ export const COURSES: Course[] = [
     ],
   },
   {
-    id: "ruy-lopez",
-    title: "The Ruy Lopez — Complete Theory",
+    id: "masterkurs-ruy-lopez",
+    title: "MasterKurs: Ruy Lopez",
     description: "The 'Spanish Game' — every variation, every key tabiya, played out 15-20 moves deep with full theoretical explanations.",
     level: "Intermediate",
-    tier: "free",
+    tier: "masterclass",
     icon: "BookOpen",
     category: "openings",
     lessons: [
@@ -1945,12 +1945,13 @@ export const COURSES: Course[] = [
     ],
   },
   {
-    id: "caro-kann",
-    title: "The Caro-Kann Defense",
-    description: "A rock-solid defense against 1.e4 — favored by world champions.",
+    id: "masterkurs-caro-kann",
+    title: "MasterKurs: Caro-Kann",
+    description: "A rock-solid defense against 1.e4 — favored by world champions. Full move-by-move annotated lines.",
     level: "Intermediate",
-    tier: "free",
+    tier: "masterclass",
     icon: "Target",
+    category: "openings",
     lessons: [
       { id: "ck-1", title: "Caro-Kann — Foundations", content: "The Caro-Kann (1.e4 c6) is the antithesis of the Sicilian: where the Sicilian seeks chaos, the Caro seeks crystalline solidity. By preparing ...d5 with a pawn (not a piece), Black gets a French-type structure WITHOUT the locked-in light-squared bishop — a huge strategic gift. Played by Capablanca, Botvinnik, Petrosian, Karpov, and Anand at world-championship level. The four main White replies: 3.Nc3/Nd2 (Classical), 3.e5 (Advance), 3.exd5 (Exchange), and 3.exd5 cxd5 4.c4 (Panov).", keyPoints: ["1...c6 prepares ...d5 with a pawn (not piece)", "Bc8 stays free — solves French's main problem", "Four main White systems to know", "Champion's choice — Capa, Botvinnik, Karpov"], fen: "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
         practiceLine: { startFen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1", playerColor: "b", moves: [
@@ -2399,11 +2400,11 @@ export const COURSES: Course[] = [
     ],
   },
   {
-    id: "sicilian-deep-dive",
-    title: "The Sicilian Defense: Deep Dive",
-    description: "Master the world's most popular and complex chess opening.",
+    id: "masterkurs-najdorf",
+    title: "MasterKurs: Najdorf & Sicilian",
+    description: "Deep dive on the Najdorf — the king of openings — and every Sicilian variation. Stockfish-vetted annotated lines.",
     level: "Advanced",
-    tier: "free",
+    tier: "masterclass",
     icon: "Target",
     category: "openings",
     lessons: [
