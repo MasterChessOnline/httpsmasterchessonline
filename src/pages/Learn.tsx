@@ -151,13 +151,16 @@ function CourseCard({ course, onClick, progress }: {
   const Icon = ICON_MAP[course.icon] || BookOpen;
   const lvl = LEVEL_CONFIG[course.level];
   const isMasterclass = course.tier === "masterclass";
-  // Detect repertoire side from course id
-  const masterclassSide: "white" | "black" | null = isMasterclass
+  // Detect repertoire side: BLACK for Najdorf/Caro-Kann/KID/Kalashnikov, WHITE for Jobava London,
+  // BOTH (null badge) for Queen's Gambit and Ruy Lopez.
+  const masterclassSide: "white" | "black" | "both" | null = isMasterclass
     ? (course.id.includes("kalashnikov") || course.id.includes("kid") || course.id.includes("najdorf") || course.id.includes("caro-kann"))
       ? "black"
-      : (course.id.includes("jobava") || course.id.includes("london") || course.id.includes("ruy-lopez") || course.id.includes("queens-gambit"))
+      : (course.id.includes("jobava") || course.id.includes("london"))
         ? "white"
-        : null
+        : (course.id.includes("queens-gambit") || course.id.includes("ruy-lopez"))
+          ? "both"
+          : null
     : null;
 
   return (
