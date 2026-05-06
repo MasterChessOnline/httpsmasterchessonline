@@ -51,35 +51,35 @@ export default function StreakIndicator() {
     <Link
       to="/missions"
       title={`Daily streak: ${data.current_streak} day${data.current_streak === 1 ? "" : "s"} in a row${data.freeze_available ? " · 1 freeze available" : ""}`}
-      className="hidden sm:flex items-center gap-1.5 rounded-xl border border-orange-500/40 bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-card/50 backdrop-blur-sm px-2.5 py-1.5 hover:border-orange-400/70 transition-all duration-300"
+      className="hidden sm:flex items-center gap-2 rounded-xl border-2 border-orange-500/50 bg-gradient-to-br from-orange-500/25 via-amber-500/15 to-card/50 backdrop-blur-sm px-3 py-2 hover:border-orange-400/80 transition-all duration-300"
       style={{
         boxShadow: legendary
-          ? "0 0 18px rgb(251 146 60 / 0.55), inset 0 0 12px rgb(251 191 36 / 0.25)"
+          ? "0 0 26px rgb(251 146 60 / 0.7), inset 0 0 16px rgb(251 191 36 / 0.35)"
           : big
-          ? "0 0 12px rgb(251 146 60 / 0.4)"
-          : undefined,
+          ? "0 0 18px rgb(251 146 60 / 0.55)"
+          : "0 0 12px rgb(251 146 60 / 0.35)",
       }}
     >
-      <span className="relative inline-flex h-5 w-5 items-center justify-center">
+      <span className="relative inline-flex h-7 w-7 items-center justify-center">
         {/* Outer glow pulse */}
         <motion.span
           aria-hidden
-          animate={{ scale: [0.85, 1.25, 0.85], opacity: [0.4, 0.1, 0.4] }}
+          animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.5, 0.15, 0.5] }}
           transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
-          className="absolute inset-0 rounded-full bg-orange-500/50 blur-md"
+          className="absolute inset-0 rounded-full bg-orange-500/60 blur-md"
         />
         {/* Flickering flame */}
         <motion.span
           animate={{
-            scale: [1, 1.18, 0.95, 1.12, 1],
-            rotate: [0, -7, 6, -4, 0],
-            y: [0, -1, 0, -1.5, 0],
+            scale: [1, 1.2, 0.95, 1.15, 1],
+            rotate: [0, -8, 7, -5, 0],
+            y: [0, -1.5, 0, -2, 0],
           }}
           transition={{ repeat: Infinity, duration: 0.9, ease: "easeInOut" }}
           className="relative inline-flex"
         >
           <Flame
-            className="h-4 w-4 fill-orange-400 text-orange-500 drop-shadow-[0_0_6px_rgb(251_146_60/0.95)]"
+            className="h-6 w-6 fill-orange-400 text-orange-500 drop-shadow-[0_0_10px_rgb(251_146_60/1)]"
           />
         </motion.span>
         {/* Inner bright core flicker */}
@@ -87,10 +87,10 @@ export default function StreakIndicator() {
           aria-hidden
           animate={{ opacity: [0.9, 0.4, 1, 0.5, 0.9] }}
           transition={{ repeat: Infinity, duration: 0.7, ease: "easeInOut" }}
-          className="absolute bottom-0 h-1.5 w-1.5 rounded-full bg-yellow-200 blur-[1px]"
+          className="absolute bottom-0.5 h-2 w-2 rounded-full bg-yellow-200 blur-[1.5px]"
         />
       </span>
-      <span className="font-display text-xs font-bold text-orange-100 tabular-nums">
+      <span className="font-display text-xl font-extrabold text-orange-50 tabular-nums leading-none drop-shadow-[0_0_4px_rgb(251_146_60/0.6)]">
         {data.current_streak}
       </span>
     </Link>
