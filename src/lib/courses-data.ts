@@ -2400,11 +2400,11 @@ export const COURSES: Course[] = [
     ],
   },
   {
-    id: "sicilian-deep-dive",
-    title: "The Sicilian Defense: Deep Dive",
-    description: "Master the world's most popular and complex chess opening.",
+    id: "masterkurs-najdorf",
+    title: "MasterKurs: Najdorf & Sicilian",
+    description: "Deep dive on the Najdorf — the king of openings — and every Sicilian variation. Stockfish-vetted annotated lines.",
     level: "Advanced",
-    tier: "free",
+    tier: "masterclass",
     icon: "Target",
     category: "openings",
     lessons: [
