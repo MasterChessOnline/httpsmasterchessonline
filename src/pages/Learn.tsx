@@ -194,7 +194,7 @@ function CourseCard({ course, onClick, progress }: {
       {isMasterclass && (
         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
           <Badge className="bg-primary text-primary-foreground border-primary/60 text-[9px] uppercase tracking-wider font-bold shadow-lg">
-            <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> Masterclass
+            <Crown className="w-2.5 h-2.5 mr-1 fill-current" /> MasterKurs
           </Badge>
           {masterclassSide && (
             <Badge
@@ -202,10 +202,12 @@ function CourseCard({ course, onClick, progress }: {
               className={`text-[9px] uppercase tracking-wider font-bold shadow-md ${
                 masterclassSide === "white"
                   ? "bg-background text-foreground border-foreground/40"
-                  : "bg-foreground text-background border-foreground"
+                  : masterclassSide === "black"
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-gradient-to-r from-background to-foreground text-primary border-primary/60"
               }`}
             >
-              For {masterclassSide === "white" ? "White" : "Black"}
+              For {masterclassSide === "white" ? "White" : masterclassSide === "black" ? "Black" : "Both"}
             </Badge>
           )}
         </div>
