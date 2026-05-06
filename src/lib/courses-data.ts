@@ -388,11 +388,11 @@ export const COURSES: Course[] = [
     ],
   },
   {
-    id: "queens-gambit",
-    title: "The Queen's Gambit",
-    description: "Master the most classical 1.d4 opening system with both White and Black.",
+    id: "masterkurs-queens-gambit",
+    title: "MasterKurs: Queen's Gambit",
+    description: "Master the most classical 1.d4 opening system — both White and Black sides covered with deep, annotated lines.",
     level: "Intermediate",
-    tier: "free",
+    tier: "masterclass",
     icon: "Crown",
     category: "openings",
     lessons: [
