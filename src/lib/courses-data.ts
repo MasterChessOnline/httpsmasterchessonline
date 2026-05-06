@@ -908,11 +908,11 @@ export const COURSES: Course[] = [
     ],
   },
   {
-    id: "ruy-lopez",
-    title: "The Ruy Lopez — Complete Theory",
+    id: "masterkurs-ruy-lopez",
+    title: "MasterKurs: Ruy Lopez",
     description: "The 'Spanish Game' — every variation, every key tabiya, played out 15-20 moves deep with full theoretical explanations.",
     level: "Intermediate",
-    tier: "free",
+    tier: "masterclass",
     icon: "BookOpen",
     category: "openings",
     lessons: [
