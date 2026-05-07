@@ -335,6 +335,40 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
     else if (mode === "practice") handlePracticeClick(square);
   };
 
+  // Drag-and-drop: pick up piece, then drop on target — works in explore & practice.
+  const handleDragStart = (e: React.DragEvent, square: Square) => {
+    if (mode === "guided") return;
+    const chess = mode === "explore" ? exploreChess : practiceChess;
+    const piece = chess.get(square);
+    if (!piece || piece.color !== chess.turn()) { e.preventDefault(); return; }
+    setDragFrom(square);
+    // Pre-select to show legal targets while dragging
+    if (mode === "explore") {
+      setExploreSelected(square);
+      setExploreLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+    } else {
+      setPracticeSelected(square);
+      setPracticeLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+    }
+    try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", square); } catch { /* noop */ }
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    if (mode === "guided" || !dragFrom) return;
+    e.preventDefault();
+    try { e.dataTransfer.dropEffect = "move"; } catch { /* noop */ }
+  };
+  const handleDrop = (e: React.DragEvent, square: Square) => {
+    if (mode === "guided" || !dragFrom) return;
+    e.preventDefault();
+    const from = dragFrom;
+    setDragFrom(null);
+    if (from === square) return;
+    // Reuse click handlers (they already validate legal/correct)
+    if (mode === "explore") handleExploreClick(square);
+    else handlePracticeClick(square);
+  };
+  const handleDragEnd = () => { setDragFrom(null); };
+
   // Selected/legal state for rendering
   const selectedSquare = mode === "explore" ? exploreSelected : mode === "practice" ? practiceSelected : null;
   const legalMoveSquares = mode === "explore" ? exploreLegalMoves : mode === "practice" ? practiceLegalMoves : [];
