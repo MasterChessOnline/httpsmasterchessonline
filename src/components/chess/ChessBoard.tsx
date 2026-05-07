@@ -74,6 +74,9 @@ export default function ChessBoard({
   const [arrows, setArrows] = useState<Array<{ from: string; to: string; color: string }>>([]);
   const dragStartRef = useRef<{ square: string; modifiers: { shift: boolean; ctrl: boolean } } | null>(null);
 
+  // ── Drag & drop pieces (HTML5) ──
+  const [dragFrom, setDragFrom] = useState<string | null>(null);
+
   const arrowColor = (mods: { shift: boolean; ctrl: boolean }) => {
     if (mods.ctrl) return "hsl(220 90% 60%)"; // blue
     if (mods.shift) return "hsl(140 70% 45%)"; // green
