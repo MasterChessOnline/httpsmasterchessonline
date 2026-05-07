@@ -2,11 +2,13 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import {
   ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle, GitBranch,
+  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle, GitBranch, Cpu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import EngineAnalysis from "./EngineAnalysis";
+import EvalBar from "./EvalBar";
+import { useEngineEval } from "./useEngineEval";
 import { usePieceGlyphs } from "@/lib/piece-glyphs";
 
 /**
@@ -95,6 +97,11 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   const [mode, setMode] = useState<BoardMode>("guided");
   const [moveIndex, setMoveIndex] = useState(0);
   const totalMoves = positions.length - 1;
+
+  // Engine toggle (eval bar + best-move arrow)
+  const [engineOn, setEngineOn] = useState(false);
+  // Drag-and-drop state for explore/practice
+  const [dragFrom, setDragFrom] = useState<Square | null>(null);
 
   // Index of the first move that belongs to the branch (for highlighting)
   const branchStartIdx = branchAt !== null ? branchAt : -1;
@@ -198,6 +205,22 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
       : practiceChess.fen();
 
   const board = useMemo(() => new Chess(currentFen).board(), [currentFen]);
+
+  // Engine eval for current position (used by eval bar + best-move arrow)
+  const engine = useEngineEval(currentFen, engineOn, 14);
+
+  // Compute arrow endpoints from best UCI move (e.g. "e2e4")
+  const bestArrow = useMemo(() => {
+    if (!engineOn || !engine.bestMoveUci || engine.bestMoveUci.length < 4) return null;
+    const from = engine.bestMoveUci.slice(0, 2);
+    const to = engine.bestMoveUci.slice(2, 4);
+    const fFi = FILES.indexOf(from[0]);
+    const fRi = RANKS.indexOf(parseInt(from[1]));
+    const tFi = FILES.indexOf(to[0]);
+    const tRi = RANKS.indexOf(parseInt(to[1]));
+    if (fFi < 0 || fRi < 0 || tFi < 0 || tRi < 0) return null;
+    return { x1: fFi * 100 + 50, y1: fRi * 100 + 50, x2: tFi * 100 + 50, y2: tRi * 100 + 50 };
+  }, [engineOn, engine.bestMoveUci]);
 
   const currentExplanation = mode === "guided" && moveIndex > 0 && moveIndex <= effectiveMoves.length
     ? effectiveMoves[moveIndex - 1].explanation : null;
@@ -312,6 +335,40 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
     else if (mode === "practice") handlePracticeClick(square);
   };
 
+  // Drag-and-drop: pick up piece, then drop on target — works in explore & practice.
+  const handleDragStart = (e: React.DragEvent, square: Square) => {
+    if (mode === "guided") return;
+    const chess = mode === "explore" ? exploreChess : practiceChess;
+    const piece = chess.get(square);
+    if (!piece || piece.color !== chess.turn()) { e.preventDefault(); return; }
+    setDragFrom(square);
+    // Pre-select to show legal targets while dragging
+    if (mode === "explore") {
+      setExploreSelected(square);
+      setExploreLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+    } else {
+      setPracticeSelected(square);
+      setPracticeLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+    }
+    try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", square); } catch { /* noop */ }
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    if (mode === "guided" || !dragFrom) return;
+    e.preventDefault();
+    try { e.dataTransfer.dropEffect = "move"; } catch { /* noop */ }
+  };
+  const handleDrop = (e: React.DragEvent, square: Square) => {
+    if (mode === "guided" || !dragFrom) return;
+    e.preventDefault();
+    const from = dragFrom;
+    setDragFrom(null);
+    if (from === square) return;
+    // Reuse click handlers (they already validate legal/correct)
+    if (mode === "explore") handleExploreClick(square);
+    else handlePracticeClick(square);
+  };
+  const handleDragEnd = () => { setDragFrom(null); };
+
   // Selected/legal state for rendering
   const selectedSquare = mode === "explore" ? exploreSelected : mode === "practice" ? practiceSelected : null;
   const legalMoveSquares = mode === "explore" ? exploreLegalMoves : mode === "practice" ? practiceLegalMoves : [];
@@ -371,15 +428,37 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
         </div>
       )}
 
-      {/* Board */}
-      <div
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        className={`rounded-lg overflow-hidden border mb-3 transition-all touch-pan-y ${
-        practiceResult === "correct" ? "border-green-500/50 shadow-[0_0_15px_hsl(142,70%,45%,0.15)]"
-        : practiceResult === "wrong" ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
-        : "border-border/50"
-      }`}>
+      {/* Engine toggle (Eval bar + best-move arrow) */}
+      <div className="flex items-center justify-between mb-2 px-1">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Position</div>
+        <button
+          onClick={() => setEngineOn(v => !v)}
+          className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors ${
+            engineOn
+              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+              : "bg-card text-muted-foreground border-border/50 hover:text-foreground hover:border-primary/40"
+          }`}
+          title="Toggle Stockfish eval bar + best-move arrow"
+        >
+          <Cpu className="w-3.5 h-3.5" />
+          Engine {engineOn ? "On" : "Off"}
+        </button>
+      </div>
+
+      {/* Board row: optional eval bar + board */}
+      <div className="flex items-stretch gap-1.5 mb-3">
+        {engineOn && (
+          <EvalBar evalCp={engine.evalCp} mate={engine.mate} loading={engine.loading} />
+        )}
+
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className={`flex-1 relative rounded-lg overflow-hidden border transition-all touch-pan-y ${
+          practiceResult === "correct" ? "border-green-500/50 shadow-[0_0_15px_hsl(142,70%,45%,0.15)]"
+          : practiceResult === "wrong" ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
+          : "border-border/50"
+        }`}>
         {RANKS.map((rank, ri) => (
           <div key={rank} className="flex">
             {FILES.map((file, fi) => {
@@ -393,6 +472,8 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
               const isLastMove = mode === "guided" && lastMoveHighlight && (lastMoveHighlight.from === sq || lastMoveHighlight.to === sq);
               const isHint = hintSquare === sq;
               const isInteractive = mode === "explore" || mode === "practice";
+              const turnColor = mode === "explore" ? exploreChess.turn() : practiceChess.turn();
+              const canDrag = isInteractive && !!piece && piece.color === turnColor;
 
               let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
               if (isSelected) bgClass = "bg-primary/40";
@@ -406,6 +487,8 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
                     isInteractive ? "cursor-pointer active:scale-95" : "cursor-default"
                   }`}
                   onClick={() => isInteractive && handleSquareClick(sq)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, sq)}
                   disabled={mode === "guided"}
                 >
                   {isLegal && !piece && <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />}
@@ -415,13 +498,18 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
                       <img
                         src={pd.svgUrl}
                         alt=""
-                        draggable={false}
-                        className="w-[88%] h-[88%] object-contain pointer-events-none"
+                        draggable={canDrag}
+                        onDragStart={(e) => handleDragStart(e, sq)}
+                        onDragEnd={handleDragEnd}
+                        className={`w-[88%] h-[88%] object-contain ${canDrag ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"} ${dragFrom === sq ? "opacity-40" : ""}`}
                         style={pd.pixelated ? { imageRendering: "pixelated" } : undefined}
                       />
                     ) : (
                       <span
-                        className={`leading-none ${
+                        draggable={canDrag}
+                        onDragStart={(e) => handleDragStart(e, sq)}
+                        onDragEnd={handleDragEnd}
+                        className={`leading-none ${canDrag ? "cursor-grab active:cursor-grabbing" : ""} ${dragFrom === sq ? "opacity-40" : ""} ${
                           pd.white
                             ? "drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
                             : "drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
@@ -442,6 +530,28 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
             })}
           </div>
         ))}
+
+        {/* Best-move arrow overlay (Stockfish) */}
+        {engineOn && bestArrow && (
+          <svg
+            viewBox="0 0 800 800"
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full pointer-events-none z-30"
+            aria-hidden
+          >
+            <defs>
+              <marker id="best-arrowhead" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="hsl(140 70% 50%)" />
+              </marker>
+            </defs>
+            <line
+              x1={bestArrow.x1} y1={bestArrow.y1} x2={bestArrow.x2} y2={bestArrow.y2}
+              stroke="hsl(140 70% 50%)" strokeWidth={14} strokeLinecap="round"
+              opacity={0.85} markerEnd="url(#best-arrowhead)"
+            />
+          </svg>
+        )}
+        </div>
       </div>
 
       {/* Practice feedback */}

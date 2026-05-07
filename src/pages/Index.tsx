@@ -237,7 +237,7 @@ const Index = () => {
             transition={{ delay: 0.5 }}
           >
             {[
-              { to: "/learn", icon: Brain, label: "Training" },
+              { to: "/training", icon: Brain, label: "Training" },
               { to: "/analysis", icon: Eye, label: "Analysis" },
               { to: "/tournaments", icon: Trophy, label: "Compete" },
             ].map(item => (

@@ -74,6 +74,9 @@ export default function ChessBoard({
   const [arrows, setArrows] = useState<Array<{ from: string; to: string; color: string }>>([]);
   const dragStartRef = useRef<{ square: string; modifiers: { shift: boolean; ctrl: boolean } } | null>(null);
 
+  // ── Drag & drop pieces (HTML5) ──
+  const [dragFrom, setDragFrom] = useState<string | null>(null);
+
   const arrowColor = (mods: { shift: boolean; ctrl: boolean }) => {
     if (mods.ctrl) return "hsl(220 90% 60%)"; // blue
     if (mods.shift) return "hsl(140 70% 45%)"; // green
@@ -145,6 +148,32 @@ export default function ChessBoard({
     }
   };
 
+  // ── Drag-and-drop a piece onto a target square ──
+  // Reuses onSquareClick so the parent's legal-move / premove logic stays authoritative.
+  const handlePieceDragStart = (e: React.DragEvent, square: string) => {
+    const piece = game.get(square as Square);
+    if (!piece) { e.preventDefault(); return; }
+    setDragFrom(square);
+    onSquareClick(square as Square);
+    try {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", square);
+    } catch { /* noop */ }
+  };
+  const handleSquareDragOver = (e: React.DragEvent) => {
+    if (!dragFrom) return;
+    e.preventDefault();
+    try { e.dataTransfer.dropEffect = "move"; } catch { /* noop */ }
+  };
+  const handleSquareDrop = (e: React.DragEvent, square: string) => {
+    if (!dragFrom) return;
+    e.preventDefault();
+    const from = dragFrom;
+    setDragFrom(null);
+    if (from === square) return;
+    onSquareClick(square as Square);
+  };
+  const handlePieceDragEnd = () => { setDragFrom(null); };
 
   return (
     <div className={className ?? "w-full max-w-[min(90vw,520px)] mx-auto"}>
@@ -218,6 +247,8 @@ export default function ChessBoard({
                     onMouseDown={(e) => handleMouseDown(e, square)}
                     onMouseUp={(e) => handleMouseUp(e, square)}
                     onContextMenu={(e) => handleContextMenu(e, square)}
+                    onDragOver={handleSquareDragOver}
+                    onDrop={(e) => handleSquareDrop(e, square)}
                     tabIndex={0}
                   >
                     {/* Right-click highlight ring */}
@@ -264,7 +295,7 @@ export default function ChessBoard({
                             ? { x: slideOffset.x, y: slideOffset.y, scale: 1 }
                             : false
                         }
-                        animate={{ x: 0, y: 0, scale: 1 }}
+                        animate={{ x: 0, y: 0, scale: 1, opacity: dragFrom === square ? 0.4 : 1 }}
                         transition={
                           slideOffset
                             ? { type: "spring", stiffness: 300, damping: 24, mass: 0.8 }
@@ -275,7 +306,10 @@ export default function ChessBoard({
                             ? { scale: 1.15, y: -3, filter: pd.white ? "drop-shadow(0 0 12px rgba(255,215,0,0.6))" : "drop-shadow(0 0 12px rgba(100,180,255,0.5))", transition: { duration: 0.15 } }
                             : undefined
                         }
-                        className={`leading-none z-10 cursor-pointer flex items-center justify-center ${
+                        draggable={!isGameOver}
+                        onDragStart={(e) => handlePieceDragStart(e as unknown as React.DragEvent, square)}
+                        onDragEnd={handlePieceDragEnd}
+                        className={`leading-none z-10 cursor-grab active:cursor-grabbing flex items-center justify-center ${
                           pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)]"
                         } ${
                           pd.white

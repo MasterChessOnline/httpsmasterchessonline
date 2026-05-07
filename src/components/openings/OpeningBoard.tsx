@@ -32,6 +32,7 @@ export default function OpeningBoard({
   correctSquare,
 }: OpeningBoardProps) {
   const { get: getGlyph } = usePieceGlyphs();
+  const [dragFrom, setDragFrom] = useState<Square | null>(null);
   const game = useMemo(() => {
     const g = new Chess();
     try { g.load(fen); } catch { /* keep default */ }
@@ -91,6 +92,14 @@ export default function OpeningBoard({
                       ${bgClass} cursor-pointer
                     `}
                     onClick={() => onSquareClick?.(square)}
+                    onDragOver={(e) => { if (dragFrom) { e.preventDefault(); } }}
+                    onDrop={(e) => {
+                      if (!dragFrom) return;
+                      e.preventDefault();
+                      const from = dragFrom;
+                      setDragFrom(null);
+                      if (from !== square) onSquareClick?.(square);
+                    }}
                   >
                     {isLegal && !piece && (
                       <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />
@@ -102,9 +111,16 @@ export default function OpeningBoard({
                       <motion.span
                         key={`${square}-${pieceKey}`}
                         initial={{ scale: 0.8, opacity: 0.5 }}
-                        animate={{ scale: 1, opacity: 1 }}
+                        animate={{ scale: 1, opacity: dragFrom === square ? 0.4 : 1 }}
                         transition={{ duration: 0.15 }}
-                        className={`leading-none flex items-center justify-center ${
+                        draggable
+                        onDragStart={(e) => {
+                          setDragFrom(square);
+                          onSquareClick?.(square);
+                          try { (e as unknown as React.DragEvent).dataTransfer.effectAllowed = "move"; } catch { /* noop */ }
+                        }}
+                        onDragEnd={() => setDragFrom(null)}
+                        className={`leading-none flex items-center justify-center cursor-grab active:cursor-grabbing ${
                           pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(6vw,2.8rem)]"
                         } ${
                           pd.white
