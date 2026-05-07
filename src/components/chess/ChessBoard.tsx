@@ -295,7 +295,7 @@ export default function ChessBoard({
                             ? { x: slideOffset.x, y: slideOffset.y, scale: 1 }
                             : false
                         }
-                        animate={{ x: 0, y: 0, scale: 1 }}
+                        animate={{ x: 0, y: 0, scale: 1, opacity: dragFrom === square ? 0.4 : 1 }}
                         transition={
                           slideOffset
                             ? { type: "spring", stiffness: 300, damping: 24, mass: 0.8 }
@@ -306,7 +306,10 @@ export default function ChessBoard({
                             ? { scale: 1.15, y: -3, filter: pd.white ? "drop-shadow(0 0 12px rgba(255,215,0,0.6))" : "drop-shadow(0 0 12px rgba(100,180,255,0.5))", transition: { duration: 0.15 } }
                             : undefined
                         }
-                        className={`leading-none z-10 cursor-pointer flex items-center justify-center ${
+                        draggable={!isGameOver}
+                        onDragStart={(e) => handlePieceDragStart(e as unknown as React.DragEvent, square)}
+                        onDragEnd={handlePieceDragEnd}
+                        className={`leading-none z-10 cursor-grab active:cursor-grabbing flex items-center justify-center ${
                           pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)]"
                         } ${
                           pd.white
