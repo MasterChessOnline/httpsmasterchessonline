@@ -98,6 +98,11 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
   const [moveIndex, setMoveIndex] = useState(0);
   const totalMoves = positions.length - 1;
 
+  // Engine toggle (eval bar + best-move arrow)
+  const [engineOn, setEngineOn] = useState(false);
+  // Drag-and-drop state for explore/practice
+  const [dragFrom, setDragFrom] = useState<Square | null>(null);
+
   // Index of the first move that belongs to the branch (for highlighting)
   const branchStartIdx = branchAt !== null ? branchAt : -1;
 
