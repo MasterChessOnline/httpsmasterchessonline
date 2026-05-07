@@ -206,6 +206,22 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
 
   const board = useMemo(() => new Chess(currentFen).board(), [currentFen]);
 
+  // Engine eval for current position (used by eval bar + best-move arrow)
+  const engine = useEngineEval(currentFen, engineOn, 14);
+
+  // Compute arrow endpoints from best UCI move (e.g. "e2e4")
+  const bestArrow = useMemo(() => {
+    if (!engineOn || !engine.bestMoveUci || engine.bestMoveUci.length < 4) return null;
+    const from = engine.bestMoveUci.slice(0, 2);
+    const to = engine.bestMoveUci.slice(2, 4);
+    const fFi = FILES.indexOf(from[0]);
+    const fRi = RANKS.indexOf(parseInt(from[1]));
+    const tFi = FILES.indexOf(to[0]);
+    const tRi = RANKS.indexOf(parseInt(to[1]));
+    if (fFi < 0 || fRi < 0 || tFi < 0 || tRi < 0) return null;
+    return { x1: fFi * 100 + 50, y1: fRi * 100 + 50, x2: tFi * 100 + 50, y2: tRi * 100 + 50 };
+  }, [engineOn, engine.bestMoveUci]);
+
   const currentExplanation = mode === "guided" && moveIndex > 0 && moveIndex <= effectiveMoves.length
     ? effectiveMoves[moveIndex - 1].explanation : null;
 
