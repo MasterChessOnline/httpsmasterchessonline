@@ -2,11 +2,13 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import {
   ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle, GitBranch,
+  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle, GitBranch, Cpu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import EngineAnalysis from "./EngineAnalysis";
+import EvalBar from "./EvalBar";
+import { useEngineEval } from "./useEngineEval";
 import { usePieceGlyphs } from "@/lib/piece-glyphs";
 
 /**
