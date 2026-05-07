@@ -247,6 +247,8 @@ export default function ChessBoard({
                     onMouseDown={(e) => handleMouseDown(e, square)}
                     onMouseUp={(e) => handleMouseUp(e, square)}
                     onContextMenu={(e) => handleContextMenu(e, square)}
+                    onDragOver={handleSquareDragOver}
+                    onDrop={(e) => handleSquareDrop(e, square)}
                     tabIndex={0}
                   >
                     {/* Right-click highlight ring */}
