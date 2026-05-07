@@ -32,6 +32,7 @@ export default function OpeningBoard({
   correctSquare,
 }: OpeningBoardProps) {
   const { get: getGlyph } = usePieceGlyphs();
+  const [dragFrom, setDragFrom] = useState<Square | null>(null);
   const game = useMemo(() => {
     const g = new Chess();
     try { g.load(fen); } catch { /* keep default */ }
