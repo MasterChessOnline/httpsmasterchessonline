@@ -148,6 +148,32 @@ export default function ChessBoard({
     }
   };
 
+  // ── Drag-and-drop a piece onto a target square ──
+  // Reuses onSquareClick so the parent's legal-move / premove logic stays authoritative.
+  const handlePieceDragStart = (e: React.DragEvent, square: string) => {
+    const piece = game.get(square as Square);
+    if (!piece) { e.preventDefault(); return; }
+    setDragFrom(square);
+    onSquareClick(square as Square);
+    try {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", square);
+    } catch { /* noop */ }
+  };
+  const handleSquareDragOver = (e: React.DragEvent) => {
+    if (!dragFrom) return;
+    e.preventDefault();
+    try { e.dataTransfer.dropEffect = "move"; } catch { /* noop */ }
+  };
+  const handleSquareDrop = (e: React.DragEvent, square: string) => {
+    if (!dragFrom) return;
+    e.preventDefault();
+    const from = dragFrom;
+    setDragFrom(null);
+    if (from === square) return;
+    onSquareClick(square as Square);
+  };
+  const handlePieceDragEnd = () => { setDragFrom(null); };
 
   return (
     <div className={className ?? "w-full max-w-[min(90vw,520px)] mx-auto"}>
