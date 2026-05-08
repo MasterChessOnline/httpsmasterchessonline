@@ -1,6 +1,7 @@
-// Loader + types for the 150 Stockfish-vetted Lichess puzzles in /public/data/lichess-puzzles.json.
-// Each puzzle stores the FEN BEFORE the opponent's setup move, then a UCI solution sequence.
-// We auto-play the setup move so the user always has the side-to-move.
+// Loader + types for the 770 Stockfish-vetted Lichess puzzles in /public/data/lichess-puzzles.json.
+// Each puzzle stores the FEN BEFORE the opponent's setup move, then a FULL UCI solution sequence.
+// Mate-to-end: the player must play every user move; opponent responses are auto-played from the
+// solution[] array. We expose the entire sequence so Training.tsx can drive the multi-step flow.
 
 import { Chess } from "chess.js";
 import type { TrainingMode, TrainingPosition } from "./training-positions";
@@ -25,7 +26,9 @@ function themeLabel(themes: string): string {
   if (t.includes("matein1")) return "Mate in 1";
   if (t.includes("matein2")) return "Mate in 2";
   if (t.includes("matein3")) return "Mate in 3";
-  if (t.includes("mateinx") || t.includes("mate")) return "Forced mate";
+  if (t.includes("matein4")) return "Mate in 4";
+  if (t.includes("matein5")) return "Mate in 5";
+  if (t.includes("mate")) return "Forced mate";
   if (t.includes("fork")) return "Tactical fork";
   if (t.includes("pin")) return "Pin tactic";
   if (t.includes("skewer")) return "Skewer";
@@ -39,7 +42,7 @@ function themeLabel(themes: string): string {
 
 function explain(themes: string, rating: number): string {
   const t = themes.toLowerCase();
-  if (t.includes("mate")) return `Forced mating sequence — every alternative loses by force. Verified by Stockfish at ${rating} difficulty.`;
+  if (t.includes("mate")) return `Forced mating sequence — every alternative loses by force. Verified by Stockfish at ${rating} difficulty. Play it through to checkmate.`;
   if (t.includes("fork")) return `Classic fork: one piece simultaneously attacks two enemy targets, winning material.`;
   if (t.includes("pin") || t.includes("skewer")) return `A pinning/skewering motif — the back piece can't move without losing more material.`;
   if (t.includes("sacrifice") || t.includes("attraction")) return `A precise sacrifice that leads to decisive advantage. Stockfish-verified.`;
@@ -49,19 +52,25 @@ function explain(themes: string, rating: number): string {
 
 function whyWrong(themes: string): string {
   const t = themes.toLowerCase();
-  if (t.includes("mate")) return `Your move missed the forced mate. Look for checks first — every check the opponent can't escape leads to mate.`;
+  if (t.includes("mate")) return `Your move missed the forced mating line. Look for checks first — every check the opponent can't escape brings you closer to mate.`;
   if (t.includes("endgame")) return `In endgames, precision matters: every tempo counts. The wrong square lets the opponent activate counterplay.`;
   return `Stockfish prefers a different move — usually one that wins more material, gives a stronger attack, or avoids a hidden tactic.`;
 }
 
-export async function loadLichessPuzzles(): Promise<TrainingPosition[]> {
-  if (cache) return cache;
-  if (inflight) return inflight;
+/** Extended training position with the full UCI solution sequence (user + opp moves). */
+export interface PuzzlePosition extends TrainingPosition {
+  /** Full move sequence in UCI starting from `fen` (after setup). Even indices = user moves. */
+  solutionUci: string[];
+}
+
+export async function loadLichessPuzzles(): Promise<PuzzlePosition[]> {
+  if (cache) return cache as PuzzlePosition[];
+  if (inflight) return inflight as Promise<PuzzlePosition[]>;
   inflight = (async () => {
     const res = await fetch("/data/lichess-puzzles.json");
     const raw: RawLichessPuzzle[] = await res.json();
 
-    const out: TrainingPosition[] = [];
+    const out: PuzzlePosition[] = [];
     for (const p of raw) {
       try {
         // Apply the setup move so user starts with the right side to play
@@ -72,6 +81,7 @@ export async function loadLichessPuzzles(): Promise<TrainingPosition[]> {
           promotion: p.setup.length > 4 ? (p.setup[4] as "q" | "r" | "b" | "n") : undefined,
         });
         if (!setupMove) continue;
+        if (!p.solution || p.solution.length === 0) continue;
         out.push({
           id: p.id,
           mode: p.mode,
@@ -86,15 +96,16 @@ export async function loadLichessPuzzles(): Promise<TrainingPosition[]> {
           explanation: explain(p.themes, p.rating),
           whyWrong: whyWrong(p.themes),
           difficulty: p.difficulty,
-        });
+          solutionUci: p.solution,
+        } as PuzzlePosition);
       } catch {
         // skip invalid
       }
     }
     cache = out;
-    return out;
-  })();
-  return inflight;
+    return out as TrainingPosition[];
+  })() as Promise<TrainingPosition[]>;
+  return inflight as Promise<PuzzlePosition[]>;
 }
 
 export function clearLichessPuzzleCache() {
