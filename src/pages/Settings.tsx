@@ -87,6 +87,7 @@ const Settings = () => {
 
   const settings = getSettings();
   const [premoves, setPremoves] = useState(settings.premoves ?? true);
+  const [moveInputMode, setMoveInputModeState] = useState<MoveInputMode>(() => getMoveInputMode());
   const [autoQueen, setAutoQueen] = useState(settings.autoQueen ?? true);
   const [moveConfirm, setMoveConfirm] = useState(settings.moveConfirm ?? false);
   const [flipBoard, setFlipBoard] = useState(settings.flipBoard ?? false);
@@ -391,6 +392,32 @@ const Settings = () => {
         return (
           <div className="space-y-6">
             <div><h3 className="text-lg font-display font-bold text-foreground mb-1">Gameplay</h3><p className="text-sm text-muted-foreground">Customize your gameplay.</p></div>
+
+            {/* Move input mode (drag/click/both) */}
+            <div className="rounded-xl border border-border/50 bg-card/60 p-4">
+              <p className="text-sm font-medium text-foreground">How you move pieces</p>
+              <p className="text-xs text-muted-foreground mb-3">Default: drag &amp; drop. You can switch to tap-to-move or both.</p>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { key: "drag" as const, label: "Drag & Drop", desc: "Default" },
+                  { key: "click" as const, label: "Click to Move", desc: "Tap squares" },
+                  { key: "both" as const, label: "Both", desc: "Either works" },
+                ]).map(opt => {
+                  const active = moveInputMode === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      onClick={() => { setMoveInputModeState(opt.key); setMoveInputMode(opt.key); toast.success(`Move input: ${opt.label}`); }}
+                      className={`rounded-lg border p-3 text-center transition-all ${active ? "border-primary bg-primary/10 text-foreground" : "border-border/50 bg-card hover:border-primary/40 text-muted-foreground"}`}
+                    >
+                      <p className="text-xs font-display font-semibold">{opt.label}</p>
+                      <p className="text-[10px] mt-0.5 opacity-70">{opt.desc}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="space-y-3">
               {[
                 { label: "Auto-Queen", desc: "Always promote to queen", value: autoQueen, key: "autoQueen", setter: setAutoQueen },
