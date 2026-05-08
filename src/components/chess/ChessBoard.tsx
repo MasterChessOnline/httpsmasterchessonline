@@ -65,6 +65,10 @@ export default function ChessBoard({
   isGameOver, isPlayerTurn, hintSquare, hintToSquare, premove, onSquareClick, overlay, className,
 }: ChessBoardProps) {
   const { get: getGlyph, style: pieceStyle } = usePieceGlyphs();
+  const { get: getGlyph2, style: _ps } = usePieceGlyphs();
+  const [moveInput] = useMoveInputMode();
+  const allowDrag = dragEnabled(moveInput);
+  const allowClick = clickEnabled(moveInput);
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
