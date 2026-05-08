@@ -67,7 +67,7 @@ export default function ChessBoard({
   const { get: getGlyph, style: pieceStyle } = usePieceGlyphs();
   const [moveInput] = useMoveInputMode();
   const allowDrag = dragEnabled(moveInput);
-  const allowClick = clickEnabled(moveInput);
+  void clickEnabled(moveInput); // click is always allowed for accessibility
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
