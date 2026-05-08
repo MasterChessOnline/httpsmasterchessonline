@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePieceGlyphs } from "@/lib/piece-glyphs";
+import { useMoveInputMode, dragEnabled, clickEnabled } from "@/hooks/use-move-input-mode";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -64,6 +65,9 @@ export default function ChessBoard({
   isGameOver, isPlayerTurn, hintSquare, hintToSquare, premove, onSquareClick, overlay, className,
 }: ChessBoardProps) {
   const { get: getGlyph, style: pieceStyle } = usePieceGlyphs();
+  const [moveInput] = useMoveInputMode();
+  const allowDrag = dragEnabled(moveInput);
+  void clickEnabled(moveInput); // click is always allowed for accessibility
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
   const board = game.board();
@@ -306,7 +310,7 @@ export default function ChessBoard({
                             ? { scale: 1.15, y: -3, filter: pd.white ? "drop-shadow(0 0 12px rgba(255,215,0,0.6))" : "drop-shadow(0 0 12px rgba(100,180,255,0.5))", transition: { duration: 0.15 } }
                             : undefined
                         }
-                        draggable={!isGameOver}
+                        draggable={!isGameOver && allowDrag}
                         onDragStart={(e) => handlePieceDragStart(e as unknown as React.DragEvent, square)}
                         onDragEnd={handlePieceDragEnd}
                         className={`leading-none z-10 cursor-grab active:cursor-grabbing flex items-center justify-center ${
