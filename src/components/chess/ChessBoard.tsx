@@ -310,7 +310,7 @@ export default function ChessBoard({
                             ? { scale: 1.15, y: -3, filter: pd.white ? "drop-shadow(0 0 12px rgba(255,215,0,0.6))" : "drop-shadow(0 0 12px rgba(100,180,255,0.5))", transition: { duration: 0.15 } }
                             : undefined
                         }
-                        draggable={!isGameOver}
+                        draggable={!isGameOver && allowDrag}
                         onDragStart={(e) => handlePieceDragStart(e as unknown as React.DragEvent, square)}
                         onDragEnd={handlePieceDragEnd}
                         className={`leading-none z-10 cursor-grab active:cursor-grabbing flex items-center justify-center ${
