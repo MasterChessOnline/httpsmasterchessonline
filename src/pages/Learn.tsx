@@ -818,14 +818,24 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
       )}
 
       {/* Interactive board exercise */}
-      {hasExercise && (
-        <div id="exercise-section" className="mb-6">
-          <h3 className="font-display text-base font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Target className="w-4 h-4 text-primary" /> Interactive Exercise
-          </h3>
-          <VariationsExercise variations={variations} fallbackFen={lesson.fen} />
-        </div>
-      )}
+      {hasExercise && (() => {
+        // Color side this course is taught from. Black-side openings flip the board.
+        const blackSideCourses = new Set([
+          "masterkurs-najdorf",
+          "masterkurs-caro-kann",
+          "masterkurs-kid",
+          "masterkurs-kalashnikov",
+        ]);
+        const orientation: "white" | "black" = blackSideCourses.has(course.id) ? "black" : "white";
+        return (
+          <div id="exercise-section" className="mb-6">
+            <h3 className="font-display text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Target className="w-4 h-4 text-primary" /> Interactive Exercise
+            </h3>
+            <VariationsExercise variations={variations} fallbackFen={lesson.fen} orientation={orientation} />
+          </div>
+        );
+      })()}
 
       {/* AI Feedback */}
       <AIFeedbackPanel lesson={lesson} />
