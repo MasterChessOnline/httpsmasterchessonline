@@ -39,6 +39,10 @@ type BoardMode = "guided" | "practice" | "explore";
 interface InteractiveBoardProps {
   startFen?: string;
   moves: MoveStep[];
+  /** Initial board orientation. Defaults to "white". */
+  orientation?: "white" | "black";
+  /** Allow flipping the board with a button (defaults true). */
+  allowFlip?: boolean;
 }
 
 const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
@@ -60,10 +64,15 @@ const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 const DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-export default function InteractiveBoard({ startFen, moves }: InteractiveBoardProps) {
+export default function InteractiveBoard({ startFen, moves, orientation = "white", allowFlip = true }: InteractiveBoardProps) {
   const { get: getGlyph } = usePieceGlyphs();
   const baseFen = startFen || DEFAULT_FEN;
   const hasMoves = moves.length > 0;
+  const [flipped, setFlipped] = useState(orientation === "black");
+  // Reset flipped when orientation prop changes (lesson navigation)
+  useEffect(() => { setFlipped(orientation === "black"); }, [orientation]);
+  const displayFiles = useMemo(() => flipped ? [...FILES].reverse() : FILES, [flipped]);
+  const displayRanks = useMemo(() => flipped ? [...RANKS].reverse() : RANKS, [flipped]);
 
   // Active branch: when set, the line "switches" to a branch at branchAt
   // (index of the move in the main line where the branch starts INSTEAD of).
