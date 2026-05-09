@@ -947,6 +947,29 @@ const Learn = () => {
         )}
 
         {view === "list" && (
+          <Link
+            to="/training"
+            className="group block mb-8 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-primary/5 to-transparent hover:from-primary/25 hover:border-primary/60 transition-all p-5 sm:p-6"
+          >
+            <div className="flex items-center gap-4">
+              <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Target className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                  <h3 className="font-display text-base sm:text-lg font-bold text-foreground">Solve Stockfish Puzzles</h3>
+                  <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">770+ puzzles</Badge>
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Mate-in-1 to mate-in-5, tactics & endgames. Solve to checkmate, build your streak.
+                </p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-primary shrink-0 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+        )}
+
+        {view === "list" && (
           <CourseList
             onSelectCourse={(course) => { setSelectedCourse(course); setView("course"); }}
             getCourseProgress={getCourseProgress}
