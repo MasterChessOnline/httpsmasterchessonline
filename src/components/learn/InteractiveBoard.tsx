@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import {
   ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle, GitBranch, Cpu,
+  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle, GitBranch, Cpu, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -39,6 +39,10 @@ type BoardMode = "guided" | "practice" | "explore";
 interface InteractiveBoardProps {
   startFen?: string;
   moves: MoveStep[];
+  /** Initial board orientation. Defaults to "white". */
+  orientation?: "white" | "black";
+  /** Allow flipping the board with a button (defaults true). */
+  allowFlip?: boolean;
 }
 
 const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
@@ -60,10 +64,15 @@ const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 const DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-export default function InteractiveBoard({ startFen, moves }: InteractiveBoardProps) {
+export default function InteractiveBoard({ startFen, moves, orientation = "white", allowFlip = true }: InteractiveBoardProps) {
   const { get: getGlyph } = usePieceGlyphs();
   const baseFen = startFen || DEFAULT_FEN;
   const hasMoves = moves.length > 0;
+  const [flipped, setFlipped] = useState(orientation === "black");
+  // Reset flipped when orientation prop changes (lesson navigation)
+  useEffect(() => { setFlipped(orientation === "black"); }, [orientation]);
+  const displayFiles = useMemo(() => flipped ? [...FILES].reverse() : FILES, [flipped]);
+  const displayRanks = useMemo(() => flipped ? [...RANKS].reverse() : RANKS, [flipped]);
 
   // Active branch: when set, the line "switches" to a branch at branchAt
   // (index of the move in the main line where the branch starts INSTEAD of).
@@ -214,10 +223,10 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
     if (!engineOn || !engine.bestMoveUci || engine.bestMoveUci.length < 4) return null;
     const from = engine.bestMoveUci.slice(0, 2);
     const to = engine.bestMoveUci.slice(2, 4);
-    const fFi = FILES.indexOf(from[0]);
-    const fRi = RANKS.indexOf(parseInt(from[1]));
-    const tFi = FILES.indexOf(to[0]);
-    const tRi = RANKS.indexOf(parseInt(to[1]));
+    const fFi = displayFiles.indexOf(from[0]);
+    const fRi = displayRanks.indexOf(parseInt(from[1]));
+    const tFi = displayFiles.indexOf(to[0]);
+    const tRi = displayRanks.indexOf(parseInt(to[1]));
     if (fFi < 0 || fRi < 0 || tFi < 0 || tRi < 0) return null;
     return { x1: fFi * 100 + 50, y1: fRi * 100 + 50, x2: tFi * 100 + 50, y2: tRi * 100 + 50 };
   }, [engineOn, engine.bestMoveUci]);
@@ -428,21 +437,33 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
         </div>
       )}
 
-      {/* Engine toggle (Eval bar + best-move arrow) */}
-      <div className="flex items-center justify-between mb-2 px-1">
+      {/* Engine + flip toolbar */}
+      <div className="flex items-center justify-between mb-2 px-1 gap-2">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Position</div>
-        <button
-          onClick={() => setEngineOn(v => !v)}
-          className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors ${
-            engineOn
-              ? "bg-primary text-primary-foreground border-primary shadow-sm"
-              : "bg-card text-muted-foreground border-border/50 hover:text-foreground hover:border-primary/40"
-          }`}
-          title="Toggle Stockfish eval bar + best-move arrow"
-        >
-          <Cpu className="w-3.5 h-3.5" />
-          Engine {engineOn ? "On" : "Off"}
-        </button>
+        <div className="flex items-center gap-2">
+          {allowFlip && (
+            <button
+              onClick={() => setFlipped(v => !v)}
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border bg-card text-muted-foreground border-border/50 hover:text-foreground hover:border-primary/40 transition-colors"
+              title="Flip board"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Flip
+            </button>
+          )}
+          <button
+            onClick={() => setEngineOn(v => !v)}
+            className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors ${
+              engineOn
+                ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                : "bg-card text-muted-foreground border-border/50 hover:text-foreground hover:border-primary/40"
+            }`}
+            title="Toggle Stockfish eval bar + best-move arrow"
+          >
+            <Cpu className="w-3.5 h-3.5" />
+            Engine {engineOn ? "On" : "Off"}
+          </button>
+        </div>
       </div>
 
       {/* Board row: optional eval bar + board */}
@@ -459,11 +480,13 @@ export default function InteractiveBoard({ startFen, moves }: InteractiveBoardPr
           : practiceResult === "wrong" ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
           : "border-border/50"
         }`}>
-        {RANKS.map((rank, ri) => (
+        {displayRanks.map((rank, ri) => (
           <div key={rank} className="flex">
-            {FILES.map((file, fi) => {
-              const isLight = (ri + fi) % 2 === 0;
-              const piece = board[ri]?.[fi];
+            {displayFiles.map((file, fi) => {
+              const boardRow = 8 - rank;
+              const boardCol = FILES.indexOf(file);
+              const isLight = (boardRow + boardCol) % 2 === 0;
+              const piece = board[boardRow]?.[boardCol];
               const pieceKey = piece ? `${piece.color}${piece.type}` : null;
               const pd = pieceKey ? getGlyph(pieceKey) : null;
               const sq = `${file}${rank}` as Square;
