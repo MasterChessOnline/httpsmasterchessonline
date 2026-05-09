@@ -7,9 +7,10 @@ import type { LessonVariation } from "@/lib/lesson-moves";
 interface Props {
   variations: LessonVariation[];
   fallbackFen?: string;
+  orientation?: "white" | "black";
 }
 
-export default function VariationsExercise({ variations, fallbackFen }: Props) {
+export default function VariationsExercise({ variations, fallbackFen, orientation = "white" }: Props) {
   const [active, setActive] = useState(0);
 
   // Reset selection when the lesson (and therefore the variations array) changes
