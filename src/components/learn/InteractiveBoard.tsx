@@ -468,11 +468,13 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
           : practiceResult === "wrong" ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
           : "border-border/50"
         }`}>
-        {RANKS.map((rank, ri) => (
+        {displayRanks.map((rank, ri) => (
           <div key={rank} className="flex">
-            {FILES.map((file, fi) => {
-              const isLight = (ri + fi) % 2 === 0;
-              const piece = board[ri]?.[fi];
+            {displayFiles.map((file, fi) => {
+              const boardRow = 8 - rank;
+              const boardCol = FILES.indexOf(file);
+              const isLight = (boardRow + boardCol) % 2 === 0;
+              const piece = board[boardRow]?.[boardCol];
               const pieceKey = piece ? `${piece.color}${piece.type}` : null;
               const pd = pieceKey ? getGlyph(pieceKey) : null;
               const sq = `${file}${rank}` as Square;
