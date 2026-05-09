@@ -142,6 +142,7 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
               <InteractiveBoard
                 startFen={current.startFen || fallbackFen}
                 moves={current.moves}
+                orientation={orientation}
               />
             </motion.div>
           </AnimatePresence>
