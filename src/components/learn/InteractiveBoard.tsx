@@ -437,21 +437,33 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
         </div>
       )}
 
-      {/* Engine toggle (Eval bar + best-move arrow) */}
-      <div className="flex items-center justify-between mb-2 px-1">
+      {/* Engine + flip toolbar */}
+      <div className="flex items-center justify-between mb-2 px-1 gap-2">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Position</div>
-        <button
-          onClick={() => setEngineOn(v => !v)}
-          className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors ${
-            engineOn
-              ? "bg-primary text-primary-foreground border-primary shadow-sm"
-              : "bg-card text-muted-foreground border-border/50 hover:text-foreground hover:border-primary/40"
-          }`}
-          title="Toggle Stockfish eval bar + best-move arrow"
-        >
-          <Cpu className="w-3.5 h-3.5" />
-          Engine {engineOn ? "On" : "Off"}
-        </button>
+        <div className="flex items-center gap-2">
+          {allowFlip && (
+            <button
+              onClick={() => setFlipped(v => !v)}
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border bg-card text-muted-foreground border-border/50 hover:text-foreground hover:border-primary/40 transition-colors"
+              title="Flip board"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Flip
+            </button>
+          )}
+          <button
+            onClick={() => setEngineOn(v => !v)}
+            className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors ${
+              engineOn
+                ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                : "bg-card text-muted-foreground border-border/50 hover:text-foreground hover:border-primary/40"
+            }`}
+            title="Toggle Stockfish eval bar + best-move arrow"
+          >
+            <Cpu className="w-3.5 h-3.5" />
+            Engine {engineOn ? "On" : "Off"}
+          </button>
+        </div>
       </div>
 
       {/* Board row: optional eval bar + board */}
