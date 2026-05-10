@@ -535,8 +535,8 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           className={`flex-1 relative rounded-lg overflow-hidden border transition-all touch-pan-y ${
-          practiceResult === "correct" ? "border-green-500/50 shadow-[0_0_15px_hsl(142,70%,45%,0.15)]"
-          : practiceResult === "wrong" ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
+          (practiceResult === "correct" || guidedFeedback === "correct") ? "border-green-500/50 shadow-[0_0_15px_hsl(142,70%,45%,0.15)]"
+          : (practiceResult === "wrong" || guidedFeedback === "wrong") ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
           : "border-border/50"
         }`}>
         {displayRanks.map((rank, ri) => (
