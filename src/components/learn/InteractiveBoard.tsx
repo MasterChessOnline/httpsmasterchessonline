@@ -430,9 +430,13 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
   };
   const handleDragEnd = () => { setDragFrom(null); };
 
-  // Selected/legal state for rendering
-  const selectedSquare = mode === "explore" ? exploreSelected : mode === "practice" ? practiceSelected : null;
-  const legalMoveSquares = mode === "explore" ? exploreLegalMoves : mode === "practice" ? practiceLegalMoves : [];
+  // Selected/legal state for rendering — covers guided too
+  const selectedSquare = mode === "explore" ? exploreSelected
+    : mode === "practice" ? practiceSelected
+    : mode === "guided" ? guidedSelected : null;
+  const legalMoveSquares = mode === "explore" ? exploreLegalMoves
+    : mode === "practice" ? practiceLegalMoves
+    : mode === "guided" ? guidedLegalMoves : [];
 
   const getMoveNumber = (idx: number) => {
     const chess = new Chess(baseFen);
