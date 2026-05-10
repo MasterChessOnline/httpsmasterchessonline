@@ -550,8 +550,11 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
               const isLegal = legalMoveSquares.includes(sq);
               const isLastMove = mode === "guided" && lastMoveHighlight && (lastMoveHighlight.from === sq || lastMoveHighlight.to === sq);
               const isHint = hintSquare === sq;
-              const isInteractive = mode === "explore" || mode === "practice";
-              const turnColor = mode === "explore" ? exploreChess.turn() : practiceChess.turn();
+              const isInteractive = mode === "explore" || mode === "practice" || (mode === "guided" && moveIndex < effectiveMoves.length);
+              const guidedFen = positions[moveIndex] || baseFen;
+              const turnColor = mode === "explore" ? exploreChess.turn()
+                : mode === "practice" ? practiceChess.turn()
+                : new Chess(guidedFen).turn();
               const canDrag = isInteractive && !!piece && piece.color === turnColor;
 
               let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
@@ -568,7 +571,7 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
                   onClick={() => isInteractive && handleSquareClick(sq)}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, sq)}
-                  disabled={mode === "guided"}
+                  disabled={!isInteractive}
                 >
                   {isLegal && !piece && <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />}
                   {isLegal && pd && <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />}
