@@ -687,7 +687,7 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
           </div>
         ) : mode === "guided" ? (
           <p className="text-sm text-muted-foreground italic">
-            {totalMoves > 0 ? "Press ▶ or use arrow keys to step through the moves." : "This position illustrates the lesson concept."}
+            {totalMoves > 0 ? "Drag a piece on the board to play the next move — or use the arrow keys / ▶ buttons." : "This position illustrates the lesson concept."}
           </p>
         ) : mode === "practice" && !practiceCompleted ? (
           <div className="space-y-1">
