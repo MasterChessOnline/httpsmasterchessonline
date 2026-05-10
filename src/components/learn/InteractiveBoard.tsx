@@ -109,8 +109,12 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
 
   // Engine toggle (eval bar + best-move arrow)
   const [engineOn, setEngineOn] = useState(false);
-  // Drag-and-drop state for explore/practice
+  // Drag-and-drop state (works in guided, explore, practice)
   const [dragFrom, setDragFrom] = useState<Square | null>(null);
+  // Guided-mode tap/drag-to-play state
+  const [guidedSelected, setGuidedSelected] = useState<Square | null>(null);
+  const [guidedLegalMoves, setGuidedLegalMoves] = useState<Square[]>([]);
+  const [guidedFeedback, setGuidedFeedback] = useState<"correct" | "wrong" | null>(null);
 
   // Index of the first move that belongs to the branch (for highlighting)
   const branchStartIdx = branchAt !== null ? branchAt : -1;
