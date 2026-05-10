@@ -142,6 +142,9 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
     setExploreChess(new Chess(baseFen));
     setExploreSelected(null);
     setExploreLegalMoves([]);
+    setGuidedSelected(null);
+    setGuidedLegalMoves([]);
+    setGuidedFeedback(null);
     resetPractice();
   }, [baseFen, moves]);
 
