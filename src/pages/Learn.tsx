@@ -280,7 +280,6 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
 
   const categories = [
     { key: "all", label: "All Topics", icon: BookOpen },
-    { key: "openings", label: "Openings", icon: BookOpen },
     { key: "middlegame", label: "Middlegames", icon: Swords },
     { key: "endgame", label: "Endgames", icon: Target },
     { key: "strategy", label: "Strategy", icon: Brain },
@@ -310,9 +309,8 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
       </div>
 
       {/* ── CATEGORY CARDS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
         {[
-          { key: "openings", label: "Openings", icon: BookOpen, desc: "Opening theory & repertoire", color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
           { key: "middlegame", label: "Middlegames", icon: Swords, desc: "Plans, attacks & defense", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
           { key: "endgame", label: "Endgames", icon: Target, desc: "Technique & calculation", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
           { key: "strategy", label: "Strategy", icon: Brain, desc: "Positional mastery", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
