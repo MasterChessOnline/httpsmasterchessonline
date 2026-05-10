@@ -280,7 +280,6 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
 
   const categories = [
     { key: "all", label: "All Topics", icon: BookOpen },
-    { key: "openings", label: "Openings", icon: BookOpen },
     { key: "middlegame", label: "Middlegames", icon: Swords },
     { key: "endgame", label: "Endgames", icon: Target },
     { key: "strategy", label: "Strategy", icon: Brain },
