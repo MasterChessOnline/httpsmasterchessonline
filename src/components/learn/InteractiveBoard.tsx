@@ -343,42 +343,90 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
     } catch { /* ignore */ }
   };
 
+  // Guided mode: tap or drag the piece that plays the next expected move.
+  // If correct, advance moveIndex. If wrong, brief red flash.
+  const tryGuidedMove = useCallback((from: Square, to: Square): boolean => {
+    if (moveIndex >= effectiveMoves.length) return false;
+    const expectedSan = effectiveMoves[moveIndex].san;
+    const fen = positions[moveIndex] || baseFen;
+    const test = new Chess(fen);
+    let res: ReturnType<typeof test.move> | null = null;
+    try { res = test.move({ from, to, promotion: "q" }); } catch { res = null; }
+    if (res && res.san === expectedSan) {
+      setMoveIndex(moveIndex + 1);
+      setGuidedSelected(null);
+      setGuidedLegalMoves([]);
+      setGuidedFeedback("correct");
+      setTimeout(() => setGuidedFeedback(null), 600);
+      return true;
+    }
+    setGuidedFeedback("wrong");
+    setGuidedSelected(null);
+    setGuidedLegalMoves([]);
+    setTimeout(() => setGuidedFeedback(null), 700);
+    return false;
+  }, [moveIndex, effectiveMoves, positions, baseFen]);
+
+  const handleGuidedClick = (square: Square) => {
+    if (moveIndex >= effectiveMoves.length) return;
+    const fen = positions[moveIndex] || baseFen;
+    const chess = new Chess(fen);
+    if (guidedSelected && guidedLegalMoves.includes(square)) {
+      tryGuidedMove(guidedSelected, square);
+      return;
+    }
+    const piece = chess.get(square);
+    if (piece && piece.color === chess.turn()) {
+      setGuidedSelected(square);
+      setGuidedLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+    } else {
+      setGuidedSelected(null);
+      setGuidedLegalMoves([]);
+    }
+  };
+
   const handleSquareClick = (square: Square) => {
     if (mode === "explore") handleExploreClick(square);
     else if (mode === "practice") handlePracticeClick(square);
+    else if (mode === "guided") handleGuidedClick(square);
   };
 
-  // Drag-and-drop: pick up piece, then drop on target — works in explore & practice.
+  // Drag-and-drop: pick up piece, then drop on target — works in guided, explore & practice.
   const handleDragStart = (e: React.DragEvent, square: Square) => {
-    if (mode === "guided") return;
-    const chess = mode === "explore" ? exploreChess : practiceChess;
+    let chess: Chess;
+    if (mode === "guided") {
+      const fen = positions[moveIndex] || baseFen;
+      chess = new Chess(fen);
+    } else {
+      chess = mode === "explore" ? exploreChess : practiceChess;
+    }
     const piece = chess.get(square);
     if (!piece || piece.color !== chess.turn()) { e.preventDefault(); return; }
     setDragFrom(square);
-    // Pre-select to show legal targets while dragging
+    const legal = chess.moves({ square, verbose: true }).map(m => m.to as Square);
     if (mode === "explore") {
-      setExploreSelected(square);
-      setExploreLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+      setExploreSelected(square); setExploreLegalMoves(legal);
+    } else if (mode === "practice") {
+      setPracticeSelected(square); setPracticeLegalMoves(legal);
     } else {
-      setPracticeSelected(square);
-      setPracticeLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+      setGuidedSelected(square); setGuidedLegalMoves(legal);
     }
     try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", square); } catch { /* noop */ }
   };
   const handleDragOver = (e: React.DragEvent) => {
-    if (mode === "guided" || !dragFrom) return;
+    if (!dragFrom) return;
     e.preventDefault();
     try { e.dataTransfer.dropEffect = "move"; } catch { /* noop */ }
   };
   const handleDrop = (e: React.DragEvent, square: Square) => {
-    if (mode === "guided" || !dragFrom) return;
+    if (!dragFrom) return;
     e.preventDefault();
     const from = dragFrom;
     setDragFrom(null);
     if (from === square) return;
-    // Reuse click handlers (they already validate legal/correct)
     if (mode === "explore") handleExploreClick(square);
-    else handlePracticeClick(square);
+    else if (mode === "practice") handlePracticeClick(square);
+    else if (mode === "guided") tryGuidedMove(from, square);
   };
   const handleDragEnd = () => { setDragFrom(null); };
 
