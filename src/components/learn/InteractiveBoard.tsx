@@ -109,8 +109,12 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
 
   // Engine toggle (eval bar + best-move arrow)
   const [engineOn, setEngineOn] = useState(false);
-  // Drag-and-drop state for explore/practice
+  // Drag-and-drop state (works in guided, explore, practice)
   const [dragFrom, setDragFrom] = useState<Square | null>(null);
+  // Guided-mode tap/drag-to-play state
+  const [guidedSelected, setGuidedSelected] = useState<Square | null>(null);
+  const [guidedLegalMoves, setGuidedLegalMoves] = useState<Square[]>([]);
+  const [guidedFeedback, setGuidedFeedback] = useState<"correct" | "wrong" | null>(null);
 
   // Index of the first move that belongs to the branch (for highlighting)
   const branchStartIdx = branchAt !== null ? branchAt : -1;
@@ -138,6 +142,9 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
     setExploreChess(new Chess(baseFen));
     setExploreSelected(null);
     setExploreLegalMoves([]);
+    setGuidedSelected(null);
+    setGuidedLegalMoves([]);
+    setGuidedFeedback(null);
     resetPractice();
   }, [baseFen, moves]);
 
@@ -339,48 +346,100 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
     } catch { /* ignore */ }
   };
 
+  // Guided mode: tap or drag the piece that plays the next expected move.
+  // If correct, advance moveIndex. If wrong, brief red flash.
+  const tryGuidedMove = useCallback((from: Square, to: Square): boolean => {
+    if (moveIndex >= effectiveMoves.length) return false;
+    const expectedSan = effectiveMoves[moveIndex].san;
+    const fen = positions[moveIndex] || baseFen;
+    const test = new Chess(fen);
+    let res: ReturnType<typeof test.move> | null = null;
+    try { res = test.move({ from, to, promotion: "q" }); } catch { res = null; }
+    if (res && res.san === expectedSan) {
+      setMoveIndex(moveIndex + 1);
+      setGuidedSelected(null);
+      setGuidedLegalMoves([]);
+      setGuidedFeedback("correct");
+      setTimeout(() => setGuidedFeedback(null), 600);
+      return true;
+    }
+    setGuidedFeedback("wrong");
+    setGuidedSelected(null);
+    setGuidedLegalMoves([]);
+    setTimeout(() => setGuidedFeedback(null), 700);
+    return false;
+  }, [moveIndex, effectiveMoves, positions, baseFen]);
+
+  const handleGuidedClick = (square: Square) => {
+    if (moveIndex >= effectiveMoves.length) return;
+    const fen = positions[moveIndex] || baseFen;
+    const chess = new Chess(fen);
+    if (guidedSelected && guidedLegalMoves.includes(square)) {
+      tryGuidedMove(guidedSelected, square);
+      return;
+    }
+    const piece = chess.get(square);
+    if (piece && piece.color === chess.turn()) {
+      setGuidedSelected(square);
+      setGuidedLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+    } else {
+      setGuidedSelected(null);
+      setGuidedLegalMoves([]);
+    }
+  };
+
   const handleSquareClick = (square: Square) => {
     if (mode === "explore") handleExploreClick(square);
     else if (mode === "practice") handlePracticeClick(square);
+    else if (mode === "guided") handleGuidedClick(square);
   };
 
-  // Drag-and-drop: pick up piece, then drop on target — works in explore & practice.
+  // Drag-and-drop: pick up piece, then drop on target — works in guided, explore & practice.
   const handleDragStart = (e: React.DragEvent, square: Square) => {
-    if (mode === "guided") return;
-    const chess = mode === "explore" ? exploreChess : practiceChess;
+    let chess: Chess;
+    if (mode === "guided") {
+      const fen = positions[moveIndex] || baseFen;
+      chess = new Chess(fen);
+    } else {
+      chess = mode === "explore" ? exploreChess : practiceChess;
+    }
     const piece = chess.get(square);
     if (!piece || piece.color !== chess.turn()) { e.preventDefault(); return; }
     setDragFrom(square);
-    // Pre-select to show legal targets while dragging
+    const legal = chess.moves({ square, verbose: true }).map(m => m.to as Square);
     if (mode === "explore") {
-      setExploreSelected(square);
-      setExploreLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+      setExploreSelected(square); setExploreLegalMoves(legal);
+    } else if (mode === "practice") {
+      setPracticeSelected(square); setPracticeLegalMoves(legal);
     } else {
-      setPracticeSelected(square);
-      setPracticeLegalMoves(chess.moves({ square, verbose: true }).map(m => m.to as Square));
+      setGuidedSelected(square); setGuidedLegalMoves(legal);
     }
     try { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", square); } catch { /* noop */ }
   };
   const handleDragOver = (e: React.DragEvent) => {
-    if (mode === "guided" || !dragFrom) return;
+    if (!dragFrom) return;
     e.preventDefault();
     try { e.dataTransfer.dropEffect = "move"; } catch { /* noop */ }
   };
   const handleDrop = (e: React.DragEvent, square: Square) => {
-    if (mode === "guided" || !dragFrom) return;
+    if (!dragFrom) return;
     e.preventDefault();
     const from = dragFrom;
     setDragFrom(null);
     if (from === square) return;
-    // Reuse click handlers (they already validate legal/correct)
     if (mode === "explore") handleExploreClick(square);
-    else handlePracticeClick(square);
+    else if (mode === "practice") handlePracticeClick(square);
+    else if (mode === "guided") tryGuidedMove(from, square);
   };
   const handleDragEnd = () => { setDragFrom(null); };
 
-  // Selected/legal state for rendering
-  const selectedSquare = mode === "explore" ? exploreSelected : mode === "practice" ? practiceSelected : null;
-  const legalMoveSquares = mode === "explore" ? exploreLegalMoves : mode === "practice" ? practiceLegalMoves : [];
+  // Selected/legal state for rendering — covers guided too
+  const selectedSquare = mode === "explore" ? exploreSelected
+    : mode === "practice" ? practiceSelected
+    : mode === "guided" ? guidedSelected : null;
+  const legalMoveSquares = mode === "explore" ? exploreLegalMoves
+    : mode === "practice" ? practiceLegalMoves
+    : mode === "guided" ? guidedLegalMoves : [];
 
   const getMoveNumber = (idx: number) => {
     const chess = new Chess(baseFen);
@@ -476,8 +535,8 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           className={`flex-1 relative rounded-lg overflow-hidden border transition-all touch-pan-y ${
-          practiceResult === "correct" ? "border-green-500/50 shadow-[0_0_15px_hsl(142,70%,45%,0.15)]"
-          : practiceResult === "wrong" ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
+          (practiceResult === "correct" || guidedFeedback === "correct") ? "border-green-500/50 shadow-[0_0_15px_hsl(142,70%,45%,0.15)]"
+          : (practiceResult === "wrong" || guidedFeedback === "wrong") ? "border-red-500/50 shadow-[0_0_15px_hsl(0,70%,45%,0.15)]"
           : "border-border/50"
         }`}>
         {displayRanks.map((rank, ri) => (
@@ -494,8 +553,11 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
               const isLegal = legalMoveSquares.includes(sq);
               const isLastMove = mode === "guided" && lastMoveHighlight && (lastMoveHighlight.from === sq || lastMoveHighlight.to === sq);
               const isHint = hintSquare === sq;
-              const isInteractive = mode === "explore" || mode === "practice";
-              const turnColor = mode === "explore" ? exploreChess.turn() : practiceChess.turn();
+              const isInteractive = mode === "explore" || mode === "practice" || (mode === "guided" && moveIndex < effectiveMoves.length);
+              const guidedFen = positions[moveIndex] || baseFen;
+              const turnColor = mode === "explore" ? exploreChess.turn()
+                : mode === "practice" ? practiceChess.turn()
+                : new Chess(guidedFen).turn();
               const canDrag = isInteractive && !!piece && piece.color === turnColor;
 
               let bgClass = isLight ? "bg-[hsl(var(--board-light))]" : "bg-[hsl(var(--board-dark))]";
@@ -512,7 +574,7 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
                   onClick={() => isInteractive && handleSquareClick(sq)}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, sq)}
-                  disabled={mode === "guided"}
+                  disabled={!isInteractive}
                 >
                   {isLegal && !piece && <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />}
                   {isLegal && pd && <span className="absolute inset-[6%] rounded-full border-[3px] border-foreground/25" />}
@@ -625,7 +687,7 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
           </div>
         ) : mode === "guided" ? (
           <p className="text-sm text-muted-foreground italic">
-            {totalMoves > 0 ? "Press ▶ or use arrow keys to step through the moves." : "This position illustrates the lesson concept."}
+            {totalMoves > 0 ? "Drag a piece on the board to play the next move — or use the arrow keys / ▶ buttons." : "This position illustrates the lesson concept."}
           </p>
         ) : mode === "practice" && !practiceCompleted ? (
           <div className="space-y-1">
@@ -777,8 +839,8 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
       {/* Keyboard / swipe hint (guided mode only) */}
       {mode === "guided" && totalMoves > 0 && (
         <p className="text-[11px] text-muted-foreground/70 text-center mt-2 leading-relaxed">
-          <span className="hidden sm:inline">Use ← → arrow keys, Space, or Home/End to navigate moves.</span>
-          <span className="sm:hidden">Tap arrows or swipe left / right on the board to step through moves.</span>
+          <span className="hidden sm:inline">Drag a piece or tap two squares to play the next move · ← → arrows also work.</span>
+          <span className="sm:hidden">Drag a piece or tap two squares to play moves · swipe to step.</span>
         </p>
       )}
     </div>
