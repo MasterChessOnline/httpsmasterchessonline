@@ -176,28 +176,31 @@ const HeroSection = () => {
 
         <motion.p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground/90 leading-relaxed"
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.3 }}>
-          Play against players worldwide, learn with interactive lessons, and climb the ranks.
-          Your next great game starts here.
+          Real games, real ratings. Battle 9 unique bots, climb the online ladder,
+          and prove your skill move by move.
         </motion.p>
 
         <motion.div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center"
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.6 }}>
-          <Link to={user ? "/play/online" : "/play"}>
+          <Link to="/play">
             <Button size="lg" className="btn-neon bg-primary text-primary-foreground hover:bg-primary/90 px-10 py-6 text-lg font-bold shadow-glow-lg group relative overflow-hidden shimmer gold-reflection">
+              <span className="relative z-10 flex items-center">
+                <Swords className="mr-2 h-5 w-5" /> Play vs Bots
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Button>
+          </Link>
+          <Link to={user ? "/play/online" : "/play"}>
+            <Button size="lg" className="btn-neon bg-gradient-to-r from-amber-500 to-yellow-500 text-black hover:brightness-110 px-10 py-6 text-lg font-bold shadow-glow-lg group relative overflow-hidden">
               <span className="relative z-10 flex items-center">
                 <Wifi className="mr-2 h-5 w-5" /> Play Online
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </span>
             </Button>
           </Link>
-          <Link to="/play">
-            <Button size="lg" variant="outline" className="border-foreground/20 text-foreground hover:bg-foreground/5 px-8 text-base backdrop-blur-md glass-border">
-              <Swords className="mr-2 h-4 w-4" /> Play vs Bot
-            </Button>
-          </Link>
           <Link to="/learn">
-            <Button size="lg" variant="outline" className="border-foreground/20 text-foreground hover:bg-foreground/5 px-8 text-base backdrop-blur-md glass-border">
-              <BookOpen className="mr-2 h-4 w-4" /> Learn Chess
+            <Button size="lg" variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-foreground/5 px-6 text-sm">
+              <BookOpen className="mr-2 h-4 w-4" /> Learn
             </Button>
           </Link>
         </motion.div>
