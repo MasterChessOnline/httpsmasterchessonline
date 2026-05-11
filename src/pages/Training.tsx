@@ -185,7 +185,29 @@ const Training = () => {
     return getCuratedByMode(mode);
   }
 
+  function endSession(reason?: string) {
+    setSessionEnded(true);
+    setPhase("feedback");
+    const finalScore = score.correct;
+    const prevBest = bestScore[sessionMode];
+    if (finalScore > prevBest && finalScore > 0) {
+      writeBest(sessionMode, finalScore);
+      setBestScore(b => ({ ...b, [sessionMode]: finalScore }));
+      setAchievement({
+        title: "New Record!",
+        subtitle: `${finalScore} solved · ${sessionMode === "timeattack" ? "Time Attack" : sessionMode === "survival" ? "Survival" : "Classic"}`,
+      });
+    } else if (reason) {
+      toast(reason, { description: `Final score: ${finalScore}` });
+    }
+  }
+
   async function startSession() {
+    setMistakes(0);
+    setSessionEnded(false);
+    setSessionTimeLeft(TIME_ATTACK_SECONDS);
+    setScore({ correct: 0, total: 0 });
+    setSeenIds(new Set());
     const pool = await buildPool();
     const next = pickFresh(pool);
     if (!next) { toast.error("No positions available for this mode."); return; }
