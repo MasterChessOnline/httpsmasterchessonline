@@ -292,6 +292,8 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
   const additionalCourses = COURSES.filter((c) => {
     if (CORE_IDS.has(c.id)) return false;
     if (masterclassIds.has(c.id)) return false;
+    // Permanently exclude opening category from Fundamentals — they live on /openings.
+    if (c.category === "openings") return false;
     if (levelFilter !== "all" && c.level !== levelFilter) return false;
     if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
     return true;
