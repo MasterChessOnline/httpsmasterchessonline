@@ -18,7 +18,19 @@ import {
 } from "@/lib/training-positions";
 import { loadLichessPuzzles, type PuzzlePosition } from "@/lib/lichess-puzzles";
 import { useTrainingStreak } from "@/hooks/use-training-streak";
+import AchievementToast from "@/components/training/AchievementToast";
 import { toast } from "sonner";
+
+type SessionMode = "classic" | "timeattack" | "survival";
+const TIME_ATTACK_SECONDS = 300; // 5 minutes
+const MAX_MISTAKES = 3;
+const BEST_KEY = (m: SessionMode) => `mc:training:best:${m}`;
+function readBest(m: SessionMode): number {
+  try { return parseInt(localStorage.getItem(BEST_KEY(m)) || "0", 10) || 0; } catch { return 0; }
+}
+function writeBest(m: SessionMode, v: number) {
+  try { localStorage.setItem(BEST_KEY(m), String(v)); } catch {}
+}
 
 type Source = "curated" | "personal";
 type Phase = "select" | "playing" | "feedback";
@@ -64,11 +76,32 @@ const Training = () => {
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
-  const [lastMoveSquares, setLastMoveSquares] = useState<{ from: Square; to: Square } | null>(null);
+  const [lastMoveSquares, setLastMoveSquares] = useState<{ from: Query; to: Square } | null>(null) as any;
   const streak = useTrainingStreak();
   const stepIndexRef = useRef(0);
 
+  // Session-mode state
+  const [sessionMode, setSessionMode] = useState<SessionMode>("classic");
+  const [mistakes, setMistakes] = useState(0);
+  const [sessionTimeLeft, setSessionTimeLeft] = useState(TIME_ATTACK_SECONDS);
+  const [bestScore, setBestScore] = useState<Record<SessionMode, number>>({
+    classic: readBest("classic"),
+    timeattack: readBest("timeattack"),
+    survival: readBest("survival"),
+  });
+  const [achievement, setAchievement] = useState<{ title: string; subtitle?: string } | null>(null);
+  const [sessionEnded, setSessionEnded] = useState(false);
+
   useEffect(() => { if (!loading && !user) navigate("/login"); }, [user, loading, navigate]);
+
+  // Time Attack global countdown
+  useEffect(() => {
+    if (sessionMode !== "timeattack" || phase === "select" || sessionEnded) return;
+    if (sessionTimeLeft <= 0) { endSession("Time's up!"); return; }
+    const t = setInterval(() => setSessionTimeLeft(s => s - 1), 1000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionMode, phase, sessionTimeLeft, sessionEnded]);
 
   // Timer — gets a generous floor based on solution length so mate-in-N is fair.
   useEffect(() => {
