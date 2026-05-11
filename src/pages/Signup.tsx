@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Crown, UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
+import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -42,6 +43,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleOpen, setGoogleOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -87,14 +89,12 @@ const Signup = () => {
     navigate("/dashboard");
   };
 
-  const handleSocialLogin = async (provider: "google" | "apple") => {
+  const handleAppleLogin = async () => {
     setError(null);
-    const result = await lovable.auth.signInWithOAuth(provider, {
+    const result = await lovable.auth.signInWithOAuth("apple", {
       redirect_uri: window.location.origin,
     });
-    if (result.error) {
-      setError(result.error.message);
-    }
+    if (result.error) setError(result.error.message);
   };
 
   return (
