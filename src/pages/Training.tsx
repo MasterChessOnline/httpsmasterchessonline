@@ -76,7 +76,7 @@ const Training = () => {
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
-  const [lastMoveSquares, setLastMoveSquares] = useState<{ from: Query; to: Square } | null>(null) as any;
+  const [lastMoveSquares, setLastMoveSquares] = useState<{ from: Square; to: Square } | null>(null);
   const streak = useTrainingStreak();
   const stepIndexRef = useRef(0);
 
