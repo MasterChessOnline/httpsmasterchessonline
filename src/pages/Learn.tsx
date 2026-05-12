@@ -263,101 +263,83 @@ function CourseCard({ course, onClick, progress }: {
 /* ──── Course List ──── */
 const CORE_IDS = new Set(["core-beginner", "core-intermediate", "core-advanced"]);
 
-function CourseList({ onSelectCourse, getCourseProgress }: {
+type LearnTab = "openings" | "masters" | "training";
+
+function CourseList({ tab, onSelectCourse, getCourseProgress }: {
+  tab: LearnTab;
   onSelectCourse: (course: Course) => void;
   getCourseProgress: (courseId: string, total: number) => { completed: number; total: number; percent: number };
 }) {
-  const [levelFilter, setLevelFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [showAdditional, setShowAdditional] = useState(false);
-
-  const levels = [
-    { key: "all", label: "All Levels", icon: BookOpen },
-    { key: "Beginner", label: "Beginner", icon: Shield },
-    { key: "Intermediate", label: "Intermediate", icon: Zap },
-    { key: "Advanced", label: "Advanced", icon: Award },
-  ];
-
-  const categories = [
-    { key: "all", label: "All Topics", icon: BookOpen },
-    { key: "middlegame", label: "Middlegames", icon: Swords },
-    { key: "endgame", label: "Endgames", icon: Target },
-    { key: "strategy", label: "Strategy", icon: Brain },
-    { key: "tactics", label: "Tactics", icon: Crosshair },
-  ];
-
-  const coreCourses = COURSES.filter((c) => CORE_IDS.has(c.id));
   const masterclassCourses = COURSES.filter((c) => c.tier === "masterclass");
-  const masterclassIds = new Set(masterclassCourses.map((c) => c.id));
-  const additionalCourses = COURSES.filter((c) => {
-    if (CORE_IDS.has(c.id)) return false;
-    if (masterclassIds.has(c.id)) return false;
-    // Permanently exclude opening category from Fundamentals — they live on /openings.
-    if (c.category === "openings") return false;
-    if (levelFilter !== "all" && c.level !== levelFilter) return false;
-    if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
-    return true;
-  });
+  const openingsCourses = COURSES.filter(
+    (c) => c.category === "openings" && c.tier !== "masterclass"
+  );
 
-  const totalCoreLessons = coreCourses.reduce((s, c) => s + c.lessons.length, 0);
+  if (tab === "training") {
+    return <TrainingTab />;
+  }
 
-  return (
-    <>
-      {/* All Free badge */}
-      <div className="flex justify-center mb-6">
-        <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs px-3 py-1">
-          <Shield className="w-3 h-3 mr-1.5" /> All {COURSES.reduce((s, c) => s + c.lessons.length, 0)}+ lessons are 100% free
-        </Badge>
-      </div>
-
-      {/* ── CATEGORY CARDS ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
-        {[
-          { key: "middlegame", label: "Middlegames", icon: Swords, desc: "Plans, attacks & defense", color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-          { key: "endgame", label: "Endgames", icon: Target, desc: "Technique & calculation", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-          { key: "strategy", label: "Strategy", icon: Brain, desc: "Positional mastery", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20" },
-        ].map((cat, i) => {
-          const count = COURSES.filter(c => c.category === cat.key).reduce((s, c) => s + c.lessons.length, 0);
-          return (
-            <motion.button
-              key={cat.key}
-              onClick={() => {
-                setCategoryFilter(prev => prev === cat.key ? "all" : cat.key);
-                setShowAdditional(true);
-              }}
-              className={`relative rounded-xl border p-4 text-center transition-all group overflow-hidden ${
-                categoryFilter === cat.key
-                  ? `${cat.border} ${cat.bg} shadow-glow`
-                  : "border-border/50 bg-card hover:border-primary/30"
-              }`}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08, duration: 0.5 }}
-              whileHover={{ y: -3, scale: 1.02 }}
-            >
-              <cat.icon className={`h-6 w-6 mx-auto mb-2 ${cat.color} group-hover:scale-110 transition-transform`} />
-              <p className="text-sm font-semibold text-foreground">{cat.label}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{count}+ lessons</p>
-            </motion.button>
-          );
-        })}
-      </div>
-
-      {/* ── CORE CURRICULUM ── */}
-      <div className="mb-10">
+  if (tab === "openings") {
+    return (
+      <div>
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
           <h2 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
-            <Star className="w-5 h-5 text-primary fill-primary" /> Core Curriculum · {totalCoreLessons} Lessons
+            <BookOpen className="w-5 h-5 text-primary" /> Openings · {openingsCourses.length} Courses
           </h2>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
         </div>
-        <p className="text-center text-muted-foreground text-sm mb-5">
-          Start here — 50 structured lessons from beginner to advanced, step by step.
+        <p className="text-center text-muted-foreground text-sm mb-6 max-w-2xl mx-auto">
+          Step-by-step opening repertoires. Open a course, navigate variations move-by-move, drag pieces freely.
+        </p>
+        {openingsCourses.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">More openings coming soon — check the Master Courses tab.</p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {openingsCourses.map((course) => (
+              <CourseCard
+                key={course.id}
+                course={course}
+                onClick={() => onSelectCourse(course)}
+                progress={getCourseProgress(course.id, course.lessons.length)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // tab === "masters"
+  return (
+    <div className="relative">
+      <div
+        aria-hidden
+        className="absolute inset-x-0 -top-6 -bottom-6 pointer-events-none opacity-60 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, hsl(var(--primary) / 0.18) 0%, transparent 70%)",
+        }}
+      />
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/50 to-primary/70" />
+          <h2 className="font-display text-xl sm:text-2xl font-extrabold text-foreground flex items-center gap-2.5 whitespace-nowrap">
+            <Crown className="w-6 h-6 text-primary fill-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />
+            <span className="bg-gradient-to-r from-primary via-yellow-300 to-primary bg-clip-text text-transparent">
+              Master Courses
+            </span>
+          </h2>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/50 to-primary/70" />
+        </div>
+        <p className="text-center text-muted-foreground text-sm mb-6 max-w-2xl mx-auto">
+          Premium deep-dives — 30+ annotated variations per course, interactive board, autoplay, drag-to-move.
         </p>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {coreCourses.map((course) => (
+          {masterclassCourses.map((course) => (
             <CourseCard
               key={course.id}
               course={course}
@@ -367,129 +349,61 @@ function CourseList({ onSelectCourse, getCourseProgress }: {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* ── MASTERCLASS COURSES ── (always visible, top placement) */}
-      {masterclassCourses.length > 0 && (
-        <div className="mb-12 relative">
-          {/* Soft gold glow backdrop */}
-          <div
-            aria-hidden
-            className="absolute inset-x-0 -top-6 -bottom-6 pointer-events-none opacity-60 blur-3xl"
-            style={{
-              background:
-                "radial-gradient(ellipse at center, hsl(var(--primary) / 0.18) 0%, transparent 70%)",
-            }}
-          />
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/50 to-primary/70" />
-              <h2 className="font-display text-xl sm:text-2xl font-extrabold text-foreground flex items-center gap-2.5 whitespace-nowrap">
-                <Crown className="w-6 h-6 text-primary fill-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />
-                <span className="bg-gradient-to-r from-primary via-yellow-300 to-primary bg-clip-text text-transparent">
-                  Masterclass · Premium Deep-Dives
-                </span>
-              </h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-transparent via-primary/50 to-primary/70" />
-            </div>
-            <p className="text-center text-muted-foreground text-sm mb-6 max-w-2xl mx-auto">
-              Elite, Stockfish-vetted opening repertoires with 50+ annotated variations, interactive boards, and Practice mode.
-            </p>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {masterclassCourses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  onClick={() => onSelectCourse(course)}
-                  progress={getCourseProgress(course.id, course.lessons.length)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+/* ──── Training Tab — pure puzzle/tactic CTAs, NO courses ──── */
+function TrainingTab() {
+  const tiles = [
+    { to: "/training", icon: Target, title: "Puzzles & Tactics", desc: "770+ Stockfish puzzles. Build streaks.", color: "text-primary", bg: "from-primary/15 to-primary/0", border: "border-primary/30" },
+    { to: "/training?theme=mateIn1", icon: Crosshair, title: "Mate in 1", desc: "Spot the killer move instantly.", color: "text-emerald-400", bg: "from-emerald-500/15 to-transparent", border: "border-emerald-500/30" },
+    { to: "/training?theme=mateIn2", icon: Crosshair, title: "Mate in 2", desc: "Two-move forced mates.", color: "text-blue-400", bg: "from-blue-500/15 to-transparent", border: "border-blue-500/30" },
+    { to: "/training?theme=mateIn3", icon: Crosshair, title: "Mate in 3", desc: "Three-move calculation drills.", color: "text-purple-400", bg: "from-purple-500/15 to-transparent", border: "border-purple-500/30" },
+    { to: "/training?theme=endgame", icon: Brain, title: "Endgame Drills", desc: "K+P, R+P, opposition, zugzwang.", color: "text-orange-400", bg: "from-orange-500/15 to-transparent", border: "border-orange-500/30" },
+    { to: "/training?mode=survival", icon: Flame, title: "Combo Trainer", desc: "Chain solves. 3 mistakes and out.", color: "text-red-400", bg: "from-red-500/15 to-transparent", border: "border-red-500/30" },
+  ];
 
-      {/* ── ADDITIONAL COURSES ── */}
-      <div>
-        <button
-          onClick={() => setShowAdditional(!showAdditional)}
-          className="w-full flex items-center justify-center gap-2 mb-6 text-sm text-muted-foreground hover:text-primary transition-colors"
-        >
-          <div className="h-px flex-1 bg-border/50" />
-          <span className="flex items-center gap-1.5 font-medium shrink-0">
-            {showAdditional ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            {showAdditional ? "Hide" : "Show"} Deep-Dive Courses ({additionalCourses.length})
-          </span>
-          <div className="h-px flex-1 bg-border/50" />
-        </button>
-
-        {showAdditional && (
-          <>
-            {/* Filters row */}
-            <div className="flex flex-col sm:flex-row justify-center gap-3 flex-wrap mb-8">
-              {/* Level filter */}
-              <div className="flex justify-center gap-2 flex-wrap">
-                {levels.map(({ key, label, icon: LvlIcon }) => (
-                  <button
-                    key={key}
-                    onClick={() => setLevelFilter(key)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-all border ${
-                      levelFilter === key
-                        ? "border-primary bg-primary/10 text-primary shadow-glow"
-                        : "border-border/50 bg-card text-muted-foreground hover:border-primary/30 hover:text-foreground"
-                    }`}
-                  >
-                    <LvlIcon className="w-3.5 h-3.5" />
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {/* Category filter */}
-              <div className="flex justify-center gap-2 flex-wrap">
-                {categories.map(({ key, label, icon: CatIcon }) => (
-                  <button
-                    key={key}
-                    onClick={() => setCategoryFilter(key)}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-all border ${
-                      categoryFilter === key
-                        ? "border-accent bg-accent/10 text-accent shadow-glow"
-                        : "border-border/50 bg-card text-muted-foreground hover:border-accent/30 hover:text-foreground"
-                    }`}
-                  >
-                    <CatIcon className="w-3.5 h-3.5" />
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {additionalCourses.map((course, i) => (
-                <motion.div
-                  key={course.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.04, duration: 0.4 }}
-                >
-                  <CourseCard
-                    course={course}
-                    onClick={() => onSelectCourse(course)}
-                    progress={getCourseProgress(course.id, course.lessons.length)}
-                  />
-                </motion.div>
-              ))}
-            </div>
-
-            {additionalCourses.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No courses match your filters.</p>
-              </div>
-            )}
-          </>
-        )}
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/30" />
+        <h2 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
+          <Target className="w-5 h-5 text-primary" /> Training
+        </h2>
+        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/30" />
       </div>
-    </>
+      <p className="text-center text-muted-foreground text-sm mb-6 max-w-2xl mx-auto">
+        Pure tactical drills — no courses, no theory. Solve, streak, level up.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {tiles.map((t, i) => (
+          <motion.div
+            key={t.title}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.05, duration: 0.4 }}
+          >
+            <Link
+              to={t.to}
+              className={`group block rounded-xl border ${t.border} bg-gradient-to-br ${t.bg} p-5 hover:shadow-[0_0_30px_hsl(var(--primary)/0.18)] transition-all`}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`shrink-0 w-11 h-11 rounded-xl bg-card/60 border border-border/40 flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <t.icon className={`w-5 h-5 ${t.color}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-display text-sm font-bold text-foreground mb-0.5">{t.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{t.desc}</p>
+                </div>
+                <ChevronRight className={`w-4 h-4 ${t.color} shrink-0 group-hover:translate-x-1 transition-transform`} />
+              </div>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+    </div>
   );
 }
 
