@@ -353,17 +353,38 @@ const Training = () => {
             </p>
           </motion.div>
 
-          {/* Streak banner — always visible */}
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 border border-orange-500/30 px-4 py-1.5">
-              <Flame className="w-4 h-4 text-orange-400" />
-              <span className="font-display font-bold text-orange-300 text-sm">Streak {streak.current}</span>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/30 px-4 py-1.5">
-              <Trophy className="w-4 h-4 text-primary" />
-              <span className="font-display font-bold text-primary text-sm">Best {streak.best}</span>
-            </div>
-          </div>
+          {/* Streak banner — always visible, fire animates with streak size */}
+          {(() => {
+            const s = streak.current;
+            const tier = s >= 15 ? 3 : s >= 5 ? 2 : 1;
+            const flameSize = tier === 3 ? "w-7 h-7" : tier === 2 ? "w-5 h-5" : "w-4 h-4";
+            const flameGlow = tier === 3 ? "drop-shadow-[0_0_14px_rgba(251,146,60,0.95)]" : tier === 2 ? "drop-shadow-[0_0_10px_rgba(251,146,60,0.7)]" : "";
+            const combo = s >= 10 ? "x3" : s >= 5 ? "x2" : null;
+            return (
+              <div className="flex items-center justify-center gap-3 mb-6 flex-wrap">
+                <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 border border-orange-500/30 px-4 py-1.5">
+                  <motion.span
+                    key={s}
+                    animate={{ scale: tier === 3 ? [1, 1.25, 1] : tier === 2 ? [1, 1.12, 1] : 1 }}
+                    transition={{ duration: 0.7, repeat: tier > 1 ? Infinity : 0, repeatDelay: 0.4 }}
+                    className="inline-flex"
+                  >
+                    <Flame className={`${flameSize} text-orange-400 ${flameGlow}`} />
+                  </motion.span>
+                  <span className="font-display font-bold text-orange-300 text-sm">Streak {s}</span>
+                  {combo && (
+                    <span className="ml-1 px-2 py-0.5 rounded-full bg-orange-500/20 text-[10px] font-bold text-orange-200 uppercase tracking-wider">
+                      {combo} combo
+                    </span>
+                  )}
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/30 px-4 py-1.5">
+                  <Trophy className="w-4 h-4 text-primary" />
+                  <span className="font-display font-bold text-primary text-sm">Best {streak.best}</span>
+                </div>
+              </div>
+            );
+          })()}
 
           <AnimatePresence mode="wait">
             {phase === "select" && (
