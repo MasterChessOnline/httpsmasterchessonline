@@ -820,6 +820,18 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
             <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-9 w-9">
               <ChevronsRight className="h-4 w-4" />
             </Button>
+            <Button
+              variant={autoplay ? "default" : "outline"}
+              size="icon"
+              onClick={() => {
+                if (moveIndex >= totalMoves) setMoveIndex(0);
+                setAutoplay((a) => !a);
+              }}
+              className="h-9 w-9"
+              title={autoplay ? "Pause" : "Autoplay"}
+            >
+              {autoplay ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
           </>
         )}
 
