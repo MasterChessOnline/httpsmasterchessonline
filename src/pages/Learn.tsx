@@ -796,6 +796,7 @@ type View = "list" | "course" | "lesson";
 const Learn = () => {
   const { user } = useAuth();
   const [view, setView] = useState<View>("list");
+  const [tab, setTab] = useState<LearnTab>("masters");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [lessonIdx, setLessonIdx] = useState(0);
   const {
@@ -821,6 +822,12 @@ const Learn = () => {
     }).length;
   }, [getCourseProgress]);
 
+  const TABS: { key: LearnTab; label: string; icon: React.ElementType }[] = [
+    { key: "openings", label: "Openings", icon: BookOpen },
+    { key: "masters",  label: "Master Courses", icon: Crown },
+    { key: "training", label: "Training", icon: Target },
+  ];
+
   return (
     <div className="min-h-screen bg-background grid-bg">
       <Navbar />
@@ -828,63 +835,46 @@ const Learn = () => {
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center mb-2 uppercase tracking-wider">
           Learn <span className="text-gradient-neon">Chess</span>
         </h1>
-        <p className="text-center text-muted-foreground mb-8 max-w-md mx-auto text-sm">
-          {view === "list" && "Structured training from beginner to advanced."}
+        <p className="text-center text-muted-foreground mb-6 max-w-md mx-auto text-sm">
+          {view === "list" && "Openings, Master Courses & Training — pick your path."}
           {view === "course" && selectedCourse && `${selectedCourse.title} — ${selectedCourse.lessons.length} chapters`}
           {view === "lesson" && selectedCourse && `${selectedCourse.title} — Chapter ${lessonIdx + 1}`}
         </p>
 
-        {/* Coming Soon */}
-        {view === "list" && (
-          <Link to="/coming-soon" className="block mb-8 rounded-xl glass-neon p-5 opacity-70 hover:opacity-90 transition-opacity">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  New Features
-                  <span className="text-[10px] uppercase tracking-widest text-primary/60 font-display">Coming Soon</span>
-                </p>
-                <p className="text-xs text-muted-foreground">Exciting new content is on the way.</p>
-              </div>
-            </div>
-          </Link>
-        )}
-
         {view === "list" && user && !loading && (
           <>
             <StatsDashboard streak={streak} totalCourses={COURSES.length} completedCourses={completedCourses} />
-            <MyLessonsPanel />
             <BookmarkedPanel bookmarks={bookmarkData} onGoToLesson={goToLesson} />
           </>
         )}
 
         {view === "list" && (
-          <Link
-            to="/training"
-            className="group block mb-8 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-primary/5 to-transparent hover:from-primary/25 hover:border-primary/60 transition-all p-5 sm:p-6"
-          >
-            <div className="flex items-center gap-4">
-              <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Target className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <h3 className="font-display text-base sm:text-lg font-bold text-foreground">Solve Stockfish Puzzles</h3>
-                  <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">770+ puzzles</Badge>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Mate-in-1 to mate-in-5, tactics & endgames. Solve to checkmate, build your streak.
-                </p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-primary shrink-0 group-hover:translate-x-1 transition-transform" />
+          <div className="mb-8 flex justify-center">
+            <div className="inline-flex rounded-xl border border-border/50 bg-card/60 p-1 shadow-sm backdrop-blur-sm overflow-x-auto max-w-full">
+              {TABS.map(({ key, label, icon: TabIcon }) => {
+                const active = tab === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setTab(key)}
+                    className={`inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${
+                      active
+                        ? "bg-gradient-to-r from-primary to-yellow-400 text-primary-foreground shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <TabIcon className="w-4 h-4" />
+                    {label}
+                  </button>
+                );
+              })}
             </div>
-          </Link>
+          </div>
         )}
 
         {view === "list" && (
           <CourseList
+            tab={tab}
             onSelectCourse={(course) => { setSelectedCourse(course); setView("course"); }}
             getCourseProgress={getCourseProgress}
           />
