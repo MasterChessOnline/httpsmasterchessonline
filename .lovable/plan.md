@@ -1,55 +1,109 @@
-## Šta menjam
+# MasterChess — Kompletan Update Plan
 
-### 1. Learn sekcija
-- **Fundamentals**: trajno brišem `Openings` kategoriju (već uklonjeno iz UI, sad i iz `categories` izvora i bilo kakvih ostataka u `Learn.tsx` / `courses-data.ts`).
-- **Training tab u Learn**: ostaju SAMO training zadaci (Lichess puzzle engine) — uklanjam sve lekcije/kurseve iz tog taba i vodim direktno u `/training` stream.
-- **MasterKursevi (svih 7)**: prepravljam tako da svaka varijanta radi kao Jobava London — interaktivna tabla, potezi se prikazuju jedan po jedan, korisnik povlači potez na tabli i tabla je 1:1 sinhronizovana sa SAN listom (kao mini-partija). Otklanjam bagove sa drag-input u Guided modu.
+Veliki scope, pa cu raditi u jasnim fazama. Svaka faza je samostalna i ne lomi prethodne.
 
-> Napomena: za 5 preostalih kurseva (Najdorf, Caro-Kann, Queen's Gambit, Ruy Lopez, King's Indian) trenutno koristim AI-generisane linije jer mi nisi poslao tvoje varijante za njih. Mehanika će raditi identično kao Jobava — čim mi pošalješ varijante, samo ih ubacim u `courses-data.ts` (jl-1…jl-100 format).
+## Faza 1 — Learn sekcija (najveci deo)
 
-### 2. Welcome intro (forsirano login/signup)
-- Brišem stari `WelcomeIntroPopup` (koji se pojavljivao samo posle login-a).
-- Novi **AuthGate**: čim neko otvori sajt bez sesije, prikazuje se full-screen welcome sa dva CTA: **Sign up** ili **Log in**. Bez prijave ne mogu se otvoriti glavne stranice (osim `/login`, `/signup`, `/about`, `/privacy`, `/terms`).
-- **Continue with Google flow**: pre OAuth poziva otvara se mali modal koji traži:
-  1. **Country** (dropdown sa zastavama iz `countries.ts`)
-  2. **Profile name**
-  Tek nakon submit-a poziva se `lovable.auth.signInWithOAuth("google")`. Country + display_name se snimaju u `pending` localStorage ključ i upisuju u `profiles` tabelu odmah po povratku iz OAuth-a.
+**Cilj:** Learn ima 3 jasna taba: Openings / Master Courses / Training. Training BEZ kurseva.
 
-### 3. Training (homepage CTA + nova /training mehanika)
-Tri moda u `/training`:
-- **Classic** (postojeći stream)
-- **Time Attack**: 5 minuta, max 3 greške → stop, prikaz score-a, dugme Restart.
-- **Survival**: neograničeno vreme, max 3 greške → stop.
+### 1.1 `src/pages/Learn.tsx` rewrite
+- Tri taba na vrhu: **Openings**, **Master Courses**, **Training**
+- **Training tab** = samo CTA kartice ka: Puzzles, Tactics, Pattern, Calculation, Mate-in-1/2/3, Endgame Drills, Streak, Combo. Bez ijednog kursa.
+- **Openings tab** = lista openings kurseva (filtrirano `category: "openings"` + masterclass openings)
+- **Master Courses tab** = svih 7 masterklasa
+- Svaki kurs renderovan istom `CourseCard` komponentom (cover, difficulty, name, progress bar, chapters count, variations count, est. time, favorite ⭐, "Continue learning" dugme, "Last played" timestamp)
 
-Dodajem:
-- Streak counter + **Best score** vidljivi u headeru (već postoji `useTrainingStreak`, dodajem `bestScore` po modu).
-- **"New Record!"** achievement toast (full-screen overlay sa konfetama) kad oboriš best.
-- **Achievement toast sistem** koji se okida i na drugim milestone-ima (5/10/25/50 streak, prvi mate-in-3, itd.).
+### 1.2 Unified Course Player — `src/components/learn/CoursePlayer.tsx` (novo)
+Zameni postojeci interaktivni view za sve kurseve (Openings + Master). Layout:
 
-Dodatne teške puzle: ubacujem novi shard **`lichess-puzzles-hard.json`** sa Lichess puzzle API filterom `rating>=2400` + theme `mate`/`endgame` (~200 dodatnih). Loader spaja oba fajla.
+```
+┌─────────────────────┬──────────────────────┐
+│                     │  Chapter / Variation │
+│      CHESSBOARD     │  selector            │
+│   (drag + click)    │                      │
+│                     │  Move list (SAN)     │
+│                     │  -> highlight current│
+│                     │                      │
+│  ◀◀ ◀ ▶ ▶▶  ▶auto  │  Notation panel      │
+│  Start End Pause    │  Engine comment      │
+└─────────────────────┴──────────────────────┘
+```
 
-### 4. Sajt prebačen na "play-first" ton
-- Homepage hero menja CTA hijerarhiju: **"Play vs Bots"** i **"Play Online"** kao primarni gold gradient dugmadi, **"Learn"** sekundarno (manje, niže).
-- `FeaturesSection` reordering: bot personalities + online multiplayer prvi, edukacija ispod.
-- `WhyChooseUsSection` copy update — naglasak na "real games, real ratings" umesto na lekcije.
+Funkcije:
+- `chess.js` instanca + `history` array
+- **NEXT** / **PREVIOUS** / **START** / **END** dugmad
+- **Autoplay** (1.2s/move) + **Pause**
+- Keyboard: ←/→/Home/End/Space
+- Smooth piece animacija (Framer Motion `layout`)
+- Highlighted from/to squares
+- Arrow overlay za "best move" (kada postoji u podacima)
+- Engine comment panel ispod move liste
+- "Practice vs Computer from this position" dugme → otvara `/play?fen=...`
 
-### 5. Mobile polish
-- MasterKurs interaktivna tabla: tap-to-move radi, board scale `min(100vw-24px, 480px)`.
-- Welcome AuthGate na mobilnom: full-bleed sa stack-ovanim dugmadima.
-- Training mode selector: horizontalno scroll-uje na <420px.
+### 1.3 Progress persistence — `src/hooks/use-course-progress.ts` (novo)
+localStorage ključ `mc:course-progress:<courseId>`:
+```ts
+{ lastChapterId, lastVariationId, lastMoveIndex, completedChapters: [], percent, updatedAt }
+```
+- "Continue learning" čita ovo
+- Course card prikazuje progress bar i "Last played"
 
-## Tehnički koraci
-1. `src/components/AuthGate.tsx` (novo) + integracija u `App.tsx` (zamenjuje `WelcomeIntroPopup`).
-2. `src/components/auth/GoogleCountryNameModal.tsx` (novo) — koristi se na Login i Signup stranicama.
-3. `src/pages/Learn.tsx` — Training tab čisti (samo puzzle CTA), Fundamentals izvor bez Openings.
-4. `src/components/learn/InteractiveBoard.tsx` — popravka drag/tap u Guided modu, board orientation = boja kursa (već delom radi).
-5. `src/pages/Training.tsx` — mode selector (Classic / Time Attack / Survival), best score per-mode u localStorage, achievement toast.
-6. `src/components/training/AchievementToast.tsx` (novo) + `src/lib/training-achievements.ts`.
-7. `public/data/lichess-puzzles-hard.json` (novo, ~200 pozicija) + update `lichess-puzzles.ts` loader-a.
-8. `src/components/HeroSection.tsx` + `FeaturesSection.tsx` — play-first reordering.
-9. Profile insert posle Google OAuth — handler u `Login.tsx` proverava `pending` ključ i radi `profiles.update`.
+### 1.4 Course data uniformity
+`src/lib/courses-data.ts` — proveri da svi kursevi imaju: `coverImage, difficulty, totalChapters, totalVariations, estMinutes`. Dopuni gde fali.
+
+## Faza 2 — Welcome Intro / Onboarding
+
+`src/components/AuthGate.tsx` — pretvori postojeci u **cinematic intro**:
+- 2.5s intro sekvenca: floating chess pieces (Framer Motion), gold glow, logo reveal
+- Posle intro: 3 velika CTA — **Play Your First Game**, **Challenge The AI**, **Start Training**, plus diskretnije Sign Up / Log In
+- Ako user nije ulogovan a klikne CTA → vodi na Signup
+- Smooth gradient pozadina, dark gaming feel
+
+## Faza 3 — Board UX (drag/drop, premove)
+
+**Audit `src/components/chess/`** — pronaći glavni board komponent. Popraviti:
+- Drag: piece prati kursor 1:1, shadow + lift (scale 1.1, drop-shadow)
+- Bez teleportovanja: koristi pointer events + `setPointerCapture`
+- Click-to-move + drag rade istovremeno
+- **Premove**: kada nije tvoj red, sledeći legal-na-trenutnoj-poziciji potez se snima i prikazuje poluprovidno (opacity 0.5, žuta ivica). Kada dođe red, automatski izvrši ako je i dalje legal.
+
+## Faza 4 — Chess pravila (verifikacija)
+
+Provera da chess.js već pokriva: 3-fold rep, 50-move, stalemate, insufficient material, en passant, castling, promotion. Dodaj ako fali:
+- **Auto-offer draw** kad `chess.isThreefoldRepetition()` (toast sa "Claim Draw" dugmetom)
+- Repetition counter u game info panelu
+- Captured pieces tray (verovatno postoji, proveriti)
+
+## Faza 5 — Sound system
+
+`src/lib/chess-sounds.ts` već ima: move, capture, check, gameOver, start. Dodaj:
+- `playPremoveSound`, `playIllegalSound`, `playPromotionSound`, `playCountdownSound`, `playCheckmateDramatic` (ducked + dramatic)
+- Mali sample fajlovi (sintetisano kroz postojeci `playToneSequence` ako nema mp3-a)
+
+## Faza 6 — Training Streak System
+
+Već postoji `useTrainingStreak`. Nadograditi `src/pages/Training.tsx`:
+- 🔥 **Animated fire icon** (Framer Motion scale + glow) — veličina raste sa streak (1-5 small, 5-15 medium, 15+ huge sa particles)
+- **Combo multiplier** prikaz (x2 posle 5 u nizu, x3 posle 10, itd.)
+- XP gain toast posle svakog tačnog
+- Daily mission widget (već postoji `DailyMissions` komponenta — uvezi)
+
+## Faza 7 — Polish
+
+- Homepage: veliki board preview u hero-u (već postoji `HeroSection`, dotjerati)
+- Smooth hover/glow na svim primary dugmadima (utility klasa u `index.css`)
+- Mobile pass — sve nove komponente
 
 ## Šta NE diram
-- Postojeći Jobava London i Kalashnikov sadržaj (već 1:1 tvoje varijante).
-- Auth provider konfiguracija (Google već radi preko Lovable Cloud).
-- Edge funkcije, Supabase šema (osim `profiles.country` koje verovatno već postoji — proverim).
+- Supabase šemu, Edge funkcije, auth providers
+- Tournaments, Stream Hub, Community
+- Postojeći Jobava London / Kalashnikov SADRŽAJ (samo player UI postaje uniforman)
+
+## Redosled isporuke
+Idem fazama 1 → 2 → 3 → 6 → 4 → 5 → 7. Faza 1 je najveca i najvrednija (zatrazena prva). Posle svake faze proverim build i mobile viewport.
+
+## Tehnicke note
+- Sve nove komponente koriste design tokens iz `index.css` (gold/black tema)
+- `chess.js` već u projektu
+- `framer-motion` već u projektu
+- Bez novih dependency-ja
