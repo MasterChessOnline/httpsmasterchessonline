@@ -169,6 +169,16 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
   const goForward = useCallback(() => setMoveIndex((i) => Math.min(i + 1, totalMoves)), [totalMoves]);
   const goBack = useCallback(() => setMoveIndex((i) => Math.max(i - 1, 0)), []);
 
+  // Autoplay (guided mode)
+  const [autoplay, setAutoplay] = useState(false);
+  useEffect(() => {
+    if (!autoplay || mode !== "guided") return;
+    if (moveIndex >= totalMoves) { setAutoplay(false); return; }
+    const id = setTimeout(() => setMoveIndex((i) => Math.min(i + 1, totalMoves)), 1100);
+    return () => clearTimeout(id);
+  }, [autoplay, moveIndex, totalMoves, mode]);
+  useEffect(() => { setAutoplay(false); }, [baseFen, moves]);
+
   // Keyboard navigation (guided mode)
   useEffect(() => {
     if (mode !== "guided") return;
