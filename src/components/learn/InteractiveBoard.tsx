@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import {
   ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  RotateCcw, Lightbulb, Play, Eye, Puzzle, CheckCircle2, XCircle, GitBranch, Cpu, RefreshCw,
+  RotateCcw, Lightbulb, Play, Pause, Eye, Puzzle, CheckCircle2, XCircle, GitBranch, Cpu, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -168,6 +168,16 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
   const goToEnd = useCallback(() => setMoveIndex(totalMoves), [totalMoves]);
   const goForward = useCallback(() => setMoveIndex((i) => Math.min(i + 1, totalMoves)), [totalMoves]);
   const goBack = useCallback(() => setMoveIndex((i) => Math.max(i - 1, 0)), []);
+
+  // Autoplay (guided mode)
+  const [autoplay, setAutoplay] = useState(false);
+  useEffect(() => {
+    if (!autoplay || mode !== "guided") return;
+    if (moveIndex >= totalMoves) { setAutoplay(false); return; }
+    const id = setTimeout(() => setMoveIndex((i) => Math.min(i + 1, totalMoves)), 1100);
+    return () => clearTimeout(id);
+  }, [autoplay, moveIndex, totalMoves, mode]);
+  useEffect(() => { setAutoplay(false); }, [baseFen, moves]);
 
   // Keyboard navigation (guided mode)
   useEffect(() => {
@@ -809,6 +819,18 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
             </Button>
             <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-9 w-9">
               <ChevronsRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={autoplay ? "default" : "outline"}
+              size="icon"
+              onClick={() => {
+                if (moveIndex >= totalMoves) setMoveIndex(0);
+                setAutoplay((a) => !a);
+              }}
+              className="h-9 w-9"
+              title={autoplay ? "Pause" : "Autoplay"}
+            >
+              {autoplay ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
           </>
         )}
