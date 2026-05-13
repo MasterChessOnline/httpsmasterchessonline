@@ -161,15 +161,19 @@ const Index = () => {
       <Seo title={"MasterChess — Play Chess Online, Tournaments & Analysis"} description={"Play chess online vs players or AI bots, join free tournaments, analyze games with Stockfish, and learn openings — no puzzles, just real chess."} path="/" type="website" />
       <Navbar />
 
+      <main>
       {/* ── HERO with parallax + 4D depth ── */}
       <div ref={heroRef} className="relative pt-16 sm:pt-24 pb-16 px-4 overflow-hidden min-h-[45vh]">
         <motion.div className="absolute inset-0" style={{ y: imgY, scale: heroScale }}>
           <img
             src={heroImage}
             alt="Chess board"
+            width={1920}
+            height={1080}
             className="absolute inset-0 w-full h-[120%] object-cover"
             style={{ filter: "brightness(0.28) saturate(0.85)" }}
             loading="eager"
+            fetchPriority="high"
           />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
