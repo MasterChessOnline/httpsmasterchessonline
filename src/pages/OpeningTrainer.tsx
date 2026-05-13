@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { OPENINGS_DATABASE, Opening } from "@/lib/openings-data";
@@ -108,6 +109,7 @@ export default function OpeningTrainer() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={"Chess Openings Trainer — Explore & Train | MasterChess"} description={"Explore and drill chess openings with interactive variation trees. From Italian to King's Indian."} path="/openings" type="website" />
       <Navbar />
 
       {/* Hero */}

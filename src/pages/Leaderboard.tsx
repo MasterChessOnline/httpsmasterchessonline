@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -281,6 +282,7 @@ const Leaderboard = () => {
 
   return (
     <div className="min-h-screen bg-background grid-bg">
+      <Seo title={"Global Chess Leaderboard — Top Players | MasterChess"} description={"Live ELO leaderboard across Bullet, Blitz, Rapid and Classical. Climb from Bronze to Grandmaster."} path="/leaderboard" type="website" />
       <Navbar />
       <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
         <motion.div

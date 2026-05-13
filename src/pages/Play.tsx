@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Chess, Square } from "chess.js";
 import { Link } from "react-router-dom";
@@ -833,6 +834,7 @@ const Play = () => {
   if (gamePhase === "lobby") {
     return (
       <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
+        <Seo title={"Play vs AI Bots — MasterChess"} description={"Challenge 9 unique chess bots from 400 to 2000 ELO. Pick a personality, set time control, and play instantly."} path="/play" type="website" />
         <Navbar />
         <main className="container mx-auto px-4 pt-24 pb-16 flex flex-col items-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-6">

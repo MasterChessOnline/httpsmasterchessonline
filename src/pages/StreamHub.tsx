@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -100,6 +101,7 @@ export default function StreamHub() {
   return (
     <div className="min-h-screen bg-background relative">
       <DynamicBackground />
+      <Seo title={"Live Chess Stream — DailyChess_12 | MasterChess"} description={"Watch DailyChess_12 live, join the viewer queue, react with emojis and vote in live polls."} path="/live" type="website" />
       <Navbar />
 
       <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16 relative z-10">

@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -110,6 +111,7 @@ export default function Community() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={"Chess Community — Moments, Badges & Followers | MasterChess"} description={"Share your best chess moments, earn badges, follow players, and join the active MasterChess community."} path="/community" type="website" />
       <Navbar />
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Header */}

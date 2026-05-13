@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -56,6 +57,7 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={"Contact MasterChess"} description={"Get in touch with the MasterChess team. Questions, feedback and partnership inquiries welcome."} path="/contact" type="website" />
       <Navbar />
       <section className="py-24">
         <div className="container mx-auto px-6 max-w-2xl">

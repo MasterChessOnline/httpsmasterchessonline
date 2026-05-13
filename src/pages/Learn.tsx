@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -830,6 +831,7 @@ const Learn = () => {
 
   return (
     <div className="min-h-screen bg-background grid-bg">
+      <Seo title={"Learn Chess — Master Courses, Openings & Training | MasterChess"} description={"Master courses, opening trees, and tactical training drills. Learn chess by playing — no static lessons."} path="/learn" type="website" />
       <Navbar />
       <main className="container mx-auto px-4 sm:px-6 pt-24 pb-16">
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center mb-2 uppercase tracking-wider">
