@@ -1,0 +1,28 @@
+# MasterChess
+
+> Play chess online vs players or AI bots, join free daily tournaments, analyze games with Stockfish, and learn openings — a premium, no-puzzles chess platform.
+
+MasterChess is a competitive chess platform built around real human play. Features include online matchmaking, bot opponents across rating tiers, free tournaments with Swiss pairing, master courses, openings explorer, AI-assisted post-game review (analysis only, never during live play), and an active community.
+
+## Pages
+
+- [Home](/): Overview, featured modes, and live activity.
+- [Play vs Bots](/play): Match against 9 bot personalities (400–2000 ELO).
+- [Play Online](/play/online): Real-time matchmaking against human players.
+- [Tournaments](/tournaments): Free daily and weekly Swiss tournaments.
+- [Leaderboard](/leaderboard): Global rating ladder.
+- [Learn](/learn): Master courses, openings, and training drills.
+- [Openings](/openings): Interactive openings trainer.
+- [Opening Explorer](/opening-explorer): Move-tree explorer powered by Lichess data.
+- [Analysis](/analysis): Stockfish-powered game analysis.
+- [Training](/training): Tactical drills and mate-in-N puzzles.
+- [Community](/community): Chess Moments, badges, and social feed.
+- [Live](/live): DailyChess_12 stream hub.
+- [Stats](/stats): Personal performance breakdown.
+- [About](/about): About the DailyChess_12 project.
+
+## Optional
+
+- [Contact](/contact)
+- [Privacy](/privacy)
+- [Terms](/terms)
