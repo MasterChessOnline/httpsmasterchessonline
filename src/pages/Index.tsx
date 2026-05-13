@@ -586,6 +586,7 @@ const Index = () => {
           <InviteFriendsCard variant="share" />
         </div>
       </section>
+      </main>
 
       <Footer />
     </div>
