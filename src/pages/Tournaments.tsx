@@ -332,7 +332,7 @@ const Tournaments = () => {
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
-      <Seo title={"Free Chess Tournaments — Daily & Weekly | MasterChess"} description={"Join free Swiss-paired chess tournaments. Bullet, Blitz, Rapid arenas with live brackets and prizes."} path="/tournaments" type="website" />
+      <Seo title={"Free Chess Tournaments — Daily & Weekly | MasterChess"} description={"Join free Swiss-paired chess tournaments. Bullet, Blitz, Rapid arenas with live brackets and prizes."} path="/tournaments" type="website" jsonLd={{ "@context": "https://schema.org", "@type": "ItemList", name: "MasterChess Tournaments", itemListElement: [{ "@type": "Event", name: "Daily Blitz Arena", eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode", eventStatus: "https://schema.org/EventScheduled", location: { "@type": "VirtualLocation", url: "https://masterchess-live.lovable.app/tournaments" }, organizer: { "@type": "Organization", name: "MasterChess" } }] }} />
       <Navbar />
       <main className="container mx-auto px-4 pt-24 pb-16">
         {/* Header */}
