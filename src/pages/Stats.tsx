@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +37,7 @@ const Stats = () => {
   if (loading || !profile) {
     return (
       <div className="min-h-screen bg-background">
+        <Seo title={"Your Chess Stats — Win Rates & Streaks | MasterChess"} description={"Detailed performance stats: win streaks, color win rates, opening repertoire and rating tiers."} path="/stats" type="website" />
         <Navbar />
         <main className="container mx-auto px-6 pt-24 pb-16">
           <div className="space-y-4 max-w-3xl mx-auto">

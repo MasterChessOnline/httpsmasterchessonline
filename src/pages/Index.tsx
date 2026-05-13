@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
@@ -157,6 +158,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <DynamicBackground />
+      <Seo title={"MasterChess — Play Chess Online, Tournaments & Analysis"} description={"Play chess online vs players or AI bots, join free tournaments, analyze games with Stockfish, and learn openings — no puzzles, just real chess."} path="/" type="website" />
       <Navbar />
 
       {/* ── HERO with parallax + 4D depth ── */}

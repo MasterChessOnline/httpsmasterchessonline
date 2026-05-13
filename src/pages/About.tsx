@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { Crown, BookOpen, Users, Target, Trophy, GraduationCap, Brain } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -8,6 +9,7 @@ import { Link } from "react-router-dom";
 
 const About = () => (
   <div className="min-h-screen bg-background grid-bg flex flex-col">
+    <Seo title={"About MasterChessOnline & DailyChess_12"} description={"Learn about MasterChess and the DailyChess_12 teaching method — accessible chess education for every level."} path="/about" type="website" />
     <Navbar />
     <main className="flex-1">
       {/* Hero */}

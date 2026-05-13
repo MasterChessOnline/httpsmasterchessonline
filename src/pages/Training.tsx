@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Chess, Square } from "chess.js";
@@ -333,7 +334,7 @@ const Training = () => {
   }
 
   if (loading || !user) {
-    return <div className="min-h-screen bg-background"><Navbar /><div className="container mx-auto pt-32 text-center text-muted-foreground">Loading…</div></div>;
+    return <div className="min-h-screen bg-background"><Seo title={"Chess Training — Tactics & Drills | MasterChess"} description={"Sharpen tactics with mate-in-N, endgame drills, combo trainer and survival mode."} path="/training" type="website" /><Navbar /><div className="container mx-auto pt-32 text-center text-muted-foreground">Loading…</div></div>;
   }
 
   const totalUserMovesNeeded = position ? Math.ceil((((position as PuzzlePosition).solutionUci || [position.bestMove]).length) / 2) : 0;

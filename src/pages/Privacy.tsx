@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,6 +14,7 @@ const sections = [
 
 const Privacy = () => (
   <div className="min-h-screen bg-background flex flex-col">
+    <Seo title={"Privacy Policy — MasterChess"} description={"How MasterChess collects, uses and protects your data."} path="/privacy" type="website" />
     <Navbar />
     <main className="flex-1 container mx-auto px-6 py-24 max-w-3xl">
       <motion.div

@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
@@ -189,6 +190,7 @@ export default function OpeningExplorer() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={"Opening Explorer — Lichess Database | MasterChess"} description={"Browse millions of master games by opening move. Filter by style and study top variations."} path="/opening-explorer" type="website" />
       <Navbar />
       <div className="container mx-auto px-3 py-4 max-w-7xl">
         {/* Header */}

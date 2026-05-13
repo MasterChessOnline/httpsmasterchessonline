@@ -1,3 +1,4 @@
+import Seo from "@/components/Seo";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,6 +15,7 @@ const sections = [
 
 const Terms = () => (
   <div className="min-h-screen bg-background flex flex-col">
+    <Seo title={"Terms of Service — MasterChess"} description={"Terms governing your use of the MasterChess platform."} path="/terms" type="website" />
     <Navbar />
     <main className="flex-1 container mx-auto px-6 py-24 max-w-3xl">
       <motion.div
