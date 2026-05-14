@@ -162,6 +162,7 @@ function AnimatedRoutes() {
         </Routes>
       </motion.div>
     </AnimatePresence>
+    </>
   );
 }
 
