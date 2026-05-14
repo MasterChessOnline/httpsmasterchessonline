@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import Seo from "@/components/Seo";
 import ShareBar from "@/components/ShareBar";
 import { LEARN_ARTICLES, getArticleBySlug } from "@/lib/learn-articles";
+import { OPENING_SEO } from "@/lib/opening-seo-meta";
+import { OPENINGS_DATABASE } from "@/lib/openings-data";
 
 export default function LearnArticle() {
   const { slug } = useParams<{ slug: string }>();
