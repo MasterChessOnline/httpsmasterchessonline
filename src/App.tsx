@@ -39,6 +39,7 @@ import TournamentSync from "./pages/TournamentSync";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
 import OpeningExplorer from "./pages/OpeningExplorer";
+import OpeningLanding from "./pages/OpeningLanding";
 import MasterGameView from "./pages/MasterGameView";
 import GameHistory from "./pages/GameHistory";
 import Analysis from "./pages/Analysis";
