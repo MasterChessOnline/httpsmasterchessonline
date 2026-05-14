@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE = "https://masterchess-live.lovable.app";
+const SITE = "https://masterchess.live";
 
 interface SeoProps {
   title: string;
