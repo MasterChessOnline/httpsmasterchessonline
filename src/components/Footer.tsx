@@ -50,6 +50,7 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
               { label: "Live · DailyChess_12", href: "/live" },
               { label: "About", href: "/about" },
               { label: "Fair Play", href: "/fair-play" },
+              { label: "Invite Friends", href: "/referrals" },
             ],
           },
         ].map((section) => (

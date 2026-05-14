@@ -1,25 +1,49 @@
 # MasterChess
 
-> Play chess online vs players or AI bots, join free daily tournaments, analyze games with Stockfish, and learn openings — a premium, no-puzzles chess platform.
+> Play chess online vs players or AI bots, join free daily tournaments, analyze games with Stockfish, and learn openings — a premium, no-puzzles chess platform built on real human play.
 
-MasterChess is a competitive chess platform built around real human play. Features include online matchmaking, bot opponents across rating tiers, free tournaments with Swiss pairing, master courses, openings explorer, AI-assisted post-game review (analysis only, never during live play), and an active community.
+MasterChess is a competitive chess platform built around authentic human play. Features include online matchmaking, bot opponents across rating tiers (400–2000 ELO), free daily Swiss tournaments, master courses, openings explorer, AI-assisted post-game review (analysis only, never during live play), live streams from DailyChess_12, and an active social community. Zero fake numbers, zero ghost players, zero engine assistance in human games.
 
 ## Pages
 
-- [Home](/): Overview, featured modes, and live activity.
-- [Play vs Bots](/play): Match against 9 bot personalities (400–2000 ELO).
-- [Play Online](/play/online): Real-time matchmaking against human players.
+- [Home](/): Live activity, daily missions, featured modes, community trust strip.
+- [Play vs Bots](/play): Match 9 bot personalities across all rating tiers.
+- [Play Online](/play/online): Real-time ELO matchmaking against humans.
 - [Tournaments](/tournaments): Free daily and weekly Swiss tournaments.
 - [Leaderboard](/leaderboard): Global rating ladder.
-- [Learn](/learn): Master courses, openings, and training drills.
-- [Openings](/openings): Interactive openings trainer.
-- [Opening Explorer](/opening-explorer): Move-tree explorer powered by Lichess data.
-- [Analysis](/analysis): Stockfish-powered game analysis.
-- [Training](/training): Tactical drills and mate-in-N puzzles.
-- [Community](/community): Chess Moments, badges, and social feed.
-- [Live](/live): DailyChess_12 stream hub.
+- [Learn](/learn): Master courses, openings guides, training drills.
+- [Blog](/blog): In-depth chess articles, opening theory, history, tactics.
+- [Openings Trainer](/openings): Interactive openings with explore + train modes.
+- [Opening Explorer](/opening-explorer): Move-tree explorer with Lichess data.
+- [Analysis](/analysis): Stockfish-powered post-game analysis.
+- [Training](/training): Tactical drills and mate-in-N exercises.
+- [Coach](/coach): AI Grandmaster-level personal chess coach.
+- [Community](/community): Chess Moments feed, badges, followers.
+- [Clubs](/clubs): Player clubs, leaderboards, club chat.
+- [Stream Hub](/live): DailyChess_12 live streams and content.
 - [Stats](/stats): Personal performance breakdown.
-- [About](/about): About the DailyChess_12 project.
+- [About](/about): About MasterChess and the DailyChess_12 method.
+- [Fair Play](/fair-play): How we keep chess authentic — no engines in PvP, manual review.
+- [Referrals](/referrals): Invite friends, earn Pioneer badge + XP bonuses.
+
+## Opening landing pages
+
+- [Italian Game](/openings/italian-game)
+- [Sicilian Defense](/openings/sicilian-defense)
+- [French Defense](/openings/french-defense)
+- [Ruy Lopez](/openings/ruy-lopez-spanish)
+- [Queen's Gambit](/openings/queens-gambit)
+- [King's Indian Defense](/openings/kings-indian-defense)
+- [London System](/openings/london-system)
+- [Caro-Kann Defense](/openings/caro-kann-defense)
+- [English Opening](/openings/english-opening)
+- [Scandinavian Defense](/openings/scandinavian-defense)
+- [King's Gambit](/openings/kings-gambit)
+- [Vienna Game](/openings/vienna-game)
+- [Pirc Defense](/openings/pirc-defense)
+- [Alekhine's Defense](/openings/alekhines-defense)
+- [Nimzo-Indian Defense](/openings/nimzo-indian-defense)
+- [Slav Defense](/openings/slav-defense)
 
 ## Optional
 
