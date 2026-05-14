@@ -319,7 +319,7 @@ const DailyChallenge = () => {
               {/* Chess Board */}
               <ChessBoard
                 game={game}
-                flipped={game.turn() === "b"}
+                flipped={false}
                 selectedSquare={selectedSquare}
                 legalMoves={legalMoves}
                 lastMove={lastMove}

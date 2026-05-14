@@ -465,7 +465,7 @@ const Training = () => {
                   <div className="rounded-xl overflow-hidden border border-border/40 shadow-2xl">
                     <ChessBoard
                       game={chess}
-                      flipped={position.side === "b"}
+                      flipped={false}
                       selectedSquare={selectedSquare}
                       legalMoves={legalMoves}
                       lastMove={lastMoveSquares}
