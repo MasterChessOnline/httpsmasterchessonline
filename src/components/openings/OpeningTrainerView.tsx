@@ -4,6 +4,7 @@ import { Opening, OpeningMove, getMainLine, getAllVariationPaths } from "@/lib/o
 import { LESSON_MOVES } from "@/lib/lesson-moves";
 import { COURSES, Lesson } from "@/lib/courses-data";
 import { MASTERCLASS_PRACTICE_EXTRAS } from "@/lib/masterclass-practice-extras";
+import { MASTERCLASS_VALIDATED_LINES } from "@/lib/masterclass-validated-lines";
 import OpeningBoard from "./OpeningBoard";
 import VariationTree from "./VariationTree";
 import { playChessSound } from "@/lib/chess-sounds";
