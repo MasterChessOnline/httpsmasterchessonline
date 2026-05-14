@@ -64,7 +64,6 @@ function buildMovesFromLesson(lesson: Lesson): { moves: OpeningMove[]; startFen?
     : MASTERCLASS_PRACTICE_EXTRAS[lesson.id];
   if (!pl || (!pl.moves?.length && !pl.autoResponses?.length)) return null;
 
-  // Determine who moves first in this practice sequence
   let firstSideToMove: "w" | "b" = "w";
   if (pl.startFen) {
     const parts = pl.startFen.split(" ");
@@ -72,23 +71,51 @@ function buildMovesFromLesson(lesson: Lesson): { moves: OpeningMove[]; startFen?
   }
   const playerMovesFirst = firstSideToMove === pl.playerColor;
 
+  // Robust interleave: at each ply, try the "expected" queue first; if its head
+  // SAN is illegal in the current position, fall back to the other queue.
+  // This recovers from authoring desync (e.g. a white retreat parked in the
+  // black list) so the board can play the full variation from the start.
+  const game = (() => { try { return pl.startFen ? new Chess(pl.startFen) : new Chess(); } catch { return new Chess(); } })();
   const out: OpeningMove[] = [];
   let pi = 0, ai = 0;
   let playerTurn = playerMovesFirst;
-  const total = (pl.moves?.length ?? 0) + (pl.autoResponses?.length ?? 0);
-  for (let i = 0; i < total; i++) {
-    if (playerTurn && pi < pl.moves.length) {
-      out.push({ san: pl.moves[pi].move, explanation: pl.moves[pi].explanation, children: [], isMainLine: true });
-      pi++;
-    } else if (!playerTurn && ai < pl.autoResponses.length) {
-      out.push({ san: pl.autoResponses[ai], explanation: undefined, children: [], isMainLine: true });
-      ai++;
-    } else if (pi < pl.moves.length) {
-      out.push({ san: pl.moves[pi].move, explanation: pl.moves[pi].explanation, children: [], isMainLine: true });
-      pi++;
-    } else if (ai < pl.autoResponses.length) {
-      out.push({ san: pl.autoResponses[ai], explanation: undefined, children: [], isMainLine: true });
-      ai++;
+  const totalSlots = (pl.moves?.length ?? 0) + (pl.autoResponses?.length ?? 0);
+
+  const tryFromQueue = (q: "p" | "a"): { ok: boolean } => {
+    if (q === "p" && pi < pl.moves.length) {
+      const san = pl.moves[pi].move;
+      try {
+        if (game.move(san)) {
+          out.push({ san, explanation: pl.moves[pi].explanation, children: [], isMainLine: true });
+          pi++;
+          return { ok: true };
+        }
+      } catch { /* illegal */ }
+    } else if (q === "a" && ai < pl.autoResponses.length) {
+      const san = pl.autoResponses[ai];
+      try {
+        if (game.move(san)) {
+          out.push({ san, explanation: undefined, children: [], isMainLine: true });
+          ai++;
+          return { ok: true };
+        }
+      } catch { /* illegal */ }
+    }
+    return { ok: false };
+  };
+
+  for (let i = 0; i < totalSlots; i++) {
+    const primary = playerTurn ? "p" : "a";
+    const fallback = playerTurn ? "a" : "p";
+    let r = tryFromQueue(primary);
+    if (!r.ok) r = tryFromQueue(fallback);
+    if (!r.ok) {
+      // Skip the head of whichever queue is "expected" to avoid infinite loop.
+      if (primary === "p" && pi < pl.moves.length) pi++;
+      else if (primary === "a" && ai < pl.autoResponses.length) ai++;
+      else if (pi < pl.moves.length) pi++;
+      else if (ai < pl.autoResponses.length) ai++;
+      else break;
     }
     playerTurn = !playerTurn;
   }
