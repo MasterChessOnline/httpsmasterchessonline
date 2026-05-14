@@ -19,26 +19,36 @@ export default function WelcomeIntroPopup() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!user || !profile) return;
+    // Guest visitors: show once per browser based on a generic key.
+    // Logged-in new users: show once per user, only before any games.
+    const guestKey = `${STORAGE_KEY_PREFIX}guest`;
+    const userKey = user ? `${STORAGE_KEY_PREFIX}${user.id}` : null;
 
-    const storageKey = `${STORAGE_KEY_PREFIX}${user.id}`;
-    if (typeof window !== "undefined" && localStorage.getItem(storageKey)) return;
+    if (typeof window === "undefined") return;
 
+    if (!user) {
+      if (localStorage.getItem(guestKey)) return;
+      const t = setTimeout(() => setOpen(true), 600);
+      return () => clearTimeout(t);
+    }
+
+    if (!profile || !userKey) return;
+    if (localStorage.getItem(userKey)) return;
     const botGames = (profile as any).bot_games_played ?? 0;
     const onlineGames = (profile as any).games_played ?? 0;
-
-    // Only for brand-new users with zero games played.
     if (botGames + onlineGames > 0) return;
 
-    // Tiny delay so the page paints first — feels like a gentle reveal.
     const t = setTimeout(() => setOpen(true), 600);
     return () => clearTimeout(t);
   }, [user, profile]);
 
   const dismiss = () => {
     setOpen(false);
-    if (user && typeof window !== "undefined") {
+    if (typeof window === "undefined") return;
+    if (user) {
       localStorage.setItem(`${STORAGE_KEY_PREFIX}${user.id}`, "1");
+    } else {
+      localStorage.setItem(`${STORAGE_KEY_PREFIX}guest`, "1");
     }
   };
 
