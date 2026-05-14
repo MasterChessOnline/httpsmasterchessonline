@@ -69,6 +69,7 @@ import ChessCard from "./pages/ChessCard";
 import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
 import SeoStatus from "./pages/SeoStatus";
+import EmbedBoard from "./pages/EmbedBoard";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
@@ -151,6 +152,7 @@ function AnimatedRoutes() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
