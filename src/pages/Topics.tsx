@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { ALL_OPENING_SLUGS } from "@/lib/opening-seo-meta";
-import Navigation from "@/components/Navigation";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const LEARN_TOPICS = [
