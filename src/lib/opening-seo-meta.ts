@@ -2,7 +2,7 @@
 // Targets high-volume Google queries like "italian game opening moves" or "sicilian najdorf explained".
 
 export interface OpeningSeoMeta {
-  id: string;                     // matches Opening.id
+  id: string;                     // matches Opening.id in OPENINGS_DATABASE when available
   slug: string;                   // URL slug
   searchVolume?: number;          // monthly Google volume (rough)
   longTitle: string;              // <60 chars
@@ -10,6 +10,13 @@ export interface OpeningSeoMeta {
   keyIdeas: string[];             // 3-5 strategic ideas
   famousGames?: string[];         // line items
   faqs: { q: string; a: string }[];
+  // Standalone fallback fields — used when there's no matching OPENINGS_DATABASE entry
+  name?: string;
+  eco?: string;
+  category?: string;
+  difficulty?: string;
+  startingMoves?: string;
+  description?: string;
 }
 
 export const OPENING_SEO: Record<string, OpeningSeoMeta> = {
