@@ -33,6 +33,7 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import FairPlay from "./pages/FairPlay";
 import Referrals from "./pages/Referrals";
+import Topics from "./pages/Topics";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 
@@ -146,6 +147,7 @@ function AnimatedRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/fair-play" element={<FairPlay />} />
           <Route path="/referrals" element={<Referrals />} />
+          <Route path="/topics" element={<Topics />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/login" element={<Login />} />

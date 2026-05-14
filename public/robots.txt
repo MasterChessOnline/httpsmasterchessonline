@@ -7,7 +7,7 @@ Disallow: /chat
 Disallow: /settings
 Disallow: /profile
 
-# AI / LLM crawlers
+# AI / LLM crawlers — explicitly allowed
 User-agent: GPTBot
 Allow: /
 User-agent: ChatGPT-User
@@ -18,5 +18,16 @@ User-agent: ClaudeBot
 Allow: /
 User-agent: Google-Extended
 Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: CCBot
+Allow: /
 
+# Image crawlers
+User-agent: Googlebot-Image
+Allow: /
+
+Sitemap: https://masterchess.live/sitemap_index.xml
 Sitemap: https://masterchess.live/sitemap.xml
+Sitemap: https://masterchess.live/sitemap-openings.xml
+Sitemap: https://masterchess.live/sitemap-images.xml
