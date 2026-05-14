@@ -1,6 +1,8 @@
-// Runs before `vite dev` and `vite build` (predev/prebuild hooks); writes public/sitemap.xml.
+// Runs before `vite dev` and `vite build` (predev/prebuild hooks).
+// Writes public/sitemap.xml, public/sitemap-openings.xml, public/sitemap-images.xml, public/sitemap_index.xml.
 import { writeFileSync } from "fs";
 import { resolve } from "path";
+import { ALL_OPENING_SLUGS } from "../src/lib/opening-seo-meta";
 
 const BASE_URL = "https://masterchess.live";
 
@@ -8,12 +10,14 @@ interface SitemapEntry {
   path: string;
   changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   priority?: string;
+  image?: { loc: string; title?: string; caption?: string };
 }
 
 const today = new Date().toISOString().slice(0, 10);
 
-const entries: SitemapEntry[] = [
-  { path: "/", changefreq: "daily", priority: "1.0" },
+// Core static routes
+const staticEntries: SitemapEntry[] = [
+  { path: "/", changefreq: "daily", priority: "1.0", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess — Play Chess Online Free", caption: "Free online chess platform with AI coach, tournaments, and lessons." } },
   { path: "/play", changefreq: "weekly", priority: "0.9" },
   { path: "/play/online", changefreq: "daily", priority: "0.9" },
   { path: "/play/titles", changefreq: "weekly", priority: "0.6" },
@@ -43,24 +47,9 @@ const entries: SitemapEntry[] = [
   { path: "/learn/chess-strategy-for-beginners", changefreq: "monthly", priority: "0.9" },
   { path: "/learn/chess-clock-rules", changefreq: "monthly", priority: "0.8" },
   { path: "/training", changefreq: "weekly", priority: "0.8" },
-  { path: "/openings", changefreq: "weekly", priority: "0.7" },
-  { path: "/openings/italian-game", changefreq: "monthly", priority: "0.85" },
-  { path: "/openings/sicilian-defense", changefreq: "monthly", priority: "0.9" },
-  { path: "/openings/french-defense", changefreq: "monthly", priority: "0.85" },
-  { path: "/openings/ruy-lopez-spanish", changefreq: "monthly", priority: "0.85" },
-  { path: "/openings/queens-gambit", changefreq: "monthly", priority: "0.9" },
-  { path: "/openings/kings-indian-defense", changefreq: "monthly", priority: "0.8" },
-  { path: "/openings/london-system", changefreq: "monthly", priority: "0.9" },
-  { path: "/openings/caro-kann-defense", changefreq: "monthly", priority: "0.85" },
-  { path: "/openings/english-opening", changefreq: "monthly", priority: "0.8" },
-  { path: "/openings/scandinavian-defense", changefreq: "monthly", priority: "0.8" },
-  { path: "/openings/kings-gambit", changefreq: "monthly", priority: "0.8" },
-  { path: "/openings/vienna-game", changefreq: "monthly", priority: "0.75" },
-  { path: "/openings/pirc-defense", changefreq: "monthly", priority: "0.75" },
-  { path: "/openings/alekhines-defense", changefreq: "monthly", priority: "0.75" },
-  { path: "/openings/nimzo-indian-defense", changefreq: "monthly", priority: "0.85" },
-  { path: "/openings/slav-defense", changefreq: "monthly", priority: "0.8" },
+  { path: "/openings", changefreq: "weekly", priority: "0.8" },
   { path: "/opening-explorer", changefreq: "weekly", priority: "0.7" },
+  { path: "/topics", changefreq: "weekly", priority: "0.7" },
   { path: "/tournaments", changefreq: "daily", priority: "0.9" },
   { path: "/leaderboard", changefreq: "daily", priority: "0.7" },
   { path: "/analysis", changefreq: "weekly", priority: "0.8" },
@@ -78,6 +67,7 @@ const entries: SitemapEntry[] = [
   { path: "/tools", changefreq: "monthly", priority: "0.4" },
   { path: "/rating-calculator", changefreq: "monthly", priority: "0.4" },
   { path: "/piece-values", changefreq: "monthly", priority: "0.4" },
+  { path: "/embed-tools", changefreq: "monthly", priority: "0.5" },
   { path: "/about", changefreq: "monthly", priority: "0.4" },
   { path: "/fair-play", changefreq: "monthly", priority: "0.5" },
   { path: "/referrals", changefreq: "monthly", priority: "0.5" },
@@ -88,21 +78,60 @@ const entries: SitemapEntry[] = [
   { path: "/terms", changefreq: "yearly", priority: "0.2" },
 ];
 
-const xml = [
-  `<?xml version="1.0" encoding="UTF-8"?>`,
-  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
-  ...entries.map((e) =>
-    [
-      `  <url>`,
-      `    <loc>${BASE_URL}${e.path}</loc>`,
-      `    <lastmod>${today}</lastmod>`,
-      e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
-      e.priority ? `    <priority>${e.priority}</priority>` : null,
-      `  </url>`,
-    ].filter(Boolean).join("\n")
-  ),
-  `</urlset>`,
-].join("\n");
+// Programmatic openings — auto-generated from ALL_OPENING_SLUGS (60+ pages)
+const openingEntries: SitemapEntry[] = ALL_OPENING_SLUGS.map((slug) => ({
+  path: `/openings/${slug}`,
+  changefreq: "monthly" as const,
+  priority: "0.85",
+}));
 
-writeFileSync(resolve("public/sitemap.xml"), xml);
-console.log(`sitemap.xml written (${entries.length} entries)`);
+function buildUrlset(entries: SitemapEntry[], withImages = false): string {
+  const ns = withImages
+    ? `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`
+    : `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+  return [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    ns,
+    ...entries.map((e) =>
+      [
+        `  <url>`,
+        `    <loc>${BASE_URL}${e.path}</loc>`,
+        `    <lastmod>${today}</lastmod>`,
+        e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
+        e.priority ? `    <priority>${e.priority}</priority>` : null,
+        withImages && e.image ? `    <image:image><image:loc>${e.image.loc}</image:loc>${e.image.title ? `<image:title>${e.image.title}</image:title>` : ""}${e.image.caption ? `<image:caption>${e.image.caption}</image:caption>` : ""}</image:image>` : null,
+        `  </url>`,
+      ].filter(Boolean).join("\n"),
+    ),
+    `</urlset>`,
+  ].join("\n");
+}
+
+// Image sitemap — every opening page renders an embedded chess board screenshot via OG image.
+const imageEntries: SitemapEntry[] = [
+  { path: "/", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess — Free Online Chess", caption: "Play chess online free with AI coach and tournaments." } },
+  ...ALL_OPENING_SLUGS.map((slug) => ({
+    path: `/openings/${slug}`,
+    image: {
+      loc: `${BASE_URL}/og-image.jpg`,
+      title: `${slug.replace(/-/g, " ")} chess opening`,
+      caption: `Learn the ${slug.replace(/-/g, " ")} chess opening — moves, theory, and best lines.`,
+    },
+  })),
+];
+
+writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
+writeFileSync(resolve("public/sitemap-openings.xml"), buildUrlset(openingEntries));
+writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
+
+const indexXml = [
+  `<?xml version="1.0" encoding="UTF-8"?>`,
+  `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+  `  <sitemap><loc>${BASE_URL}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-openings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `</sitemapindex>`,
+].join("\n");
+writeFileSync(resolve("public/sitemap_index.xml"), indexXml);
+
+console.log(`✓ sitemap.xml (${staticEntries.length}) + sitemap-openings.xml (${openingEntries.length}) + sitemap-images.xml (${imageEntries.length}) + sitemap_index.xml`);
