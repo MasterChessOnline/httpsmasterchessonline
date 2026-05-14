@@ -92,6 +92,7 @@ function AnimatedRoutes() {
           <Route path="/play/online" element={<PlayOnline />} />
           <Route path="/play/titles" element={<Titles />} />
           <Route path="/learn" element={<Learn />} />
+          <Route path="/learn/:slug" element={<LearnArticle />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
           <Route path="/tournament-sync" element={<TournamentSync />} />
