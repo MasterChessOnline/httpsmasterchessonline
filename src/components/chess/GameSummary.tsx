@@ -102,6 +102,8 @@ export default function GameSummary({ moveHistory, result, playerColor, playerMo
   const won = (playerColor === "w" && result === "1-0") || (playerColor === "b" && result === "0-1");
   const drew = result === "1/2-1/2";
   const opening = detectOpening(moveHistory);
+  const { user, profile } = useAuth() as any;
+  const [shareOpen, setShareOpen] = useState(false);
 
   // Use real per-move data when available, otherwise fall back to heuristics
   const usingReal = !!playerMoveQuality && playerMoveQuality.length > 0;
@@ -184,12 +186,33 @@ export default function GameSummary({ moveHistory, result, playerColor, playerMo
       {/* Clutch Moment */}
       <ClutchMoment moveHistory={moveHistory} playerColor={playerColor} show={true} />
 
+      {/* Share win card — viral growth lever */}
+      <Button
+        size="sm"
+        onClick={() => setShareOpen(true)}
+        className="w-full bg-gradient-to-r from-primary to-amber-400 text-background hover:opacity-90"
+      >
+        <Share2 className="mr-1.5 h-3.5 w-3.5" />
+        {won ? "Share your win" : drew ? "Share this draw" : "Share this game"}
+      </Button>
+
       {/* Recommend lesson */}
       <Link to="/learn">
         <Button size="sm" variant="outline" className="w-full">
           <BookOpen className="mr-1.5 h-3.5 w-3.5" /> Study Recommended Lessons
         </Button>
       </Link>
+
+      <ShareWinCard
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        playerName={profile?.display_name || user?.email?.split("@")[0] || "Player"}
+        opponentName={botName || "Opponent"}
+        result={won ? "win" : drew ? "draw" : "loss"}
+        newRating={profile?.rating}
+        opening={opening}
+        moves={Math.ceil(moveHistory.length / 2)}
+      />
     </div>
   );
 }
