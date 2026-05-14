@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import AnimatedGradientBg from "@/components/AnimatedGradientBg";
 import { useRef, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import ShareBar from "@/components/ShareBar";
 
 const FloatingPiece = ({ piece, delay, x, y, size }: { piece: string; delay: number; x: string; y: string; size: number }) => (
   <motion.div
@@ -222,6 +223,16 @@ const HeroSection = () => {
               <div className="text-[9px] text-muted-foreground uppercase tracking-widest">{label}</div>
             </motion.div>
           ))}
+        </motion.div>
+
+        <motion.div
+          className="mt-8 flex flex-col items-center gap-2"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.4 }}
+        >
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Share MasterChess</span>
+          <ShareBar url="https://masterchess.live/" title="MasterChess — Play chess online free, tournaments, bots & analysis" compact />
         </motion.div>
       </motion.div>
     </section>

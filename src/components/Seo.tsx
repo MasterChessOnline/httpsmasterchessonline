@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE = "https://masterchess-live.lovable.app";
+const SITE = "https://masterchess.live";
 
 interface SeoProps {
   title: string;
@@ -13,7 +13,7 @@ interface SeoProps {
 
 export default function Seo({ title, description, path, image, type = "website", jsonLd }: SeoProps) {
   const url = `${SITE}${path}`;
-  const img = image || "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/26437083-4db3-4e8f-96d3-abc684b1f210";
+  const img = image || `${SITE}/og-image.jpg`;
   const ldArr = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   return (
     <Helmet>

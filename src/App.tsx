@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
 import PlayOnline from "./pages/PlayOnline";
 import Learn from "./pages/Learn";
+import LearnArticle from "./pages/LearnArticle";
 import Tournaments from "./pages/Tournaments";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -91,6 +92,7 @@ function AnimatedRoutes() {
           <Route path="/play/online" element={<PlayOnline />} />
           <Route path="/play/titles" element={<Titles />} />
           <Route path="/learn" element={<Learn />} />
+          <Route path="/learn/:slug" element={<LearnArticle />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
           <Route path="/tournament-sync" element={<TournamentSync />} />
