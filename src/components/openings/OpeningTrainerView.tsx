@@ -387,7 +387,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
     if (!isUserTurnInTraining || trainCompleted) return;
     if (trainMoveIndex >= trainMovesSequence.length) return;
 
-    const game = new Chess();
+    const game = newTrainGame();
     for (let i = 0; i < trainMoveIndex; i++) {
       try { game.move(trainMovesSequence[i].san); } catch { break; }
     }
@@ -453,7 +453,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
 
   const handleShowHint = useCallback(() => {
     if (trainMoveIndex >= trainMovesSequence.length) return;
-    const game = new Chess();
+    const game = newTrainGame();
     for (let i = 0; i < trainMoveIndex; i++) {
       try { game.move(trainMovesSequence[i].san); } catch { break; }
     }
