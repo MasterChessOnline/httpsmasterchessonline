@@ -2,7 +2,9 @@
 // Writes public/sitemap.xml, public/sitemap-openings.xml, public/sitemap-images.xml, public/sitemap_index.xml.
 import { writeFileSync } from "fs";
 import { resolve } from "path";
-import { ALL_OPENING_SLUGS } from "../src/lib/opening-seo-meta";
+import { ALL_OPENING_SLUGS, OPENING_SEO } from "../src/lib/opening-seo-meta";
+import { OPENINGS_DATABASE } from "../src/lib/openings-data";
+import { getOpeningBoardImage } from "../src/lib/og-board-image";
 
 const BASE_URL = "https://masterchess.live";
 
