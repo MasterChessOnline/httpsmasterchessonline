@@ -1,9 +1,12 @@
-import { BookOpen, TrendingUp, AlertTriangle, CheckCircle, BarChart3, Target, Zap } from "lucide-react";
+import { useState } from "react";
+import { BookOpen, TrendingUp, AlertTriangle, CheckCircle, BarChart3, Target, Zap, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ClutchMoment from "@/components/ClutchMoment";
+import ShareWinCard from "@/components/ShareWinCard";
+import { useAuth } from "@/contexts/AuthContext";
 
 type MoveQuality = "best" | "good" | "inaccuracy" | "mistake" | "blunder";
 interface MoveQualityEntry { cp: number; quality: MoveQuality; }
