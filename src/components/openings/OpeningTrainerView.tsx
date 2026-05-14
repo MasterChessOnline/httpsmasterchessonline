@@ -336,17 +336,23 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
 
   const trainMovesSequence = useMemo(() => trainCustomMoves || getMovesForPath(opening.tree, trainPath), [opening.tree, trainCustomMoves, trainPath]);
 
+  const trainStartFen = activeMasterLine?.startFen;
+  const newTrainGame = useCallback(() => {
+    try { return trainStartFen ? new Chess(trainStartFen) : new Chess(); }
+    catch { return new Chess(); }
+  }, [trainStartFen]);
+
   const trainFen = useMemo(() => {
-    const game = new Chess();
+    const game = newTrainGame();
     for (let i = 0; i < trainMoveIndex; i++) {
       try { game.move(trainMovesSequence[i].san); } catch { break; }
     }
     return game.fen();
-  }, [trainMovesSequence, trainMoveIndex]);
+  }, [trainMovesSequence, trainMoveIndex, newTrainGame]);
 
   const trainLastMove = useMemo(() => {
     if (trainMoveIndex === 0) return null;
-    const game = new Chess();
+    const game = newTrainGame();
     let last: { from: string; to: string } | null = null;
     for (let i = 0; i < trainMoveIndex; i++) {
       try {
@@ -355,7 +361,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
       } catch { break; }
     }
     return last;
-  }, [trainMovesSequence, trainMoveIndex]);
+  }, [trainMovesSequence, trainMoveIndex, newTrainGame]);
 
   // Who plays at trainMoveIndex? White is even indices
   const isUserTurnInTraining = trainMoveIndex % 2 === (flipped ? 1 : 0);
