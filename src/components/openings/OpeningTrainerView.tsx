@@ -17,6 +17,7 @@ import {
   SkipBack, SkipForward, Swords
 } from "lucide-react";
 import PlayFromPositionDialog from "./PlayFromPositionDialog";
+import StockfishLessonPanel from "./StockfishLessonPanel";
 
 type Mode = "explore" | "train";
 
@@ -271,6 +272,18 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   // Current node's explanation
   const currentNode = fullMovePath[clampedView] || null;
   const highlightSquares = currentNode?.highlightSquares || [];
+
+  // FEN of the position BEFORE the current move (for Stockfish move-comment).
+  const fenBeforePlayed = useMemo(() => {
+    if (clampedView < 0) return null;
+    let game: Chess;
+    try { game = activeMasterLine?.startFen ? new Chess(activeMasterLine.startFen) : new Chess(); }
+    catch { game = new Chess(); }
+    for (let i = 0; i < clampedView; i++) {
+      try { game.move(fullMovePath[i].san); } catch { break; }
+    }
+    return game.fen();
+  }, [fullMovePath, clampedView, activeMasterLine]);
 
   // Navigation
   const goForward = useCallback(() => {
@@ -775,6 +788,15 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
                 </div>
               )}
             </div>
+
+            {/* Stockfish analysis (under variations) */}
+            {mode === "explore" && (
+              <StockfishLessonPanel
+                fen={fen}
+                playedSan={currentNode?.san ?? null}
+                fenBeforePlayed={fenBeforePlayed}
+              />
+            )}
 
             {/* Train specific lines */}
             {mode === "explore" && (
