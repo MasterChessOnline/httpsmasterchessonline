@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
 import PlayOnline from "./pages/PlayOnline";
 import Learn from "./pages/Learn";
+import LearnArticle from "./pages/LearnArticle";
 import Tournaments from "./pages/Tournaments";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
