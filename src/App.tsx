@@ -110,6 +110,7 @@ function AnimatedRoutes() {
           
           <Route path="/story" element={<StoryMode />} />
           <Route path="/openings" element={<OpeningTrainer />} />
+          <Route path="/openings/:slug" element={<OpeningLanding />} />
           <Route path="/opening-explorer" element={<OpeningExplorer />} />
           <Route path="/master-game/:id" element={<MasterGameView />} />
           <Route path="/history" element={<GameHistory />} />
