@@ -1,0 +1,32 @@
+{
+  "name": "MasterChess — Play Chess Online Free",
+  "short_name": "MasterChess",
+  "description": "Play chess online free vs players or AI bots, daily tournaments, Stockfish analysis, and opening trainer. No puzzles — just real chess.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0b0d",
+  "theme_color": "#0b0b0d",
+  "lang": "en",
+  "categories": ["games", "entertainment", "education"],
+  "icons": [
+    {
+      "src": "/og-image.jpg",
+      "sizes": "1216x640",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Play Online", "url": "/play/online", "description": "Play chess vs real players" },
+    { "name": "Play vs Bots", "url": "/play", "description": "Play chess vs AI bots" },
+    { "name": "Tournaments", "url": "/tournaments", "description": "Join a live tournament" },
+    { "name": "Daily Plan", "url": "/daily-plan", "description": "Today's missions and streak" }
+  ]
+}
