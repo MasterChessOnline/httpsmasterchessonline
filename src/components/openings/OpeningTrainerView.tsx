@@ -17,6 +17,7 @@ import {
   SkipBack, SkipForward, Swords
 } from "lucide-react";
 import PlayFromPositionDialog from "./PlayFromPositionDialog";
+import StockfishLessonPanel from "./StockfishLessonPanel";
 
 type Mode = "explore" | "train";
 
