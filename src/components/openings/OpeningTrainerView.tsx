@@ -23,32 +23,73 @@ type Mode = "explore" | "train";
 // in `lesson-moves.ts`. Add a new entry here when you ship another masterclass.
 const MASTERCLASS_OPENINGS: Record<
   string,
-  { courseId: string; lessonPrefix: string; lineCount: number; side: "white" | "black" }
+  {
+    courseId: string;
+    lessonPrefix?: string; // for LESSON_MOVES-based courses
+    lineCount?: number;    // for LESSON_MOVES-based courses
+    side: "white" | "black";
+    /**
+     * When true, build variations from each course lesson's `practiceLine`
+     * (interleaving `moves` and `autoResponses`) instead of from LESSON_MOVES.
+     */
+    useCourseMoves?: boolean;
+  }
 > = {
-  "masterclass-jobava-london": {
-    courseId: "masterkurs-jobava-london",
-    lessonPrefix: "jl",
-    lineCount: 130,
-    side: "white",
-  },
-  "masterclass-kalashnikov": {
-    courseId: "masterkurs-kalashnikov",
-    lessonPrefix: "kal",
-    lineCount: 50,
-    side: "black",
-  },
-  "masterclass-kid": {
-    courseId: "masterkurs-kid",
-    lessonPrefix: "kid",
-    lineCount: 50,
-    side: "black",
-  },
+  "masterclass-jobava-london": { courseId: "masterkurs-jobava-london", lessonPrefix: "jl", lineCount: 130, side: "white" },
+  "masterclass-kalashnikov":   { courseId: "masterkurs-kalashnikov",   lessonPrefix: "kal", lineCount: 50, side: "black" },
+  "masterclass-kid":           { courseId: "masterkurs-kid",           lessonPrefix: "kid", lineCount: 50, side: "black" },
+  // Course-driven masterclasses (use practiceLine on each lesson)
+  "masterclass-queens-gambit": { courseId: "masterkurs-queens-gambit", side: "white", useCourseMoves: true },
+  "masterclass-ruy-lopez":     { courseId: "masterkurs-ruy-lopez",     side: "white", useCourseMoves: true },
+  "masterclass-caro-kann":     { courseId: "masterkurs-caro-kann",     side: "black", useCourseMoves: true },
+  "masterclass-najdorf":       { courseId: "masterkurs-najdorf",       side: "black", useCourseMoves: true },
 };
 
 interface MasterclassLine {
   id: string;
   title: string;
   moves: OpeningMove[];
+  startFen?: string;
+}
+
+/**
+ * Build a full sequence of OpeningMoves from a lesson's practiceLine by
+ * interleaving the player's moves with the opponent's autoResponses based on
+ * who moves first in the position (derived from startFen, or playerColor).
+ */
+function buildMovesFromLesson(lesson: Lesson): { moves: OpeningMove[]; startFen?: string } | null {
+  const pl = lesson.practiceLine;
+  if (!pl || (!pl.moves?.length && !pl.autoResponses?.length)) return null;
+
+  // Determine who moves first in this practice sequence
+  let firstSideToMove: "w" | "b" = "w";
+  if (pl.startFen) {
+    const parts = pl.startFen.split(" ");
+    if (parts[1] === "b") firstSideToMove = "b";
+  }
+  const playerMovesFirst = firstSideToMove === pl.playerColor;
+
+  const out: OpeningMove[] = [];
+  let pi = 0, ai = 0;
+  let playerTurn = playerMovesFirst;
+  const total = (pl.moves?.length ?? 0) + (pl.autoResponses?.length ?? 0);
+  for (let i = 0; i < total; i++) {
+    if (playerTurn && pi < pl.moves.length) {
+      out.push({ san: pl.moves[pi].move, explanation: pl.moves[pi].explanation, children: [], isMainLine: true });
+      pi++;
+    } else if (!playerTurn && ai < pl.autoResponses.length) {
+      out.push({ san: pl.autoResponses[ai], explanation: undefined, children: [], isMainLine: true });
+      ai++;
+    } else if (pi < pl.moves.length) {
+      out.push({ san: pl.moves[pi].move, explanation: pl.moves[pi].explanation, children: [], isMainLine: true });
+      pi++;
+    } else if (ai < pl.autoResponses.length) {
+      out.push({ san: pl.autoResponses[ai], explanation: undefined, children: [], isMainLine: true });
+      ai++;
+    }
+    playerTurn = !playerTurn;
+  }
+  return { moves: out, startFen: pl.startFen };
 }
 
 interface OpeningTrainerViewProps {
