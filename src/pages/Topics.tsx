@@ -60,7 +60,7 @@ export default function Topics() {
         })}</script>
       </Helmet>
 
-      <Navigation />
+      <Navbar />
 
       <main className="container mx-auto px-4 py-12 max-w-6xl">
         <header className="mb-12 text-center">
