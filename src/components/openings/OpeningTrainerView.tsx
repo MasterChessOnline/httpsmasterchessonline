@@ -149,10 +149,23 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
     const mc = MASTERCLASS_OPENINGS[opening.id];
     if (mc) {
       const course = COURSES.find((c) => c.id === mc.courseId);
+
+      // Course-driven masterclass: build from each lesson's practiceLine.
+      if (mc.useCourseMoves) {
+        const lines: MasterclassLine[] = [];
+        for (const lesson of course?.lessons ?? []) {
+          const built = buildMovesFromLesson(lesson);
+          if (!built) continue;
+          lines.push({ id: lesson.id, title: lesson.title, moves: built.moves, startFen: built.startFen });
+        }
+        return lines;
+      }
+
+      // Prefix/LESSON_MOVES-driven masterclass (Jobava, Kalashnikov, KID).
       const lessonTitleById = new Map<string, string>(
         (course?.lessons ?? []).map((l) => [l.id, l.title]),
       );
-      return Array.from({ length: mc.lineCount }, (_, index) => {
+      return Array.from({ length: mc.lineCount ?? 0 }, (_, index) => {
         const lessonId = `${mc.lessonPrefix}-${index + 1}`;
         const lessonMoves = LESSON_MOVES[lessonId]?.moves || [];
         return {
@@ -166,7 +179,6 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
     // For every other opening: build one card per leaf-path in the tree.
     const paths = getAllVariationPaths(opening.tree);
     return paths.map((path, index) => {
-      // Try to derive a friendly title: last move with explanation, else "Variation N"
       const lastMoveWithExpl = [...path].reverse().find((m) => m.explanation);
       const fallbackTitle = `Variation ${index + 1}`;
       const title = lastMoveWithExpl?.explanation
@@ -187,16 +199,20 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   // Build the full path of moves for the current selection
   const fullMovePath = useMemo(() => {
     if (activeMasterLine) return activeMasterLine.moves;
-    // Walk from root, always taking index from currentPath
     return getMovesForPath(opening.tree, currentPath);
   }, [activeMasterLine, opening.tree, currentPath]);
 
   // Clamp viewUpToIndex
   const clampedView = Math.min(viewUpToIndex, fullMovePath.length - 1);
 
-  // Build the FEN for the current view position
+  // Build the FEN for the current view position (honoring per-line startFen).
   const { fen, lastMove } = useMemo(() => {
-    const game = new Chess();
+    let game: Chess;
+    try {
+      game = activeMasterLine?.startFen ? new Chess(activeMasterLine.startFen) : new Chess();
+    } catch {
+      game = new Chess();
+    }
     let last: { from: string; to: string } | null = null;
     const movesToApply = fullMovePath.slice(0, clampedView + 1);
     for (const mv of movesToApply) {
@@ -206,7 +222,7 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
       } catch { break; }
     }
     return { fen: game.fen(), lastMove: last };
-  }, [fullMovePath, clampedView]);
+  }, [fullMovePath, clampedView, activeMasterLine]);
 
   // Current node's explanation
   const currentNode = fullMovePath[clampedView] || null;
