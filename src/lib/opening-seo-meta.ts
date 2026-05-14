@@ -238,6 +238,120 @@ export const OPENING_SEO: Record<string, OpeningSeoMeta> = {
       { q: "Why is it called Scandinavian?", a: "Popular in 19th-century Scandinavia and once known as the 'Center Counter Defense'." },
     ],
   },
+  "kings-gambit": {
+    id: "kings-gambit",
+    slug: "kings-gambit",
+    searchVolume: 6600,
+    longTitle: "King's Gambit — Romantic Attack & Theory",
+    longDescription: "King's Gambit (1.e4 e5 2.f4) — sacrifice a pawn for open lines and a kingside attack. Famous lines, traps, and modern theory.",
+    keyIdeas: [
+      "Sacrifice the f-pawn to open the f-file fast",
+      "Aim Bc4 at f7 and the exposed Black king",
+      "Push d4 to seize the center after castling",
+      "Convert dynamic compensation into a direct mating attack",
+    ],
+    famousGames: [
+      "Anderssen vs Kieseritzky, 1851 — the Immortal Game",
+      "Spassky vs Fischer, 1960 — masterclass in defense",
+    ],
+    faqs: [
+      { q: "Is the King's Gambit still playable?", a: "Yes — surprise weapon at all levels. Sound enough with the Bishop's Gambit (3.Bc4) or Falkbeer setups." },
+      { q: "How do you refute the King's Gambit?", a: "Black should accept (2...exf4) and aim for ...d5 to free the position; the Modern Defense (2...exf4 3.Nf3 d6) is solid." },
+    ],
+  },
+  "vienna-game": {
+    id: "vienna-game",
+    slug: "vienna-game",
+    searchVolume: 5400,
+    longTitle: "Vienna Game — Flexible 1.e4 e5 Weapon",
+    longDescription: "Vienna Game (1.e4 e5 2.Nc3) — flexible knight development, sharp f4 push, surprising traps and modern lines.",
+    keyIdeas: [
+      "Knight before bishop — keep the c4 / Bb5 choice open",
+      "Strike with f4 once the king is safe",
+      "Aim for a delayed King's Gambit setup",
+      "Punish ...Nf6 with the Frankenstein-Dracula trap",
+    ],
+    faqs: [
+      { q: "Is the Vienna Game good for beginners?", a: "Excellent — simple development with sharp attacking ideas baked in." },
+      { q: "What is the Vienna Gambit?", a: "1.e4 e5 2.Nc3 Nf6 3.f4 — a delayed King's Gambit hitting Black's developed knight." },
+    ],
+  },
+  "pirc-defense": {
+    id: "pirc-defense",
+    slug: "pirc-defense",
+    searchVolume: 4400,
+    longTitle: "Pirc Defense — Hypermodern Counterattack",
+    longDescription: "Pirc Defense (1.e4 d6 2.d4 Nf6 3.Nc3 g6) — let White build the center, then strike with ...c5 or ...e5.",
+    keyIdeas: [
+      "Fianchetto the bishop to g7 for long-diagonal pressure",
+      "Provoke an over-extended center, then dynamite it",
+      "Use ...c5 or ...e5 as the main counter-break",
+      "Castle short, then play on the queenside",
+    ],
+    faqs: [
+      { q: "Is the Pirc Defense sound?", a: "Yes — used by Azmaiparashvili, Seirawan, and many GMs as a fighting weapon against 1.e4." },
+      { q: "Pirc vs Modern Defense?", a: "Pirc commits ...Nf6 early; Modern (1.e4 g6) keeps the knight flexible for ...Nh6 or ...Nf6 later." },
+    ],
+  },
+  "alekhines-defense": {
+    id: "alekhines-defense",
+    slug: "alekhines-defense",
+    searchVolume: 4200,
+    longTitle: "Alekhine's Defense — Provoke the Center",
+    longDescription: "Alekhine's Defense (1.e4 Nf6) — bait White's pawns forward, then dismantle the over-extended center.",
+    keyIdeas: [
+      "Lure White into the Four Pawns Attack, then counter-break",
+      "Use the knight on b6 to harass the d-pawn",
+      "Trade pieces to expose the over-extended pawns",
+      "Strike with ...c5 or ...f6 at the right moment",
+    ],
+    faqs: [
+      { q: "Is Alekhine's Defense good?", a: "Sharp and underestimated. Strong as a surprise weapon — Carlsen has played it in serious games." },
+      { q: "Best line for White?", a: "Modern Variation (4.Nf3) — solid, no overextension, keeps a small space edge." },
+    ],
+  },
+  "nimzo-indian-defense": {
+    id: "nimzo-indian-defense",
+    slug: "nimzo-indian-defense",
+    searchVolume: 7400,
+    longTitle: "Nimzo-Indian Defense — Strategy & Best Lines",
+    longDescription: "Nimzo-Indian (1.d4 Nf6 2.c4 e6 3.Nc3 Bb4) — pin the knight, double White's c-pawns, dominate dark squares.",
+    keyIdeas: [
+      "Pin Nc3 with Bb4 and threaten to trade for doubled c-pawns",
+      "Place the bishop on b7 for a powerful long diagonal",
+      "Aim for ...d5 / ...c5 breaks in the center",
+      "Use prophylactic moves like ...h6 before kingside expansion",
+    ],
+    famousGames: [
+      "Capablanca vs Réti, 1928 — classical Nimzo handling",
+      "Kasparov vs Karpov, 1985 WCC — both sides showed mastery",
+    ],
+    faqs: [
+      { q: "Is the Nimzo-Indian sound?", a: "One of the most respected defenses in chess history — used by every World Champion since 1930." },
+      { q: "Main White answers?", a: "Rubinstein 4.e3, Classical 4.Qc2, and Sämisch 4.a3 — each leads to completely different middlegames." },
+    ],
+  },
+  "slav-defense": {
+    id: "slav-defense",
+    slug: "slav-defense",
+    searchVolume: 6100,
+    longTitle: "Slav Defense — Rock-Solid vs 1.d4",
+    longDescription: "Slav Defense (1.d4 d5 2.c4 c6) — keep the c8-bishop alive, lock the structure, build a fortress that any GM trusts.",
+    keyIdeas: [
+      "Support d5 with c6 instead of locking the bishop in",
+      "Develop the bishop outside the pawn chain via ...Bf5 or ...Bg4",
+      "Counter in the center with ...e5 or ...c5",
+      "Aim for the dependable Czech / Semi-Slav structures",
+    ],
+    famousGames: [
+      "Botvinnik vs Bronstein, 1951 — model Slav middlegame",
+      "Anand vs Kramnik, 2008 WCC — Meran Variation showdown",
+    ],
+    faqs: [
+      { q: "Slav vs Queen's Gambit Declined?", a: "Slav keeps the light-squared bishop active; QGD locks it in but supports d5 more naturally." },
+      { q: "Is the Slav too passive?", a: "Far from it — Meran and Botvinnik lines are razor-sharp tactical fights." },
+    ],
+  },
 };
 
 // Categories we expose to programmatic SEO (excludes 'masterclass-*' courses which aren't separate openings).
