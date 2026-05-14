@@ -73,6 +73,7 @@ const entries: SitemapEntry[] = [
   { path: "/rating-calculator", changefreq: "monthly", priority: "0.4" },
   { path: "/piece-values", changefreq: "monthly", priority: "0.4" },
   { path: "/about", changefreq: "monthly", priority: "0.4" },
+  { path: "/fair-play", changefreq: "monthly", priority: "0.5" },
   { path: "/contact", changefreq: "monthly", priority: "0.3" },
   { path: "/login", changefreq: "yearly", priority: "0.3" },
   { path: "/signup", changefreq: "yearly", priority: "0.3" },

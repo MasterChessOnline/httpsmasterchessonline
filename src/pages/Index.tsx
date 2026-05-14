@@ -21,6 +21,7 @@ import heroImage from "@/assets/hero-chess.jpg";
 import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
 import DailyMissions from "@/components/DailyMissions";
+import TrustStrip from "@/components/TrustStrip";
 
 interface RecentGame {
   id: string;
@@ -385,6 +386,11 @@ const Index = () => {
             </ParallaxCard>
           </SectionHeader>
         )}
+
+        {/* Community trust strip — real numbers, no fakes */}
+        <SectionHeader title="Trusted by real players" icon={Sparkles}>
+          <TrustStrip />
+        </SectionHeader>
 
         {/* Daily Missions widget — only for logged-in users */}
         {user && (

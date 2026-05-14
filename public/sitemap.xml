@@ -359,9 +359,12 @@
     <lastmod>2026-05-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
-  </url>
   <url>
-    <loc>https://masterchess.live/contact</loc>
+    <loc>https://masterchess.live/fair-play</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
     <lastmod>2026-05-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>

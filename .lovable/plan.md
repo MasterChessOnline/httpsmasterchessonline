@@ -1,90 +1,146 @@
-# Plan da MasterChess eksplodira — brzi, konkretni potezi
 
-Sortiran po **ROI / brzini**. Možeš mi reći "uradi 1, 3, 5" pa krećem.
+# Plan: Make MasterChess Explode — Daily Retention + AI Coach + Trust
 
----
-
-## 1. Programmatic SEO — 500+ stranica iz baze (najveći ROI)
-
-Generiši automatski landing strane iz već postojećih podataka. Svaka stranica = nova prilika u Google-u.
-
-- **`/openings/:slug`** — po stranica za svako otvaranje iz `openings-data.ts` (Italian Game, Sicilian Najdorf, KID...) sa: PGN viewer, statistika, top potezi, varijacije. Targetira "italian game opening", "sicilian najdorf moves", itd.
-- **`/players/:username`** — javni profili svih registrovanih igrača sa partijama i ratingom. Targetira pretrage po imenu igrača.
-- **`/games/:id`** — svaka odigrana partija dobija public URL sa PGN-om i Stockfish review-om. Ovo je kako se chess.com i Lichess raširili.
-- **`/bots/:slug`** — landing po botu (9 botova × ~3000 mesečnih pretraga "play chess vs computer").
-
-**Rezultat:** sa ~100 ručno napisanih stranica skočiš na 1000+ indeksiranih.
+Goal: give people a real reason to open the site **every single day**, fix the AI Coach so it actually works, and add trust signals so new visitors convert instead of bouncing.
 
 ---
 
-## 2. Viralni share alati (bez signup-a)
+## 1. Daily Retention Engine (the "why come back every day" loop)
 
-Stranice koje ljudi prirodno share-uju.
+**a) Daily Puzzle Replacement — "Daily Challenge"**
+Since the project policy forbids static puzzles, build a daily *play* challenge instead:
+- "Daily Bot" — a different bot personality each day with a unique theme (e.g. Monday: aggressive gambit bot, Tuesday: defensive wall bot).
+- "Daily Opening Mission" — play 1 game using today's featured opening, earn XP bonus.
+- "Daily Time Control" — rotates bullet/blitz/rapid daily; finishing 1 game = streak credit.
 
-- **"Share your last game" kartica** — slika za Instagram/X sa rezultatom, accuracy %, opening, opponent rating. Auto-generated OG image preko edge funkcije.
-- **"My Chess Year"** — godišnji wrap-up tipa Spotify Wrapped (broj partija, omiljeno otvaranje, najbolja partija). Najmanje 1 viralni potez godišnje.
-- **Chess Card** (već postoji) — dodaj javan link i ćaskanje preko OG slike.
+**b) Streak System (real, server-side)**
+- Table `daily_streaks` (user_id, current_streak, longest_streak, last_active_date, freezes_remaining).
+- Edge function `check-streak` runs on first login of the day, increments or resets.
+- 2 "streak freeze" tokens per month so a missed day doesn't kill motivation.
+- Streak fire icon in navbar with count; 7/30/100-day milestone rewards (XP, badges, profile flair).
 
----
+**c) Daily Login Rewards**
+- Day 1: +50 XP → Day 7: rare badge → Day 30: profile aura/title.
+- Pop-up "claim today's reward" modal on first daily visit.
 
-## 3. Reddit + YouTube SEO blitz (besplatan saobraćaj sutra)
+**d) Daily Leaderboards (reset every 24h)**
+- "Today's Top 10" for: most games won, longest win streak today, biggest rating gain today.
+- Resets at 00:00 UTC. Creates fresh competition daily.
 
-- **Reddit:** posting plan za r/chess, r/chessbeginners, r/AnarchyChess sa autentičnim sadržajem (ne spam). 1 post = 5k–50k pregleda.
-- **Pisani guideovi koji već postoje** sad treba videom — kratki Shorts (60s) od svakog članka. DailyChess_12 može hostovati, ti samo embedduješ u Blog.
-- **"Tools" stranice** koje rangiraju lako: PGN viewer, FEN editor, opening explorer, rating calculator — svi targetiraju long-tail.
-
----
-
-## 4. Indexing API + automatska submit-acija
-
-Sad kad imam GSC pristup, mogu da auto-šaljem URL-ove kad se dodaju (samo job/jobs, ali korisno za nove blog članke). Plus:
-
-- **`<lastmod>`** ažuriran pri svakoj promeni → Google brže refetchuje.
-- **Internal linking audit** — svaki članak treba 3–5 linkova na druge članke (sad ima 2–3).
-- **Bing Webmaster Tools** registracija — 5% dodatnog saobraćaja besplatno.
-
----
-
-## 5. Push notifikacije + email loop (retencija)
-
-Da posetioci ne odu i ne vrate se nikad.
-
-- **Web push** — "Your daily puzzle... ups, sorry — your daily game is waiting" (uz to što već imamo daily streak).
-- **Welcome email serija** (3 emaila kroz Lovable Email): dan 1 — kako napredovati, dan 3 — challenge prijatelja, dan 7 — turnir.
-- **Inactive user re-engagement** — auto email posle 7 dana neaktivnosti.
+**e) Push notifications + email**
+- Browser push: "Your streak ends in 4 hours" / "Daily bot is waiting".
+- Optional email digest: weekly recap of rating change, games played, streak.
 
 ---
 
-## 6. Reference program (zaprljaj geometrijski rast)
+## 2. Make AI Coach Actually Work
 
-- **Pozovi prijatelja** → obojica dobijaju badge "Pioneer" + 100 XP.
-- Public leaderboard top referrera mesečno.
-- **Embed widget** — "play chess on my site" iframe koji svaki streamer/blog može da stavi, sa MasterChess brendiranjem na dnu.
-
----
-
-## 7. Vizuelni "wow" momenat na homepage (prvi utisak)
-
-- Hero animacija sa 3D pločom koja se sama igra (chess.js + light Stockfish, lazy-loaded).
-- Live "playing now" counter (autentičan — ne lažan) i live partija u pozadini.
-- "Beat the bot in 60s" — instant gameplay bez signup-a, captures email kasnije.
+Current AI Coach likely exists but isn't fully wired. Plan:
+- Audit current `AICoach` component / edge function.
+- Build/repair edge function `ai-coach` using Lovable AI Gateway (`google/gemini-3-flash-preview`) — no user API key needed.
+- Inputs: current PGN + last move + player rating.
+- Outputs: short natural-language coaching tip ("You're overextending the queen — try Nf3 to develop"), shown in a side panel during/after games.
+- Post-game: "Coach Review" — narrative summary of 3 key moments (no engine eval bar, just verbal analysis per project policy).
+- Cache per-position responses in `coach_cache` table to control cost.
+- Rate-limit: 20 coach requests/user/day on free tier.
 
 ---
 
-## 8. Pricing/premium (kad već imaš protok)
+## 3. Trust Signals (so first-time visitors don't bounce)
 
-Ne sada, ali planiraj za mesec 2:
-- **Free**: sve što sad imaš.
-- **Pro $4.99/mo**: advanced analytics, neograničene PGN study lekcije, exclusive bot personalities, ad-free.
+**a) Homepage trust strip**
+- "X games played today" (real count from DB)
+- "X players online right now" (real presence count)
+- "X countries represented" (from profile country field)
+- Testimonials carousel (real quotes once we have them; until then, hide instead of faking — project rule: zero fake data).
+
+**b) Safety & fairness page** `/fair-play`
+- Explain anti-cheat, no-engine-during-human-play policy, manual review, reporting flow.
+- Visible link in footer + during signup.
+
+**c) Transparency page** `/about`
+- Who built it, the no-puzzle / authentic-play philosophy, contact email.
+- Link to public roadmap.
+
+**d) Social proof**
+- Embed real DailyChess_12 YouTube subscriber count via YouTube Data API.
+- Show recent featured games on homepage (real games from DB).
+- "As featured in" — only add real mentions; leave empty if none.
+
+**e) Security badges**
+- "Encrypted accounts", "GDPR-friendly", "No ads, no tracking" badges in footer.
 
 ---
 
-## Šta predlažem da uradimo **odmah, danas**:
+## 4. Growth Boosters (explode mode)
 
-**Phase 1 (3–4 sata rada moja):**
-1. Programmatic stranice za 30 najvažnijih otvaranja (`/openings/:slug`) → +30 indeksiranih
-2. Reddit-ready share card sa OG image generator-om za partije
-3. Internal linking audit + auto-related u blog člancima
-4. Bing Webmaster registracija (kao GSC)
+**a) Viral share moments**
+- After every win, auto-generate a shareable PNG card (final position + rating change + bot/player name + masterchess.live watermark). One-click "Share on X / Reddit / WhatsApp".
+- "Year in chess" wrapped recap for returning users.
 
-Reci mi koji set hoćeš — ili samo "kreni" i ja idem redom 1→4.
+**b) Referral program**
+- Unique invite link per user. Both inviter and invitee get a "Pioneer" badge + XP boost when invitee plays 3 games.
+- Public referrer leaderboard.
+
+**c) Embeddable mini-board widget**
+- `<iframe src="masterchess.live/embed/...">` for streamers and bloggers to embed a live board → free backlinks.
+
+**d) Public profile = SEO surface**
+- Make `/players/:username` indexable with real stats, recent games, badges. Each active user = one more Google-indexed page.
+
+**e) "Beat the bot in 60s" no-signup hook on homepage**
+- Hero board where a fresh visitor can immediately play a 60-second game vs an easy bot without account. Conversion to signup after the game ends.
+
+---
+
+## Technical scope
+
+```text
+DB (new tables)
+├── daily_streaks
+├── daily_rewards_claimed
+├── daily_challenges (today's bot/opening/time control)
+├── daily_leaderboard_snapshots
+├── coach_cache
+└── referrals
+
+Edge functions
+├── check-streak           (idempotent daily streak update)
+├── ai-coach               (Lovable AI Gateway, cached)
+├── daily-challenge-gen    (cron 00:00 UTC — picks today's bot/opening)
+├── leaderboard-reset      (cron 00:00 UTC)
+└── share-card             (generates PNG via @vercel/og style)
+
+Frontend
+├── components/StreakBadge.tsx
+├── components/DailyRewardModal.tsx
+├── components/DailyChallengeCard.tsx (homepage hero block)
+├── components/AICoachPanel.tsx (in-game side panel)
+├── components/ShareWinCard.tsx
+├── components/TrustStrip.tsx
+├── pages/FairPlay.tsx
+├── pages/About.tsx
+└── pages/Referrals.tsx
+```
+
+All values must be **real** — no ghost numbers, no fake testimonials, no simulated activity (project Core rule).
+
+---
+
+## Build order (so it ships fast, not all at once)
+
+**Phase 1 — Retention spine (highest ROI):**
+1. Streak system + navbar badge
+2. Daily challenge card on homepage
+3. Daily login reward modal
+
+**Phase 2 — AI Coach working end-to-end:**
+4. Audit + repair `ai-coach` edge function with Lovable AI
+5. Side-panel UI + post-game coach review
+
+**Phase 3 — Trust + viral:**
+6. Trust strip + `/fair-play` + `/about`
+7. Share win card + referral system
+8. Daily leaderboards + push notifications
+
+Reply with **"go phase 1"** (or which phase you want first) and I'll start building.
