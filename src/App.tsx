@@ -131,6 +131,7 @@ function AnimatedRoutes() {
           <Route path="/chess-card" element={<ChessCard />} />
           <Route path="/bot/:botId" element={<BotProfile />} />
           <Route path="/admin/email-status" element={<AdminEmailStatus />} />
+          <Route path="/admin/seo-status" element={<SeoStatus />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
