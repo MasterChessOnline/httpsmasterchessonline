@@ -160,7 +160,7 @@ const App = () => (
             </div>
             <AntiTiltWatcher />
             <TitleUnlockGate />
-            <AuthGate />
+            <WelcomeIntroPopup />
             <GameInviteListener />
             <MobileBottomNav />
           </Suspense>
