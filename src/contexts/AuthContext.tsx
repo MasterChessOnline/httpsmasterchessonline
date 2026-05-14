@@ -55,6 +55,60 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Touch the user's daily streak at most once per UTC day, per browser.
+  // Auto-resets when a day is missed (handled inside the RPC logic below).
+  const touchDailyStreak = async (userId: string) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const lastKey = `streak:lastTouch:${userId}`;
+    if (typeof window !== "undefined" && localStorage.getItem(lastKey) === today) return;
+
+    const { data: row } = await supabase
+      .from("user_daily_streaks" as any)
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const diffDays = (from: string, to: string) =>
+      Math.round((new Date(to + "T00:00:00Z").getTime() - new Date(from + "T00:00:00Z").getTime()) / 86_400_000);
+
+    if (!row) {
+      await supabase.from("user_daily_streaks" as any).insert({
+        user_id: userId,
+        current_streak: 1,
+        longest_streak: 1,
+        last_active_date: today,
+        total_active_days: 1,
+        freeze_available: true,
+      });
+    } else {
+      const r = row as any;
+      if (r.last_active_date !== today) {
+        const d = r.last_active_date ? diffDays(r.last_active_date, today) : 999;
+        let newStreak = r.current_streak;
+        let freezeAvailable = r.freeze_available;
+        let freezeUsedDate = r.freeze_used_date;
+        if (d === 1) newStreak = r.current_streak + 1;
+        else if (d === 2 && r.freeze_available) {
+          newStreak = r.current_streak + 1;
+          freezeAvailable = false;
+          freezeUsedDate = today;
+        } else { newStreak = 1; freezeAvailable = true; freezeUsedDate = null; }
+        await supabase
+          .from("user_daily_streaks" as any)
+          .update({
+            current_streak: newStreak,
+            longest_streak: Math.max(r.longest_streak, newStreak),
+            last_active_date: today,
+            total_active_days: (r.total_active_days ?? 0) + 1,
+            freeze_available: freezeAvailable,
+            freeze_used_date: freezeUsedDate,
+          })
+          .eq("user_id", userId);
+      }
+    }
+    if (typeof window !== "undefined") localStorage.setItem(lastKey, today);
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -62,6 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session?.user) {
           setTimeout(() => {
             fetchProfile(session.user.id);
+            touchDailyStreak(session.user.id);
           }, 0);
         } else {
           setProfile(null);
@@ -74,6 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       if (session?.user) {
         fetchProfile(session.user.id);
+        touchDailyStreak(session.user.id);
       }
       setLoading(false);
     });
