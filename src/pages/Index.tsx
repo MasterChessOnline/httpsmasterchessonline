@@ -21,6 +21,7 @@ import heroImage from "@/assets/hero-chess.jpg";
 import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
 import DailyMissions from "@/components/DailyMissions";
+import TrustStrip from "@/components/TrustStrip";
 
 interface RecentGame {
   id: string;
