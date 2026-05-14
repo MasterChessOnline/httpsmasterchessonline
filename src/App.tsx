@@ -31,6 +31,7 @@ import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
+import FairPlay from "./pages/FairPlay";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 
