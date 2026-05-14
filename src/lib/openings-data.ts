@@ -1625,6 +1625,90 @@ export const OPENINGS_DATABASE: Opening[] = [
       ]),
     ],
   },
+  // ═══════════════════════════════════════════
+  // MASTERCLASS — QUEEN'S GAMBIT (course-driven)
+  // ═══════════════════════════════════════════
+  {
+    id: "masterclass-queens-gambit",
+    name: "MasterKurs: Queen's Gambit",
+    eco: "D06-D69",
+    category: "queen-pawn",
+    description: "30-line masterclass on the Queen's Gambit (1.d4 d5 2.c4) — Orthodox QGD, QGA, Slav, Semi-Slav (Meran/Anti-Moscow), Tarrasch, Ragozin, Vienna and more. Each line is fully interactive with move-by-move annotations.",
+    difficulty: "intermediate",
+    icon: "♛",
+    startingMoves: "1.d4 d5 2.c4",
+    totalVariations: 30,
+    tree: [
+      m("d4", "1.d4 — Claim the central dark square.", [
+        m("d5", "1...d5 — Mirror in the center.", [
+          m("c4", "2.c4 — The Queen's Gambit. Pressure on d5.", []),
+        ]),
+      ]),
+    ],
+  },
+  // ═══════════════════════════════════════════
+  // MASTERCLASS — RUY LOPEZ (course-driven)
+  // ═══════════════════════════════════════════
+  {
+    id: "masterclass-ruy-lopez",
+    name: "MasterKurs: Ruy Lopez",
+    eco: "C60-C99",
+    category: "king-pawn",
+    description: "30-line masterclass on the Ruy Lopez / Spanish Game (1.e4 e5 2.Nf3 Nc6 3.Bb5) — Closed lines, Berlin, Marshall Attack, Open Spanish, Exchange and Steinitz. Every key tabiya, played 15-20 moves deep with full theoretical explanations.",
+    difficulty: "intermediate",
+    icon: "♗",
+    startingMoves: "1.e4 e5 2.Nf3 Nc6 3.Bb5",
+    totalVariations: 30,
+    tree: [
+      m("e4", "1.e4 — King's pawn opening.", [
+        m("e5", "1...e5 — Classical reply.", [
+          m("Nf3", "2.Nf3 — Develop with tempo, attack e5.", [
+            m("Nc6", "2...Nc6 — Defend e5.", [
+              m("Bb5", "3.Bb5 — The Spanish Bishop!", []),
+            ]),
+          ]),
+        ]),
+      ]),
+    ],
+  },
+  // ═══════════════════════════════════════════
+  // MASTERCLASS — CARO-KANN (course-driven)
+  // ═══════════════════════════════════════════
+  {
+    id: "masterclass-caro-kann",
+    name: "MasterKurs: Caro-Kann",
+    eco: "B10-B19",
+    category: "king-pawn",
+    description: "Caro-Kann masterclass for Black (1.e4 c6) — Classical, Advance, Exchange, Panov-Botvinnik Attack and Two Knights. Solid, structurally sound defense covered with annotated lines from the typical tabiyas onward.",
+    difficulty: "intermediate",
+    icon: "🛡️",
+    startingMoves: "1.e4 c6",
+    totalVariations: 7,
+    tree: [
+      m("e4", "1.e4 — King's pawn.", [
+        m("c6", "1...c6 — The Caro-Kann! Solid and structurally sound.", []),
+      ]),
+    ],
+  },
+  // ═══════════════════════════════════════════
+  // MASTERCLASS — NAJDORF & SICILIAN (course-driven)
+  // ═══════════════════════════════════════════
+  {
+    id: "masterclass-najdorf",
+    name: "MasterKurs: Najdorf & Sicilian",
+    eco: "B20-B99",
+    category: "king-pawn",
+    description: "Deep dive on the Najdorf — the king of openings — and every Sicilian variation. Covers Najdorf, Dragon, Scheveningen, Classical, Sveshnikov and key anti-Sicilian sidelines with annotated lines.",
+    difficulty: "advanced",
+    icon: "⚔️",
+    startingMoves: "1.e4 c5",
+    totalVariations: 6,
+    tree: [
+      m("e4", "1.e4 — Open game.", [
+        m("c5", "1...c5 — The Sicilian! The most fighting reply to 1.e4.", []),
+      ]),
+    ],
+  },
 ];
 
 // Utility: flatten all moves in a tree to get a list of variation paths
