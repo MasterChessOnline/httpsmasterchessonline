@@ -789,6 +789,15 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
               )}
             </div>
 
+            {/* Stockfish analysis (under variations) */}
+            {mode === "explore" && (
+              <StockfishLessonPanel
+                fen={fen}
+                playedSan={currentNode?.san ?? null}
+                fenBeforePlayed={fenBeforePlayed}
+              />
+            )}
+
             {/* Train specific lines */}
             {mode === "explore" && (
               <div className="bg-card border border-border/50 rounded-xl p-4">
