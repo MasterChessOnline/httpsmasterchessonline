@@ -324,7 +324,7 @@ export const OPENINGS_DATABASE: Opening[] = [
   // ═══════════════════════════════════════════
   {
     id: "ruy-lopez",
-    name: "MasterKurs: Ruy Lopez",
+    name: "Ruy Lopez (Spanish Game)",
     eco: "C60-C99",
     category: "king-pawn",
     description: "The Spanish Game — one of the oldest and most deeply analyzed openings. Rich in strategic ideas.",
@@ -427,7 +427,7 @@ export const OPENINGS_DATABASE: Opening[] = [
   // ═══════════════════════════════════════════
   {
     id: "queens-gambit",
-    name: "MasterKurs: Queen's Gambit",
+    name: "Queen's Gambit",
     eco: "D06-D69",
     category: "queen-pawn",
     description: "A classic opening where White offers a pawn to gain central control. Not a true gambit — the pawn can usually be recovered.",
@@ -522,7 +522,7 @@ export const OPENINGS_DATABASE: Opening[] = [
   // ═══════════════════════════════════════════
   {
     id: "kings-indian",
-    name: "MasterKurs: King's Indian Defense (Classical Tree)",
+    name: "King's Indian Defense (Classical)",
     eco: "E60-E99",
     category: "indian",
     description: "A hypermodern defense where Black lets White build a big center, then attacks it. Dynamic and aggressive.",
@@ -672,7 +672,7 @@ export const OPENINGS_DATABASE: Opening[] = [
   // ═══════════════════════════════════════════
   {
     id: "caro-kann",
-    name: "MasterKurs: Caro-Kann Defense",
+    name: "Caro-Kann Defense",
     eco: "B10-B19",
     category: "king-pawn",
     description: "A rock-solid defense. Black maintains a healthy pawn structure and develops the light-squared bishop freely.",
@@ -1630,7 +1630,7 @@ export const OPENINGS_DATABASE: Opening[] = [
   // ═══════════════════════════════════════════
   {
     id: "masterclass-queens-gambit",
-    name: "MasterKurs: Queen's Gambit",
+    name: "Queen's Gambit",
     eco: "D06-D69",
     category: "queen-pawn",
     description: "30-line masterclass on the Queen's Gambit (1.d4 d5 2.c4) — Orthodox QGD, QGA, Slav, Semi-Slav (Meran/Anti-Moscow), Tarrasch, Ragozin, Vienna and more. Each line is fully interactive with move-by-move annotations.",
@@ -1651,7 +1651,7 @@ export const OPENINGS_DATABASE: Opening[] = [
   // ═══════════════════════════════════════════
   {
     id: "masterclass-ruy-lopez",
-    name: "MasterKurs: Ruy Lopez",
+    name: "Ruy Lopez (Spanish Game)",
     eco: "C60-C99",
     category: "king-pawn",
     description: "30-line masterclass on the Ruy Lopez / Spanish Game (1.e4 e5 2.Nf3 Nc6 3.Bb5) — Closed lines, Berlin, Marshall Attack, Open Spanish, Exchange and Steinitz. Every key tabiya, played 15-20 moves deep with full theoretical explanations.",
