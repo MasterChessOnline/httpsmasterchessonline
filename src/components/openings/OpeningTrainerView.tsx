@@ -3,6 +3,7 @@ import { Chess, Square } from "chess.js";
 import { Opening, OpeningMove, getMainLine, getAllVariationPaths } from "@/lib/openings-data";
 import { LESSON_MOVES } from "@/lib/lesson-moves";
 import { COURSES, Lesson } from "@/lib/courses-data";
+import { MASTERCLASS_PRACTICE_EXTRAS } from "@/lib/masterclass-practice-extras";
 import OpeningBoard from "./OpeningBoard";
 import VariationTree from "./VariationTree";
 import { playChessSound } from "@/lib/chess-sounds";
@@ -58,7 +59,9 @@ interface MasterclassLine {
  * who moves first in the position (derived from startFen, or playerColor).
  */
 function buildMovesFromLesson(lesson: Lesson): { moves: OpeningMove[]; startFen?: string } | null {
-  const pl = lesson.practiceLine;
+  const pl = lesson.practiceLine && (lesson.practiceLine.moves?.length || lesson.practiceLine.autoResponses?.length)
+    ? lesson.practiceLine
+    : MASTERCLASS_PRACTICE_EXTRAS[lesson.id];
   if (!pl || (!pl.moves?.length && !pl.autoResponses?.length)) return null;
 
   // Determine who moves first in this practice sequence

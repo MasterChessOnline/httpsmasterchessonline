@@ -1683,7 +1683,7 @@ export const OPENINGS_DATABASE: Opening[] = [
     difficulty: "intermediate",
     icon: "🛡️",
     startingMoves: "1.e4 c6",
-    totalVariations: 7,
+    totalVariations: 30,
     tree: [
       m("e4", "1.e4 — King's pawn.", [
         m("c6", "1...c6 — The Caro-Kann! Solid and structurally sound.", []),
@@ -1702,7 +1702,7 @@ export const OPENINGS_DATABASE: Opening[] = [
     difficulty: "advanced",
     icon: "⚔️",
     startingMoves: "1.e4 c5",
-    totalVariations: 6,
+    totalVariations: 30,
     tree: [
       m("e4", "1.e4 — Open game.", [
         m("c5", "1...c5 — The Sicilian! The most fighting reply to 1.e4.", []),
