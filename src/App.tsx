@@ -63,6 +63,7 @@ import Training from "./pages/Training";
 import ChessCard from "./pages/ChessCard";
 import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
+import SeoStatus from "./pages/SeoStatus";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
@@ -130,6 +131,7 @@ function AnimatedRoutes() {
           <Route path="/chess-card" element={<ChessCard />} />
           <Route path="/bot/:botId" element={<BotProfile />} />
           <Route path="/admin/email-status" element={<AdminEmailStatus />} />
+          <Route path="/admin/seo-status" element={<SeoStatus />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
