@@ -95,7 +95,7 @@ export const MASTERCLASS_PRACTICE_EXTRAS: Record<string, PracticeLineFallback> =
   ),
   "ck-20": ck(
     ["c6","d5","Bf5","e6","Bg6","c5","h5","Bh7","cxd4","Nc6"],
-    ["e4","d4","e5","Nc3","g4","Nge2","h4","Nf4","Nxh5","Nxd4"],
+    ["e4","d4","e5","Nc3","g4","Nge2","h4","Nf4","Nxh5","Nxd5"],
     {4:"5...Bg6 — Tartakower's bishop tucks away."},
   ),
   "ck-21": ck(
@@ -128,7 +128,7 @@ export const MASTERCLASS_PRACTICE_EXTRAS: Record<string, PracticeLineFallback> =
     {9:"10...Qc7 — prepare ...O-O-O and ...c5 expansion."},
   ),
   "ck-27": ck(
-    ["c6","d5","Bg4","Bxf3","Nf6","e6","Bb4","Nbd7","O-O","Nd5"],
+    ["c6","d5","Bg4","Bxf3","Nf6","e6","Bb4","Nbd7","O-O","Re8"],
     ["e4","Nc3","Nf3","h3","Qxf3","d3","g3","Bd2","O-O-O","e5"],
     {0:"1...c6 — vs the Anti-Caro 2.Nc3."},
   ),
