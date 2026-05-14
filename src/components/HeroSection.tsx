@@ -223,6 +223,16 @@ const HeroSection = () => {
             </motion.div>
           ))}
         </motion.div>
+
+        <motion.div
+          className="mt-8 flex flex-col items-center gap-2"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.4 }}
+        >
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Share MasterChess</span>
+          <ShareBar url="https://masterchess.live/" title="MasterChess — Play chess online free, tournaments, bots & analysis" compact />
+        </motion.div>
       </motion.div>
     </section>
   );
