@@ -39,6 +39,7 @@ import TournamentSync from "./pages/TournamentSync";
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
 import OpeningExplorer from "./pages/OpeningExplorer";
+import OpeningLanding from "./pages/OpeningLanding";
 import MasterGameView from "./pages/MasterGameView";
 import GameHistory from "./pages/GameHistory";
 import Analysis from "./pages/Analysis";
@@ -109,6 +110,7 @@ function AnimatedRoutes() {
           
           <Route path="/story" element={<StoryMode />} />
           <Route path="/openings" element={<OpeningTrainer />} />
+          <Route path="/openings/:slug" element={<OpeningLanding />} />
           <Route path="/opening-explorer" element={<OpeningExplorer />} />
           <Route path="/master-game/:id" element={<MasterGameView />} />
           <Route path="/history" element={<GameHistory />} />

@@ -6,6 +6,8 @@ import Navbar from "@/components/Navbar";
 import Seo from "@/components/Seo";
 import ShareBar from "@/components/ShareBar";
 import { LEARN_ARTICLES, getArticleBySlug } from "@/lib/learn-articles";
+import { OPENING_SEO } from "@/lib/opening-seo-meta";
+import { OPENINGS_DATABASE } from "@/lib/openings-data";
 
 export default function LearnArticle() {
   const { slug } = useParams<{ slug: string }>();
@@ -177,6 +179,23 @@ export default function LearnArticle() {
             </div>
           </section>
         )}
+
+        {/* Internal link bridge to opening landings — boosts SEO crawl + click-through */}
+        <section className="mt-10">
+          <h2 className="font-display text-xl font-bold text-foreground mb-4">Explore chess openings</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {Object.values(OPENING_SEO).slice(0, 6).map((o) => {
+              const op = OPENINGS_DATABASE.find((x) => x.id === o.id);
+              if (!op) return null;
+              return (
+                <Link key={o.slug} to={`/openings/${o.slug}`} className="block rounded-xl border border-border/50 bg-card/50 p-4 hover:border-primary/40 hover:bg-card/80 transition-colors">
+                  <p className="text-xs uppercase tracking-wider text-primary mb-1">ECO {op.eco}</p>
+                  <p className="font-semibold text-foreground text-sm">{op.name}</p>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
       </article>
     </div>
   );
