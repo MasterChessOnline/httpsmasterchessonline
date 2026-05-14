@@ -60,6 +60,19 @@ interface MasterclassLine {
  * who moves first in the position (derived from startFen, or playerColor).
  */
 function buildMovesFromLesson(lesson: Lesson): { moves: OpeningMove[]; startFen?: string } | null {
+  // Prefer the auto-generated, chess.js-validated SAN sequence so every
+  // variation plays cleanly from start to end (script: scripts/build-masterclass-validated.ts).
+  const validated = MASTERCLASS_VALIDATED_LINES[lesson.id];
+  if (validated && validated.sans.length) {
+    const explanationBySan = new Map<string, string>();
+    for (const m of lesson.practiceLine?.moves ?? []) {
+      if (m.explanation && !explanationBySan.has(m.move)) explanationBySan.set(m.move, m.explanation);
+    }
+    return {
+      moves: validated.sans.map((san) => ({ san, explanation: explanationBySan.get(san), children: [], isMainLine: true })),
+      startFen: validated.startFen,
+    };
+  }
   const pl = lesson.practiceLine && (lesson.practiceLine.moves?.length || lesson.practiceLine.autoResponses?.length)
     ? lesson.practiceLine
     : MASTERCLASS_PRACTICE_EXTRAS[lesson.id];
