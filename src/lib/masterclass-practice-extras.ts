@@ -44,7 +44,7 @@ export const MASTERCLASS_PRACTICE_EXTRAS: Record<string, PracticeLineFallback> =
     {0:"1...c6 — Classical Caro.",10:"11...Ngf6 — Short tabiya complete."},
   ),
   "ck-10": ck(
-    ["c6","d5","Bf5","e6","c5","Nd7","Be7","Ne7","Bg6","O-O"],
+    ["c6","d5","Bf5","e6","c5","Nd7","Be7","Nf6","Bg6","O-O"],
     ["e4","d4","e5","Nf3","Be2","Be3","O-O","Nbd2","c3","Re1"],
     {2:"3...Bf5 — get the bishop OUT before ...e6.",7:"8...Bg6 — keep f5 free for the knight."},
   ),
