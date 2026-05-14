@@ -387,6 +387,11 @@ const Index = () => {
           </SectionHeader>
         )}
 
+        {/* Community trust strip — real numbers, no fakes */}
+        <SectionHeader title="Trusted by real players" icon={Sparkles}>
+          <TrustStrip />
+        </SectionHeader>
+
         {/* Daily Missions widget — only for logged-in users */}
         {user && (
           <SectionHeader title="Today's Missions" icon={Target}>
