@@ -75,6 +75,7 @@ import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
 import GameInviteListener from "@/components/GameInviteListener";
+import Analytics from "@/components/Analytics";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
 const queryClient = new QueryClient();
@@ -83,6 +84,8 @@ function AnimatedRoutes() {
   const location = useLocation();
 
   return (
+    <>
+    <Analytics />
     <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
@@ -159,6 +162,7 @@ function AnimatedRoutes() {
         </Routes>
       </motion.div>
     </AnimatePresence>
+    </>
   );
 }
 
