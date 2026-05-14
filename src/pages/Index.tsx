@@ -22,6 +22,7 @@ import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
 import DailyMissions from "@/components/DailyMissions";
 import TrustStrip from "@/components/TrustStrip";
+import ActivityPulse from "@/components/ActivityPulse";
 
 interface RecentGame {
   id: string;
@@ -389,7 +390,10 @@ const Index = () => {
 
         {/* Community trust strip — real numbers, no fakes */}
         <SectionHeader title="Trusted by real players" icon={Sparkles}>
-          <TrustStrip />
+          <div className="grid lg:grid-cols-2 gap-4">
+            <TrustStrip />
+            <ActivityPulse />
+          </div>
         </SectionHeader>
 
         {/* Daily Missions widget — only for logged-in users */}
