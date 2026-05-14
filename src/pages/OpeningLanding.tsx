@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OPENING_SEO, getOpeningBySlug } from "@/lib/opening-seo-meta";
 import { OPENINGS_DATABASE } from "@/lib/openings-data";
+import { getOpeningBoardImage } from "@/lib/og-board-image";
 
 export default function OpeningLanding() {
   const { slug } = useParams<{ slug: string }>();
@@ -32,6 +33,7 @@ export default function OpeningLanding() {
   };
 
   const url = `https://masterchess.live/openings/${meta.slug}`;
+  const ogImage = getOpeningBoardImage(opening.startingMoves);
   const otherOpenings = Object.values(OPENING_SEO).filter((o) => o.id !== meta.id).slice(0, 6);
 
   // Extract first 6 main-line moves for the SEO preview (only when DB tree exists)
@@ -59,7 +61,7 @@ export default function OpeningLanding() {
       mainEntityOfPage: url,
       datePublished: "2026-05-14",
       dateModified: "2026-05-14",
-      image: "https://masterchess.live/og-image.jpg",
+      image: ogImage,
       keywords: opening.name + ", chess opening, " + opening.eco,
     },
     {
@@ -89,6 +91,7 @@ export default function OpeningLanding() {
         description={meta.longDescription}
         path={`/openings/${meta.slug}`}
         type="article"
+        image={ogImage}
         jsonLd={jsonLd}
       />
       <Navbar />

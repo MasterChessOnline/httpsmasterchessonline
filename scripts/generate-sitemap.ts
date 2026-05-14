@@ -2,7 +2,9 @@
 // Writes public/sitemap.xml, public/sitemap-openings.xml, public/sitemap-images.xml, public/sitemap_index.xml.
 import { writeFileSync } from "fs";
 import { resolve } from "path";
-import { ALL_OPENING_SLUGS } from "../src/lib/opening-seo-meta";
+import { ALL_OPENING_SLUGS, OPENING_SEO } from "../src/lib/opening-seo-meta";
+import { OPENINGS_DATABASE } from "../src/lib/openings-data";
+import { getOpeningBoardImage } from "../src/lib/og-board-image";
 
 const BASE_URL = "https://masterchess.live";
 
@@ -107,17 +109,26 @@ function buildUrlset(entries: SitemapEntry[], withImages = false): string {
   ].join("\n");
 }
 
-// Image sitemap — every opening page renders an embedded chess board screenshot via OG image.
+// Image sitemap — every opening page emits a UNIQUE board-position screenshot URL
+// (chess.com dynboard PNG of that opening's starting position). Google Images indexes
+// each as a separate image, multiplying our presence in image search.
 const imageEntries: SitemapEntry[] = [
   { path: "/", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess — Free Online Chess", caption: "Play chess online free with AI coach and tournaments." } },
-  ...ALL_OPENING_SLUGS.map((slug) => ({
-    path: `/openings/${slug}`,
-    image: {
-      loc: `${BASE_URL}/og-image.jpg`,
-      title: `${slug.replace(/-/g, " ")} chess opening`,
-      caption: `Learn the ${slug.replace(/-/g, " ")} chess opening — moves, theory, and best lines.`,
-    },
-  })),
+  ...ALL_OPENING_SLUGS.map((slug) => {
+    const meta = OPENING_SEO[slug];
+    const dbOpening = meta ? OPENINGS_DATABASE.find((o) => o.id === meta.id) : null;
+    const startingMoves = dbOpening?.startingMoves ?? meta?.startingMoves;
+    const name = dbOpening?.name ?? meta?.name ?? slug.replace(/-/g, " ");
+    const eco = dbOpening?.eco ?? meta?.eco ?? "";
+    return {
+      path: `/openings/${slug}`,
+      image: {
+        loc: getOpeningBoardImage(startingMoves),
+        title: `${name} chess opening${eco ? ` (ECO ${eco})` : ""} — starting position`,
+        caption: `Board position after ${startingMoves || "the opening moves"} — learn the ${name} on MasterChess.`,
+      },
+    };
+  }),
 ];
 
 writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
