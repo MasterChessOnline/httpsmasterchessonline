@@ -373,12 +373,22 @@ const STANDALONE: Record<string, Pick<OpeningSeoMeta, "name" | "eco" | "category
 };
 
 // Categories we expose to programmatic SEO (excludes 'masterclass-*' courses which aren't separate openings).
-export const SEO_OPENING_IDS = Object.keys(OPENING_SEO);
+import { EXTRA_OPENINGS } from "./extra-opening-seo";
+
+export const SEO_OPENING_IDS = [...Object.keys(OPENING_SEO), ...Object.keys(EXTRA_OPENINGS)];
+
+export const ALL_OPENING_SLUGS: string[] = [
+  ...Object.values(OPENING_SEO).map((o) => o.slug),
+  ...Object.values(EXTRA_OPENINGS).map((o) => o.slug),
+];
 
 export const getOpeningBySlug = (slug: string): OpeningSeoMeta | null => {
+  const extra = Object.values(EXTRA_OPENINGS).find((o) => o.slug === slug);
+  if (extra) return extra;
   const found = Object.values(OPENING_SEO).find((o) => o.slug === slug);
   if (!found) return null;
   const fallback = STANDALONE[found.id];
   return fallback ? { ...fallback, ...found } : found;
 };
+
 
