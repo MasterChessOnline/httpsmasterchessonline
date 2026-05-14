@@ -273,6 +273,18 @@ export default function OpeningTrainerView({ opening, onBack }: OpeningTrainerVi
   const currentNode = fullMovePath[clampedView] || null;
   const highlightSquares = currentNode?.highlightSquares || [];
 
+  // FEN of the position BEFORE the current move (for Stockfish move-comment).
+  const fenBeforePlayed = useMemo(() => {
+    if (clampedView < 0) return null;
+    let game: Chess;
+    try { game = activeMasterLine?.startFen ? new Chess(activeMasterLine.startFen) : new Chess(); }
+    catch { game = new Chess(); }
+    for (let i = 0; i < clampedView; i++) {
+      try { game.move(fullMovePath[i].san); } catch { break; }
+    }
+    return game.fen();
+  }, [fullMovePath, clampedView, activeMasterLine]);
+
   // Navigation
   const goForward = useCallback(() => {
     if (clampedView < fullMovePath.length - 1) {
