@@ -1,109 +1,90 @@
-# MasterChess — Kompletan Update Plan
+# Plan da MasterChess eksplodira — brzi, konkretni potezi
 
-Veliki scope, pa cu raditi u jasnim fazama. Svaka faza je samostalna i ne lomi prethodne.
+Sortiran po **ROI / brzini**. Možeš mi reći "uradi 1, 3, 5" pa krećem.
 
-## Faza 1 — Learn sekcija (najveci deo)
+---
 
-**Cilj:** Learn ima 3 jasna taba: Openings / Master Courses / Training. Training BEZ kurseva.
+## 1. Programmatic SEO — 500+ stranica iz baze (najveći ROI)
 
-### 1.1 `src/pages/Learn.tsx` rewrite
-- Tri taba na vrhu: **Openings**, **Master Courses**, **Training**
-- **Training tab** = samo CTA kartice ka: Puzzles, Tactics, Pattern, Calculation, Mate-in-1/2/3, Endgame Drills, Streak, Combo. Bez ijednog kursa.
-- **Openings tab** = lista openings kurseva (filtrirano `category: "openings"` + masterclass openings)
-- **Master Courses tab** = svih 7 masterklasa
-- Svaki kurs renderovan istom `CourseCard` komponentom (cover, difficulty, name, progress bar, chapters count, variations count, est. time, favorite ⭐, "Continue learning" dugme, "Last played" timestamp)
+Generiši automatski landing strane iz već postojećih podataka. Svaka stranica = nova prilika u Google-u.
 
-### 1.2 Unified Course Player — `src/components/learn/CoursePlayer.tsx` (novo)
-Zameni postojeci interaktivni view za sve kurseve (Openings + Master). Layout:
+- **`/openings/:slug`** — po stranica za svako otvaranje iz `openings-data.ts` (Italian Game, Sicilian Najdorf, KID...) sa: PGN viewer, statistika, top potezi, varijacije. Targetira "italian game opening", "sicilian najdorf moves", itd.
+- **`/players/:username`** — javni profili svih registrovanih igrača sa partijama i ratingom. Targetira pretrage po imenu igrača.
+- **`/games/:id`** — svaka odigrana partija dobija public URL sa PGN-om i Stockfish review-om. Ovo je kako se chess.com i Lichess raširili.
+- **`/bots/:slug`** — landing po botu (9 botova × ~3000 mesečnih pretraga "play chess vs computer").
 
-```
-┌─────────────────────┬──────────────────────┐
-│                     │  Chapter / Variation │
-│      CHESSBOARD     │  selector            │
-│   (drag + click)    │                      │
-│                     │  Move list (SAN)     │
-│                     │  -> highlight current│
-│                     │                      │
-│  ◀◀ ◀ ▶ ▶▶  ▶auto  │  Notation panel      │
-│  Start End Pause    │  Engine comment      │
-└─────────────────────┴──────────────────────┘
-```
+**Rezultat:** sa ~100 ručno napisanih stranica skočiš na 1000+ indeksiranih.
 
-Funkcije:
-- `chess.js` instanca + `history` array
-- **NEXT** / **PREVIOUS** / **START** / **END** dugmad
-- **Autoplay** (1.2s/move) + **Pause**
-- Keyboard: ←/→/Home/End/Space
-- Smooth piece animacija (Framer Motion `layout`)
-- Highlighted from/to squares
-- Arrow overlay za "best move" (kada postoji u podacima)
-- Engine comment panel ispod move liste
-- "Practice vs Computer from this position" dugme → otvara `/play?fen=...`
+---
 
-### 1.3 Progress persistence — `src/hooks/use-course-progress.ts` (novo)
-localStorage ključ `mc:course-progress:<courseId>`:
-```ts
-{ lastChapterId, lastVariationId, lastMoveIndex, completedChapters: [], percent, updatedAt }
-```
-- "Continue learning" čita ovo
-- Course card prikazuje progress bar i "Last played"
+## 2. Viralni share alati (bez signup-a)
 
-### 1.4 Course data uniformity
-`src/lib/courses-data.ts` — proveri da svi kursevi imaju: `coverImage, difficulty, totalChapters, totalVariations, estMinutes`. Dopuni gde fali.
+Stranice koje ljudi prirodno share-uju.
 
-## Faza 2 — Welcome Intro / Onboarding
+- **"Share your last game" kartica** — slika za Instagram/X sa rezultatom, accuracy %, opening, opponent rating. Auto-generated OG image preko edge funkcije.
+- **"My Chess Year"** — godišnji wrap-up tipa Spotify Wrapped (broj partija, omiljeno otvaranje, najbolja partija). Najmanje 1 viralni potez godišnje.
+- **Chess Card** (već postoji) — dodaj javan link i ćaskanje preko OG slike.
 
-`src/components/AuthGate.tsx` — pretvori postojeci u **cinematic intro**:
-- 2.5s intro sekvenca: floating chess pieces (Framer Motion), gold glow, logo reveal
-- Posle intro: 3 velika CTA — **Play Your First Game**, **Challenge The AI**, **Start Training**, plus diskretnije Sign Up / Log In
-- Ako user nije ulogovan a klikne CTA → vodi na Signup
-- Smooth gradient pozadina, dark gaming feel
+---
 
-## Faza 3 — Board UX (drag/drop, premove)
+## 3. Reddit + YouTube SEO blitz (besplatan saobraćaj sutra)
 
-**Audit `src/components/chess/`** — pronaći glavni board komponent. Popraviti:
-- Drag: piece prati kursor 1:1, shadow + lift (scale 1.1, drop-shadow)
-- Bez teleportovanja: koristi pointer events + `setPointerCapture`
-- Click-to-move + drag rade istovremeno
-- **Premove**: kada nije tvoj red, sledeći legal-na-trenutnoj-poziciji potez se snima i prikazuje poluprovidno (opacity 0.5, žuta ivica). Kada dođe red, automatski izvrši ako je i dalje legal.
+- **Reddit:** posting plan za r/chess, r/chessbeginners, r/AnarchyChess sa autentičnim sadržajem (ne spam). 1 post = 5k–50k pregleda.
+- **Pisani guideovi koji već postoje** sad treba videom — kratki Shorts (60s) od svakog članka. DailyChess_12 može hostovati, ti samo embedduješ u Blog.
+- **"Tools" stranice** koje rangiraju lako: PGN viewer, FEN editor, opening explorer, rating calculator — svi targetiraju long-tail.
 
-## Faza 4 — Chess pravila (verifikacija)
+---
 
-Provera da chess.js već pokriva: 3-fold rep, 50-move, stalemate, insufficient material, en passant, castling, promotion. Dodaj ako fali:
-- **Auto-offer draw** kad `chess.isThreefoldRepetition()` (toast sa "Claim Draw" dugmetom)
-- Repetition counter u game info panelu
-- Captured pieces tray (verovatno postoji, proveriti)
+## 4. Indexing API + automatska submit-acija
 
-## Faza 5 — Sound system
+Sad kad imam GSC pristup, mogu da auto-šaljem URL-ove kad se dodaju (samo job/jobs, ali korisno za nove blog članke). Plus:
 
-`src/lib/chess-sounds.ts` već ima: move, capture, check, gameOver, start. Dodaj:
-- `playPremoveSound`, `playIllegalSound`, `playPromotionSound`, `playCountdownSound`, `playCheckmateDramatic` (ducked + dramatic)
-- Mali sample fajlovi (sintetisano kroz postojeci `playToneSequence` ako nema mp3-a)
+- **`<lastmod>`** ažuriran pri svakoj promeni → Google brže refetchuje.
+- **Internal linking audit** — svaki članak treba 3–5 linkova na druge članke (sad ima 2–3).
+- **Bing Webmaster Tools** registracija — 5% dodatnog saobraćaja besplatno.
 
-## Faza 6 — Training Streak System
+---
 
-Već postoji `useTrainingStreak`. Nadograditi `src/pages/Training.tsx`:
-- 🔥 **Animated fire icon** (Framer Motion scale + glow) — veličina raste sa streak (1-5 small, 5-15 medium, 15+ huge sa particles)
-- **Combo multiplier** prikaz (x2 posle 5 u nizu, x3 posle 10, itd.)
-- XP gain toast posle svakog tačnog
-- Daily mission widget (već postoji `DailyMissions` komponenta — uvezi)
+## 5. Push notifikacije + email loop (retencija)
 
-## Faza 7 — Polish
+Da posetioci ne odu i ne vrate se nikad.
 
-- Homepage: veliki board preview u hero-u (već postoji `HeroSection`, dotjerati)
-- Smooth hover/glow na svim primary dugmadima (utility klasa u `index.css`)
-- Mobile pass — sve nove komponente
+- **Web push** — "Your daily puzzle... ups, sorry — your daily game is waiting" (uz to što već imamo daily streak).
+- **Welcome email serija** (3 emaila kroz Lovable Email): dan 1 — kako napredovati, dan 3 — challenge prijatelja, dan 7 — turnir.
+- **Inactive user re-engagement** — auto email posle 7 dana neaktivnosti.
 
-## Šta NE diram
-- Supabase šemu, Edge funkcije, auth providers
-- Tournaments, Stream Hub, Community
-- Postojeći Jobava London / Kalashnikov SADRŽAJ (samo player UI postaje uniforman)
+---
 
-## Redosled isporuke
-Idem fazama 1 → 2 → 3 → 6 → 4 → 5 → 7. Faza 1 je najveca i najvrednija (zatrazena prva). Posle svake faze proverim build i mobile viewport.
+## 6. Reference program (zaprljaj geometrijski rast)
 
-## Tehnicke note
-- Sve nove komponente koriste design tokens iz `index.css` (gold/black tema)
-- `chess.js` već u projektu
-- `framer-motion` već u projektu
-- Bez novih dependency-ja
+- **Pozovi prijatelja** → obojica dobijaju badge "Pioneer" + 100 XP.
+- Public leaderboard top referrera mesečno.
+- **Embed widget** — "play chess on my site" iframe koji svaki streamer/blog može da stavi, sa MasterChess brendiranjem na dnu.
+
+---
+
+## 7. Vizuelni "wow" momenat na homepage (prvi utisak)
+
+- Hero animacija sa 3D pločom koja se sama igra (chess.js + light Stockfish, lazy-loaded).
+- Live "playing now" counter (autentičan — ne lažan) i live partija u pozadini.
+- "Beat the bot in 60s" — instant gameplay bez signup-a, captures email kasnije.
+
+---
+
+## 8. Pricing/premium (kad već imaš protok)
+
+Ne sada, ali planiraj za mesec 2:
+- **Free**: sve što sad imaš.
+- **Pro $4.99/mo**: advanced analytics, neograničene PGN study lekcije, exclusive bot personalities, ad-free.
+
+---
+
+## Šta predlažem da uradimo **odmah, danas**:
+
+**Phase 1 (3–4 sata rada moja):**
+1. Programmatic stranice za 30 najvažnijih otvaranja (`/openings/:slug`) → +30 indeksiranih
+2. Reddit-ready share card sa OG image generator-om za partije
+3. Internal linking audit + auto-related u blog člancima
+4. Bing Webmaster registracija (kao GSC)
+
+Reci mi koji set hoćeš — ili samo "kreni" i ja idem redom 1→4.
