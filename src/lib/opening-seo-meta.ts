@@ -2,7 +2,7 @@
 // Targets high-volume Google queries like "italian game opening moves" or "sicilian najdorf explained".
 
 export interface OpeningSeoMeta {
-  id: string;                     // matches Opening.id
+  id: string;                     // matches Opening.id in OPENINGS_DATABASE when available
   slug: string;                   // URL slug
   searchVolume?: number;          // monthly Google volume (rough)
   longTitle: string;              // <60 chars
@@ -10,6 +10,13 @@ export interface OpeningSeoMeta {
   keyIdeas: string[];             // 3-5 strategic ideas
   famousGames?: string[];         // line items
   faqs: { q: string; a: string }[];
+  // Standalone fallback fields — used when there's no matching OPENINGS_DATABASE entry
+  name?: string;
+  eco?: string;
+  category?: string;
+  difficulty?: string;
+  startingMoves?: string;
+  description?: string;
 }
 
 export const OPENING_SEO: Record<string, OpeningSeoMeta> = {
@@ -354,9 +361,34 @@ export const OPENING_SEO: Record<string, OpeningSeoMeta> = {
   },
 };
 
+// Standalone fallback fields for openings NOT in OPENINGS_DATABASE.
+// Lets us ship dedicated SEO landing pages without bloating the trainer DB.
+const STANDALONE: Record<string, Pick<OpeningSeoMeta, "name" | "eco" | "category" | "difficulty" | "startingMoves" | "description">> = {
+  "kings-gambit":         { name: "King's Gambit",          eco: "C30–C39", category: "open game",        difficulty: "advanced",     startingMoves: "1.e4 e5 2.f4",                    description: "The romantic era's sharpest weapon — sacrifice a pawn for open lines and a kingside attack on the f-file." },
+  "vienna-game":          { name: "Vienna Game",            eco: "C25–C29", category: "open game",        difficulty: "intermediate", startingMoves: "1.e4 e5 2.Nc3",                   description: "Flexible knight development that keeps a delayed King's Gambit on the table and threatens sharp f4 breaks." },
+  "pirc-defense":         { name: "Pirc Defense",           eco: "B07–B09", category: "hypermodern",      difficulty: "advanced",     startingMoves: "1.e4 d6 2.d4 Nf6 3.Nc3 g6",       description: "A hypermodern reply against 1.e4 — let White build a center, then dynamite it with ...c5 and ...e5." },
+  "alekhines-defense":    { name: "Alekhine's Defense",     eco: "B02–B05", category: "hypermodern",      difficulty: "advanced",     startingMoves: "1.e4 Nf6",                        description: "Provoke White's pawns forward, then dismantle the over-extended center — Alekhine's wild brainchild." },
+  "nimzo-indian-defense": { name: "Nimzo-Indian Defense",   eco: "E20–E59", category: "indian defense",   difficulty: "intermediate", startingMoves: "1.d4 Nf6 2.c4 e6 3.Nc3 Bb4",     description: "Pin the c3 knight, double White's c-pawns, and dominate the dark squares — a defense every World Champion has trusted." },
+  "slav-defense":         { name: "Slav Defense",           eco: "D10–D19", category: "queen's pawn",     difficulty: "intermediate", startingMoves: "1.d4 d5 2.c4 c6",                description: "Rock-solid Slav structure — keep the c8-bishop alive while building a fortress against the Queen's Gambit." },
+};
+
 // Categories we expose to programmatic SEO (excludes 'masterclass-*' courses which aren't separate openings).
-export const SEO_OPENING_IDS = Object.keys(OPENING_SEO);
+import { EXTRA_OPENINGS } from "./extra-opening-seo";
+
+export const SEO_OPENING_IDS = [...Object.keys(OPENING_SEO), ...Object.keys(EXTRA_OPENINGS)];
+
+export const ALL_OPENING_SLUGS: string[] = [
+  ...Object.values(OPENING_SEO).map((o) => o.slug),
+  ...Object.values(EXTRA_OPENINGS).map((o) => o.slug),
+];
 
 export const getOpeningBySlug = (slug: string): OpeningSeoMeta | null => {
-  return Object.values(OPENING_SEO).find((o) => o.slug === slug) ?? null;
+  const extra = Object.values(EXTRA_OPENINGS).find((o) => o.slug === slug);
+  if (extra) return extra;
+  const found = Object.values(OPENING_SEO).find((o) => o.slug === slug);
+  if (!found) return null;
+  const fallback = STANDALONE[found.id];
+  return fallback ? { ...fallback, ...found } : found;
 };
+
+

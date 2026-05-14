@@ -14,19 +14,34 @@ export default function OpeningLanding() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const meta = slug ? getOpeningBySlug(slug) : null;
-  const opening = meta ? OPENINGS_DATABASE.find((o) => o.id === meta.id) : null;
+  const dbOpening = meta ? OPENINGS_DATABASE.find((o) => o.id === meta.id) : null;
 
-  if (!meta || !opening) return <Navigate to="/openings" replace />;
+  if (!meta) return <Navigate to="/openings" replace />;
+
+  // Resolve display fields — prefer the database, fall back to meta-provided fields.
+  const opening = {
+    id: meta.id,
+    name: dbOpening?.name ?? meta.name ?? meta.longTitle.split("—")[0].trim(),
+    eco: dbOpening?.eco ?? meta.eco ?? "—",
+    category: dbOpening?.category ?? meta.category ?? "opening",
+    difficulty: dbOpening?.difficulty ?? meta.difficulty ?? "intermediate",
+    startingMoves: dbOpening?.startingMoves ?? meta.startingMoves ?? "",
+    description: dbOpening?.description ?? meta.description ?? meta.longDescription,
+    totalVariations: dbOpening?.totalVariations,
+    tree: dbOpening?.tree,
+  };
 
   const url = `https://masterchess.live/openings/${meta.slug}`;
   const otherOpenings = Object.values(OPENING_SEO).filter((o) => o.id !== meta.id).slice(0, 6);
 
-  // Extract first 6 main-line moves for the SEO preview
+  // Extract first 6 main-line moves for the SEO preview (only when DB tree exists)
   const previewMoves: string[] = [];
-  let cursor: any = opening.tree[0];
-  while (cursor && previewMoves.length < 10) {
-    previewMoves.push(cursor.san);
-    cursor = cursor.children?.find((c: any) => c.isMainLine) ?? cursor.children?.[0];
+  if (opening.tree) {
+    let cursor: any = opening.tree[0];
+    while (cursor && previewMoves.length < 10) {
+      previewMoves.push(cursor.san);
+      cursor = cursor.children?.find((c: any) => c.isMainLine) ?? cursor.children?.[0];
+    }
   }
 
   const jsonLd: Record<string, any>[] = [
@@ -102,16 +117,20 @@ export default function OpeningLanding() {
         <div className="flex flex-wrap gap-2 mb-6">
           <Badge variant="secondary" className="capitalize">{opening.difficulty}</Badge>
           <Badge variant="outline" className="capitalize">{opening.category.replace("-", " ")}</Badge>
-          <Badge variant="outline">{opening.totalVariations} variations</Badge>
+          {opening.totalVariations !== undefined && (
+            <Badge variant="outline">{opening.totalVariations} variations</Badge>
+          )}
           <Badge variant="outline">ECO {opening.eco}</Badge>
         </div>
 
         <div className="flex flex-wrap gap-3 mb-10">
-          <Link to={`/openings?openingId=${opening.id}`}>
-            <Button className="gap-2">
-              <Sparkles className="h-4 w-4" /> Train this opening
-            </Button>
-          </Link>
+          {dbOpening && (
+            <Link to={`/openings?openingId=${opening.id}`}>
+              <Button className="gap-2">
+                <Sparkles className="h-4 w-4" /> Train this opening
+              </Button>
+            </Link>
+          )}
           <Link to="/play">
             <Button variant="outline" className="gap-2">
               Play now <ArrowRight className="h-4 w-4" />
@@ -120,16 +139,19 @@ export default function OpeningLanding() {
         </div>
 
         {/* Opening moves preview */}
-        <section className="mb-10 rounded-2xl border border-border/60 bg-card/50 p-6">
-          <h2 className="font-display text-xl font-bold text-foreground mb-3">Starting moves</h2>
-          <p className="font-mono text-lg text-foreground mb-2 break-words">{opening.startingMoves}</p>
-          {previewMoves.length > 0 && (
-            <>
-              <p className="text-sm text-muted-foreground mb-2 mt-4">Main line continuation:</p>
-              <p className="font-mono text-base text-foreground/80 break-words">{previewMoves.join(" ")}</p>
-            </>
-          )}
-        </section>
+        {opening.startingMoves && (
+          <section className="mb-10 rounded-2xl border border-border/60 bg-card/50 p-6">
+            <h2 className="font-display text-xl font-bold text-foreground mb-3">Starting moves</h2>
+            <p className="font-mono text-lg text-foreground mb-2 break-words">{opening.startingMoves}</p>
+            {previewMoves.length > 0 && (
+              <>
+                <p className="text-sm text-muted-foreground mb-2 mt-4">Main line continuation:</p>
+                <p className="font-mono text-base text-foreground/80 break-words">{previewMoves.join(" ")}</p>
+              </>
+            )}
+          </section>
+        )}
+
 
         {/* Key ideas */}
         <section className="mb-10">
@@ -192,12 +214,14 @@ export default function OpeningLanding() {
           <div className="grid sm:grid-cols-2 gap-3">
             {otherOpenings.map((o) => {
               const op = OPENINGS_DATABASE.find((x) => x.id === o.id);
-              if (!op) return null;
+              const name = op?.name ?? o.name ?? o.longTitle.split("—")[0].trim();
+              const eco = op?.eco ?? o.eco ?? "—";
+              const desc = op?.description ?? o.description ?? o.longDescription;
               return (
                 <Link key={o.slug} to={`/openings/${o.slug}`} className="block rounded-xl border border-border/50 bg-card/50 p-4 hover:border-primary/40 hover:bg-card/80 transition-colors">
-                  <p className="text-xs uppercase tracking-wider text-primary mb-1">{op.eco}</p>
-                  <p className="font-semibold text-foreground">{op.name}</p>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{op.description}</p>
+                  <p className="text-xs uppercase tracking-wider text-primary mb-1">{eco}</p>
+                  <p className="font-semibold text-foreground">{name}</p>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{desc}</p>
                 </Link>
               );
             })}
