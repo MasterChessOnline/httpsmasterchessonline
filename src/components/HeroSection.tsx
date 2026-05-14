@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import AnimatedGradientBg from "@/components/AnimatedGradientBg";
 import { useRef, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import ShareBar from "@/components/ShareBar";
 
 const FloatingPiece = ({ piece, delay, x, y, size }: { piece: string; delay: number; x: string; y: string; size: number }) => (
   <motion.div
