@@ -76,6 +76,53 @@ function parsePuzzle(p: DailyPuzzle): ParsedPuzzle | null {
   }
 }
 
+// Fetch Lichess daily puzzle (engine-verified, single forced winning line).
+async function fetchVerifiedDailyMate(): Promise<ParsedPuzzle> {
+  const r = await fetch("https://lichess.org/api/puzzle/daily");
+  if (!r.ok) throw new Error(`Lichess HTTP ${r.status}`);
+  const data = await r.json();
+
+  const pgn: string = data.game?.pgn || "";
+  const initialPly: number = data.puzzle?.initialPly ?? 0;
+  const solution: string[] = data.puzzle?.solution || [];
+  const themes: string[] = data.puzzle?.themes || [];
+  const id: string = data.puzzle?.id || "daily";
+
+  if (!pgn || !solution.length) throw new Error("Invalid puzzle payload");
+
+  // Replay PGN moves up to initialPly to get the puzzle starting FEN.
+  const sanMoves = pgn.split(/\s+/).filter(Boolean);
+  const board = new Chess();
+  for (let i = 0; i <= initialPly && i < sanMoves.length; i++) {
+    try { board.move(sanMoves[i]); } catch { break; }
+  }
+  const startFen = board.fen();
+
+  // Verify solution legality
+  const verifier = new Chess(startFen);
+  for (const uci of solution) {
+    verifier.move({
+      from: uci.slice(0, 2),
+      to: uci.slice(2, 4),
+      promotion: uci.length > 4 ? uci[4] : undefined,
+    });
+  }
+  const isMate = verifier.isCheckmate();
+  const isMateTheme = themes.some((t) => t.toLowerCase().startsWith("matein"));
+
+  return {
+    title: isMate || isMateTheme ? "Daily Mate Puzzle" : "Daily Tactic",
+    url: `https://lichess.org/training/${id}`,
+    date: todayStr(),
+    startFen,
+    solution,
+    playerColor: board.turn(),
+    firstMoveBy: board.turn(),
+    isMate: isMate || isMateTheme,
+  };
+}
+
+
 const DailyChallenge = () => {
   const [puzzle, setPuzzle] = useState<ParsedPuzzle | null>(null);
   const [loading, setLoading] = useState(true);
