@@ -85,6 +85,10 @@ import CheckmatePatterns from "./pages/CheckmatePatterns";
 import CheckmatePatternDetail from "./pages/CheckmatePatternDetail";
 import EloLanding from "./pages/EloLanding";
 import EloDetail from "./pages/EloDetail";
+import FamousGames from "./pages/FamousGames";
+import FamousGameDetail from "./pages/FamousGameDetail";
+import Grandmasters from "./pages/Grandmasters";
+import GrandmasterDetail from "./pages/GrandmasterDetail";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
@@ -140,7 +144,7 @@ function AnimatedRoutes() {
           <Route path="/history" element={<GameHistory />} />
           <Route path="/analysis" element={<Analysis />} />
           <Route path="/rating-calculator" element={<RatingCalculator />} />
-          <Route path="/tools" element={<ChessTools />} />
+          <Route path="/legacy-tools" element={<ChessTools />} />
           <Route path="/piece-values" element={<PieceValues />} />
           <Route path="/skill-tree" element={<SkillTree />} />
           <Route path="/challenge" element={<Challenge />} />
@@ -189,6 +193,10 @@ function AnimatedRoutes() {
           <Route path="/learn/checkmate-patterns/:slug" element={<CheckmatePatternDetail />} />
           <Route path="/elo" element={<EloLanding />} />
           <Route path="/elo/:rating" element={<EloDetail />} />
+          <Route path="/famous-games" element={<FamousGames />} />
+          <Route path="/famous-games/:slug" element={<FamousGameDetail />} />
+          <Route path="/players" element={<Grandmasters />} />
+          <Route path="/players/:slug" element={<GrandmasterDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
