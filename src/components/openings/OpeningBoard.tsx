@@ -45,16 +45,16 @@ export default function OpeningBoard({
 
   return (
     <div className="w-full max-w-[min(85vw,480px)] mx-auto">
-      <div className="flex ml-6 mr-1 mb-0.5">
+      <div className="flex ml-7 mr-1 mb-1">
         {displayFiles.map((f) => (
-          <span key={f} className="flex-1 text-center text-[11px] font-mono font-semibold text-foreground/85">{f}</span>
+          <span key={f} className="flex-1 text-center text-[13px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{f}</span>
         ))}
       </div>
 
       <div className="flex">
-        <div className="flex flex-col w-6 flex-shrink-0">
+        <div className="flex flex-col w-7 flex-shrink-0">
           {displayRanks.map((r) => (
-            <span key={r} className="flex-1 flex items-center justify-center text-[11px] font-mono font-semibold text-foreground/85">{r}</span>
+            <span key={r} className="flex-1 flex items-center justify-center text-[13px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{r}</span>
           ))}
         </div>
 
