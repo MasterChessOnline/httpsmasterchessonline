@@ -264,6 +264,8 @@ export default function ChessBoard({
                     onClick={() => onSquareClick(square)}
                     onMouseDown={(e) => handleMouseDown(e, square)}
                     onMouseUp={(e) => handleMouseUp(e, square)}
+                    onMouseEnter={() => setHoverSquare(square)}
+                    onMouseLeave={() => setHoverSquare((s) => (s === square ? null : s))}
                     onContextMenu={(e) => handleContextMenu(e, square)}
                     onDragOver={handleSquareDragOver}
                     onDrop={(e) => handleSquareDrop(e, square)}
