@@ -287,6 +287,16 @@ const Index = () => {
       {/* ── MAIN CONTENT ── */}
       <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
 
+        {/* Daily Challenge — directly below the hero, first thing users see */}
+        <section id="daily-missions" className="scroll-mt-24 -mt-4">
+          <SectionHeader title="Daily Challenge" icon={Target}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <DailyPuzzleWidget />
+              <DailyMissions compact />
+            </div>
+          </SectionHeader>
+        </section>
+
         {/* User Preferences */}
         <motion.div
           className="flex items-center justify-between flex-wrap gap-3"
