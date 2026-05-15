@@ -201,8 +201,8 @@ const Index = () => {
               <span className="text-gradient-gold">Master</span>
               <span className="text-foreground">Chess</span>
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 font-light tracking-wide">
-              Play, learn, and compete — your next great game starts here
+            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 font-light tracking-wide uppercase">
+              <span className="text-primary font-semibold">Battle.</span> Climb. <span className="text-primary font-semibold">Conquer.</span>
             </p>
           </motion.div>
 
@@ -217,10 +217,10 @@ const Index = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
                 <Button
                   size="lg"
-                  className="ripple-btn h-12 px-8 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_40px_hsl(43_90%_55%/0.4)] transition-all duration-300"
+                  className="ripple-btn h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
                 >
-                  <Play className="h-5 w-5 mr-2" />
-                  Play Online
+                  <Play className="h-5 w-5 mr-2 fill-current" />
+                  Enter Arena
                 </Button>
               </motion.div>
             </Link>
@@ -229,10 +229,10 @@ const Index = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="ripple-btn h-12 px-8 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
+                  className="ripple-btn h-14 px-8 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
                 >
                   <Swords className="h-5 w-5 mr-2" />
-                  Play vs AI
+                  vs Bots
                 </Button>
               </motion.div>
             </Link>
@@ -279,55 +279,72 @@ const Index = () => {
           <PreferenceToggles />
         </motion.div>
 
-        {/* ─── Start Playing Section — Parallax Cards ─── */}
-        <SectionHeader title="Start Playing" icon={Swords}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Link to="/play/online" className="group">
-              <ParallaxCard className="rounded-xl" glowColor="hsl(43 90% 55% / 0.15)">
-                <div className="rounded-xl border border-primary/20 glass-4d p-6 hover:border-primary/40 transition-all duration-300 h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <motion.div
-                      className="h-10 w-10 rounded-lg bg-primary/15 flex items-center justify-center"
-                      whileHover={{ rotate: 10, scale: 1.1 }}
-                    >
-                      <Play className="h-5 w-5 text-primary" />
-                    </motion.div>
-                    <div>
-                      <h3 className="text-base font-semibold text-foreground">Play Online</h3>
-                      <p className="text-xs text-muted-foreground">Find an opponent instantly</p>
+        {/* ─── QUICK MATCH — Arcade-style time control launcher ─── */}
+        <SectionHeader title="Quick Match" icon={Zap}
+          action={<ActivityPulse />}>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+            {[
+              { tc: "1+0",   label: "Bullet",     icon: "⚡", color: "from-red-500/20 to-orange-500/10",    border: "border-red-500/30 hover:border-red-400/60" },
+              { tc: "3+0",   label: "Blitz",      icon: "🔥", color: "from-orange-500/20 to-amber-500/10",  border: "border-orange-500/30 hover:border-orange-400/60" },
+              { tc: "5+0",   label: "Blitz",      icon: "💨", color: "from-amber-500/20 to-yellow-500/10",  border: "border-amber-500/30 hover:border-amber-400/60" },
+              { tc: "10+0",  label: "Rapid",      icon: "⚔️", color: "from-emerald-500/20 to-teal-500/10",  border: "border-emerald-500/30 hover:border-emerald-400/60" },
+              { tc: "15+10", label: "Classical",  icon: "👑", color: "from-blue-500/20 to-indigo-500/10",   border: "border-blue-500/30 hover:border-blue-400/60" },
+            ].map((tc, i) => (
+              <motion.div
+                key={tc.tc}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05, duration: 0.4 }}
+              >
+                <Link to={`/play/online?tc=${encodeURIComponent(tc.tc)}`}>
+                  <motion.div
+                    className={`relative rounded-xl border ${tc.border} bg-gradient-to-br ${tc.color} backdrop-blur p-3 sm:p-4 text-center transition-all duration-300 overflow-hidden`}
+                    whileHover={{ y: -6, scale: 1.06 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <div className="text-2xl sm:text-3xl mb-1">{tc.icon}</div>
+                    <div className="font-display font-bold text-base sm:text-lg text-foreground tracking-tight">{tc.tc}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">{tc.label}</div>
+                  </motion.div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Secondary play modes — gamey row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-3">
+            {[
+              { to: "/play",         icon: Swords,  label: "vs Bots",     sub: "9 personalities" },
+              { to: "/friends",      icon: Users,   label: "Challenge",   sub: "A friend" },
+              { to: "/tournaments",  icon: Trophy,  label: "Tournaments", sub: "Live now" },
+              { to: "/spectate",     icon: Eye,     label: "Spectate",    sub: "Top games" },
+            ].map((m, i) => (
+              <motion.div
+                key={m.to}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.25 + i * 0.05, duration: 0.4 }}
+              >
+                <Link to={m.to}>
+                  <motion.div
+                    className="rounded-xl border border-border/30 glass-4d p-3 flex items-center gap-2.5 group hover:border-primary/40 transition-all duration-300"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <div className="h-9 w-9 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                      <m.icon className="h-4 w-4 text-primary" />
                     </div>
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {["Bullet", "Blitz", "Rapid"].map(tc => (
-                      <span key={tc} className="text-[10px] px-2 py-1 rounded-md bg-primary/10 text-primary font-medium">{tc}</span>
-                    ))}
-                  </div>
-                </div>
-              </ParallaxCard>
-            </Link>
-            <Link to="/play" className="group">
-              <ParallaxCard className="rounded-xl" glowColor="hsl(30 60% 40% / 0.12)">
-                <div className="rounded-xl border border-border/30 glass-4d p-6 hover:border-primary/30 transition-all duration-300 h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <motion.div
-                      className="h-10 w-10 rounded-lg bg-muted/30 flex items-center justify-center"
-                      whileHover={{ rotate: -10, scale: 1.1 }}
-                    >
-                      <Swords className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </motion.div>
-                    <div>
-                      <h3 className="text-base font-semibold text-foreground">Play vs AI</h3>
-                      <p className="text-xs text-muted-foreground">Practice against bots (800–3000 ELO)</p>
+                    <div className="text-left min-w-0">
+                      <div className="text-xs font-semibold text-foreground truncate">{m.label}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">{m.sub}</div>
                     </div>
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {["Easy", "Medium", "Hard", "Master"].map(d => (
-                      <span key={d} className="text-[10px] px-2 py-1 rounded-md bg-muted/20 text-muted-foreground font-medium">{d}</span>
-                    ))}
-                  </div>
-                </div>
-              </ParallaxCard>
-            </Link>
+                  </motion.div>
+                </Link>
+              </motion.div>
+            ))}
           </div>
         </SectionHeader>
 
@@ -401,76 +418,38 @@ const Index = () => {
           )}
         </section>
 
-        {/* ─── Explore Modes — interactive cards ─── */}
-        <SectionHeader title="Explore" icon={Zap}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* ─── Training shortcuts (de-emphasized — for between matches) ─── */}
+        <section className="pt-2">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[11px] uppercase tracking-widest text-muted-foreground/70 font-semibold">Between matches</p>
+            <Link to="/guides" className="text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
+              All guides <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { to: "/tournaments", icon: Trophy, label: "Tournaments", desc: "Compete to win" },
-              { to: "/friends", icon: Users, label: "Play Friend", desc: "Challenge a friend" },
-              { to: "/guess-the-move", icon: Target, label: "Guess the Move", desc: "Find the best move" },
-              { to: "/play-like-gm", icon: Crown, label: "Play Like a GM", desc: "GM-style challenges" },
+              { to: "/openings",    icon: BookOpen,       label: "Openings" },
+              { to: "/training",    icon: Brain,          label: "Training" },
+              { to: "/analysis",    icon: Eye,            label: "Analysis" },
+              { to: "/learn",       icon: GraduationCap,  label: "Lessons" },
             ].map((item, i) => (
               <motion.div
                 key={item.to}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.5 }}
+                transition={{ delay: i * 0.04, duration: 0.35 }}
               >
                 <Link to={item.to}>
-                  <motion.div
-                    className="rounded-xl border border-border/30 glass-4d p-4 sm:p-5 text-center group block hover:border-primary/30 transition-all duration-300"
-                    whileHover={{ y: -6, scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  >
-                    <item.icon className="h-6 w-6 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                    <p className="text-sm font-semibold text-foreground mb-0.5">{item.label}</p>
-                    <p className="text-[11px] text-muted-foreground leading-tight">{item.desc}</p>
-                  </motion.div>
+                  <div className="rounded-lg border border-border/15 bg-muted/5 hover:bg-muted/15 hover:border-border/30 p-2.5 flex items-center gap-2 transition-all duration-200">
+                    <item.icon className="h-3.5 w-3.5 text-muted-foreground/80 shrink-0" />
+                    <span className="text-xs text-muted-foreground font-medium truncate">{item.label}</span>
+                  </div>
                 </Link>
               </motion.div>
             ))}
           </div>
-        </SectionHeader>
-
-        {/* ─── Learn & Improve ─── */}
-        <SectionHeader title="Learn & Improve" icon={GraduationCap}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { to: "/openings", icon: BookOpen, label: "Opening Explorer", desc: "Master popular openings with move trees & stats" },
-              { to: "/learn", icon: GraduationCap, label: "Lessons", desc: "Step-by-step interactive training" },
-              { to: "/analysis", icon: Eye, label: "Game Analysis", desc: "Review & analyze your games with AI" },
-            ].map((item, i) => (
-              <motion.div
-                key={item.to}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-              >
-                <Link to={item.to}>
-                  <motion.div
-                    className="flex items-center gap-4 rounded-xl border border-border/30 glass-4d p-4 group transition-all duration-300 hover:border-primary/30"
-                    whileHover={{ x: 6, scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                  >
-                    <motion.div
-                      className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors"
-                      whileHover={{ rotate: 8 }}
-                    >
-                      <item.icon className="h-5 w-5 text-primary" />
-                    </motion.div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{item.label}</p>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">{item.desc}</p>
-                    </div>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </SectionHeader>
+        </section>
 
         {/* Recent Games */}
         {user && recentGames.length > 0 && (
