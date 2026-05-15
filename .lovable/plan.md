@@ -1,134 +1,170 @@
 
-# Full SEO Eruption — kompletna implementacija
+# Kako da MasterChess.live "eksplodira"
 
-Cilj: maksimizirati Google indeksaciju, video/image SERP prisustvo, rich snippets i knowledge panel kandidaturu za **masterchess.live**.
-
----
-
-## Pack 1 — Google Indexing API (instant crawl trigger)
-
-**Šta:** Edge funkcija `google-indexing-ping` koja pozove Google Indexing API (`https://indexing.googleapis.com/v3/urlNotifications:publish`) preko **Google Search Console connector-a** (već imaš token sa pravim scope-om — proširićemo `https://www.googleapis.com/auth/indexing` ako fali).
-
-**Trigger:**
-- Manualni: dugme u `/seo-status` admin panelu → "Push all URLs to Google"
-- Auto: pg_cron jednom dnevno → ping svih novih URL-ova iz sitemape
-- Per-event: kad se objavi novi blog/turnir, edge funkcija pozove ping za taj URL
-
-**Fallback:** ako scope nije dostupan, postojeći `indexnow-ping` ostaje za Bing.
+Sajt je tehnički jak (Stockfish, real human play, tournaments, DailyChess_12). Sledeći korak je **vidljivost + retencija + viralnost**. Evo konkretnog plana po prioritetu.
 
 ---
 
-## Pack 2 — Schema Markup (FAQ + Course + Video + Event + Breadcrumb + Sitelinks)
+## 1. Google indeksiranje i SEO temelji (PRVO — bez ovoga ostalo ne radi)
 
-Dodaj JSON-LD u sledeće stranice preko postojećeg `<Seo jsonLd={...}>` propa:
+**a) Google Search Console verifikacija + sitemap submit**
+- Već postoji `scripts/generate-sitemap.ts` i `public/sitemap.xml`. Treba:
+  - Verifikovati domen `masterchess.live` u Search Console (META tag flow).
+  - Submit-ovati `sitemap.xml`, `sitemap-openings.xml`, `sitemap-images.xml`.
+  - Setup IndexNow za Bing/Yandex (već postoji `indexnow-key.txt` i edge fn — proveriti da radi).
 
-| Stranica | Schema | Efekat u SERP |
-|---|---|---|
-| `/openings/:slug` (60+) | `FAQPage` (3-5 pitanja po openingu) + `BreadcrumbList` + `Course` | Accordion + breadcrumb + course card |
-| `/learn/*` (28 članaka) | `Course` + `BreadcrumbList` + `FAQPage` | Star ratings + breadcrumb |
-| `/tournaments/:id` | `Event` + `SportsEvent` | Event card sa datumom |
-| `/live` | `VideoObject` (per DailyChess_12 video) | Video thumbnail u SERP |
-| `/blog/:slug` | `Article` + `BreadcrumbList` | Already partial — proširi |
-| `/profile/:user` | `Person` + `Athlete` | Knowledge panel kandidat |
-| `/` (root) | `Organization` + `WebSite` + `SearchAction` + `SiteNavigationElement` | Sitelinks search box + brand panel |
+**b) Bogatiji sitemap (dinamički)**
+- Trenutno verovatno samo statične rute. Dodati po jednu URL u sitemap za:
+  - svaki opening (`/openings/:slug`) — ima ih stotine, ogromna SEO površina
+  - svaki bot profil (`/bots/:id`)
+  - svaki javni player profil (`/player/:username`)
+  - svaki turnir (`/tournaments/:id`)
+  - svaki master game (`/master-game/:id`)
+- **To je realno 1000+ URL-ova** — Google ih obožava.
 
-**Implementacija:** novi helper `src/lib/jsonld-builders.ts` sa funkcijama tipa `buildFAQSchema(qa)`, `buildCourseSchema(article)`, `buildVideoSchema(video)`. Pozivaju se u svakoj relevantnoj stranici.
+**c) Per-route meta tagovi (react-helmet-async)**
+- Već postoji `Seo` komponenta (vidim u Index.tsx). Proveriti da je na SVAKOJ stranici sa: unique `<title>`, `<description>`, canonical, og:image, JSON-LD.
+- Najvažnije: openings, lessons, blog, master games, leaderboard.
 
-**FAQ podaci za openinge:** auto-generišu se iz postojećeg `OPENING_SEO` (description, history, response polja → "What is X?", "How to play X?", "Best response to X?").
-
----
-
-## Pack 3 — GSC Auto-Loop & Inspection Dashboard
-
-Proširi postojeći `gsc-status` edge funkciju i `/seo-status` stranicu:
-
-- Dodaj `urlInspection.index.inspect` poziv → po stranici prikaži status (`URL is on Google`, `Discovered – not indexed`, `Crawled – not indexed`).
-- Auto-resubmit dugme za sve "Discovered – not indexed" URL-ove → batch poziv Indexing API-ja.
-- Dnevni cron koji pinga top 50 URL-ova sa najlošijim impresijama.
-- Tabela "Coverage issues" sa tipovima problema (404, redirect chain, soft 404).
-
----
-
-## Pack 4 — Video Sitemap (DailyChess_12)
-
-- Nova edge funkcija `generate-video-sitemap` (cron 6h) → dohvata sve videe sa DailyChess_12 kanala preko YouTube Data API.
-- Generiše `public/sitemap-videos.xml` sa `<video:video>` markupom (thumbnail_loc, title, description, content_loc, duration, player_loc).
-- Doda u `public/sitemap_index.xml`.
-- Na `/live` i tamo gde se video embed-uje, dodaj `VideoObject` JSON-LD sa `embedUrl` i `uploadDate` → Google ih prepoznaje kao tvoj sadržaj.
+**d) JSON-LD strukturirani podaci**
+- `Organization` + `WebSite` (sitewide u index.html — verovatno već imaš).
+- `VideoObject` za svaki DailyChess_12 stream embed → Google Video carousel.
+- `Article` za blog/learn članke.
+- `BreadcrumbList` na svim podstranicama.
+- `FAQPage` na "Find a chess opening", "How to improve" stranama → rich snippets.
+- `Event` za turnire → Google Events carousel.
 
 ---
 
-## Pack 5 — Knowledge Graph & Sitelinks
+## 2. Slike i Google Images (ogroman, potcenjen kanal)
 
-U `index.html` `<head>`:
+**a) OG board images per page**
+- Već postoji `src/lib/og-board-image.ts`. Za svaku opening stranicu generisati unique board screenshot kao OG image → kad neko deli link na Discord/Twitter/WhatsApp, vidi se tabla.
 
-- `Organization` JSON-LD sa `name`, `url`, `logo`, `sameAs: [youtube, x, discord]`
-- `WebSite` JSON-LD sa `potentialAction` (SearchAction) → aktivira Google sitelinks search box
-- `SiteNavigationElement` array → potpomaže sitelinks ispod glavnog rezultata
+**b) Image SEO**
+- Sve slike: descriptive `alt` ("King's Indian Defense main line position after 7. O-O"), `loading="lazy"`, `width`/`height` attributes, WebP.
+- **Image sitemap** (već imaš `sitemap-images.xml`) — popuniti svim board pozicijama, bot avatarima, achievement ikonama.
 
----
-
-## Pack 6 — hreflang multi-region
-
-- Dodaj `<link rel="alternate" hreflang="en" />`, `hreflang="sr"`, `hreflang="de"`, `hreflang="es"`, `hreflang="x-default"` u `Seo.tsx`.
-- Sve verzije pokazuju na isti URL (single-language sajt) → Google ih indeksira po regionu bez duplicate-content penala.
-- Procenjeno +30-50% impresija u non-EN tržištima.
+**c) Pinterest / Reddit r/chess board pin strategy**
+- Top 50 famoznih pozicija (Immortal Game, Opera Game, Kasparov vs Deep Blue) kao deljive infografike linkovane na `/master-game/:id`. Pinterest je masovan izvor saobraćaja za chess sadržaj.
 
 ---
 
-## Pack 7 — Image SEO drugi nivo
+## 3. Sadržaj koji rangira (programmatic SEO)
 
-- **Per-game OG image:** edge funkcija `og-game-board` → prima FEN kao query → vraća PNG board screenshot sa logom (već imamo `og-board-image.ts` helper). Svaki game review = unique og:image.
-- **Player avatar schema:** `ImageObject` JSON-LD na svakom player profilu.
-- **`<picture>` AVIF + lazy loading:** za sve hero slike → Core Web Vitals boost (LCP).
-- **sitemap-images.xml** proširiti sa avatarima top-100 igrača.
+Najveći chess sajtovi (Lichess, Chess.com) dominiraju sa **dugim tail keyword stranicama**. Predlog šta da generišeš:
 
----
+**a) Opening landing stranice — SEO copy**
+- Za svaki ECO kod: "Sicilian Defense Najdorf — moves, theory, traps, statistics" (1500+ reči, FAQ, video embed sa DailyChess_12 ako postoji).
+- Cilj: rangirati na "how to play [opening]", "[opening] traps", "[opening] for white/black".
 
-## Pack 8 — Bing Webmaster + IndexNow polish
+**b) Player vs Bot landing**
+- "Play against 1200 ELO bot" — svaka rating ima sopstvenu landing stranu sa CTA.
+- Ranguje za "play chess bot 1500 elo", "chess engine for beginners".
 
-- IndexNow već radi → dodati `lastModified` per URL u payload (Bing daje prioritet).
-- Edge funkcija `bing-submit-url-batch` → koristi Bing Webmaster API (ako user doda Bing API ključ kao secret) za direktni submit + crawl-rate increase.
-- Auto-ping kad se sitemap regeneriše.
+**c) Tools landing**
+- `/tools/pgn-viewer`, `/tools/fen-editor`, `/tools/elo-calculator` (već imaš `RatingCalculator`).
+- Lichess i Chess.com gube ovde — male tool stranice rangiraju brzo.
 
----
-
-## Tehnički detalji (za developera)
-
-**Novi fajlovi:**
-- `src/lib/jsonld-builders.ts` — sve schema builder funkcije
-- `src/lib/jsonld-faqs.ts` — FAQ generatori za openinge i learn članke
-- `supabase/functions/google-indexing-ping/index.ts` — Indexing API
-- `supabase/functions/generate-video-sitemap/index.ts` — YouTube → XML
-- `supabase/functions/og-game-board/index.ts` — dynamic FEN → PNG OG
-- `scripts/generate-sitemap.ts` — proširenje za video sitemap entry u indexu
-- `src/pages/SeoStatus.tsx` — proširenje sa Inspection tabelom
-
-**Connector setup:**
-- Provera da li postojeći GSC connector ima `https://www.googleapis.com/auth/indexing` scope; ako ne, pozvati reconnect.
-
-**Cron rasporedi:**
-- `google-indexing-ping`: dnevno u 04:00 UTC (top 50 URL)
-- `generate-video-sitemap`: svakih 6h
-- `gsc-status` inspection: dnevno u 05:00 UTC
-
-**Schema validation:** sve šeme proći kroz Google Rich Results Test format (čisto `@context` + `@type`, bez nested anomalija).
+**d) Glossary**
+- `/learn/glossary/:term` — "What is en passant", "What is zugzwang" (300+ termina). Svaki je SEO friendly URL.
 
 ---
 
-## Šta će korisnik videti odmah
+## 4. Distribucija i backlinks
 
-1. `/seo-status` admin panel sa novim sekcijama: Indexing API status, Inspection table, Video sitemap status, Schema validator linkovi.
-2. Konzolni log u dev modu kad se schema markup ubaci na stranicu.
-3. Posle 7 dana: skok u GSC impresijama (FAQ accordions + breadcrumbs povećavaju CTR ~30%).
-4. Posle 30 dana: video thumbnails u SERP-u za chess upite.
+**a) Reddit**
+- r/chess (1.5M članova), r/chessbeginners, r/chesspuzzles
+- NE spam — postavi DailyChess_12 highlight clipove sa linkom "solve this position on masterchess.live".
+
+**b) YouTube SEO za DailyChess_12**
+- U opisu svakog videa: link ka odgovarajućoj poziciji/openingu na sajtu.
+- "Try this position yourself: masterchess.live/analysis?fen=..."
+- Ovo gradi backlinks + direktan saobraćaj.
+
+**c) Discord servers**
+- Chess.com Discord, Lichess Discord, lokalni klubovi — postaviti tournament link, ne reklamu.
+
+**d) Wikipedia external links**
+- Master games stranice mogu se linkovati sa relevantnih Wikipedia članaka o tim partijama (pažljivo, ne spam).
+
+**e) Submitting tools**
+- ProductHunt launch (jednom), AlternativeTo.net (alternativa Chess.com), Chess.com fanbase forumi.
 
 ---
 
-## Ne diram
+## 5. Viralni mehanizmi unutar sajta
 
-- Postojeći `sitemap.xml`, `sitemap-openings.xml`, `sitemap-images.xml` — samo dodajem `sitemap-videos.xml`.
-- Postojeći `Seo.tsx` API — samo proširenje, backward compatible.
-- Auth/RLS sistem.
-- Postojeće edge funkcije (`gsc-status` se proširuje, ne menja API).
+**a) "Share your win" → automatic image card**
+- Na kraju partije: dugme "Share win card" → generiše PNG sa: pozicija mata + ELO + "I beat 1800 player on masterchess.live".
+- Twitter/X i WhatsApp kartice = besplatna reklama.
 
+**b) "Brag link" za Daily Puzzle**
+- "Solved Daily Puzzle in 12s — 47 day streak 🔥 — masterchess.live/daily-puzzle"
+- Auto-generated share image sa streak counter.
+
+**c) Referral program**
+- "Pozovi prijatelja, oboje dobijate 30 dana premium tema/avatara." Ima `Referrals.tsx` — proveriti da je aktivan.
+
+**d) Public profiles indeksabilni**
+- Svaki user profile = potencijalna SEO landing kad neko gugla njegov username. Mora biti SSR-friendly ili imati pre-renderovan meta.
+
+---
+
+## 6. Retencija (da posetioci ne odu)
+
+**a) Streak protection**
+- "Streak freeze" — jedan dan mesečno smeš preskočiti bez gubitka streak-a (Duolingo trik). Drastično povećava DAU.
+
+**b) Email/Push notifications**
+- "Tvoj daily puzzle čeka — 47 day streak na liniji"
+- "Turnir počinje za 10 min" (već imaš `use-tournament-notifications`)
+- Web Push API + email fallback (već imaš email infrastrukturu).
+
+**c) Weekly recap email**
+- "Ove nedelje: 23 partije, +47 ELO, najjači mat u 6 poteza" + share button.
+
+**d) Onboarding checklist**
+- Prvi dan: "1. Odigraj prvu partiju 2. Reši daily puzzle 3. Pridruži se turniru" — XP nagrada za svaki korak.
+
+---
+
+## 7. Tehnički performance (Core Web Vitals)
+
+Google rangira brze sajtove više. Provere:
+- LCP < 2.5s na homepage (mereno PageSpeed Insights)
+- Lazy load sve ispod fold (already partial)
+- Stockfish WASM — load on demand, ne na homepage
+- Image dimenzije: width/height na svim slikama da spreči CLS
+- Service Worker (već imaš `sw.js`) — proveriti da kešira pravilno
+
+---
+
+## 8. Lokalizacija (multipli growth lever)
+
+`use-i18n` postoji u Settings. Aktivirati:
+- Srpski, ruski, španski, hindi (ogromne chess populacije).
+- `<link rel="alternate" hreflang="sr">` tagovi za svaku stranu.
+- Posebne sitemap fajlove po jeziku.
+- Rezultat: 5x SEO površina, ulazak na tržišta gde Chess.com nije dominantan.
+
+---
+
+## Predlog redosleda (12 nedelja)
+
+```
+Nedelja 1-2:   Google Search Console + dynamic sitemap + per-route Helmet
+Nedelja 3-4:   Programmatic opening pages (ECO codes) sa unique tekstom
+Nedelja 5-6:   Share cards (win + puzzle streak) + OG images
+Nedelja 7-8:   Reddit/YouTube distribucija + DailyChess_12 cross-linking
+Nedelja 9-10:  Email/Push notifications + streak freeze
+Nedelja 11-12: Lokalizacija (srpski + ruski) + image SEO
+```
+
+---
+
+## Šta predlažem da radimo PRVO (1 task, da krenemo)
+
+**Najveći ROI sa najmanje rada**: dinamičan sitemap sa svim opening + bot + master-game URL-ovima + Helmet meta po stranicama. To otvara 1000+ URL-ova Google-u za par dana.
+
+Reci koji deo plana želiš da implementiram prvi i krećem.
