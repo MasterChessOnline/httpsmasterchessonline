@@ -8,6 +8,12 @@
     <image:image><image:loc>https://masterchess.live/og-image.jpg</image:loc><image:title>MasterChess — Play Chess Online Free</image:title><image:caption>Free online chess platform with AI coach, tournaments, and lessons.</image:caption></image:image>
   </url>
   <url>
+    <loc>https://masterchess.live/daily-mate</loc>
+    <lastmod>2026-05-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://masterchess.live/play</loc>
     <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
