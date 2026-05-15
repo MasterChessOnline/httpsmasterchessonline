@@ -81,6 +81,20 @@ export default function ChessBoard({
   // ── Drag & drop pieces (HTML5) ──
   const [dragFrom, setDragFrom] = useState<string | null>(null);
 
+  // ── Hover ghost preview ──
+  const [hoverSquare, setHoverSquare] = useState<string | null>(null);
+  const selectedPiece = selectedSquare ? game.get(selectedSquare as Square) : null;
+  const selectedPieceData = selectedPiece ? getGlyph(`${selectedPiece.color}${selectedPiece.type}`) : null;
+
+  // ── Detect if the last move was a capture (for spark burst) ──
+  const lastWasCapture = useMemo(() => {
+    try {
+      const h = game.history({ verbose: true });
+      const last = h[h.length - 1] as any;
+      return !!(last && last.captured);
+    } catch { return false; }
+  }, [lastMove?.from, lastMove?.to]);
+
   const arrowColor = (mods: { shift: boolean; ctrl: boolean }) => {
     if (mods.ctrl) return "hsl(220 90% 60%)"; // blue
     if (mods.shift) return "hsl(140 70% 45%)"; // green
