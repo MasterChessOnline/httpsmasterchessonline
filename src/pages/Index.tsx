@@ -418,76 +418,38 @@ const Index = () => {
           )}
         </section>
 
-        {/* ─── Explore Modes — interactive cards ─── */}
-        <SectionHeader title="Explore" icon={Zap}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* ─── Training shortcuts (de-emphasized — for between matches) ─── */}
+        <section className="pt-2">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[11px] uppercase tracking-widest text-muted-foreground/70 font-semibold">Between matches</p>
+            <Link to="/guides" className="text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5">
+              All guides <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { to: "/tournaments", icon: Trophy, label: "Tournaments", desc: "Compete to win" },
-              { to: "/friends", icon: Users, label: "Play Friend", desc: "Challenge a friend" },
-              { to: "/guess-the-move", icon: Target, label: "Guess the Move", desc: "Find the best move" },
-              { to: "/play-like-gm", icon: Crown, label: "Play Like a GM", desc: "GM-style challenges" },
+              { to: "/openings",    icon: BookOpen,       label: "Openings" },
+              { to: "/training",    icon: Brain,          label: "Training" },
+              { to: "/analysis",    icon: Eye,            label: "Analysis" },
+              { to: "/learn",       icon: GraduationCap,  label: "Lessons" },
             ].map((item, i) => (
               <motion.div
                 key={item.to}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.5 }}
+                transition={{ delay: i * 0.04, duration: 0.35 }}
               >
                 <Link to={item.to}>
-                  <motion.div
-                    className="rounded-xl border border-border/30 glass-4d p-4 sm:p-5 text-center group block hover:border-primary/30 transition-all duration-300"
-                    whileHover={{ y: -6, scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  >
-                    <item.icon className="h-6 w-6 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                    <p className="text-sm font-semibold text-foreground mb-0.5">{item.label}</p>
-                    <p className="text-[11px] text-muted-foreground leading-tight">{item.desc}</p>
-                  </motion.div>
+                  <div className="rounded-lg border border-border/15 bg-muted/5 hover:bg-muted/15 hover:border-border/30 p-2.5 flex items-center gap-2 transition-all duration-200">
+                    <item.icon className="h-3.5 w-3.5 text-muted-foreground/80 shrink-0" />
+                    <span className="text-xs text-muted-foreground font-medium truncate">{item.label}</span>
+                  </div>
                 </Link>
               </motion.div>
             ))}
           </div>
-        </SectionHeader>
-
-        {/* ─── Learn & Improve ─── */}
-        <SectionHeader title="Learn & Improve" icon={GraduationCap}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { to: "/openings", icon: BookOpen, label: "Opening Explorer", desc: "Master popular openings with move trees & stats" },
-              { to: "/learn", icon: GraduationCap, label: "Lessons", desc: "Step-by-step interactive training" },
-              { to: "/analysis", icon: Eye, label: "Game Analysis", desc: "Review & analyze your games with AI" },
-            ].map((item, i) => (
-              <motion.div
-                key={item.to}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-              >
-                <Link to={item.to}>
-                  <motion.div
-                    className="flex items-center gap-4 rounded-xl border border-border/30 glass-4d p-4 group transition-all duration-300 hover:border-primary/30"
-                    whileHover={{ x: 6, scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                  >
-                    <motion.div
-                      className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors"
-                      whileHover={{ rotate: 8 }}
-                    >
-                      <item.icon className="h-5 w-5 text-primary" />
-                    </motion.div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{item.label}</p>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">{item.desc}</p>
-                    </div>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </SectionHeader>
+        </section>
 
         {/* Recent Games */}
         {user && recentGames.length > 0 && (
