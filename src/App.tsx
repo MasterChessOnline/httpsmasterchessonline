@@ -79,6 +79,7 @@ import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
 import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
+import InstallPrompt from "@/components/InstallPrompt";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
 const queryClient = new QueryClient();
@@ -190,6 +191,7 @@ const App = () => (
             <WelcomeIntroPopup />
             <GameInviteListener />
             <MobileBottomNav />
+            <InstallPrompt />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
