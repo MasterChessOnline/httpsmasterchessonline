@@ -201,8 +201,8 @@ const Index = () => {
               <span className="text-gradient-gold">Master</span>
               <span className="text-foreground">Chess</span>
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 font-light tracking-wide">
-              Play, learn, and compete — your next great game starts here
+            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 font-light tracking-wide uppercase">
+              <span className="text-primary font-semibold">Battle.</span> Climb. <span className="text-primary font-semibold">Conquer.</span>
             </p>
           </motion.div>
 
@@ -217,10 +217,10 @@ const Index = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
                 <Button
                   size="lg"
-                  className="ripple-btn h-12 px-8 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_40px_hsl(43_90%_55%/0.4)] transition-all duration-300"
+                  className="ripple-btn h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
                 >
-                  <Play className="h-5 w-5 mr-2" />
-                  Play Online
+                  <Play className="h-5 w-5 mr-2 fill-current" />
+                  Enter Arena
                 </Button>
               </motion.div>
             </Link>
@@ -229,10 +229,10 @@ const Index = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="ripple-btn h-12 px-8 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
+                  className="ripple-btn h-14 px-8 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
                 >
                   <Swords className="h-5 w-5 mr-2" />
-                  Play vs AI
+                  vs Bots
                 </Button>
               </motion.div>
             </Link>
