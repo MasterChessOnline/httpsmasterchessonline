@@ -109,17 +109,27 @@ export default function PublicPlayer() {
   const title = `${name} — ${profile.rating} ELO chess player | MasterChess`;
   const description = `${name} is a ${profile.rating}-rated chess player on MasterChess with ${profile.games_played} games played and a ${winRate}% win rate. View their Chess Card, stats, and recent games.`;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ProfilePage",
-    mainEntity: {
-      "@type": "Person",
-      name,
-      url: `https://masterchess.live${url}`,
-      image: profile.avatar_url || undefined,
-      description: profile.bio || description,
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      mainEntity: {
+        "@context": "https://schema.org",
+        "@type": ["Person", "Athlete"],
+        name,
+        alternateName: profile.username ?? undefined,
+        url: `https://masterchess.live${url}`,
+        image: profile.avatar_url || `https://masterchess.live/og-image.jpg`,
+        description: profile.bio || description,
+        nationality: profile.country ?? undefined,
+        sport: "Chess",
+        award: `${profile.rating} ELO · peak ${profile.peak_rating ?? profile.rating}`,
+        affiliation: { "@type": "Organization", name: "MasterChess", url: "https://masterchess.live" },
+        memberOf: { "@type": "Organization", name: "MasterChess" },
+      },
     },
-    breadcrumb: {
+    {
+      "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: "https://masterchess.live/" },
@@ -127,7 +137,7 @@ export default function PublicPlayer() {
         { "@type": "ListItem", position: 3, name, item: `https://masterchess.live${url}` },
       ],
     },
-  };
+  ];
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>

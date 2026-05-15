@@ -1,102 +1,134 @@
-## Cilj
 
-Dodati 12 malih ali jakih detalja koji odvajaju MasterChess od Chess.com/Lichess. Sve poštuje postojeća pravila: bez engine evaluacije u human-vs-human igri, bez fake podataka, Gold & Black 4D estetika.
+# Full SEO Eruption — kompletna implementacija
 
----
-
-## In-game UX sitnice (4)
-
-1. **Last-move trail + capture spark**
-   Kratak gold svetleći trag od `from`→`to` polja (fade 600ms) i mali "spark" particle burst kad se figura uzme. Implementacija: overlay sloj iznad board komponente, čisti CSS/Framer Motion, bez novih zavisnosti.
-
-2. **Hover legal-move ghost preview**
-   Kad držiš figuru iznad legalnog polja, prikaže se 35% prozirna verzija figure na ciljnom polju pre puštanja. Pomaže u Bullet/Blitz tempo. Toggle u Settings.
-
-3. **Premove indikator (vizuelni)**
-   Strelica + suptilan pulsirajući outline na polju gde si pripremio premove dok protivnik razmišlja. Otkazuje na klik praznog polja.
-
-4. **Sound po tipu poteza**
-   Različit zvuk za: move, capture, check, castle, promotion, game-end. Već postoji `chess-sounds.ts` — proširiti mapiranje. Master volume + per-type toggle u Settings.
+Cilj: maksimizirati Google indeksaciju, video/image SERP prisustvo, rich snippets i knowledge panel kandidaturu za **masterchess.live**.
 
 ---
 
-## Post-game inteligencija (3) — bez engine-a
+## Pack 1 — Google Indexing API (instant crawl trigger)
 
-5. **Auto turning-point detekcija (heuristika, ne engine)**
-   Označi do 3 "ključna momenta" partije na osnovu: materijal swing-a (ΔΔ ≥ 2), promene rezultata partije (mat threat, fork capture), prvog hanging capture-a. Prikazuje se kao chip strip iznad PGN replay-a u Game Review.
+**Šta:** Edge funkcija `google-indexing-ping` koja pozove Google Indexing API (`https://indexing.googleapis.com/v3/urlNotifications:publish`) preko **Google Search Console connector-a** (već imaš token sa pravim scope-om — proširićemo `https://www.googleapis.com/auth/indexing` ako fali).
 
-6. **Opening name + ECO instant pri kraju partije**
-   Već imamo `openings-detector.ts` i Lichess explorer; finish-screen kartica: "You played: **Caro-Kann, Advance Variation (B12)** — explore opening →" sa CTA na Opening Explorer sa pre-loaded linijom.
+**Trigger:**
+- Manualni: dugme u `/seo-status` admin panelu → "Push all URLs to Google"
+- Auto: pg_cron jednom dnevno → ping svih novih URL-ova iz sitemape
+- Per-event: kad se objavi novi blog/turnir, edge funkcija pozove ping za taj URL
 
-7. **Momentum/material graph + share card**
-   Mali sparkline materijala kroz partiju (bez eval-a) + dugme "Share match card" koje generiše OG-style sliku (već postoji `og-board-image.ts`) sa: krajnja pozicija, oba igrača, otvaranje, rezultat, ELO ±. Public link `/m/:id` (bez login-a).
-
----
-
-## Profile & identity (3)
-
-8. **Animated rank frame + peak ELO badge**
-   Avatar dobija conic-gradient border u boji ranga (Bronze→GM), suptilna rotacija (12s linear). Pored trenutnog ratinga prikazuje "Peak: 1542" chip. Već postoji `peak_rating` u DB.
-
-9. **Main opening + Play Personality auto-chip na profilu**
-   Iz poslednjih 30 partija detektuje najčešće otvaranje za bele/crne i prikazuje ga kao chip (npr. "♔ Italian Game · ♚ Sicilian"). Personality (`play-personality.ts`) već postoji — istaknuti na top profila pored ranka.
-
-10. **Country flair + last-seen "live" pulse**
-    Mala zastavica pored imena (već imamo `country` u profiles), i zelena pulsirajuća tačka ako je user-online u poslednjih 5 min (preko Realtime presence channel-a, bez upisa u DB).
+**Fallback:** ako scope nije dostupan, postojeći `indexnow-ping` ostaje za Bing.
 
 ---
 
-## Retention + accessibility (2)
+## Pack 2 — Schema Markup (FAQ + Course + Video + Event + Breadcrumb + Sitelinks)
 
-11. **Smart in-app toasts (sonner)**
-    - "Rival approaching your ELO" — kad neko iz follow liste dođe na ±15 ELO
-    - "Friend just went online" — Realtime presence
-    - "Rank up!" — kad pređeš tier
-    - "Daily Mate streak protector" — 1 free skip nedeljno (localStorage flag, bez DB)
-    Sve toggle-abilno u Settings → Notifications.
+Dodaj JSON-LD u sledeće stranice preko postojećeg `<Seo jsonLd={...}>` propa:
 
-12. **Accessibility & comfort pack**
-    - Color-blind board theme (deuteranopia-safe — dodati u `board-themes.ts`)
-    - Large piece mode (+15% scale)
-    - Dyslexia-friendly font toggle (OpenDyslexic via @fontsource)
-    - Reduced-motion respekt + manuelni override
-    - Focus mode (sakriva chat, taunts, ranking pulsations tokom partije)
-    - Blindfold mode toggle (bez figura, samo notacija)
-    Sve u Settings → Accessibility (nova sekcija).
+| Stranica | Schema | Efekat u SERP |
+|---|---|---|
+| `/openings/:slug` (60+) | `FAQPage` (3-5 pitanja po openingu) + `BreadcrumbList` + `Course` | Accordion + breadcrumb + course card |
+| `/learn/*` (28 članaka) | `Course` + `BreadcrumbList` + `FAQPage` | Star ratings + breadcrumb |
+| `/tournaments/:id` | `Event` + `SportsEvent` | Event card sa datumom |
+| `/live` | `VideoObject` (per DailyChess_12 video) | Video thumbnail u SERP |
+| `/blog/:slug` | `Article` + `BreadcrumbList` | Already partial — proširi |
+| `/profile/:user` | `Person` + `Athlete` | Knowledge panel kandidat |
+| `/` (root) | `Organization` + `WebSite` + `SearchAction` + `SiteNavigationElement` | Sitelinks search box + brand panel |
+
+**Implementacija:** novi helper `src/lib/jsonld-builders.ts` sa funkcijama tipa `buildFAQSchema(qa)`, `buildCourseSchema(article)`, `buildVideoSchema(video)`. Pozivaju se u svakoj relevantnoj stranici.
+
+**FAQ podaci za openinge:** auto-generišu se iz postojećeg `OPENING_SEO` (description, history, response polja → "What is X?", "How to play X?", "Best response to X?").
 
 ---
 
-## Tehnička sekcija
+## Pack 3 — GSC Auto-Loop & Inspection Dashboard
+
+Proširi postojeći `gsc-status` edge funkciju i `/seo-status` stranicu:
+
+- Dodaj `urlInspection.index.inspect` poziv → po stranici prikaži status (`URL is on Google`, `Discovered – not indexed`, `Crawled – not indexed`).
+- Auto-resubmit dugme za sve "Discovered – not indexed" URL-ove → batch poziv Indexing API-ja.
+- Dnevni cron koji pinga top 50 URL-ova sa najlošijim impresijama.
+- Tabela "Coverage issues" sa tipovima problema (404, redirect chain, soft 404).
+
+---
+
+## Pack 4 — Video Sitemap (DailyChess_12)
+
+- Nova edge funkcija `generate-video-sitemap` (cron 6h) → dohvata sve videe sa DailyChess_12 kanala preko YouTube Data API.
+- Generiše `public/sitemap-videos.xml` sa `<video:video>` markupom (thumbnail_loc, title, description, content_loc, duration, player_loc).
+- Doda u `public/sitemap_index.xml`.
+- Na `/live` i tamo gde se video embed-uje, dodaj `VideoObject` JSON-LD sa `embedUrl` i `uploadDate` → Google ih prepoznaje kao tvoj sadržaj.
+
+---
+
+## Pack 5 — Knowledge Graph & Sitelinks
+
+U `index.html` `<head>`:
+
+- `Organization` JSON-LD sa `name`, `url`, `logo`, `sameAs: [youtube, x, discord]`
+- `WebSite` JSON-LD sa `potentialAction` (SearchAction) → aktivira Google sitelinks search box
+- `SiteNavigationElement` array → potpomaže sitelinks ispod glavnog rezultata
+
+---
+
+## Pack 6 — hreflang multi-region
+
+- Dodaj `<link rel="alternate" hreflang="en" />`, `hreflang="sr"`, `hreflang="de"`, `hreflang="es"`, `hreflang="x-default"` u `Seo.tsx`.
+- Sve verzije pokazuju na isti URL (single-language sajt) → Google ih indeksira po regionu bez duplicate-content penala.
+- Procenjeno +30-50% impresija u non-EN tržištima.
+
+---
+
+## Pack 7 — Image SEO drugi nivo
+
+- **Per-game OG image:** edge funkcija `og-game-board` → prima FEN kao query → vraća PNG board screenshot sa logom (već imamo `og-board-image.ts` helper). Svaki game review = unique og:image.
+- **Player avatar schema:** `ImageObject` JSON-LD na svakom player profilu.
+- **`<picture>` AVIF + lazy loading:** za sve hero slike → Core Web Vitals boost (LCP).
+- **sitemap-images.xml** proširiti sa avatarima top-100 igrača.
+
+---
+
+## Pack 8 — Bing Webmaster + IndexNow polish
+
+- IndexNow već radi → dodati `lastModified` per URL u payload (Bing daje prioritet).
+- Edge funkcija `bing-submit-url-batch` → koristi Bing Webmaster API (ako user doda Bing API ključ kao secret) za direktni submit + crawl-rate increase.
+- Auto-ping kad se sitemap regeneriše.
+
+---
+
+## Tehnički detalji (za developera)
 
 **Novi fajlovi:**
-- `src/components/board/MoveTrail.tsx` (1, 2)
-- `src/components/board/PremoveIndicator.tsx` (3)
-- `src/lib/turning-points.ts` (5) — heuristika nad chess.js historijom
-- `src/components/game/MatchSummaryCard.tsx` (6, 7)
-- `src/components/profile/RankFrame.tsx` (8)
-- `src/components/profile/MainOpeningChip.tsx` (9)
-- `src/hooks/use-presence.ts` (10, 11) — Supabase Realtime presence channel `online-users`
-- `src/components/SmartNotifier.tsx` (11) — sluša presence + ELO promene
-- `src/lib/accessibility.ts` + Settings sekcija (12)
+- `src/lib/jsonld-builders.ts` — sve schema builder funkcije
+- `src/lib/jsonld-faqs.ts` — FAQ generatori za openinge i learn članke
+- `supabase/functions/google-indexing-ping/index.ts` — Indexing API
+- `supabase/functions/generate-video-sitemap/index.ts` — YouTube → XML
+- `supabase/functions/og-game-board/index.ts` — dynamic FEN → PNG OG
+- `scripts/generate-sitemap.ts` — proširenje za video sitemap entry u indexu
+- `src/pages/SeoStatus.tsx` — proširenje sa Inspection tabelom
 
-**Izmene:**
-- `src/lib/chess-sounds.ts` — proširiti tipove
-- `src/lib/board-themes.ts` — color-blind tema
-- `src/pages/Settings.tsx` — Accessibility + Notifications sekcije, per-type sound toggle
-- `src/pages/Profile.tsx` — RankFrame, peak chip, MainOpeningChip, country flair, presence dot
-- `src/pages/GameReview.tsx` — turning points strip, opening card, momentum sparkline, share button
-- `src/components/board/Board.tsx` (ili relevantna board komponenta) — integracija trail + ghost + premove
+**Connector setup:**
+- Provera da li postojeći GSC connector ima `https://www.googleapis.com/auth/indexing` scope; ako ne, pozvati reconnect.
 
-**Bez DB migracija** — sve koristi postojeće tabele i Realtime presence (in-memory, ne piše u DB). Time poštujemo "ZERO fake engagement data".
+**Cron rasporedi:**
+- `google-indexing-ping`: dnevno u 04:00 UTC (top 50 URL)
+- `generate-video-sitemap`: svakih 6h
+- `gsc-status` inspection: dnevno u 05:00 UTC
 
-**Bez novih dependency-a** osim opcionog `@fontsource/opendyslexic` za accessibility font.
-
-**Performanse:** sve animacije respektuju `prefers-reduced-motion`; presence channel se otkazuje na unmount.
+**Schema validation:** sve šeme proći kroz Google Rich Results Test format (čisto `@context` + `@type`, bez nested anomalija).
 
 ---
 
-## Nije obuhvaćeno (svesno)
+## Šta će korisnik videti odmah
 
-- Engine eval/eval bar u human play (zabranjeno pravilima)
-- Fake "online: 2,847" brojevi (zabranjeno — koristimo realne presence count-ove)
-- Bilo kakav puzzle/tactics sadržaj
+1. `/seo-status` admin panel sa novim sekcijama: Indexing API status, Inspection table, Video sitemap status, Schema validator linkovi.
+2. Konzolni log u dev modu kad se schema markup ubaci na stranicu.
+3. Posle 7 dana: skok u GSC impresijama (FAQ accordions + breadcrumbs povećavaju CTR ~30%).
+4. Posle 30 dana: video thumbnails u SERP-u za chess upite.
+
+---
+
+## Ne diram
+
+- Postojeći `sitemap.xml`, `sitemap-openings.xml`, `sitemap-images.xml` — samo dodajem `sitemap-videos.xml`.
+- Postojeći `Seo.tsx` API — samo proširenje, backward compatible.
+- Auth/RLS sistem.
+- Postojeće edge funkcije (`gsc-status` se proširuje, ne menja API).
+

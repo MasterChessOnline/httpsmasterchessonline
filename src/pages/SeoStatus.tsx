@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, AlertTriangle, RefreshCw, ShieldAlert, Search, ExternalLink } from "lucide-react";
+import { CheckCircle2, AlertTriangle, RefreshCw, ShieldAlert, Search, ExternalLink, Zap, Video, Globe } from "lucide-react";
 import { toast } from "sonner";
 
 type Sitemap = {
@@ -41,6 +41,11 @@ export default function SeoStatus() {
   const [data, setData] = useState<StatusResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [resubmitting, setResubmitting] = useState(false);
+  const [pinging, setPinging] = useState(false);
+  const [indexingResult, setIndexingResult] = useState<{
+    succeeded: number; failed: number; total: number; scopeIssue?: boolean; hint?: string;
+  } | null>(null);
+  const [indexNowPinging, setIndexNowPinging] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -77,6 +82,40 @@ export default function SeoStatus() {
       toast.error(e instanceof Error ? e.message : "Resubmit failed");
     } finally {
       setResubmitting(false);
+    }
+  };
+
+  const pushToGoogle = async () => {
+    setPinging(true);
+    setIndexingResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-indexing-ping", {
+        body: { type: "URL_UPDATED" },
+      });
+      if (error) throw error;
+      setIndexingResult(data);
+      if (data?.succeeded > 0) {
+        toast.success(`${data.succeeded}/${data.total} URLs pushed to Google`);
+      } else {
+        toast.error("Indexing API push failed — see details below");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Indexing push failed");
+    } finally {
+      setPinging(false);
+    }
+  };
+
+  const pingIndexNow = async () => {
+    setIndexNowPinging(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("indexnow-ping", { body: {} });
+      if (error) throw error;
+      toast.success(`IndexNow: pinged ${data?.pinged ?? 0} URLs (Bing/Yandex)`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "IndexNow ping failed");
+    } finally {
+      setIndexNowPinging(false);
     }
   };
 
@@ -121,15 +160,63 @@ export default function SeoStatus() {
               Live data from Google Search Console for masterchess.live
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" onClick={load} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
             </Button>
-            <Button onClick={resubmit} disabled={resubmitting}>
+            <Button variant="outline" onClick={resubmit} disabled={resubmitting}>
               {resubmitting ? "Submitting..." : "Resubmit sitemap"}
+            </Button>
+            <Button onClick={pushToGoogle} disabled={pinging} className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700">
+              <Zap className={`h-4 w-4 mr-2 ${pinging ? "animate-pulse" : ""}`} />
+              {pinging ? "Pushing…" : "Push to Google (Indexing API)"}
+            </Button>
+            <Button variant="secondary" onClick={pingIndexNow} disabled={indexNowPinging}>
+              <Globe className={`h-4 w-4 mr-2 ${indexNowPinging ? "animate-spin" : ""}`} />
+              {indexNowPinging ? "Pinging…" : "Ping Bing/Yandex (IndexNow)"}
             </Button>
           </div>
         </div>
+
+        {/* Indexing API result */}
+        {indexingResult && (
+          <Alert variant={indexingResult.scopeIssue ? "destructive" : "default"}>
+            <Zap className="h-5 w-5" />
+            <AlertTitle>
+              Indexing API: {indexingResult.succeeded}/{indexingResult.total} URLs accepted by Google
+            </AlertTitle>
+            <AlertDescription>
+              {indexingResult.scopeIssue
+                ? indexingResult.hint
+                : indexingResult.failed === 0
+                  ? "All URLs forwarded to Googlebot for instant crawl. New pages typically appear in SERP within 1-24h."
+                  : `${indexingResult.failed} URLs failed — check function logs for details.`}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Video sitemap quick links */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5 text-primary" /> Video Sitemap (DailyChess_12)
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Auto-generated from YouTube — Google Video Search indexes thumbnails.
+              </p>
+            </div>
+            <a
+              href="https://kicabdwgdyabibioycbq.supabase.co/functions/v1/generate-video-sitemap"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              View XML <ExternalLink className="h-3 w-3" />
+            </a>
+          </CardHeader>
+        </Card>
+
 
         {/* Totals */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
