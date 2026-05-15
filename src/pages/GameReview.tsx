@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import EvalReviewPanel from "@/components/chess/EvalReviewPanel";
 import { detectOpening } from "@/lib/openings-detector";
+import TurningPointsStrip from "@/components/game/TurningPointsStrip";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -259,6 +260,13 @@ const GameReview = () => {
               Load New Game
             </Button>
           </div>
+
+          {moves.length > 0 && (
+            <TurningPointsStrip
+              pgn={gameRef.current.pgn()}
+              onJump={(ply) => setCurrentMove(ply - 1)}
+            />
+          )}
 
           {/* Stockfish eval — pure engine, no labels, no AI */}
           <div className="w-full">

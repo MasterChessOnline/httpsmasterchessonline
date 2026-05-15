@@ -4,9 +4,11 @@ import App from "./App.tsx";
 import "./index.css";
 import { bootstrapVisualSettings } from "./lib/board-themes";
 import { bootstrapSoundPack } from "./lib/chess-sounds";
+import { bootstrapA11y } from "./lib/accessibility";
 
 bootstrapVisualSettings();
 bootstrapSoundPack();
+bootstrapA11y();
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {

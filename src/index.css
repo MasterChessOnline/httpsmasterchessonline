@@ -878,3 +878,31 @@ main > div {
   border: 1.5px solid transparent;
   animation: erupt-border-spin 8s linear infinite;
 }
+
+/* ── Accessibility utility classes (controlled via lib/accessibility.ts) ── */
+.a11y-large-pieces .chess-piece,
+.a11y-large-pieces [data-piece] {
+  transform: scale(1.15);
+  transform-origin: center;
+}
+.a11y-dyslexia body,
+.a11y-dyslexia {
+  font-family: "OpenDyslexic", "Comic Sans MS", "Inter", system-ui, sans-serif !important;
+  letter-spacing: 0.02em;
+}
+.a11y-reduce-motion *,
+.a11y-reduce-motion *::before,
+.a11y-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+.a11y-focus [data-focus-hide],
+.a11y-focus .focus-hide {
+  display: none !important;
+}
+.a11y-blindfold [data-piece],
+.a11y-blindfold .chess-piece {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

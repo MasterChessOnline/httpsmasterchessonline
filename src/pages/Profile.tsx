@@ -24,6 +24,9 @@ import BadgeGrid from "@/components/BadgeGrid";
 import { getStreakState, type StreakState } from "@/lib/progression";
 
 import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
+import RankFrame from "@/components/profile/RankFrame";
+import PresenceDot from "@/components/profile/PresenceDot";
+import MainOpeningChip from "@/components/profile/MainOpeningChip";
 
 interface ProfileData {
   id: string;
@@ -304,9 +307,18 @@ const Profile = () => {
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                   <TitleBadge rating={profileData.bot_rating ?? 1200} mode="bot" size="sm" hideUnranked={false} />
                   <RankBadge rating={profileData.rating} size="sm" />
+                  <PresenceDot userId={profileData.user_id} showLabel />
+                  {profileData.peak_rating && profileData.peak_rating > profileData.rating && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[10px] font-mono">
+                      <Trophy className="h-3 w-3 text-primary" /> Peak {profileData.peak_rating}
+                    </span>
+                  )}
                   {streak && (
                     <StreakBadge streak={streak.current_streak} best={streak.best_streak} size="sm" showBest />
                   )}
+                </div>
+                <div className="mt-3">
+                  <MainOpeningChip userId={profileData.user_id} />
                 </div>
               </div>
             </div>

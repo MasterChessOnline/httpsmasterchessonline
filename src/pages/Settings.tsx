@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   User, Palette, Volume2, Globe, Bell, Shield, Gamepad2,
   LogOut, Check, ChevronRight, Settings2, Brain, Target as TargetIcon,
-  Upload, Trash2, Smile
+  Upload, Trash2, Smile, Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -27,8 +27,9 @@ import { SOUND_PACKS, applySoundPack, playMoveSound } from "@/lib/chess-sounds";
 import BoardThemeCard from "@/components/settings/BoardThemeCard";
 import PieceStyleCard from "@/components/settings/PieceStyleCard";
 import LiveBoardPreview from "@/components/settings/LiveBoardPreview";
+import AccessibilityPanel from "@/components/AccessibilityPanel";
 
-type SettingsSection = "account" | "profile" | "gameplay" | "training" | "improvement" | "appearance" | "audio" | "language" | "notifications" | "privacy";
+type SettingsSection = "account" | "profile" | "gameplay" | "training" | "improvement" | "appearance" | "audio" | "accessibility" | "language" | "notifications" | "privacy";
 
 const SECTIONS: { key: SettingsSection; label: string; icon: typeof User }[] = [
   { key: "account", label: "Account", icon: Shield },
@@ -38,6 +39,7 @@ const SECTIONS: { key: SettingsSection; label: string; icon: typeof User }[] = [
   { key: "improvement", label: "Improvement", icon: TargetIcon },
   { key: "appearance", label: "Appearance", icon: Palette },
   { key: "audio", label: "Audio", icon: Volume2 },
+  { key: "accessibility", label: "Accessibility", icon: Eye },
   { key: "language", label: "Language", icon: Globe },
   { key: "notifications", label: "Notifications", icon: Bell },
   { key: "privacy", label: "Privacy & Security", icon: Shield },
@@ -732,6 +734,9 @@ const Settings = () => {
             </div>
           </div>
         );
+
+      case "accessibility":
+        return <AccessibilityPanel />;
 
       case "notifications":
         return (
