@@ -25,6 +25,7 @@ import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
+import LivePlayerCounter from "@/components/LivePlayerCounter";
 
 interface RecentGame {
   id: string;
@@ -282,6 +283,16 @@ const Index = () => {
                 </motion.div>
               </Link>
             ))}
+          </motion.div>
+
+          {/* Live player counter — real-time engagement signal */}
+          <motion.div
+            className="mt-6 flex justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+          >
+            <LivePlayerCounter />
           </motion.div>
         </motion.div>
       </div>

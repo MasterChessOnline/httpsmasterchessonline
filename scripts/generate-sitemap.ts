@@ -11,6 +11,8 @@ import { GLOSSARY } from "../src/data/chessGlossary";
 import { TOOLS } from "../src/data/tools";
 import { MATE_PATTERNS } from "../src/data/matePatterns";
 import { ELO_TIERS } from "../src/data/eloTiers";
+import { FAMOUS_GAMES } from "../src/data/famousGames";
+import { GRANDMASTERS } from "../src/data/grandmasters";
 
 const BASE_URL = "https://masterchess.live";
 
@@ -130,6 +132,14 @@ const eloEntries: SitemapEntry[] = [
   { path: "/elo", changefreq: "weekly", priority: "0.8" },
   ...ELO_TIERS.map((t) => ({ path: `/elo/${t.rating}`, changefreq: "monthly" as const, priority: "0.7" })),
 ];
+const famousGameEntries: SitemapEntry[] = [
+  { path: "/famous-games", changefreq: "weekly", priority: "0.85" },
+  ...FAMOUS_GAMES.map((g) => ({ path: `/famous-games/${g.slug}`, changefreq: "monthly" as const, priority: "0.8" })),
+];
+const playerEntries: SitemapEntry[] = [
+  { path: "/players", changefreq: "weekly", priority: "0.85" },
+  ...GRANDMASTERS.map((g) => ({ path: `/players/${g.slug}`, changefreq: "monthly" as const, priority: "0.8" })),
+];
 
 function buildUrlset(entries: SitemapEntry[], withImages = false): string {
   const ns = withImages
@@ -182,6 +192,8 @@ writeFileSync(resolve("public/sitemap-glossary.xml"), buildUrlset(glossaryEntrie
 writeFileSync(resolve("public/sitemap-tools.xml"), buildUrlset(toolsEntries));
 writeFileSync(resolve("public/sitemap-mates.xml"), buildUrlset(mateEntries));
 writeFileSync(resolve("public/sitemap-elo.xml"), buildUrlset(eloEntries));
+writeFileSync(resolve("public/sitemap-famous-games.xml"), buildUrlset(famousGameEntries));
+writeFileSync(resolve("public/sitemap-players.xml"), buildUrlset(playerEntries));
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -194,9 +206,11 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap-tools.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-mates.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-elo.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-famous-games.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-players.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
 writeFileSync(resolve("public/sitemap_index.xml"), indexXml);
 
-console.log(`✓ static (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + tools (${toolsEntries.length}) + mates (${mateEntries.length}) + elo (${eloEntries.length}) + images (${imageEntries.length})`);
+console.log(`✓ static (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + tools (${toolsEntries.length}) + mates (${mateEntries.length}) + elo (${eloEntries.length}) + games (${famousGameEntries.length}) + players (${playerEntries.length}) + images (${imageEntries.length})`);
