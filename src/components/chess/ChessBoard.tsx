@@ -394,6 +394,58 @@ export default function ChessBoard({
             </div>
           ))}
 
+          {/* Last-move trail + capture spark — gold glow from→to, particle burst on capture */}
+          {lastMove && (
+            <svg
+              key={`trail-${moveCountRef.current}`}
+              viewBox="0 0 800 800"
+              preserveAspectRatio="none"
+              className="absolute inset-0 w-full h-full pointer-events-none z-[15] motion-reduce:hidden"
+              aria-hidden
+            >
+              <defs>
+                <linearGradient id="mc-trail-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(43 95% 60%)" stopOpacity="0" />
+                  <stop offset="50%" stopColor="hsl(43 95% 60%)" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="hsl(43 95% 60%)" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {(() => {
+                const a = squareToXY(lastMove.from);
+                const b = squareToXY(lastMove.to);
+                return (
+                  <motion.line
+                    x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                    stroke="url(#mc-trail-grad)"
+                    strokeWidth={10}
+                    strokeLinecap="round"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 0.9, 0] }}
+                    transition={{ duration: 0.85, ease: "easeOut" }}
+                  />
+                );
+              })()}
+              {lastWasCapture && (() => {
+                const c = squareToXY(lastMove.to);
+                return Array.from({ length: 8 }).map((_, i) => {
+                  const angle = (Math.PI * 2 * i) / 8;
+                  const dx = Math.cos(angle) * 55;
+                  const dy = Math.sin(angle) * 55;
+                  return (
+                    <motion.circle
+                      key={i}
+                      cx={c.x} cy={c.y} r={6}
+                      fill="hsl(43 95% 60%)"
+                      initial={{ opacity: 1, scale: 0.4 }}
+                      animate={{ opacity: 0, scale: 1, cx: c.x + dx, cy: c.y + dy }}
+                      transition={{ duration: 0.7, ease: "easeOut" }}
+                    />
+                  );
+                });
+              })()}
+            </svg>
+          )}
+
           {/* Right-click drag arrows (Shift = green, Ctrl/Cmd = blue, default = gold) */}
           {arrows.length > 0 && (
             <svg
