@@ -117,6 +117,20 @@ const glossaryEntries: SitemapEntry[] = [
   })),
 ];
 
+// Programmatic tools, mate patterns, ELO tiers
+const toolsEntries: SitemapEntry[] = [
+  { path: "/tools", changefreq: "weekly", priority: "0.85" },
+  ...TOOLS.map((t) => ({ path: `/tools/${t.slug}`, changefreq: "monthly" as const, priority: "0.8" })),
+];
+const mateEntries: SitemapEntry[] = [
+  { path: "/learn/checkmate-patterns", changefreq: "weekly", priority: "0.85" },
+  ...MATE_PATTERNS.map((m) => ({ path: `/learn/checkmate-patterns/${m.slug}`, changefreq: "monthly" as const, priority: "0.75" })),
+];
+const eloEntries: SitemapEntry[] = [
+  { path: "/elo", changefreq: "weekly", priority: "0.8" },
+  ...ELO_TIERS.map((t) => ({ path: `/elo/${t.rating}`, changefreq: "monthly" as const, priority: "0.7" })),
+];
+
 function buildUrlset(entries: SitemapEntry[], withImages = false): string {
   const ns = withImages
     ? `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`
