@@ -5,6 +5,8 @@ import { resolve } from "path";
 import { ALL_OPENING_SLUGS, OPENING_SEO } from "../src/lib/opening-seo-meta";
 import { OPENINGS_DATABASE } from "../src/lib/openings-data";
 import { getOpeningBoardImage } from "../src/lib/og-board-image";
+import { ONLINE_BOTS } from "../src/lib/online-bots-data";
+import { BOT_PROFILES } from "../src/lib/bots/profiles";
 
 const BASE_URL = "https://masterchess.live";
 
@@ -87,6 +89,20 @@ const openingEntries: SitemapEntry[] = ALL_OPENING_SLUGS.map((slug) => ({
   priority: "0.85",
 }));
 
+// Programmatic bot profiles — every roster bot becomes its own indexable URL.
+// Each one gets a unique title/description via the BotProfile route Helmet.
+// We dedupe across both BOT_PROFILES (the `/bot/:id` route source) and the
+// ONLINE_BOTS roster so any future bot in either list shows up in search.
+const botIds = Array.from(new Set([
+  ...BOT_PROFILES.map((b) => b.id),
+  ...ONLINE_BOTS.map((b) => b.id),
+]));
+const botEntries: SitemapEntry[] = botIds.map((id) => ({
+  path: `/bot/${id}`,
+  changefreq: "monthly" as const,
+  priority: "0.6",
+}));
+
 function buildUrlset(entries: SitemapEntry[], withImages = false): string {
   const ns = withImages
     ? `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`
@@ -133,6 +149,7 @@ const imageEntries: SitemapEntry[] = [
 
 writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
 writeFileSync(resolve("public/sitemap-openings.xml"), buildUrlset(openingEntries));
+writeFileSync(resolve("public/sitemap-bots.xml"), buildUrlset(botEntries));
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -140,9 +157,10 @@ const indexXml = [
   `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
   `  <sitemap><loc>${BASE_URL}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-openings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-bots.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
 writeFileSync(resolve("public/sitemap_index.xml"), indexXml);
 
-console.log(`✓ sitemap.xml (${staticEntries.length}) + sitemap-openings.xml (${openingEntries.length}) + sitemap-images.xml (${imageEntries.length}) + sitemap_index.xml`);
+console.log(`✓ sitemap.xml (${staticEntries.length}) + sitemap-openings.xml (${openingEntries.length}) + sitemap-bots.xml (${botEntries.length}) + sitemap-images.xml (${imageEntries.length})`);

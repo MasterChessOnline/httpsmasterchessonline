@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getBotById } from "@/lib/bots/profiles";
@@ -58,8 +59,27 @@ export default function BotProfile() {
   const progress = getTitleProgress(bot.rating, "bot");
   const rank = getRank(bot.rating);
 
+  const seoTitle = `Play ${bot.name} (${bot.rating} ELO) — ${title?.fullName ?? "Chess Bot"} on MasterChess`;
+  const seoDesc = `Challenge ${bot.name}, a ${bot.rating}-rated ${bot.style || "chess"} bot from ${bot.country}. ${stats.wins} wins, ${stats.losses} losses, peak ${stats.peak}. Free online chess on MasterChess.`;
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: bot.name,
+    nationality: bot.country,
+    description: bot.bio?.slice(0, 200) || `${bot.rating}-rated chess bot.`,
+    url: `https://masterchess.live/bot/${bot.id}`,
+    knowsAbout: ["Chess", bot.style, bot.playstyle].filter(Boolean),
+    affiliation: { "@type": "Organization", name: "MasterChess" },
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title={seoTitle}
+        description={seoDesc}
+        path={`/bot/${bot.id}`}
+        jsonLd={personSchema}
+      />
       <Navbar />
       <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
         <div className="max-w-2xl mx-auto space-y-4">
