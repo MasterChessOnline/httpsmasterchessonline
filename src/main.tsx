@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
+import { I18nProvider } from "@/i18n/I18nProvider";
 import App from "./App.tsx";
 import "./index.css";
 import { bootstrapVisualSettings } from "./lib/board-themes";
