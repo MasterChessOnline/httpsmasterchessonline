@@ -167,23 +167,45 @@ export default function SiteRating() {
           </div>
         </div>
 
-        {/* Reviews */}
+        {/* Public reviews list */}
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" /> Najnovije ocene
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" /> Najnovije ocene zajednice
+            </h3>
+            {ratings.length > 0 && (
+              <span className="text-xs text-muted-foreground">{ratings.length} ukupno</span>
+            )}
+          </div>
           {loading ? (
             <div className="text-sm text-muted-foreground">Učitavanje…</div>
           ) : ratings.length === 0 ? (
-            <div className="text-sm text-muted-foreground italic">Još nema ocena.</div>
+            <div className="text-sm text-muted-foreground italic">Još nema ocena. Budi prvi!</div>
           ) : (
-            ratings.slice(0, 10).map((r) => {
+            ratings.slice(0, 20).map((r) => {
               const p = profiles[r.user_id];
+              const name = p?.display_name?.trim() || "Anonimni igrač";
+              const initial = name.charAt(0).toUpperCase();
+              const date = new Date(r.created_at).toLocaleDateString("sr-RS", {
+                day: "numeric", month: "short", year: "numeric",
+              });
               return (
                 <div key={r.id} className="rounded-lg border border-border/50 bg-background/30 p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-sm">{p?.display_name || "Igrač"}</span>
-                    <div className="flex">
+                  <div className="flex items-center justify-between mb-1.5 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {p?.avatar_url ? (
+                        <img src={p.avatar_url} alt={name} className="w-7 h-7 rounded-full object-cover border border-border/60" />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-xs font-bold text-primary">
+                          {initial}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm truncate">{name}</div>
+                        <div className="text-[10px] text-muted-foreground">{date}</div>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0">
                       {[1, 2, 3, 4, 5].map((n) => (
                         <Star
                           key={n}
@@ -192,7 +214,7 @@ export default function SiteRating() {
                       ))}
                     </div>
                   </div>
-                  {r.comment && <p className="text-sm text-foreground/80">{r.comment}</p>}
+                  {r.comment && <p className="text-sm text-foreground/85 whitespace-pre-wrap">{r.comment}</p>}
                 </div>
               );
             })
