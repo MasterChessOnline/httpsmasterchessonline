@@ -8,7 +8,7 @@ export interface DailyMate {
   id: string;
   fen: string;             // White (or Black, indicated by side) to move
   side: "w" | "b";         // Whose turn / who delivers mate
-  matesIn: 2 | 3;
+  matesIn: 1 | 2 | 3;
   /** Acceptable first moves in SAN (handles transpositions). */
   firstMoves: string[];
   /** Optional human-readable name / source */
