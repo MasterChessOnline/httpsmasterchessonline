@@ -74,6 +74,8 @@ import AdminEmailStatus from "./pages/AdminEmailStatus";
 import SeoStatus from "./pages/SeoStatus";
 import AdminFullStats from "./pages/AdminFullStats";
 import EmbedBoard from "./pages/EmbedBoard";
+import Guides from "./pages/Guides";
+import Guide from "./pages/Guide";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
@@ -165,6 +167,8 @@ function AnimatedRoutes() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
+          <Route path="/guides" element={<Guides />} />
+          <Route path="/guide/:slug" element={<Guide />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
