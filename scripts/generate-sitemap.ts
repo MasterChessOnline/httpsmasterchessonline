@@ -161,6 +161,7 @@ const imageEntries: SitemapEntry[] = [
 writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
 writeFileSync(resolve("public/sitemap-openings.xml"), buildUrlset(openingEntries));
 writeFileSync(resolve("public/sitemap-bots.xml"), buildUrlset(botEntries));
+writeFileSync(resolve("public/sitemap-glossary.xml"), buildUrlset(glossaryEntries));
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -169,9 +170,10 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-openings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-bots.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-glossary.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
 writeFileSync(resolve("public/sitemap_index.xml"), indexXml);
 
-console.log(`✓ sitemap.xml (${staticEntries.length}) + sitemap-openings.xml (${openingEntries.length}) + sitemap-bots.xml (${botEntries.length}) + sitemap-images.xml (${imageEntries.length})`);
+console.log(`✓ sitemap.xml (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + images (${imageEntries.length})`);
