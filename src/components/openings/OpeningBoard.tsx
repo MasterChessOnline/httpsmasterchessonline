@@ -83,6 +83,7 @@ export default function OpeningBoard({
                 else if (isLastMv) bgClass = isLight ? "bg-primary/20" : "bg-primary/25";
                 else if (isHighlight) bgClass = "bg-blue-500/20";
 
+                const moveKey = lastMove ? `${lastMove.from}-${lastMove.to}` : "none";
                 return (
                   <button
                     key={square}
@@ -101,6 +102,13 @@ export default function OpeningBoard({
                       if (from !== square) onSquareClick?.(square);
                     }}
                   >
+                    {isLastMv && (
+                      <span
+                        key={`flash-${square}-${moveKey}`}
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 animate-square-flash rounded-[2px]"
+                      />
+                    )}
                     {isLegal && !piece && (
                       <span className="block h-[26%] w-[26%] rounded-full bg-foreground/20" />
                     )}
