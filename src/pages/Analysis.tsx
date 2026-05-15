@@ -932,8 +932,18 @@ export default function Analysis() {
 
             {/* Engine eval */}
             <div className="px-3 py-2 border-b border-border/20">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-mono font-bold text-foreground">{formatEval(evalCpForBar, evalMateForBar)}</span>
+                {pgnComplete && activeIdx >= 0 && reviewClassifications[activeIdx] && (() => {
+                  const k = reviewClassifications[activeIdx];
+                  const meta = CLASS_META[k];
+                  return (
+                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider ${meta.bg} ${meta.color}`}>
+                      <span className="text-sm leading-none">{meta.symbol}</span>
+                      {meta.label}
+                    </span>
+                  );
+                })()}
               </div>
               {/* Depth slider */}
               <div className="flex items-center gap-2 mt-2">
