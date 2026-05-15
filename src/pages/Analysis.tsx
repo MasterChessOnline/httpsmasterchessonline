@@ -642,6 +642,7 @@ export default function Analysis() {
   }, [pgnComplete, pgnCurrentIdx, goToPgnMove, pgnMoveEvals.length, liveMoveHistory, liveViewIdx, goToLiveMove]);
 
   const runAnalysis = async () => {
+    if (analyzing) return; // hard guard against double-click re-entry
     setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
     const trimmed = pgnInput.trim();
@@ -728,6 +729,7 @@ export default function Analysis() {
 
   // Variant of runAnalysis that takes the PGN text directly (avoids React state lag).
   const runAnalysisFromText = async (pgnText: string) => {
+    if (analyzing) return; // hard guard against double-click re-entry
     setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
     const trimmed = pgnText.trim();
@@ -930,8 +932,18 @@ export default function Analysis() {
 
             {/* Engine eval */}
             <div className="px-3 py-2 border-b border-border/20">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-mono font-bold text-foreground">{formatEval(evalCpForBar, evalMateForBar)}</span>
+                {pgnComplete && activeIdx >= 0 && reviewClassifications[activeIdx] && (() => {
+                  const k = reviewClassifications[activeIdx];
+                  const meta = CLASS_META[k];
+                  return (
+                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider ${meta.bg} ${meta.color}`}>
+                      <span className="text-sm leading-none">{meta.symbol}</span>
+                      {meta.label}
+                    </span>
+                  );
+                })()}
               </div>
               {/* Depth slider */}
               <div className="flex items-center gap-2 mt-2">
@@ -1076,11 +1088,19 @@ export default function Analysis() {
                           {showNum && <span className="text-muted-foreground/50 font-mono w-5 text-right shrink-0 text-[10px]">{mv.moveNumber}.</span>}
                           {!showNum && <span className="w-5 shrink-0" />}
                           <span className="font-mono font-medium">{mv.san}</span>
-                          {pgnComplete && reviewClassifications[i] && (
-                            <span className={`ml-auto text-[10px] font-bold ${CLASS_META[reviewClassifications[i]].color}`}>
-                              {CLASS_META[reviewClassifications[i]].symbol}
-                            </span>
-                          )}
+                          {pgnComplete && reviewClassifications[i] && (() => {
+                            const k = reviewClassifications[i];
+                            const meta = CLASS_META[k];
+                            return (
+                              <span
+                                className={`ml-auto inline-flex items-center gap-1 px-1.5 py-[1px] rounded border text-[9px] font-bold uppercase tracking-wider ${meta.bg} ${meta.color}`}
+                                title={meta.label}
+                              >
+                                <span className="leading-none">{meta.symbol}</span>
+                                <span className="hidden xl:inline leading-none">{meta.label}</span>
+                              </span>
+                            );
+                          })()}
                         </button>
                         {varsHere.map((v, vk) => (
                           <div key={vk} className="col-span-2 ml-6 my-0.5 px-2 py-1 rounded border border-primary/30 bg-[hsl(45,80%,55%)]/10 text-[11px] text-foreground/90 flex items-center flex-wrap gap-x-1 gap-y-0.5">
