@@ -284,11 +284,11 @@ const Index = () => {
           action={<ActivityPulse />}>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
             {[
-              { tc: "1+0",   label: "Bullet",     icon: "⚡", color: "from-red-500/20 to-orange-500/10",    border: "border-red-500/30 hover:border-red-400/60" },
-              { tc: "3+0",   label: "Blitz",      icon: "🔥", color: "from-orange-500/20 to-amber-500/10",  border: "border-orange-500/30 hover:border-orange-400/60" },
-              { tc: "5+0",   label: "Blitz",      icon: "💨", color: "from-amber-500/20 to-yellow-500/10",  border: "border-amber-500/30 hover:border-amber-400/60" },
-              { tc: "10+0",  label: "Rapid",      icon: "⚔️", color: "from-emerald-500/20 to-teal-500/10",  border: "border-emerald-500/30 hover:border-emerald-400/60" },
-              { tc: "15+10", label: "Classical",  icon: "👑", color: "from-blue-500/20 to-indigo-500/10",   border: "border-blue-500/30 hover:border-blue-400/60" },
+              { tc: "1+0",   label: "Bullet",     icon: "⚡", color: "from-red-500/20 to-orange-500/10",    border: "border-red-500/30 hover:border-red-400/60",       erupt: "0 90% 60%" },
+              { tc: "3+0",   label: "Blitz",      icon: "🔥", color: "from-orange-500/20 to-amber-500/10",  border: "border-orange-500/30 hover:border-orange-400/60", erupt: "25 95% 58%" },
+              { tc: "5+0",   label: "Blitz",      icon: "💨", color: "from-amber-500/20 to-yellow-500/10",  border: "border-amber-500/30 hover:border-amber-400/60",   erupt: "43 90% 55%" },
+              { tc: "10+0",  label: "Rapid",      icon: "⚔️", color: "from-emerald-500/20 to-teal-500/10",  border: "border-emerald-500/30 hover:border-emerald-400/60", erupt: "160 85% 50%" },
+              { tc: "15+10", label: "Classical",  icon: "👑", color: "from-blue-500/20 to-indigo-500/10",   border: "border-blue-500/30 hover:border-blue-400/60",     erupt: "220 90% 62%" },
             ].map((tc, i) => (
               <motion.div
                 key={tc.tc}
@@ -299,14 +299,21 @@ const Index = () => {
               >
                 <Link to={`/play/online?tc=${encodeURIComponent(tc.tc)}`}>
                   <motion.div
-                    className={`relative rounded-xl border ${tc.border} bg-gradient-to-br ${tc.color} backdrop-blur p-3 sm:p-4 text-center transition-all duration-300 overflow-hidden`}
-                    whileHover={{ y: -6, scale: 1.06 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    style={{ ["--erupt-color" as any]: tc.erupt, animationDelay: `${i * 0.4}s` }}
+                    className={`erupt-conic erupt-aura erupt-flare relative rounded-xl border ${tc.border} bg-gradient-to-br ${tc.color} backdrop-blur p-3 sm:p-4 text-center transition-all duration-300`}
+                    whileHover={{ y: -8, scale: 1.08, rotateZ: -1 }}
+                    whileTap={{ scale: 0.93 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
                   >
-                    <div className="text-2xl sm:text-3xl mb-1">{tc.icon}</div>
-                    <div className="font-display font-bold text-base sm:text-lg text-foreground tracking-tight">{tc.tc}</div>
-                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">{tc.label}</div>
+                    <motion.div
+                      className="text-2xl sm:text-3xl mb-1"
+                      animate={{ scale: [1, 1.15, 1], rotate: [0, i % 2 ? 6 : -6, 0] }}
+                      transition={{ duration: 2.4 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+                    >
+                      {tc.icon}
+                    </motion.div>
+                    <div className="font-display font-bold text-base sm:text-lg text-foreground tracking-tight relative z-10">{tc.tc}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold relative z-10">{tc.label}</div>
                   </motion.div>
                 </Link>
               </motion.div>
