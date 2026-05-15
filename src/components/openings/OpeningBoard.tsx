@@ -121,15 +121,15 @@ export default function OpeningBoard({
                         }}
                         onDragEnd={() => setDragFrom(null)}
                         className={`leading-none flex items-center justify-center cursor-grab active:cursor-grabbing ${
-                          pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(6vw,2.8rem)] font-bold"
+                          pd.svgUrl ? "w-[90%] h-[90%]" : "text-[min(7vw,3rem)] font-black"
                         } ${
                           pd.white
-                            ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] [filter:drop-shadow(0_0_1px_rgba(0,0,0,0.9))]"
-                            : "drop-shadow-[0_0_2px_rgba(255,255,255,0.55)] [filter:drop-shadow(0_0_1px_rgba(255,255,255,0.7))]"
+                            ? "[filter:drop-shadow(0_0_1.5px_#000)_drop-shadow(0_0_1.5px_#000)_drop-shadow(0_1px_2px_rgba(0,0,0,0.9))]"
+                            : "[filter:drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_1px_2px_rgba(255,255,255,0.55))]"
                         }`}
                         style={pd.svgUrl ? undefined : {
-                          color: pd.white ? "#ffffff" : "#0a0a0a",
-                          WebkitTextStroke: pd.white ? "1.5px #000000" : "1.5px #ffffff",
+                          color: pd.white ? "#ffffff" : "#000000",
+                          WebkitTextStroke: pd.white ? "2px #000000" : "2px #ffffff",
                         }}
                       >
                         {pd.svgUrl ? (
