@@ -217,11 +217,11 @@ const Index = () => {
               transition={{ delay: 0.25, duration: 0.4 }}
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 backdrop-blur-sm text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-                <span className="text-primary">🔥 Get Ready to Battle</span>
+                <span className="text-primary">🔥 {t("hero.signupCta")}</span>
                 <span className="text-muted-foreground">—</span>
-                <Link to="/signup" className="text-primary hover:text-primary/80 underline underline-offset-2">Join Free</Link>
-                <span className="text-muted-foreground">or</span>
-                <Link to="/login" className="text-muted-foreground hover:text-foreground underline underline-offset-2">Log In</Link>
+                <Link to="/signup" className="text-primary hover:text-primary/80 underline underline-offset-2">{t("hero.joinFree")}</Link>
+                <span className="text-muted-foreground">{t("common.or", "or")}</span>
+                <Link to="/login" className="text-muted-foreground hover:text-foreground underline underline-offset-2">{t("hero.login")}</Link>
               </span>
             </motion.div>
           )}
