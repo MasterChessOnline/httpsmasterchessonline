@@ -283,6 +283,16 @@ const Index = () => {
               </Link>
             ))}
           </motion.div>
+
+          {/* Live player counter — real-time engagement signal */}
+          <motion.div
+            className="mt-6 flex justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+          >
+            <LivePlayerCounter />
+          </motion.div>
         </motion.div>
       </div>
 
