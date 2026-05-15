@@ -43,6 +43,17 @@ export default function OpeningBoard({
   const displayFiles = flipped ? [...FILES].reverse() : FILES;
   const displayRanks = flipped ? [...RANKS].reverse() : RANKS;
 
+  // Haptic feedback on every move change (mobile)
+  const moveSig = lastMove ? `${lastMove.from}-${lastMove.to}` : null;
+  useEffect(() => {
+    if (!moveSig) return;
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+        navigator.vibrate(15);
+      }
+    } catch { /* ignore */ }
+  }, [moveSig]);
+
   return (
     <div className="w-full max-w-[min(85vw,480px)] mx-auto">
       <div className="flex ml-7 mr-1 mb-1">
