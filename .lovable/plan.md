@@ -1,71 +1,87 @@
-## Plan — "Explode" preko Google slika i društvenih mreža
+# Plan — Šta još dodati da sajt eksplodira od popularnosti
 
-Cilj: maksimalno povećati šanse da se MasterChess pojavljuje u Google pretrazi, Google Images i da svaka deljena URL izgleda profesionalno na X/WhatsApp/Reddit/Facebook/LinkedIn.
+Imaš već: 156+ indexed URL-ova, GA4, IndexNow, OG slike po openingu, ShareBar svuda, FAQ schema, admin dashboard. Sledeći nivo je **viralnost + retencija + vidljivost**.
 
-### Šta je već urađeno (status)
-- Sitemap index sa 156+ URL-ova (statički + 60 opening landing pages + image sitemap)
-- Robots.txt dozvoljava Googlebot-Image + AI crawlere (GPT, Claude, Perplexity)
-- GSC verifikacija + svi sitemapi submit-ovani
-- IndexNow ključ postoji (`public/indexnow-key.txt`)
-- ShareWinCard komponenta (canvas 1200×630) za viralno deljenje pobeda
-- `/topics` hub stranica koja distribuira link juice
-- Osnovni Seo komponenta sa OG tagovima
+## 1. Viralni "Chess Card" generator (najveći ROI)
+Stranica `/card/:username` koja generiše **personalizovanu sliku 1200×630** sa: avatar, ELO, win rate, najjači opening, "play personality" badge, QR kod ka profilu.
+- Dugme "Share my chess card" na profilu, posle svake pobede, na kraju turnira
+- Auto-tweet template: "Just hit 1500 ELO on @masterchess ♟️ [card image]"
+- Svaka deljena karta = backlink + slika u Google Images sa keyword "chess rating"
+- **Zašto radi:** ljudi vole da deli postignuća. Chess.com/Lichess nemaju ovo lepo rešeno.
 
-### Šta NIJE urađeno (ovo je plan)
+## 2. "Daily Position" — viralna kuka koja vraća ljude
+Svaki dan jedna pozicija na `/daily` sa countdown-om do sledeće.
+- Email + push notifikacija u 9h ujutru
+- Globalni leaderboard ko je rešio najbrže
+- Auto-share rezultat ("Solved today's position in 12s — can you?")
+- Streak counter (gamifikacija + retention)
+- **Zašto radi:** Wordle-efekat. Daily ritual = svakodnevni traffic + viralno deljenje.
 
-**1. Pravi OG slike po stranici (Google Images + social previews)**
-- Edge funkcija `og-image` koja generiše PNG 1200×630 po ruti (opening name, ELO badge, brand)
-- Per-route `og:image` u Seo komponenti za sve 60 opening stranica + 25 learn članaka
-- `twitter:image` + `og:image:width`/`height` meta tagovi
-- Rezultat: ~85 unikatnih slika u Google Images, lepi previewi na svakom share-u
+## 3. Public player profili (`/u/:username`) indexable
+Trenutno profili nisu javno indexovani. Otvoriti top 500 igrača kao public stranice:
+- SEO title: "Marko Petrović — 1847 ELO chess player | MasterChess"
+- Recent games, openings repertoire, achievements
+- Dodati u `sitemap-players.xml` (auto-generated)
+- **Zašto radi:** ljudi guglaju svoje ime → nalaze profil → dele ga. +500 indexed stranica preko noći.
 
-**2. IndexNow auto-ping (instant indexing)**
-- Edge funkcija `indexnow-ping` koja šalje URL listu na Bing/Yandex/Seznam endpoint
-- Trigger pri build-u (sve URL-ove iz sitemap-a) + pri novim blog postovima
-- Bonus: Google Indexing API (samo za JobPosting/BroadcastEvent zvanično, ali često prolazi i za ostalo)
+## 4. Embed widgets za druge sajtove (backlink magnet)
+Već imaš `/embed-tools` — proširiti sa:
+- **PGN viewer iframe** (svaki chess blogger će ga embed-ovati)
+- **Live tournament widget** (klubovi staviti na svoj sajt)
+- **Mini puzzle widget** za blogere
+- "Powered by MasterChess" footer = automatski backlink sa svakog embed-a
+- **Zašto radi:** Lichess je tako narastao. Free tools = stotine backlink-ova mesečno.
 
-**3. Image sitemap proširen sa pravim slikama**
-- Trenutno svaka opening pokazuje isti `/og-image.jpg` — beskorisno za Google Images
-- Generiši po jednu sliku po opening-u (chess board screenshot ili dinamički OG) i upiši ih u `sitemap-images.xml` sa unikatnim title/caption koji sadrži keyword
+## 5. Referral program sa nagradama
+`/referrals` već postoji — aktivirati sa konkretnim:
+- 3 prijave = "Recruiter" badge + besplatan custom piece set
+- 10 prijava = "Ambassador" + ime na hall of fame
+- Personalizovan link `masterchess.live/r/marko123`
+- **Zašto radi:** najjeftiniji rast po user-u. K-faktor > 1 = exponential.
 
-**4. Strukturni schema markup (rich snippets na Google)**
-- `FAQPage` schema na svim 60 opening stranica (3-5 Q&A po opening-u)
-- `HowTo` schema na `/learn/how-to-*` člancima (već imamo 6 ovakvih)
-- `BreadcrumbList` schema globalno (Header → Sekcija → Stranica)
-- `VideoObject` schema na `/live` (DailyChess_12 video embed)
-- Rezultat: rich results u SERP-u = 2-3× viši CTR
+## 6. SEO content engine (50 novih članaka automatski)
+Imaš 23 learn članaka — dodati 50 dugog repa:
+- "Best chess opening for [rating]" (×10 rejtinga)
+- "How to beat [opening] as [color]" (×20 openinga)
+- "Chess tips for [age group]" (×5)
+- Svaki članak: 1500+ reči, FAQ schema, internal linkovi, ShareBar
+- **Zašto radi:** dugi rep nosi 70% organskog trafika. Niska konkurencija.
 
-**5. Social sharing dugmad svuda**
-- `<ShareButtons>` komponenta (X, WhatsApp, Reddit, Facebook, LinkedIn, Telegram, copy link)
-- Dodati na: opening landing, blog/learn članke, game review, player profile
-- Pre-popunjen text + UTM parametri za tracking (`?utm_source=share&utm_medium=x`)
+## 7. Reddit/Discord launch kampanja
+- Post na **r/chess, r/chessbeginners, r/AnarchyChess** (3.5M kombinovano)
+- Naslov: "I built a free chess site with X feature [Lichess/Chess.com] doesn't have"
+- Pin "Show & tell" thread-ovi na chess Discord serverima
+- AMA na r/chess
+- **Zašto radi:** jedan dobar Reddit post = 50,000 poseta za 24h.
 
-**6. Backlink magneti (linkovi koji stvaraju linkove)**
-- `/embed-tools` već postoji — dodati: PNG board generator, FEN→image API, opening trainer iframe
-- "Powered by MasterChess" watermark u svakom embed-u (svaki sajt koji embed-uje = backlink)
-- Free tools koji rangiraju: PGN viewer, ECO opening database, blunder checker
+## 8. PWA + push notifikacije
+`manifest.json` već postoji. Dodati:
+- "Add to home screen" prompt
+- Push notifikacije: daily puzzle, "opponent moved", turnir starta za 5min
+- Offline mod (cache poslednje partije)
+- **Zašto radi:** retention 3× viši kad je PWA instaliran. Push = recurring traffic.
 
-**7. PWA + share target (mobile reach)**
-- `manifest.json` već postoji — dodati `share_target` API tako da kad neko deli PGN/FEN sa drugog app-a, MasterChess se pojavi kao opcija
-- Push notifikacije za daily puzzle (retention loop koji vraća ljude → više share-ova)
+---
 
-**8. Sitemap proširenje**
-- Dodati javne player profile (`/players/:username`) za top 500 igrača — auto-generated u sitemap
-- Dodati game share linkove (`/game/:id`) za public games
-- Cilj: 500-1000+ indexed URL-ova
+## Preporučeni redosled (od najvećeg ROI)
 
-### Tehnički sažetak (za dev)
-- **Edge funkcije:** `og-image` (Satori/canvas), `indexnow-ping` (cron + on-demand)
-- **Nove komponente:** `ShareButtons.tsx`, `Breadcrumbs.tsx` sa JSON-LD
-- **Izmene:** `Seo.tsx` (per-route og:image), `OpeningLanding.tsx` (FAQ schema), `LearnArticle.tsx` (HowTo schema), `generate-sitemap.ts` (per-page images, profile slugs)
-- **Nove rute:** `/players/:username` (već u planu iz `.lovable/plan.md`)
-- **Backend:** novo polje `og_image_url` na opening data, profili sa public flag
+1. **Chess Card generator** (1 dan) — odmah viralno
+2. **Daily Position** (2 dana) — kreira retention loop
+3. **Public profili + sitemap** (1 dan) — +500 indexed stranica
+4. **Reddit launch** (1 dan, posle gornjeg) — burst trafik
+5. **50 SEO članaka** (3-5 dana, AI-assisted) — long tail
+6. **Embed widgets** (2 dana) — dugoročni backlinks
+7. **Referral aktivacija** (1 dan)
+8. **PWA push** (2 dana)
 
-### Redosled (preporučujem ovaj prioritet)
-1. **Per-page OG slike + FAQ schema** (najveći SEO ROI, vidi se u 1-2 nedelje)
-2. **Share dugmad svuda + UTM tracking** (odmah viralni efekat)
-3. **IndexNow auto-ping** (Bing/Yandex indeksiraju za 24h umesto 2 nedelje)
-4. **Backlink magneti (embed tools)** (dugoročni efekat, gradi domain authority)
-5. **Player profili + sitemap proširenje** (masa novih indexed stranica)
+## Tehnički plan (ukratko)
 
-Reci **"sve redom"** da krenem od vrha, ili broj (npr. **"1 i 2"**) za selektivno.
+- **Chess Card:** edge funkcija `chess-card-image` (Satori PNG render), nova `/card/:username` stranica, dugme u Profile.tsx i posle game-a
+- **Daily Position:** nova tabela `daily_positions` (admin posts dnevno ili cron iz Lichess puzzle DB), `/daily` stranica, Resend email cron, FCM push
+- **Public profili:** otkloniti `Disallow: /profile` u robots.txt za public flag, `/u/:username` ruta, scripts/generate-sitemap.ts dodaje top 500 by ELO
+- **Embed widgets:** proširiti `EmbedBoard.tsx` sa `?mode=pgn`, `?mode=puzzle`, `?mode=tournament`
+- **Push:** service worker već postoji u PWA, dodati FCM ili Web Push API + tabela `push_subscriptions`
+
+---
+
+**Reci broj (npr. "1, 2 i 3") ili "sve redom" da krenem.** Preporučujem **1 + 2 + 3 + 4** — to je realno 5 dana rada i može da donese 10× više trafika za mesec dana.

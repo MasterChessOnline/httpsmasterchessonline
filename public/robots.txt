@@ -6,6 +6,7 @@ Disallow: /tournament-sync
 Disallow: /chat
 Disallow: /settings
 Disallow: /profile
+Allow: /u/
 
 # AI / LLM crawlers — explicitly allowed
 User-agent: GPTBot

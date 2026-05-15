@@ -25,6 +25,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import ProfileRedirect from "./pages/ProfileRedirect";
+import PublicPlayer from "./pages/PublicPlayer";
 import Friends from "./pages/Friends";
 import ComingSoon from "./pages/ComingSoon";
 import Achievements from "./pages/Achievements";
@@ -111,6 +112,7 @@ function AnimatedRoutes() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<ProfileRedirect />} />
           <Route path="/profile/:userId" element={<Profile />} />
+          <Route path="/u/:username" element={<PublicPlayer />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path="/achievements" element={<Achievements />} />

@@ -407,6 +407,26 @@ const Profile = () => {
             </motion.div>
           </Link>
 
+          {/* Public share link */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="rounded-xl border border-border/40 bg-card/60 p-4"
+          >
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h3 className="font-display text-sm font-bold text-foreground">Public profile</h3>
+                <p className="text-xs text-muted-foreground">
+                  Share this link anywhere — it works without login and shows up on Google.
+                </p>
+              </div>
+              <Link to={`/u/${profileData.username || profileData.user_id}`}>
+                <Button variant="outline" size="sm">View public page →</Button>
+              </Link>
+            </div>
+          </motion.div>
+
           {/* Play Personality */}
           {profileData.games_played >= 1 && (
             <motion.div
