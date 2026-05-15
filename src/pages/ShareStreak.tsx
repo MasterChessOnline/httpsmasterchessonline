@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useRef, useState } from "react";
 import { Download, Copy, Twitter, Check, Flame } from "lucide-react";
 import Seo from "@/components/Seo";
-import Header from "@/components/Header";
+import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -46,7 +46,7 @@ export default function ShareStreak() {
         description={`I solved the daily mate-in-N puzzle ${days} days in a row on MasterChess. Beat my streak — free chess puzzles every day.`}
         path={`/share/streak/${days}`}
       />
-      <Header />
+      <Navbar />
       <main className="container mx-auto px-4 py-10 max-w-3xl">
         <h1 className="font-display text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2 text-center">
           Share your <span className="text-gradient-gold">streak</span>

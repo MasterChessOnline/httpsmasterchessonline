@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, Search } from "lucide-react";
 import Seo from "@/components/Seo";
-import Header from "@/components/Header";
+import Navbar from "@/components/Navbar";
 import { Input } from "@/components/ui/input";
 import { GLOSSARY } from "@/data/chessGlossary";
 
@@ -40,7 +40,7 @@ export default function Glossary() {
           })),
         }}
       />
-      <Header />
+      <Navbar />
       <main className="container mx-auto px-4 py-10 max-w-5xl">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center gap-3 mb-2">

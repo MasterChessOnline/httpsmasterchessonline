@@ -2,7 +2,7 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, BookOpen } from "lucide-react";
 import Seo from "@/components/Seo";
-import Header from "@/components/Header";
+import Navbar from "@/components/Navbar";
 import { getTermBySlug, GLOSSARY } from "@/data/chessGlossary";
 
 export default function GlossaryTerm() {
@@ -41,7 +41,7 @@ export default function GlossaryTerm() {
           },
         ]}
       />
-      <Header />
+      <Navbar />
       <main className="container mx-auto px-4 py-10 max-w-3xl">
         <Link to="/learn/glossary" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary mb-6">
           <ChevronLeft className="h-4 w-4" /> All terms
