@@ -25,6 +25,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Leaderboard from "./pages/Leaderboard";
 import Profile from "./pages/Profile";
 import ProfileRedirect from "./pages/ProfileRedirect";
+import PublicPlayer from "./pages/PublicPlayer";
 import Friends from "./pages/Friends";
 import ComingSoon from "./pages/ComingSoon";
 import Achievements from "./pages/Achievements";
