@@ -68,6 +68,7 @@ import DailyPlan from "./pages/DailyPlan";
 import Repertoire from "./pages/Repertoire";
 import Training from "./pages/Training";
 import ChessCard from "./pages/ChessCard";
+import DailyMate from "./pages/DailyMate";
 import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
 import SeoStatus from "./pages/SeoStatus";
@@ -146,6 +147,7 @@ function AnimatedRoutes() {
           <Route path="/repertoire" element={<Repertoire />} />
           <Route path="/training" element={<Training />} />
           <Route path="/chess-card" element={<ChessCard />} />
+          <Route path="/daily-mate" element={<DailyMate />} />
           <Route path="/bot/:botId" element={<BotProfile />} />
           <Route path="/admin/email-status" element={<AdminEmailStatus />} />
           <Route path="/admin/seo-status" element={<SeoStatus />} />
