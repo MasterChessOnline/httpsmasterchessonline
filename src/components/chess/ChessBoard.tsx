@@ -306,6 +306,29 @@ export default function ChessBoard({
                     {isLegal && pd && (
                       <span className={`absolute inset-[6%] rounded-full border-[3px] ${premoveMode ? "border-blue-500/70" : "border-foreground/25"}`} />
                     )}
+                    {/* Hover ghost preview — translucent piece on legal target while a piece is selected */}
+                    {isLegal && hoverSquare === square && selectedPieceData && selectedSquare !== square && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-[6%] z-[5] pointer-events-none flex items-center justify-center opacity-40 motion-reduce:hidden"
+                      >
+                        {selectedPieceData.svgUrl ? (
+                          <img
+                            src={selectedPieceData.svgUrl}
+                            alt=""
+                            className="w-full h-full object-contain"
+                            style={selectedPieceData.pixelated ? { imageRendering: "pixelated" } : undefined}
+                          />
+                        ) : (
+                          <span
+                            className="text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none"
+                            style={{ color: selectedPieceData.white ? "var(--piece-white,#fff)" : "var(--piece-black,hsl(220,15%,8%))" }}
+                          >
+                            {selectedPieceData.symbol}
+                          </span>
+                        )}
+                      </span>
+                    )}
                     {/* Piece — SVG artwork or Unicode glyph depending on the active set */}
                     {pd && (
                       <motion.span
