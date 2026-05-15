@@ -98,10 +98,36 @@ export default function StreamHub() {
       ? `https://www.youtube.com/embed/${latestVideoId}`
       : null;
 
+  // VideoObject schemas for the latest videos — Google indexes these as MasterChess
+  // video content (we host the discovery page) and shows thumbnails in SERP.
+  const videoLd = recentVideos.slice(0, 8).map((v) => ({
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: v.title,
+    description: v.title,
+    thumbnailUrl: v.thumbnail || `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`,
+    uploadDate: v.publishedAt,
+    contentUrl: `https://www.youtube.com/watch?v=${v.id}`,
+    embedUrl: `https://www.youtube.com/embed/${v.id}`,
+    publisher: {
+      "@type": "Organization",
+      name: "MasterChess",
+      logo: { "@type": "ImageObject", url: "https://masterchess.live/og-image.jpg" },
+    },
+  }));
+  const liveLd = isLive && liveVideoId ? [{
+    "@context": "https://schema.org",
+    "@type": "BroadcastEvent",
+    name: "DailyChess_12 Live Stream",
+    isLiveBroadcast: true,
+    startDate: new Date().toISOString(),
+    videoFormat: "HD",
+  }] : [];
+
   return (
     <div className="min-h-screen bg-background relative">
       <DynamicBackground />
-      <Seo title={"Live Chess Stream — DailyChess_12 | MasterChess"} description={"Watch DailyChess_12 live, join the viewer queue, react with emojis and vote in live polls."} path="/live" type="website" />
+      <Seo title={"Live Chess Stream — DailyChess_12 | MasterChess"} description={"Watch DailyChess_12 live, join the viewer queue, react with emojis and vote in live polls."} path="/live" type="website" jsonLd={[...liveLd, ...videoLd]} />
       <Navbar />
 
       <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16 relative z-10">
