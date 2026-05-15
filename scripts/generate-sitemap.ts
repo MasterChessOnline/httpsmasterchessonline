@@ -5,6 +5,7 @@ import { resolve } from "path";
 import { ALL_OPENING_SLUGS, OPENING_SEO } from "../src/lib/opening-seo-meta";
 import { OPENINGS_DATABASE } from "../src/lib/openings-data";
 import { getOpeningBoardImage } from "../src/lib/og-board-image";
+import { ONLINE_BOTS } from "../src/lib/online-bots-data";
 
 const BASE_URL = "https://masterchess.live";
 
