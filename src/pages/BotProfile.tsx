@@ -59,7 +59,7 @@ export default function BotProfile() {
   const progress = getTitleProgress(bot.rating, "bot");
   const rank = getRank(bot.rating);
 
-  const seoTitle = `Play ${bot.name} (${bot.rating} ELO) — ${title?.title ?? "Chess Bot"} on MasterChess`;
+  const seoTitle = `Play ${bot.name} (${bot.rating} ELO) — ${title?.fullName ?? "Chess Bot"} on MasterChess`;
   const seoDesc = `Challenge ${bot.name}, a ${bot.rating}-rated ${bot.style || "chess"} bot from ${bot.country}. ${stats.wins} wins, ${stats.losses} losses, peak ${stats.peak}. Free online chess on MasterChess.`;
   const personSchema = {
     "@context": "https://schema.org",
