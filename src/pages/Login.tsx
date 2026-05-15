@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Crown, LogIn, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
+import AuthAura from "@/components/auth/AuthAura";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -69,22 +70,20 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.08),transparent_60%)]" />
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden py-10">
+      <AuthAura />
       {CHESS_PIECES.map((piece, i) => (
         <FloatingPiece key={i} piece={piece} index={i} />
       ))}
 
       {/* Card */}
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        initial={{ opacity: 0, y: 28, scale: 0.94 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-10 w-full max-w-md mx-4"
       >
-        <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.4)] p-8 sm:p-10">
+        <div className="erupt-card rounded-2xl backdrop-blur-2xl shadow-[0_20px_70px_-10px_rgba(0,0,0,0.6),0_0_60px_-20px_hsl(43_90%_55%/0.3)] p-8 sm:p-10">
           {/* Header */}
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5">

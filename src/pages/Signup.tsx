@@ -9,6 +9,7 @@ import { Crown, UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
+import AuthAura from "@/components/auth/AuthAura";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -98,22 +99,20 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--primary)/0.08),transparent_60%)]" />
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden py-10">
+      <AuthAura />
       {CHESS_PIECES.map((piece, i) => (
         <FloatingPiece key={i} piece={piece} index={i} />
       ))}
 
       {/* Card */}
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        initial={{ opacity: 0, y: 28, scale: 0.94 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-10 w-full max-w-md mx-4"
       >
-        <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.4)] p-8 sm:p-10">
+        <div className="erupt-card rounded-2xl backdrop-blur-2xl shadow-[0_20px_70px_-10px_rgba(0,0,0,0.6),0_0_60px_-20px_hsl(43_90%_55%/0.3)] p-8 sm:p-10">
           {/* Header */}
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2.5 mb-5">
@@ -222,46 +221,6 @@ const Signup = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-            </div>
-
-            {/* Starting level picker */}
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Starting Level
-                <span className="ml-1 text-[10px] text-muted-foreground/70">(sets your online rating)</span>
-              </Label>
-              <div className="grid grid-cols-5 gap-1.5">
-                {STARTING_LEVELS.map((lvl) => {
-                  const selected = levelKey === lvl.key;
-                  return (
-                    <button
-                      key={lvl.key}
-                      type="button"
-                      onClick={() => setLevelKey(lvl.key)}
-                      className={`group relative flex flex-col items-center justify-center rounded-lg border bg-muted/20 px-1.5 py-2 transition-all hover:scale-[1.03] ${
-                        selected
-                          ? `${lvl.borderColor} bg-primary/5 shadow-glow`
-                          : "border-border/40 hover:border-primary/30"
-                      }`}
-                      aria-pressed={selected}
-                      aria-label={`${lvl.label} — ${lvl.rating} rating`}
-                    >
-                      <span className={`text-base leading-none ${selected ? lvl.color : "opacity-70"}`}>
-                        {lvl.icon}
-                      </span>
-                      <span className={`mt-1 text-[9px] font-bold uppercase tracking-wider ${selected ? lvl.color : "text-muted-foreground"}`}>
-                        L{lvl.level}
-                      </span>
-                      <span className={`mt-0.5 font-mono text-[10px] font-semibold ${selected ? "text-foreground" : "text-muted-foreground"}`}>
-                        {lvl.rating}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-[10px] text-muted-foreground text-center">
-                {getStartingLevel(levelKey).label} — {getStartingLevel(levelKey).description}
-              </p>
             </div>
 
             {error && (
