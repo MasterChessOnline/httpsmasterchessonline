@@ -7,8 +7,45 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Target, Flame, Zap, Trophy, RotateCcw, Lightbulb,
-  CheckCircle, XCircle, Clock, Calendar, Loader2,
+  CheckCircle, XCircle, Clock, Calendar, Loader2, Lock, ShieldCheck,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+
+const SOLVED_KEY = "mc.dailyMate.solved.v1";
+const STREAK_KEY = "mc.dailyMate.streak.v1";
+
+function isSolvedToday(): boolean {
+  try { return localStorage.getItem(SOLVED_KEY) === todayStr(); } catch { return false; }
+}
+function loadStreak(): { streak: number; lastSolvedDay: string | null } {
+  try {
+    const raw = localStorage.getItem(STREAK_KEY);
+    if (!raw) return { streak: 0, lastSolvedDay: null };
+    return JSON.parse(raw);
+  } catch { return { streak: 0, lastSolvedDay: null }; }
+}
+function markSolvedToday() {
+  const today = todayStr();
+  try {
+    localStorage.setItem(SOLVED_KEY, today);
+    const cur = loadStreak();
+    if (cur.lastSolvedDay === today) return cur;
+    // Yesterday continues streak; otherwise restart at 1
+    const y = new Date(); y.setUTCDate(y.getUTCDate() - 1);
+    const yesterday = y.toISOString().split("T")[0];
+    const next = {
+      streak: cur.lastSolvedDay === yesterday ? cur.streak + 1 : 1,
+      lastSolvedDay: today,
+    };
+    localStorage.setItem(STREAK_KEY, JSON.stringify(next));
+    return next;
+  } catch { return loadStreak(); }
+}
+function secondsUntilMidnightUTC(): number {
+  const now = new Date();
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+  return Math.max(0, Math.floor((next.getTime() - now.getTime()) / 1000));
+}
 
 interface DailyPuzzle {
   title: string;
