@@ -204,7 +204,7 @@ const Index = () => {
               <span className="text-foreground">Chess</span>
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-2 font-light tracking-wide uppercase">
-              <span className="text-primary font-semibold">Battle.</span> Climb. <span className="text-primary font-semibold">Conquer.</span>
+              {t("hero.tagline")}
             </p>
           </motion.div>
 
