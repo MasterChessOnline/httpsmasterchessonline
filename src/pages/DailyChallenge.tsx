@@ -333,6 +333,14 @@ function PuzzleSolver({ puzzle, onSolved, replayMode }: { puzzle: ParsedPuzzle; 
     return () => clearInterval(i);
   }, [status]);
 
+  // Notify parent once when solved
+  useEffect(() => {
+    if (status === "solved" && !reportedRef.current) {
+      reportedRef.current = true;
+      onSolved?.();
+    }
+  }, [status, onSolved]);
+
   function reset() {
     setGame(new Chess(puzzle.startFen));
     setMoveIndex(0);
