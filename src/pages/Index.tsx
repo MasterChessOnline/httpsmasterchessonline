@@ -21,7 +21,6 @@ import heroImage from "@/assets/hero-chess.jpg";
 import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
 import DailyMissions from "@/components/DailyMissions";
-import DailyMateWidget from "@/components/DailyMateWidget";
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 
@@ -433,14 +432,11 @@ const Index = () => {
 
 
 
-        {/* Daily Mate + Missions side-by-side on desktop, stacked on mobile */}
-        <section className="grid grid-cols-1 lg:grid-cols-[1fr,1fr] gap-4 mb-6">
-          <DailyMateWidget />
-          {user && (
-            <SectionHeader title="Today's Missions" icon={Target}>
-              <DailyMissions compact />
-            </SectionHeader>
-          )}
+        {/* Daily Missions — homepage daily focus */}
+        <section id="daily-missions" className="mb-6 scroll-mt-24">
+          <SectionHeader title="Daily Missions" icon={Target}>
+            <DailyMissions compact />
+          </SectionHeader>
         </section>
 
         {/* ─── Training shortcuts (de-emphasized — for between matches) ─── */}

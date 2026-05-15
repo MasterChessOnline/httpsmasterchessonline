@@ -18,6 +18,54 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
+const previewMissions: MissionWithProgress[] = [
+  {
+    id: "preview-play-online",
+    key: "preview-play-online",
+    title: "Play one online game",
+    description: "Start a real match and finish it today.",
+    icon: "swords",
+    mission_type: "online_game",
+    target_value: 1,
+    xp_reward: 40,
+    sort_order: 1,
+    current_value: 0,
+    completed: false,
+    claimed: false,
+    percent: 0,
+  },
+  {
+    id: "preview-train",
+    key: "preview-train",
+    title: "Complete training reps",
+    description: "Build sharp habits between matches.",
+    icon: "target",
+    mission_type: "training",
+    target_value: 3,
+    xp_reward: 60,
+    sort_order: 2,
+    current_value: 0,
+    completed: false,
+    claimed: false,
+    percent: 0,
+  },
+  {
+    id: "preview-lesson",
+    key: "preview-lesson",
+    title: "Study one lesson",
+    description: "Open a guide or lesson and improve today.",
+    icon: "book-open",
+    mission_type: "lesson",
+    target_value: 1,
+    xp_reward: 35,
+    sort_order: 3,
+    current_value: 0,
+    completed: false,
+    claimed: false,
+    percent: 0,
+  },
+];
+
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   swords: Swords,
   trophy: Trophy,
@@ -125,6 +173,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
   const { missions, loading, claimMission, completedCount, totalCount, claimableXp } =
     useDailyMissions();
   const [claiming, setClaiming] = useState<string | null>(null);
+  const visible = compact ? (user ? missions : previewMissions).slice(0, 3) : missions;
 
   const handleClaim = async (key: string) => {
     setClaiming(key);
@@ -143,13 +192,19 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
 
   if (!user) {
     return (
-      <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-card/80 backdrop-blur-sm p-5">
-        <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2 mb-2">
-          <Target className="h-5 w-5 text-primary" /> Daily Missions
-        </h2>
-        <p className="text-sm text-muted-foreground mb-3">
-          Sign in to unlock daily missions and rewards.
-        </p>
+      <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-card/80 backdrop-blur-sm p-5 relative overflow-hidden">
+        <div className="flex items-center justify-between mb-4 relative">
+          <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" /> Daily Missions
+          </h2>
+          <span className="text-xs text-muted-foreground tabular-nums">0/3</span>
+        </div>
+        <div className="space-y-2 relative mb-4">
+          {visible.map((m) => (
+            <MissionRow key={m.key} mission={m} onClaim={() => undefined} busy={false} />
+          ))}
+        </div>
+        <p className="text-sm text-muted-foreground mb-3">Sign in to save progress and claim XP rewards.</p>
         <Link
           to="/login"
           className="inline-block rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition"
@@ -159,8 +214,6 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
       </div>
     );
   }
-
-  const visible = compact ? missions.slice(0, 3) : missions;
 
   return (
     <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-card/80 backdrop-blur-sm p-5 relative overflow-hidden">
