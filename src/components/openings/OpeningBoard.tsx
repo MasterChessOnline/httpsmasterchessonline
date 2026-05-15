@@ -166,7 +166,7 @@ export default function OpeningBoard({
 
         <div className="flex flex-col w-5 flex-shrink-0">
           {displayRanks.map((r) => (
-            <span key={r} className="flex-1 flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">{r}</span>
+            <span key={r} className="flex-1 flex items-center justify-center text-[11px] font-mono font-semibold text-foreground/85">{r}</span>
           ))}
         </div>
       </div>
