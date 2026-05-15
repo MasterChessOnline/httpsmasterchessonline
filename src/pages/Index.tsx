@@ -220,7 +220,7 @@ const Index = () => {
                   className="ripple-btn h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
                 >
                   <Play className="h-5 w-5 mr-2 fill-current" />
-                  Enter Arena
+                  Play Online
                 </Button>
               </motion.div>
             </Link>
