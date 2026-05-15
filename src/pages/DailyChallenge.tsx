@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
