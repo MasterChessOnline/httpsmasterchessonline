@@ -391,12 +391,15 @@ const Index = () => {
 
 
 
-        {/* Daily Missions widget — only for logged-in users */}
-        {user && (
-          <SectionHeader title="Today's Missions" icon={Target}>
-            <DailyMissions compact />
-          </SectionHeader>
-        )}
+        {/* Daily Mate + Missions side-by-side on desktop, stacked on mobile */}
+        <section className="grid grid-cols-1 lg:grid-cols-[1fr,1fr] gap-4 mb-6">
+          <DailyMateWidget />
+          {user && (
+            <SectionHeader title="Today's Missions" icon={Target}>
+              <DailyMissions compact />
+            </SectionHeader>
+          )}
+        </section>
 
         {/* ─── Explore Modes — interactive cards ─── */}
         <SectionHeader title="Explore" icon={Zap}>
