@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, AlertTriangle, RefreshCw, ShieldAlert, Search, ExternalLink } from "lucide-react";
+import { CheckCircle2, AlertTriangle, RefreshCw, ShieldAlert, Search, ExternalLink, Zap, Video, Globe } from "lucide-react";
 import { toast } from "sonner";
 
 type Sitemap = {
@@ -41,6 +41,11 @@ export default function SeoStatus() {
   const [data, setData] = useState<StatusResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [resubmitting, setResubmitting] = useState(false);
+  const [pinging, setPinging] = useState(false);
+  const [indexingResult, setIndexingResult] = useState<{
+    succeeded: number; failed: number; total: number; scopeIssue?: boolean; hint?: string;
+  } | null>(null);
+  const [indexNowPinging, setIndexNowPinging] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -77,6 +82,40 @@ export default function SeoStatus() {
       toast.error(e instanceof Error ? e.message : "Resubmit failed");
     } finally {
       setResubmitting(false);
+    }
+  };
+
+  const pushToGoogle = async () => {
+    setPinging(true);
+    setIndexingResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-indexing-ping", {
+        body: { type: "URL_UPDATED" },
+      });
+      if (error) throw error;
+      setIndexingResult(data);
+      if (data?.succeeded > 0) {
+        toast.success(`${data.succeeded}/${data.total} URLs pushed to Google`);
+      } else {
+        toast.error("Indexing API push failed — see details below");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Indexing push failed");
+    } finally {
+      setPinging(false);
+    }
+  };
+
+  const pingIndexNow = async () => {
+    setIndexNowPinging(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("indexnow-ping", { body: {} });
+      if (error) throw error;
+      toast.success(`IndexNow: pinged ${data?.pinged ?? 0} URLs (Bing/Yandex)`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "IndexNow ping failed");
+    } finally {
+      setIndexNowPinging(false);
     }
   };
 
