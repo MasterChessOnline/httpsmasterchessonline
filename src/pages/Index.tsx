@@ -12,7 +12,7 @@ import {
   Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
   Eye, Target, Crown, Zap,
   ChevronRight, Clock, Play, Brain,
-  Volume2, VolumeX, Sparkles
+  Volume2, VolumeX, Sparkles, LogIn
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
@@ -201,10 +201,28 @@ const Index = () => {
               <span className="text-gradient-gold">Master</span>
               <span className="text-foreground">Chess</span>
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 font-light tracking-wide uppercase">
+            <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-2 font-light tracking-wide uppercase">
               <span className="text-primary font-semibold">Battle.</span> Climb. <span className="text-primary font-semibold">Conquer.</span>
             </p>
           </motion.div>
+
+          {/* Login prompt for guests above Play Online */}
+          {!user && (
+            <motion.div
+              className="mb-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.4 }}
+            >
+              <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 backdrop-blur-sm">
+                <LogIn className="h-3 w-3 text-primary" />
+                <span>Sign in to play online —</span>
+                <Link to="/login" className="text-primary underline hover:text-primary/80 font-medium">Log in</Link>
+                <span>or</span>
+                <Link to="/signup" className="text-primary underline hover:text-primary/80 font-medium">Sign up</Link>
+              </span>
+            </motion.div>
+          )}
 
           {/* CTA Buttons with ripple + glow */}
           <motion.div
