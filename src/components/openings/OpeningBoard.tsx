@@ -45,16 +45,16 @@ export default function OpeningBoard({
 
   return (
     <div className="w-full max-w-[min(85vw,480px)] mx-auto">
-      <div className="flex ml-6 mr-1 mb-0.5">
+      <div className="flex ml-7 mr-1 mb-1">
         {displayFiles.map((f) => (
-          <span key={f} className="flex-1 text-center text-[11px] font-mono font-semibold text-foreground/85">{f}</span>
+          <span key={f} className="flex-1 text-center text-[13px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{f}</span>
         ))}
       </div>
 
       <div className="flex">
-        <div className="flex flex-col w-6 flex-shrink-0">
+        <div className="flex flex-col w-7 flex-shrink-0">
           {displayRanks.map((r) => (
-            <span key={r} className="flex-1 flex items-center justify-center text-[11px] font-mono font-semibold text-foreground/85">{r}</span>
+            <span key={r} className="flex-1 flex items-center justify-center text-[13px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{r}</span>
           ))}
         </div>
 
@@ -121,15 +121,15 @@ export default function OpeningBoard({
                         }}
                         onDragEnd={() => setDragFrom(null)}
                         className={`leading-none flex items-center justify-center cursor-grab active:cursor-grabbing ${
-                          pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(6vw,2.8rem)] font-bold"
+                          pd.svgUrl ? "w-[90%] h-[90%]" : "text-[min(7vw,3rem)] font-black"
                         } ${
                           pd.white
-                            ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] [filter:drop-shadow(0_0_1px_rgba(0,0,0,0.9))]"
-                            : "drop-shadow-[0_0_2px_rgba(255,255,255,0.55)] [filter:drop-shadow(0_0_1px_rgba(255,255,255,0.7))]"
+                            ? "[filter:drop-shadow(0_0_1.5px_#000)_drop-shadow(0_0_1.5px_#000)_drop-shadow(0_1px_2px_rgba(0,0,0,0.9))]"
+                            : "[filter:drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_1px_2px_rgba(255,255,255,0.55))]"
                         }`}
                         style={pd.svgUrl ? undefined : {
-                          color: pd.white ? "#ffffff" : "#0a0a0a",
-                          WebkitTextStroke: pd.white ? "1.5px #000000" : "1.5px #ffffff",
+                          color: pd.white ? "#ffffff" : "#000000",
+                          WebkitTextStroke: pd.white ? "2px #000000" : "2px #ffffff",
                         }}
                       >
                         {pd.svgUrl ? (
@@ -164,9 +164,9 @@ export default function OpeningBoard({
           ))}
         </div>
 
-        <div className="flex flex-col w-5 flex-shrink-0">
+        <div className="flex flex-col w-6 flex-shrink-0">
           {displayRanks.map((r) => (
-            <span key={r} className="flex-1 flex items-center justify-center text-[11px] font-mono font-semibold text-foreground/85">{r}</span>
+            <span key={r} className="flex-1 flex items-center justify-center text-[13px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{r}</span>
           ))}
         </div>
       </div>
