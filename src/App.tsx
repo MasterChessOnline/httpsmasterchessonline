@@ -112,6 +112,7 @@ function AnimatedRoutes() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<ProfileRedirect />} />
           <Route path="/profile/:userId" element={<Profile />} />
+          <Route path="/u/:username" element={<PublicPlayer />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path="/achievements" element={<Achievements />} />
