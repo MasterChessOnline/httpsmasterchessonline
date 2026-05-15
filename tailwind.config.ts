@@ -104,6 +104,10 @@ export default {
           "0%": { transform: "rotate(0deg) translateX(120px) rotate(0deg)" },
           "100%": { transform: "rotate(360deg) translateX(120px) rotate(-360deg)" },
         },
+        "square-flash": {
+          "0%": { boxShadow: "inset 0 0 0 3px hsl(var(--primary) / 0.9), 0 0 14px hsl(var(--primary) / 0.55)" },
+          "100%": { boxShadow: "inset 0 0 0 0px hsl(var(--primary) / 0), 0 0 0px hsl(var(--primary) / 0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -115,6 +119,7 @@ export default {
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
         "float": "float 4s ease-in-out infinite",
         "orbit": "orbit 20s linear infinite",
+        "square-flash": "square-flash 0.7s ease-out",
       },
     },
   },
