@@ -81,6 +81,20 @@ export default function ChessBoard({
   // ── Drag & drop pieces (HTML5) ──
   const [dragFrom, setDragFrom] = useState<string | null>(null);
 
+  // ── Hover ghost preview ──
+  const [hoverSquare, setHoverSquare] = useState<string | null>(null);
+  const selectedPiece = selectedSquare ? game.get(selectedSquare as Square) : null;
+  const selectedPieceData = selectedPiece ? getGlyph(`${selectedPiece.color}${selectedPiece.type}`) : null;
+
+  // ── Detect if the last move was a capture (for spark burst) ──
+  const lastWasCapture = useMemo(() => {
+    try {
+      const h = game.history({ verbose: true });
+      const last = h[h.length - 1] as any;
+      return !!(last && last.captured);
+    } catch { return false; }
+  }, [lastMove?.from, lastMove?.to]);
+
   const arrowColor = (mods: { shift: boolean; ctrl: boolean }) => {
     if (mods.ctrl) return "hsl(220 90% 60%)"; // blue
     if (mods.shift) return "hsl(140 70% 45%)"; // green
@@ -250,6 +264,8 @@ export default function ChessBoard({
                     onClick={() => onSquareClick(square)}
                     onMouseDown={(e) => handleMouseDown(e, square)}
                     onMouseUp={(e) => handleMouseUp(e, square)}
+                    onMouseEnter={() => setHoverSquare(square)}
+                    onMouseLeave={() => setHoverSquare((s) => (s === square ? null : s))}
                     onContextMenu={(e) => handleContextMenu(e, square)}
                     onDragOver={handleSquareDragOver}
                     onDrop={(e) => handleSquareDrop(e, square)}
@@ -289,6 +305,29 @@ export default function ChessBoard({
                     {/* Legal capture ring */}
                     {isLegal && pd && (
                       <span className={`absolute inset-[6%] rounded-full border-[3px] ${premoveMode ? "border-blue-500/70" : "border-foreground/25"}`} />
+                    )}
+                    {/* Hover ghost preview — translucent piece on legal target while a piece is selected */}
+                    {isLegal && hoverSquare === square && selectedPieceData && selectedSquare !== square && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-[6%] z-[5] pointer-events-none flex items-center justify-center opacity-40 motion-reduce:hidden"
+                      >
+                        {selectedPieceData.svgUrl ? (
+                          <img
+                            src={selectedPieceData.svgUrl}
+                            alt=""
+                            className="w-full h-full object-contain"
+                            style={selectedPieceData.pixelated ? { imageRendering: "pixelated" } : undefined}
+                          />
+                        ) : (
+                          <span
+                            className="text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)] leading-none"
+                            style={{ color: selectedPieceData.white ? "var(--piece-white,#fff)" : "var(--piece-black,hsl(220,15%,8%))" }}
+                          >
+                            {selectedPieceData.symbol}
+                          </span>
+                        )}
+                      </span>
                     )}
                     {/* Piece — SVG artwork or Unicode glyph depending on the active set */}
                     {pd && (
@@ -354,6 +393,58 @@ export default function ChessBoard({
               })}
             </div>
           ))}
+
+          {/* Last-move trail + capture spark — gold glow from→to, particle burst on capture */}
+          {lastMove && (
+            <svg
+              key={`trail-${moveCountRef.current}`}
+              viewBox="0 0 800 800"
+              preserveAspectRatio="none"
+              className="absolute inset-0 w-full h-full pointer-events-none z-[15] motion-reduce:hidden"
+              aria-hidden
+            >
+              <defs>
+                <linearGradient id="mc-trail-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(43 95% 60%)" stopOpacity="0" />
+                  <stop offset="50%" stopColor="hsl(43 95% 60%)" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="hsl(43 95% 60%)" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {(() => {
+                const a = squareToXY(lastMove.from);
+                const b = squareToXY(lastMove.to);
+                return (
+                  <motion.line
+                    x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                    stroke="url(#mc-trail-grad)"
+                    strokeWidth={10}
+                    strokeLinecap="round"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 0.9, 0] }}
+                    transition={{ duration: 0.85, ease: "easeOut" }}
+                  />
+                );
+              })()}
+              {lastWasCapture && (() => {
+                const c = squareToXY(lastMove.to);
+                return Array.from({ length: 8 }).map((_, i) => {
+                  const angle = (Math.PI * 2 * i) / 8;
+                  const dx = Math.cos(angle) * 55;
+                  const dy = Math.sin(angle) * 55;
+                  return (
+                    <motion.circle
+                      key={i}
+                      cx={c.x} cy={c.y} r={6}
+                      fill="hsl(43 95% 60%)"
+                      initial={{ opacity: 1, scale: 0.4 }}
+                      animate={{ opacity: 0, scale: 1, cx: c.x + dx, cy: c.y + dy }}
+                      transition={{ duration: 0.7, ease: "easeOut" }}
+                    />
+                  );
+                });
+              })()}
+            </svg>
+          )}
 
           {/* Right-click drag arrows (Shift = green, Ctrl/Cmd = blue, default = gold) */}
           {arrows.length > 0 && (
