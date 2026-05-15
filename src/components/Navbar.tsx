@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import StreakIndicator from "@/components/StreakIndicator";
 import NavSearchPalette from "@/components/NavSearchPalette";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface DropdownItem {
   label: string;
@@ -414,6 +415,9 @@ const Navbar = () => {
                   <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 </Button>
               </Link>
+
+              {/* Language switcher */}
+              <div className="hidden md:block"><LanguageSwitcher compact /></div>
 
               {/* User streak + sign out */}
               {loading ? (

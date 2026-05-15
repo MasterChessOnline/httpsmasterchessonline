@@ -24,6 +24,7 @@ import DailyMissions from "@/components/DailyMissions";
 import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
+import { useI18n } from "@/i18n/I18nProvider";
 
 interface RecentGame {
   id: string;
@@ -114,6 +115,7 @@ const PreferenceToggles = () => {
 
 const Index = () => {
   const { user, profile } = useAuth();
+  const { t } = useI18n();
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
   const [winStreak, setWinStreak] = useState(0);
@@ -202,7 +204,7 @@ const Index = () => {
               <span className="text-foreground">Chess</span>
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-2 font-light tracking-wide uppercase">
-              <span className="text-primary font-semibold">Battle.</span> Climb. <span className="text-primary font-semibold">Conquer.</span>
+              {t("hero.tagline")}
             </p>
           </motion.div>
 
@@ -215,11 +217,11 @@ const Index = () => {
               transition={{ delay: 0.25, duration: 0.4 }}
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 backdrop-blur-sm text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-                <span className="text-primary">🔥 Get Ready to Battle</span>
+                <span className="text-primary">🔥 {t("hero.signupCta")}</span>
                 <span className="text-muted-foreground">—</span>
-                <Link to="/signup" className="text-primary hover:text-primary/80 underline underline-offset-2">Join Free</Link>
-                <span className="text-muted-foreground">or</span>
-                <Link to="/login" className="text-muted-foreground hover:text-foreground underline underline-offset-2">Log In</Link>
+                <Link to="/signup" className="text-primary hover:text-primary/80 underline underline-offset-2">{t("hero.joinFree")}</Link>
+                <span className="text-muted-foreground">{t("common.or", "or")}</span>
+                <Link to="/login" className="text-muted-foreground hover:text-foreground underline underline-offset-2">{t("hero.login")}</Link>
               </span>
             </motion.div>
           )}
@@ -238,7 +240,7 @@ const Index = () => {
                   className="ripple-btn h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
                 >
                   <Play className="h-5 w-5 mr-2 fill-current" />
-                  Play Online
+                  {t("hero.playOnline")}
                 </Button>
               </motion.div>
             </Link>
@@ -286,6 +288,16 @@ const Index = () => {
 
       {/* ── MAIN CONTENT ── */}
       <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
+
+        {/* Daily Challenge — directly below the hero, first thing users see */}
+        <section id="daily-missions" className="scroll-mt-24 -mt-4">
+          <SectionHeader title="Daily Challenge" icon={Target}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <DailyPuzzleWidget />
+              <DailyMissions compact />
+            </div>
+          </SectionHeader>
+        </section>
 
         {/* User Preferences */}
         <motion.div
@@ -433,15 +445,8 @@ const Index = () => {
 
 
 
-        {/* Daily Puzzle + Missions — homepage daily focus */}
-        <section id="daily-missions" className="mb-6 scroll-mt-24">
-          <SectionHeader title="Daily Challenge" icon={Target}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <DailyPuzzleWidget />
-              <DailyMissions compact />
-            </div>
-          </SectionHeader>
-        </section>
+        {/* Daily section moved to top of main content (above) */}
+
 
         {/* ─── Training shortcuts (de-emphasized — for between matches) ─── */}
         <section className="pt-2">

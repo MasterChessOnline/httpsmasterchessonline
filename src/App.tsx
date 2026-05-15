@@ -76,6 +76,9 @@ import AdminFullStats from "./pages/AdminFullStats";
 import EmbedBoard from "./pages/EmbedBoard";
 import Guides from "./pages/Guides";
 import Guide from "./pages/Guide";
+import Glossary from "./pages/Glossary";
+import GlossaryTerm from "./pages/GlossaryTerm";
+import ShareStreak from "./pages/ShareStreak";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
@@ -171,6 +174,9 @@ function AnimatedRoutes() {
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
           <Route path="/guides" element={<Guides />} />
           <Route path="/guide/:slug" element={<Guide />} />
+          <Route path="/learn/glossary" element={<Glossary />} />
+          <Route path="/learn/glossary/:slug" element={<GlossaryTerm />} />
+          <Route path="/share/streak/:n" element={<ShareStreak />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
