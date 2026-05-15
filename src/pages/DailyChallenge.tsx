@@ -164,8 +164,11 @@ const DailyChallenge = () => {
   const [puzzle, setPuzzle] = useState<ParsedPuzzle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [alreadySolved, setAlreadySolved] = useState(isSolvedToday());
+  const [streak, setStreak] = useState(loadStreak());
+  const [override, setOverride] = useState(false); // user chose to replay
+  const [secondsLeft, setSecondsLeft] = useState(secondsUntilMidnightUTC());
 
-  // Load puzzle (cached per day)
   useEffect(() => {
     const today = todayStr();
     try {
@@ -180,16 +183,16 @@ const DailyChallenge = () => {
     fetchVerifiedDailyMate()
       .then((parsed) => {
         setPuzzle(parsed);
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify({ day: today, puzzle: parsed })
-        );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ day: today, puzzle: parsed }));
       })
       .catch((e) => {
         console.error(e);
         setError("Could not load today's puzzle. Please try again.");
       })
       .finally(() => setLoading(false));
+
+    const t = setInterval(() => setSecondsLeft(secondsUntilMidnightUTC()), 30_000);
+    return () => clearInterval(t);
   }, []);
 
   if (loading) {
@@ -216,6 +219,53 @@ const DailyChallenge = () => {
     );
   }
 
+  const hh = Math.floor(secondsLeft / 3600);
+  const mm = Math.floor((secondsLeft % 3600) / 60);
+
+  if (alreadySolved && !override) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 pt-24 pb-16">
+          <div className="max-w-xl mx-auto text-center space-y-5">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/15 border border-emerald-500/40">
+              <CheckCircle className="h-10 w-10 text-emerald-400" />
+            </div>
+            <h1 className="font-display text-3xl font-bold text-foreground">Today's puzzle is solved</h1>
+            <p className="text-muted-foreground">
+              You've already cracked today's engine-verified puzzle. Come back when the next one drops to keep your streak alive.
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+              <div className="rounded-xl border border-orange-500/30 bg-orange-500/5 p-4">
+                <Flame className="h-6 w-6 text-orange-400 mx-auto mb-1" />
+                <div className="text-2xl font-display font-bold text-foreground">{streak.streak}</div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Day streak</div>
+              </div>
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <Clock className="h-6 w-6 text-primary mx-auto mb-1" />
+                <div className="text-2xl font-display font-bold text-foreground tabular-nums">{hh}h {mm}m</div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Next puzzle</div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-center pt-2">
+              <Button variant="outline" onClick={() => setOverride(true)}>
+                <RotateCcw className="mr-2 h-4 w-4" /> Replay (won't change streak)
+              </Button>
+              <Link to="/"><Button>Back to home</Button></Link>
+            </div>
+
+            <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1 justify-center">
+              <Lock className="h-3 w-3" /> One puzzle per day · resets at 00:00 UTC
+            </p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -227,14 +277,30 @@ const DailyChallenge = () => {
               <h1 className="font-display text-3xl font-bold text-foreground">
                 Daily Puzzle
               </h1>
+              <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/15 border border-orange-500/30 px-2 py-0.5 text-xs text-orange-300">
+                <Flame className="h-3 w-3" /> {streak.streak}-day streak
+              </span>
             </div>
-            <p className="text-muted-foreground text-sm flex items-center justify-center gap-2">
+            <p className="text-muted-foreground text-sm flex items-center justify-center gap-2 flex-wrap">
               <Calendar className="h-4 w-4" />
-              {puzzle.date} · One puzzle per day · Solve it all the way to mate
+              {puzzle.date} · One puzzle per day · resets in {hh}h {mm}m
+              <span className="inline-flex items-center gap-1 text-emerald-400">
+                <ShieldCheck className="h-3.5 w-3.5" /> Stockfish-verified
+              </span>
             </p>
           </div>
 
-          <PuzzleSolver puzzle={puzzle} />
+          <PuzzleSolver
+            puzzle={puzzle}
+            replayMode={override}
+            onSolved={() => {
+              if (!override) {
+                const next = markSolvedToday();
+                setStreak(next);
+                setAlreadySolved(true);
+              }
+            }}
+          />
         </div>
       </main>
       <Footer />
@@ -242,7 +308,7 @@ const DailyChallenge = () => {
   );
 };
 
-function PuzzleSolver({ puzzle }: { puzzle: ParsedPuzzle }) {
+function PuzzleSolver({ puzzle, onSolved, replayMode }: { puzzle: ParsedPuzzle; onSolved?: () => void; replayMode?: boolean }) {
   const [game, setGame] = useState(() => new Chess(puzzle.startFen));
   const [moveIndex, setMoveIndex] = useState(0);
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
@@ -252,6 +318,7 @@ function PuzzleSolver({ puzzle }: { puzzle: ParsedPuzzle }) {
   const [hintSquare, setHintSquare] = useState<Square | null>(null);
   const [hintsUsed, setHintsUsed] = useState(0);
   const [timer, setTimer] = useState(0);
+  const reportedRef = useRef(false);
 
   // Reset when puzzle changes
   useEffect(() => {
@@ -276,6 +343,7 @@ function PuzzleSolver({ puzzle }: { puzzle: ParsedPuzzle }) {
     setHintSquare(null);
     setHintsUsed(0);
     setTimer(0);
+    reportedRef.current = false;
   }
 
   const playerTurn = useMemo(() => {
