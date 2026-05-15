@@ -88,6 +88,14 @@ const openingEntries: SitemapEntry[] = ALL_OPENING_SLUGS.map((slug) => ({
   priority: "0.85",
 }));
 
+// Programmatic bot profiles — every roster bot becomes its own indexable URL.
+// Each one gets a unique title/description via the BotProfile route Helmet.
+const botEntries: SitemapEntry[] = ONLINE_BOTS.map((b) => ({
+  path: `/bot/${b.id}`,
+  changefreq: "monthly" as const,
+  priority: "0.6",
+}));
+
 function buildUrlset(entries: SitemapEntry[], withImages = false): string {
   const ns = withImages
     ? `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`
