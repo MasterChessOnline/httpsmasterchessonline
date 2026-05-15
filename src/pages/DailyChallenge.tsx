@@ -338,11 +338,15 @@ function PuzzleSolver({ puzzle }: { puzzle: ParsedPuzzle }) {
           <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-display text-lg font-semibold text-foreground">
-                {puzzle.title}
+                {puzzle.isMate ? `Mate in ${playerPlies}` : "Find the winning move"}
               </h2>
-              {puzzle.isMate && (
+              {puzzle.isMate ? (
                 <Badge className="bg-destructive/20 text-destructive">
-                  Forced Mate
+                  Forced Mate in {playerPlies}
+                </Badge>
+              ) : (
+                <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30">
+                  Best move only
                 </Badge>
               )}
               <Badge className="bg-primary/20 text-primary">
@@ -355,9 +359,11 @@ function PuzzleSolver({ puzzle }: { puzzle: ParsedPuzzle }) {
               </span>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {puzzle.playerColor === "w" ? "⬜ White" : "⬛ Black"} to move ·
-            Find every move to the end of the combination.
+          <p className="text-sm text-foreground/90 font-medium">
+            {puzzle.playerColor === "w" ? "⬜ White" : "⬛ Black"} to play —{" "}
+            {puzzle.isMate
+              ? `force checkmate in ${playerPlies} move${playerPlies === 1 ? "" : "s"}.`
+              : "find every move of the winning combination."}
           </p>
           <div className="mt-2 text-xs text-muted-foreground font-mono">
             Progress: {playerMovesDone}/{playerPlies} of your moves
