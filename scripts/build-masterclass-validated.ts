@@ -22,18 +22,43 @@ const MC_COURSES = [
 
 interface Built { sans: string[]; startFen?: string; truncatedAt?: number; sourceLen: number; }
 
+// Map of known startFen → SAN prefix played from the initial position.
+// This lets every masterclass variation start from move 1 (like Jobava London)
+// rather than mid-position, so users always see the full game build-up.
+const STARTFEN_PREFIX: Record<string, string[]> = {
+  "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1": ["e4"],
+  "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1": ["d4"],
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2": ["e4", "e5"],
+};
+
 function buildLesson(lesson: any): Built | null {
   const pl = (lesson.practiceLine && (lesson.practiceLine.moves?.length || lesson.practiceLine.autoResponses?.length))
     ? lesson.practiceLine
     : MASTERCLASS_PRACTICE_EXTRAS[lesson.id];
   if (!pl) return null;
 
+  // If we know how to reach pl.startFen from the initial position, replay the
+  // prefix moves from move 1 so the line starts at the very beginning.
+  const knownPrefix = pl.startFen ? STARTFEN_PREFIX[pl.startFen] : null;
+  const startFromInitial = !pl.startFen || !!knownPrefix;
+
   let firstSide: "w" | "b" = "w";
-  if (pl.startFen && pl.startFen.split(" ")[1] === "b") firstSide = "b";
+  if (!startFromInitial && pl.startFen && pl.startFen.split(" ")[1] === "b") firstSide = "b";
+  // After replaying the known prefix, side-to-move is whatever pl.startFen said.
+  if (startFromInitial && pl.startFen && pl.startFen.split(" ")[1] === "b") firstSide = "b";
   const playerFirst = firstSide === pl.playerColor;
 
-  const game = (() => { try { return pl.startFen ? new Chess(pl.startFen) : new Chess(); } catch { return new Chess(); } })();
-  const out: string[] = [];
+  const game = (() => {
+    try {
+      if (startFromInitial) {
+        const g = new Chess();
+        for (const san of (knownPrefix ?? [])) g.move(san);
+        return g;
+      }
+      return pl.startFen ? new Chess(pl.startFen) : new Chess();
+    } catch { return new Chess(); }
+  })();
+  const out: string[] = startFromInitial ? [...(knownPrefix ?? [])] : [];
   let pi = 0, ai = 0, turn = playerFirst;
   const sourceLen = (pl.moves?.length ?? 0) + (pl.autoResponses?.length ?? 0);
 
