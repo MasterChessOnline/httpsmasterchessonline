@@ -104,6 +104,16 @@ const botEntries: SitemapEntry[] = botIds.map((id) => ({
   priority: "0.6",
 }));
 
+// Programmatic glossary — every chess term becomes its own indexable URL
+const glossaryEntries: SitemapEntry[] = [
+  { path: "/learn/glossary", changefreq: "weekly", priority: "0.8" },
+  ...GLOSSARY.map((t) => ({
+    path: `/learn/glossary/${t.slug}`,
+    changefreq: "monthly" as const,
+    priority: "0.7",
+  })),
+];
+
 function buildUrlset(entries: SitemapEntry[], withImages = false): string {
   const ns = withImages
     ? `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`
