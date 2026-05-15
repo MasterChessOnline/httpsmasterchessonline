@@ -12,7 +12,7 @@ import {
   Swords, Trophy, GraduationCap, BookOpen, Users, BarChart3,
   Eye, Target, Crown, Zap,
   ChevronRight, Clock, Play, Brain,
-  Volume2, VolumeX, Sparkles
+  Volume2, VolumeX, Sparkles, LogIn
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
