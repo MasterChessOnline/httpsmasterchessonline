@@ -160,15 +160,63 @@ export default function SeoStatus() {
               Live data from Google Search Console for masterchess.live
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" onClick={load} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Refresh
             </Button>
-            <Button onClick={resubmit} disabled={resubmitting}>
+            <Button variant="outline" onClick={resubmit} disabled={resubmitting}>
               {resubmitting ? "Submitting..." : "Resubmit sitemap"}
+            </Button>
+            <Button onClick={pushToGoogle} disabled={pinging} className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700">
+              <Zap className={`h-4 w-4 mr-2 ${pinging ? "animate-pulse" : ""}`} />
+              {pinging ? "Pushing…" : "Push to Google (Indexing API)"}
+            </Button>
+            <Button variant="secondary" onClick={pingIndexNow} disabled={indexNowPinging}>
+              <Globe className={`h-4 w-4 mr-2 ${indexNowPinging ? "animate-spin" : ""}`} />
+              {indexNowPinging ? "Pinging…" : "Ping Bing/Yandex (IndexNow)"}
             </Button>
           </div>
         </div>
+
+        {/* Indexing API result */}
+        {indexingResult && (
+          <Alert variant={indexingResult.scopeIssue ? "destructive" : "default"}>
+            <Zap className="h-5 w-5" />
+            <AlertTitle>
+              Indexing API: {indexingResult.succeeded}/{indexingResult.total} URLs accepted by Google
+            </AlertTitle>
+            <AlertDescription>
+              {indexingResult.scopeIssue
+                ? indexingResult.hint
+                : indexingResult.failed === 0
+                  ? "All URLs forwarded to Googlebot for instant crawl. New pages typically appear in SERP within 1-24h."
+                  : `${indexingResult.failed} URLs failed — check function logs for details.`}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Video sitemap quick links */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5 text-primary" /> Video Sitemap (DailyChess_12)
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Auto-generated from YouTube — Google Video Search indexes thumbnails.
+              </p>
+            </div>
+            <a
+              href="https://kicabdwgdyabibioycbq.supabase.co/functions/v1/generate-video-sitemap"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              View XML <ExternalLink className="h-3 w-3" />
+            </a>
+          </CardHeader>
+        </Card>
+
 
         {/* Totals */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
