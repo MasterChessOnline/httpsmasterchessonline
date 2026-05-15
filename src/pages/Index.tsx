@@ -21,6 +21,7 @@ import heroImage from "@/assets/hero-chess.jpg";
 import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
 import DailyMissions from "@/components/DailyMissions";
+import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 
