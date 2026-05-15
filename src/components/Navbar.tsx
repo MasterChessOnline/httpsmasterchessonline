@@ -416,6 +416,9 @@ const Navbar = () => {
                 </Button>
               </Link>
 
+              {/* Language switcher */}
+              <div className="hidden md:block"><LanguageSwitcher compact /></div>
+
               {/* User streak + sign out */}
               {loading ? (
                 <div className="h-9 w-9 bg-muted/20 rounded-xl animate-pulse" />
