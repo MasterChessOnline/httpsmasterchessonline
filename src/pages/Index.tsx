@@ -24,6 +24,7 @@ import DailyMissions from "@/components/DailyMissions";
 import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
+import { useI18n } from "@/i18n/I18nProvider";
 
 interface RecentGame {
   id: string;
