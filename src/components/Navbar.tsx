@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import StreakIndicator from "@/components/StreakIndicator";
 import NavSearchPalette from "@/components/NavSearchPalette";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface DropdownItem {
   label: string;
