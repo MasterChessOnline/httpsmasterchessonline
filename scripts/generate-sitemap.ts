@@ -179,6 +179,9 @@ writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
 writeFileSync(resolve("public/sitemap-openings.xml"), buildUrlset(openingEntries));
 writeFileSync(resolve("public/sitemap-bots.xml"), buildUrlset(botEntries));
 writeFileSync(resolve("public/sitemap-glossary.xml"), buildUrlset(glossaryEntries));
+writeFileSync(resolve("public/sitemap-tools.xml"), buildUrlset(toolsEntries));
+writeFileSync(resolve("public/sitemap-mates.xml"), buildUrlset(mateEntries));
+writeFileSync(resolve("public/sitemap-elo.xml"), buildUrlset(eloEntries));
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -188,9 +191,12 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap-openings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-bots.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-glossary.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-tools.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-mates.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-elo.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
 writeFileSync(resolve("public/sitemap_index.xml"), indexXml);
 
-console.log(`✓ sitemap.xml (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + images (${imageEntries.length})`);
+console.log(`✓ static (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + tools (${toolsEntries.length}) + mates (${mateEntries.length}) + elo (${eloEntries.length}) + images (${imageEntries.length})`);
