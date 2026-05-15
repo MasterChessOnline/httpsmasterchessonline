@@ -642,6 +642,7 @@ export default function Analysis() {
   }, [pgnComplete, pgnCurrentIdx, goToPgnMove, pgnMoveEvals.length, liveMoveHistory, liveViewIdx, goToLiveMove]);
 
   const runAnalysis = async () => {
+    if (analyzing) return; // hard guard against double-click re-entry
     setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
     const trimmed = pgnInput.trim();
