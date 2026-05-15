@@ -57,12 +57,21 @@ const TC_PRESET_BY_PARAM: Record<string, number> = {
   classical: 11,
 };
 
+function resolveTcParam(raw: string): number {
+  if (!raw) return 4;
+  const key = raw.toLowerCase().trim();
+  if (key in TC_PRESET_BY_PARAM) return TC_PRESET_BY_PARAM[key];
+  // Try matching by label (e.g. "1+0", "3+0", "15+10")
+  const idx = TIME_CONTROLS.findIndex((t) => t.label.toLowerCase() === key);
+  return idx >= 0 ? idx : 4;
+}
+
 const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tcParam = searchParams.get("tc") || "";
-  const initialTcIdx = TC_PRESET_BY_PARAM[tcParam] ?? 4;
+  const initialTcIdx = resolveTcParam(tcParam);
   const {
     status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult,
     searchMatch, cancelSearch, makeMove, endGame, resign, reset: resetOnline,
