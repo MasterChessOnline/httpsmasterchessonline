@@ -43,20 +43,19 @@ export default function PublicPlayer() {
     setLoading(true);
     setNotFound(false);
     (async () => {
-      // Find by username first, fall back to display_name match
-      let { data } = await supabase
-        .from("profiles")
-        .select("user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at")
-        .eq("username", username)
-        .maybeSingle();
-      if (!data) {
-        const r = await supabase
-          .from("profiles")
-          .select("user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at")
-          .ilike("display_name", username)
-          .limit(1)
-          .maybeSingle();
-        data = r.data as any;
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username);
+      const cols = "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at";
+      let data: any = null;
+      if (isUuid) {
+        const r = await supabase.from("profiles").select(cols).eq("user_id", username).maybeSingle();
+        data = r.data;
+      } else {
+        let r = await supabase.from("profiles").select(cols).eq("username", username).maybeSingle();
+        data = r.data;
+        if (!data) {
+          const r2 = await supabase.from("profiles").select(cols).ilike("display_name", username).limit(1).maybeSingle();
+          data = r2.data as any;
+        }
       }
       if (!data) {
         setNotFound(true);
