@@ -183,6 +183,12 @@ function AnimatedRoutes() {
           <Route path="/learn/glossary" element={<Glossary />} />
           <Route path="/learn/glossary/:slug" element={<GlossaryTerm />} />
           <Route path="/share/streak/:n" element={<ShareStreak />} />
+          <Route path="/tools" element={<Tools />} />
+          <Route path="/tools/:slug" element={<ToolDetail />} />
+          <Route path="/learn/checkmate-patterns" element={<CheckmatePatterns />} />
+          <Route path="/learn/checkmate-patterns/:slug" element={<CheckmatePatternDetail />} />
+          <Route path="/elo" element={<EloLanding />} />
+          <Route path="/elo/:rating" element={<EloDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
