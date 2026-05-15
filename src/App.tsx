@@ -79,6 +79,12 @@ import Guide from "./pages/Guide";
 import Glossary from "./pages/Glossary";
 import GlossaryTerm from "./pages/GlossaryTerm";
 import ShareStreak from "./pages/ShareStreak";
+import Tools from "./pages/Tools";
+import ToolDetail from "./pages/ToolDetail";
+import CheckmatePatterns from "./pages/CheckmatePatterns";
+import CheckmatePatternDetail from "./pages/CheckmatePatternDetail";
+import EloLanding from "./pages/EloLanding";
+import EloDetail from "./pages/EloDetail";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
@@ -177,6 +183,12 @@ function AnimatedRoutes() {
           <Route path="/learn/glossary" element={<Glossary />} />
           <Route path="/learn/glossary/:slug" element={<GlossaryTerm />} />
           <Route path="/share/streak/:n" element={<ShareStreak />} />
+          <Route path="/tools" element={<Tools />} />
+          <Route path="/tools/:slug" element={<ToolDetail />} />
+          <Route path="/learn/checkmate-patterns" element={<CheckmatePatterns />} />
+          <Route path="/learn/checkmate-patterns/:slug" element={<CheckmatePatternDetail />} />
+          <Route path="/elo" element={<EloLanding />} />
+          <Route path="/elo/:rating" element={<EloDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>

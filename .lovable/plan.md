@@ -1,170 +1,124 @@
+# MasterChess.live — Plan eksplozivnog rasta
 
-# Kako da MasterChess.live "eksplodira"
-
-Sajt je tehnički jak (Stockfish, real human play, tournaments, DailyChess_12). Sledeći korak je **vidljivost + retencija + viralnost**. Evo konkretnog plana po prioritetu.
-
----
-
-## 1. Google indeksiranje i SEO temelji (PRVO — bez ovoga ostalo ne radi)
-
-**a) Google Search Console verifikacija + sitemap submit**
-- Već postoji `scripts/generate-sitemap.ts` i `public/sitemap.xml`. Treba:
-  - Verifikovati domen `masterchess.live` u Search Console (META tag flow).
-  - Submit-ovati `sitemap.xml`, `sitemap-openings.xml`, `sitemap-images.xml`.
-  - Setup IndexNow za Bing/Yandex (već postoji `indexnow-key.txt` i edge fn — proveriti da radi).
-
-**b) Bogatiji sitemap (dinamički)**
-- Trenutno verovatno samo statične rute. Dodati po jednu URL u sitemap za:
-  - svaki opening (`/openings/:slug`) — ima ih stotine, ogromna SEO površina
-  - svaki bot profil (`/bots/:id`)
-  - svaki javni player profil (`/player/:username`)
-  - svaki turnir (`/tournaments/:id`)
-  - svaki master game (`/master-game/:id`)
-- **To je realno 1000+ URL-ova** — Google ih obožava.
-
-**c) Per-route meta tagovi (react-helmet-async)**
-- Već postoji `Seo` komponenta (vidim u Index.tsx). Proveriti da je na SVAKOJ stranici sa: unique `<title>`, `<description>`, canonical, og:image, JSON-LD.
-- Najvažnije: openings, lessons, blog, master games, leaderboard.
-
-**d) JSON-LD strukturirani podaci**
-- `Organization` + `WebSite` (sitewide u index.html — verovatno već imaš).
-- `VideoObject` za svaki DailyChess_12 stream embed → Google Video carousel.
-- `Article` za blog/learn članke.
-- `BreadcrumbList` na svim podstranicama.
-- `FAQPage` na "Find a chess opening", "How to improve" stranama → rich snippets.
-- `Event` za turnire → Google Events carousel.
+Konkretne taktike grupisane po prioritetu i ROI-u. Svaka je nezavisno implementabilna.
 
 ---
 
-## 2. Slike i Google Images (ogroman, potcenjen kanal)
+## A. Google Images dominacija (najbrže rezultate daje)
 
-**a) OG board images per page**
-- Već postoji `src/lib/og-board-image.ts`. Za svaku opening stranicu generisati unique board screenshot kao OG image → kad neko deli link na Discord/Twitter/WhatsApp, vidi se tabla.
+Google Images je 22% svih Google pretraga — šahovska publika tamo traži dijagrame.
 
-**b) Image SEO**
-- Sve slike: descriptive `alt` ("King's Indian Defense main line position after 7. O-O"), `loading="lazy"`, `width`/`height` attributes, WebP.
-- **Image sitemap** (već imaš `sitemap-images.xml`) — popuniti svim board pozicijama, bot avatarima, achievement ikonama.
-
-**c) Pinterest / Reddit r/chess board pin strategy**
-- Top 50 famoznih pozicija (Immortal Game, Opera Game, Kasparov vs Deep Blue) kao deljive infografike linkovane na `/master-game/:id`. Pinterest je masovan izvor saobraćaja za chess sadržaj.
-
----
-
-## 3. Sadržaj koji rangira (programmatic SEO)
-
-Najveći chess sajtovi (Lichess, Chess.com) dominiraju sa **dugim tail keyword stranicama**. Predlog šta da generišeš:
-
-**a) Opening landing stranice — SEO copy**
-- Za svaki ECO kod: "Sicilian Defense Najdorf — moves, theory, traps, statistics" (1500+ reči, FAQ, video embed sa DailyChess_12 ako postoji).
-- Cilj: rangirati na "how to play [opening]", "[opening] traps", "[opening] for white/black".
-
-**b) Player vs Bot landing**
-- "Play against 1200 ELO bot" — svaka rating ima sopstvenu landing stranu sa CTA.
-- Ranguje za "play chess bot 1500 elo", "chess engine for beginners".
-
-**c) Tools landing**
-- `/tools/pgn-viewer`, `/tools/fen-editor`, `/tools/elo-calculator` (već imaš `RatingCalculator`).
-- Lichess i Chess.com gube ovde — male tool stranice rangiraju brzo.
-
-**d) Glossary**
-- `/learn/glossary/:term` — "What is en passant", "What is zugzwang" (300+ termina). Svaki je SEO friendly URL.
+1. **Generisani OG board snimci po otvaranju** (već imamo `getOpeningBoardImage`) — proširi na svaku poziciju: lekcije, glossary termine, master games, klutch momente.
+2. **Image sitemap sa `<image:title>` + `<image:caption>` na svakoj slici** — Google Images indeksira caption kao alt-text rank signal.
+3. **Pinterest auto-pinovi** — svaki dnevni mat puzzle postane Pinterest pin (1000x1500 vertical card sa pozicijom + naslov "Mate in 2 — can you find it?").
+4. **`schema.org/ImageObject` JSON-LD** na svakoj stranici sa contentUrl, license, creator — daje 'Licensable' badge u Google Images.
+5. **Famous-positions galerija** — `/positions/immortal-game`, `/positions/opera-game`, `/positions/evergreen` — svaka pozicija = jedna unique slika koja rangira za "immortal game position".
+6. **Endgame study slike** — `/endgames/lucena`, `/endgames/philidor` — klasične pozicije, svaka generiše unique board image.
+7. **OpenGraph slike sa rating-om korisnika** — svaki javni profil emituje custom OG sliku "X (1850 ELO) on MasterChess" generisanu Edge funkcijom (Vercel/Deno OG).
 
 ---
 
-## 4. Distribucija i backlinks
+## B. Programmatic SEO — masovni broj indeksabilnih stranica
 
-**a) Reddit**
-- r/chess (1.5M članova), r/chessbeginners, r/chesspuzzles
-- NE spam — postavi DailyChess_12 highlight clipove sa linkom "solve this position on masterchess.live".
+Cilj: skok sa 312 na 5000+ URL-ova za 2 nedelje.
 
-**b) YouTube SEO za DailyChess_12**
-- U opisu svakog videa: link ka odgovarajućoj poziciji/openingu na sajtu.
-- "Try this position yourself: masterchess.live/analysis?fen=..."
-- Ovo gradi backlinks + direktan saobraćaj.
-
-**c) Discord servers**
-- Chess.com Discord, Lichess Discord, lokalni klubovi — postaviti tournament link, ne reklamu.
-
-**d) Wikipedia external links**
-- Master games stranice mogu se linkovati sa relevantnih Wikipedia članaka o tim partijama (pažljivo, ne spam).
-
-**e) Submitting tools**
-- ProductHunt launch (jednom), AlternativeTo.net (alternativa Chess.com), Chess.com fanbase forumi.
+8. **`/openings/:slug/vs/:opponent`** — varijacije svake otvaranja vs popularne odgovore (Sicilian vs Najdorf, vs Dragon, vs Sveshnikov). 60 otvaranja × 5 odgovora = **300 stranica**.
+9. **`/elo/:rating`** — `/elo/1200`, `/elo/1500`, `/elo/2000` — "What is a 1500 ELO chess rating? What % of players?" 50 stranica long-tail.
+10. **`/learn/checkmate-patterns/:name`** — Anastasia, Boden, Légal, Arabian, Hook, Smothered, Back-rank, Damiano (16 patterns × 1500 reči).
+11. **`/learn/tactics/:name`** — fork, pin, skewer, discovered attack itd. (već u glossary-ju, ali deeper landing page sa 5 interaktivnih primera).
+12. **`/famous-games/:slug`** — Kasparov vs Topalov (1999), Fischer vs Spassky (1972), Karjakin vs Carlsen — 100 najslavnijih partija sa PGN replayom.
+13. **`/players/:gm-name`** — Magnus Carlsen, Hikaru Nakamura, Bobby Fischer profili (top 50 GM-ova) sa best games linkovima.
+14. **`/tools/:tool`** — `/tools/pgn-viewer`, `/tools/fen-editor`, `/tools/elo-calculator`, `/tools/chess-clock`, `/tools/notation-converter`, `/tools/blunder-checker` (10 alata, svaki 1000+ search vol/mes).
+15. **`/learn/glossary/:term/:lang`** — prevedi 60 termina na sr/ru/es = **240 dodatnih URL-ova**.
 
 ---
 
-## 5. Viralni mehanizmi unutar sajta
+## C. Viralni mehanizmi — "share me" trenuci
 
-**a) "Share your win" → automatic image card**
-- Na kraju partije: dugme "Share win card" → generiše PNG sa: pozicija mata + ELO + "I beat 1800 player on masterchess.live".
-- Twitter/X i WhatsApp kartice = besplatna reklama.
-
-**b) "Brag link" za Daily Puzzle**
-- "Solved Daily Puzzle in 12s — 47 day streak 🔥 — masterchess.live/daily-puzzle"
-- Auto-generated share image sa streak counter.
-
-**c) Referral program**
-- "Pozovi prijatelja, oboje dobijate 30 dana premium tema/avatara." Ima `Referrals.tsx` — proveriti da je aktivan.
-
-**d) Public profiles indeksabilni**
-- Svaki user profile = potencijalna SEO landing kad neko gugla njegov username. Mora biti SSR-friendly ili imati pre-renderovan meta.
+16. **Auto-share PNG nakon pobede** — endgame screen pokazuje "Share your win" karticu sa pozicijom + ELO change + "Defeated NinjaPawn (1820)". One-click WhatsApp/Twitter/IG Stories.
+17. **"Brilliancy of the day"** — kad engine detektuje !! potez tokom analize, pokaže mini-cinematic + "Share this brilliancy" karticu.
+18. **Streak share** ✅ (urađeno) — dodaj 7/30/100 day milestone celebracije sa unique badge artwork.
+19. **Embeddable game widget** — `<iframe src="masterchess.live/embed/game/:id">` da blogeri/Reddit users mogu da embeduju partije. Svaki embed = backlink + pageview.
+20. **Battle results card** za turnire — "I finished 3rd of 64 in MasterChess Friday Arena" sa pehar grafičkom.
+21. **"Compare ratings" link** — `/vs/:user1/:user2` head-to-head kartica koju dva igrača mogu da podele.
+22. **Replay GIF generator** — ključne pozicije u partiji se pretvore u 8-frame GIF za Twitter/IG.
 
 ---
 
-## 6. Retencija (da posetioci ne odu)
+## D. Retencija — Duolingo trikovi
 
-**a) Streak protection**
-- "Streak freeze" — jedan dan mesečno smeš preskočiti bez gubitka streak-a (Duolingo trik). Drastično povećava DAU.
-
-**b) Email/Push notifications**
-- "Tvoj daily puzzle čeka — 47 day streak na liniji"
-- "Turnir počinje za 10 min" (već imaš `use-tournament-notifications`)
-- Web Push API + email fallback (već imaš email infrastrukturu).
-
-**c) Weekly recap email**
-- "Ove nedelje: 23 partije, +47 ELO, najjači mat u 6 poteza" + share button.
-
-**d) Onboarding checklist**
-- Prvi dan: "1. Odigraj prvu partiju 2. Reši daily puzzle 3. Pridruži se turniru" — XP nagrada za svaki korak.
+23. **Streak freeze** — jednom mesečno besplatan "freeze" da streak ne padne. Plaćen ($1.99 ili XP).
+24. **Dnevni notification reminder** u 19:00 lokalno: "Your 12-day streak ends in 5h. Solve today's mate."
+25. **"Comeback" mehanika** — ako korisnik ne dođe 3 dana, šaljemo mu njegov najbolji partiju gif + "We saved your spot".
+26. **Weekly recap email** — petak uveče: "5 wins, 2 losses, +47 ELO, best move: Qxh7+ vs Kingmaster99".
+27. **Push notification permission flow** posle 3. partije (ne odmah na ulazu — premium UX praksa).
+28. **Onboarding checklist** — 10 zadataka sa progress barom: igraj 1 partiju, prati 3 igrača, reši dnevni mat, postavi avatar...
+29. **Daily login bonus** — 7-day rotating: bonus XP, opening pack, free lesson, profile frame.
+30. **Loss-streak protection** — posle 3 uzastopna gubitka, prikaži "Take a breath" ekran sa pozitivnim porukama umesto rematch dugmeta odmah (smanjuje tilt churn).
 
 ---
 
-## 7. Tehnički performance (Core Web Vitals)
+## E. Backlink & distribucija
 
-Google rangira brze sajtove više. Provere:
-- LCP < 2.5s na homepage (mereno PageSpeed Insights)
-- Lazy load sve ispod fold (already partial)
-- Stockfish WASM — load on demand, ne na homepage
-- Image dimenzije: width/height na svim slikama da spreči CLS
-- Service Worker (već imaš `sw.js`) — proveriti da kešira pravilno
-
----
-
-## 8. Lokalizacija (multipli growth lever)
-
-`use-i18n` postoji u Settings. Aktivirati:
-- Srpski, ruski, španski, hindi (ogromne chess populacije).
-- `<link rel="alternate" hreflang="sr">` tagovi za svaku stranu.
-- Posebne sitemap fajlove po jeziku.
-- Rezultat: 5x SEO površina, ulazak na tržišta gde Chess.com nije dominantan.
+31. **Reddit launch sequence** — r/chess (1.2M), r/chessbeginners (180k), r/AnarchyChess (450k humor), r/IndieDev (release post).
+32. **Wikipedia citation** — dodaj MasterChess kao "External link" na stranicama 5-10 otvaranja kao alat za vežbu (mora biti useful, ne spam).
+33. **ProductHunt launch** — koordiniraj sa DailyChess_12 zajednicom za Hunter-of-the-day.
+34. **Hacker News Show HN** — "Show HN: I built a free chess platform with no engine assistance in human play".
+35. **AlternativeTo.net** — listing kao alternativa Chess.com / Lichess.
+36. **TopoftheNet/Capterra** — software directory listing.
+37. **Chess YouTube creators outreach** — pošalji 50 manjim YT kreatorima (1k-50k subs) free Premium lifetime + custom bot named after them.
+38. **DailyChess_12 cross-promo** — svaki video ima link u opisu, end-screen card, pinned comment sa link na exact opening pomenutu u videu.
+39. **Tournament prize pools sponzorstvo** — $10 weekly arena prize → lokalni FB/IG ads "Win $10 playing chess this Friday".
+40. **University chess club outreach** — email 100 univerzitetskih chess klubova "Free private tournament platform".
 
 ---
 
-## Predlog redosleda (12 nedelja)
+## F. Sitni UX detalji koji eksplodiraju engagement
 
-```
-Nedelja 1-2:   Google Search Console + dynamic sitemap + per-route Helmet
-Nedelja 3-4:   Programmatic opening pages (ECO codes) sa unique tekstom
-Nedelja 5-6:   Share cards (win + puzzle streak) + OG images
-Nedelja 7-8:   Reddit/YouTube distribucija + DailyChess_12 cross-linking
-Nedelja 9-10:  Email/Push notifications + streak freeze
-Nedelja 11-12: Lokalizacija (srpski + ruski) + image SEO
-```
+41. **"You almost won" detection** — ako si imao +3 evaluation i izgubio, prikaži "You missed Qxf7+! See the line".
+42. **First-move sound personalization** — top 5 igrača ima signature sound effect kad se ulogiraju (gamification).
+43. **Floating ELO change ticker** posle partije — animirani brojač +12 → +24 → +47 sa zlatnom prašinom.
+44. **"Hot streak" board glow** — ako pobediš 3 u nizu, sledeća tabla ima zlatnu auru (psihološki "in the zone" feeling).
+45. **Crown animation** posle 10 pobeda u nizu — celokupan UI dobije crown badge pored avatara 24h.
+46. **Live "currently playing" counter** — "🔥 1,247 igrača trenutno u partiji" (REAL count, ne fake).
+47. **Rank-up cinematic** — kad pređeš iz Bronze u Silver, pun ekran cinematic 3 sekunde sa shatter efekat.
+48. **Custom victory dance** — 5 unlock-ovih animacija na 100/500/1000/5000/10000 partija.
+49. **Profile flexing** — "Played 247 games", "Highest peak: 1834", "Best win: vs 2100" — javno na profilu sa share dugmetom.
+50. **Chess card collection** — 40 kolekcionarskih "Player Cards" (kao FIFA Ultimate Team) koje dobiješ random posle pobeda. Sakupljanje = vraća se dnevno.
 
 ---
 
-## Šta predlažem da radimo PRVO (1 task, da krenemo)
+## G. Tehnički SEO finishing touches
 
-**Najveći ROI sa najmanje rada**: dinamičan sitemap sa svim opening + bot + master-game URL-ovima + Helmet meta po stranicama. To otvara 1000+ URL-ova Google-u za par dana.
+51. **Core Web Vitals optimizacija** — LCP <2.5s, INP <200ms, CLS <0.1. Stockfish WASM lazy load posle interakcije, ne na page load.
+52. **Service Worker offline mode** — bot partije rade offline, povratak online sync-uje stats.
+53. **Web App Manifest + install prompt** — "Install MasterChess" na mobile = engagement booster 3-5x.
+54. **HTTP/3 + Brotli compression** preko Cloudflare (free tier).
+55. **`<link rel="preconnect">` na Stockfish CDN, Lichess API, YouTube embed**.
+56. **Structured data validator pass** — svaki `JSON-LD` mora proći Google Rich Results Test bez warninga.
+57. **`hreflang` mapping per page** — sada svuda iste, treba per-route alternates kad budu prevedene stranice.
+58. **404 to recovery** — `/not-found` predlaže 5 popularnih ruta umesto suvog "Not found".
+59. **AMP NIJE potreban** — Google ga deprioritizuje. Preskoči.
+60. **Bing Webmaster Tools + Yandex Webmaster** — submituj sitemap (Bing = 8% market share, Yandex dominira u RU/SR).
 
-Reci koji deo plana želiš da implementiram prvi i krećem.
+---
+
+## H. Monetizacija → reinvest u rast
+
+61. **Premium tier $4.99/mes** — unlimited analiza, custom board themes, profile frames, no ads.
+62. **Tournament sponsorship slots** — lokalni šahovski klubovi za $20/mes vide svoj logo.
+63. **Affiliate sa Chess.com books / Amazon chess sets** — passive income.
+64. **Custom bot "buy a bot"** — $9.99 da kreiraš named bot po sebi (vidi se na leaderboardu).
+
+---
+
+## Predlog: koji blok prvi?
+
+Najbrži ROI redosled:
+
+1. **Blok F (UX detalji)** — 1-2 dana rada, drastično podiže "wow" moment i sharing.
+2. **Blok B (programmatic SEO)** — najveći broj indeksiranih URL-ova, 3-5 dana.
+3. **Blok C (share mehanizmi)** — pretvara existing trafik u virusni rast.
+4. **Blok D (retencija)** — održava trafik kad počne da raste.
+
+Reci mi koji blok ili koji konkretni broj (npr. "uradi 16, 17, 23, 26") da krenem da implementiram.
