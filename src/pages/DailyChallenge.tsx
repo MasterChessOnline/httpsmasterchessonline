@@ -93,17 +93,8 @@ const DailyChallenge = () => {
       }
     } catch {}
 
-    fetch("https://api.chess.com/pub/puzzle")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data: DailyPuzzle) => {
-        const parsed = parsePuzzle(data);
-        if (!parsed) throw new Error("Could not parse puzzle");
-        if (!parsed.isMate) {
-          // Not a mate-only puzzle; still solvable but flag for the user
-        }
+    fetchVerifiedDailyMate()
+      .then((parsed) => {
         setPuzzle(parsed);
         localStorage.setItem(
           STORAGE_KEY,
