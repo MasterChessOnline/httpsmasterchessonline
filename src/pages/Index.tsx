@@ -617,6 +617,7 @@ const Index = () => {
       </section>
       </main>
 
+      <SiteRating />
       <Footer />
     </div>
   );
