@@ -68,6 +68,7 @@ import DailyPlan from "./pages/DailyPlan";
 import Repertoire from "./pages/Repertoire";
 import Training from "./pages/Training";
 import ChessCard from "./pages/ChessCard";
+import DailyMate from "./pages/DailyMate";
 import BotProfile from "./pages/BotProfile";
 import AdminEmailStatus from "./pages/AdminEmailStatus";
 import SeoStatus from "./pages/SeoStatus";
