@@ -82,6 +82,7 @@ import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
 import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
 import InstallPrompt from "@/components/InstallPrompt";
+import SmartNotifier from "@/components/SmartNotifier";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
 const queryClient = new QueryClient();
@@ -196,6 +197,7 @@ const App = () => (
             <GameInviteListener />
             <MobileBottomNav />
             <InstallPrompt />
+            <SmartNotifier />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
