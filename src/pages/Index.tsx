@@ -209,17 +209,17 @@ const Index = () => {
           {/* Login prompt for guests above Play Online */}
           {!user && (
             <motion.div
-              className="mb-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
+              className="mb-3 flex items-center justify-center"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.4 }}
             >
-              <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 backdrop-blur-sm">
-                <LogIn className="h-3 w-3 text-primary" />
-                <span>Sign in to play online —</span>
-                <Link to="/login" className="text-primary underline hover:text-primary/80 font-medium">Log in</Link>
-                <span>or</span>
-                <Link to="/signup" className="text-primary underline hover:text-primary/80 font-medium">Sign up</Link>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 backdrop-blur-sm text-[11px] sm:text-xs font-bold uppercase tracking-wider">
+                <span className="text-primary">🔥 Get Ready to Battle</span>
+                <span className="text-muted-foreground">—</span>
+                <Link to="/signup" className="text-primary hover:text-primary/80 underline underline-offset-2">Join Free</Link>
+                <span className="text-muted-foreground">or</span>
+                <Link to="/login" className="text-muted-foreground hover:text-foreground underline underline-offset-2">Log In</Link>
               </span>
             </motion.div>
           )}
