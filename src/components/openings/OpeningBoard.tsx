@@ -121,14 +121,15 @@ export default function OpeningBoard({
                         }}
                         onDragEnd={() => setDragFrom(null)}
                         className={`leading-none flex items-center justify-center cursor-grab active:cursor-grabbing ${
-                          pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(6vw,2.8rem)]"
+                          pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(6vw,2.8rem)] font-bold"
                         } ${
                           pd.white
-                            ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-                            : "drop-shadow-[0_0_3px_rgba(255,255,255,0.35)]"
+                            ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)] [filter:drop-shadow(0_0_1px_rgba(0,0,0,0.9))]"
+                            : "drop-shadow-[0_0_2px_rgba(255,255,255,0.55)] [filter:drop-shadow(0_0_1px_rgba(255,255,255,0.7))]"
                         }`}
                         style={pd.svgUrl ? undefined : {
-                          color: pd.white ? "var(--piece-white, #ffffff)" : "var(--piece-black, hsl(220,15%,8%))",
+                          color: pd.white ? "#ffffff" : "#0a0a0a",
+                          WebkitTextStroke: pd.white ? "1.5px #000000" : "1.5px #ffffff",
                         }}
                       >
                         {pd.svgUrl ? (
