@@ -174,6 +174,9 @@ function AnimatedRoutes() {
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
           <Route path="/guides" element={<Guides />} />
           <Route path="/guide/:slug" element={<Guide />} />
+          <Route path="/learn/glossary" element={<Glossary />} />
+          <Route path="/learn/glossary/:slug" element={<GlossaryTerm />} />
+          <Route path="/share/streak/:n" element={<ShareStreak />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
