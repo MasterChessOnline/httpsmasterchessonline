@@ -11,6 +11,7 @@ import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Index from "./pages/Index";
+import DailyChallenge from "./pages/DailyChallenge";
 import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
 import PlayOnline from "./pages/PlayOnline";
