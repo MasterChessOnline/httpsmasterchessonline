@@ -74,11 +74,14 @@ import AdminEmailStatus from "./pages/AdminEmailStatus";
 import SeoStatus from "./pages/SeoStatus";
 import AdminFullStats from "./pages/AdminFullStats";
 import EmbedBoard from "./pages/EmbedBoard";
+import Guides from "./pages/Guides";
+import Guide from "./pages/Guide";
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
 import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
+import InstallPrompt from "@/components/InstallPrompt";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
 const queryClient = new QueryClient();
@@ -164,6 +167,8 @@ function AnimatedRoutes() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
+          <Route path="/guides" element={<Guides />} />
+          <Route path="/guide/:slug" element={<Guide />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
@@ -190,6 +195,7 @@ const App = () => (
             <WelcomeIntroPopup />
             <GameInviteListener />
             <MobileBottomNav />
+            <InstallPrompt />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
