@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getBotById } from "@/lib/bots/profiles";
