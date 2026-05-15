@@ -443,15 +443,8 @@ const Index = () => {
 
 
 
-        {/* Daily Puzzle + Missions — homepage daily focus */}
-        <section id="daily-missions" className="mb-6 scroll-mt-24">
-          <SectionHeader title="Daily Challenge" icon={Target}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <DailyPuzzleWidget />
-              <DailyMissions compact />
-            </div>
-          </SectionHeader>
-        </section>
+        {/* Daily section moved to top of main content (above) */}
+
 
         {/* ─── Training shortcuts (de-emphasized — for between matches) ─── */}
         <section className="pt-2">
