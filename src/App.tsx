@@ -11,6 +11,7 @@ import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Index from "./pages/Index";
+import DailyChallenge from "./pages/DailyChallenge";
 import Dashboard from "./pages/Dashboard";
 import Play from "./pages/Play";
 import PlayOnline from "./pages/PlayOnline";
@@ -150,7 +151,8 @@ function AnimatedRoutes() {
           <Route path="/repertoire" element={<Repertoire />} />
           <Route path="/training" element={<Training />} />
           <Route path="/chess-card" element={<ChessCard />} />
-          <Route path="/daily-mate" element={<Navigate to="/#daily-missions" replace />} />
+          <Route path="/daily-mate" element={<Navigate to="/daily-puzzle" replace />} />
+          <Route path="/daily-puzzle" element={<DailyChallenge />} />
           <Route path="/bot/:botId" element={<BotProfile />} />
           <Route path="/admin/email-status" element={<AdminEmailStatus />} />
           <Route path="/admin/seo-status" element={<SeoStatus />} />
