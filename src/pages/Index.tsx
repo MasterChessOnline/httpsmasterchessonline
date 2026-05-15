@@ -115,6 +115,7 @@ const PreferenceToggles = () => {
 
 const Index = () => {
   const { user, profile } = useAuth();
+  const { t } = useI18n();
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
   const [winStreak, setWinStreak] = useState(0);
