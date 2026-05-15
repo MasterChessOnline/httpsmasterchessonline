@@ -91,8 +91,14 @@ const openingEntries: SitemapEntry[] = ALL_OPENING_SLUGS.map((slug) => ({
 
 // Programmatic bot profiles — every roster bot becomes its own indexable URL.
 // Each one gets a unique title/description via the BotProfile route Helmet.
-const botEntries: SitemapEntry[] = ONLINE_BOTS.map((b) => ({
-  path: `/bot/${b.id}`,
+// We dedupe across both BOT_PROFILES (the `/bot/:id` route source) and the
+// ONLINE_BOTS roster so any future bot in either list shows up in search.
+const botIds = Array.from(new Set([
+  ...BOT_PROFILES.map((b) => b.id),
+  ...ONLINE_BOTS.map((b) => b.id),
+]));
+const botEntries: SitemapEntry[] = botIds.map((id) => ({
+  path: `/bot/${id}`,
   changefreq: "monthly" as const,
   priority: "0.6",
 }));
