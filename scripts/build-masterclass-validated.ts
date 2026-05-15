@@ -90,7 +90,7 @@ function buildLesson(lesson: any): Built | null {
     }
     turn = !turn;
   }
-  return { sans: out, startFen: pl.startFen, truncatedAt, sourceLen };
+  return { sans: out, startFen: startFromInitial ? undefined : pl.startFen, truncatedAt, sourceLen };
 }
 
 const result: Record<string, { sans: string[]; startFen?: string }> = {};
