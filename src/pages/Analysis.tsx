@@ -729,6 +729,7 @@ export default function Analysis() {
 
   // Variant of runAnalysis that takes the PGN text directly (avoids React state lag).
   const runAnalysisFromText = async (pgnText: string) => {
+    if (analyzing) return; // hard guard against double-click re-entry
     setError(""); setPgnMoveEvals([]); setPgnComplete(false); setPgnCurrentIdx(-1);
     pgnDisplayGame.current = new Chess(); setPgnDisplayFen("start");
     const trimmed = pgnText.trim();
