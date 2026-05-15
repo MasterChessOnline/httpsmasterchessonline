@@ -12,14 +12,13 @@ export default function LivePlayerCounter() {
 
     const fetchCount = async () => {
       try {
-        // Count games started in the last 30 minutes (active sessions)
         const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-        const { count: c } = await supabase
+        const { count: c } = await (supabase as any)
           .from("games")
           .select("*", { count: "exact", head: true })
           .gte("created_at", since)
           .is("result", null);
-        if (!cancelled) setCount(typeof c === "number" ? Math.max(c * 2, 0) : 0); // *2 for two players per game
+        if (!cancelled) setCount(typeof c === "number" ? Math.max(c * 2, 0) : 0);
       } catch {
         if (!cancelled) setCount(0);
       }
