@@ -433,10 +433,13 @@ const Index = () => {
 
 
 
-        {/* Daily Missions — homepage daily focus */}
+        {/* Daily Puzzle + Missions — homepage daily focus */}
         <section id="daily-missions" className="mb-6 scroll-mt-24">
-          <SectionHeader title="Daily Missions" icon={Target}>
-            <DailyMissions compact />
+          <SectionHeader title="Daily Challenge" icon={Target}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <DailyPuzzleWidget />
+              <DailyMissions compact />
+            </div>
           </SectionHeader>
         </section>
 
