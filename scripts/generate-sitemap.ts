@@ -8,6 +8,9 @@ import { getOpeningBoardImage } from "../src/lib/og-board-image";
 import { ONLINE_BOTS } from "../src/lib/online-bots-data";
 import { BOT_PROFILES } from "../src/lib/bots/profiles";
 import { GLOSSARY } from "../src/data/chessGlossary";
+import { TOOLS } from "../src/data/tools";
+import { MATE_PATTERNS } from "../src/data/matePatterns";
+import { ELO_TIERS } from "../src/data/eloTiers";
 
 const BASE_URL = "https://masterchess.live";
 
