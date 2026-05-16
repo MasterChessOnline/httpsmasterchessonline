@@ -356,11 +356,11 @@ export default function ChessBoard({
                         onDragStart={(e) => handlePieceDragStart(e as unknown as React.DragEvent, square)}
                         onDragEnd={handlePieceDragEnd}
                         className={`leading-none z-10 cursor-grab active:cursor-grabbing flex items-center justify-center ${
-                          pd.svgUrl ? "w-[94%] h-[94%]" : "text-[min(8.6vw,4rem)] sm:text-[min(6.7vw,3.7rem)]"
+                          pd.svgUrl ? "w-[100%] h-[100%]" : "text-[min(10vw,4.6rem)] sm:text-[min(7.4vw,4.1rem)]"
                         } ${
                           pd.white
-                            ? "[filter:drop-shadow(0_0_1.5px_#000)_drop-shadow(0_0_1.5px_#000)_drop-shadow(0_1px_2px_rgba(0,0,0,0.9))]"
-                            : "[filter:drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_1px_2px_rgba(255,255,255,0.55))]"
+                            ? "[filter:drop-shadow(0_0_2px_rgba(0,0,0,0.95))_drop-shadow(0_0_3px_rgba(0,0,0,0.7))_drop-shadow(0_2px_3px_rgba(0,0,0,0.85))]"
+                            : "[filter:drop-shadow(0_0_2px_rgba(255,255,255,0.95))_drop-shadow(0_0_3px_rgba(255,255,255,0.6))_drop-shadow(0_2px_3px_rgba(0,0,0,0.7))]"
                         } ${isSelected ? "drop-shadow-[0_0_10px_hsl(43_80%_55%/0.6)] scale-110" : ""}`}
                         style={{
                           position: "relative",
