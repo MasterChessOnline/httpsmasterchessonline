@@ -387,8 +387,8 @@ export default function ChessBoard({
                             style={{
                               ...(pd.pixelated ? { imageRendering: "pixelated" as const } : {}),
                               filter: pd.white
-                                ? "drop-shadow(0 0 1px hsl(0 0% 0%)) drop-shadow(0 1px 2px hsl(0 0% 0% / 0.95))"
-                                : "drop-shadow(0 0 1px hsl(0 0% 100%)) drop-shadow(0 1px 2px hsl(0 0% 100% / 0.45))",
+                                ? "brightness(0) invert(1) drop-shadow(0 0 1px hsl(0 0% 0%)) drop-shadow(0 1px 2px hsl(0 0% 0% / 0.95))"
+                                : "brightness(0) drop-shadow(0 0 1px hsl(0 0% 100%)) drop-shadow(0 1px 2px hsl(0 0% 100% / 0.55))",
                             }}
                             onError={(e) => {
                               // SVG failed to load — fall back to Unicode glyph so the
