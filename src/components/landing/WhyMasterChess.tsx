@@ -1,21 +1,36 @@
 import { motion } from "framer-motion";
-import { ShieldCheck, Users, Radio } from "lucide-react";
+import { ShieldCheck, Users, Radio, Crown, Zap, Trophy } from "lucide-react";
 
 const pillars = [
   {
     icon: ShieldCheck,
-    title: "No Ads. Ever.",
-    body: "Distraction-free interface built for serious play. No banners, no popups, no nonsense.",
+    title: "No Noise",
+    body: "A clean board-first experience where players can focus, improve, and enjoy real games without clutter.",
   },
   {
     icon: Users,
-    title: "Pure Human Play",
-    body: "Zero AI assistance and zero eval bars during games. Just you against another human mind.",
+    title: "Real Players",
+    body: "Built around authentic human games, fair competition, profiles, ratings, and a community that feels personal.",
   },
   {
     icon: Radio,
     title: "Streamer-First",
     body: "Distraction-free Streamer Mode, overlay-ready embeds, and live integration with DailyChess_12.",
+  },
+  {
+    icon: Crown,
+    title: "Premium Identity",
+    body: "Gold & black design, cinematic boards, and a luxury chess feel that makes every invite look serious.",
+  },
+  {
+    icon: Zap,
+    title: "Fast to Start",
+    body: "One clear path: enter, play, train, compete. New players understand the site in seconds.",
+  },
+  {
+    icon: Trophy,
+    title: "Built to Grow",
+    body: "Tournaments, streaks, ranks, missions, and share tools give people a reason to come back and bring friends.",
   },
 ];
 
@@ -30,14 +45,14 @@ export default function WhyMasterChess() {
         className="text-center mb-8"
       >
         <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-          Why <span className="text-primary">MasterChess</span>
+          Why Players Choose <span className="text-primary">MasterChess</span>
         </h2>
-        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-          Built by chess players for chess players — every decision protects your game.
+        <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
+          Invite people into a premium chess club, not another crowded game page: clean play, human competition, streamer tools, ranks, and a brand that feels worth joining.
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {pillars.map((p, i) => (
           <motion.div
             key={p.title}
