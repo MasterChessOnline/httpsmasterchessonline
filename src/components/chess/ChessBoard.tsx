@@ -356,7 +356,7 @@ export default function ChessBoard({
                         onDragStart={(e) => handlePieceDragStart(e as unknown as React.DragEvent, square)}
                         onDragEnd={handlePieceDragEnd}
                         className={`leading-none z-10 cursor-grab active:cursor-grabbing flex items-center justify-center ${
-                          pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)]"
+                          pd.svgUrl ? "w-[94%] h-[94%]" : "text-[min(8.6vw,4rem)] sm:text-[min(6.7vw,3.7rem)]"
                         } ${
                           pd.white
                             ? "[filter:drop-shadow(0_0_1.5px_#000)_drop-shadow(0_0_1.5px_#000)_drop-shadow(0_1px_2px_rgba(0,0,0,0.9))]"
@@ -384,7 +384,12 @@ export default function ChessBoard({
                             alt=""
                             draggable={false}
                             className="w-full h-full object-contain pointer-events-none"
-                            style={pd.pixelated ? { imageRendering: "pixelated" } : undefined}
+                            style={{
+                              ...(pd.pixelated ? { imageRendering: "pixelated" as const } : {}),
+                              filter: pd.white
+                                ? "drop-shadow(0 0 1px hsl(0 0% 0%)) drop-shadow(0 1px 2px hsl(0 0% 0% / 0.95))"
+                                : "drop-shadow(0 0 1px hsl(0 0% 100%)) drop-shadow(0 1px 2px hsl(0 0% 100% / 0.45))",
+                            }}
                             onError={(e) => {
                               // SVG failed to load — fall back to Unicode glyph so the
                               // square never shows a broken-image icon.
@@ -395,7 +400,7 @@ export default function ChessBoard({
                               img.style.display = "none";
                               const span = document.createElement("span");
                               span.textContent = pd.symbol;
-                              span.style.fontSize = "min(7vw, 3.4rem)";
+                              span.style.fontSize = "min(8.6vw, 4rem)";
                               span.style.lineHeight = "1";
                               span.style.color = pd.white ? "#ffffff" : "hsl(220,15%,8%)";
                               span.style.textShadow = pd.white
