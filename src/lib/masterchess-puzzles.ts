@@ -114,6 +114,11 @@ export async function loadPuzzles(): Promise<PuzzlePosition[]> {
   return inflight;
 }
 
+export function clearPuzzleCache() {
+  cache = null;
+  inflight = null;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Daily-tier picker — 4 tiers, deterministic per UTC day            */
 /* ------------------------------------------------------------------ */
