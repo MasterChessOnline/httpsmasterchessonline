@@ -70,3 +70,36 @@ self.addEventListener("fetch", (e) => {
     );
   }
 });
+
+// Push notifications support
+self.addEventListener("push", (event) => {
+  let data = { title: "MasterChess", body: "Imate novo obaveštenje", url: "/" };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch {}
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/app-icon-192.png",
+      badge: "/app-icon-192.png",
+      data: { url: data.url },
+      vibrate: [80, 40, 80],
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if ("focus" in c) {
+          c.navigate(url);
+          return c.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});

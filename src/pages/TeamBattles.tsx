@@ -137,7 +137,7 @@ export default function TeamBattles() {
 
   return (
     <>
-      <Seo title="Team Battles — MasterChess" description="Bori se rame uz rame sa svojim timom u realnom vremenu." />
+      <Seo title="Team Battles — MasterChess" description="Bori se rame uz rame sa svojim timom u realnom vremenu." path="/team-battles" />
       <Navbar />
       <main className="container mx-auto px-4 py-10 max-w-6xl">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex flex-wrap items-center justify-between gap-4">
