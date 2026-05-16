@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ShieldCheck, Users, Radio, Sparkles } from "lucide-react";
+import { ShieldCheck, Users, Radio } from "lucide-react";
 
 const pillars = [
   {
@@ -16,11 +16,6 @@ const pillars = [
     icon: Radio,
     title: "Streamer-First",
     body: "Distraction-free Streamer Mode, overlay-ready embeds, and live integration with DailyChess_12.",
-  },
-  {
-    icon: Sparkles,
-    title: "Free Forever",
-    body: "Tournaments, opening trainer, Stockfish analysis and bots — all free, no paywall, no tiers.",
   },
 ];
 
@@ -42,7 +37,7 @@ export default function WhyMasterChess() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {pillars.map((p, i) => (
           <motion.div
             key={p.title}
