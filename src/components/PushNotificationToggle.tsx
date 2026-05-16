@@ -14,6 +14,8 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function PushNotificationToggle() {
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const { status, busy, enable, disable, supported, refresh } = usePushSubscription();
+  const { user } = useAuth();
+  const [testing, setTesting] = useState(false);
   const enabled = status === "subscribed";
 
   useEffect(() => {
