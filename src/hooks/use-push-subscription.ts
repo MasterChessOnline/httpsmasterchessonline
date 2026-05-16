@@ -72,10 +72,15 @@ export function usePushSubscription() {
   useEffect(() => { refresh(); }, [refresh]);
 
   const enable = useCallback(async () => {
-    if (!user || !VAPID_PUBLIC_KEY) return false;
+    if (!user) return false;
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
     setBusy(true);
     try {
+      const vapidKey = await getVapidPublicKey();
+      if (!vapidKey) {
+        console.error("VAPID public key unavailable");
+        return false;
+      }
       const perm = await Notification.requestPermission();
       if (perm !== "granted") {
         setStatus(perm === "denied" ? "denied" : "default");
@@ -86,7 +91,7 @@ export function usePushSubscription() {
       if (!sub) {
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+          applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
         });
       }
       const json = sub.toJSON() as any;
