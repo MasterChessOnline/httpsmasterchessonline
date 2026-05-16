@@ -239,6 +239,7 @@ const App = () => (
             <GameInviteListener />
             <MobileBottomNav />
             <InstallPrompt />
+            <NotificationPrompt />
             <SmartNotifier />
           </Suspense>
         </BrowserRouter>
