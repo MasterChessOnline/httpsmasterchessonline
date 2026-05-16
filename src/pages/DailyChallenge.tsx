@@ -57,7 +57,7 @@ interface ParsedPuzzle {
   isMate: boolean;
 }
 
-const STORAGE_KEY = "mc_daily_puzzle_cache_v2";
+const STORAGE_KEY = "mc_daily_puzzle_cache_v3";
 
 const MASTERCHESS_DAILY_PUZZLES: Omit<ParsedPuzzle, "date">[] = [
   {
