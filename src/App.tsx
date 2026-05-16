@@ -98,6 +98,7 @@ import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
 import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
 import InstallPrompt from "@/components/InstallPrompt";
+import AppLaunchSplash from "@/components/AppLaunchSplash";
 import SmartNotifier from "@/components/SmartNotifier";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
@@ -221,6 +222,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        <AppLaunchSplash />
         <DepthLayers />
         <CursorGlow />
         <Toaster />

@@ -108,10 +108,21 @@ export default function InstallAppButton({
       }
       return;
     }
-    // 3. iOS — Apple blocks fully automatic web-app installs. Show the
-    //    step-by-step guide immediately so the user always sees what to tap.
+    // 3. iOS — Apple blocks fully automatic installs. Open the Share sheet
+    //    immediately AND show the step-by-step guide as backup.
     if (isIos) {
       setShowIosHelp(true);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "MasterChess",
+            text: "Install MasterChess on your iPhone.",
+            url: window.location.origin,
+          });
+        } catch {
+          // user dismissed; modal stays visible with steps
+        }
+      }
       return;
     }
     // 4. Other browsers without beforeinstallprompt → show manual steps.
