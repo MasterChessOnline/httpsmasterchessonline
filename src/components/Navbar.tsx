@@ -336,16 +336,16 @@ const Navbar = () => {
                                 return (
                                   <div key={item.label}>
                                     {item.separator && idx > 0 && (
-                                      <div className="mx-2 my-1 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
+                                      <div className="mx-2 my-0.5 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-1.5 pb-0.5" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
+                                      <p className="text-[9px] uppercase tracking-[0.14em] font-extrabold px-3 pt-1 pb-0.5" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
                                         {item.subheading}
                                       </p>
                                     )}
                                     <Link
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                                      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all duration-200 group/item"
+                                      className="flex items-center gap-2 px-2 py-1 rounded-lg transition-all duration-200 group/item"
                                       style={{
                                         backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.accent} / 0.08)` : undefined,
                                         border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
@@ -358,14 +358,14 @@ const Navbar = () => {
                                       }}
                                     >
                                       <div
-                                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200"
+                                        className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-all duration-200"
                                         style={{ backgroundColor: item.highlight || itemActive ? `hsla(${section.accent} / 0.2)` : `hsla(${section.accent} / 0.08)` }}
                                       >
-                                        <item.icon className="h-3.5 w-3.5 transition-colors duration-200" style={{ color: item.highlight || itemActive || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.6)` }} />
+                                        <item.icon className="h-3 w-3 transition-colors duration-200" style={{ color: item.highlight || itemActive || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.6)` }} />
                                       </div>
                                       <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                          <p className="text-xs font-medium leading-tight" style={{ color: item.highlight ? accentColor : item.comingSoon ? "hsl(var(--foreground) / 0.6)" : "hsl(var(--foreground))" }}>
+                                        <div className="flex items-center gap-1.5">
+                                          <p className="text-[11px] font-medium leading-tight truncate" style={{ color: item.highlight ? accentColor : item.comingSoon ? "hsl(var(--foreground) / 0.6)" : "hsl(var(--foreground))" }}>
                                             {item.label}
                                           </p>
                                           {item.highlight && (
@@ -375,7 +375,6 @@ const Navbar = () => {
                                             <span className="text-[8px] px-1 py-0.5 rounded-full font-bold tracking-wide" style={{ backgroundColor: `hsla(${section.accent} / 0.2)`, color: accentColor }}>SOON</span>
                                           )}
                                         </div>
-                                        <p className="text-[10px] text-muted-foreground/60 leading-tight mt-0.5">{item.desc}</p>
                                       </div>
                                       {item.comingSoon && <Lock className="h-3 w-3 shrink-0" style={{ color: `hsla(${section.accent} / 0.4)` }} />}
                                     </Link>
@@ -383,6 +382,7 @@ const Navbar = () => {
                                 );
                               })}
                           </div>
+
                         </motion.div>
                       )}
                     </AnimatePresence>
