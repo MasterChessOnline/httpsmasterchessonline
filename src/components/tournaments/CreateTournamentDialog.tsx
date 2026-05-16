@@ -10,7 +10,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Loader2, Trophy, Clock, Zap, Timer } from "lucide-react";
+import { Plus, Loader2, Trophy, Clock, Zap, Timer, Swords, Calendar, Flame } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Props {
@@ -31,17 +31,31 @@ const TIME_CONTROLS = [
   { label: "30+0 Classical", seconds: 1800, increment: 0, category: "classical" },
 ];
 
+type TFormat = "swiss" | "arena" | "daily_cup" | "blitz_royale";
+
+const FORMAT_PRESETS: Record<TFormat, {
+  label: string; desc: string; icon: any; rounds: number; durationMin?: number; tcIdx: number;
+}> = {
+  swiss:        { label: "Swiss",         desc: "Classic paired rounds",        icon: Trophy,  rounds: 5, tcIdx: 5 },
+  arena:        { label: "MasterChess Arena", desc: "Play as many games as you can in a fixed window", icon: Swords, rounds: 99, durationMin: 60, tcIdx: 4 },
+  daily_cup:    { label: "Daily Cup",     desc: "Featured short event, rotating daily", icon: Calendar, rounds: 7, durationMin: 45, tcIdx: 3 },
+  blitz_royale: { label: "Blitz Royale",  desc: "Fast & furious, every game counts",   icon: Flame,    rounds: 99, durationMin: 30, tcIdx: 2 },
+};
+
 export const CreateTournamentDialog = ({ trigger, onCreated }: Props) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
+  const [tFormat, setTFormat] = useState<TFormat>("swiss");
   const [tcIdx, setTcIdx] = useState("5"); // default 5+3
   const [rounds, setRounds] = useState("5");
   const [maxPlayers, setMaxPlayers] = useState("32");
   const [startsIn, setStartsIn] = useState("5"); // minutes
 
   const tc = TIME_CONTROLS[parseInt(tcIdx)];
+  const preset = FORMAT_PRESETS[tFormat];
+  const isArenaLike = tFormat !== "swiss";
 
   const handleCreate = async () => {
     setCreating(true);
@@ -54,7 +68,8 @@ export const CreateTournamentDialog = ({ trigger, onCreated }: Props) => {
           time_control_seconds: tc.seconds,
           time_control_increment: tc.increment,
           category: tc.category,
-          format: "swiss",
+          format: tFormat,
+          arena_duration_minutes: preset.durationMin ?? null,
           total_rounds: parseInt(rounds),
           max_players: parseInt(maxPlayers),
           starts_in_minutes: parseInt(startsIn),
@@ -97,9 +112,43 @@ export const CreateTournamentDialog = ({ trigger, onCreated }: Props) => {
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          {/* Format picker */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Format</Label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {(Object.keys(FORMAT_PRESETS) as TFormat[]).map((k) => {
+                const p = FORMAT_PRESETS[k];
+                const Icon = p.icon;
+                const active = tFormat === k;
+                return (
+                  <button
+                    type="button"
+                    key={k}
+                    onClick={() => {
+                      setTFormat(k);
+                      setRounds(String(p.rounds === 99 ? 9 : p.rounds));
+                      setTcIdx(String(p.tcIdx));
+                    }}
+                    className={`text-left rounded-lg border p-2 transition-all ${
+                      active
+                        ? "border-primary bg-primary/10"
+                        : "border-border/40 bg-card hover:border-primary/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <Icon className={`h-3.5 w-3.5 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className="text-xs font-semibold">{p.label}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{p.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="t-name" className="text-xs">Name (optional)</Label>
-            <Input id="t-name" placeholder="My Friday Night Arena" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input id="t-name" placeholder={isArenaLike ? `My ${preset.label}` : "My Friday Night Arena"} value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           <div className="space-y-1.5">
