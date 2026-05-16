@@ -116,7 +116,6 @@ function getMasterChessDailyPuzzle(): ParsedPuzzle {
 const DailyChallenge = () => {
   const [puzzle, setPuzzle] = useState<ParsedPuzzle | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [alreadySolved, setAlreadySolved] = useState(isSolvedToday());
   const [streak, setStreak] = useState(loadStreak());
   const [override, setOverride] = useState(false); // user chose to replay
@@ -133,16 +132,10 @@ const DailyChallenge = () => {
       }
     } catch {}
 
-    fetchVerifiedDailyMate()
-      .then((parsed) => {
-        setPuzzle(parsed);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ day: today, puzzle: parsed }));
-      })
-      .catch((e) => {
-        console.error(e);
-        setError("Could not load today's puzzle. Please try again.");
-      })
-      .finally(() => setLoading(false));
+    const parsed = getMasterChessDailyPuzzle();
+    setPuzzle(parsed);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ day: today, puzzle: parsed }));
+    setLoading(false);
 
     const t = setInterval(() => setSecondsLeft(secondsUntilMidnightUTC()), 30_000);
     return () => clearInterval(t);
@@ -160,12 +153,12 @@ const DailyChallenge = () => {
     );
   }
 
-  if (error || !puzzle) {
+  if (!puzzle) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="container mx-auto px-4 pt-24 pb-16 text-center">
-          <p className="text-destructive">{error || "Puzzle unavailable."}</p>
+          <p className="text-destructive">Puzzle unavailable.</p>
         </main>
         <Footer />
       </div>
