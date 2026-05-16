@@ -3,11 +3,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Crown } from "lucide-react";
 
 /**
- * Cinematic launch splash shown ONLY when the app is opened from the home
- * screen (standalone/PWA mode). Gives the "real native app" feel right after
- * the user taps the icon — gold King mark, halo glow, brand wordmark.
+ * Cinematic, "brutal-luxury" launch splash. Shown once per session when the
+ * user opens MasterChess from the home-screen icon (PWA / standalone mode).
  *
- * Auto-dismisses after ~1.6s. Never shows inside the browser tab or iframe.
+ * Layers (bottom → top):
+ *  1. Pure black backdrop with two oversized radial spotlights.
+ *  2. Animated gold grid scanlines sliding diagonally.
+ *  3. Film grain overlay.
+ *  4. Large gold King crest with halo + sweep.
+ *  5. Stencil wordmark "MASTERCHESS" with split-letter reveal.
+ *  6. Tagline + animated tracking line.
+ *  7. Twin shutter-wipe exit (top + bottom panels close in).
  */
 export default function AppLaunchSplash() {
   const [visible, setVisible] = useState(false);
@@ -25,86 +31,162 @@ export default function AppLaunchSplash() {
         return true;
       }
     })();
-    // Show once per session, only in real installed-app mode.
     if (!isStandalone || isInIframe) return;
     if (sessionStorage.getItem("mc.splash.shown") === "1") return;
     sessionStorage.setItem("mc.splash.shown", "1");
     setVisible(true);
-    const t = setTimeout(() => setVisible(false), 1600);
+    const t = setTimeout(() => setVisible(false), 2000);
     return () => clearTimeout(t);
   }, []);
+
+  const letters = "MASTERCHESS".split("");
 
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0b0b0d] overflow-hidden"
+          className="fixed inset-0 z-[9999] overflow-hidden bg-black"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeOut" } }}
+          exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeInOut" } }}
         >
-          {/* Cinematic gold radial glow */}
-          <motion.div
+          {/* Spotlights */}
+          <div
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(circle at 50% 45%, rgba(201,168,76,0.28) 0%, rgba(201,168,76,0.08) 30%, transparent 60%)",
+                "radial-gradient(ellipse 70% 50% at 50% 35%, rgba(251,191,36,0.18) 0%, rgba(251,191,36,0.04) 35%, transparent 65%), radial-gradient(circle at 50% 85%, rgba(201,168,76,0.10) 0%, transparent 55%)",
             }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1.1 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
           />
 
-          {/* Subtle film grain */}
+          {/* Diagonal gold scanlines */}
+          <motion.div
+            aria-hidden
+            className="absolute inset-[-20%] pointer-events-none opacity-30"
+            style={{
+              background:
+                "repeating-linear-gradient(135deg, rgba(251,191,36,0.10) 0px, rgba(251,191,36,0.10) 1px, transparent 1px, transparent 14px)",
+            }}
+            initial={{ x: -80, y: -80 }}
+            animate={{ x: 80, y: 80 }}
+            transition={{ duration: 2, ease: "linear" }}
+          />
+
+          {/* Film grain */}
           <div
-            className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
+            aria-hidden
+            className="absolute inset-0 opacity-[0.06] mix-blend-overlay pointer-events-none"
             style={{
               backgroundImage:
                 "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
             }}
           />
 
-          {/* Crown mark */}
+          {/* Top + bottom hairlines */}
           <motion.div
-            className="relative"
-            initial={{ scale: 0.6, opacity: 0, rotate: -8 }}
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 180, damping: 14, delay: 0.05 }}
-          >
-            <div className="absolute inset-0 blur-2xl bg-amber-400/40 rounded-full" />
-            <div className="relative h-24 w-24 rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-300/20 via-amber-500/10 to-black flex items-center justify-center shadow-[0_20px_60px_-10px_rgba(201,168,76,0.55)]">
-              <Crown className="h-12 w-12 text-amber-300 drop-shadow-[0_0_12px_rgba(251,191,36,0.7)]" />
-            </div>
-          </motion.div>
+            className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-300/70 to-transparent"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
+          />
+          <motion.div
+            className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-300/70 to-transparent"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
+          />
 
-          {/* Wordmark */}
-          <motion.div
-            className="mt-7 text-center"
-            initial={{ y: 12, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.55, delay: 0.25, ease: "easeOut" }}
-          >
-            <div className="font-display text-3xl tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-b from-amber-200 via-amber-300 to-amber-500 uppercase">
-              MasterChess
-            </div>
-            <div className="mt-1.5 text-[10px] uppercase tracking-[0.4em] text-amber-300/60">
-              Play · Compete · Master
-            </div>
-          </motion.div>
-
-          {/* Gold loading bar */}
-          <motion.div
-            className="absolute bottom-16 h-[2px] w-40 overflow-hidden rounded-full bg-white/5"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
+          {/* Content */}
+          <div className="relative h-full w-full flex flex-col items-center justify-center px-6">
+            {/* Crown crest */}
             <motion.div
-              className="h-full bg-gradient-to-r from-transparent via-amber-300 to-transparent"
-              initial={{ x: "-100%" }}
-              animate={{ x: "100%" }}
-              transition={{ duration: 1.1, ease: "easeInOut", repeat: Infinity }}
-            />
-          </motion.div>
+              className="relative"
+              initial={{ scale: 0.55, opacity: 0, rotate: -12 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 170, damping: 13 }}
+            >
+              <div className="absolute -inset-8 blur-3xl bg-amber-400/40 rounded-full" />
+              <div className="absolute -inset-2 rounded-3xl border border-amber-300/30" />
+              <div className="relative h-28 w-28 rounded-3xl border-2 border-amber-300/60 bg-gradient-to-br from-amber-200/15 via-amber-500/10 to-black flex items-center justify-center shadow-[0_30px_80px_-10px_rgba(251,191,36,0.6)]">
+                {/* sweep highlight */}
+                <motion.div
+                  className="absolute inset-0 overflow-hidden rounded-3xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.35 }}
+                >
+                  <motion.div
+                    className="absolute top-0 -left-1/2 h-full w-1/2 bg-gradient-to-r from-transparent via-amber-200/45 to-transparent skew-x-12"
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "260%" }}
+                    transition={{ duration: 1.1, ease: "easeOut", delay: 0.4 }}
+                  />
+                </motion.div>
+                <Crown className="relative h-14 w-14 text-amber-200 drop-shadow-[0_0_18px_rgba(251,191,36,0.9)]" />
+              </div>
+            </motion.div>
+
+            {/* Wordmark — letter-by-letter stencil reveal */}
+            <div className="mt-8 flex items-end gap-[1px] sm:gap-[2px] select-none">
+              {letters.map((ch, i) => (
+                <motion.span
+                  key={i}
+                  className="font-display font-black text-[clamp(2rem,9vw,4rem)] leading-none uppercase text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-600"
+                  style={{ letterSpacing: "0.04em" }}
+                  initial={{ y: 28, opacity: 0, filter: "blur(6px)" }}
+                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                  transition={{
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1],
+                    delay: 0.25 + i * 0.035,
+                  }}
+                >
+                  {ch}
+                </motion.span>
+              ))}
+            </div>
+
+            {/* Tagline */}
+            <motion.div
+              className="mt-3 flex items-center gap-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.85, duration: 0.5 }}
+            >
+              <span className="h-px w-8 bg-amber-300/40" />
+              <span className="font-display text-[10px] sm:text-xs uppercase tracking-[0.45em] text-amber-200/70">
+                Play · Compete · Master
+              </span>
+              <span className="h-px w-8 bg-amber-300/40" />
+            </motion.div>
+
+            {/* Tracking bar */}
+            <motion.div
+              className="absolute bottom-16 h-[2px] w-44 overflow-hidden rounded-full bg-amber-300/10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+            >
+              <motion.div
+                className="h-full w-1/2 bg-gradient-to-r from-transparent via-amber-300 to-transparent"
+                initial={{ x: "-100%" }}
+                animate={{ x: "220%" }}
+                transition={{ duration: 1.2, ease: "easeInOut", repeat: Infinity }}
+              />
+            </motion.div>
+          </div>
+
+          {/* Shutter wipe exit — top */}
+          <motion.div
+            className="absolute inset-x-0 top-0 bg-black z-10 pointer-events-none"
+            initial={{ height: 0 }}
+            exit={{ height: "52%", transition: { duration: 0.45, ease: [0.7, 0, 0.3, 1] } }}
+          />
+          {/* Shutter wipe exit — bottom */}
+          <motion.div
+            className="absolute inset-x-0 bottom-0 bg-black z-10 pointer-events-none"
+            initial={{ height: 0 }}
+            exit={{ height: "52%", transition: { duration: 0.45, ease: [0.7, 0, 0.3, 1] } }}
+          />
         </motion.div>
       )}
     </AnimatePresence>

@@ -112,20 +112,18 @@ const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
   const location = useLocation();
+  // Skip route transition animation on phones — it causes layout thrash and
+  // janky scroll on low-end devices. Desktop still gets the smooth fade.
+  const isMobile =
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 768px)").matches;
+  const reduceMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const lite = isMobile || reduceMotion;
 
-  return (
-    <>
-    <Analytics />
-    <ReferralTracker />
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 8, scale: 0.995 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -8, scale: 0.995 }}
-        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <Routes location={location}>
+  const routes = (
+    <Routes location={location}>
           <Route path="/" element={<Index />} />
           <Route path="/pitch" element={<Pitch />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -215,8 +213,27 @@ function AnimatedRoutes() {
           <Route path="/team-battles" element={<TeamBattles />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </motion.div>
-    </AnimatePresence>
+  );
+
+  return (
+    <>
+      <Analytics />
+      <ReferralTracker />
+      {lite ? (
+        routes
+      ) : (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 8, scale: 0.995 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.995 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {routes}
+          </motion.div>
+        </AnimatePresence>
+      )}
     </>
   );
 }
