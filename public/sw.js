@@ -1,5 +1,5 @@
 // MasterChess service worker - lightweight offline shell + cache for static assets
-const CACHE = "mc-shell-v4";
+const CACHE = "mc-shell-v5";
 const SHELL = ["/", "/manifest.json", "/favicon.ico", "/app-icon-192.png", "/app-icon-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
