@@ -222,6 +222,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        <AppLaunchSplash />
         <DepthLayers />
         <CursorGlow />
         <Toaster />
