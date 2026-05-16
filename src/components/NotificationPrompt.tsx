@@ -42,13 +42,26 @@ export default function NotificationPrompt() {
         toast.success("Notifications enabled", {
           description: "We'll ping you for tournaments, challenges and game invites.",
         });
-        // Welcome shot so the user sees it actually works
+        // Welcome shot via the service worker (works on iOS 16.4+ PWA + Android).
         try {
-          new Notification("Master Chess", {
-            body: "You're all set — see you on the board!",
-            icon: "/app-icon-192.png",
-            badge: "/app-icon-192.png",
-          });
+          const reg =
+            (await navigator.serviceWorker?.ready) ||
+            (await navigator.serviceWorker?.getRegistration());
+          if (reg) {
+            await reg.showNotification("Master Chess", {
+              body: "You're all set — see you on the board!",
+              icon: "/app-icon-192.png",
+              badge: "/app-icon-192.png",
+              vibrate: [80, 40, 80],
+              tag: "mc-welcome",
+              data: { url: "/" },
+            } as NotificationOptions);
+          } else {
+            new Notification("Master Chess", {
+              body: "You're all set — see you on the board!",
+              icon: "/app-icon-192.png",
+            });
+          }
         } catch {}
       } else {
         toast("Notifications skipped", {
