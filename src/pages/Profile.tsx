@@ -51,6 +51,7 @@ interface ProfileData {
   peak_rating?: number;
   bot_peak_rating?: number;
   highest_title_key?: string | null;
+  total_xp?: number;
 }
 
 interface GameHistory {
