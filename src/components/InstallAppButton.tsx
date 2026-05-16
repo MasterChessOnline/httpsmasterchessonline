@@ -285,7 +285,7 @@ export default function InstallAppButton({
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-foreground">Install MasterChess</h3>
-                    <p className="text-xs text-muted-foreground">Android / Desktop</p>
+                    <p className="text-xs text-muted-foreground">Desktop · Laptop · Android</p>
                   </div>
                 </div>
                 <button
@@ -296,24 +296,33 @@ export default function InstallAppButton({
                 </button>
               </div>
 
-              <ol className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="text-primary font-bold">1.</span> Open your browser{" "}
-                  <strong className="text-foreground">menu</strong> (⋮ top right).
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-primary font-bold">2.</span> Tap{" "}
-                  <strong className="text-foreground">"Install app"</strong> or{" "}
-                  <strong className="text-foreground">"Add to Home Screen"</strong>.
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-primary font-bold">3.</span> Confirm — MasterChess launches like a native app.
-                </li>
-              </ol>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-primary/80 font-semibold mb-1.5">Chrome · Edge · Brave (Mac / Windows / Linux)</p>
+                  <p>
+                    Click the <strong className="text-foreground">install icon</strong>{" "}
+                    <span className="inline-block px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary text-xs">⊕</span>{" "}
+                    in the address bar — or open the menu{" "}
+                    <strong className="text-foreground">⋮ → "Install MasterChess"</strong>.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-primary/80 font-semibold mb-1.5">Safari (macOS)</p>
+                  <p>
+                    Click <strong className="text-foreground">File → Add to Dock</strong> in the top menu bar.
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-primary/80 font-semibold mb-1.5">Android</p>
+                  <p>
+                    Menu <strong className="text-foreground">⋮ → "Install app"</strong> or <strong className="text-foreground">"Add to Home Screen"</strong>.
+                  </p>
+                </div>
+              </div>
 
               <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-emerald-300">
                 <Check className="h-4 w-4 shrink-0" />
-                Works on Chrome, Edge, Brave, Samsung Internet, Firefox.
+                Launches in its own window — no browser bar, like a native app.
               </div>
 
               <div className="mt-4 flex justify-end">
