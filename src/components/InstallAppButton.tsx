@@ -223,9 +223,27 @@ export default function InstallAppButton({
                 Fullscreen, no browser bar, instant launch from home screen.
               </div>
 
-              <div className="mt-4 flex justify-end">
-                <Button size="sm" onClick={() => setShowIosHelp(false)}>
-                  Got it
+              <div className="mt-4 flex flex-col gap-2">
+                <Button
+                  size="lg"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display uppercase tracking-wider"
+                  onClick={async () => {
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({
+                          title: "MasterChess",
+                          text: "Install MasterChess on your iPhone.",
+                          url: window.location.origin,
+                        });
+                      } catch {}
+                    }
+                  }}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Open Share Menu
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setShowIosHelp(false)}>
+                  Close
                 </Button>
               </div>
             </motion.div>
