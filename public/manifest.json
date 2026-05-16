@@ -19,9 +19,38 @@
     { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Play Online",  "url": "/play/online",  "description": "Play chess vs real players" },
-    { "name": "Play vs Bots", "url": "/play",         "description": "Play chess vs AI bots" },
-    { "name": "Tournaments",  "url": "/tournaments",  "description": "Join a live tournament" },
-    { "name": "Daily Plan",   "url": "/daily-plan",   "description": "Today's missions and streak" }
-  ]
+    {
+      "name": "Quick Match",
+      "short_name": "Quick Match",
+      "url": "/play/online?utm_source=pwa_shortcut",
+      "description": "Find an opponent instantly",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Play vs Bots",
+      "short_name": "vs Bots",
+      "url": "/play?utm_source=pwa_shortcut",
+      "description": "Play chess vs AI bots",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Tournaments",
+      "short_name": "Tournaments",
+      "url": "/tournaments?utm_source=pwa_shortcut",
+      "description": "Join a live tournament",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "My Profile",
+      "short_name": "Profile",
+      "url": "/profile?utm_source=pwa_shortcut",
+      "description": "View stats and rating",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  }
 }
