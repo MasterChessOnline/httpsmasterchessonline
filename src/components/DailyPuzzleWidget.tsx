@@ -129,7 +129,7 @@ export default function DailyPuzzleWidget() {
   const mm = Math.floor((secondsLeft % 3600) / 60);
 
   const boardImg = puzzle
-    ? `https://www.chess.com/dynboard?fen=${encodeURIComponent(puzzle.startFen)}&board=green&piece=neo&size=2${puzzle.playerColor === "b" ? "&flip=1" : ""}`
+    ? `https://www.chess.com/dynboard?fen=${encodeURIComponent(puzzle.startFen)}&board=green&piece=neo&size=2`
     : null;
 
   const label = puzzle?.isMate ? `Mate in ${puzzle.matesIn}` : "Daily Tactic";

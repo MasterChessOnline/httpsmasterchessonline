@@ -485,7 +485,7 @@ function PuzzleSolver({ puzzle, onSolved, replayMode }: { puzzle: ParsedPuzzle; 
 
         <ChessBoard
           game={game}
-          flipped={puzzle.playerColor === "b"}
+          flipped={false}
           selectedSquare={selectedSquare}
           legalMoves={legalMoves}
           lastMove={lastMove}
