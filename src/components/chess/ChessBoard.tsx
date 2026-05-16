@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { usePieceGlyphs } from "@/lib/piece-glyphs";
 import { useMoveInputMode, dragEnabled, clickEnabled } from "@/hooks/use-move-input-mode";
 import { playCheckSound, playGameOverSound } from "@/lib/chess-sounds";
+import { triggerHaptic } from "@/lib/haptics";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
