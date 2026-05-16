@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Apple, X, Check, ExternalLink } from "lucide-react";
+import { Download, Apple, X, Check, ExternalLink, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -20,6 +21,7 @@ export default function InstallAppButton({
   const [installed, setInstalled] = useState(
     typeof window !== "undefined" && localStorage.getItem(INSTALLED_KEY) === "1",
   );
+  const [justInstalled, setJustInstalled] = useState(false);
   const [showIosHelp, setShowIosHelp] = useState(false);
 
   const isIos =
@@ -44,8 +46,17 @@ export default function InstallAppButton({
     };
     const onInstalled = () => {
       localStorage.setItem(INSTALLED_KEY, "1");
-      setInstalled(true);
       setDeferred(null);
+      // Show the confirmation chip briefly, then hide the button entirely.
+      setJustInstalled(true);
+      toast.success("Instalirano ✓", {
+        description: "MasterChess je dodat među tvoje aplikacije.",
+        duration: 4000,
+      });
+      setTimeout(() => {
+        setInstalled(true);
+        setJustInstalled(false);
+      }, 2800);
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
@@ -55,8 +66,10 @@ export default function InstallAppButton({
     };
   }, []);
 
-  // Hide forever once installed or already running as PWA.
-  if (installed || isStandalone) return null;
+  // Hide forever once installed or already running as PWA (but keep visible
+  // during the brief "Instalirano" confirmation animation).
+  if ((installed || isStandalone) && !justInstalled) return null;
+
 
   const handleClick = async () => {
     // 1. Native install prompt available → fire it immediately.
@@ -107,20 +120,49 @@ export default function InstallAppButton({
 
   return (
     <>
-      <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-        <Button
-          onClick={handleClick}
-          variant="outline"
-          className={`ripple-btn ${sizeClass} border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-display uppercase tracking-wider gap-2 shadow-glow transition-all`}
-        >
-          {deferred || !isInIframe ? (
-            <Download className="h-4 w-4" />
-          ) : (
-            <ExternalLink className="h-4 w-4" />
-          )}
-          {variant === "hero" ? "Install App" : "Install"}
-        </Button>
-      </motion.div>
+      <AnimatePresence mode="wait" initial={false}>
+        {justInstalled ? (
+          <motion.div
+            key="installed"
+            initial={{ opacity: 0, scale: 0.85, y: -4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -8 }}
+            transition={{ type: "spring", stiffness: 320, damping: 22 }}
+          >
+            <div
+              className={`${sizeClass} inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 font-display uppercase tracking-wider shadow-[0_0_24px_-4px_rgba(16,185,129,0.55)]`}
+              role="status"
+              aria-live="polite"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Instalirano
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="install"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <Button
+              onClick={handleClick}
+              variant="outline"
+              className={`ripple-btn ${sizeClass} border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-display uppercase tracking-wider gap-2 shadow-glow transition-all`}
+            >
+              {deferred || !isInIframe ? (
+                <Download className="h-4 w-4" />
+              ) : (
+                <ExternalLink className="h-4 w-4" />
+              )}
+              {variant === "hero" ? "Install App" : "Install"}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
 
       <AnimatePresence>
         {showIosHelp && (
