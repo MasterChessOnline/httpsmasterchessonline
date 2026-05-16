@@ -4,11 +4,16 @@ import { ArrowRight, Clock, Zap, Timer, Coffee, Crown } from "lucide-react";
 import { motion } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
 import { useState, useEffect } from "react";
+import { usePieceGlyphs } from "@/lib/piece-glyphs";
 
 const PIECES: Record<string, string> = {
   K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
   k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
 };
+
+function pieceKeyFor(p: string): string {
+  return (p === p.toUpperCase() ? "w" : "b") + p.toLowerCase();
+}
 
 const INITIAL_BOARD = [
   ["r","n","b","q","k","b","n","r"],
@@ -40,6 +45,7 @@ const ChessboardPreview = () => {
   const [board, setBoard] = useState(INITIAL_BOARD);
   const [moveIdx, setMoveIdx] = useState(0);
   const [lastMove, setLastMove] = useState<{from: number[], to: number[]} | null>(null);
+  const { get: getGlyph } = usePieceGlyphs();
 
   useEffect(() => {
     if (moveIdx >= sampleMoves.length) return;
@@ -100,18 +106,31 @@ const ChessboardPreview = () => {
                               transition={{ duration: 0.3 }}
                             />
                           )}
-                          {piece ? (
-                            <motion.span
-                              className="cursor-pointer drop-shadow-lg relative z-10"
-                              initial={{ opacity: 0, scale: 0 }}
-                              whileInView={{ opacity: 1, scale: 1 }}
-                              viewport={{ once: true }}
-                              transition={{ delay: (r * 8 + c) * 0.01, duration: 0.3, type: "spring" }}
-                              layout
-                            >
-                              {PIECES[piece]}
-                            </motion.span>
-                          ) : ""}
+                          {piece ? (() => {
+                            const art = getGlyph(pieceKeyFor(piece));
+                            return (
+                              <motion.span
+                                className="cursor-pointer relative z-10 flex items-center justify-center w-[88%] h-[88%]"
+                                initial={{ opacity: 0, scale: 0 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: (r * 8 + c) * 0.01, duration: 0.3, type: "spring" }}
+                                layout
+                              >
+                                {art?.svgUrl ? (
+                                  <img
+                                    src={art.svgUrl}
+                                    alt=""
+                                    draggable={false}
+                                    className="w-full h-full drop-shadow-md select-none"
+                                    style={{ imageRendering: art.pixelated ? "pixelated" : "auto" }}
+                                  />
+                                ) : (
+                                  <span className="drop-shadow-lg">{PIECES[piece]}</span>
+                                )}
+                              </motion.span>
+                            );
+                          })() : ""}
                         </motion.div>
                       );
                     })
