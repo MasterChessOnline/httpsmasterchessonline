@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Apple, X, Check, ExternalLink } from "lucide-react";
+import { Download, Apple, X, Check, ExternalLink, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -20,6 +21,7 @@ export default function InstallAppButton({
   const [installed, setInstalled] = useState(
     typeof window !== "undefined" && localStorage.getItem(INSTALLED_KEY) === "1",
   );
+  const [justInstalled, setJustInstalled] = useState(false);
   const [showIosHelp, setShowIosHelp] = useState(false);
 
   const isIos =
@@ -44,8 +46,17 @@ export default function InstallAppButton({
     };
     const onInstalled = () => {
       localStorage.setItem(INSTALLED_KEY, "1");
-      setInstalled(true);
       setDeferred(null);
+      // Show the confirmation chip briefly, then hide the button entirely.
+      setJustInstalled(true);
+      toast.success("Instalirano ✓", {
+        description: "MasterChess je dodat među tvoje aplikacije.",
+        duration: 4000,
+      });
+      setTimeout(() => {
+        setInstalled(true);
+        setJustInstalled(false);
+      }, 2800);
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
@@ -55,8 +66,10 @@ export default function InstallAppButton({
     };
   }, []);
 
-  // Hide forever once installed or already running as PWA.
-  if (installed || isStandalone) return null;
+  // Hide forever once installed or already running as PWA (but keep visible
+  // during the brief "Instalirano" confirmation animation).
+  if ((installed || isStandalone) && !justInstalled) return null;
+
 
   const handleClick = async () => {
     // 1. Native install prompt available → fire it immediately.
