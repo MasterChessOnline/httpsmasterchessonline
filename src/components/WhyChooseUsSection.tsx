@@ -3,13 +3,13 @@ import { motion } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
 import chessPiecesBg from "@/assets/chess-pieces-dramatic.jpg";
 
-const comparisons = [
-  { feature: "Play Online", us: true, competitor1: true, competitor2: true },
-  { feature: "100% Free", us: true, competitor1: false, competitor2: true },
-  { feature: "No Ads", us: true, competitor1: false, competitor2: false },
-  { feature: "Stockfish Analysis", us: true, competitor1: false, competitor2: true },
-  { feature: "Story Mode", us: true, competitor1: false, competitor2: false },
-  { feature: "Modern Design", us: true, competitor1: false, competitor2: false },
+const promises = [
+  { feature: "Real human play, no bots in your matchmaking", value: "Always" },
+  { feature: "100% Free forever — every feature unlocked", value: "$0" },
+  { feature: "Zero ads, zero popups, zero distractions", value: "0" },
+  { feature: "Stockfish analysis on every single game", value: "All games" },
+  { feature: "Story Mode + Opening Trainer + Daily Missions", value: "Built-in" },
+  { feature: "Cinematic 4D design — feels premium", value: "Native" },
 ];
 
 const reasons = [
@@ -57,36 +57,33 @@ const WhyChooseUsSection = () => {
               Why Us
             </span>
             <h2 className="font-display text-3xl font-bold text-foreground sm:text-4xl lg:text-5xl">
-              Why Choose <span className="text-gradient-gold">MasterChessOnline</span>?
+              Why <span className="text-gradient-gold">MasterChess</span> is different
             </h2>
             <p className="mt-4 text-muted-foreground text-lg">
-              See how we compare to the biggest chess platforms
+              Built from scratch for players who want real chess — not another feed.
             </p>
           </div>
         </ScrollReveal>
 
-        {/* Comparison Table */}
+        {/* Promise list (no competitors, no comparisons) */}
         <ScrollReveal>
           <div className="max-w-3xl mx-auto mb-20 rounded-2xl glass-elevated overflow-hidden ambient-reflect">
-            <div className="grid grid-cols-4 gap-0 text-center text-sm border-b border-border/50 bg-card/80">
-              <div className="p-4 font-display font-semibold text-muted-foreground text-left">Feature</div>
-              <div className="p-4 font-display font-bold text-gradient-gold">MasterChess</div>
-              <div className="p-4 font-display font-semibold text-muted-foreground">Chess.com</div>
-              <div className="p-4 font-display font-semibold text-muted-foreground">Lichess</div>
-            </div>
-            {comparisons.map(({ feature, us, competitor1, competitor2 }, i) => (
+            {promises.map(({ feature, value }, i) => (
               <motion.div
                 key={feature}
-                className="grid grid-cols-4 gap-0 text-center text-sm border-b border-border/30 last:border-b-0 hover:bg-primary/5 transition-colors"
+                className="grid grid-cols-[1fr,auto] gap-4 items-center px-5 py-4 border-b border-border/30 last:border-b-0 hover:bg-primary/5 transition-colors"
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
               >
-                <div className="p-3 text-left text-muted-foreground">{feature}</div>
-                <div className="p-3"><span className="text-lg">{us ? "✅" : "❌"}</span></div>
-                <div className="p-3"><span className="text-lg">{competitor1 ? "✅" : "❌"}</span></div>
-                <div className="p-3"><span className="text-lg">{competitor2 ? "✅" : "❌"}</span></div>
+                <div className="flex items-center gap-3 text-sm text-foreground">
+                  <span className="text-emerald-400 text-lg">✓</span>
+                  {feature}
+                </div>
+                <div className="text-xs font-display font-bold text-gradient-gold uppercase tracking-wider">
+                  {value}
+                </div>
               </motion.div>
             ))}
           </div>

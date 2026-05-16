@@ -11,8 +11,8 @@ export default function CheckmatePatternDetail() {
   const m = getMateBySlug(slug);
   if (!m) return <Navigate to="/learn/checkmate-patterns" replace />;
 
-  // chess.com dynamic board image — gives Google Images a unique illustration per pattern
-  const boardImg = `https://www.chess.com/dynboard?fen=${encodeURIComponent(m.fen)}&board=brown&piece=neo&size=3`;
+  // Use brand OG image (no external chess image services).
+  const boardImg = "https://masterchess.live/og-image.jpg";
 
   const related = MATE_PATTERNS.filter(p => p.slug !== m.slug && p.difficulty === m.difficulty).slice(0, 3);
 

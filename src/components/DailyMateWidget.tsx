@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Crosshair, Flame, Clock, Check } from "lucide-react";
 import { getTodaysMate, secondsUntilNextMate } from "@/lib/daily-mates";
-import { getOpeningBoardImage } from "@/lib/og-board-image";
+import MiniFenBoard from "@/components/MiniFenBoard";
 
 const STORAGE_KEY = "mc.dailyMate.streak.v1";
 const SOLVED_KEY = "mc.dailyMate.solved.v1";
@@ -52,9 +52,6 @@ export default function DailyMateWidget() {
     return () => clearInterval(t);
   }, []);
 
-  // FEN URL — shows the actual position via Chess.com dyn-board (same trick as OG images)
-  const boardImg = `https://www.chess.com/dynboard?fen=${encodeURIComponent(puzzle.fen)}&board=green&piece=neo&size=2`;
-
   const hh = Math.floor(secondsLeft / 3600);
   const mm = Math.floor((secondsLeft % 3600) / 60);
 
@@ -78,14 +75,7 @@ export default function DailyMateWidget() {
 
         <div className="p-3 grid grid-cols-[auto,1fr] gap-3 items-center">
           <Link to="/daily-mate" className="block shrink-0">
-            <img
-              src={boardImg}
-              alt={`Daily mate-in-${puzzle.matesIn} chess puzzle`}
-              loading="lazy"
-              width={120}
-              height={120}
-              className="w-[120px] h-[120px] rounded-md ring-1 ring-border/40"
-            />
+            <MiniFenBoard fen={puzzle.fen} size={120} alt={`Daily mate-in-${puzzle.matesIn} chess puzzle`} />
           </Link>
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground mb-2 leading-snug">
