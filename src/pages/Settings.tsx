@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -81,7 +81,25 @@ function saveSetting(key: string, value: any) {
 const Settings = () => {
   const { user, profile, signOut, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const [section, setSection] = useState<SettingsSection>("profile");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const validSections: SettingsSection[] = ["account","profile","gameplay","training","improvement","appearance","audio","accessibility","language","notifications","privacy"];
+  const initialSection = (searchParams.get("section") as SettingsSection);
+  const [section, setSection] = useState<SettingsSection>(
+    validSections.includes(initialSection) ? initialSection : "profile"
+  );
+  useEffect(() => {
+    const s = searchParams.get("section") as SettingsSection;
+    if (validSections.includes(s) && s !== section) setSection(s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+  useEffect(() => {
+    if (searchParams.get("section") !== section) {
+      const next = new URLSearchParams(searchParams);
+      next.set("section", section);
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section]);
 
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [bio, setBio] = useState((profile as any)?.bio || "");
