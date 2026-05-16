@@ -320,32 +320,12 @@ export default function InstallAppButton({
                     <Apple className="h-3.5 w-3.5" /> Safari (macOS)
                   </p>
 
-                  {/* Mini macOS menu-bar mockup */}
-                  <div className="rounded-lg border border-white/10 bg-gradient-to-b from-zinc-800/70 to-zinc-900/70 overflow-hidden mb-2.5 shadow-inner">
-                    <div className="flex items-center gap-3 px-2.5 py-1 border-b border-white/5 bg-black/30 text-[11px] text-white/70">
-                      <div className="flex gap-1">
-                        <span className="h-2 w-2 rounded-full bg-rose-400/80" />
-                        <span className="h-2 w-2 rounded-full bg-amber-300/80" />
-                        <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
-                      </div>
-                      <span className="font-semibold text-white">Safari</span>
-                      <span className="relative px-1.5 py-0.5 rounded text-amber-300 bg-amber-400/15 ring-1 ring-amber-400/40">
-                        File
-                        <span className="absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full bg-amber-300 animate-ping" />
-                      </span>
-                      <span>Edit</span>
-                      <span>View</span>
-                      <span>History</span>
-                    </div>
-                    <div className="px-2.5 py-1.5 text-[11px] space-y-0.5">
-                      <div className="text-white/40">New Tab</div>
-                      <div className="text-white/40">New Window</div>
-                      <div className="flex items-center justify-between rounded bg-amber-400/20 ring-1 ring-amber-400/50 px-1.5 py-0.5 text-amber-200 font-semibold">
-                        <span>Add to Dock…</span>
-                        <span className="text-amber-300/70">⌘D</span>
-                      </div>
-                      <div className="text-white/40">Share</div>
-                    </div>
+                  {/* Animated Safari macOS demo */}
+                  <div className="mb-2.5">
+                    <SafariMacDemo />
+                    <p className="mt-1.5 text-center text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                      Live demo · loops automatically
+                    </p>
                   </div>
 
                   <ol className="space-y-1.5 text-sm">
