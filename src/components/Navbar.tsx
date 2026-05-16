@@ -491,16 +491,37 @@ const Navbar = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 bg-[hsl(220,15%,5%)/0.98] backdrop-blur-xl overflow-y-auto pt-20 pb-24 px-5"
+            className="fixed inset-0 z-40 bg-[hsl(220,15%,5%)]/98 backdrop-blur-xl overflow-y-auto pt-16 pb-28"
           >
-            <div className="max-w-lg mx-auto space-y-4">
-              {/* Mobile Play Now */}
-              <Link to="/play" onClick={() => setMobileOpen(false)}>
-                <Button className="w-full bg-primary text-primary-foreground font-bold shadow-[0_0_20px_rgba(212,175,55,0.25)] h-12 text-base">
-                  <Play className="h-5 w-5 mr-2 fill-current" />
-                  Play Now
-                </Button>
-              </Link>
+            {/* Sticky CTA header — primary actions always reachable */}
+            <div className="sticky top-0 z-10 -mt-16 pt-16 pb-3 px-4 bg-gradient-to-b from-[hsl(220,15%,5%)] via-[hsl(220,15%,5%)]/95 to-transparent backdrop-blur-xl border-b border-border/20">
+              <div className="max-w-lg mx-auto grid grid-cols-2 gap-2.5">
+                <Link to="/play/online" onClick={() => setMobileOpen(false)}>
+                  <Button className="w-full h-12 bg-primary text-primary-foreground font-bold shadow-[0_6px_20px_-4px_hsl(var(--primary)/0.55)]">
+                    <Zap className="h-4 w-4 mr-1.5" />
+                    Quick Match
+                  </Button>
+                </Link>
+                <Link to="/play" onClick={() => setMobileOpen(false)}>
+                  <Button variant="outline" className="w-full h-12 font-semibold border-primary/30 text-primary hover:bg-primary/10">
+                    <Play className="h-4 w-4 mr-1.5 fill-current" />
+                    Play vs Bot
+                  </Button>
+                </Link>
+              </div>
+              {!user && (
+                <div className="max-w-lg mx-auto grid grid-cols-2 gap-2.5 mt-2.5">
+                  <Link to="/login" onClick={() => setMobileOpen(false)}>
+                    <Button variant="ghost" className="w-full h-10 text-sm border border-border/30">Sign In</Button>
+                  </Link>
+                  <Link to="/signup" onClick={() => setMobileOpen(false)}>
+                    <Button className="w-full h-10 text-sm font-bold bg-foreground text-background hover:bg-foreground/90">Create Account</Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <div className="max-w-lg mx-auto space-y-3 px-4 pt-4">
 
               {[...NAV_SECTIONS, FRIENDS_SECTION].map((section) => {
                 const accentColor = `hsl(${section.accent})`;
@@ -577,7 +598,7 @@ const Navbar = () => {
                 );
               })}
 
-              {user ? (
+              {user && (
                 <button
                   onClick={() => { signOut(); setMobileOpen(false); }}
                   className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 transition-all w-full text-left"
@@ -585,15 +606,6 @@ const Navbar = () => {
                   <LogOut className="h-5 w-5 text-destructive" />
                   <span className="text-sm font-semibold text-destructive">Sign Out</span>
                 </button>
-              ) : (
-                <div className="space-y-3 pt-2">
-                  <Link to="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full h-12 text-base font-medium border-border/30">Sign In</Button>
-                  </Link>
-                  <Link to="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full h-12 text-base font-bold bg-primary text-primary-foreground shadow-[0_0_20px_rgba(212,175,55,0.2)]">Sign Up</Button>
-                  </Link>
-                </div>
               )}
             </div>
           </motion.div>
