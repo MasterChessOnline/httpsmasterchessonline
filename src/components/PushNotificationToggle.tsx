@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { Bell, BellOff, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 
 /**
  * PWA push notifications opt-in.
@@ -12,63 +10,37 @@ import { supabase } from "@/integrations/supabase/client";
  * (move played, your turn, tournament starting, friend invite, etc.).
  */
 export default function PushNotificationToggle() {
-  const { user } = useAuth();
-  const [supported, setSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
-  const [enabled, setEnabled] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { status, busy, enable, disable, supported, refresh } = usePushSubscription();
+  const enabled = status === "subscribed";
 
   useEffect(() => {
-    const ok = typeof window !== "undefined" && "Notification" in window && "serviceWorker" in navigator;
-    setSupported(ok);
-    if (ok) setPermission(Notification.permission);
-    try {
-      setEnabled(localStorage.getItem("mc_push_enabled") === "1");
-    } catch {}
-  }, []);
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setPermission(Notification.permission);
+    }
+  }, [status]);
 
-  const toggle = async (next: boolean) => {
+  const handleEnable = async () => {
     if (!supported) {
       toast.error("Vaš pretraživač ne podržava push obaveštenja.");
       return;
     }
-    setLoading(true);
-    try {
-      if (next) {
-        const perm = await Notification.requestPermission();
-        setPermission(perm);
-        if (perm !== "granted") {
-          toast.error("Dozvola za obaveštenja nije data.");
-          setLoading(false);
-          return;
-        }
-        // Test notification via SW if available
-        try {
-          const reg = await navigator.serviceWorker.ready;
-          await reg.showNotification("MasterChess obaveštenja uključena", {
-            body: "Bićete obavešteni kada vas neko izazove ili kad počne turnir.",
-            icon: "/app-icon-192.png",
-            badge: "/app-icon-192.png",
-            tag: "mc-welcome",
-          });
-        } catch {}
-        localStorage.setItem("mc_push_enabled", "1");
-        setEnabled(true);
-        if (user) {
-          await supabase.from("profiles").update({ push_notifications_enabled: true } as any).eq("user_id", user.id);
-        }
-        toast.success("Obaveštenja uključena.");
-      } else {
-        localStorage.setItem("mc_push_enabled", "0");
-        setEnabled(false);
-        if (user) {
-          await supabase.from("profiles").update({ push_notifications_enabled: false } as any).eq("user_id", user.id);
-        }
-        toast.success("Obaveštenja isključena.");
-      }
-    } finally {
-      setLoading(false);
+    const ok = await enable();
+    if (typeof window !== "undefined" && "Notification" in window) setPermission(Notification.permission);
+    if (ok) {
+      toast.success("Obaveštenja uključena.");
+      refresh();
+    } else if (typeof window !== "undefined" && "Notification" in window && Notification.permission !== "granted") {
+      toast.error("Dozvola za obaveštenja nije data.");
+    } else {
+      toast.error("Nije moguće uključiti obaveštenja.");
     }
+  };
+
+  const handleDisable = async () => {
+    const ok = await disable();
+    if (ok) toast.success("Obaveštenja isključena.");
+    else toast.error("Nije moguće isključiti obaveštenja.");
   };
 
   return (
@@ -85,7 +57,16 @@ export default function PushNotificationToggle() {
                 Igre, izazovi, turniri — obaveštenja čak i kad je tab zatvoren.
               </p>
             </div>
-            <Switch checked={enabled && permission === "granted"} disabled={loading || !supported} onCheckedChange={toggle} />
+            <Button
+              type="button"
+              size="sm"
+              variant={enabled ? "outline" : "default"}
+              disabled={busy || !supported || status === "denied"}
+              onClick={enabled ? handleDisable : handleEnable}
+              className="shrink-0"
+            >
+              {busy ? "Loading..." : enabled ? "Disable" : "Enable"}
+            </Button>
           </div>
           {!supported && (
             <p className="text-xs text-amber-500 mt-2 flex items-center gap-1.5">
