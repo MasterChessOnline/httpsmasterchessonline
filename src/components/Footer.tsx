@@ -72,6 +72,7 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
           {[
             { label: "Privacy", href: "/privacy" },
             { label: "Terms", href: "/terms" },
+            { label: "Press", href: "/press" },
             { label: "Contact", href: "/contact" },
           ].map((link) => (
             <Link key={link.href} to={link.href} className="text-[10px] text-muted-foreground hover:text-primary transition-colors">
