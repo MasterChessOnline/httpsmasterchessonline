@@ -307,10 +307,53 @@ export default function InstallAppButton({
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-primary/80 font-semibold mb-1.5">Safari (macOS)</p>
-                  <p>
-                    Click <strong className="text-foreground">File → Add to Dock</strong> in the top menu bar.
+                  <p className="text-xs uppercase tracking-wider text-primary/80 font-semibold mb-2 flex items-center gap-1.5">
+                    <Apple className="h-3.5 w-3.5" /> Safari (macOS)
                   </p>
+
+                  {/* Mini macOS menu-bar mockup */}
+                  <div className="rounded-lg border border-white/10 bg-gradient-to-b from-zinc-800/70 to-zinc-900/70 overflow-hidden mb-2.5 shadow-inner">
+                    <div className="flex items-center gap-3 px-2.5 py-1 border-b border-white/5 bg-black/30 text-[11px] text-white/70">
+                      <div className="flex gap-1">
+                        <span className="h-2 w-2 rounded-full bg-rose-400/80" />
+                        <span className="h-2 w-2 rounded-full bg-amber-300/80" />
+                        <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
+                      </div>
+                      <span className="font-semibold text-white">Safari</span>
+                      <span className="relative px-1.5 py-0.5 rounded text-amber-300 bg-amber-400/15 ring-1 ring-amber-400/40">
+                        File
+                        <span className="absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full bg-amber-300 animate-ping" />
+                      </span>
+                      <span>Edit</span>
+                      <span>View</span>
+                      <span>History</span>
+                    </div>
+                    <div className="px-2.5 py-1.5 text-[11px] space-y-0.5">
+                      <div className="text-white/40">New Tab</div>
+                      <div className="text-white/40">New Window</div>
+                      <div className="flex items-center justify-between rounded bg-amber-400/20 ring-1 ring-amber-400/50 px-1.5 py-0.5 text-amber-200 font-semibold">
+                        <span>Add to Dock…</span>
+                        <span className="text-amber-300/70">⌘D</span>
+                      </div>
+                      <div className="text-white/40">Share</div>
+                    </div>
+                  </div>
+
+                  <ol className="space-y-1.5 text-sm">
+                    <li className="flex gap-2">
+                      <span className="shrink-0 h-5 w-5 rounded-full bg-primary/20 border border-primary/40 text-primary text-xs font-bold flex items-center justify-center">1</span>
+                      In the top menu bar click <strong className="text-foreground">File</strong>.
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 h-5 w-5 rounded-full bg-primary/20 border border-primary/40 text-primary text-xs font-bold flex items-center justify-center">2</span>
+                      Choose <strong className="text-foreground">Add to Dock…</strong>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="shrink-0 h-5 w-5 rounded-full bg-primary/20 border border-primary/40 text-primary text-xs font-bold flex items-center justify-center">3</span>
+                      Click <strong className="text-foreground">Add</strong> — MasterChess appears in your Dock and launches like a native app.
+                    </li>
+                  </ol>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground/70">Requires macOS Sonoma 14+ · Safari 17+</p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider text-primary/80 font-semibold mb-1.5">Android</p>
