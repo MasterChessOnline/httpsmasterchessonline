@@ -3,6 +3,8 @@ import { Bell, BellOff, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { usePushSubscription } from "@/hooks/use-push-subscription";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * PWA push notifications opt-in.
