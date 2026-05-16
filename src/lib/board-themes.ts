@@ -265,7 +265,19 @@ export function bootstrapVisualSettings() {
   if (typeof window === "undefined") return;
   const s = readSettings();
   if (s.boardTheme) applyBoardTheme(s.boardTheme);
-  // Migrate old keys that no longer exist (emoji, animals, letters, etc.) → fall back.
+  // Sitewide Merida migration: one-time force-set Merida as the default piece set.
+  // Users can still pick a different style in Settings after this migration runs.
+  const MIGRATION_FLAG = "mc.pieces.merida.v1";
+  try {
+    if (!localStorage.getItem(MIGRATION_FLAG)) {
+      const raw = localStorage.getItem("chess-settings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.pieceStyle = "merida";
+      localStorage.setItem("chess-settings", JSON.stringify(parsed));
+      localStorage.setItem(MIGRATION_FLAG, "1");
+      s.pieceStyle = "merida";
+    }
+  } catch {}
   const validKey = PIECE_STYLES.find(p => p.key === s.pieceStyle)?.key || "merida";
   applyPieceStyle(validKey);
 }
