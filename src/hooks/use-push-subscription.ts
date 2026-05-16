@@ -12,8 +12,22 @@ import { useAuth } from "@/contexts/AuthContext";
 export type PushStatus = "unsupported" | "denied" | "default" | "subscribed";
 
 // VAPID public key — exposed publicly; safe in the client bundle.
-// Set via VITE_VAPID_PUBLIC_KEY at build time. Falls back to runtime fetch.
-const VAPID_PUBLIC_KEY = (import.meta as any).env?.VITE_VAPID_PUBLIC_KEY as string | undefined;
+// Prefer build-time VITE_VAPID_PUBLIC_KEY, otherwise fetch from the edge function.
+const BUILD_VAPID_PUBLIC_KEY = (import.meta as any).env?.VITE_VAPID_PUBLIC_KEY as string | undefined;
+let cachedVapidKey: string | undefined = BUILD_VAPID_PUBLIC_KEY;
+
+async function getVapidPublicKey(): Promise<string | undefined> {
+  if (cachedVapidKey) return cachedVapidKey;
+  try {
+    const { data, error } = await supabase.functions.invoke("push-public-key");
+    if (error) throw error;
+    cachedVapidKey = (data as any)?.publicKey || undefined;
+    return cachedVapidKey;
+  } catch (err) {
+    console.error("failed to fetch VAPID public key", err);
+    return undefined;
+  }
+}
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -58,10 +72,15 @@ export function usePushSubscription() {
   useEffect(() => { refresh(); }, [refresh]);
 
   const enable = useCallback(async () => {
-    if (!user || !VAPID_PUBLIC_KEY) return false;
+    if (!user) return false;
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
     setBusy(true);
     try {
+      const vapidKey = await getVapidPublicKey();
+      if (!vapidKey) {
+        console.error("VAPID public key unavailable");
+        return false;
+      }
       const perm = await Notification.requestPermission();
       if (perm !== "granted") {
         setStatus(perm === "denied" ? "denied" : "default");
@@ -72,7 +91,7 @@ export function usePushSubscription() {
       if (!sub) {
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+          applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
         });
       }
       const json = sub.toJSON() as any;
