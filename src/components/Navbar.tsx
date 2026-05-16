@@ -67,7 +67,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Analysis", href: "/analysis", icon: FileText, desc: "Analyze games & explore lines", separator: true, subheading: "Analysis" },
       { label: "Game History", href: "/history", icon: History, desc: "Online & bot games to review" },
       { label: "Game Review", href: "/game-review", icon: History, desc: "Move-by-move replay" },
-      { label: "Blog & Guides", href: "/blog", icon: BookOpen, desc: "Chess guides, openings & rules", separator: true, subheading: "Read" },
+      
     ],
   },
   {
