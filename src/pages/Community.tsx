@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LobbyChat from "@/components/lobby/LobbyChat";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -265,6 +266,12 @@ export default function Community() {
           </div>
         </div>
       </div>
+
+      <section className="container mx-auto px-4 pb-12 max-w-3xl">
+        <h2 className="font-display font-bold text-2xl mb-4 text-emerald-300">Lobby Chat</h2>
+        <LobbyChat />
+      </section>
+
       <Footer />
     </div>
   );
