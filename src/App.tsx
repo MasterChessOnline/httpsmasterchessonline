@@ -43,7 +43,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 
 import TournamentLobby from "./pages/TournamentLobby";
-import TournamentSync from "./pages/TournamentSync";
+
 import StoryMode from "./pages/StoryMode";
 import OpeningTrainer from "./pages/OpeningTrainer";
 import OpeningExplorer from "./pages/OpeningExplorer";
@@ -133,7 +133,7 @@ function AnimatedRoutes() {
           <Route path="/blog/:slug" element={<LearnArticle />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
-          <Route path="/tournament-sync" element={<TournamentSync />} />
+          
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<ProfileRedirect />} />
           <Route path="/profile/:userId" element={<Profile />} />

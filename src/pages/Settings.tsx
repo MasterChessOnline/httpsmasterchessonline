@@ -794,9 +794,29 @@ const Settings = () => {
             <p className="text-sm text-muted-foreground">Manage your account and preferences.</p>
           </div>
 
-          <div className="flex gap-6">
+          {/* Mobile sticky section selector (icons + horizontal scroll) */}
+          <div className="md:hidden sticky top-16 z-30 -mx-4 px-4 py-2 mb-4 bg-background/85 backdrop-blur-md border-b border-border/40">
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar snap-x snap-mandatory">
+              {SECTIONS.map(s => (
+                <button
+                  key={s.key}
+                  onClick={() => setSection(s.key)}
+                  className={`shrink-0 snap-start flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium transition-all ${
+                    section === s.key
+                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                      : "bg-card/70 text-muted-foreground border border-border/40 hover:text-foreground"
+                  }`}
+                >
+                  <s.icon className="w-3.5 h-3.5" />
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-6">
             {/* Desktop Sidebar */}
-            <nav className="hidden md:flex flex-col w-56 shrink-0 space-y-1">
+            <nav className="hidden md:flex flex-col w-56 shrink-0 space-y-1 md:sticky md:top-24 md:self-start">
               {SECTIONS.map(s => (
                 <button key={s.key} onClick={() => setSection(s.key)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${section === s.key ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}>
@@ -805,18 +825,6 @@ const Settings = () => {
                 </button>
               ))}
             </nav>
-
-            {/* Mobile section selector */}
-            <div className="md:hidden w-full mb-4">
-              <div className="flex flex-wrap gap-1.5">
-                {SECTIONS.map(s => (
-                  <button key={s.key} onClick={() => setSection(s.key)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${section === s.key ? "bg-primary/15 text-primary border border-primary/30" : "bg-card text-muted-foreground border border-border/40"}`}>
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
