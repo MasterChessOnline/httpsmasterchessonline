@@ -229,6 +229,7 @@ async function handleAutoStartDue(supabase: any) {
       })
       .eq("id", t.id);
 
+    await notifyTournamentStart(supabase, t.id);
     started.push(t.id);
   }
 
