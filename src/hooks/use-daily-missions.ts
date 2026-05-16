@@ -12,6 +12,7 @@ export interface DailyMission {
   target_value: number;
   xp_reward: number;
   sort_order: number;
+  difficulty: "easy" | "medium" | "hard" | "elite";
 }
 
 export interface MissionProgress {
@@ -43,11 +44,8 @@ export function useDailyMissions() {
     }
     setLoading(true);
 
-    const { data: defs } = await supabase
-      .from("daily_missions" as any)
-      .select("*")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true });
+    // Today's rotated set (one mission per difficulty tier, rotates daily)
+    const { data: defs } = await supabase.rpc("get_today_missions" as any);
 
     const { data: progress } = await supabase
       .from("user_mission_progress" as any)
@@ -141,13 +139,9 @@ export async function bumpMissionProgress(
   if (!userId) return;
   const date = todayIso();
 
-  // Find active missions matching this type
-  const { data: defs } = await supabase
-    .from("daily_missions" as any)
-    .select("key, target_value, mission_type")
-    .eq("is_active", true)
-    .eq("mission_type", missionType);
-
+  // Only bump missions that are in TODAY's rotated set + match this type
+  const { data: todays } = await supabase.rpc("get_today_missions" as any);
+  const defs = ((todays as any[]) || []).filter((d) => d.mission_type === missionType);
   if (!defs || defs.length === 0) return;
 
   for (const def of defs as any[]) {

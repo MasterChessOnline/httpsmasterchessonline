@@ -20,45 +20,64 @@ import { toast } from "sonner";
 
 const previewMissions: MissionWithProgress[] = [
   {
-    id: "preview-play-online",
-    key: "preview-play-online",
-    title: "Play one online game",
-    description: "Start a real match and finish it today.",
+    id: "preview-easy",
+    key: "preview-easy",
+    title: "Warm Up",
+    description: "Play 1 online game today.",
     icon: "swords",
-    mission_type: "online_game",
+    mission_type: "games_played",
     target_value: 1,
-    xp_reward: 40,
+    xp_reward: 25,
     sort_order: 1,
+    difficulty: "easy",
     current_value: 0,
     completed: false,
     claimed: false,
     percent: 0,
   },
   {
-    id: "preview-train",
-    key: "preview-train",
-    title: "Complete training reps",
-    description: "Build sharp habits between matches.",
-    icon: "target",
-    mission_type: "training",
+    id: "preview-medium",
+    key: "preview-medium",
+    title: "Player of the Day",
+    description: "Play 3 online games today.",
+    icon: "swords",
+    mission_type: "games_played",
     target_value: 3,
     xp_reward: 60,
     sort_order: 2,
+    difficulty: "medium",
     current_value: 0,
     completed: false,
     claimed: false,
     percent: 0,
   },
   {
-    id: "preview-lesson",
-    key: "preview-lesson",
-    title: "Study one lesson",
-    description: "Open a guide or lesson and improve today.",
-    icon: "book-open",
-    mission_type: "lesson",
-    target_value: 1,
-    xp_reward: 35,
+    id: "preview-hard",
+    key: "preview-hard",
+    title: "Triple Threat",
+    description: "Win 3 games today.",
+    icon: "trophy",
+    mission_type: "games_won",
+    target_value: 3,
+    xp_reward: 110,
     sort_order: 3,
+    difficulty: "hard",
+    current_value: 0,
+    completed: false,
+    claimed: false,
+    percent: 0,
+  },
+  {
+    id: "preview-elite",
+    key: "preview-elite",
+    title: "Conqueror",
+    description: "Win 5 games today.",
+    icon: "trophy",
+    mission_type: "games_won",
+    target_value: 5,
+    xp_reward: 200,
+    sort_order: 4,
+    difficulty: "elite",
     current_value: 0,
     completed: false,
     claimed: false,
@@ -126,6 +145,19 @@ const MissionRow = forwardRef<HTMLDivElement, MissionRowProps>(function MissionR
           >
             {mission.title}
           </span>
+          <span
+            className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+              mission.difficulty === "easy"
+                ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                : mission.difficulty === "medium"
+                ? "bg-sky-500/15 text-sky-300 border border-sky-500/30"
+                : mission.difficulty === "hard"
+                ? "bg-orange-500/15 text-orange-300 border border-orange-500/30"
+                : "bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30"
+            }`}
+          >
+            {mission.difficulty}
+          </span>
         </div>
         <p className="text-[10px] text-muted-foreground truncate">
           {mission.description}
@@ -173,7 +205,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
   const { missions, loading, claimMission, completedCount, totalCount, claimableXp } =
     useDailyMissions();
   const [claiming, setClaiming] = useState<string | null>(null);
-  const visible = compact ? (user ? missions : previewMissions).slice(0, 3) : missions;
+  const visible = compact ? (user ? missions : previewMissions).slice(0, 4) : missions;
 
   const handleClaim = async (key: string) => {
     setClaiming(key);
@@ -197,7 +229,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
           <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" /> Daily Missions
           </h2>
-          <span className="text-xs text-muted-foreground tabular-nums">0/3</span>
+          <span className="text-xs text-muted-foreground tabular-nums">0/4</span>
         </div>
         <div className="space-y-2 relative mb-4">
           {visible.map((m) => (
@@ -265,7 +297,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
         </div>
       )}
 
-      {compact && missions.length > 3 && (
+      {compact && missions.length > 4 && (
         <Link
           to="/missions"
           className="mt-3 block text-center text-xs font-semibold text-primary hover:text-primary/80 transition"
