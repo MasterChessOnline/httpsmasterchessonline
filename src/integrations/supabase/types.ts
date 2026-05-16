@@ -1961,7 +1961,9 @@ export type Database = {
       tournaments: {
         Row: {
           anti_cheat_level: string
+          arena_duration_minutes: number | null
           auto_started: boolean
+          berserk_allowed: boolean
           category: string
           created_at: string
           created_by: string | null
@@ -1988,7 +1990,9 @@ export type Database = {
         }
         Insert: {
           anti_cheat_level?: string
+          arena_duration_minutes?: number | null
           auto_started?: boolean
+          berserk_allowed?: boolean
           category?: string
           created_at?: string
           created_by?: string | null
@@ -2015,7 +2019,9 @@ export type Database = {
         }
         Update: {
           anti_cheat_level?: string
+          arena_duration_minutes?: number | null
           auto_started?: boolean
+          berserk_allowed?: boolean
           category?: string
           created_at?: string
           created_by?: string | null
