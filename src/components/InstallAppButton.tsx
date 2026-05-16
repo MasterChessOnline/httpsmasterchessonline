@@ -23,9 +23,15 @@ export default function InstallAppButton({
   );
   const [justInstalled, setJustInstalled] = useState(false);
   const [showIosHelp, setShowIosHelp] = useState(false);
+  const [showAndroidHelp, setShowAndroidHelp] = useState(false);
 
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+  // Catches Safari, Chrome, Firefox, Edge on iPhone/iPad — all use WebKit.
   const isIos =
-    typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    /iPad|iPhone|iPod/.test(ua) ||
+    (typeof navigator !== "undefined" &&
+      navigator.platform === "MacIntel" &&
+      (navigator as any).maxTouchPoints > 1);
   const isStandalone =
     typeof window !== "undefined" &&
     (window.matchMedia("(display-mode: standalone)").matches ||
@@ -108,9 +114,9 @@ export default function InstallAppButton({
       return;
     }
     // 4. On live site but browser hasn't fired beforeinstallprompt yet
-    //    (e.g. user just landed, criteria not met). Reload to give Chrome
-    //    a chance to surface the address-bar install icon.
-    window.location.href = LIVE_URL + "?install=1";
+    //    (e.g. Firefox, Samsung Internet, Brave, or criteria not met).
+    //    Show manual install instructions instead of silent reload.
+    setShowAndroidHelp(true);
   };
 
   const sizeClass =
@@ -220,6 +226,70 @@ export default function InstallAppButton({
 
               <div className="mt-4 flex justify-end">
                 <Button size="sm" onClick={() => setShowIosHelp(false)}>
+                  Got it
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAndroidHelp && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowAndroidHelp(false)}
+          >
+            <motion.div
+              className="w-full max-w-md rounded-2xl border border-primary/30 bg-card p-5 shadow-2xl"
+              initial={{ y: 30, opacity: 0, scale: 0.96 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 30, opacity: 0, scale: 0.96 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-10 w-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                    <Download className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-foreground">Install MasterChess</h3>
+                    <p className="text-xs text-muted-foreground">Android / Desktop</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAndroidHelp(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <ol className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex gap-2">
+                  <span className="text-primary font-bold">1.</span> Open your browser{" "}
+                  <strong className="text-foreground">menu</strong> (⋮ top right).
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-primary font-bold">2.</span> Tap{" "}
+                  <strong className="text-foreground">"Install app"</strong> or{" "}
+                  <strong className="text-foreground">"Add to Home Screen"</strong>.
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-primary font-bold">3.</span> Confirm — MasterChess launches like a native app.
+                </li>
+              </ol>
+
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-emerald-300">
+                <Check className="h-4 w-4 shrink-0" />
+                Works on Chrome, Edge, Brave, Samsung Internet, Firefox.
+              </div>
+
+              <div className="mt-4 flex justify-end">
+                <Button size="sm" onClick={() => setShowAndroidHelp(false)}>
                   Got it
                 </Button>
               </div>
