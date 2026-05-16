@@ -95,6 +95,20 @@ const GameInviteDialog = ({ open, onOpenChange, recipientId, recipientName }: Pr
     setWaiting(true);
     toast({ title: "Challenge sent!", description: `Waiting for ${recipientName} to accept...` });
 
+    // Fire push notification to the recipient (best-effort, non-blocking)
+    supabase.functions.invoke("push-send", {
+      body: {
+        user_ids: [recipientId],
+        type: "challenges",
+        payload: {
+          title: "♟️ New challenge!",
+          body: `Challenge from a player • ${tc.label} ${rated ? "rated" : "casual"}`,
+          url: "/notifications",
+          tag: `invite-${inviteId}`,
+        },
+      },
+    }).catch(() => {});
+
     // Subscribe for the recipient's response — when they accept, the invite gets a game_id
     const channel = supabase
       .channel(`invite-response-${inviteId}`)
