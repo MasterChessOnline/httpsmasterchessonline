@@ -101,6 +101,7 @@ import InstallPrompt from "@/components/InstallPrompt";
 import SmartNotifier from "@/components/SmartNotifier";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
+import ReferralTracker from "@/hooks/useReferralTracker";
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -109,6 +110,7 @@ function AnimatedRoutes() {
   return (
     <>
     <Analytics />
+    <ReferralTracker />
     <AnimatePresence mode="wait">
       <motion.div
         key={location.pathname}
