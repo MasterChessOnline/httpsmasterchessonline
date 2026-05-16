@@ -27,6 +27,9 @@ import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
 import LivePlayerCounter from "@/components/LivePlayerCounter";
+import WhyMasterChess from "@/components/landing/WhyMasterChess";
+import ComparisonStrip from "@/components/landing/ComparisonStrip";
+import TestimonialsCarousel from "@/components/landing/TestimonialsCarousel";
 
 interface RecentGame {
   id: string;
@@ -608,6 +611,15 @@ const Index = () => {
           </div>
         </SectionHeader>
       </div>
+
+      {/* Marketing landing strips */}
+      <section className="px-4">
+        <div className="max-w-5xl mx-auto">
+          <WhyMasterChess />
+          <ComparisonStrip />
+          <TestimonialsCarousel />
+        </div>
+      </section>
 
       {/* Share MasterChess — site-wide share card */}
       <section className="px-4 pb-16">
