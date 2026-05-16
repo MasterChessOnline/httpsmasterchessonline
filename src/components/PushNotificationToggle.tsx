@@ -112,6 +112,19 @@ export default function PushNotificationToggle() {
               <AlertCircle className="w-3.5 h-3.5" /> Dozvola je odbijena — uključite je u podešavanjima pretraživača.
             </p>
           )}
+          {enabled && (
+            <div className="mt-3">
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                disabled={testing}
+                onClick={handleTest}
+              >
+                {testing ? "Šaljem..." : "Pošalji test"}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
