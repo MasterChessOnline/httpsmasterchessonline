@@ -250,7 +250,8 @@ export default function ChessBoard({
         </div>
 
         {/* Board */}
-        <div
+        <motion.div
+          animate={shakeControls}
           className="flex-1 rounded-lg overflow-hidden shadow-card border border-border/30 relative"
           role="grid"
           aria-label="Chess board"
