@@ -78,7 +78,7 @@ export default function InstallAppButton({
 
 
   const handleClick = async () => {
-    // 1. Native install prompt available → fire it immediately.
+    // 1. Native install prompt available → fire it immediately, no questions asked.
     if (deferred) {
       try {
         await deferred.prompt();
@@ -86,23 +86,18 @@ export default function InstallAppButton({
         if (outcome === "accepted") {
           localStorage.setItem(INSTALLED_KEY, "1");
           setInstalled(true);
+          toast.success("Installed ✓", {
+            description: "MasterChess has been added to your apps.",
+          });
         }
       } catch {}
       setDeferred(null);
       return;
     }
-    // 2. iOS Safari has no native prompt → show "Add to Home Screen" sheet.
-    if (isIos) {
-      setShowIosHelp(true);
-      return;
-    }
-    // 3. Inside Lovable preview iframe → break out to live domain (same tab
-    //    in the top window) where the browser's native install dialog can
-    //    actually fire. Sandbox iframes physically cannot install a PWA.
+    // 2. Inside Lovable preview iframe → break out to live domain where
+    //    the native install dialog can fire (iframes cannot install PWAs).
     if (isInIframe) {
       try {
-        // Break out of the iframe so the user lands on masterchess.live
-        // as a top-level navigation where install is allowed.
         if (window.top) {
           window.top.location.href = LIVE_URL + "?install=1";
         } else {
@@ -113,9 +108,13 @@ export default function InstallAppButton({
       }
       return;
     }
-    // 4. On live site but browser hasn't fired beforeinstallprompt yet
-    //    (e.g. Firefox, Samsung Internet, Brave, or criteria not met).
-    //    Show manual install instructions instead of silent reload.
+    // 3. iOS — Apple does not allow programmatic install. Show the only
+    //    available path: Add to Home Screen via Share sheet.
+    if (isIos) {
+      setShowIosHelp(true);
+      return;
+    }
+    // 4. Other browsers without beforeinstallprompt → show manual steps.
     setShowAndroidHelp(true);
   };
 
