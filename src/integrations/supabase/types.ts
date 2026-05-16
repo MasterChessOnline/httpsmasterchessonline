@@ -916,6 +916,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          challenges: boolean
+          created_at: string
+          daily_reminder: boolean
+          direct_messages: boolean
+          friend_activity: boolean
+          tournaments: boolean
+          updated_at: string
+          user_id: string
+          your_turn: boolean
+        }
+        Insert: {
+          challenges?: boolean
+          created_at?: string
+          daily_reminder?: boolean
+          direct_messages?: boolean
+          friend_activity?: boolean
+          tournaments?: boolean
+          updated_at?: string
+          user_id: string
+          your_turn?: boolean
+        }
+        Update: {
+          challenges?: boolean
+          created_at?: string
+          daily_reminder?: boolean
+          direct_messages?: boolean
+          friend_activity?: boolean
+          tournaments?: boolean
+          updated_at?: string
+          user_id?: string
+          your_turn?: boolean
+        }
+        Relationships: []
+      }
       online_game_moves: {
         Row: {
           black_time: number
@@ -1325,6 +1361,42 @@ export type Database = {
           stripe_session_id?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_used_at: string
+          p256dh: string
+          platform: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_used_at?: string
+          p256dh: string
+          platform?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_used_at?: string
+          p256dh?: string
+          platform?: string | null
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
