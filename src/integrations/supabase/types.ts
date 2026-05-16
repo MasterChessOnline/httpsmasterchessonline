@@ -435,6 +435,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string
+          difficulty: string
           icon: string
           id: string
           is_active: boolean
@@ -448,6 +449,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description: string
+          difficulty?: string
           icon?: string
           id?: string
           is_active?: boolean
@@ -461,6 +463,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
+          difficulty?: string
           icon?: string
           id?: string
           is_active?: boolean
@@ -2473,6 +2476,21 @@ export type Database = {
         Returns: Json
       }
       get_club_role: { Args: { _club: string; _user: string }; Returns: string }
+      get_today_missions: {
+        Args: { p_date?: string }
+        Returns: {
+          description: string
+          difficulty: string
+          icon: string
+          id: string
+          key: string
+          mission_type: string
+          sort_order: number
+          target_value: number
+          title: string
+          xp_reward: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
