@@ -1,8 +1,9 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Chess, Square } from "chess.js";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { usePieceGlyphs } from "@/lib/piece-glyphs";
 import { useMoveInputMode, dragEnabled, clickEnabled } from "@/hooks/use-move-input-mode";
+import { playCheckSound, playGameOverSound } from "@/lib/chess-sounds";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
