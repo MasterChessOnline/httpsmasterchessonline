@@ -189,6 +189,12 @@ export default function OpeningBoard({
           ))}
         </div>
       </div>
+
+      <div className="flex ml-7 mr-7 mt-1">
+        {displayFiles.map((f) => (
+          <span key={`bot-${f}`} className="flex-1 text-center text-[13px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{f}</span>
+        ))}
+      </div>
     </div>
   );
 }
