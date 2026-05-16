@@ -661,6 +661,20 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
           </svg>
         )}
         </div>
+            {/* Right rank labels */}
+            <div className="flex flex-col w-6 flex-shrink-0">
+              {displayRanks.map((r) => (
+                <span key={`r-${r}`} className="flex-1 flex items-center justify-center text-[11px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{r}</span>
+              ))}
+            </div>
+          </div>
+          {/* Bottom file labels */}
+          <div className="flex ml-6 mr-6 mt-0.5">
+            {displayFiles.map((f) => (
+              <span key={`b-${f}`} className="flex-1 text-center text-[11px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{f}</span>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Practice feedback */}
