@@ -395,9 +395,11 @@ export default function ChessBoard({
                         className={`leading-none z-10 cursor-grab active:cursor-grabbing flex items-center justify-center ${
                           pd.svgUrl ? "w-[100%] h-[100%]" : "text-[min(10vw,4.6rem)] sm:text-[min(7.4vw,4.1rem)]"
                         } ${
-                          pd.white
-                            ? "[filter:drop-shadow(0_0_2px_rgba(0,0,0,0.95))_drop-shadow(0_0_3px_rgba(0,0,0,0.7))_drop-shadow(0_2px_3px_rgba(0,0,0,0.85))]"
-                            : "[filter:drop-shadow(0_0_2px_rgba(255,255,255,0.95))_drop-shadow(0_0_3px_rgba(255,255,255,0.6))_drop-shadow(0_2px_3px_rgba(0,0,0,0.7))]"
+                          pd.svgUrl
+                            ? "[filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.45))]"
+                            : pd.white
+                              ? "[filter:drop-shadow(0_0_2px_rgba(0,0,0,0.95))_drop-shadow(0_0_3px_rgba(0,0,0,0.7))_drop-shadow(0_2px_3px_rgba(0,0,0,0.85))]"
+                              : "[filter:drop-shadow(0_0_2px_rgba(255,255,255,0.95))_drop-shadow(0_0_3px_rgba(255,255,255,0.6))_drop-shadow(0_2px_3px_rgba(0,0,0,0.7))]"
                         } ${isSelected ? "drop-shadow-[0_0_10px_hsl(43_80%_55%/0.6)] scale-110" : ""}`}
                         style={{
                           position: "relative",
@@ -420,13 +422,8 @@ export default function ChessBoard({
                             src={pd.svgUrl}
                             alt=""
                             draggable={false}
-                            className="w-full h-full object-contain pointer-events-none"
-                            style={{
-                              ...(pd.pixelated ? { imageRendering: "pixelated" as const } : {}),
-                              filter: pd.white
-                                ? "brightness(0) invert(1) drop-shadow(0 0 1px hsl(0 0% 0%)) drop-shadow(0 1px 2px hsl(0 0% 0% / 0.95))"
-                                : "brightness(0) drop-shadow(0 0 1px hsl(0 0% 100%)) drop-shadow(0 1px 2px hsl(0 0% 100% / 0.55))",
-                            }}
+                            className="w-full h-full object-contain pointer-events-none select-none"
+                            style={pd.pixelated ? { imageRendering: "pixelated" as const } : undefined}
                             onError={(e) => {
                               // SVG failed to load — fall back to Unicode glyph so the
                               // square never shows a broken-image icon.
