@@ -229,7 +229,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
           <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" /> Daily Missions
           </h2>
-          <span className="text-xs text-muted-foreground tabular-nums">0/3</span>
+          <span className="text-xs text-muted-foreground tabular-nums">0/4</span>
         </div>
         <div className="space-y-2 relative mb-4">
           {visible.map((m) => (
