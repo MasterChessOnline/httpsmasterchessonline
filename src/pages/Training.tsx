@@ -17,7 +17,7 @@ import {
   TRAINING_MODES, CURATED_POSITIONS, getCuratedByMode,
   type TrainingMode, type TrainingPosition,
 } from "@/lib/training-positions";
-import { loadLichessPuzzles, type PuzzlePosition } from "@/lib/lichess-puzzles";
+import { loadPuzzles as loadLichessPuzzles, type PuzzlePosition } from "@/lib/masterchess-puzzles";
 import { useTrainingStreak } from "@/hooks/use-training-streak";
 import AchievementToast from "@/components/training/AchievementToast";
 import { toast } from "sonner";
