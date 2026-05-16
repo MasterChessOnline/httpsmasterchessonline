@@ -519,6 +519,23 @@ export function useOnlineGame() {
         const { data: fresh } = await supabase.from("online_games").select("*").eq("id", game.id).single();
         if (fresh) setGame(fresh as OnlineGame);
       }
+    } else if (rpcGame && rpcGame.status === "active") {
+      // Notify opponent it's their turn (best-effort, non-blocking)
+      const opponentId = movingColor === "w" ? game.black_player_id : game.white_player_id;
+      if (opponentId) {
+        supabase.functions.invoke("push-send", {
+          body: {
+            user_ids: [opponentId],
+            type: "your_turn",
+            payload: {
+              title: "♟️ It's your turn",
+              body: `Opponent played ${san}. Make your move!`,
+              url: `/play/online?game=${game.id}`,
+              tag: `turn-${game.id}`,
+            },
+          },
+        }).catch(() => {});
+      }
     }
   }, [game]);
 
