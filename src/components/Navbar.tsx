@@ -158,6 +158,21 @@ const Navbar = () => {
     setSearchOpen(false);
   }, [location.pathname]);
 
+  // Escape closes mobile menu + body scroll lock when open
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [mobileOpen]);
+
   // Cmd/Ctrl+K opens the search palette globally
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
