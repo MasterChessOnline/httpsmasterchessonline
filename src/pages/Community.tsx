@@ -266,6 +266,12 @@ export default function Community() {
           </div>
         </div>
       </div>
+
+      <section className="container mx-auto px-4 pb-12 max-w-3xl">
+        <h2 className="font-display font-bold text-2xl mb-4 text-emerald-300">Lobby Chat</h2>
+        <LobbyChat />
+      </section>
+
       <Footer />
     </div>
   );
