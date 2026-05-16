@@ -3,15 +3,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Apple, X, Check, Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import IOSDemo from "@/components/install-demos/IOSDemo";
+import { useInstallStatus } from "@/hooks/use-install-status";
 
 /**
  * Fullscreen iOS install overlay.
- * Shown to every iPhone/iPad visitor in Safari (non-standalone) until the
- * app is actually installed (display-mode: standalone OR navigator.standalone).
- * Once installed, the overlay self-deletes forever.
- *
- * A small X allows session-only dismissal so users can still browse —
- * the overlay reappears on the next visit until install is detected.
+ * Visible to every iPhone/iPad visitor in Safari (non-standalone) until the
+ * app is actually installed. The shared `useInstallStatus` hook detects
+ * installation in real time (display-mode change, navigator.standalone,
+ * appinstalled event, related-apps API) and the overlay self-deletes the
+ * moment install is confirmed — no refresh required.
  */
 
 const SESSION_KEY = "mc.ios.overlay.dismissed";
@@ -19,18 +19,14 @@ const SESSION_KEY = "mc.ios.overlay.dismissed";
 export default function IOSInstallOverlay() {
   const [dismissed, setDismissed] = useState(false);
   const [isIos, setIsIos] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
   const [inIframe, setInIframe] = useState(false);
+  const { installed, isStandalone } = useInstallStatus();
 
   useEffect(() => {
     const ua = navigator.userAgent;
     const ios =
       /iPad|iPhone|iPod/.test(ua) ||
       (navigator.platform === "MacIntel" && (navigator as any).maxTouchPoints > 1);
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      // @ts-expect-error iOS only
-      window.navigator.standalone === true;
     let iframe = false;
     try {
       iframe = window.self !== window.top;
@@ -38,17 +34,17 @@ export default function IOSInstallOverlay() {
       iframe = true;
     }
     setIsIos(ios);
-    setIsStandalone(standalone);
     setInIframe(iframe);
     setDismissed(sessionStorage.getItem(SESSION_KEY) === "1");
   }, []);
 
-  const show = isIos && !isStandalone && !inIframe && !dismissed;
+  const show = isIos && !isStandalone && !installed && !inIframe && !dismissed;
 
   const handleDismiss = () => {
     sessionStorage.setItem(SESSION_KEY, "1");
     setDismissed(true);
   };
+
 
   return (
     <AnimatePresence>
