@@ -59,7 +59,10 @@ export default function DailyMate() {
     return () => clearInterval(t);
   }, []);
 
-  const flipped = puzzle.side === "b";
+  // Keep puzzle boards in official chess-coordinate orientation:
+  // White home rank stays on 1/2 and Black home rank stays on 7/8,
+  // even when Black is the side to move.
+  const flipped = false;
   const isPlayerTurn = !solved && !failed && game.turn() === puzzle.side;
 
   const reset = useCallback(() => {
