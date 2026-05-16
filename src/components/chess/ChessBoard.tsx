@@ -359,8 +359,8 @@ export default function ChessBoard({
                           pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)]"
                         } ${
                           pd.white
-                            ? "drop-shadow-[0_1px_3px_rgba(0,0,0,0.55)]"
-                            : "drop-shadow-[0_1px_2px_rgba(255,255,255,0.18)]"
+                            ? "[filter:drop-shadow(0_0_1.5px_#000)_drop-shadow(0_0_1.5px_#000)_drop-shadow(0_1px_2px_rgba(0,0,0,0.9))]"
+                            : "[filter:drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_1px_2px_rgba(255,255,255,0.55))]"
                         } ${isSelected ? "drop-shadow-[0_0_10px_hsl(43_80%_55%/0.6)] scale-110" : ""}`}
                         style={{
                           position: "relative",
