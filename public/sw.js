@@ -1,5 +1,5 @@
 // MasterChess service worker - lightweight offline shell + cache for static assets
-const CACHE = "mc-shell-v1";
+const CACHE = "mc-shell-v3";
 const SHELL = ["/", "/manifest.json", "/favicon.ico", "/og-image.jpg"];
 
 self.addEventListener("install", (e) => {
@@ -39,13 +39,31 @@ self.addEventListener("fetch", (e) => {
   }
 
   if (/\.(?:js|css|png|jpg|jpeg|svg|webp|woff2?|ico|json)$/.test(url.pathname)) {
+    // Piece artwork: network-first so any broken cache heals on next load.
+    const isPieceAsset = url.pathname.startsWith("/pieces/");
+    if (isPieceAsset) {
+      e.respondWith(
+        fetch(req)
+          .then((res) => {
+            if (res && res.ok) {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+            }
+            return res;
+          })
+          .catch(() => caches.match(req))
+      );
+      return;
+    }
     e.respondWith(
       caches.match(req).then(
         (cached) =>
           cached ||
           fetch(req).then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+            if (res && res.ok) {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+            }
             return res;
           })
       )

@@ -385,6 +385,24 @@ export default function ChessBoard({
                             draggable={false}
                             className="w-full h-full object-contain pointer-events-none"
                             style={pd.pixelated ? { imageRendering: "pixelated" } : undefined}
+                            onError={(e) => {
+                              // SVG failed to load — fall back to Unicode glyph so the
+                              // square never shows a broken-image icon.
+                              const img = e.currentTarget;
+                              const parent = img.parentElement;
+                              if (!parent || parent.dataset.fallback === "1") return;
+                              parent.dataset.fallback = "1";
+                              img.style.display = "none";
+                              const span = document.createElement("span");
+                              span.textContent = pd.symbol;
+                              span.style.fontSize = "min(7vw, 3.4rem)";
+                              span.style.lineHeight = "1";
+                              span.style.color = pd.white ? "#ffffff" : "hsl(220,15%,8%)";
+                              span.style.textShadow = pd.white
+                                ? "0 0 2px #000, 0 1px 2px rgba(0,0,0,0.9)"
+                                : "0 0 2px #fff, 0 1px 2px rgba(255,255,255,0.55)";
+                              parent.appendChild(span);
+                            }}
                           />
                         ) : (
                           pd.symbol
