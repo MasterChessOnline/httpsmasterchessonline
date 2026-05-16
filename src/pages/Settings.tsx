@@ -97,6 +97,7 @@ const Settings = () => {
   const [moveConfirm, setMoveConfirm] = useState(settings.moveConfirm ?? false);
   const [flipBoard, setFlipBoard] = useState(settings.flipBoard ?? false);
   const [preMoveEnabled, setPreMoveEnabled] = useState(settings.preMoveEnabled ?? true);
+  const [haptics, setHaptics] = useState(settings.haptics ?? true);
   const [boardTheme, setBoardTheme] = useState(() => {
     const saved = settings.boardTheme;
     return BOARD_THEMES.find(t => t.key === saved) ? saved : "classic";
@@ -481,6 +482,7 @@ const Settings = () => {
                 { label: "Flip Board", desc: "Flip board after each move", value: flipBoard, key: "flipBoard", setter: setFlipBoard },
                 { label: "Pre-move", desc: "Queue moves before your turn", value: preMoveEnabled, key: "preMoveEnabled", setter: setPreMoveEnabled },
                 { label: "Highlight Moves", desc: "Show legal move indicators", value: highlightMoves, key: "highlightMoves", setter: setHighlightMoves },
+                { label: "Haptic Feedback", desc: "Vibrate on moves, captures, check & mate (mobile)", value: haptics, key: "haptics", setter: setHaptics },
               ].map(item => (
                 <div key={item.key} className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4">
                   <div><p className="text-sm font-medium text-foreground">{item.label}</p><p className="text-xs text-muted-foreground">{item.desc}</p></div>
