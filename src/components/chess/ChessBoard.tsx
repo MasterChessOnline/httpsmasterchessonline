@@ -105,6 +105,41 @@ export default function ChessBoard({
   // Subtle indicator: which king is currently in check?
   const inCheck = game.inCheck();
   const checkedKingSquare = inCheck ? findKingSquare(board, game.turn()) : null;
+  const isCheckmate = game.isCheckmate();
+
+  // ── Board shake on check + checkmate sound/effect triggers ──
+  const shakeControls = useAnimation();
+  const prevCheckRef = useRef(false);
+  const prevMateRef = useRef(false);
+  const [mateBurstKey, setMateBurstKey] = useState(0);
+  const [mateBurstSquare, setMateBurstSquare] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check transition: false → true triggers shake + sound
+    if (inCheck && !prevCheckRef.current) {
+      shakeControls.start({
+        x: [0, -8, 8, -6, 6, -3, 3, 0],
+        transition: { duration: 0.45, ease: "easeInOut" },
+      });
+      try { playCheckSound(); } catch {}
+    }
+    prevCheckRef.current = inCheck;
+  }, [inCheck, shakeControls]);
+
+  useEffect(() => {
+    if (isCheckmate && !prevMateRef.current) {
+      // Big particle burst on losing king's square + boom sound
+      const losingKing = findKingSquare(board, game.turn());
+      setMateBurstSquare(losingKing);
+      setMateBurstKey(k => k + 1);
+      shakeControls.start({
+        x: [0, -14, 14, -10, 10, -5, 5, 0],
+        transition: { duration: 0.7, ease: "easeInOut" },
+      });
+      try { playGameOverSound(); } catch {}
+    }
+    prevMateRef.current = isCheckmate;
+  }, [isCheckmate, board, game, shakeControls]);
 
   // Track a move counter to generate unique keys for slide animations
   const moveCountRef = useRef(0);
