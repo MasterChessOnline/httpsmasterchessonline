@@ -121,6 +121,7 @@ const FRIENDS_SECTION: NavSection = {
     { label: "Browse Teams", href: "/clubs", icon: Shield, desc: "Find a club or team", separator: true, subheading: "Teams & Clubs" },
     { label: "Create a Team", href: "/clubs", icon: Plus, desc: "Build your own group", auth: true },
     { label: "Chat", href: "/chat", icon: FileText, desc: "Direct messages", auth: true, separator: true },
+    { label: "Blog & Guides", href: "/blog", icon: BookOpen, desc: "Chess guides, openings & rules", separator: true, subheading: "Read" },
   ],
 };
 
