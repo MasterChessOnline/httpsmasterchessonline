@@ -47,6 +47,36 @@ export default function PushNotificationToggle() {
     else toast.error("Nije moguće isključiti obaveštenja.");
   };
 
+  const handleTest = async () => {
+    if (!user) {
+      toast.error("Morate biti prijavljeni.");
+      return;
+    }
+    setTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("push-send", {
+        body: {
+          user_ids: [user.id],
+          type: "system",
+          payload: {
+            title: "MasterChess test",
+            body: "Push obaveštenja rade! ♟️",
+            url: "/",
+          },
+        },
+      });
+      if (error) throw error;
+      const sent = (data as any)?.sent ?? 0;
+      if (sent > 0) toast.success(`Test poslat (${sent}). Proveri notifikacije.`);
+      else toast.error("Nije poslato — proveri da je uređaj pretplaćen.");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Greška pri slanju testa.");
+    } finally {
+      setTesting(false);
+    }
+  };
+
   return (
     <div className="rounded-xl border border-border/50 bg-card/60 p-4">
       <div className="flex items-start gap-3">
