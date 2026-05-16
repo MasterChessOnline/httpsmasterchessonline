@@ -102,6 +102,7 @@ import SmartNotifier from "@/components/SmartNotifier";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
 import Pitch from "./pages/Pitch";
+import TeamBattles from "./pages/TeamBattles";
 import ReferralTracker from "@/hooks/useReferralTracker";
 const queryClient = new QueryClient();
 
@@ -207,6 +208,7 @@ function AnimatedRoutes() {
           <Route path="/famous-games/:slug" element={<FamousGameDetail />} />
           <Route path="/players" element={<Grandmasters />} />
           <Route path="/players/:slug" element={<GrandmasterDetail />} />
+          <Route path="/team-battles" element={<TeamBattles />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
