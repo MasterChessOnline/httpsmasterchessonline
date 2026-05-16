@@ -158,6 +158,21 @@ const Navbar = () => {
     setSearchOpen(false);
   }, [location.pathname]);
 
+  // Escape closes mobile menu + body scroll lock when open
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [mobileOpen]);
+
   // Cmd/Ctrl+K opens the search palette globally
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -466,9 +481,12 @@ const Navbar = () => {
               {/* Mobile hamburger */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden p-2.5 rounded-lg hover:bg-muted/20 text-foreground transition-colors"
+                aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-nav-overlay"
+                className="lg:hidden p-2.5 min-h-11 min-w-11 rounded-lg hover:bg-muted/20 text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {mobileOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -487,6 +505,10 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
+            id="mobile-nav-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -538,20 +560,26 @@ const Navbar = () => {
                   >
                     <button
                       onClick={() => setMobileExpanded(mobileExpanded === section.key ? null : section.key)}
-                      className="w-full flex items-center justify-between px-5 py-4 text-left"
+                      aria-expanded={mobileExpanded === section.key}
+                      aria-controls={`mobile-section-${section.key}`}
+                      aria-label={`${section.label} menu`}
+                      className="w-full flex items-center justify-between px-5 py-4 text-left min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset rounded-2xl"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}>
+                        <div aria-hidden="true" className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}>
                           <section.icon className="h-4 w-4" style={{ color: accentColor }} />
                         </div>
                         <span className="font-semibold text-sm" style={{ color: accentColor }}>{section.label}</span>
                       </div>
-                      <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${mobileExpanded === section.key ? "rotate-180" : ""}`} style={{ color: `hsla(${section.accent} / 0.5)` }} />
+                      <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform duration-300 ${mobileExpanded === section.key ? "rotate-180" : ""}`} style={{ color: `hsla(${section.accent} / 0.5)` }} />
                     </button>
 
                     <AnimatePresence>
                       {mobileExpanded === section.key && (
                         <motion.div
+                          id={`mobile-section-${section.key}`}
+                          role="region"
+                          aria-label={`${section.label} links`}
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
