@@ -34,6 +34,7 @@ import ProofStrip from "@/components/landing/ProofStrip";
 import Manifesto from "@/components/landing/Manifesto";
 import WallOfReasons from "@/components/landing/WallOfReasons";
 import StickyJoinBar from "@/components/landing/StickyJoinBar";
+import InstallAppButton from "@/components/InstallAppButton";
 
 interface RecentGame {
   id: string;
@@ -265,6 +266,7 @@ const Index = () => {
                 </Button>
               </motion.div>
             </Link>
+            <InstallAppButton variant="hero" />
           </motion.div>
 
           {/* Quick Actions with hover lift */}
