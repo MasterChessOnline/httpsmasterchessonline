@@ -101,6 +101,7 @@ import InstallPrompt from "@/components/InstallPrompt";
 import SmartNotifier from "@/components/SmartNotifier";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
+import Pitch from "./pages/Pitch";
 import ReferralTracker from "@/hooks/useReferralTracker";
 const queryClient = new QueryClient();
 
@@ -121,6 +122,7 @@ function AnimatedRoutes() {
       >
         <Routes location={location}>
           <Route path="/" element={<Index />} />
+          <Route path="/pitch" element={<Pitch />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/play" element={<Play />} />
           <Route path="/play/online" element={<PlayOnline />} />

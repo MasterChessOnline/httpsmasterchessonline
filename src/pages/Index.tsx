@@ -28,6 +28,7 @@ import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
 import LivePlayerCounter from "@/components/LivePlayerCounter";
 import WhyMasterChess from "@/components/landing/WhyMasterChess";
+import WhyInvest from "@/components/landing/WhyInvest";
 import TestimonialsCarousel from "@/components/landing/TestimonialsCarousel";
 
 interface RecentGame {
@@ -614,6 +615,7 @@ const Index = () => {
       {/* Marketing landing strips */}
       <section className="px-4">
         <div className="max-w-5xl mx-auto">
+          <WhyInvest />
           <WhyMasterChess />
           <TestimonialsCarousel />
         </div>

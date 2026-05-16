@@ -73,6 +73,7 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
             { label: "Privacy", href: "/privacy" },
             { label: "Terms", href: "/terms" },
             { label: "Press", href: "/press" },
+            { label: "Investors", href: "/pitch" },
             { label: "Streamers", href: "/streamers" },
             { label: "Contact", href: "/contact" },
           ].map((link) => (
