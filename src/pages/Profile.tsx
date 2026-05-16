@@ -469,12 +469,13 @@ const Profile = () => {
           <SeasonBanner />
 
           {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
               { label: "Played", value: profileData.games_played, icon: Swords },
               { label: "Won", value: profileData.games_won, icon: Trophy },
               { label: "Win Rate", value: `${winRate}%`, icon: TrendingUp },
               { label: "Best Streak", value: streak?.best_streak ?? 0, icon: Trophy },
+              { label: "Total XP", value: (profileData.total_xp ?? 0).toLocaleString(), icon: Sparkles },
             ].map(stat => (
               <div key={stat.label} className="rounded-xl border border-border/50 bg-card/80 p-3 text-center">
                 <stat.icon className="h-4 w-4 mx-auto mb-1 text-primary" />
