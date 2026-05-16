@@ -110,6 +110,7 @@ import NotificationPrompt from "@/components/NotificationPrompt";
 import IOSInstallOverlay from "@/components/IOSInstallOverlay";
 import DailyReminderNotifier from "@/components/DailyReminderNotifier";
 import SmartNotifier from "@/components/SmartNotifier";
+import AppBadgeSync from "@/components/AppBadgeSync";
 import ReferralTracker from "@/hooks/useReferralTracker";
 const queryClient = new QueryClient();
 
