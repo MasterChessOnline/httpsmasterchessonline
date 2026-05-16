@@ -15,11 +15,12 @@ import { useInstallStatus } from "@/hooks/use-install-status";
  */
 
 /**
- * Versioned dismiss key — bump APP_VERSION to force the overlay to reappear
- * for every visitor after a new release (e.g. major UX update, new install
- * benefits, redesigned demo). Old dismiss keys are ignored automatically.
+ * Versioned dismiss key — derived automatically from package.json `version`
+ * via Vite's `define` (see vite.config.ts). Bumping the version in
+ * package.json forces the overlay to reappear for everyone who hasn't
+ * installed yet. Old dismiss keys are cleaned up automatically below.
  */
-const APP_VERSION = "1.0.0";
+const APP_VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "0.0.0";
 const DISMISS_KEY = `mc.ios.overlay.dismissed.v${APP_VERSION}`;
 
 export default function IOSInstallOverlay() {
