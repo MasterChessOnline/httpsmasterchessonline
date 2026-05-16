@@ -301,7 +301,7 @@ const Navbar = () => {
                           exit={{ opacity: 0, y: 6, scale: 0.98 }}
                           transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                           className={`absolute left-1/2 -translate-x-1/2 rounded-2xl z-[70] backdrop-blur-2xl flex flex-col ${
-                            section.wide ? "w-[300px]" : "w-[240px]"
+                            section.wide ? "w-[340px]" : "w-[260px]"
                           }`}
                           style={{
                             top: shrunk ? "calc(100% + 12px)" : "calc(100% + 34px)",
@@ -339,13 +339,13 @@ const Navbar = () => {
                                       <div className="mx-2 my-0.5 h-px" style={{ backgroundColor: `hsla(${section.accent} / 0.1)` }} />
                                     )}
                                     {item.subheading && (
-                                      <p className="text-[9px] uppercase tracking-[0.14em] font-extrabold px-3 pt-1 pb-0.5" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
+                                      <p className="text-[10px] uppercase tracking-[0.14em] font-extrabold px-3 pt-1.5 pb-0.5" style={{ color: accentColor, textShadow: `0 0 10px hsla(${section.accent} / 0.35)` }}>
                                         {item.subheading}
                                       </p>
                                     )}
                                     <Link
                                       to={item.href === "/profile" && user ? `/profile/${user.id}` : item.href}
-                                      className="flex items-center gap-2 px-2 py-1 rounded-lg transition-all duration-200 group/item"
+                                      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all duration-200 group/item"
                                       style={{
                                         backgroundColor: item.highlight ? `hsla(${section.accent} / 0.12)` : itemActive ? `hsla(${section.accent} / 0.08)` : undefined,
                                         border: item.highlight ? `1px solid hsla(${section.accent} / 0.2)` : "1px solid transparent",
@@ -358,14 +358,14 @@ const Navbar = () => {
                                       }}
                                     >
                                       <div
-                                        className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-all duration-200"
+                                        className="w-7 h-7 rounded-md flex items-center justify-center shrink-0 transition-all duration-200"
                                         style={{ backgroundColor: item.highlight || itemActive ? `hsla(${section.accent} / 0.2)` : `hsla(${section.accent} / 0.08)` }}
                                       >
-                                        <item.icon className="h-3 w-3 transition-colors duration-200" style={{ color: item.highlight || itemActive || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.6)` }} />
+                                        <item.icon className="h-3.5 w-3.5 transition-colors duration-200" style={{ color: item.highlight || itemActive || item.comingSoon ? accentColor : `hsla(${section.accent} / 0.6)` }} />
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-1.5">
-                                          <p className="text-[11px] font-medium leading-tight truncate" style={{ color: item.highlight ? accentColor : item.comingSoon ? "hsl(var(--foreground) / 0.6)" : "hsl(var(--foreground))" }}>
+                                          <p className="text-[13px] font-semibold leading-tight truncate" style={{ color: item.highlight ? accentColor : item.comingSoon ? "hsl(var(--foreground) / 0.6)" : "hsl(var(--foreground))" }}>
                                             {item.label}
                                           </p>
                                           {item.highlight && (
