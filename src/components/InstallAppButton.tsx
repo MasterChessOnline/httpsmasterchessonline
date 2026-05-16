@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SafariMacDemo from "@/components/install-demos/SafariMacDemo";
 import IOSDemo from "@/components/install-demos/IOSDemo";
+import { useInstallStatus, INSTALLED_KEY } from "@/hooks/use-install-status";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const INSTALLED_KEY = "mc.install.done.v1";
 const LIVE_URL = "https://masterchess.live";
 
 export default function InstallAppButton({
@@ -20,9 +20,7 @@ export default function InstallAppButton({
   variant?: "hero" | "navbar";
 }) {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
-  const [installed, setInstalled] = useState(
-    typeof window !== "undefined" && localStorage.getItem(INSTALLED_KEY) === "1",
-  );
+  const { installed, isStandalone } = useInstallStatus();
   const [justInstalled, setJustInstalled] = useState(false);
   const [showIosHelp, setShowIosHelp] = useState(false);
   const [showAndroidHelp, setShowAndroidHelp] = useState(false);
@@ -34,11 +32,6 @@ export default function InstallAppButton({
     (typeof navigator !== "undefined" &&
       navigator.platform === "MacIntel" &&
       (navigator as any).maxTouchPoints > 1);
-  const isStandalone =
-    typeof window !== "undefined" &&
-    (window.matchMedia("(display-mode: standalone)").matches ||
-      // @ts-expect-error iOS-only flag
-      window.navigator.standalone === true);
   const isInIframe = (() => {
     try {
       return typeof window !== "undefined" && window.self !== window.top;
@@ -61,10 +54,7 @@ export default function InstallAppButton({
         description: "MasterChess has been added to your apps.",
         duration: 4000,
       });
-      setTimeout(() => {
-        setInstalled(true);
-        setJustInstalled(false);
-      }, 2800);
+      setTimeout(() => setJustInstalled(false), 2800);
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
@@ -73,6 +63,7 @@ export default function InstallAppButton({
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
+
 
   // Hide forever once installed or already running as PWA (but keep visible
   // during the brief "Installed" confirmation animation).
@@ -87,7 +78,6 @@ export default function InstallAppButton({
         const { outcome } = await deferred.userChoice;
         if (outcome === "accepted") {
           localStorage.setItem(INSTALLED_KEY, "1");
-          setInstalled(true);
           toast.success("Installed ✓", {
             description: "MasterChess has been added to your apps.",
           });
