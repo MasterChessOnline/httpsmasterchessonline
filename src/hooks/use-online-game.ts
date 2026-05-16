@@ -562,6 +562,34 @@ export function useOnlineGame() {
     eloUpdatedRef.current = false;
   }, [cleanupChannels]);
 
+  // Load a specific game by id without a full page reload (used by rematch flow).
+  const loadGameById = useCallback(async (gameId: string) => {
+    if (!user || !gameId) return;
+    cleanupChannels();
+    eloUpdatedRef.current = false;
+    setError(null);
+    const { data: byId } = await supabase
+      .from("online_games")
+      .select("*")
+      .eq("id", gameId)
+      .maybeSingle();
+    if (byId && (byId.white_player_id === user.id || byId.black_player_id === user.id)) {
+      setGame(byId as OnlineGame);
+      setStatus(byId.status === "finished" ? "finished" : "playing");
+      subscribeToGame(byId.id);
+    }
+  }, [user, cleanupChannels, subscribeToGame]);
+
+  // Listen for cross-component rematch broadcasts.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (id) loadGameById(id);
+    };
+    window.addEventListener("online-game-load", handler as EventListener);
+    return () => window.removeEventListener("online-game-load", handler as EventListener);
+  }, [loadGameById]);
+
   useEffect(() => {
     return () => {
       cleanupChannels();
@@ -571,5 +599,5 @@ export function useOnlineGame() {
     };
   }, [user, cleanupChannels]);
 
-  return { status, game, myColor, error, ratingResult, searchMatch, cancelSearch, makeMove, endGame, resign, reset };
+  return { status, game, myColor, error, ratingResult, searchMatch, cancelSearch, makeMove, endGame, resign, reset, loadGameById };
 }
