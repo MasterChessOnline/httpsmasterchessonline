@@ -49,8 +49,8 @@ export default function InstallAppButton({
       setDeferred(null);
       // Show the confirmation chip briefly, then hide the button entirely.
       setJustInstalled(true);
-      toast.success("Instalirano ✓", {
-        description: "MasterChess je dodat među tvoje aplikacije.",
+      toast.success("Installed ✓", {
+        description: "MasterChess has been added to your apps.",
         duration: 4000,
       });
       setTimeout(() => {
