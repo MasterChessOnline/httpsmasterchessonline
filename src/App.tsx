@@ -101,6 +101,7 @@ import InstallPrompt from "@/components/InstallPrompt";
 import AppLaunchSplash from "@/components/AppLaunchSplash";
 import NotificationPrompt from "@/components/NotificationPrompt";
 import IOSInstallOverlay from "@/components/IOSInstallOverlay";
+import DailyReminderNotifier from "@/components/DailyReminderNotifier";
 import SmartNotifier from "@/components/SmartNotifier";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
@@ -242,6 +243,7 @@ const App = () => (
             <InstallPrompt />
             <NotificationPrompt />
             <IOSInstallOverlay />
+            <DailyReminderNotifier />
             <SmartNotifier />
           </Suspense>
         </BrowserRouter>
