@@ -135,7 +135,7 @@ export default function InstallAppButton({
               aria-live="polite"
             >
               <CheckCircle2 className="h-4 w-4" />
-              Instalirano
+              Installed
             </div>
           </motion.div>
         ) : (
