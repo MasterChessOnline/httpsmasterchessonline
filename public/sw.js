@@ -73,7 +73,7 @@ self.addEventListener("fetch", (e) => {
 
 // Push notifications support
 self.addEventListener("push", (event) => {
-  let data = { title: "MasterChess", body: "Imate novo obaveštenje", url: "/" };
+  let data = { title: "Master Chess", body: "You have a new notification", url: "/" };
   try {
     if (event.data) data = { ...data, ...event.data.json() };
   } catch {}
