@@ -598,7 +598,7 @@ const Navbar = () => {
                 );
               })}
 
-              {user ? (
+              {user && (
                 <button
                   onClick={() => { signOut(); setMobileOpen(false); }}
                   className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 transition-all w-full text-left"
@@ -606,15 +606,6 @@ const Navbar = () => {
                   <LogOut className="h-5 w-5 text-destructive" />
                   <span className="text-sm font-semibold text-destructive">Sign Out</span>
                 </button>
-              ) : (
-                <div className="space-y-3 pt-2">
-                  <Link to="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" className="w-full h-12 text-base font-medium border-border/30">Sign In</Button>
-                  </Link>
-                  <Link to="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full h-12 text-base font-bold bg-primary text-primary-foreground shadow-[0_0_20px_rgba(212,175,55,0.2)]">Sign Up</Button>
-                  </Link>
-                </div>
               )}
             </div>
           </motion.div>
