@@ -193,20 +193,23 @@ export default function ChessBoard({
   };
   const handlePieceDragEnd = () => { setDragFrom(null); };
 
+  const fileLabelClass = "flex-1 text-center text-[11px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]";
+  const rankLabelClass = "flex-1 flex items-center justify-center text-[11px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]";
+
   return (
     <div className={className ?? "w-full max-w-[min(90vw,520px)] mx-auto"}>
       {/* Coordinate labels top */}
-      <div className="flex ml-6 mr-1 mb-0.5">
+      <div className="flex ml-7 mr-7 mb-0.5">
         {displayFiles.map((f) => (
-          <span key={f} className="flex-1 text-center text-[10px] font-mono text-muted-foreground/60">{f}</span>
+          <span key={`top-${f}`} className={fileLabelClass}>{f}</span>
         ))}
       </div>
 
       <div className="flex">
         {/* Rank labels left */}
-        <div className="flex flex-col w-6 flex-shrink-0">
+        <div className="flex flex-col w-7 flex-shrink-0">
           {displayRanks.map((r) => (
-            <span key={r} className="flex-1 flex items-center justify-center text-[10px] font-mono text-muted-foreground/60">{r}</span>
+            <span key={`l-${r}`} className={rankLabelClass}>{r}</span>
           ))}
         </div>
 
@@ -356,8 +359,8 @@ export default function ChessBoard({
                           pd.svgUrl ? "w-[88%] h-[88%]" : "text-[min(7vw,3.4rem)] sm:text-[min(6vw,3.2rem)]"
                         } ${
                           pd.white
-                            ? "drop-shadow-[0_1px_3px_rgba(0,0,0,0.55)]"
-                            : "drop-shadow-[0_1px_2px_rgba(255,255,255,0.18)]"
+                            ? "[filter:drop-shadow(0_0_1.5px_#000)_drop-shadow(0_0_1.5px_#000)_drop-shadow(0_1px_2px_rgba(0,0,0,0.9))]"
+                            : "[filter:drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_0_1.5px_#fff)_drop-shadow(0_1px_2px_rgba(255,255,255,0.55))]"
                         } ${isSelected ? "drop-shadow-[0_0_10px_hsl(43_80%_55%/0.6)] scale-110" : ""}`}
                         style={{
                           position: "relative",
@@ -496,17 +499,17 @@ export default function ChessBoard({
         </div>
 
         {/* Rank labels right */}
-        <div className="flex flex-col w-5 flex-shrink-0">
+        <div className="flex flex-col w-7 flex-shrink-0">
           {displayRanks.map((r) => (
-            <span key={r} className="flex-1 flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">{r}</span>
+            <span key={`r-${r}`} className={rankLabelClass}>{r}</span>
           ))}
         </div>
       </div>
 
       {/* Coordinate labels bottom */}
-      <div className="flex ml-6 mr-1 mt-0.5">
+      <div className="flex ml-7 mr-7 mt-0.5">
         {displayFiles.map((f) => (
-          <span key={f} className="flex-1 text-center text-[10px] font-mono text-muted-foreground/40">{f}</span>
+          <span key={`bot-${f}`} className={fileLabelClass}>{f}</span>
         ))}
       </div>
     </div>
