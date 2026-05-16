@@ -1,6 +1,6 @@
 {
   "name": "Master Chess — Play Chess Online Free",
-  "short_name": "Master Chess",
+  "short_name": "MasterChess",
   "description": "Play chess online free vs players or AI bots, live tournaments, Stockfish analysis, and opening trainer. No puzzles — just real chess.",
   "id": "/",
   "start_url": "/?utm_source=pwa",
