@@ -100,6 +100,7 @@ import Analytics from "@/components/Analytics";
 import InstallPrompt from "@/components/InstallPrompt";
 import AppLaunchSplash from "@/components/AppLaunchSplash";
 import NotificationPrompt from "@/components/NotificationPrompt";
+import IOSInstallOverlay from "@/components/IOSInstallOverlay";
 import SmartNotifier from "@/components/SmartNotifier";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
@@ -240,6 +241,7 @@ const App = () => (
             <MobileBottomNav />
             <InstallPrompt />
             <NotificationPrompt />
+            <IOSInstallOverlay />
             <SmartNotifier />
           </Suspense>
         </BrowserRouter>
