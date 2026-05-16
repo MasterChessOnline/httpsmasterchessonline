@@ -1352,6 +1352,42 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          converted_at: string | null
+          created_at: string
+          id: string
+          ref_code: string
+          referred_user_id: string | null
+          referrer_user_id: string | null
+          status: string
+          user_agent: string | null
+          visitor_fingerprint: string | null
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          ref_code: string
+          referred_user_id?: string | null
+          referrer_user_id?: string | null
+          status?: string
+          user_agent?: string | null
+          visitor_fingerprint?: string | null
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          ref_code?: string
+          referred_user_id?: string | null
+          referrer_user_id?: string | null
+          status?: string
+          user_agent?: string | null
+          visitor_fingerprint?: string | null
+        }
+        Relationships: []
+      }
       season_results: {
         Row: {
           created_at: string
@@ -2235,6 +2271,7 @@ export type Database = {
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
+      claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
       commit_online_move: {
         Args: {
           p_black_time: number
@@ -2289,6 +2326,7 @@ export type Database = {
         }
         Returns: number
       }
+      my_referral_stats: { Args: never; Returns: Json }
       place_spectator_bet: {
         Args: {
           p_game_id: string
@@ -2310,6 +2348,7 @@ export type Database = {
         Args: { _tid: string }
         Returns: undefined
       }
+      resolve_ref_code: { Args: { _ref_code: string }; Returns: string }
       server_now: { Args: never; Returns: string }
       settle_bets_for_game: { Args: { p_game_id: string }; Returns: Json }
       tournament_color_balance: {
@@ -2319,6 +2358,14 @@ export type Database = {
           user_id: string
           whites: number
         }[]
+      }
+      track_referral_visit: {
+        Args: {
+          p_fingerprint: string
+          p_ref_code: string
+          p_user_agent?: string
+        }
+        Returns: undefined
       }
       update_elo_ratings: {
         Args: { p_black_id: string; p_result: string; p_white_id: string }
