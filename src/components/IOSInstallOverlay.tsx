@@ -14,7 +14,13 @@ import { useInstallStatus } from "@/hooks/use-install-status";
  * moment install is confirmed — no refresh required.
  */
 
-const SESSION_KEY = "mc.ios.overlay.dismissed";
+/**
+ * Versioned dismiss key — bump APP_VERSION to force the overlay to reappear
+ * for every visitor after a new release (e.g. major UX update, new install
+ * benefits, redesigned demo). Old dismiss keys are ignored automatically.
+ */
+const APP_VERSION = "1.0.0";
+const DISMISS_KEY = `mc.ios.overlay.dismissed.v${APP_VERSION}`;
 
 export default function IOSInstallOverlay() {
   const [dismissed, setDismissed] = useState(false);
@@ -35,15 +41,30 @@ export default function IOSInstallOverlay() {
     }
     setIsIos(ios);
     setInIframe(iframe);
-    setDismissed(sessionStorage.getItem(SESSION_KEY) === "1");
+    setDismissed(localStorage.getItem(DISMISS_KEY) === "1");
+
+    // Clean up any older versioned dismiss keys so storage stays tidy.
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("mc.ios.overlay.dismissed.v") && k !== DISMISS_KEY) {
+          localStorage.removeItem(k);
+        }
+      }
+      // Legacy session-only key from earlier builds.
+      sessionStorage.removeItem("mc.ios.overlay.dismissed");
+    } catch {}
   }, []);
 
   const show = isIos && !isStandalone && !installed && !inIframe && !dismissed;
 
   const handleDismiss = () => {
-    sessionStorage.setItem(SESSION_KEY, "1");
+    try {
+      localStorage.setItem(DISMISS_KEY, "1");
+    } catch {}
     setDismissed(true);
   };
+
 
 
   return (
