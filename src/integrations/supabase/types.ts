@@ -1156,6 +1156,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_frame: string | null
           avatar_url: string | null
           bio: string | null
           bot_games_drawn: number
@@ -1184,12 +1185,15 @@ export type Database = {
           login_streak_best: number
           master_coins: number
           peak_rating: number
+          profile_banner: string | null
+          push_notifications_enabled: boolean
           rating: number
           updated_at: string
           user_id: string
           username: string | null
         }
         Insert: {
+          avatar_frame?: string | null
           avatar_url?: string | null
           bio?: string | null
           bot_games_drawn?: number
@@ -1218,12 +1222,15 @@ export type Database = {
           login_streak_best?: number
           master_coins?: number
           peak_rating?: number
+          profile_banner?: string | null
+          push_notifications_enabled?: boolean
           rating?: number
           updated_at?: string
           user_id: string
           username?: string | null
         }
         Update: {
+          avatar_frame?: string | null
           avatar_url?: string | null
           bio?: string | null
           bot_games_drawn?: number
@@ -1252,6 +1259,8 @@ export type Database = {
           login_streak_best?: number
           master_coins?: number
           peak_rating?: number
+          profile_banner?: string | null
+          push_notifications_enabled?: boolean
           rating?: number
           updated_at?: string
           user_id?: string
@@ -1783,6 +1792,95 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      team_battle_members: {
+        Row: {
+          battle_id: string
+          id: string
+          joined_at: string
+          score: number
+          team: string
+          user_id: string
+        }
+        Insert: {
+          battle_id: string
+          id?: string
+          joined_at?: string
+          score?: number
+          team: string
+          user_id: string
+        }
+        Update: {
+          battle_id?: string
+          id?: string
+          joined_at?: string
+          score?: number
+          team?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_battle_members_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "team_battles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_battles: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          max_per_team: number
+          name: string
+          starts_at: string
+          status: string
+          team_a_name: string
+          team_a_score: number
+          team_b_name: string
+          team_b_score: number
+          time_control_label: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          max_per_team?: number
+          name: string
+          starts_at?: string
+          status?: string
+          team_a_name?: string
+          team_a_score?: number
+          team_b_name?: string
+          team_b_score?: number
+          time_control_label?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          max_per_team?: number
+          name?: string
+          starts_at?: string
+          status?: string
+          team_a_name?: string
+          team_a_score?: number
+          team_b_name?: string
+          team_b_score?: number
+          time_control_label?: string
+          updated_at?: string
         }
         Relationships: []
       }
