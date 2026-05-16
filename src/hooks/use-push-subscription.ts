@@ -12,8 +12,22 @@ import { useAuth } from "@/contexts/AuthContext";
 export type PushStatus = "unsupported" | "denied" | "default" | "subscribed";
 
 // VAPID public key — exposed publicly; safe in the client bundle.
-// Set via VITE_VAPID_PUBLIC_KEY at build time. Falls back to runtime fetch.
-const VAPID_PUBLIC_KEY = (import.meta as any).env?.VITE_VAPID_PUBLIC_KEY as string | undefined;
+// Prefer build-time VITE_VAPID_PUBLIC_KEY, otherwise fetch from the edge function.
+const BUILD_VAPID_PUBLIC_KEY = (import.meta as any).env?.VITE_VAPID_PUBLIC_KEY as string | undefined;
+let cachedVapidKey: string | undefined = BUILD_VAPID_PUBLIC_KEY;
+
+async function getVapidPublicKey(): Promise<string | undefined> {
+  if (cachedVapidKey) return cachedVapidKey;
+  try {
+    const { data, error } = await supabase.functions.invoke("push-public-key");
+    if (error) throw error;
+    cachedVapidKey = (data as any)?.publicKey || undefined;
+    return cachedVapidKey;
+  } catch (err) {
+    console.error("failed to fetch VAPID public key", err);
+    return undefined;
+  }
+}
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
