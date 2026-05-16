@@ -216,6 +216,13 @@ export default function InstallAppButton({
                 </button>
               </div>
 
+              <div className="mb-3">
+                <IOSDemo />
+                <p className="mt-1.5 text-center text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                  Live demo · loops automatically
+                </p>
+              </div>
+
               <ol className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex gap-2">
                   <span className="text-primary font-bold">1.</span> Tap the{" "}
