@@ -29,6 +29,7 @@ import PieceStyleCard from "@/components/settings/PieceStyleCard";
 import LiveBoardPreview from "@/components/settings/LiveBoardPreview";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
 import InstallAppButton from "@/components/InstallAppButton";
+import PushNotificationToggle from "@/components/PushNotificationToggle";
 
 type SettingsSection = "account" | "profile" | "gameplay" | "training" | "improvement" | "appearance" | "audio" | "accessibility" | "language" | "notifications" | "privacy";
 
@@ -794,6 +795,7 @@ const Settings = () => {
         return (
           <div className="space-y-6">
             <div><h3 className="text-lg font-display font-bold text-foreground mb-1">Notifications</h3></div>
+            <PushNotificationToggle />
             <div className="space-y-3">
               {[
                 { label: "Match Found", desc: "When a match is found", value: notifMatch, key: "notifMatch", setter: setNotifMatch },
