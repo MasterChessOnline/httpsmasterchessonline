@@ -86,6 +86,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Starting Soon", href: "/tournaments?filter=starting", icon: Clock, desc: "Upcoming events" },
       { label: "Create Tournament", href: "/tournaments?filter=create", icon: Plus, desc: "Host your own event" },
       { label: "My Tournaments", href: "/tournaments?filter=mine", icon: ListChecks, desc: "Your active tournaments" },
+      { label: "Team Battles", href: "/team-battles", icon: Swords, desc: "Battle team vs team in real time" },
       { label: "Community", href: "/community", icon: Users, desc: "Posts & chess moments", separator: true, subheading: "Connect" },
     ],
   },
