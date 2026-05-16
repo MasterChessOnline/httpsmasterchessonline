@@ -560,15 +560,18 @@ const Navbar = () => {
                   >
                     <button
                       onClick={() => setMobileExpanded(mobileExpanded === section.key ? null : section.key)}
-                      className="w-full flex items-center justify-between px-5 py-4 text-left"
+                      aria-expanded={mobileExpanded === section.key}
+                      aria-controls={`mobile-section-${section.key}`}
+                      aria-label={`${section.label} menu`}
+                      className="w-full flex items-center justify-between px-5 py-4 text-left min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset rounded-2xl"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}>
+                        <div aria-hidden="true" className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsla(${section.accent} / 0.15)` }}>
                           <section.icon className="h-4 w-4" style={{ color: accentColor }} />
                         </div>
                         <span className="font-semibold text-sm" style={{ color: accentColor }}>{section.label}</span>
                       </div>
-                      <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${mobileExpanded === section.key ? "rotate-180" : ""}`} style={{ color: `hsla(${section.accent} / 0.5)` }} />
+                      <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform duration-300 ${mobileExpanded === section.key ? "rotate-180" : ""}`} style={{ color: `hsla(${section.accent} / 0.5)` }} />
                     </button>
 
                     <AnimatePresence>
