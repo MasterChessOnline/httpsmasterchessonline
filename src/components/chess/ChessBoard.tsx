@@ -554,9 +554,50 @@ export default function ChessBoard({
             </svg>
           )}
 
+          {/* Checkmate burst — explosion of gold particles on losing king */}
+          {mateBurstSquare && (
+            <svg
+              key={`mate-${mateBurstKey}`}
+              viewBox="0 0 800 800"
+              preserveAspectRatio="none"
+              className="absolute inset-0 w-full h-full pointer-events-none z-[25] motion-reduce:hidden"
+              aria-hidden
+            >
+              {(() => {
+                const c = squareToXY(mateBurstSquare);
+                return Array.from({ length: 24 }).map((_, i) => {
+                  const angle = (Math.PI * 2 * i) / 24;
+                  const dist = 180 + (i % 3) * 60;
+                  const dx = Math.cos(angle) * dist;
+                  const dy = Math.sin(angle) * dist;
+                  return (
+                    <motion.circle
+                      key={i}
+                      cx={c.x} cy={c.y} r={10}
+                      fill={i % 2 ? "hsl(43 95% 60%)" : "hsl(30 95% 55%)"}
+                      initial={{ opacity: 1, scale: 0.3 }}
+                      animate={{ opacity: 0, scale: 1.4, cx: c.x + dx, cy: c.y + dy }}
+                      transition={{ duration: 1.4, ease: "easeOut" }}
+                    />
+                  );
+                });
+              })()}
+              {/* Center flash */}
+              <motion.circle
+                cx={squareToXY(mateBurstSquare).x}
+                cy={squareToXY(mateBurstSquare).y}
+                r={40}
+                fill="hsl(43 95% 65%)"
+                initial={{ opacity: 0.9, scale: 0.2 }}
+                animate={{ opacity: 0, scale: 4 }}
+                transition={{ duration: 0.9, ease: "easeOut" }}
+              />
+            </svg>
+          )}
+
           {/* Game-over / status overlay */}
           {overlay}
-        </div>
+        </motion.div>
 
         {/* Rank labels right */}
         <div className="flex flex-col w-7 flex-shrink-0">
