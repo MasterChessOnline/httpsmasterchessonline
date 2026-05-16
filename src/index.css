@@ -251,6 +251,46 @@
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
 
+  /* === Sitewide hover & transition polish === */
+  /* Smooth, consistent micro-interactions for all interactive elements */
+  a, button, [role="button"], [role="tab"], [role="menuitem"], summary,
+  .interactive {
+    transition:
+      color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  a:hover, button:not(:disabled):hover, [role="button"]:not([aria-disabled="true"]):hover {
+    filter: brightness(1.06);
+  }
+  button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active {
+    transform: translateY(0.5px) scale(0.985);
+  }
+  a:focus-visible, button:focus-visible, [role="button"]:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 2px solid hsl(var(--ring) / 0.55);
+    outline-offset: 2px;
+  }
+  /* Lift utility for cards */
+  .lift-on-hover { @apply transition-transform duration-300 ease-out will-change-transform; }
+  .lift-on-hover:hover { transform: translateY(-2px); }
+  /* Soft underline reveal for inline links */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 250ms ease;
+  }
+  .link-underline:hover { background-size: 100% 1px; }
+  @media (prefers-reduced-motion: reduce) {
+    a, button, [role="button"], .lift-on-hover { transition: none !important; }
+    a:hover, button:hover, [role="button"]:hover { filter: none !important; transform: none !important; }
+  }
+
   /* Noise overlay — film grain texture */
   .noise-overlay::before {
     content: '';
