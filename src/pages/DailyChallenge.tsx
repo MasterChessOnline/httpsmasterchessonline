@@ -67,7 +67,7 @@ interface ParsedPuzzle {
   isMate: boolean;
 }
 
-const STORAGE_KEY = "mc_daily_puzzle_cache_v1";
+const STORAGE_KEY = "mc_daily_puzzle_cache_v2";
 
 function todayStr() {
   return new Date().toISOString().split("T")[0];
@@ -127,10 +127,12 @@ async function fetchVerifiedDailyMate(): Promise<ParsedPuzzle> {
 
   if (!pgn || !solution.length) throw new Error("Invalid puzzle payload");
 
-  // Replay PGN moves up to initialPly to get the puzzle starting FEN.
-  const sanMoves = pgn.split(/\s+/).filter(Boolean);
+  // Replay exactly the moves before the puzzle position to get the correct FEN.
+  const sourceGame = new Chess();
+  sourceGame.loadPgn(pgn);
+  const sanMoves = sourceGame.history();
   const board = new Chess();
-  for (let i = 0; i <= initialPly && i < sanMoves.length; i++) {
+  for (let i = 0; i < initialPly && i < sanMoves.length; i++) {
     try { board.move(sanMoves[i]); } catch { break; }
   }
   const startFen = board.fen();
@@ -485,7 +487,7 @@ function PuzzleSolver({ puzzle, onSolved, replayMode }: { puzzle: ParsedPuzzle; 
 
         <ChessBoard
           game={game}
-          flipped={false}
+          flipped={puzzle.playerColor === "b"}
           selectedSquare={selectedSquare}
           legalMoves={legalMoves}
           lastMove={lastMove}
