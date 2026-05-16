@@ -623,7 +623,7 @@ const Index = () => {
       <section className="px-4">
         <div className="max-w-5xl mx-auto">
           <WhyInvest />
-          <VsTheRest />
+          
           <WhyMasterChess />
           <Manifesto />
           <WallOfReasons />
