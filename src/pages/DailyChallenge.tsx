@@ -47,18 +47,8 @@ function secondsUntilMidnightUTC(): number {
   return Math.max(0, Math.floor((next.getTime() - now.getTime()) / 1000));
 }
 
-interface DailyPuzzle {
-  title: string;
-  url: string;
-  publish_time: number;
-  fen: string;
-  pgn: string;
-  image: string;
-}
-
 interface ParsedPuzzle {
   title: string;
-  url: string;
   date: string;
   startFen: string;
   solution: string[]; // UCI moves
@@ -69,96 +59,57 @@ interface ParsedPuzzle {
 
 const STORAGE_KEY = "mc_daily_puzzle_cache_v2";
 
+const MASTERCHESS_DAILY_PUZZLES: Omit<ParsedPuzzle, "date">[] = [
+  {
+    title: "Back Rank Crown",
+    startFen: "6k1/6pp/8/7Q/8/8/6PP/6K1 w - - 0 1",
+    solution: ["h5e8"],
+    playerColor: "w",
+    firstMoveBy: "w",
+    isMate: true,
+  },
+  {
+    title: "Black Rook Finish",
+    startFen: "7k/6pp/8/8/8/8/6PP/5r1K b - - 0 1",
+    solution: ["f1a1"],
+    playerColor: "b",
+    firstMoveBy: "b",
+    isMate: true,
+  },
+  {
+    title: "File Control",
+    startFen: "k7/pp6/8/8/8/8/PP6/K1R5 w - - 0 1",
+    solution: ["c1c8"],
+    playerColor: "w",
+    firstMoveBy: "w",
+    isMate: true,
+  },
+  {
+    title: "Dark-Side Back Rank",
+    startFen: "k1r5/pp6/8/8/8/8/PP6/K7 b - - 0 1",
+    solution: ["c8c1"],
+    playerColor: "b",
+    firstMoveBy: "b",
+    isMate: true,
+  },
+  {
+    title: "Queen Takes the Stage",
+    startFen: "7k/6pp/8/8/8/8/6PP/5Q1K w - - 0 1",
+    solution: ["f1f8"],
+    playerColor: "w",
+    firstMoveBy: "w",
+    isMate: true,
+  },
+];
+
 function todayStr() {
   return new Date().toISOString().split("T")[0];
 }
 
-function parsePuzzle(p: DailyPuzzle): ParsedPuzzle | null {
-  try {
-    const chess = new Chess();
-    chess.loadPgn(p.pgn);
-    const history = chess.history({ verbose: true });
-    if (!history.length) return null;
-
-    // Replay from start of PGN to get the puzzle's starting FEN (first move's "before")
-    const startFen = (history[0] as any).before || p.fen;
-    const solution = history.map((m: any) => `${m.from}${m.to}${m.promotion || ""}`);
-
-    // Verify last move is checkmate (Stockfish-verified by Chess.com — this just confirms forced mate)
-    const verifier = new Chess(startFen);
-    let isMate = false;
-    for (const uci of solution) {
-      const from = uci.slice(0, 2) as Square;
-      const to = uci.slice(2, 4) as Square;
-      const promotion = uci.length > 4 ? uci[4] : undefined;
-      verifier.move({ from, to, promotion });
-    }
-    isMate = verifier.isCheckmate();
-
-    const startTurn = new Chess(startFen).turn();
-    // Player plays the side that moves first in the solution
-    return {
-      title: p.title,
-      url: p.url,
-      date: new Date(p.publish_time * 1000).toISOString().split("T")[0],
-      startFen,
-      solution,
-      playerColor: startTurn,
-      firstMoveBy: startTurn,
-      isMate,
-    };
-  } catch (e) {
-    console.error("Puzzle parse error:", e);
-    return null;
-  }
-}
-
-// Fetch Lichess daily puzzle (engine-verified, single forced winning line).
-async function fetchVerifiedDailyMate(): Promise<ParsedPuzzle> {
-  const r = await fetch("https://lichess.org/api/puzzle/daily");
-  if (!r.ok) throw new Error(`Lichess HTTP ${r.status}`);
-  const data = await r.json();
-
-  const pgn: string = data.game?.pgn || "";
-  const initialPly: number = data.puzzle?.initialPly ?? 0;
-  const solution: string[] = data.puzzle?.solution || [];
-  const themes: string[] = data.puzzle?.themes || [];
-  const id: string = data.puzzle?.id || "daily";
-
-  if (!pgn || !solution.length) throw new Error("Invalid puzzle payload");
-
-  // Replay exactly the moves before the puzzle position to get the correct FEN.
-  const sourceGame = new Chess();
-  sourceGame.loadPgn(pgn);
-  const sanMoves = sourceGame.history();
-  const board = new Chess();
-  for (let i = 0; i < initialPly && i < sanMoves.length; i++) {
-    try { board.move(sanMoves[i]); } catch { break; }
-  }
-  const startFen = board.fen();
-
-  // Verify solution legality
-  const verifier = new Chess(startFen);
-  for (const uci of solution) {
-    verifier.move({
-      from: uci.slice(0, 2),
-      to: uci.slice(2, 4),
-      promotion: uci.length > 4 ? uci[4] : undefined,
-    });
-  }
-  const isMate = verifier.isCheckmate();
-  const isMateTheme = themes.some((t) => t.toLowerCase().startsWith("matein"));
-
-  return {
-    title: isMate || isMateTheme ? "Daily Mate Puzzle" : "Daily Tactic",
-    url: `https://lichess.org/training/${id}`,
-    date: todayStr(),
-    startFen,
-    solution,
-    playerColor: board.turn(),
-    firstMoveBy: board.turn(),
-    isMate: isMate || isMateTheme,
-  };
+function getMasterChessDailyPuzzle(): ParsedPuzzle {
+  const daySeed = Math.floor(Date.parse(`${todayStr()}T00:00:00.000Z`) / 86_400_000);
+  const puzzle = MASTERCHESS_DAILY_PUZZLES[daySeed % MASTERCHESS_DAILY_PUZZLES.length];
+  return { ...puzzle, date: todayStr() };
 }
 
 
