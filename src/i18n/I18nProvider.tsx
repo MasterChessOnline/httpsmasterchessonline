@@ -16,10 +16,6 @@ function detectInitial(): Lang {
   if (typeof window === "undefined") return "en";
   const stored = localStorage.getItem(STORAGE_KEY) as Lang | null;
   if (stored && stored in DICTS) return stored;
-  const nav = navigator.language.toLowerCase();
-  if (nav.startsWith("sr") || nav.startsWith("hr") || nav.startsWith("bs")) return "sr";
-  if (nav.startsWith("ru") || nav.startsWith("uk") || nav.startsWith("be")) return "ru";
-  if (nav.startsWith("es")) return "es";
   return "en";
 }
 
