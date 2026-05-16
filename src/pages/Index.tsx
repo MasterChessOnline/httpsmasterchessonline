@@ -23,7 +23,7 @@ import ParallaxCard from "@/components/ParallaxCard";
 import DynamicBackground from "@/components/DynamicBackground";
 import DailyMissions from "@/components/DailyMissions";
 import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
-import DailyRewardWidget from "@/components/DailyRewardWidget";
+
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
