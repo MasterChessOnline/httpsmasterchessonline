@@ -202,21 +202,38 @@ interface DailyMissionsProps {
 
 export default function DailyMissions({ compact = false }: DailyMissionsProps) {
   const { user } = useAuth();
-  const { missions, loading, claimMission, completedCount, totalCount, claimableXp } =
-    useDailyMissions();
+  const {
+    missions,
+    loading,
+    claimMission,
+    completedCount,
+    totalCount,
+    claimableXp,
+    xpClaimedToday,
+  } = useDailyMissions();
   const [claiming, setClaiming] = useState<string | null>(null);
-  const visible = compact ? (user ? missions : previewMissions).slice(0, 4) : missions;
+  // Hide already-claimed missions — once claimed it's gone for today.
+  const liveMissions = missions.filter((m) => !m.claimed);
+  const visible = compact
+    ? (user ? liveMissions : previewMissions).slice(0, 4)
+    : (user ? liveMissions : previewMissions);
 
   const handleClaim = async (key: string) => {
     setClaiming(key);
-    const ok = await claimMission(key);
+    const res = await claimMission(key);
     setClaiming(null);
-    if (ok) {
+    if (res.ok) {
       const m = missions.find((x) => x.key === key);
-      toast.success(`+${m?.xp_reward ?? 0} XP earned!`, {
-        description: m?.title,
+      toast.success(`+${res.xp ?? m?.xp_reward ?? 0} XP earned!`, {
+        description: `${m?.title ?? "Mission"} — Total ${res.total ?? 0} XP`,
         icon: "🏆",
       });
+      (res.newBadges ?? []).forEach((b) =>
+        toast.success(`New achievement unlocked!`, {
+          description: b,
+          icon: "🏅",
+        }),
+      );
     } else {
       toast.error("Failed to claim");
     }
@@ -257,7 +274,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
         />
       )}
 
-      <div className="flex items-center justify-between mb-4 relative">
+      <div className="flex items-center justify-between mb-2 relative">
         <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
           <Target className="h-5 w-5 text-primary" />
           Daily Missions
@@ -278,9 +295,19 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
         </div>
       </div>
 
+      <p className="mb-3 text-[11px] text-muted-foreground">
+        <span className="text-primary font-semibold">+{xpClaimedToday} XP</span> claimed today · resets every 24 h
+      </p>
+
       {loading ? (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-5 w-5 animate-spin text-primary/60" />
+        </div>
+      ) : visible.length === 0 ? (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-6 text-center">
+          <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-primary" />
+          <p className="text-sm font-semibold text-foreground">All missions claimed!</p>
+          <p className="text-[11px] text-muted-foreground">New rotation tomorrow at 00:00 UTC.</p>
         </div>
       ) : (
         <div className="space-y-2 relative">
@@ -297,7 +324,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
         </div>
       )}
 
-      {compact && missions.length > 4 && (
+      {compact && liveMissions.length > 4 && (
         <Link
           to="/missions"
           className="mt-3 block text-center text-xs font-semibold text-primary hover:text-primary/80 transition"
