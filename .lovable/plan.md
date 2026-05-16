@@ -1,68 +1,108 @@
-# Make MasterChess Explode vs chess.com / lichess
+# Mobile App Upgrade — 4-Phase Plan
 
-Goal: when anyone lands on the homepage, in 5 seconds they understand **why MasterChess beats chess.com and lichess** and they want in. Pure frontend/presentation work — no backend changes.
+Sve 4 oblasti, izvedene redom da svaka faza ima vidljiv efekat i da rizik bude pod kontrolom.
 
-## What I'll add
+---
 
-### 1. `ProofStrip` (new) — directly under the hero
-A single-line, scroll-marquee strip: "No ads · No bots · No clutter · Streamer-first · Gold-grade UI · 10s to first game · Human-only ELO · Daily tournaments · Skill tree · Real ranks". Subtle gold shimmer, infinite loop. Instant gut-punch of differentiators.
+## Phase 1 — Gameplay Polish (touch board, portrait, haptics)
 
-### 2. `VsTheRest` (new) — the headline weapon
-A bold side-by-side comparison table: **MasterChess vs chess.com vs lichess** across ~10 rows:
-- Premium cinematic UI
-- Zero ads / popups
-- Streamer Mode + overlay embeds
-- Creator integration (DailyChess_12)
-- Human-only ELO (no bot inflation)
-- Skill Tree + XP gamification
-- Referral program with conversion tracking
-- 10-second time-to-first-game
-- Modern, mobile-first design
-- Built-in community / Chess Moments
+**Cilj:** Šahovska tabla i partija da rade savršeno jednom rukom na telefonu.
 
-✅ green checks for MasterChess, ❌/⚠️ for the others — **factual, not slanderous** (we only check ourselves green; competitors get neutral marks where they genuinely lack the feature). Glassmorphic card, gold highlight on our column.
+- **Touch handling table**
+  - Tap-tap-to-move kao default na mobile (drag opciono u Settings)
+  - Larger tap targets: padding oko polja na touch device (≥ 44×44 efektivno)
+  - Drag preview: figura ide iznad prsta + halo na legalnim poljima
+  - Dugi tap = preview legalnih poteza (bez puštanja figure)
+- **Portrait layout** (`<768px`)
+  - Layout: top bar (clock + opponent) → captures pieces → board → captures → bottom bar (my clock + actions)
+  - Action dock fiksiran u dnu (Resign / Draw / Chat / Flip) — palac dohvat
+  - Promotion picker kao bottom sheet (vaul), ne kao centered modal
+- **Haptics** (`navigator.vibrate`, gated by Settings toggle)
+  - Move: 8ms, Capture: 14ms, Check: [10,30,10], Mate/Win: [30,40,30,40,60], Illegal: [40]
+  - Clock low (<10s): jedan pulse na svakih 5s, drugi pattern u zadnjih 5s
+  - Bot taunt prijem: 6ms
+- **Settings dodavanje**
+  - "Tap to move" / "Drag pieces" / "Both"
+  - "Haptic feedback" on/off
+  - "Lock landscape on tablet" on/off
 
-### 3. `Manifesto` (new) — the emotional hook
-Full-bleed dark section, large editorial typography:
-> "Chess deserves better than ads, popups and bot farms. MasterChess is chess the way it should feel — premium, honest, alive."
-Three short lines + a single gold CTA "Claim your seat".
+**Deliverables:** `useTouchBoard` hook, `useHaptics` hook, novi `MobileGameLayout` wrapper, Settings sekcija "Mobile".
 
-### 4. `WallOfReasons` (new) — 12 micro-cards
-Tight 3×4 (desktop) / 2×6 (mobile) grid of one-line punchy reasons with icons: "Zero ads. Forever.", "Real humans only.", "Your rank, earned.", "Streamer-grade overlays.", "Tournaments every night.", "Built in 2026, not 2007.", "Mobile-first board.", "Invite friends, track conversions.", "Skill tree that levels you up.", "Daily missions, daily wins.", "Community that sees you.", "Yours to export, always.".
+---
 
-### 5. `StickyJoinBar` (new) — bottom-of-viewport on mobile, dismissible
-Slim gold bar that slides in after scrolling 60% of homepage: "Join MasterChess — free, 10s setup → [Create account]". One-tap acquisition for mobile users (the user's current viewport is 393px).
+## Phase 2 — Native-like Features
 
-### 6. Hero upgrade
-Add a small kicker line above the hero headline: **"The premium home of online chess"** + a subtle "Built different from chess.com & lichess" microcopy under the CTAs. No layout rewrite — just copy + one badge.
+**Cilj:** PWA da izgleda i deluje kao native app posle install-a.
 
-### 7. Homepage assembly (`src/pages/Index.tsx`)
-New order under hero:
-1. `ProofStrip` (marquee)
-2. existing `StatsSection`
-3. `WhyInvest` (existing)
-4. `VsTheRest` ⭐ new headline weapon
-5. `WhyMasterChess` (existing)
-6. `Manifesto` ⭐ new
-7. `WallOfReasons` ⭐ new
-8. `CallToActionSection` (existing)
-9. `StickyJoinBar` (floating, mobile-only)
+- **Web Share API** — share game/PGN/profil/chess-card preko OS share sheet-a (fallback: copy-to-clipboard)
+- **Manifest `shortcuts`** — long-press na app ikoni: Quick Match, Play vs Bot, Tournaments, Profile
+- **Badging API** (`navigator.setAppBadge`) — broj pending challenges + unread chats na app ikoni
+- **iOS splash screens** — generišemo set za sve aktuelne iPhone rezolucije (12/13/14/15/16 Pro/Plus/Mini)
+- **Status bar theming** — `apple-mobile-web-app-status-bar-style="black-translucent"` + theme-color koji prati background
+- **Bottom sheet pattern** (vaul) za: game settings, share, profile actions, promotion picker, filter sheets
+- **Pull-to-refresh** na Home, Tournaments lobby, Leaderboard, History (custom hook, ne native)
 
-## Technical notes
-- All new components in `src/components/landing/`.
-- Uses existing design tokens: `text-gradient-gold`, `glass-4d`, `shadow-glow-lg`, `ripple-btn`, primary/foreground/muted-foreground HSL tokens. No new colors.
-- Framer Motion for marquee, scroll reveals, sticky bar slide-in.
-- Mobile-first (393px): comparison table becomes stacked accordion-style on <640px, manifesto type scales down, wall becomes 2-col.
-- No new dependencies. No backend, no schema, no edge functions.
-- SEO: keeps single H1 in hero; new sections use H2/H3.
+**Deliverables:** `useShare`, `useAppBadge` hookovi, splash generator skripta, `BottomSheet` komponenta, `PullToRefresh` wrapper, manifest shortcuts.
 
-## Files
-- create `src/components/landing/ProofStrip.tsx`
-- create `src/components/landing/VsTheRest.tsx`
-- create `src/components/landing/Manifesto.tsx`
-- create `src/components/landing/WallOfReasons.tsx`
-- create `src/components/landing/StickyJoinBar.tsx`
-- edit `src/pages/Index.tsx` (mount the new sections)
-- edit `src/components/HeroSection.tsx` (kicker + microcopy only — small copy tweak)
+---
 
-After implementation I'll QA at 393px viewport to confirm everything reads cleanly on mobile.
+## Phase 3 — Push Notifications (VAPID + Edge)
+
+**Cilj:** Igrač prima notifikaciju i kad je app potpuno zatvoren.
+
+- **Backend** (Supabase)
+  - Tabela `push_subscriptions` (user_id, endpoint, p256dh, auth, platform, created_at) sa RLS
+  - Tabela `notification_preferences` (per-type toggle: challenges, your_turn, tournaments, daily_reminder)
+  - VAPID ključevi kao secrets: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
+  - Edge funkcija `push-send` — prima `{user_ids, payload}`, šalje preko `web-push` (npm), čisti expired endpoints
+  - Triggers/Edge hooks:
+    - challenge insert → push opponentu ("X challenged you")
+    - online_games move → push protivniku ("Your turn")
+    - tournament starting (15min, 1min) → push svim registrovanima
+- **Frontend**
+  - `usePushSubscription` hook — registruje SW, poziva `pushManager.subscribe()` sa VAPID public key, upsert u DB
+  - Permission prompt sa kontekstom (ne na page load) — npr. posle prve odigrane partije
+  - Service worker `push` event handler + `notificationclick` koji otvara deep link
+  - Settings UI za per-type toggle
+- **Cleanup**
+  - Postojeći `DailyReminderNotifier` (client-side) ostaje kao fallback, ali backend cron preuzima slanje
+
+**Deliverables:** SQL migracije, edge funkcija `push-send`, SW push handlers, `usePushSubscription`, Settings → Notifications panel.
+
+---
+
+## Phase 4 — Performance
+
+**Cilj:** TTI < 2s na 4G mid-range Androidu, smooth 60fps scrolling.
+
+- **Code splitting**
+  - `React.lazy` za teške rute: Tournaments, Analysis, Game Review, Stream Hub, Coach, Stats
+  - Stockfish WASM lazy load — tek kad korisnik otvori vs Bot ili Analysis (ne na app start)
+- **Skeleton loaders** zamenjuju spinnere na: Home cards, Leaderboard, Tournaments, History, Profile
+- **Images**
+  - `vite-imagetools` plugin → bundled assets generišu `webp` + `avif` varijante
+  - Avatari sa `loading="lazy"` + `decoding="async"` + explicit `width`/`height` (anti-CLS)
+  - LCP image (home hero) preload u index.html sa `fetchpriority="high"`
+- **List virtualization** (`@tanstack/react-virtual`) na: Leaderboard, History, Community feed (>50 items)
+- **Network**
+  - React Query već postoji — dodati `staleTime`/`gcTime` defaults i `placeholderData` za instant transitions
+  - Debounce na search input (300ms) u Command Palette i player search
+- **Bundle audit**
+  - `rollup-plugin-visualizer` da identifikujemo top 10 najtežih chunkova
+  - Tree-shake unused lucide ikone, zameniti barrel imports
+- **Mobile-specific**
+  - Disable framer-motion page transitions na `lite` mode (već postoji) + extend to heavy animation komponenti
+  - `content-visibility: auto` na off-screen sekcijama Home stranice
+
+**Deliverables:** lazy route konfiguracija, `Skeleton*` komponente per page, `vite-imagetools` setup, virtualized liste, bundle analyzer report.
+
+---
+
+## Technical Notes
+
+- **Redosled izvođenja:** Phase 1 → 4 → 2 → 3 (Phase 4 ranije jer ubrzava sve ostale; Phase 3 zahteva produkcijski deploy da bi VAPID radio — testira se na publish URL-u, ne u editor preview-u)
+- **PWA constraint:** push notifikacije rade samo na published/installed PWA (ne u Lovable preview iframe) — biće naglašeno korisniku posle Phase 3
+- **Bez breaking changes** za desktop — sve dodavanja su iza mobile breakpoint-a (`md:hidden` ili `useIsMobile`) ili iza opt-in Settings toggle-a
+- **Bundle target:** initial chunk < 200KB gzipped posle Phase 4
+
+Reci samo "Implement plan" i krećem sa Fazom 1.
