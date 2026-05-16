@@ -101,7 +101,7 @@ const Settings = () => {
   });
   const [pieceStyle, setPieceStyle] = useState(() => {
     const saved = settings.pieceStyle;
-    return PIECE_STYLES.find(p => p.key === saved) ? saved : "standard";
+    return PIECE_STYLES.find(p => p.key === saved) ? saved : "merida";
   });
   const [moveSound, setMoveSound] = useState(settings.moveSound ?? true);
   const [captureSound, setCaptureSound] = useState(settings.captureSound ?? true);

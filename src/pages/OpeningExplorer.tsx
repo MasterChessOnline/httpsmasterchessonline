@@ -190,7 +190,7 @@ export default function OpeningExplorer() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Seo title={"Opening Explorer — Lichess Database | MasterChess"} description={"Browse millions of master games by opening move. Filter by style and study top variations."} path="/opening-explorer" type="website" />
+      <Seo title={"Opening Explorer — Master Games Database | MasterChess"} description={"Browse millions of master games by opening move. Filter by style and study top variations."} path="/opening-explorer" type="website" />
       <Navbar />
       <div className="container mx-auto px-3 py-4 max-w-7xl">
         {/* Header */}
