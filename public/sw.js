@@ -1,5 +1,5 @@
 // MasterChess service worker - lightweight offline shell + cache for static assets
-const CACHE = "mc-shell-v4";
+const CACHE = "mc-shell-v5";
 const SHELL = ["/", "/manifest.json", "/favicon.ico", "/app-icon-192.png", "/app-icon-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
@@ -73,7 +73,7 @@ self.addEventListener("fetch", (e) => {
 
 // Push notifications support
 self.addEventListener("push", (event) => {
-  let data = { title: "MasterChess", body: "Imate novo obaveštenje", url: "/" };
+  let data = { title: "Master Chess", body: "You have a new notification", url: "/" };
   try {
     if (event.data) data = { ...data, ...event.data.json() };
   } catch {}

@@ -99,6 +99,7 @@ import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
 import InstallPrompt from "@/components/InstallPrompt";
 import AppLaunchSplash from "@/components/AppLaunchSplash";
+import NotificationPrompt from "@/components/NotificationPrompt";
 import SmartNotifier from "@/components/SmartNotifier";
 import Titles from "./pages/Titles";
 import Missions from "./pages/Missions";
@@ -238,6 +239,7 @@ const App = () => (
             <GameInviteListener />
             <MobileBottomNav />
             <InstallPrompt />
+            <NotificationPrompt />
             <SmartNotifier />
           </Suspense>
         </BrowserRouter>
