@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Download, Apple, X, Check, ExternalLink, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import SafariMacDemo from "@/components/install-demos/SafariMacDemo";
+import IOSDemo from "@/components/install-demos/IOSDemo";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
