@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
 
   let body: any = {};
   try { body = await req.json(); } catch { body = {}; }
-  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes } = body;
+  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes, arena_duration_minutes } = body;
 
   // Public action: auto-start due tournaments (called by cron). No user required.
   if (action === "auto_start_due") {
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
   try {
     if (action === "create") {
       // Any authenticated user can create a tournament (they become the creator).
-      return await handleCreate(supabase, user.id, { name, category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment, starts_in_minutes });
+      return await handleCreate(supabase, user.id, { name, category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment, starts_in_minutes, arena_duration_minutes });
     }
     if (action === "join") {
       return await handleJoin(supabase, user.id, tournament_id);
@@ -88,7 +88,9 @@ async function handleCreate(supabase: any, userId: string, opts: any) {
       description: `${opts.format || "swiss"} tournament — auto-starts at scheduled time`,
       category: cat,
       format: opts.format || "swiss",
-      tournament_type: opts.format === "round-robin" ? "round_robin" : "swiss",
+      tournament_type: opts.format === "round-robin" ? "round_robin"
+        : (opts.format === "arena" || opts.format === "daily_cup" || opts.format === "blitz_royale") ? "arena"
+        : "swiss",
       total_rounds: opts.total_rounds || 5,
       max_players: opts.max_players || 32,
       time_control_label: opts.time_control_label || "5+3",
@@ -96,6 +98,7 @@ async function handleCreate(supabase: any, userId: string, opts: any) {
       time_control_increment: opts.time_control_increment || 3,
       status: "registering",
       starts_at: startsAt,
+      arena_duration_minutes: opts.arena_duration_minutes ?? null,
       created_by: userId,
       start_time_locked: false,
     })
