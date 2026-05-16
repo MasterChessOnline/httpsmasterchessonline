@@ -642,6 +642,7 @@ const Index = () => {
 
       <SiteRating />
       <Footer />
+      <StickyJoinBar />
     </div>
   );
 };
