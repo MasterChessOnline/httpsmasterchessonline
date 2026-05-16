@@ -114,9 +114,9 @@ export default function InstallAppButton({
       return;
     }
     // 4. On live site but browser hasn't fired beforeinstallprompt yet
-    //    (e.g. user just landed, criteria not met). Reload to give Chrome
-    //    a chance to surface the address-bar install icon.
-    window.location.href = LIVE_URL + "?install=1";
+    //    (e.g. Firefox, Samsung Internet, Brave, or criteria not met).
+    //    Show manual install instructions instead of silent reload.
+    setShowAndroidHelp(true);
   };
 
   const sizeClass =
