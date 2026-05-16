@@ -405,6 +405,8 @@ async function handleStart(supabase: any, tournament_id: string, callerId: strin
     })
     .eq("id", tournament_id);
 
+  await notifyTournamentStart(supabase, tournament_id);
+
   return jsonRes({ success: true, round: 1 });
 }
 
