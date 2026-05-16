@@ -28,6 +28,7 @@ import BoardThemeCard from "@/components/settings/BoardThemeCard";
 import PieceStyleCard from "@/components/settings/PieceStyleCard";
 import LiveBoardPreview from "@/components/settings/LiveBoardPreview";
 import AccessibilityPanel from "@/components/AccessibilityPanel";
+import InstallAppButton from "@/components/InstallAppButton";
 
 type SettingsSection = "account" | "profile" | "gameplay" | "training" | "improvement" | "appearance" | "audio" | "accessibility" | "language" | "notifications" | "privacy";
 
@@ -231,6 +232,57 @@ const Settings = () => {
                 <Label className="text-xs text-muted-foreground">Status</Label>
                 <div className="flex items-center gap-2 mt-1"><div className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-sm text-foreground">Active</span></div>
               </div>
+
+              {/* App / PWA management */}
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">MasterChess App</p>
+                    <p className="text-xs text-muted-foreground">Version {(import.meta as any).env?.VITE_APP_VERSION || "1.0.0"}</p>
+                  </div>
+                  <InstallAppButton variant="navbar" />
+                </div>
+                <Separator className="opacity-40" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        if ("serviceWorker" in navigator) {
+                          const regs = await navigator.serviceWorker.getRegistrations();
+                          await Promise.all(regs.map(r => r.update()));
+                        }
+                        toast.success("Checked for updates");
+                      } catch { toast.error("Update check failed"); }
+                    }}
+                  >Check for Updates</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        if ("caches" in window) {
+                          const keys = await caches.keys();
+                          await Promise.all(keys.map(k => caches.delete(k)));
+                        }
+                        toast.success("App cache cleared");
+                      } catch { toast.error("Couldn't clear cache"); }
+                    }}
+                  >Clear Cache</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      if (!("Notification" in window)) { toast.error("Notifications not supported"); return; }
+                      const res = await Notification.requestPermission();
+                      if (res === "granted") toast.success("Notifications enabled");
+                      else toast.error("Notifications blocked");
+                    }}
+                  >Enable Notifications</Button>
+                </div>
+              </div>
+
               <Separator />
               <Button variant="destructive" onClick={handleSignOut} className="gap-2"><LogOut className="w-4 h-4" /> Sign Out</Button>
             </div>

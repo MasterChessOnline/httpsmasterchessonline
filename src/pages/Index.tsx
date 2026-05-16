@@ -35,6 +35,7 @@ import Manifesto from "@/components/landing/Manifesto";
 import WallOfReasons from "@/components/landing/WallOfReasons";
 import StickyJoinBar from "@/components/landing/StickyJoinBar";
 import InstallAppButton from "@/components/InstallAppButton";
+import PlayAnywhereSection from "@/components/PlayAnywhereSection";
 
 interface RecentGame {
   id: string;
@@ -632,6 +633,9 @@ const Index = () => {
           <TestimonialsCarousel />
         </div>
       </section>
+
+      {/* Install MasterChess — Play Anywhere */}
+      <PlayAnywhereSection />
 
       {/* Share MasterChess — site-wide share card */}
       <section className="px-4 pb-16">
