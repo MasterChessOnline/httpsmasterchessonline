@@ -868,6 +868,27 @@ export type Database = {
         }
         Relationships: []
       }
+      lobby_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       matchmaking_queue: {
         Row: {
           created_at: string
@@ -1158,6 +1179,9 @@ export type Database = {
           highest_title_key: string | null
           id: string
           is_streamer: boolean
+          last_login_reward_date: string | null
+          login_streak: number
+          login_streak_best: number
           master_coins: number
           peak_rating: number
           rating: number
@@ -1189,6 +1213,9 @@ export type Database = {
           highest_title_key?: string | null
           id?: string
           is_streamer?: boolean
+          last_login_reward_date?: string | null
+          login_streak?: number
+          login_streak_best?: number
           master_coins?: number
           peak_rating?: number
           rating?: number
@@ -1220,6 +1247,9 @@ export type Database = {
           highest_title_key?: string | null
           id?: string
           is_streamer?: boolean
+          last_login_reward_date?: string | null
+          login_streak?: number
+          login_streak_best?: number
           master_coins?: number
           peak_rating?: number
           rating?: number
@@ -1833,6 +1863,38 @@ export type Database = {
           },
         ]
       }
+      tournament_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_messages_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_pairings: {
         Row: {
           black_player_id: string | null
@@ -2277,6 +2339,7 @@ export type Database = {
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
+      claim_daily_reward: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
       commit_online_move: {
         Args: {
