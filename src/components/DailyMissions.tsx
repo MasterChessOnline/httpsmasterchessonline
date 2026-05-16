@@ -145,6 +145,19 @@ const MissionRow = forwardRef<HTMLDivElement, MissionRowProps>(function MissionR
           >
             {mission.title}
           </span>
+          <span
+            className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+              mission.difficulty === "easy"
+                ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                : mission.difficulty === "medium"
+                ? "bg-sky-500/15 text-sky-300 border border-sky-500/30"
+                : mission.difficulty === "hard"
+                ? "bg-orange-500/15 text-orange-300 border border-orange-500/30"
+                : "bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30"
+            }`}
+          >
+            {mission.difficulty}
+          </span>
         </div>
         <p className="text-[10px] text-muted-foreground truncate">
           {mission.description}
@@ -192,7 +205,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
   const { missions, loading, claimMission, completedCount, totalCount, claimableXp } =
     useDailyMissions();
   const [claiming, setClaiming] = useState<string | null>(null);
-  const visible = compact ? (user ? missions : previewMissions).slice(0, 3) : missions;
+  const visible = compact ? (user ? missions : previewMissions).slice(0, 4) : missions;
 
   const handleClaim = async (key: string) => {
     setClaiming(key);
@@ -284,7 +297,7 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
         </div>
       )}
 
-      {compact && missions.length > 3 && (
+      {compact && missions.length > 4 && (
         <Link
           to="/missions"
           className="mt-3 block text-center text-xs font-semibold text-primary hover:text-primary/80 transition"
