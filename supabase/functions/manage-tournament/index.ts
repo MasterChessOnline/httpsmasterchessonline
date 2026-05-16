@@ -229,6 +229,7 @@ async function handleAutoStartDue(supabase: any) {
       })
       .eq("id", t.id);
 
+    await notifyTournamentStart(supabase, t.id);
     started.push(t.id);
   }
 
@@ -403,6 +404,8 @@ async function handleStart(supabase: any, tournament_id: string, callerId: strin
       round_started_at: new Date().toISOString(),
     })
     .eq("id", tournament_id);
+
+  await notifyTournamentStart(supabase, tournament_id);
 
   return jsonRes({ success: true, round: 1 });
 }
@@ -753,3 +756,35 @@ function jsonRes(data: any, status = 200) {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
+
+async function notifyTournamentStart(supabase: any, tournamentId: string) {
+  try {
+    const { data: t } = await supabase
+      .from("tournaments")
+      .select("id, name")
+      .eq("id", tournamentId)
+      .single();
+    if (!t) return;
+    const { data: regs } = await supabase
+      .from("tournament_registrations")
+      .select("user_id")
+      .eq("tournament_id", tournamentId);
+    const userIds = (regs ?? []).map((r: any) => r.user_id).filter(Boolean);
+    if (userIds.length === 0) return;
+    await supabase.functions.invoke("push-send", {
+      body: {
+        user_ids: userIds,
+        type: "tournaments",
+        payload: {
+          title: "🏆 Tournament started!",
+          body: `${t.name} just began. Round 1 is live — good luck!`,
+          url: `/tournaments/${tournamentId}`,
+          tag: `tournament-start-${tournamentId}`,
+        },
+      },
+    });
+  } catch (err) {
+    console.error("notifyTournamentStart failed", err);
+  }
+}
+

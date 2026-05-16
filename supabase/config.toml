@@ -5,3 +5,5 @@ project_id = "kicabdwgdyabibioycbq"
     verify_jwt = false
   [functions.process-email-queue]
     verify_jwt = true
+  [functions.push-daily-reminder]
+    verify_jwt = false
