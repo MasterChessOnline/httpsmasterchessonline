@@ -115,20 +115,21 @@ export default function ChessBoard({
   const [mateBurstSquare, setMateBurstSquare] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check transition: false → true triggers shake + sound
+    // Check transition: false → true triggers shake + sound + haptic
     if (inCheck && !prevCheckRef.current) {
       shakeControls.start({
         x: [0, -8, 8, -6, 6, -3, 3, 0],
         transition: { duration: 0.45, ease: "easeInOut" },
       });
       try { playCheckSound(); } catch {}
+      triggerHaptic("check");
     }
     prevCheckRef.current = inCheck;
   }, [inCheck, shakeControls]);
 
   useEffect(() => {
     if (isCheckmate && !prevMateRef.current) {
-      // Big particle burst on losing king's square + boom sound
+      // Big particle burst on losing king's square + boom sound + mate haptic
       const losingKing = findKingSquare(board, game.turn());
       setMateBurstSquare(losingKing);
       setMateBurstKey(k => k + 1);
@@ -137,9 +138,23 @@ export default function ChessBoard({
         transition: { duration: 0.7, ease: "easeInOut" },
       });
       try { playGameOverSound(); } catch {}
+      triggerHaptic("mate");
     }
     prevMateRef.current = isCheckmate;
   }, [isCheckmate, board, game, shakeControls]);
+
+  // Haptic on opponent's last move (capture vs move), only when board changes
+  const prevHistoryLenRef = useRef(0);
+  useEffect(() => {
+    try {
+      const h = game.history({ verbose: true });
+      if (h.length > prevHistoryLenRef.current) {
+        const last = h[h.length - 1] as any;
+        triggerHaptic(last?.captured ? "capture" : "move");
+      }
+      prevHistoryLenRef.current = h.length;
+    } catch { /* ignore */ }
+  }, [lastMove?.from, lastMove?.to, game]);
 
   // Track a move counter to generate unique keys for slide animations
   const moveCountRef = useRef(0);
