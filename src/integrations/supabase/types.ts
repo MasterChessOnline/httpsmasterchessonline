@@ -1191,6 +1191,7 @@ export type Database = {
           profile_banner: string | null
           push_notifications_enabled: boolean
           rating: number
+          total_xp: number
           updated_at: string
           user_id: string
           username: string | null
@@ -1228,6 +1229,7 @@ export type Database = {
           profile_banner?: string | null
           push_notifications_enabled?: boolean
           rating?: number
+          total_xp?: number
           updated_at?: string
           user_id: string
           username?: string | null
@@ -1265,6 +1267,7 @@ export type Database = {
           profile_banner?: string | null
           push_notifications_enabled?: boolean
           rating?: number
+          total_xp?: number
           updated_at?: string
           user_id?: string
           username?: string | null
@@ -2440,6 +2443,7 @@ export type Database = {
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
+      claim_daily_mission: { Args: { p_key: string }; Returns: Json }
       claim_daily_reward: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
       commit_online_move: {
