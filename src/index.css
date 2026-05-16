@@ -98,6 +98,9 @@
 }
 
 @layer utilities {
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
   .text-gradient-neon {
     background: var(--gradient-neon);
     -webkit-background-clip: text;
