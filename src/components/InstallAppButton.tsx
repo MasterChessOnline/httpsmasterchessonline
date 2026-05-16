@@ -77,16 +77,27 @@ export default function InstallAppButton({
       setShowIosHelp(true);
       return;
     }
-    // 3. Likely inside an iframe (Lovable preview) or browser hasn't fired
-    //    beforeinstallprompt yet → open live site in a new tab where the
-    //    install banner / address-bar install icon will appear natively.
+    // 3. Inside Lovable preview iframe → break out to live domain (same tab
+    //    in the top window) where the browser's native install dialog can
+    //    actually fire. Sandbox iframes physically cannot install a PWA.
     if (isInIframe) {
-      window.open(LIVE_URL, "_blank", "noopener,noreferrer");
+      try {
+        // Break out of the iframe so the user lands on masterchess.live
+        // as a top-level navigation where install is allowed.
+        if (window.top) {
+          window.top.location.href = LIVE_URL + "?install=1";
+        } else {
+          window.location.href = LIVE_URL + "?install=1";
+        }
+      } catch {
+        window.location.href = LIVE_URL + "?install=1";
+      }
       return;
     }
-    // 4. Desktop browser with no install criteria met yet → open same-tab
-    //    address-bar install hint.
-    window.open(LIVE_URL, "_blank", "noopener,noreferrer");
+    // 4. On live site but browser hasn't fired beforeinstallprompt yet
+    //    (e.g. user just landed, criteria not met). Reload to give Chrome
+    //    a chance to surface the address-bar install icon.
+    window.location.href = LIVE_URL + "?install=1";
   };
 
   const sizeClass =
