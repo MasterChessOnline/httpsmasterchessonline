@@ -28,7 +28,7 @@ export default function Press() {
       <Seo
         title="Press Kit — MasterChess"
         description="Press kit, brand assets, fact sheet and media contact for MasterChess — the streamer-first online chess platform."
-        canonical="https://masterchess.live/press"
+        path="/press"
       />
       <Navbar />
 
