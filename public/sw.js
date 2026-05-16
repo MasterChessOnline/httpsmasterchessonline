@@ -16,6 +16,13 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
+// Allow the page to trigger immediate activation of a newly installed worker.
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
