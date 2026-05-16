@@ -499,17 +499,17 @@ export default function ChessBoard({
         </div>
 
         {/* Rank labels right */}
-        <div className="flex flex-col w-5 flex-shrink-0">
+        <div className="flex flex-col w-7 flex-shrink-0">
           {displayRanks.map((r) => (
-            <span key={r} className="flex-1 flex items-center justify-center text-[10px] font-mono text-muted-foreground/40">{r}</span>
+            <span key={`r-${r}`} className={rankLabelClass}>{r}</span>
           ))}
         </div>
       </div>
 
       {/* Coordinate labels bottom */}
-      <div className="flex ml-6 mr-1 mt-0.5">
+      <div className="flex ml-7 mr-7 mt-0.5">
         {displayFiles.map((f) => (
-          <span key={f} className="flex-1 text-center text-[10px] font-mono text-muted-foreground/40">{f}</span>
+          <span key={`bot-${f}`} className={fileLabelClass}>{f}</span>
         ))}
       </div>
     </div>
