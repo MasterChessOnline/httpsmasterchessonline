@@ -73,7 +73,7 @@ export default function InstallAppButton({
   }, []);
 
   // Hide forever once installed or already running as PWA (but keep visible
-  // during the brief "Instalirano" confirmation animation).
+  // during the brief "Installed" confirmation animation).
   if ((installed || isStandalone) && !justInstalled) return null;
 
 
@@ -108,9 +108,21 @@ export default function InstallAppButton({
       }
       return;
     }
-    // 3. iOS — Apple does not allow programmatic install. Show the only
-    //    available path: Add to Home Screen via Share sheet.
+    // 3. iOS — Apple blocks fully automatic web-app installs, so trigger the
+    //    native Share sheet immediately from the tap (the fastest allowed flow).
     if (isIos) {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "MasterChess",
+            text: "Install MasterChess on your iPhone.",
+            url: window.location.origin,
+          });
+          return;
+        } catch {
+          // User closed the native sheet or browser refused it; fall back below.
+        }
+      }
       setShowIosHelp(true);
       return;
     }
