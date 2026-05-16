@@ -541,6 +541,20 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
           <EvalBar evalCp={engine.evalCp} mate={engine.mate} loading={engine.loading} />
         )}
 
+        <div className="flex-1 flex flex-col">
+          {/* Top file labels */}
+          <div className="flex ml-6 mr-6 mb-0.5">
+            {displayFiles.map((f) => (
+              <span key={`t-${f}`} className="flex-1 text-center text-[11px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{f}</span>
+            ))}
+          </div>
+          <div className="flex">
+            {/* Left rank labels */}
+            <div className="flex flex-col w-6 flex-shrink-0">
+              {displayRanks.map((r) => (
+                <span key={`l-${r}`} className="flex-1 flex items-center justify-center text-[11px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]">{r}</span>
+              ))}
+            </div>
         <div
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
