@@ -1,8 +1,9 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Chess, Square } from "chess.js";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { usePieceGlyphs } from "@/lib/piece-glyphs";
 import { useMoveInputMode, dragEnabled, clickEnabled } from "@/hooks/use-move-input-mode";
+import { playCheckSound, playGameOverSound } from "@/lib/chess-sounds";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -104,6 +105,41 @@ export default function ChessBoard({
   // Subtle indicator: which king is currently in check?
   const inCheck = game.inCheck();
   const checkedKingSquare = inCheck ? findKingSquare(board, game.turn()) : null;
+  const isCheckmate = game.isCheckmate();
+
+  // ── Board shake on check + checkmate sound/effect triggers ──
+  const shakeControls = useAnimation();
+  const prevCheckRef = useRef(false);
+  const prevMateRef = useRef(false);
+  const [mateBurstKey, setMateBurstKey] = useState(0);
+  const [mateBurstSquare, setMateBurstSquare] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check transition: false → true triggers shake + sound
+    if (inCheck && !prevCheckRef.current) {
+      shakeControls.start({
+        x: [0, -8, 8, -6, 6, -3, 3, 0],
+        transition: { duration: 0.45, ease: "easeInOut" },
+      });
+      try { playCheckSound(); } catch {}
+    }
+    prevCheckRef.current = inCheck;
+  }, [inCheck, shakeControls]);
+
+  useEffect(() => {
+    if (isCheckmate && !prevMateRef.current) {
+      // Big particle burst on losing king's square + boom sound
+      const losingKing = findKingSquare(board, game.turn());
+      setMateBurstSquare(losingKing);
+      setMateBurstKey(k => k + 1);
+      shakeControls.start({
+        x: [0, -14, 14, -10, 10, -5, 5, 0],
+        transition: { duration: 0.7, ease: "easeInOut" },
+      });
+      try { playGameOverSound(); } catch {}
+    }
+    prevMateRef.current = isCheckmate;
+  }, [isCheckmate, board, game, shakeControls]);
 
   // Track a move counter to generate unique keys for slide animations
   const moveCountRef = useRef(0);
@@ -214,7 +250,8 @@ export default function ChessBoard({
         </div>
 
         {/* Board */}
-        <div
+        <motion.div
+          animate={shakeControls}
           className="flex-1 rounded-lg overflow-hidden shadow-card border border-border/30 relative"
           role="grid"
           aria-label="Chess board"
@@ -517,9 +554,50 @@ export default function ChessBoard({
             </svg>
           )}
 
+          {/* Checkmate burst — explosion of gold particles on losing king */}
+          {mateBurstSquare && (
+            <svg
+              key={`mate-${mateBurstKey}`}
+              viewBox="0 0 800 800"
+              preserveAspectRatio="none"
+              className="absolute inset-0 w-full h-full pointer-events-none z-[25] motion-reduce:hidden"
+              aria-hidden
+            >
+              {(() => {
+                const c = squareToXY(mateBurstSquare);
+                return Array.from({ length: 24 }).map((_, i) => {
+                  const angle = (Math.PI * 2 * i) / 24;
+                  const dist = 180 + (i % 3) * 60;
+                  const dx = Math.cos(angle) * dist;
+                  const dy = Math.sin(angle) * dist;
+                  return (
+                    <motion.circle
+                      key={i}
+                      cx={c.x} cy={c.y} r={10}
+                      fill={i % 2 ? "hsl(43 95% 60%)" : "hsl(30 95% 55%)"}
+                      initial={{ opacity: 1, scale: 0.3 }}
+                      animate={{ opacity: 0, scale: 1.4, cx: c.x + dx, cy: c.y + dy }}
+                      transition={{ duration: 1.4, ease: "easeOut" }}
+                    />
+                  );
+                });
+              })()}
+              {/* Center flash */}
+              <motion.circle
+                cx={squareToXY(mateBurstSquare).x}
+                cy={squareToXY(mateBurstSquare).y}
+                r={40}
+                fill="hsl(43 95% 65%)"
+                initial={{ opacity: 0.9, scale: 0.2 }}
+                animate={{ opacity: 0, scale: 4 }}
+                transition={{ duration: 0.9, ease: "easeOut" }}
+              />
+            </svg>
+          )}
+
           {/* Game-over / status overlay */}
           {overlay}
-        </div>
+        </motion.div>
 
         {/* Rank labels right */}
         <div className="flex flex-col w-7 flex-shrink-0">
