@@ -3,6 +3,8 @@ import { Bell, BellOff, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { usePushSubscription } from "@/hooks/use-push-subscription";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * PWA push notifications opt-in.
@@ -12,6 +14,8 @@ import { usePushSubscription } from "@/hooks/use-push-subscription";
 export default function PushNotificationToggle() {
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const { status, busy, enable, disable, supported, refresh } = usePushSubscription();
+  const { user } = useAuth();
+  const [testing, setTesting] = useState(false);
   const enabled = status === "subscribed";
 
   useEffect(() => {
@@ -41,6 +45,36 @@ export default function PushNotificationToggle() {
     const ok = await disable();
     if (ok) toast.success("Obaveštenja isključena.");
     else toast.error("Nije moguće isključiti obaveštenja.");
+  };
+
+  const handleTest = async () => {
+    if (!user) {
+      toast.error("Morate biti prijavljeni.");
+      return;
+    }
+    setTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("push-send", {
+        body: {
+          user_ids: [user.id],
+          type: "system",
+          payload: {
+            title: "MasterChess test",
+            body: "Push obaveštenja rade! ♟️",
+            url: "/",
+          },
+        },
+      });
+      if (error) throw error;
+      const sent = (data as any)?.sent ?? 0;
+      if (sent > 0) toast.success(`Test poslat (${sent}). Proveri notifikacije.`);
+      else toast.error("Nije poslato — proveri da je uređaj pretplaćen.");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Greška pri slanju testa.");
+    } finally {
+      setTesting(false);
+    }
   };
 
   return (
@@ -77,6 +111,19 @@ export default function PushNotificationToggle() {
             <p className="text-xs text-destructive mt-2 flex items-center gap-1.5">
               <AlertCircle className="w-3.5 h-3.5" /> Dozvola je odbijena — uključite je u podešavanjima pretraživača.
             </p>
+          )}
+          {enabled && (
+            <div className="mt-3">
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                disabled={testing}
+                onClick={handleTest}
+              >
+                {testing ? "Šaljem..." : "Pošalji test"}
+              </Button>
+            </div>
           )}
         </div>
       </div>
