@@ -320,8 +320,8 @@ const PlayOnline = () => {
               setRematchOfferedByMe(false);
               setRematchOfferedByOpponent(false);
               navigate(`/play/online?game=${newId}`, { replace: true });
-              // Force a clean reload so use-online-game picks up the fresh ?game=
-              setTimeout(() => window.location.reload(), 50);
+              // Smooth in-place reload — no full page restart.
+              window.dispatchEvent(new CustomEvent("online-game-load", { detail: newId }));
             }
           }
         }
@@ -615,7 +615,7 @@ const PlayOnline = () => {
     });
     setRematchOfferedByOpponent(false);
     navigate(`/play/online?game=${created.id}`, { replace: true });
-    setTimeout(() => window.location.reload(), 50);
+    window.dispatchEvent(new CustomEvent("online-game-load", { detail: created.id }));
   };
 
   const declineRematch = async () => {
