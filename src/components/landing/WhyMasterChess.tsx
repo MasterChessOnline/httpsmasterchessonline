@@ -1,37 +1,61 @@
 import { motion } from "framer-motion";
-import { ShieldCheck, Users, Radio, Crown, Zap, Trophy } from "lucide-react";
+import { ShieldCheck, Users, Radio, Crown, Zap, Trophy, Sparkles, Heart, Globe2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const pillars = [
   {
-    icon: ShieldCheck,
-    title: "No Noise",
-    body: "A clean board-first experience where players can focus, improve, and enjoy real games without clutter.",
+    icon: Crown,
+    title: "A Premium Club, Not a Crowd",
+    body: "Gold & black cinematic design. Every game, profile and invite feels like it belongs in a real chess club — not a noisy game portal.",
   },
   {
     icon: Users,
-    title: "Real Players",
-    body: "Built around authentic human games, fair competition, profiles, ratings, and a community that feels personal.",
+    title: "Real Humans, Real Games",
+    body: "Authentic player-vs-player chess with ELO, ranks and profiles. No engine help in human games — just honest skill.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "No Clutter, No Ads",
+    body: "Board-first interface. No popups, no upsells, no dark patterns. You open the site and you play.",
   },
   {
     icon: Radio,
-    title: "Streamer-First",
-    body: "Distraction-free Streamer Mode, overlay-ready embeds, and live integration with DailyChess_12.",
-  },
-  {
-    icon: Crown,
-    title: "Premium Identity",
-    body: "Gold & black design, cinematic boards, and a luxury chess feel that makes every invite look serious.",
+    title: "Made for Streamers",
+    body: "Distraction-free Streamer Mode, overlay embeds and a live hub with DailyChess_12 built into the site.",
   },
   {
     icon: Zap,
     title: "Fast to Start",
-    body: "One clear path: enter, play, train, compete. New players understand the site in seconds.",
+    body: "Pick a time control, hit Play. No tutorials, no walls. New players are in a real game in under 10 seconds.",
   },
   {
     icon: Trophy,
-    title: "Built to Grow",
-    body: "Tournaments, streaks, ranks, missions, and share tools give people a reason to come back and bring friends.",
+    title: "Reasons to Come Back",
+    body: "Daily challenges, missions, win streaks, ranks Bronze→Grandmaster, tournaments and a skill tree that levels you up.",
   },
+  {
+    icon: Sparkles,
+    title: "Train Without Tedium",
+    body: "Opening Trainer, bot personalities, Guess the Move and Play Like a GM modes — practice that feels like play.",
+  },
+  {
+    icon: Heart,
+    title: "A Community That Notices You",
+    body: "Followers, Chess Moments, badges, quick chat. People actually see your wins and your style.",
+  },
+  {
+    icon: Globe2,
+    title: "Yours, Forever",
+    body: "Your account, your rating, your games — clean export, full history, multi-language. You own your chess life here.",
+  },
+];
+
+const bigStats = [
+  { value: "10s", label: "to your first game" },
+  { value: "0", label: "ads, popups, upsells" },
+  { value: "100%", label: "human-vs-human play" },
+  { value: "24/7", label: "tournaments & lobbies" },
 ];
 
 export default function WhyMasterChess() {
@@ -44,13 +68,39 @@ export default function WhyMasterChess() {
         transition={{ duration: 0.6 }}
         className="text-center mb-8"
       >
-        <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-          Why Players Choose <span className="text-primary">MasterChess</span>
+        <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-primary mb-3">
+          <Crown className="h-3 w-3" /> Why MasterChess
+        </span>
+        <h2 className="font-display text-2xl sm:text-4xl font-black text-foreground tracking-tight">
+          Built for players who want{" "}
+          <span className="text-gradient-gold">chess to feel serious again</span>
         </h2>
-        <p className="text-sm text-muted-foreground mt-2 max-w-2xl mx-auto">
-          Invite people into a premium chess club, not another crowded game page: clean play, human competition, streamer tools, ranks, and a brand that feels worth joining.
+        <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-2xl mx-auto leading-relaxed">
+          MasterChess is a premium home for real human play. Clean board, honest competition,
+          streamer-grade tools, and a brand that makes every invite worth accepting.
         </p>
       </motion.div>
+
+      {/* Big stats acquisition strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-8">
+        {bigStats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.06, duration: 0.45 }}
+            className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-transparent to-transparent p-3 sm:p-4 text-center glass-4d"
+          >
+            <div className="font-display text-xl sm:text-3xl font-black text-gradient-gold leading-none">
+              {s.value}
+            </div>
+            <div className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider mt-1.5">
+              {s.label}
+            </div>
+          </motion.div>
+        ))}
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {pillars.map((p, i) => (
@@ -59,7 +109,7 @@ export default function WhyMasterChess() {
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ y: -6 }}
             className="relative rounded-2xl border border-primary/15 glass-4d p-4 sm:p-5 overflow-hidden group"
           >
@@ -74,6 +124,34 @@ export default function WhyMasterChess() {
           </motion.div>
         ))}
       </div>
+
+      {/* Acquisition CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="mt-10 rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent p-5 sm:p-7 text-center"
+      >
+        <h3 className="font-display text-lg sm:text-2xl font-bold text-foreground mb-2">
+          Stop playing on noisy sites. Start playing where chess feels like chess.
+        </h3>
+        <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto mb-4">
+          Create your free account, get your rank, join a tournament tonight.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link to="/signup">
+            <Button size="lg" className="ripple-btn h-12 px-7 font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg">
+              Join MasterChess
+            </Button>
+          </Link>
+          <Link to="/play/online">
+            <Button size="lg" variant="outline" className="h-12 px-7 rounded-xl border-border/40 hover:border-primary/40">
+              Play a game now
+            </Button>
+          </Link>
+        </div>
+      </motion.div>
     </section>
   );
 }
