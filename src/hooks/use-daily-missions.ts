@@ -77,40 +77,41 @@ export function useDailyMissions() {
   }, [refresh]);
 
   const claimMission = useCallback(
-    async (missionKey: string): Promise<boolean> => {
-      if (!user) return false;
+    async (
+      missionKey: string,
+    ): Promise<{ ok: boolean; xp?: number; total?: number; newBadges?: string[] }> => {
+      if (!user) return { ok: false };
       const m = missions.find((x) => x.key === missionKey);
-      if (!m || !m.completed || m.claimed) return false;
+      if (!m || !m.completed || m.claimed) return { ok: false };
 
-      const { error } = await supabase
-        .from("user_mission_progress" as any)
-        .update({
-          claimed: true,
-          claimed_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id)
-        .eq("mission_key", missionKey)
-        .eq("mission_date", todayIso());
+      const { data, error } = await supabase.rpc("claim_daily_mission" as any, {
+        p_key: missionKey,
+      });
 
-      if (error) {
-        console.error("Claim failed", error);
-        return false;
+      if (error || !(data as any)?.ok) {
+        console.error("Claim failed", error ?? data);
+        return { ok: false };
       }
       await refresh();
-      return true;
+      return {
+        ok: true,
+        xp: (data as any).xp_awarded,
+        total: (data as any).total_xp,
+        newBadges: (data as any).new_badges ?? [],
+      };
     },
-    [user, missions, refresh]
+    [user, missions, refresh],
   );
 
   const completedCount = missions.filter((m) => m.completed).length;
   const claimedCount = missions.filter((m) => m.claimed).length;
-  const totalXp = missions.reduce(
+  const xpClaimedToday = missions.reduce(
     (acc, m) => acc + (m.claimed ? m.xp_reward : 0),
-    0
+    0,
   );
   const claimableXp = missions.reduce(
     (acc, m) => acc + (m.completed && !m.claimed ? m.xp_reward : 0),
-    0
+    0,
   );
 
   return {
@@ -121,7 +122,7 @@ export function useDailyMissions() {
     completedCount,
     claimedCount,
     totalCount: missions.length,
-    totalXp,
+    xpClaimedToday,
     claimableXp,
   };
 }
