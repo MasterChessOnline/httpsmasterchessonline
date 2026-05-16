@@ -266,6 +266,7 @@ const App = () => (
             <IOSInstallOverlay />
             <DailyReminderNotifier />
             <SmartNotifier />
+            <AppBadgeSync />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
