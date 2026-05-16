@@ -36,6 +36,8 @@ import About from "./pages/About";
 import FairPlay from "./pages/FairPlay";
 import Referrals from "./pages/Referrals";
 import Press from "./pages/Press";
+import Streamers from "./pages/Streamers";
+import EmbedRating from "./pages/EmbedRating";
 import Topics from "./pages/Topics";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -176,6 +178,8 @@ function AnimatedRoutes() {
           <Route path="/fair-play" element={<FairPlay />} />
           <Route path="/referrals" element={<Referrals />} />
           <Route path="/press" element={<Press />} />
+          <Route path="/streamers" element={<Streamers />} />
+          <Route path="/embed/rating/:username" element={<EmbedRating />} />
           <Route path="/topics" element={<Topics />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
