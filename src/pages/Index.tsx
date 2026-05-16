@@ -31,7 +31,6 @@ import WhyMasterChess from "@/components/landing/WhyMasterChess";
 import WhyInvest from "@/components/landing/WhyInvest";
 import TestimonialsCarousel from "@/components/landing/TestimonialsCarousel";
 import ProofStrip from "@/components/landing/ProofStrip";
-import VsTheRest from "@/components/landing/VsTheRest";
 import Manifesto from "@/components/landing/Manifesto";
 import WallOfReasons from "@/components/landing/WallOfReasons";
 import StickyJoinBar from "@/components/landing/StickyJoinBar";
