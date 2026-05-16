@@ -181,6 +181,12 @@ export default function InstallAppButton({
         )}
       </AnimatePresence>
 
+              <div className="mb-3">
+                <IOSDemo />
+                <p className="mt-1 text-center text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                  Live preview · loops automatically
+                </p>
+              </div>
 
       <AnimatePresence>
         {showIosHelp && (
