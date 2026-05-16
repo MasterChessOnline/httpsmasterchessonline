@@ -23,9 +23,15 @@ export default function InstallAppButton({
   );
   const [justInstalled, setJustInstalled] = useState(false);
   const [showIosHelp, setShowIosHelp] = useState(false);
+  const [showAndroidHelp, setShowAndroidHelp] = useState(false);
 
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+  // Catches Safari, Chrome, Firefox, Edge on iPhone/iPad — all use WebKit.
   const isIos =
-    typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
+    /iPad|iPhone|iPod/.test(ua) ||
+    (typeof navigator !== "undefined" &&
+      navigator.platform === "MacIntel" &&
+      (navigator as any).maxTouchPoints > 1);
   const isStandalone =
     typeof window !== "undefined" &&
     (window.matchMedia("(display-mode: standalone)").matches ||
