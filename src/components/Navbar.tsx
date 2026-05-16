@@ -297,22 +297,43 @@ const Navbar = () => {
                     <AnimatePresence>
                       {activeDropdown === section.key && (
                         <motion.div
-                          initial={{ opacity: 0, y: 10, scale: 0.97 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                          className={`absolute left-1/2 -translate-x-1/2 rounded-2xl z-[70] backdrop-blur-2xl flex flex-col ${
+                          initial={{ opacity: 0, y: 14, scale: 0.96, rotateX: -8 }}
+                          animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                          exit={{ opacity: 0, y: 8, scale: 0.97, rotateX: -4 }}
+                          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                          className={`absolute left-1/2 -translate-x-1/2 rounded-2xl z-[70] backdrop-blur-2xl flex flex-col overflow-hidden ${
                             section.wide ? "w-[340px]" : "w-[260px]"
                           }`}
                           style={{
                             top: shrunk ? "calc(100% + 12px)" : "calc(100% + 34px)",
-                            background: `linear-gradient(135deg, hsla(${section.accent} / 0.12) 0%, hsl(220 15% 6%) 35%, hsl(220 15% 5%) 100%)`,
-                            border: `1px solid hsla(${section.accent} / 0.35)`,
-                            boxShadow: `0 18px 50px rgba(0,0,0,0.85), 0 0 30px -5px rgba(${section.accentRgb},0.2), inset 0 1px 0 hsla(${section.accent} / 0.15)`,
+                            transformOrigin: "top center",
+                            background: `linear-gradient(160deg, hsla(${section.accent} / 0.14) 0%, hsl(220 15% 6%) 38%, hsl(220 18% 4%) 100%)`,
+                            border: `1px solid hsla(${section.accent} / 0.4)`,
+                            boxShadow: `0 24px 60px rgba(0,0,0,0.9), 0 0 40px -8px rgba(${section.accentRgb},0.3), inset 0 1px 0 hsla(${section.accent} / 0.2), inset 0 -1px 0 rgba(0,0,0,0.4)`,
                           }}
                           onMouseEnter={() => handleMouseEnter(section.key)}
                           onMouseLeave={handleMouseLeave}
                         >
+                          {/* animated top accent line */}
+                          <motion.div
+                            className="absolute top-0 left-0 right-0 h-[2px] pointer-events-none z-10"
+                            initial={{ scaleX: 0, opacity: 0 }}
+                            animate={{ scaleX: 1, opacity: 1 }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                            style={{
+                              transformOrigin: "left",
+                              background: `linear-gradient(90deg, transparent 0%, hsla(${section.accent} / 0.95) 50%, transparent 100%)`,
+                              boxShadow: `0 0 14px hsla(${section.accent} / 0.75)`,
+                            }}
+                          />
+                          {/* subtle radial glow at top */}
+                          <div
+                            className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-24 pointer-events-none opacity-60"
+                            style={{
+                              background: `radial-gradient(ellipse at top, hsla(${section.accent} / 0.4) 0%, transparent 70%)`,
+                            }}
+                          />
+
                           <div
                             className="px-3 pt-3 pb-2 flex items-center gap-2 shrink-0 rounded-t-2xl"
                             style={{
