@@ -193,20 +193,23 @@ export default function ChessBoard({
   };
   const handlePieceDragEnd = () => { setDragFrom(null); };
 
+  const fileLabelClass = "flex-1 text-center text-[11px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]";
+  const rankLabelClass = "flex-1 flex items-center justify-center text-[11px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]";
+
   return (
     <div className={className ?? "w-full max-w-[min(90vw,520px)] mx-auto"}>
       {/* Coordinate labels top */}
-      <div className="flex ml-6 mr-1 mb-0.5">
+      <div className="flex ml-7 mr-7 mb-0.5">
         {displayFiles.map((f) => (
-          <span key={f} className="flex-1 text-center text-[10px] font-mono text-muted-foreground/60">{f}</span>
+          <span key={`top-${f}`} className={fileLabelClass}>{f}</span>
         ))}
       </div>
 
       <div className="flex">
         {/* Rank labels left */}
-        <div className="flex flex-col w-6 flex-shrink-0">
+        <div className="flex flex-col w-7 flex-shrink-0">
           {displayRanks.map((r) => (
-            <span key={r} className="flex-1 flex items-center justify-center text-[10px] font-mono text-muted-foreground/60">{r}</span>
+            <span key={`l-${r}`} className={rankLabelClass}>{r}</span>
           ))}
         </div>
 
