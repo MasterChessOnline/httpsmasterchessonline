@@ -26,12 +26,35 @@ export default function InstallAppButton({
   const [showAndroidHelp, setShowAndroidHelp] = useState(false);
 
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-  // Catches Safari, Chrome, Firefox, Edge on iPhone/iPad — all use WebKit.
-  const isIos =
-    /iPad|iPhone|iPod/.test(ua) ||
-    (typeof navigator !== "undefined" &&
-      navigator.platform === "MacIntel" &&
-      (navigator as any).maxTouchPoints > 1);
+  const nav = (typeof navigator !== "undefined" ? navigator : null) as
+    | (Navigator & { userAgentData?: { platform?: string; mobile?: boolean }; standalone?: boolean })
+    | null;
+
+  // True iPhone / iPad / iPod detection across Safari, Chrome (CriOS),
+  // Firefox (FxiOS), Edge (EdgiOS) and in-app WebViews. All iOS browsers
+  // are WebKit-only, so we explicitly require WebKit AND exclude Android,
+  // which prevents false positives on Android browsers that spoof "like Mac".
+  const isAppleHardware = /iPad|iPhone|iPod/.test(ua);
+  // iPadOS 13+ reports as "MacIntel" — distinguish from real desktop Macs
+  // by requiring multi-touch AND that we're NOT a UA-Client-Hints desktop.
+  const isIpadOsDesktopMode =
+    nav?.platform === "MacIntel" &&
+    typeof nav?.maxTouchPoints === "number" &&
+    nav.maxTouchPoints > 1 &&
+    // userAgentData.mobile is reliable on Chromium; if it explicitly says
+    // desktop (false on a Mac without touch), don't treat as iPad.
+    nav?.userAgentData?.mobile !== false &&
+    // Belt-and-suspenders: real iPads have no "Macintosh" + Chrome desktop UA.
+    !/Android/i.test(ua);
+  // Some iOS WebViews (Gmail, Facebook, Instagram, TikTok, LinkedIn) wrap
+  // WebKit and may strip "iPhone" from the UA — detect via standalone flag
+  // (iOS-only) when WebKit is present and Android is not.
+  const isIosWebView =
+    !/Android/i.test(ua) &&
+    /AppleWebKit/.test(ua) &&
+    typeof nav?.standalone === "boolean" &&
+    /Mobile/.test(ua);
+  const isIos = isAppleHardware || isIpadOsDesktopMode || isIosWebView;
   const isInIframe = (() => {
     try {
       return typeof window !== "undefined" && window.self !== window.top;
