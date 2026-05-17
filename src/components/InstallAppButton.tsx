@@ -143,14 +143,10 @@ export default function InstallAppButton({
       }
       return;
     }
-    // 4. Desktop/Android without a deferred prompt available yet
-    //    (e.g. already-eligible Chrome that fired the event before mount, or
-    //    PWA criteria not yet met). Skip the intro modal — just nudge with a
-    //    short toast pointing at the address-bar install icon.
-    toast("Tap the install icon ⊕ in your address bar", {
-      description: "Or open your browser menu → Install app.",
-      duration: 5000,
-    });
+    // 4. Desktop/Android without a deferred prompt — show the step-by-step
+    //    guide modal (covers Chrome/Edge/Brave install icon + Safari macOS
+    //    File → Add to Dock) so the user can still add the app manually.
+    setShowAndroidHelp(true);
   };
 
   const sizeClass =
