@@ -294,9 +294,7 @@ const Navbar = () => {
                       <section.icon className="relative h-4 w-4 shrink-0" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
                       <span
                         className="relative whitespace-nowrap transition-colors duration-300"
-                        style={{
-                          color: isActive || activeDropdown === section.key ? accentColor : undefined,
-                        }}
+                        style={{ color: accentColor }}
                       >
                         {section.label}
                       </span>
