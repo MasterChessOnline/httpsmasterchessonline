@@ -155,8 +155,8 @@ export default function InstallAppButton({
 
   const sizeClass =
     variant === "hero"
-      ? "h-14 px-8 text-base rounded-xl"
-      : "h-9 px-3 text-xs rounded-lg";
+      ? "h-16 px-7 text-base rounded-2xl"
+      : "h-10 px-4 text-xs rounded-xl";
 
   return (
     <>
@@ -170,7 +170,7 @@ export default function InstallAppButton({
             transition={{ type: "spring", stiffness: 320, damping: 22 }}
           >
             <div
-              className={`${sizeClass} inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 font-display uppercase tracking-wider shadow-[0_0_24px_-4px_rgba(16,185,129,0.55)]`}
+              className={`${sizeClass} inline-flex items-center justify-center gap-2 border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 font-display uppercase tracking-wider shadow-[0_0_24px_-4px_rgba(16,185,129,0.55)]`}
               role="status"
               aria-live="polite"
             >
@@ -182,30 +182,33 @@ export default function InstallAppButton({
           <motion.div
             key="install"
             className="relative inline-block"
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.96 }}
-            initial={{ opacity: 0, y: 6 }}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.96, y: 1 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
+            transition={{ type: "spring", stiffness: 280, damping: 22 }}
           >
-            {/* Pulsing attention ring */}
+            {/* Outer pulsing glow halo */}
             <motion.span
               aria-hidden
-              className="absolute inset-0 rounded-xl bg-amber-400/40 -z-10"
-              animate={{ scale: [1, 1.18, 1], opacity: [0.45, 0, 0.45] }}
+              className="absolute -inset-3 rounded-[1.75rem] bg-amber-400/35 blur-2xl -z-20"
+              animate={{ opacity: [0.35, 0.7, 0.35], scale: [1, 1.08, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            />
+            {/* Expanding ring — pulses outward */}
+            <motion.span
+              aria-hidden
+              className="absolute inset-0 rounded-2xl border-2 border-amber-300/70 -z-10"
+              animate={{ scale: [1, 1.22, 1.22], opacity: [0.9, 0, 0] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
             />
-            {/* Soft glow halo */}
-            <span
-              aria-hidden
-              className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-amber-400/30 via-amber-300/50 to-amber-500/30 blur-md -z-10"
-            />
-            {/* "NEW" pill badge */}
+            {/* "FREE" badge */}
             {variant === "hero" && (
               <motion.span
                 aria-hidden
-                className="absolute -top-2 -right-2 z-10 rounded-full bg-gradient-to-br from-red-500 to-rose-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-lg shadow-rose-500/50 ring-2 ring-background"
-                animate={{ rotate: [-4, 4, -4], scale: [1, 1.08, 1] }}
+                className="absolute -top-2.5 -right-2.5 z-20 rounded-full bg-gradient-to-br from-red-500 to-rose-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-[0_4px_14px_rgba(244,63,94,0.6)] ring-2 ring-background"
+                animate={{ rotate: [-5, 5, -5], scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
                 Free
@@ -213,26 +216,34 @@ export default function InstallAppButton({
             )}
             <Button
               onClick={handleClick}
-              className={`ripple-btn ${sizeClass} relative overflow-hidden border-0 bg-gradient-to-r from-amber-500 via-amber-300 to-amber-500 bg-[length:200%_100%] text-zinc-950 hover:text-zinc-950 font-display font-extrabold uppercase tracking-wider gap-2 shadow-[0_8px_28px_-4px_rgba(251,191,36,0.7)] hover:shadow-[0_10px_36px_-2px_rgba(251,191,36,0.9)] transition-all animate-[shimmer_3s_linear_infinite]`}
-              style={{
-                animation: "shimmer 3s linear infinite",
-              }}
+              className={`${sizeClass} relative overflow-hidden border-0 text-zinc-950 hover:text-zinc-950 font-display font-black uppercase tracking-[0.12em] gap-3 transition-all duration-300 bg-[linear-gradient(135deg,#f59e0b_0%,#fde68a_25%,#fbbf24_50%,#fde68a_75%,#f59e0b_100%)] bg-[length:200%_100%] shadow-[0_10px_30px_-6px_rgba(251,191,36,0.65),inset_0_1px_0_0_rgba(255,255,255,0.45),inset_0_-2px_0_0_rgba(120,53,15,0.35)] hover:shadow-[0_14px_38px_-4px_rgba(251,191,36,0.9),inset_0_1px_0_0_rgba(255,255,255,0.55),inset_0_-2px_0_0_rgba(120,53,15,0.4)]`}
+              style={{ animation: "shimmer 3.5s linear infinite" }}
             >
-              {/* Sweep highlight */}
+              {/* Diagonal sweep highlight */}
               <motion.span
                 aria-hidden
-                className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12 pointer-events-none"
-                animate={{ x: ["0%", "500%"] }}
-                transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.6 }}
+                className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent skew-x-[-20deg] pointer-events-none"
+                animate={{ x: ["0%", "600%"] }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8 }}
               />
-              {deferred || !isInIframe ? (
-                <Download className="h-5 w-5 relative" />
-              ) : (
-                <ExternalLink className="h-5 w-5 relative" />
-              )}
-              <span className="relative">
-                {variant === "hero" ? "Install App" : "Install"}
+              {/* Icon in dark contrast bubble */}
+              <span className={`relative flex items-center justify-center rounded-lg bg-zinc-950/85 shadow-inner ring-1 ring-amber-200/30 ${variant === "hero" ? "h-9 w-9" : "h-6 w-6"}`}>
+                {deferred || !isInIframe ? (
+                  <Download className={`text-amber-300 ${variant === "hero" ? "h-4 w-4" : "h-3.5 w-3.5"}`} strokeWidth={2.8} />
+                ) : (
+                  <ExternalLink className={`text-amber-300 ${variant === "hero" ? "h-4 w-4" : "h-3.5 w-3.5"}`} strokeWidth={2.8} />
+                )}
               </span>
+              {variant === "hero" ? (
+                <span className="relative flex flex-col items-start leading-none">
+                  <span className="text-[15px]">Install App</span>
+                  <span className="text-[9px] font-bold tracking-[0.25em] opacity-70 mt-1">
+                    Free · No Store
+                  </span>
+                </span>
+              ) : (
+                <span className="relative">Install</span>
+              )}
             </Button>
           </motion.div>
         )}
