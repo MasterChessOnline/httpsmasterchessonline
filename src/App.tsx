@@ -101,17 +101,19 @@ const TeamBattles = lazy(() => import("./pages/TeamBattles"));
 // Eager components (used in every page chrome)
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
-import WelcomeIntroPopup from "@/components/WelcomeIntroPopup";
 import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
-import InstallPrompt from "@/components/InstallPrompt";
 import AppLaunchSplash from "@/components/AppLaunchSplash";
-import NotificationPrompt from "@/components/NotificationPrompt";
-import IOSInstallOverlay from "@/components/IOSInstallOverlay";
-import DailyReminderNotifier from "@/components/DailyReminderNotifier";
-import SmartNotifier from "@/components/SmartNotifier";
-import AppBadgeSync from "@/components/AppBadgeSync";
 import ReferralTracker from "@/hooks/useReferralTracker";
+
+// Non-critical overlays — lazy-loaded so they don't block first paint.
+const WelcomeIntroPopup = lazy(() => import("@/components/WelcomeIntroPopup"));
+const InstallPrompt = lazy(() => import("@/components/InstallPrompt"));
+const NotificationPrompt = lazy(() => import("@/components/NotificationPrompt"));
+const IOSInstallOverlay = lazy(() => import("@/components/IOSInstallOverlay"));
+const DailyReminderNotifier = lazy(() => import("@/components/DailyReminderNotifier"));
+const SmartNotifier = lazy(() => import("@/components/SmartNotifier"));
+const AppBadgeSync = lazy(() => import("@/components/AppBadgeSync"));
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {

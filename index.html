@@ -12,6 +12,14 @@
     <meta name="google-site-verification" content="dlmxLE2WITGYdQXxGSeNlMMOC86hhW-IPObiVqgfXVg" />
     <link rel="canonical" href="https://masterchess.live/" />
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- Performance: preconnect to backend + asset CDNs so first API and image
+         requests skip DNS + TLS handshake on cold load. -->
+    <link rel="preconnect" href="https://kicabdwgdyabibioycbq.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://kicabdwgdyabibioycbq.supabase.co" />
+    <link rel="preconnect" href="https://i.ytimg.com" crossorigin />
+    <link rel="dns-prefetch" href="https://i.ytimg.com" />
+    <link rel="preload" as="image" href="/app-icon-512.png" fetchpriority="high" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MasterChess" />

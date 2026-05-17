@@ -1,6 +1,6 @@
 {
-  "name": "Master Chess — Play Chess Online Free",
-  "short_name": "MasterChess",
+  "name": "MasterChess — Play Chess Online",
+  "short_name": "Master Chess",
   "description": "Play chess online free vs players or AI bots, live tournaments, Stockfish analysis, and opening trainer. No puzzles — just real chess.",
   "id": "/",
   "start_url": "/?utm_source=pwa",
@@ -11,6 +11,7 @@
   "background_color": "#0b0b0d",
   "theme_color": "#0b0b0d",
   "lang": "en",
+  "dir": "ltr",
   "categories": ["games", "entertainment", "education"],
   "icons": [
     { "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

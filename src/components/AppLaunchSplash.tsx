@@ -35,7 +35,7 @@ export default function AppLaunchSplash() {
     if (sessionStorage.getItem("mc.splash.shown") === "1") return;
     sessionStorage.setItem("mc.splash.shown", "1");
     setVisible(true);
-    const t = setTimeout(() => setVisible(false), 2000);
+    const t = setTimeout(() => setVisible(false), 2600);
     return () => clearTimeout(t);
   }, []);
 
@@ -94,6 +94,55 @@ export default function AppLaunchSplash() {
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
           />
+
+          {/* Chess board assembling — 64 squares cascade in diagonally */}
+          <motion.div
+            aria-hidden
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            initial={{ rotateX: 55, rotateZ: -8, scale: 0.85, opacity: 0 }}
+            animate={{ rotateX: 55, rotateZ: -8, scale: 1, opacity: 0.55 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.35 } }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            style={{ perspective: 1000, transformStyle: "preserve-3d" }}
+          >
+            <div
+              className="grid grid-cols-8 gap-0 rounded-md overflow-hidden border border-amber-300/20 shadow-[0_40px_120px_-20px_rgba(251,191,36,0.45)]"
+              style={{
+                width: "min(70vw, 420px)",
+                height: "min(70vw, 420px)",
+              }}
+            >
+              {Array.from({ length: 64 }).map((_, i) => {
+                const row = Math.floor(i / 8);
+                const col = i % 8;
+                const dark = (row + col) % 2 === 1;
+                // Diagonal stagger: squares closer to top-left land first.
+                const delay = (row + col) * 0.035;
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: -40, rotateX: 90 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                    transition={{
+                      duration: 0.45,
+                      ease: [0.22, 1, 0.36, 1],
+                      delay,
+                    }}
+                    className={
+                      dark
+                        ? "bg-gradient-to-br from-[#3a2a14] to-[#1a0f05]"
+                        : "bg-gradient-to-br from-[#d9b876] to-[#a8854a]"
+                    }
+                  />
+                );
+              })}
+            </div>
+            {/* Gold floor reflection */}
+            <div
+              className="absolute left-1/2 -translate-x-1/2 -bottom-10 h-16 w-3/4 rounded-[50%] blur-2xl bg-amber-400/30"
+              aria-hidden
+            />
+          </motion.div>
 
           {/* Content */}
           <div className="relative h-full w-full flex flex-col items-center justify-center px-6">
