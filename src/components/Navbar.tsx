@@ -291,7 +291,7 @@ const Navbar = () => {
                           background: `linear-gradient(110deg, transparent 30%, hsla(${section.accent} / 0.18) 50%, transparent 70%)`,
                         }}
                       />
-                      <section.icon className="relative h-4 w-4 shrink-0" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
+                      <section.icon className="relative h-4 w-4 shrink-0" style={{ color: accentColor }} />
                       <span
                         className="relative whitespace-nowrap transition-colors duration-300"
                         style={{ color: accentColor }}
@@ -300,7 +300,7 @@ const Navbar = () => {
                       </span>
                       <ChevronDown
                         className={`relative h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
-                        style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined}
+                        style={{ color: accentColor }}
                       />
                       {isActive && (
                         <motion.span
