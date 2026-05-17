@@ -12,6 +12,18 @@ bootstrapVisualSettings();
 bootstrapSoundPack();
 bootstrapA11y();
 
+// Capture the install prompt at the earliest possible moment so it's never
+// missed by late-mounting components. Chrome fires `beforeinstallprompt`
+// once and won't refire — we stash it on window for the Install button.
+(() => {
+  if (typeof window === "undefined") return;
+  window.addEventListener("beforeinstallprompt", (e: Event) => {
+    e.preventDefault();
+    (window as unknown as { __mcInstallPrompt?: Event }).__mcInstallPrompt = e;
+    window.dispatchEvent(new Event("mc:install-ready"));
+  });
+})();
+
 // Service worker: register only in production AND only outside Lovable previews/iframes.
 // Inside the editor preview a cached shell would mask code changes.
 //
