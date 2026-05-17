@@ -160,6 +160,40 @@ export default function AppLaunchSplash() {
             />
           </motion.div>
 
+          {/* Flying chess pieces — swoop in from off-screen, settle, then linger */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" aria-hidden>
+            {flyingPieces.map((p, i) => (
+              <motion.span
+                key={i}
+                className="absolute select-none text-amber-300"
+                style={{
+                  fontSize: p.size,
+                  lineHeight: 1,
+                  filter: "drop-shadow(0 6px 24px rgba(251,191,36,0.55)) drop-shadow(0 0 12px rgba(251,191,36,0.35))",
+                  textShadow: "0 0 14px rgba(251,191,36,0.6)",
+                  left: 0,
+                  top: 0,
+                }}
+                initial={{ x: p.fromX, y: p.fromY, rotate: 0, scale: 0.4, opacity: 0 }}
+                animate={{
+                  x: [p.fromX, p.toX, p.toX + (i % 2 === 0 ? -8 : 8)],
+                  y: [p.fromY, p.toY, p.toY - 6],
+                  rotate: [0, p.rotate, p.rotate],
+                  scale: [0.4, 1.1, 1],
+                  opacity: [0, 1, 1],
+                }}
+                transition={{
+                  duration: 2.6,
+                  times: [0, 0.55, 1],
+                  ease: [0.22, 1, 0.36, 1],
+                  delay: p.delay,
+                }}
+              >
+                {p.char}
+              </motion.span>
+            ))}
+          </div>
+
           {/* Content */}
           <div className="relative h-full w-full flex flex-col items-center justify-center px-6">
             {/* Crown crest */}
