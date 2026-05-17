@@ -300,7 +300,7 @@ const Navbar = () => {
                       </span>
                       <ChevronDown
                         className={`relative h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
-                        style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined}
+                        style={{ color: accentColor }}
                       />
                       {isActive && (
                         <motion.span
