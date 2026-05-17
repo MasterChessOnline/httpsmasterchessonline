@@ -31,15 +31,31 @@ export default function AppLaunchSplash() {
         return true;
       }
     })();
-    if (!isStandalone || isInIframe) return;
+    const isMobile =
+      window.matchMedia?.("(max-width: 768px)").matches ||
+      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    // Show on PWA standalone OR mobile browsers (per-session). Never inside the editor iframe.
+    if (isInIframe) return;
+    if (!isStandalone && !isMobile) return;
     if (sessionStorage.getItem("mc.splash.shown") === "1") return;
     sessionStorage.setItem("mc.splash.shown", "1");
     setVisible(true);
-    const t = setTimeout(() => setVisible(false), 2600);
+    const t = setTimeout(() => setVisible(false), 3600);
     return () => clearTimeout(t);
   }, []);
 
   const letters = "MASTERCHESS".split("");
+
+  // Flying chess pieces — swoop in from off-screen toward final positions around the crest.
+  const flyingPieces = [
+    { char: "♞", fromX: -420, fromY: -360, toX: -180, toY: -120, rotate: -540, delay: 0.10, size: 64 },
+    { char: "♝", fromX: 460, fromY: -380, toX: 170, toY: -110, rotate: 480, delay: 0.22, size: 58 },
+    { char: "♜", fromX: -500, fromY: 320, toX: -190, toY: 130, rotate: -360, delay: 0.34, size: 60 },
+    { char: "♛", fromX: 480, fromY: 340, toX: 180, toY: 140, rotate: 420, delay: 0.46, size: 68 },
+    { char: "♟", fromX: 0, fromY: -460, toX: 0, toY: -210, rotate: 720, delay: 0.58, size: 42 },
+    { char: "♞", fromX: 520, fromY: 40, toX: 230, toY: 20, rotate: -420, delay: 0.70, size: 50 },
+    { char: "♝", fromX: -520, fromY: 60, toX: -230, toY: 30, rotate: 540, delay: 0.82, size: 52 },
+  ];
 
   return (
     <AnimatePresence>
@@ -143,6 +159,40 @@ export default function AppLaunchSplash() {
               aria-hidden
             />
           </motion.div>
+
+          {/* Flying chess pieces — swoop in from off-screen, settle, then linger */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" aria-hidden>
+            {flyingPieces.map((p, i) => (
+              <motion.span
+                key={i}
+                className="absolute select-none text-amber-300"
+                style={{
+                  fontSize: p.size,
+                  lineHeight: 1,
+                  filter: "drop-shadow(0 6px 24px rgba(251,191,36,0.55)) drop-shadow(0 0 12px rgba(251,191,36,0.35))",
+                  textShadow: "0 0 14px rgba(251,191,36,0.6)",
+                  left: 0,
+                  top: 0,
+                }}
+                initial={{ x: p.fromX, y: p.fromY, rotate: 0, scale: 0.4, opacity: 0 }}
+                animate={{
+                  x: [p.fromX, p.toX, p.toX + (i % 2 === 0 ? -8 : 8)],
+                  y: [p.fromY, p.toY, p.toY - 6],
+                  rotate: [0, p.rotate, p.rotate],
+                  scale: [0.4, 1.1, 1],
+                  opacity: [0, 1, 1],
+                }}
+                transition={{
+                  duration: 2.6,
+                  times: [0, 0.55, 1],
+                  ease: [0.22, 1, 0.36, 1],
+                  delay: p.delay,
+                }}
+              >
+                {p.char}
+              </motion.span>
+            ))}
+          </div>
 
           {/* Content */}
           <div className="relative h-full w-full flex flex-col items-center justify-center px-6">
