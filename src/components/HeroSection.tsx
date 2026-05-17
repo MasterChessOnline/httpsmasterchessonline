@@ -29,11 +29,11 @@ const FloatingPiece = ({ piece, delay, x, y, size }: { piece: string; delay: num
 );
 
 const activities = [
-  "GrandMaster_Alex won a Blitz game in 23 moves",
-  "ChessNinja42 earned a 15-day streak badge 🔥",
-  "Tournament: Weekly Blitz starting in 2 hours",
-  "Sarah_K reached 1400 ELO rating! 📈",
-  "DarkKnight99 won 5 games in a row! 🏆",
+  "No engines. No assistants. Just human players.",
+  "Rated games · ELO that actually moves.",
+  "9 unique bots from 400 to 2000 ELO — each plays its own style.",
+  "Daily tournaments. Real opponents. Honest wins.",
+  "Manual review. You decide what was brilliant.",
 ];
 
 const LiveTicker = () => {
@@ -177,30 +177,27 @@ const HeroSection = () => {
 
         <motion.p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground/90 leading-relaxed"
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.3 }}>
-          Real games, real ratings. Battle 9 unique bots, climb the online ladder,
-          and prove your skill move by move.
+          Real games. Real ratings. No engine help, no ghosts —
+          just you, the board, and the next move.
         </motion.p>
 
         <motion.div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center"
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.6 }}>
-          <Link to="/play">
-            <Button size="lg" className="btn-neon bg-primary text-primary-foreground hover:bg-primary/90 px-10 py-6 text-lg font-bold shadow-glow-lg group relative overflow-hidden shimmer gold-reflection">
-              <span className="relative z-10 flex items-center">
-                <Swords className="mr-2 h-5 w-5" /> Play vs Bots
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Button>
-          </Link>
           <Link to={user ? "/play/online" : "/play"}>
-            <Button size="lg" className="btn-neon bg-gradient-to-r from-amber-500 to-yellow-500 text-black hover:brightness-110 px-10 py-6 text-lg font-bold shadow-glow-lg group relative overflow-hidden">
+            <Button size="lg" className="btn-neon bg-primary text-primary-foreground hover:bg-primary/90 px-12 py-7 text-lg font-bold shadow-glow-lg group relative overflow-hidden shimmer gold-reflection">
               <span className="relative z-10 flex items-center">
                 <Wifi className="mr-2 h-5 w-5" /> Play Online
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </span>
             </Button>
           </Link>
+          <Link to="/play">
+            <Button size="lg" variant="outline" className="border-primary/30 hover:border-primary/60 hover:bg-primary/5 text-foreground px-8 py-7 text-base font-semibold group">
+              <Swords className="mr-2 h-5 w-5 text-primary" /> Play vs Bots
+            </Button>
+          </Link>
           <Link to="/learn">
-            <Button size="lg" variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-foreground/5 px-6 text-sm">
+            <Button size="lg" variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-foreground/5 px-5 text-sm">
               <BookOpen className="mr-2 h-4 w-4" /> Learn
             </Button>
           </Link>
@@ -209,8 +206,8 @@ const HeroSection = () => {
         <motion.div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 w-full max-w-3xl"
           initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 2 }}>
           {[
-            { icon: Users, label: "Online Now", value: "2,847", color: "text-emerald" },
-            { icon: Zap, label: "Games Today", value: "14,203", color: "text-primary" },
+            { icon: Shield, label: "Fair Play", value: "No Engines", color: "text-emerald" },
+            { icon: Swords, label: "Unique Bots", value: "9 Styles", color: "text-primary" },
             { icon: Trophy, label: "Tournaments", value: "Daily", color: "text-primary" },
             { icon: Target, label: "Analysis", value: "Stockfish", color: "text-primary" },
           ].map(({ icon: Icon, label, value, color }, i) => (
