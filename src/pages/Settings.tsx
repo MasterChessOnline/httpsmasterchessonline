@@ -23,7 +23,7 @@ import TitleBadge from "@/components/TitleBadge";
 import { COUNTRIES, findCountry } from "@/lib/countries";
 import { BOARD_THEMES, PIECE_STYLES, applyBoardTheme, applyPieceStyle } from "@/lib/board-themes";
 import { useMoveInputMode as _unused, getMoveInputMode, setMoveInputMode, type MoveInputMode } from "@/hooks/use-move-input-mode";
-import { SOUND_PACKS, applySoundPack, playMoveSound } from "@/lib/chess-sounds";
+import { SOUND_PACKS, applySoundPack, playMoveSound, setMasterVolume, setMuted, getMasterVolume, isMuted } from "@/lib/chess-sounds";
 import BoardThemeCard from "@/components/settings/BoardThemeCard";
 import PieceStyleCard from "@/components/settings/PieceStyleCard";
 import LiveBoardPreview from "@/components/settings/LiveBoardPreview";
@@ -630,10 +630,50 @@ const Settings = () => {
               ))}
               <div className="rounded-xl border border-border/50 bg-card/60 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div><p className="text-sm font-medium text-foreground">Volume</p></div>
-                  <span className="text-xs text-muted-foreground font-mono">{volume}%</span>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Master volume</p>
+                    <p className="text-xs text-muted-foreground">Applies to every sound on the site.</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground font-mono">{isMuted() ? "muted" : `${volume}%`}</span>
                 </div>
-                <Slider value={[volume]} onValueChange={([v]) => { setVolume(v); saveSetting("volume", v); }} min={0} max={100} step={5} />
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !isMuted();
+                      setMuted(next);
+                      saveSetting("soundMuted", next);
+                      toast.success(next ? "Sound muted" : "Sound on");
+                    }}
+                    className="shrink-0 h-9 w-9 rounded-lg border border-border/60 bg-background/60 hover:border-primary/40 hover:bg-primary/5 transition-colors flex items-center justify-center"
+                    aria-label={isMuted() ? "Unmute" : "Mute"}
+                  >
+                    {isMuted()
+                      ? <span className="text-base">🔇</span>
+                      : <Volume2 className="w-4 h-4 text-primary" />}
+                  </button>
+                  <div className="flex-1">
+                    <Slider
+                      value={[volume]}
+                      onValueChange={([v]) => {
+                        setVolume(v);
+                        saveSetting("volume", v);
+                        setMasterVolume(v / 100);
+                        if (v > 0 && isMuted()) { setMuted(false); saveSetting("soundMuted", false); }
+                      }}
+                      min={0}
+                      max={100}
+                      step={5}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => playMoveSound()}
+                    className="shrink-0 h-9 px-3 rounded-lg border border-primary/30 bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/15 transition-colors"
+                  >
+                    Test
+                  </button>
+                </div>
               </div>
 
               {/* Sound packs — pick the texture/timbre of every move */}

@@ -83,6 +83,23 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
           ))}
         </div>
       </div>
+
+      {/* Signature — quiet, personal, ends the page on a human note */}
+      <Link
+        to="/about"
+        className="group mt-6 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground/50 hover:text-primary/80 transition-colors"
+      >
+        <span>Crafted with passion</span>
+        <motion.span
+          aria-hidden
+          className="inline-flex items-center justify-center"
+          whileHover={{ rotate: 360, scale: 1.15 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+        >
+          <Crown className="h-3 w-3 text-primary/70 group-hover:text-primary transition-colors" style={{ filter: "drop-shadow(0 0 4px hsl(43 90% 55% / 0.45))" }} />
+        </motion.span>
+        <span className="text-primary/60 group-hover:text-primary/90 transition-colors">MasterChess</span>
+      </Link>
     </div>
   </footer>
 ));

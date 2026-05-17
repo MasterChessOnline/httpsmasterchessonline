@@ -50,8 +50,46 @@ export const SOUND_PACKS: SoundPack[] = [
 
 let activePack: SoundPack = SOUND_PACKS[0];
 
+// User-controlled master volume (0.0 – 1.0) and global mute. Layered on top
+// of activePack.masterGain so the user can keep the warm "Wood" character
+// but turn the whole site down to a whisper or off entirely.
+let userVolume = 0.6;
+let userMuted = false;
+
 export function getActiveSoundPack(): SoundPack {
   return activePack;
+}
+
+export function getMasterVolume(): number {
+  return userVolume;
+}
+
+export function isMuted(): boolean {
+  return userMuted;
+}
+
+function effectiveBusGain(): number {
+  return userMuted ? 0 : activePack.masterGain * userVolume;
+}
+
+function refreshBusGain() {
+  if (audioCtx && masterBus) {
+    try {
+      masterBus.gain.setValueAtTime(effectiveBusGain(), audioCtx.currentTime);
+    } catch {}
+  }
+}
+
+export function setMasterVolume(v: number) {
+  userVolume = Math.max(0, Math.min(1, v));
+  try { localStorage.setItem("chess-sound-volume", String(userVolume)); } catch {}
+  refreshBusGain();
+}
+
+export function setMuted(m: boolean) {
+  userMuted = !!m;
+  try { localStorage.setItem("chess-sound-muted", userMuted ? "1" : "0"); } catch {}
+  refreshBusGain();
 }
 
 export function applySoundPack(packKey: string) {
@@ -72,6 +110,18 @@ export function bootstrapSoundPack() {
   try {
     const s = JSON.parse(localStorage.getItem("chess-settings") || "{}");
     if (s.soundPack) applySoundPack(s.soundPack);
+    if (typeof s.volume === "number") {
+      userVolume = Math.max(0, Math.min(1, s.volume / 100));
+    }
+    if (typeof s.soundMuted === "boolean") {
+      userMuted = s.soundMuted;
+    }
+  } catch {}
+  try {
+    const v = localStorage.getItem("chess-sound-volume");
+    if (v !== null) userVolume = Math.max(0, Math.min(1, parseFloat(v)));
+    const m = localStorage.getItem("chess-sound-muted");
+    if (m !== null) userMuted = m === "1";
   } catch {}
 }
 
@@ -117,7 +167,7 @@ function getBus(ctx: AudioContext): GainNode {
   compressor.release.setValueAtTime(0.18, ctx.currentTime);
 
   masterBus = ctx.createGain();
-  masterBus.gain.setValueAtTime(activePack.masterGain, ctx.currentTime);
+  masterBus.gain.setValueAtTime(effectiveBusGain(), ctx.currentTime);
 
   bassShelf.connect(warmthFilter);
   warmthFilter.connect(compressor);
