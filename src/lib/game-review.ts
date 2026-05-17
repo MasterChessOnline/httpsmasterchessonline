@@ -58,11 +58,29 @@ export function classifyMove(args: {
     if (goodMate && Math.abs(mateW) <= 5) return { classification: "best", cpLoss: 0 };
   }
 
-  if (cpLoss <= 5) return { classification: "best", cpLoss };
-  if (cpLoss <= 25) return { classification: "good", cpLoss };
-  if (cpLoss <= 60) return { classification: "inaccuracy", cpLoss };
-  if (cpLoss <= 150) return { classification: "mistake", cpLoss };
-  return { classification: "blunder", cpLoss };
+  // Use winning-percentage loss (not raw cp) so classification matches
+  // perceived impact. Dropping from +900 to +700 is still completely winning,
+  // it should NOT be a blunder. Dropping from 0 to -300 actually is.
+  const wpBefore = winProb(before);
+  const wpAfter = winProb(after);
+  const wpLoss = Math.max(0, wpBefore - wpAfter);
+
+  // Safety cap: if the mover is still clearly winning after the move,
+  // never label worse than "inaccuracy". You can't "blunder" while up a piece.
+  const stillWinning = after >= 300;
+  const stillCompletelyWinning = after >= 600;
+
+  let classification: MoveClass;
+  if (wpLoss < 2) classification = "best";
+  else if (wpLoss < 5) classification = "good";
+  else if (wpLoss < 10) classification = "inaccuracy";
+  else if (wpLoss < 20) classification = "mistake";
+  else classification = "blunder";
+
+  if (stillCompletelyWinning && classification !== "best") classification = "good";
+  else if (stillWinning && (classification === "blunder" || classification === "mistake")) classification = "inaccuracy";
+
+  return { classification, cpLoss };
 }
 
 /**
