@@ -31,15 +31,31 @@ export default function AppLaunchSplash() {
         return true;
       }
     })();
-    if (!isStandalone || isInIframe) return;
+    const isMobile =
+      window.matchMedia?.("(max-width: 768px)").matches ||
+      /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    // Show on PWA standalone OR mobile browsers (per-session). Never inside the editor iframe.
+    if (isInIframe) return;
+    if (!isStandalone && !isMobile) return;
     if (sessionStorage.getItem("mc.splash.shown") === "1") return;
     sessionStorage.setItem("mc.splash.shown", "1");
     setVisible(true);
-    const t = setTimeout(() => setVisible(false), 2600);
+    const t = setTimeout(() => setVisible(false), 3600);
     return () => clearTimeout(t);
   }, []);
 
   const letters = "MASTERCHESS".split("");
+
+  // Flying chess pieces — swoop in from off-screen toward final positions around the crest.
+  const flyingPieces = [
+    { char: "♞", fromX: -420, fromY: -360, toX: -180, toY: -120, rotate: -540, delay: 0.10, size: 64 },
+    { char: "♝", fromX: 460, fromY: -380, toX: 170, toY: -110, rotate: 480, delay: 0.22, size: 58 },
+    { char: "♜", fromX: -500, fromY: 320, toX: -190, toY: 130, rotate: -360, delay: 0.34, size: 60 },
+    { char: "♛", fromX: 480, fromY: 340, toX: 180, toY: 140, rotate: 420, delay: 0.46, size: 68 },
+    { char: "♟", fromX: 0, fromY: -460, toX: 0, toY: -210, rotate: 720, delay: 0.58, size: 42 },
+    { char: "♞", fromX: 520, fromY: 40, toX: 230, toY: 20, rotate: -420, delay: 0.70, size: 50 },
+    { char: "♝", fromX: -520, fromY: 60, toX: -230, toY: 30, rotate: 540, delay: 0.82, size: 52 },
+  ];
 
   return (
     <AnimatePresence>
