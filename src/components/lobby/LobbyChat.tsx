@@ -233,7 +233,7 @@ export default function LobbyChat({ floating = false }: { floating?: boolean }) 
           </div>
         ) : (
           <Link
-            to="/auth"
+            to="/login"
             className="block text-center text-xs text-muted-foreground hover:text-emerald-300 py-2"
           >
             Prijavi se da bi pisao u lobi

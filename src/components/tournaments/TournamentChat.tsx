@@ -224,7 +224,7 @@ export default function TournamentChat({ tournamentId }: { tournamentId: string 
           </div>
         ) : (
           <Link
-            to="/auth"
+            to="/login"
             className="block text-center text-xs text-muted-foreground hover:text-amber-300 py-2"
           >
             Prijavi se da bi pisao
