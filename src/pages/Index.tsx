@@ -314,6 +314,53 @@ const Index = () => {
       {/* ── MAIN CONTENT ── */}
       <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
 
+        {/* Instagram poster + follow CTA — directly under hero, above Daily */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="relative -mt-4"
+        >
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-wider mb-2">
+              Follow <span className="text-gradient-gold">MasterChess</span> on Instagram
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
+              Behind-the-scenes, results, and the story of how a 13-year-old is building the future of chess.
+            </p>
+
+            <a
+              href="https://www.instagram.com/masterchess.live?igsh=MWl6ZjIzcGJuMGllaA=="
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open MasterChess Instagram profile"
+              className="block group relative rounded-2xl overflow-hidden border border-primary/30 bg-card/40 backdrop-blur-sm shadow-2xl hover:border-primary/70 transition-all duration-300"
+              style={{ boxShadow: "0 25px 60px -15px hsl(43 90% 55% / 0.25)" }}
+            >
+              <img
+                src={posterImage}
+                alt="MasterChess — 13 years old, already winning. Founded by Nikola Šakotić."
+                loading="lazy"
+                className="w-full h-auto object-contain block group-hover:scale-[1.01] transition-transform duration-500"
+              />
+              <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </a>
+
+            <div className="mt-6 flex justify-center">
+              <a
+                href="https://www.instagram.com/masterchess.live?igsh=MWl6ZjIzcGJuMGllaA=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold uppercase tracking-wider text-sm shadow-lg hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
+              >
+                <Instagram className="h-4 w-4" />
+                @masterchess.live
+              </a>
+            </div>
+          </div>
+        </motion.section>
+
         {/* Daily Challenge — directly below the hero, first thing users see */}
         <section id="daily-missions" className="scroll-mt-24 -mt-4">
           <SectionHeader title="Daily Challenge" icon={Target}>
@@ -647,44 +694,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Instagram poster + follow CTA */}
-      <section className="px-4 pb-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-wider mb-2">
-            Follow <span className="text-gradient-gold">MasterChess</span> on Instagram
-          </h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            Behind-the-scenes, results, and the story of how a 13-year-old is building the future of chess.
-          </p>
-
-          <a
-            href="https://www.instagram.com/masterchess.live?igsh=MWl6ZjIzcGJuMGllaA=="
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open MasterChess Instagram profile"
-            className="block group rounded-2xl overflow-hidden border border-primary/30 bg-card/40 backdrop-blur-sm shadow-2xl hover:border-primary/60 transition-all duration-300"
-          >
-            <img
-              src={posterImage}
-              alt="MasterChess — 13 years old, already winning. Founded by Nikola Šakotić."
-              loading="lazy"
-              className="w-full h-auto object-contain group-hover:scale-[1.01] transition-transform duration-500"
-            />
-          </a>
-
-          <div className="mt-6 flex justify-center">
-            <a
-              href="https://www.instagram.com/masterchess.live?igsh=MWl6ZjIzcGJuMGllaA=="
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold uppercase tracking-wider text-sm shadow-lg hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
-            >
-              <Instagram className="h-4 w-4" />
-              @masterchess.live
-            </a>
-          </div>
-        </div>
-      </section>
       </main>
 
       <SiteRating />
