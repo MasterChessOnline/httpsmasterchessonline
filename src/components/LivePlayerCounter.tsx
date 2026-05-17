@@ -14,11 +14,11 @@ export default function LivePlayerCounter() {
       try {
         const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
         const { count: c } = await (supabase as any)
-          .from("games")
+          .from("online_games")
           .select("*", { count: "exact", head: true })
-          .gte("created_at", since)
-          .is("result", null);
-        if (!cancelled) setCount(typeof c === "number" ? Math.max(c * 2, 0) : 0);
+          .gte("updated_at", since)
+          .eq("status", "active");
+        if (!cancelled) setCount(typeof c === "number" ? Math.max(c, 0) : 0);
       } catch {
         if (!cancelled) setCount(0);
       }
