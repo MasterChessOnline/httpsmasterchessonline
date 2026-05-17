@@ -110,6 +110,12 @@ export function bootstrapSoundPack() {
   try {
     const s = JSON.parse(localStorage.getItem("chess-settings") || "{}");
     if (s.soundPack) applySoundPack(s.soundPack);
+    if (typeof s.volume === "number") {
+      userVolume = Math.max(0, Math.min(1, s.volume / 100));
+    }
+    if (typeof s.soundMuted === "boolean") {
+      userMuted = s.soundMuted;
+    }
   } catch {}
   try {
     const v = localStorage.getItem("chess-sound-volume");
