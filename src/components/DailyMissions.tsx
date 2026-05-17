@@ -12,7 +12,7 @@ import {
   Gift,
   Loader2,
 } from "lucide-react";
-import { forwardRef, useState } from "react";
+import { forwardRef, useRef, useState } from "react";
 import { useDailyMissions, type MissionWithProgress } from "@/hooks/use-daily-missions";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
