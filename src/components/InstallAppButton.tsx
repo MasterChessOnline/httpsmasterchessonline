@@ -64,14 +64,23 @@ export default function InstallAppButton({
   })();
 
   useEffect(() => {
+    // Pick up a prompt that was captured globally before this component mounted.
+    const cached = (window as unknown as { __mcInstallPrompt?: BeforeInstallPromptEvent })
+      .__mcInstallPrompt;
+    if (cached) setDeferred(cached);
+
     const onPrompt = (e: Event) => {
       e.preventDefault();
       setDeferred(e as BeforeInstallPromptEvent);
     };
+    const onReady = () => {
+      const ev = (window as unknown as { __mcInstallPrompt?: BeforeInstallPromptEvent })
+        .__mcInstallPrompt;
+      if (ev) setDeferred(ev);
+    };
     const onInstalled = () => {
       localStorage.setItem(INSTALLED_KEY, "1");
       setDeferred(null);
-      // Show the confirmation chip briefly, then hide the button entirely.
       setJustInstalled(true);
       toast.success("Installed ✓", {
         description: "MasterChess has been added to your apps.",
@@ -80,9 +89,11 @@ export default function InstallAppButton({
       setTimeout(() => setJustInstalled(false), 2800);
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("mc:install-ready", onReady);
     window.addEventListener("appinstalled", onInstalled);
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("mc:install-ready", onReady);
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
