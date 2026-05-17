@@ -352,12 +352,23 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
         <div className="space-y-2 relative">
           <AnimatePresence>
             {visible.map((m) => (
-              <MissionRow
+              <div
                 key={m.key}
-                mission={m}
-                onClaim={handleClaim}
-                busy={claiming === m.key}
-              />
+                ref={(el) => {
+                  rowRefs.current[m.key] = el;
+                }}
+                className={
+                  nextUpKey === m.key
+                    ? "rounded-lg ring-2 ring-primary/70 shadow-[0_0_24px_rgba(212,175,55,0.35)] animate-pulse"
+                    : undefined
+                }
+              >
+                <MissionRow
+                  mission={m}
+                  onClaim={handleClaim}
+                  busy={claiming === m.key}
+                />
+              </div>
             ))}
           </AnimatePresence>
         </div>
