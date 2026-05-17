@@ -55,6 +55,10 @@ export default function InstallAppButton({
     typeof nav?.standalone === "boolean" &&
     /Mobile/.test(ua);
   const isIos = isAppleHardware || isIpadOsDesktopMode || isIosWebView;
+  // Safari on macOS — no beforeinstallprompt, manual File → Add to Dock only.
+  // Hide the button there too, per product decision: install is Chromium-only.
+  const isSafariDesktop =
+    /Safari/.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Brave/.test(ua) && !isIos;
   const isInIframe = (() => {
     try {
       return typeof window !== "undefined" && window.self !== window.top;
