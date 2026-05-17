@@ -212,22 +212,61 @@ export default function DailyMissions({ compact = false }: DailyMissionsProps) {
     xpClaimedToday,
   } = useDailyMissions();
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [nextUpKey, setNextUpKey] = useState<string | null>(null);
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
   // Hide already-claimed missions — once claimed it's gone for today.
   const liveMissions = missions.filter((m) => !m.claimed);
   const visible = compact
     ? (user ? liveMissions : previewMissions).slice(0, 4)
     : (user ? liveMissions : previewMissions);
 
+  const DIFFICULTY_ORDER = ["easy", "medium", "hard", "elite"] as const;
+  const nextLabel: Record<string, string> = {
+    easy: "Medium",
+    medium: "Hard",
+    hard: "Elite",
+  };
+
   const handleClaim = async (key: string) => {
     setClaiming(key);
+    const claimed = missions.find((x) => x.key === key);
     const res = await claimMission(key);
     setClaiming(null);
     if (res.ok) {
-      const m = missions.find((x) => x.key === key);
+      const m = claimed;
+      // Find the next-difficulty unclaimed mission, if any.
+      const curIdx = DIFFICULTY_ORDER.indexOf(
+        (m?.difficulty ?? "easy") as (typeof DIFFICULTY_ORDER)[number],
+      );
+      const nextDiff = DIFFICULTY_ORDER[curIdx + 1];
+      const nextMission = nextDiff
+        ? missions.find((x) => x.difficulty === nextDiff && !x.claimed && x.key !== key)
+        : undefined;
+
       toast.success(`+${res.xp ?? m?.xp_reward ?? 0} XP earned!`, {
-        description: `${m?.title ?? "Mission"} — Total ${res.total ?? 0} XP`,
+        description: nextMission
+          ? `${m?.title ?? "Mission"} done. Next up: ${nextMission.title} (${nextLabel[m?.difficulty ?? "easy"] ?? ""})`
+          : `${m?.title ?? "Mission"} — Total ${res.total ?? 0} XP`,
         icon: "🏆",
+        action: nextMission
+          ? {
+              label: "Sledeći nivo →",
+              onClick: () => {
+                setNextUpKey(nextMission.key);
+                rowRefs.current[nextMission.key]?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+                setTimeout(() => setNextUpKey(null), 4000);
+              },
+            }
+          : undefined,
       });
+
+      if (nextMission) {
+        setNextUpKey(nextMission.key);
+        setTimeout(() => setNextUpKey(null), 4000);
+      }
       (res.newBadges ?? []).forEach((b) =>
         toast.success(`New achievement unlocked!`, {
           description: b,
