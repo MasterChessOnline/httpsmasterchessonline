@@ -139,6 +139,7 @@ function AnimatedRoutes() {
           <Route path="/play/titles" element={<Titles />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/learn/:slug" element={<LearnArticle />} />
+          <Route path="/lessons" element={<Lessons />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<LearnArticle />} />
           <Route path="/tournaments" element={<Tournaments />} />
