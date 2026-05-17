@@ -277,7 +277,7 @@ const Navbar = () => {
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      className="relative flex items-center gap-1.5 px-3 h-9 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
+                      className="relative flex items-center gap-1.5 px-3 h-9 rounded-lg text-[13px] font-display font-semibold uppercase tracking-[0.14em] transition-all duration-300 group overflow-hidden whitespace-nowrap shrink-0"
                       style={{
                         color: isActive || activeDropdown === section.key ? accentColor : undefined,
                         backgroundColor: isActive || activeDropdown === section.key ? `hsla(${section.accent} / 0.1)` : undefined,
@@ -292,7 +292,25 @@ const Navbar = () => {
                         }}
                       />
                       <section.icon className="relative h-4 w-4 shrink-0" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
-                      <span className={`relative whitespace-nowrap ${!(isActive || activeDropdown === section.key) ? "text-muted-foreground group-hover:text-foreground" : ""}`}>{section.label}</span>
+                      <span
+                        className={`relative whitespace-nowrap transition-all duration-300 ${
+                          isActive || activeDropdown === section.key
+                            ? "bg-clip-text text-transparent"
+                            : "text-muted-foreground/90 group-hover:text-transparent group-hover:bg-clip-text"
+                        }`}
+                        style={{
+                          backgroundImage:
+                            isActive || activeDropdown === section.key
+                              ? `linear-gradient(180deg, hsla(${section.accent} / 1) 0%, hsla(${section.accent} / 0.75) 100%)`
+                              : `linear-gradient(180deg, hsl(var(--foreground)) 0%, hsla(${section.accent} / 0.85) 120%)`,
+                          textShadow:
+                            isActive || activeDropdown === section.key
+                              ? `0 0 14px hsla(${section.accent} / 0.45)`
+                              : undefined,
+                        }}
+                      >
+                        {section.label}
+                      </span>
                       <ChevronDown
                         className={`relative h-3.5 w-3.5 transition-transform duration-300 ${activeDropdown === section.key ? "rotate-180" : ""}`}
                         style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined}
