@@ -1,10 +1,12 @@
-// Tiny gate component that watches for title unlocks and renders the popup.
-// Lives at the app root so it's available on every page for the logged-in user.
+// Title unlock popup is intentionally DISABLED.
+// User requirement: titles must never trigger a popup/notification on entry
+// (e.g. "Bot Hunter" showing up right after login). The hook still runs so
+// `profiles.highest_title_key` keeps being persisted silently — only the
+// visual popup is suppressed.
 
-import TitleUnlockPopup from "./TitleUnlockPopup";
 import { useTitleUnlock } from "@/hooks/use-title-unlock";
 
 export default function TitleUnlockGate() {
-  const { unlockedKey, dismiss } = useTitleUnlock();
-  return <TitleUnlockPopup titleKey={unlockedKey} onDismiss={dismiss} />;
+  useTitleUnlock();
+  return null;
 }
