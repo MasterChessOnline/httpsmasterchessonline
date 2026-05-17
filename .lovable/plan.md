@@ -1,108 +1,106 @@
-# Mobile App Upgrade — 4-Phase Plan
 
-Sve 4 oblasti, izvedene redom da svaka faza ima vidljiv efekat i da rizik bude pod kontrolom.
+# Plan: Dati MasterChess-u dušu
 
----
-
-## Phase 1 — Gameplay Polish (touch board, portrait, haptics)
-
-**Cilj:** Šahovska tabla i partija da rade savršeno jednom rukom na telefonu.
-
-- **Touch handling table**
-  - Tap-tap-to-move kao default na mobile (drag opciono u Settings)
-  - Larger tap targets: padding oko polja na touch device (≥ 44×44 efektivno)
-  - Drag preview: figura ide iznad prsta + halo na legalnim poljima
-  - Dugi tap = preview legalnih poteza (bez puštanja figure)
-- **Portrait layout** (`<768px`)
-  - Layout: top bar (clock + opponent) → captures pieces → board → captures → bottom bar (my clock + actions)
-  - Action dock fiksiran u dnu (Resign / Draw / Chat / Flip) — palac dohvat
-  - Promotion picker kao bottom sheet (vaul), ne kao centered modal
-- **Haptics** (`navigator.vibrate`, gated by Settings toggle)
-  - Move: 8ms, Capture: 14ms, Check: [10,30,10], Mate/Win: [30,40,30,40,60], Illegal: [40]
-  - Clock low (<10s): jedan pulse na svakih 5s, drugi pattern u zadnjih 5s
-  - Bot taunt prijem: 6ms
-- **Settings dodavanje**
-  - "Tap to move" / "Drag pieces" / "Both"
-  - "Haptic feedback" on/off
-  - "Lock landscape on tablet" on/off
-
-**Deliverables:** `useTouchBoard` hook, `useHaptics` hook, novi `MobileGameLayout` wrapper, Settings sekcija "Mobile".
+Cilj: sajt da se **oseti živo** prvih 5 sekundi i da svaka partija ima emocionalni vrhunac. Bez novih stranica, bez novih feature-a — samo poliranje + zvuk + cinematic momenti.
 
 ---
 
-## Phase 2 — Native-like Features
+## 1. Tihi, elegantni audio sloj
 
-**Cilj:** PWA da izgleda i deluje kao native app posle install-a.
+Suptilan zvuk koji **dodaje, ne smeta**. Sve može da se ugasi iz Settings → Sound (default uključeno, tiho na 30%).
 
-- **Web Share API** — share game/PGN/profil/chess-card preko OS share sheet-a (fallback: copy-to-clipboard)
-- **Manifest `shortcuts`** — long-press na app ikoni: Quick Match, Play vs Bot, Tournaments, Profile
-- **Badging API** (`navigator.setAppBadge`) — broj pending challenges + unread chats na app ikoni
-- **iOS splash screens** — generišemo set za sve aktuelne iPhone rezolucije (12/13/14/15/16 Pro/Plus/Mini)
-- **Status bar theming** — `apple-mobile-web-app-status-bar-style="black-translucent"` + theme-color koji prati background
-- **Bottom sheet pattern** (vaul) za: game settings, share, profile actions, promotion picker, filter sheets
-- **Pull-to-refresh** na Home, Tournaments lobby, Leaderboard, History (custom hook, ne native)
+Zvuci koje uvodimo:
+- **Move** — meki "tap" drvene figure (kratko, < 100ms)
+- **Capture** — nešto teži udarac
+- **Check** — suptilan zlatni "ding"
+- **Checkmate / pobeda** — kratka cinematic fanfara (2s, ne više)
+- **Poraz** — tihi minor akord
+- **Hover na CTA dugme (Play, Install App)** — jedva čujan klik
+- **Notification (rival pronađen, izazov)** — meki gong
 
-**Deliverables:** `useShare`, `useAppBadge` hookovi, splash generator skripta, `BottomSheet` komponenta, `PullToRefresh` wrapper, manifest shortcuts.
+Implementacija:
+- Generišemo SFX preko ElevenLabs API (Edge function) jednom, kešujemo kao `.mp3` fajlove u `public/sounds/`
+- `useSound()` hook sa globalnim volume controlom + master mute u Settings
+- `localStorage` čuva preference, podrazumevano: volume 30%, muted=false
+- Prvi put ulazak: tihi welcome chime (1.5s) **samo na prvom učitavanju ikad**, pa nikad više
+
+## 2. Jači prvi utisak (homepage hero)
+
+Trenutno: korisnik vidi puno informacija, ali ne **oseća** zašto je MasterChess poseban.
+
+Promene u hero sekciji:
+- **Velika headline animacija**: jedna jaka rečenica koja se ispisuje slovo-po-slovo prvih 0.8s ("Šah. Bez asistenta. Bez varanja. Samo igrači.")
+- **Subline ispod**: jedna mirna linija sa key brojkama (X partija danas, X aktivnih igrača — samo ako su brojke realne)
+- **Cinematic 3D scena**: 2-3 figure koje **lebde tiho** sa parallax-om na pokret miša (već ima 4D Visual Mode — pojačati ovde)
+- **Glavni CTA "Play Now"** dobija jedan jak gold pulse svake ~4s (ne stalno)
+- **Install App** ostaje gde jeste, ali manje agresivan u hero-u
+- Hero visina: zauzima ~85vh tako da prvi utisak nije pretrpan — sve ostalo je "ispod fold-a"
+
+Klar hijerarhija: **jedan H1, jedan glavni CTA, jedan secondary**. Ostalo se vidi kad skroluje.
+
+## 3. Cinematic momenti pobede / mata
+
+Ovo je gde "duša" najviše dolazi. Trenutno game-over je verovatno tekstualni modal.
+
+Novi flow nakon pobede (3-4s):
+1. Tabla blago **dim-uje** osim mat-figure (spotlight efekat)
+2. Mat figura dobija zlatni glow + lagani spin
+3. Cinematic fanfara (2s)
+4. Fullscreen overlay sa zlatnom particle erupcijom (Framer Motion + canvas confetti)
+5. "VICTORY" tekst koji se ispisuje masivnim display fontom
+6. ELO change pokazan sa **count-up animacijom** (1450 → 1462, broji uživo)
+7. Tek tada se pojavljuju dugmad (Rematch, Review, Share Moment)
+
+Za poraz: kraći, dostojanstven — sivi overlay, "Defeat" u manjem fontu, tihi akord, fokus odmah na "Review".
+
+Za draw: neutralno, plavi accent.
+
+## 4. Sitne UX cake (micro-delights)
+
+Stvari koje korisnik ne registruje svesno ali oseti:
+- **Hover na figure** u tabli: jedva primetan zlatni outline + 1px lift
+- **Loading states**: zameniti spinner-e sa **animiranim figurama** (peška koji "korača")
+- **Empty states**: kratka rečenica + ilustracija figure (ne "No data found")
+- **Toast notifikacije**: subtilni slide-in sa zvonom ako je tihi mode dozvoljen
+- **Page transitions**: 200ms crossfade umesto hard cut između stranica
+
+## 5. Mali "potpis" autora na footer-u
+
+Tihi, ne previše uočljiv potpis koji daje sajtu **lični identitet**:
+- "Made with passion · MasterChess 2026"
+- Mali zlatni kralj ikonica koja se rotira na hover
+- Link ka About / Manifesto stranici (ako želiš da napravimo i jednostavnu "Why MasterChess" stranicu kasnije)
 
 ---
 
-## Phase 3 — Push Notifications (VAPID + Edge)
+## Tehnički detalji
 
-**Cilj:** Igrač prima notifikaciju i kad je app potpuno zatvoren.
+- **Audio**: `<audio>` HTML elementi + `Howler.js` (lightweight) ili native Web Audio API; ElevenLabs Edge function za inicijalnu generaciju, fajlovi kešovani u `public/sounds/`
+- **Settings store**: proširiti postojeći `localStorage` settings sa `audio: { enabled, volume, moveSound, victorySound }`
+- **Particle erupcija**: `canvas-confetti` library (lagan, 8kb)
+- **Count-up za ELO**: jednostavan custom hook sa `requestAnimationFrame`
+- **Hero refactor**: izmena postojeće Hero komponente, bez dodavanja novih stranica
+- **Game-over overlay**: nova `<VictoryOverlay />` / `<DefeatOverlay />` komponenta koja se zove iz postojeće game-state logike
 
-- **Backend** (Supabase)
-  - Tabela `push_subscriptions` (user_id, endpoint, p256dh, auth, platform, created_at) sa RLS
-  - Tabela `notification_preferences` (per-type toggle: challenges, your_turn, tournaments, daily_reminder)
-  - VAPID ključevi kao secrets: `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
-  - Edge funkcija `push-send` — prima `{user_ids, payload}`, šalje preko `web-push` (npm), čisti expired endpoints
-  - Triggers/Edge hooks:
-    - challenge insert → push opponentu ("X challenged you")
-    - online_games move → push protivniku ("Your turn")
-    - tournament starting (15min, 1min) → push svim registrovanima
-- **Frontend**
-  - `usePushSubscription` hook — registruje SW, poziva `pushManager.subscribe()` sa VAPID public key, upsert u DB
-  - Permission prompt sa kontekstom (ne na page load) — npr. posle prve odigrane partije
-  - Service worker `push` event handler + `notificationclick` koji otvara deep link
-  - Settings UI za per-type toggle
-- **Cleanup**
-  - Postojeći `DailyReminderNotifier` (client-side) ostaje kao fallback, ali backend cron preuzima slanje
-
-**Deliverables:** SQL migracije, edge funkcija `push-send`, SW push handlers, `usePushSubscription`, Settings → Notifications panel.
+Bez novih ruta, bez novih tabela u bazi, bez novih biblioteka osim `canvas-confetti` i jedne ElevenLabs Edge function za inicijalnu generaciju SFX-a.
 
 ---
 
-## Phase 4 — Performance
+## Šta NE radim u ovom planu
 
-**Cilj:** TTI < 2s na 4G mid-range Androidu, smooth 60fps scrolling.
-
-- **Code splitting**
-  - `React.lazy` za teške rute: Tournaments, Analysis, Game Review, Stream Hub, Coach, Stats
-  - Stockfish WASM lazy load — tek kad korisnik otvori vs Bot ili Analysis (ne na app start)
-- **Skeleton loaders** zamenjuju spinnere na: Home cards, Leaderboard, Tournaments, History, Profile
-- **Images**
-  - `vite-imagetools` plugin → bundled assets generišu `webp` + `avif` varijante
-  - Avatari sa `loading="lazy"` + `decoding="async"` + explicit `width`/`height` (anti-CLS)
-  - LCP image (home hero) preload u index.html sa `fetchpriority="high"`
-- **List virtualization** (`@tanstack/react-virtual`) na: Leaderboard, History, Community feed (>50 items)
-- **Network**
-  - React Query već postoji — dodati `staleTime`/`gcTime` defaults i `placeholderData` za instant transitions
-  - Debounce na search input (300ms) u Command Palette i player search
-- **Bundle audit**
-  - `rollup-plugin-visualizer` da identifikujemo top 10 najtežih chunkova
-  - Tree-shake unused lucide ikone, zameniti barrel imports
-- **Mobile-specific**
-  - Disable framer-motion page transitions na `lite` mode (već postoji) + extend to heavy animation komponenti
-  - `content-visibility: auto` na off-screen sekcijama Home stranice
-
-**Deliverables:** lazy route konfiguracija, `Skeleton*` komponente per page, `vite-imagetools` setup, virtualized liste, bundle analyzer report.
+- ❌ Native mobilna aplikacija (Capacitor) — odložiti dok ne budeš spreman za App Store
+- ❌ Novi feature-i (puzzles, novi modovi, novi alati)
+- ❌ Promena postojećih stranica osim homepage hero-a
+- ❌ Ambijentalni soundtrack — previše agresivno za šah
 
 ---
 
-## Technical Notes
+## Predloženi redosled implementacije
 
-- **Redosled izvođenja:** Phase 1 → 4 → 2 → 3 (Phase 4 ranije jer ubrzava sve ostale; Phase 3 zahteva produkcijski deploy da bi VAPID radio — testira se na publish URL-u, ne u editor preview-u)
-- **PWA constraint:** push notifikacije rade samo na published/installed PWA (ne u Lovable preview iframe) — biće naglašeno korisniku posle Phase 3
-- **Bez breaking changes** za desktop — sve dodavanja su iza mobile breakpoint-a (`md:hidden` ili `useIsMobile`) ili iza opt-in Settings toggle-a
-- **Bundle target:** initial chunk < 200KB gzipped posle Phase 4
+1. **Audio sistem + Settings toggle** (osnov za sve ostalo)
+2. **Cinematic Victory / Defeat overlay** (najveći emocionalni impact)
+3. **Hero redesign** (jači prvi utisak)
+4. **Micro-delights** (hover, loading, empty states)
+5. **Footer potpis**
 
-Reci samo "Implement plan" i krećem sa Fazom 1.
+Ako ti se sviđa pravac, klikni Implement i krećemo od koraka 1.
