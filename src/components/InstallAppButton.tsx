@@ -205,19 +205,27 @@ export default function InstallAppButton({
             />
             <Button
               onClick={handleClick}
-              className={`${sizeClass} relative overflow-hidden border border-amber-200/20 text-amber-50 hover:text-amber-50 font-display font-bold uppercase tracking-[0.18em] gap-3 transition-all duration-300 bg-[linear-gradient(135deg,#1a1208_0%,#2a1d0a_45%,#3a280c_100%)] shadow-[0_12px_40px_-8px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(251,191,36,0.35),inset_0_-1px_0_0_rgba(0,0,0,0.5)] hover:shadow-[0_18px_50px_-6px_rgba(251,191,36,0.45),inset_0_1px_0_0_rgba(251,191,36,0.5),inset_0_-1px_0_0_rgba(0,0,0,0.5)]`}
+              className={`${sizeClass} relative overflow-hidden border border-amber-200/40 text-amber-50 hover:text-amber-50 font-display font-bold uppercase tracking-[0.18em] gap-3 transition-all duration-300 bg-[linear-gradient(110deg,#1a1208_0%,#3d2a0c_25%,#8a6418_50%,#3d2a0c_75%,#1a1208_100%)] bg-[length:250%_100%] shadow-[0_12px_40px_-6px_rgba(251,191,36,0.55),inset_0_1px_0_0_rgba(255,220,130,0.6),inset_0_-1px_0_0_rgba(0,0,0,0.5)] hover:shadow-[0_20px_60px_-4px_rgba(251,191,36,0.9),inset_0_1px_0_0_rgba(255,220,130,0.75),inset_0_-1px_0_0_rgba(0,0,0,0.5)]`}
+              style={{ animation: "shimmer 2.6s linear infinite" }}
             >
               {/* Top gold inner highlight strip */}
               <span
                 aria-hidden
-                className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/70 to-transparent pointer-events-none"
+                className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-amber-100 to-transparent pointer-events-none"
               />
-              {/* Diagonal light sweep */}
+              {/* Bright diagonal light sweep */}
               <motion.span
                 aria-hidden
-                className="absolute inset-y-0 -left-1/3 w-1/4 bg-gradient-to-r from-transparent via-amber-200/25 to-transparent skew-x-[-18deg] pointer-events-none"
-                animate={{ x: ["0%", "700%"] }}
-                transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.2 }}
+                className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-amber-100/80 to-transparent skew-x-[-18deg] pointer-events-none blur-[1px]"
+                animate={{ x: ["0%", "600%"] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.3 }}
+              />
+              {/* Second faster white sparkle sweep */}
+              <motion.span
+                aria-hidden
+                className="absolute inset-y-0 -left-1/4 w-1/6 bg-gradient-to-r from-transparent via-white/70 to-transparent skew-x-[-25deg] pointer-events-none"
+                animate={{ x: ["0%", "750%"] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "linear", repeatDelay: 1.4 }}
               />
               {/* Gold icon chip */}
               <span className={`relative flex items-center justify-center rounded-lg bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_2px_6px_rgba(0,0,0,0.4)] ${variant === "hero" ? "h-9 w-9" : "h-6 w-6"}`}>
