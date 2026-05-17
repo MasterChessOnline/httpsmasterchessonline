@@ -181,23 +181,58 @@ export default function InstallAppButton({
         ) : (
           <motion.div
             key="install"
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.97 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            className="relative inline-block"
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.96 }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
           >
+            {/* Pulsing attention ring */}
+            <motion.span
+              aria-hidden
+              className="absolute inset-0 rounded-xl bg-amber-400/40 -z-10"
+              animate={{ scale: [1, 1.18, 1], opacity: [0.45, 0, 0.45] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+            />
+            {/* Soft glow halo */}
+            <span
+              aria-hidden
+              className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-amber-400/30 via-amber-300/50 to-amber-500/30 blur-md -z-10"
+            />
+            {/* "NEW" pill badge */}
+            {variant === "hero" && (
+              <motion.span
+                aria-hidden
+                className="absolute -top-2 -right-2 z-10 rounded-full bg-gradient-to-br from-red-500 to-rose-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-lg shadow-rose-500/50 ring-2 ring-background"
+                animate={{ rotate: [-4, 4, -4], scale: [1, 1.08, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                Free
+              </motion.span>
+            )}
             <Button
               onClick={handleClick}
-              variant="outline"
-              className={`ripple-btn ${sizeClass} border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-display uppercase tracking-wider gap-2 shadow-glow transition-all`}
+              className={`ripple-btn ${sizeClass} relative overflow-hidden border-0 bg-gradient-to-r from-amber-500 via-amber-300 to-amber-500 bg-[length:200%_100%] text-zinc-950 hover:text-zinc-950 font-display font-extrabold uppercase tracking-wider gap-2 shadow-[0_8px_28px_-4px_rgba(251,191,36,0.7)] hover:shadow-[0_10px_36px_-2px_rgba(251,191,36,0.9)] transition-all animate-[shimmer_3s_linear_infinite]`}
+              style={{
+                animation: "shimmer 3s linear infinite",
+              }}
             >
+              {/* Sweep highlight */}
+              <motion.span
+                aria-hidden
+                className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12 pointer-events-none"
+                animate={{ x: ["0%", "500%"] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.6 }}
+              />
               {deferred || !isInIframe ? (
-                <Download className="h-4 w-4" />
+                <Download className="h-5 w-5 relative" />
               ) : (
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="h-5 w-5 relative" />
               )}
-              {variant === "hero" ? "Install App" : "Install"}
+              <span className="relative">
+                {variant === "hero" ? "Install App" : "Install"}
+              </span>
             </Button>
           </motion.div>
         )}
