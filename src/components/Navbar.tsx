@@ -293,20 +293,9 @@ const Navbar = () => {
                       />
                       <section.icon className="relative h-4 w-4 shrink-0" style={isActive || activeDropdown === section.key ? { color: accentColor } : undefined} />
                       <span
-                        className={`relative whitespace-nowrap transition-all duration-300 ${
-                          isActive || activeDropdown === section.key
-                            ? "bg-clip-text text-transparent"
-                            : "text-muted-foreground/90 group-hover:text-transparent group-hover:bg-clip-text"
-                        }`}
+                        className="relative whitespace-nowrap transition-colors duration-300"
                         style={{
-                          backgroundImage:
-                            isActive || activeDropdown === section.key
-                              ? `linear-gradient(180deg, hsla(${section.accent} / 1) 0%, hsla(${section.accent} / 0.75) 100%)`
-                              : `linear-gradient(180deg, hsl(var(--foreground)) 0%, hsla(${section.accent} / 0.85) 120%)`,
-                          textShadow:
-                            isActive || activeDropdown === section.key
-                              ? `0 0 14px hsla(${section.accent} / 0.45)`
-                              : undefined,
+                          color: isActive || activeDropdown === section.key ? accentColor : undefined,
                         }}
                       >
                         {section.label}
