@@ -68,6 +68,9 @@ export default function InstallAppButton({
   // Hide forever once installed or already running as PWA (but keep visible
   // during the brief "Installed" confirmation animation).
   if ((installed || isStandalone) && !justInstalled) return null;
+  // iOS installs are clunky (manual Share → Add to Home Screen) and Apple
+  // blocks beforeinstallprompt. Hide the button entirely on iPhone/iPad.
+  if (isIos) return null;
 
 
   const handleClick = async () => {

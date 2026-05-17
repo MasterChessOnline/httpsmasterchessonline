@@ -118,7 +118,7 @@ const MobileBottomNav = () => {
               data-nav-item
               aria-label="Play a new game"
               aria-current={isActive("/play") ? "page" : undefined}
-              className={`group absolute -top-6 flex flex-col items-center min-h-11 min-w-11 ${focusRing}`}
+              className={`group absolute -top-10 flex flex-col items-center min-h-11 min-w-11 ${focusRing}`}
             >
               <motion.div
                 whileTap={{ scale: 0.92 }}
