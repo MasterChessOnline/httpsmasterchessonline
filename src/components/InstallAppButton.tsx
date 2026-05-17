@@ -55,6 +55,10 @@ export default function InstallAppButton({
     typeof nav?.standalone === "boolean" &&
     /Mobile/.test(ua);
   const isIos = isAppleHardware || isIpadOsDesktopMode || isIosWebView;
+  // Safari on macOS — no beforeinstallprompt, manual File → Add to Dock only.
+  // Hide the button there too, per product decision: install is Chromium-only.
+  const isSafariDesktop =
+    /Safari/.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Brave/.test(ua) && !isIos;
   const isInIframe = (() => {
     try {
       return typeof window !== "undefined" && window.self !== window.top;
@@ -103,8 +107,8 @@ export default function InstallAppButton({
   // during the brief "Installed" confirmation animation).
   if ((installed || isStandalone) && !justInstalled) return null;
   // iOS installs are clunky (manual Share → Add to Home Screen) and Apple
-  // blocks beforeinstallprompt. Hide the button entirely on iPhone/iPad.
-  if (isIos) return null;
+  // blocks beforeinstallprompt. Hide entirely on iPhone/iPad AND Safari macOS.
+  if (isIos || isSafariDesktop) return null;
 
 
   const handleClick = async () => {
