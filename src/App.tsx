@@ -25,6 +25,7 @@ const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Learn = lazy(() => import("./pages/Learn"));
 const LearnArticle = lazy(() => import("./pages/LearnArticle"));
+const Lessons = lazy(() => import("./pages/Lessons"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Tournaments = lazy(() => import("./pages/Tournaments"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
