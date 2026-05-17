@@ -181,68 +181,63 @@ export default function InstallAppButton({
         ) : (
           <motion.div
             key="install"
-            className="relative inline-block"
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.96, y: 1 }}
+            className="relative inline-block group"
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.97, y: 1 }}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ type: "spring", stiffness: 280, damping: 22 }}
           >
-            {/* Outer pulsing glow halo */}
+            {/* Soft ambient gold glow */}
             <motion.span
               aria-hidden
-              className="absolute -inset-3 rounded-[1.75rem] bg-amber-400/35 blur-2xl -z-20"
-              animate={{ opacity: [0.35, 0.7, 0.35], scale: [1, 1.08, 1] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -inset-4 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.45),transparent_70%)] blur-xl -z-20"
+              animate={{ opacity: [0.5, 0.85, 0.5] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
-            {/* Expanding ring — pulses outward */}
+            {/* Thin gold outline pulse */}
             <motion.span
               aria-hidden
-              className="absolute inset-0 rounded-2xl border-2 border-amber-300/70 -z-10"
-              animate={{ scale: [1, 1.22, 1.22], opacity: [0.9, 0, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+              className="absolute -inset-px rounded-2xl border border-amber-300/60 -z-10"
+              animate={{ opacity: [0.4, 1, 0.4] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
             />
-            {/* "FREE" badge */}
-            {variant === "hero" && (
-              <motion.span
-                aria-hidden
-                className="absolute -top-2.5 -right-2.5 z-20 rounded-full bg-gradient-to-br from-red-500 to-rose-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-[0_4px_14px_rgba(244,63,94,0.6)] ring-2 ring-background"
-                animate={{ rotate: [-5, 5, -5], scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              >
-                Free
-              </motion.span>
-            )}
             <Button
               onClick={handleClick}
-              className={`${sizeClass} relative overflow-hidden border-0 text-zinc-950 hover:text-zinc-950 font-display font-black uppercase tracking-[0.12em] gap-3 transition-all duration-300 bg-[linear-gradient(135deg,#f59e0b_0%,#fde68a_25%,#fbbf24_50%,#fde68a_75%,#f59e0b_100%)] bg-[length:200%_100%] shadow-[0_10px_30px_-6px_rgba(251,191,36,0.65),inset_0_1px_0_0_rgba(255,255,255,0.45),inset_0_-2px_0_0_rgba(120,53,15,0.35)] hover:shadow-[0_14px_38px_-4px_rgba(251,191,36,0.9),inset_0_1px_0_0_rgba(255,255,255,0.55),inset_0_-2px_0_0_rgba(120,53,15,0.4)]`}
-              style={{ animation: "shimmer 3.5s linear infinite" }}
+              className={`${sizeClass} relative overflow-hidden border border-amber-200/20 text-amber-50 hover:text-amber-50 font-display font-bold uppercase tracking-[0.18em] gap-3 transition-all duration-300 bg-[linear-gradient(135deg,#1a1208_0%,#2a1d0a_45%,#3a280c_100%)] shadow-[0_12px_40px_-8px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(251,191,36,0.35),inset_0_-1px_0_0_rgba(0,0,0,0.5)] hover:shadow-[0_18px_50px_-6px_rgba(251,191,36,0.45),inset_0_1px_0_0_rgba(251,191,36,0.5),inset_0_-1px_0_0_rgba(0,0,0,0.5)]`}
             >
-              {/* Diagonal sweep highlight */}
+              {/* Top gold inner highlight strip */}
+              <span
+                aria-hidden
+                className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/70 to-transparent pointer-events-none"
+              />
+              {/* Diagonal light sweep */}
               <motion.span
                 aria-hidden
-                className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent skew-x-[-20deg] pointer-events-none"
-                animate={{ x: ["0%", "600%"] }}
-                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8 }}
+                className="absolute inset-y-0 -left-1/3 w-1/4 bg-gradient-to-r from-transparent via-amber-200/25 to-transparent skew-x-[-18deg] pointer-events-none"
+                animate={{ x: ["0%", "700%"] }}
+                transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.2 }}
               />
-              {/* Icon in dark contrast bubble */}
-              <span className={`relative flex items-center justify-center rounded-lg bg-zinc-950/85 shadow-inner ring-1 ring-amber-200/30 ${variant === "hero" ? "h-9 w-9" : "h-6 w-6"}`}>
+              {/* Gold icon chip */}
+              <span className={`relative flex items-center justify-center rounded-lg bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_2px_6px_rgba(0,0,0,0.4)] ${variant === "hero" ? "h-9 w-9" : "h-6 w-6"}`}>
                 {deferred || !isInIframe ? (
-                  <Download className={`text-amber-300 ${variant === "hero" ? "h-4 w-4" : "h-3.5 w-3.5"}`} strokeWidth={2.8} />
+                  <Download className={`text-zinc-950 ${variant === "hero" ? "h-4 w-4" : "h-3.5 w-3.5"}`} strokeWidth={3} />
                 ) : (
-                  <ExternalLink className={`text-amber-300 ${variant === "hero" ? "h-4 w-4" : "h-3.5 w-3.5"}`} strokeWidth={2.8} />
+                  <ExternalLink className={`text-zinc-950 ${variant === "hero" ? "h-4 w-4" : "h-3.5 w-3.5"}`} strokeWidth={3} />
                 )}
               </span>
               {variant === "hero" ? (
                 <span className="relative flex flex-col items-start leading-none">
-                  <span className="text-[15px]">Install App</span>
-                  <span className="text-[9px] font-bold tracking-[0.25em] opacity-70 mt-1">
-                    Free · No Store
+                  <span className="text-[15px] bg-gradient-to-b from-amber-50 to-amber-200 bg-clip-text text-transparent">
+                    Install App
+                  </span>
+                  <span className="text-[9px] font-semibold tracking-[0.3em] text-amber-300/70 mt-1.5">
+                    Free · Instant
                   </span>
                 </span>
               ) : (
-                <span className="relative">Install</span>
+                <span className="relative bg-gradient-to-b from-amber-50 to-amber-200 bg-clip-text text-transparent">Install</span>
               )}
             </Button>
           </motion.div>
