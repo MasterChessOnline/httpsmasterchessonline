@@ -168,8 +168,15 @@ function buildUrlset(entries: SitemapEntry[], withImages = false): string {
 // Image sitemap — every opening page emits a UNIQUE board-position screenshot URL
 // (chess.com dynboard PNG of that opening's starting position). Google Images indexes
 // each as a separate image, multiplying our presence in image search.
+const BRAND_IMG = `${BASE_URL}/app-icon-512.png`;
+const OG_IMG = `${BASE_URL}/og-image.jpg`;
 const imageEntries: SitemapEntry[] = [
-  { path: "/", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess — Free Online Chess", caption: "Play chess online free with AI coach and tournaments." } },
+  { path: "/", image: { loc: OG_IMG, title: "MasterChess — Free Online Chess", caption: "Play chess online free with AI coach and tournaments on MasterChess." } },
+  { path: "/", image: { loc: BRAND_IMG, title: "MasterChess logo — Play Chess Online", caption: "MasterChess — premium online chess with tournaments, bots and Stockfish analysis." } },
+  { path: "/play/online", image: { loc: OG_IMG, title: "Play Chess Online Free — MasterChess", caption: "Play live chess online vs real players on MasterChess." } },
+  { path: "/tournaments", image: { loc: OG_IMG, title: "Free Online Chess Tournaments — MasterChess", caption: "Join free daily Arena and Swiss chess tournaments on MasterChess." } },
+  { path: "/analysis", image: { loc: OG_IMG, title: "Stockfish Chess Analysis — MasterChess", caption: "Analyze your chess games with Stockfish on MasterChess." } },
+  { path: "/openings", image: { loc: OG_IMG, title: "Chess Openings Trainer — MasterChess", caption: "Learn and practice chess openings on MasterChess." } },
   ...ALL_OPENING_SLUGS.map((slug) => {
     const meta = OPENING_SEO[slug];
     const dbOpening = meta ? OPENINGS_DATABASE.find((o) => o.id === meta.id) : null;
@@ -180,11 +187,27 @@ const imageEntries: SitemapEntry[] = [
       path: `/openings/${slug}`,
       image: {
         loc: getOpeningBoardImage(startingMoves),
-        title: `${name} chess opening${eco ? ` (ECO ${eco})` : ""} — starting position`,
-        caption: `Board position after ${startingMoves || "the opening moves"} — learn the ${name} on MasterChess.`,
+        title: `${name} chess opening${eco ? ` (ECO ${eco})` : ""} — MasterChess`,
+        caption: `${name}${eco ? ` (ECO ${eco})` : ""} — starting position after ${startingMoves || "the opening moves"}. Learn it on MasterChess.`,
       },
     };
   }),
+  ...botIds.map((id) => ({
+    path: `/bot/${id}`,
+    image: { loc: OG_IMG, title: `Play vs ${id} chess bot — MasterChess`, caption: `Play chess online vs the ${id} AI bot on MasterChess.` },
+  })),
+  ...GRANDMASTERS.map((g) => ({
+    path: `/players/${g.slug}`,
+    image: { loc: OG_IMG, title: `${g.name} — chess grandmaster on MasterChess`, caption: `${g.name} chess games, ratings and famous matches on MasterChess.` },
+  })),
+  ...FAMOUS_GAMES.map((g) => ({
+    path: `/famous-games/${g.slug}`,
+    image: { loc: OG_IMG, title: `${g.slug.replace(/-/g, " ")} — famous chess game on MasterChess`, caption: `Replay and analyze this famous chess game on MasterChess.` },
+  })),
+  ...MATE_PATTERNS.map((m) => ({
+    path: `/learn/checkmate-patterns/${m.slug}`,
+    image: { loc: OG_IMG, title: `${m.slug.replace(/-/g, " ")} checkmate pattern — MasterChess`, caption: `Learn the ${m.slug.replace(/-/g, " ")} checkmate pattern on MasterChess.` },
+  })),
 ];
 
 writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
