@@ -100,7 +100,7 @@ const MobileBottomNav = () => {
         className="pointer-events-none absolute -top-6 left-0 right-0 h-6 bg-gradient-to-t from-[hsl(220,15%,5%)] to-transparent"
       />
 
-      <div className="relative mx-3 mb-2 rounded-2xl border border-border/40 bg-[hsl(220,15%,7%)]/95 backdrop-blur-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.5),inset_0_1px_0_hsl(var(--primary)/0.08)]">
+      <div className="relative mx-3 mb-4 rounded-2xl border border-border/40 bg-[hsl(220,15%,7%)]/95 backdrop-blur-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.5),inset_0_1px_0_hsl(var(--primary)/0.08)]">
         <ul
           role="list"
           className="grid grid-cols-5 items-end h-16 px-1 m-0 p-0 list-none"
