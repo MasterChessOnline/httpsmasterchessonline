@@ -61,9 +61,10 @@ export default function CoachReviewPanel({
     setLoading(true);
     setProgress({ done: 0, total: 0, phase: "engine" });
     try {
-      // Step 1 — local engine analysis (honest verdicts).
+      // Step 1 — local engine analysis (honest verdicts, MultiPV=3).
       const result = await classifyGame(pgn, {
         depth: 16,
+        multiPv: 3,
         onProgress: (done, total) => setProgress({ done, total, phase: "engine" }),
       });
       setClassified(result.moves);
@@ -262,6 +263,59 @@ export default function CoachReviewPanel({
             ))}
           </ul>
         </div>
+      )}
+
+      {/* Per-move breakdown with MultiPV top variants */}
+      {classified && classified.length > 0 && (
+        <details className="rounded-xl border border-border/40 bg-card/80 p-4 group">
+          <summary className="flex items-center gap-2 cursor-pointer select-none list-none">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h4 className="text-sm font-semibold text-foreground flex-1">All moves & top engine lines</h4>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground group-open:hidden">Expand</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground hidden group-open:inline">Hide</span>
+          </summary>
+          <ul className="mt-3 space-y-2 max-h-[420px] overflow-y-auto pr-1">
+            {classified.map((m) => {
+              const formatEval = (cp: number, mate: number | null) => {
+                if (mate != null) return `M${Math.abs(mate)}${mate < 0 ? "-" : ""}`;
+                const pawns = cp / 100;
+                return (pawns >= 0 ? "+" : "") + pawns.toFixed(2);
+              };
+              return (
+                <li key={m.ply} className="text-xs border border-border/30 rounded-lg p-2 bg-background/40">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-muted-foreground w-10 shrink-0">
+                      {m.moveNumber}{m.color === "w" ? "." : "…"}
+                    </span>
+                    <span className="font-mono font-bold text-foreground">{m.san}</span>
+                    <span className={`px-1.5 py-0.5 rounded-md border text-[9px] font-medium uppercase tracking-wide ${VERDICT_STYLES[m.verdict] ?? "text-muted-foreground bg-muted/40 border-border/40"}`}>
+                      {VERDICT_LABEL[m.verdict]}
+                    </span>
+                    {m.cpLoss > 5 && m.verdict !== "book" && m.verdict !== "brilliant" && (
+                      <span className="text-[10px] text-muted-foreground font-mono">−{(m.cpLoss / 100).toFixed(2)}</span>
+                    )}
+                    <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+                      eval {formatEval(m.evalAfter, null)}
+                    </span>
+                  </div>
+                  {m.topLines && m.topLines.length > 0 && m.verdict !== "best" && m.verdict !== "book" && (
+                    <ol className="mt-1.5 space-y-0.5 pl-12">
+                      {m.topLines.map((line, idx) => (
+                        <li key={idx} className="flex items-baseline gap-2 font-mono text-[11px]">
+                          <span className="text-muted-foreground w-4">{idx + 1}.</span>
+                          <span className={`shrink-0 w-12 ${idx === 0 ? "text-emerald-300" : "text-muted-foreground"}`}>
+                            {formatEval(line.eval, line.mate)}
+                          </span>
+                          <span className="text-foreground/90 truncate">{line.pvSan.join(" ")}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
       )}
 
       {/* Repertoire suggestions */}
