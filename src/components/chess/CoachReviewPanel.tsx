@@ -61,9 +61,10 @@ export default function CoachReviewPanel({
     setLoading(true);
     setProgress({ done: 0, total: 0, phase: "engine" });
     try {
-      // Step 1 — local engine analysis (honest verdicts).
+      // Step 1 — local engine analysis (honest verdicts, MultiPV=3).
       const result = await classifyGame(pgn, {
         depth: 16,
+        multiPv: 3,
         onProgress: (done, total) => setProgress({ done, total, phase: "engine" }),
       });
       setClassified(result.moves);
