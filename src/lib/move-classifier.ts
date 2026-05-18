@@ -188,7 +188,10 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
 
     // Classify.
     let verdict: Verdict;
-    if (bookMove) {
+    // Only treat as "book" if it's also a sound move. A theory move that
+    // hangs material (e.g. fingerslip) must be classified honestly, not hidden
+    // behind the book label.
+    if (bookMove && cpLoss <= 50) {
       verdict = "book";
     } else {
       verdict = classifyByCpLoss(cpLoss);
