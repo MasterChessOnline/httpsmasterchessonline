@@ -63,7 +63,7 @@ export default function CoachReviewPanel({
     try {
       // Step 1 — local engine analysis (honest verdicts).
       const result = await classifyGame(pgn, {
-        depth: 12,
+        depth: 16,
         onProgress: (done, total) => setProgress({ done, total, phase: "engine" }),
       });
       setClassified(result.moves);

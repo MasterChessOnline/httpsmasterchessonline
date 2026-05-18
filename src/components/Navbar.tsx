@@ -521,7 +521,7 @@ const Navbar = () => {
             className="fixed inset-0 z-40 bg-[hsl(220,15%,5%)]/98 backdrop-blur-xl overflow-y-auto pt-16 pb-28"
           >
             {/* Sticky CTA header — primary actions always reachable */}
-            <div className="sticky top-0 z-10 -mt-16 pt-16 pb-3 px-4 bg-gradient-to-b from-[hsl(220,15%,5%)] via-[hsl(220,15%,5%)]/95 to-transparent backdrop-blur-xl border-b border-border/20">
+            <div className="sticky top-0 z-10 -mt-16 pt-16 pb-4 px-4 bg-[hsl(220,15%,5%)] backdrop-blur-xl border-b border-border/20 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.8)]">
               <div className="max-w-lg mx-auto grid grid-cols-2 gap-2.5">
                 <Link to="/play/online" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full h-12 bg-primary text-primary-foreground font-bold shadow-[0_6px_20px_-4px_hsl(var(--primary)/0.55)]">
