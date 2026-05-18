@@ -31,6 +31,13 @@ export type Verdict =
   | "blunder"
   | "brilliant";
 
+export interface TopLine {
+  san: string;        // first move of the line in SAN
+  pvSan: string[];    // first ~5 moves in SAN (preview)
+  eval: number;       // centipawns from the side-to-move POV (positive = mover better)
+  mate: number | null;
+}
+
 export interface ClassifiedMove {
   ply: number;          // 1-based half-move
   moveNumber: number;   // full move number (1, 1, 2, 2, …)
@@ -42,6 +49,7 @@ export interface ClassifiedMove {
   evalAfter: number;    // cp from White's POV after the move
   cpLoss: number;       // from the mover's POV (≥ 0)
   bestMoveSan?: string; // engine's top suggestion (SAN)
+  topLines?: TopLine[]; // top N PV lines at the position BEFORE this move
   verdict: Verdict;
 }
 
