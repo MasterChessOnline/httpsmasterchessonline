@@ -118,7 +118,8 @@ function materialDelta(fenBefore: string, fenAfter: string, mover: "w" | "b"): n
 }
 
 export interface ClassifyOptions {
-  depth?: number;             // engine depth per position (default 12)
+  depth?: number;             // engine depth per position (default 14)
+  multiPv?: number;           // number of top variants to capture (default 3)
   onProgress?: (done: number, total: number) => void;
 }
 
@@ -129,12 +130,29 @@ export interface ClassifiedGame {
   counts: Record<Verdict, number>;
 }
 
+/** Convert a UCI PV line to SAN moves played from the given FEN. */
+function pvUciToSan(fen: string, pvUci: string[], maxMoves = 5): string[] {
+  const c = new Chess(fen);
+  const sans: string[] = [];
+  for (const uci of pvUci.slice(0, maxMoves)) {
+    if (!uci || uci.length < 4) break;
+    try {
+      const m = c.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] as any });
+      if (!m) break;
+      sans.push(m.san);
+    } catch { break; }
+  }
+  return sans;
+}
+
 /**
  * Walk through a game and classify every move. Returns per-move verdicts
- * plus simple per-side accuracy numbers (0-100).
+ * plus simple per-side accuracy numbers (0-100). Uses MultiPV to capture the
+ * top N candidate lines at every position for precise cp-loss + UI display.
  */
 export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Promise<ClassifiedGame> {
-  const depth = opts.depth ?? 12;
+  const depth = opts.depth ?? 14;
+  const multiPv = Math.max(1, Math.min(5, opts.multiPv ?? 3));
 
   const game = new Chess();
   game.loadPgn(pgn);
@@ -151,28 +169,45 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
 
   // Eval before move 1 = 0 (start position is equal).
   let evalBeforeWhitePov = 0;
-  // First call we do need: get eval at start so first cp loss is meaningful.
-  try {
-    const r0 = await engine.evaluate(replay.fen(), depth);
-    evalBeforeWhitePov = scoreToWhitePov(replay.fen(), r0.evaluation, r0.mate);
-  } catch { /* keep 0 */ }
 
   for (let i = 0; i < history.length; i++) {
     const move = history[i];
     const fenBefore = replay.fen();
     const moverColor = move.color as "w" | "b";
 
-    // Best move at this position (for cpLoss + bestMoveSan).
+    // One MultiPV call gives us: best move, top-N lines (with SAN previews)
+    // AND a side-to-move eval for the position itself (== best line's eval).
+    let topLines: TopLine[] = [];
     let bestUci = "";
-    let bestEvalAfterWhitePov = evalBeforeWhitePov;
+    let bestEvalSideToMove = 0;
+    let bestMateSideToMove: number | null = null;
     try {
-      const best = await engine.getBestMove(fenBefore, undefined, depth);
-      bestUci = best.bestMove;
-      // The "evaluation" returned by getBestMove is from the side-to-move POV
-      // (chess.js / UCI convention). Convert to White POV for consistency.
-      const evalSideToMove = best.mate != null ? (best.mate > 0 ? 10000 : -10000) : (best.evaluation ?? 0);
-      bestEvalAfterWhitePov = moverColor === "w" ? evalSideToMove : -evalSideToMove;
+      const lines = await engine.getMultiPV(fenBefore, multiPv, depth);
+      topLines = lines.map(l => {
+        const pvSan = pvUciToSan(fenBefore, l.pv, 5);
+        return {
+          san: pvSan[0] ?? "",
+          pvSan,
+          eval: l.eval,
+          mate: l.mate,
+        };
+      }).filter(l => l.san);
+      if (lines[0]) {
+        bestUci = lines[0].pv[0] ?? "";
+        bestEvalSideToMove = lines[0].eval;
+        bestMateSideToMove = lines[0].mate;
+      }
     } catch { /* fallback below */ }
+
+    // White-POV evals.
+    const evalBeforeSideToMove = bestMateSideToMove != null
+      ? (bestMateSideToMove > 0 ? 10000 : -10000)
+      : bestEvalSideToMove;
+    const evalBeforeFromMover = moverColor === "w" ? evalBeforeSideToMove : -evalBeforeSideToMove;
+    // The eval BEFORE this move, from White's POV. If no engine result, keep previous.
+    evalBeforeWhitePov = topLines.length > 0
+      ? (moverColor === "w" ? evalBeforeSideToMove : -evalBeforeSideToMove)
+      : evalBeforeWhitePov;
 
     // Apply the actual move.
     replay.move(move.san);
@@ -180,33 +215,43 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
     const fenAfter = replay.fen();
     const bookMove = isBookMove(sanSoFar) || await isDatabaseBookMove(fenBefore, move.san, i + 1);
 
-    // Eval AFTER the played move (from White POV).
+    // Eval AFTER the played move (from White POV). If the played move is the
+    // engine's #1 choice, we already know — skip the extra call.
     let evalAfterWhitePov = evalBeforeWhitePov;
-    try {
-      const after = await engine.evaluate(fenAfter, depth);
-      evalAfterWhitePov = scoreToWhitePov(fenAfter, after.evaluation, after.mate);
-    } catch { /* keep previous */ }
+    const playedIsBest = !!bestUci && bestUci.slice(0, 4) === `${move.from}${move.to}`;
+    if (playedIsBest && topLines[0]) {
+      // After the engine's best move, the score for the opponent is the same
+      // magnitude with opposite sign (side to move flips).
+      const afterSideToMove = topLines[0].mate != null
+        ? (topLines[0].mate > 0 ? -10000 : 10000)
+        : -topLines[0].eval;
+      // afterSideToMove is from the new side-to-move (opponent). Convert to White.
+      const newSideIsWhite = moverColor === "b"; // opponent of mover
+      evalAfterWhitePov = newSideIsWhite ? afterSideToMove : -afterSideToMove;
+    } else {
+      try {
+        const after = await engine.evaluate(fenAfter, depth);
+        evalAfterWhitePov = scoreToWhitePov(fenAfter, after.evaluation, after.mate);
+      } catch { /* keep previous */ }
+    }
 
     // CP loss from the mover's POV.
-    // mover wants their POV eval to be as high as possible. Best move
-    // produces bestEvalAfterWhitePov; played move produces evalAfterWhitePov.
-    const moverPovBest = moverColor === "w" ? bestEvalAfterWhitePov : -bestEvalAfterWhitePov;
+    const moverPovBest = evalBeforeFromMover;                          // best continuation value for mover
     const moverPovPlayed = moverColor === "w" ? evalAfterWhitePov : -evalAfterWhitePov;
     const cpLoss = Math.max(0, Math.round(moverPovBest - moverPovPlayed));
 
     // Classify.
     let verdict: Verdict;
-    // Only treat as "book" if it's also a sound move. A theory move that
-    // hangs material (e.g. fingerslip) must be classified honestly, not hidden
-    // behind the book label.
-    if (bookMove && cpLoss <= 50) {
+    // Book only if it's ALSO a sound move (theory move that hangs material
+    // must be labeled honestly).
+    if (bookMove && cpLoss <= 30) {
       verdict = "book";
     } else {
       verdict = classifyByCpLoss(cpLoss);
-      // Brilliant heuristic: sacrificed material AND still played near-best.
+      // Brilliant: sacrificed material AND still played near-best AND there
+      // was a clearly worse alternative.
       const sacrificed = materialDelta(fenBefore, fenAfter, moverColor);
       const isCapture = /x/.test(move.san);
-      // Real sac: lost ≥ minor piece worth and didn't just trade equally.
       if (sacrificed >= 200 && cpLoss <= 10 && !isCapture && i >= 6) {
         verdict = "brilliant";
       }
@@ -222,7 +267,8 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
       evalBefore: evalBeforeWhitePov,
       evalAfter: evalAfterWhitePov,
       cpLoss,
-      bestMoveSan: bestUci ? uciToSan(fenBefore, bestUci) : undefined,
+      bestMoveSan: bestUci ? uciToSan(fenBefore, bestUci) : (topLines[0]?.san || undefined),
+      topLines,
       verdict,
     });
 
