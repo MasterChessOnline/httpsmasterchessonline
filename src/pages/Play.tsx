@@ -1196,6 +1196,7 @@ const Play = () => {
                         type={gameOverInfo.type}
                         winner={gameOverInfo.winner}
                         reason={gameOverInfo.reason}
+                        myColor={playerColor === "w" ? "white" : "black"}
                       />
                     )}
                   </>
