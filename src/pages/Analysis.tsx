@@ -874,17 +874,31 @@ export default function Analysis() {
             </div>
 
             <div className="flex items-stretch w-full justify-center">
-              {/* Eval Bar */}
-              <div className="w-6 sm:w-7 shrink-0 rounded-sm overflow-hidden mr-1.5 relative flex flex-col" style={{ minHeight: 320 }}>
-                <motion.div className="bg-[hsl(220,15%,18%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${100 - evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
-                <motion.div className="bg-[hsl(60,10%,90%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
+              {/* Eval Bar — wider, with side arrow marker */}
+              <div className="w-9 sm:w-11 shrink-0 rounded-md overflow-hidden mr-2 relative flex flex-col border border-border/40 shadow-[0_0_0_1px_hsl(43_90%_55%/0.15)]" style={{ minHeight: 320 }}>
+                <motion.div className="bg-[hsl(220,15%,12%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${100 - evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
+                <motion.div className="bg-[hsl(60,8%,92%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
+                {/* Center reference line */}
+                <div className="absolute left-0 right-0 top-1/2 h-px bg-primary/40 pointer-events-none" />
+                {/* Moving arrow marker on the right edge of the bar */}
+                <motion.div
+                  className="absolute -right-1.5 pointer-events-none"
+                  initial={{ top: "50%" }}
+                  animate={{ top: `${100 - evalPercent}%` }}
+                  transition={{ type: "spring", stiffness: 180, damping: 22 }}
+                  style={{ transform: "translateY(-50%)" }}
+                  aria-hidden
+                >
+                  <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[8px] border-l-primary drop-shadow-[0_0_4px_hsl(43_90%_55%/0.6)]" />
+                </motion.div>
+                {/* Numeric eval centered on the bar */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span className={`text-[9px] font-bold font-mono px-0.5 ${evalCpForBar >= 0 ? 'text-[hsl(220,15%,18%)]' : 'text-[hsl(60,10%,90%)]'}`}>
+                  <span className={`text-[11px] font-extrabold font-mono px-1 rounded ${evalCpForBar >= 0 ? 'text-[hsl(220,15%,12%)] bg-white/70' : 'text-[hsl(60,8%,92%)] bg-black/60'}`}>
                     {formatEval(evalCpForBar, evalMateForBar)}
                   </span>
                 </div>
                 {(positionEvaluating || (liveEvaluating && !pgnComplete)) && (
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20">
                     <Loader2 className="h-3 w-3 text-primary animate-spin" />
                   </div>
                 )}

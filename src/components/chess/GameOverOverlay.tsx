@@ -40,6 +40,16 @@ export default function GameOverOverlay({ type, winner, reason, myColor }: GameO
       ? "Time out"
       : "Resignation";
 
+  // Loss-specific reason text in English: "by resignation" / "on time" / "by checkmate"
+  const lossReason =
+    type === "timeout"
+      ? "on time"
+      : type === "resign"
+      ? "by resignation"
+      : type === "checkmate"
+      ? "by checkmate"
+      : "";
+
   const subline =
     type === "draw"
       ? reason || "Game drawn"
@@ -202,11 +212,11 @@ export default function GameOverOverlay({ type, winner, reason, myColor }: GameO
               : undefined
           }
         >
-          {mood === "win" ? "Victory" : mood === "loss" ? "Defeat" : headline}
+          {mood === "win" ? "Victory" : mood === "loss" ? "You lost" : headline}
         </motion.h3>
 
         {/* Subline */}
-        {subline && (
+        {(subline || mood === "loss") && (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -217,7 +227,7 @@ export default function GameOverOverlay({ type, winner, reason, myColor }: GameO
                 : "text-sm text-muted-foreground"
             }`}
           >
-            {mood === "win" || mood === "loss" ? headline : subline}
+            {mood === "loss" ? lossReason : mood === "win" ? headline : subline}
           </motion.p>
         )}
 
