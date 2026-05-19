@@ -40,6 +40,16 @@ export default function GameOverOverlay({ type, winner, reason, myColor }: GameO
       ? "Time out"
       : "Resignation";
 
+  // Loss-specific reason text in English: "by resignation" / "on time" / "by checkmate"
+  const lossReason =
+    type === "timeout"
+      ? "on time"
+      : type === "resign"
+      ? "by resignation"
+      : type === "checkmate"
+      ? "by checkmate"
+      : "";
+
   const subline =
     type === "draw"
       ? reason || "Game drawn"
