@@ -212,11 +212,11 @@ export default function GameOverOverlay({ type, winner, reason, myColor }: GameO
               : undefined
           }
         >
-          {mood === "win" ? "Victory" : mood === "loss" ? "Defeat" : headline}
+          {mood === "win" ? "Victory" : mood === "loss" ? "You lost" : headline}
         </motion.h3>
 
         {/* Subline */}
-        {subline && (
+        {(subline || mood === "loss") && (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -227,7 +227,7 @@ export default function GameOverOverlay({ type, winner, reason, myColor }: GameO
                 : "text-sm text-muted-foreground"
             }`}
           >
-            {mood === "win" || mood === "loss" ? headline : subline}
+            {mood === "loss" ? lossReason : mood === "win" ? headline : subline}
           </motion.p>
         )}
 
