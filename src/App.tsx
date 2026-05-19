@@ -28,6 +28,7 @@ const LearnArticle = lazy(() => import("./pages/LearnArticle"));
 const Lessons = lazy(() => import("./pages/Lessons"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Tournaments = lazy(() => import("./pages/Tournaments"));
+const WorldTournaments = lazy(() => import("./pages/WorldTournaments"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ProfileRedirect = lazy(() => import("./pages/ProfileRedirect"));
@@ -144,6 +145,7 @@ function AnimatedRoutes() {
           <Route path="/blog/:slug" element={<LearnArticle />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
+          <Route path="/world-tournaments" element={<WorldTournaments />} />
           
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<ProfileRedirect />} />
