@@ -702,6 +702,22 @@ const PlayOnline = () => {
           </motion.div>
 
           <div className="max-w-lg mx-auto space-y-5">
+            {/* Resume active game banner — 1 user = 1 active game rule */}
+            {profile?.current_game_id && onlineStatus === "idle" && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl border border-primary/50 bg-primary/10 p-4 flex items-center justify-between gap-3"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-primary">You have an active game</p>
+                  <p className="text-xs text-muted-foreground">Resume it before starting a new one.</p>
+                </div>
+                <Button size="sm" onClick={() => loadGameById(profile.current_game_id!)}>
+                  Resume
+                </Button>
+              </motion.div>
+            )}
             {/* Quick Start */}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full">
               <button
