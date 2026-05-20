@@ -74,7 +74,7 @@ const PlayOnline = () => {
   const initialTcIdx = resolveTcParam(tcParam);
   const {
     status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult,
-    searchMatch, cancelSearch, makeMove, endGame, resign, reset: resetOnline,
+    searchMatch, cancelSearch, makeMove, endGame, resign, abortGame, reset: resetOnline, loadGameById,
   } = useOnlineGame();
 
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
