@@ -1153,6 +1153,25 @@ const PlayOnline = () => {
         onSelect={handlePromotionSelect}
         onCancel={() => setPendingPromotion(null)}
       />
+      <AlertDialog open={confirmResignOpen} onOpenChange={setConfirmResignOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resign this game?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will lose the game and your rating will drop. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep playing</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => { setConfirmResignOpen(false); resign(); }}
+            >
+              Resign
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
