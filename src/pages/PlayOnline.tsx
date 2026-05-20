@@ -591,22 +591,27 @@ const PlayOnline = () => {
     // Swap colors for fairness
     const newWhite = onlineGame.black_player_id;
     const newBlack = onlineGame.white_player_id;
-    const { data: created, error: createErr } = await supabase
-      .from("online_games")
-      .insert({
-        white_player_id: newWhite,
-        black_player_id: newBlack,
-        white_time: tc.seconds || 600,
-        black_time: tc.seconds || 600,
-        time_control_label: onlineGame.time_control_label,
-        increment: onlineGame.increment,
-        is_rated: onlineGame.is_rated ?? true,
-      })
-      .select()
-      .single();
-    if (createErr || !created) {
+    // Use the atomic start_online_game RPC so the 1-game-per-user rule is enforced.
+    const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
+      p_white_id: newWhite,
+      p_black_id: newBlack,
+      p_white_time: tc.seconds || 600,
+      p_black_time: tc.seconds || 600,
+      p_time_control_label: onlineGame.time_control_label,
+      p_increment: onlineGame.increment,
+    });
+    const startOk = startRes && (startRes as any).ok === true;
+    const created = startOk ? ((startRes as any).game as { id: string }) : null;
+    if (startErr || !created) {
       setRematchInProgress(false);
-      toast({ title: "Rematch failed", description: "Could not create the new game.", variant: "destructive" });
+      const reason = (startRes as any)?.error;
+      toast({
+        title: "Rematch failed",
+        description: reason === "white_busy" || reason === "black_busy"
+          ? "One of the players is already in another game."
+          : "Could not create the new game.",
+        variant: "destructive",
+      });
       return;
     }
     // Tell the opponent which game id to join
