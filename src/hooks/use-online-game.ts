@@ -589,6 +589,21 @@ export function useOnlineGame() {
     await endGame(myColor === "w" ? "0-1" : "1-0", "resignation");
   }, [game, myColor, endGame]);
 
+  // Abort: only valid before the first move. No Elo change.
+  const abortGame = useCallback(async () => {
+    if (!game) return { ok: false, error: "no_game" as const };
+    if ((game.move_number ?? 0) > 0) return { ok: false, error: "moves_played" as const };
+    const { data, error: rpcErr } = await supabase.rpc("abort_online_game" as any, {
+      p_game_id: game.id,
+    });
+    if (rpcErr || (data as any)?.ok === false) {
+      return { ok: false, error: ((data as any)?.error ?? "failed") as string };
+    }
+    setGame(prev => prev ? { ...prev, status: "aborted", end_reason: "agreement" } : prev);
+    setStatus("finished");
+    return { ok: true as const };
+  }, [game]);
+
   const reset = useCallback(() => {
     cleanupChannels();
     setGame(null);
