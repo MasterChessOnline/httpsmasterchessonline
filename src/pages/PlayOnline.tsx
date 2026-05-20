@@ -1018,9 +1018,26 @@ const PlayOnline = () => {
             {/* Game Controls */}
             {!isGameOver && onlineStatus === "playing" && (
               <div className="flex flex-wrap gap-2">
-                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" onClick={resign}>
+                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" onClick={() => setConfirmResignOpen(true)}>
                   <Flag className="h-3.5 w-3.5" /> Resign
                 </Button>
+                {(onlineGame?.move_number ?? 0) === 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 min-w-[100px] gap-1"
+                    onClick={async () => {
+                      const r = await abortGame();
+                      if (!r.ok) {
+                        toast({ title: "Cannot abort", description: r.error === "moves_played" ? "Moves have already been played." : "Try again.", variant: "destructive" });
+                      } else {
+                        toast({ title: "Game aborted", description: "No rating change." });
+                      }
+                    }}
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Abort
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
