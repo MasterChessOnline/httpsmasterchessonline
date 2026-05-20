@@ -1208,6 +1208,7 @@ export type Database = {
           country: string | null
           country_flag: string | null
           created_at: string
+          current_game_id: string | null
           display_name: string | null
           favorite_openings: string[] | null
           followers_count: number
@@ -1246,6 +1247,7 @@ export type Database = {
           country?: string | null
           country_flag?: string | null
           created_at?: string
+          current_game_id?: string | null
           display_name?: string | null
           favorite_openings?: string[] | null
           followers_count?: number
@@ -1284,6 +1286,7 @@ export type Database = {
           country?: string | null
           country_flag?: string | null
           created_at?: string
+          current_game_id?: string | null
           display_name?: string | null
           favorite_openings?: string[] | null
           followers_count?: number
@@ -2513,11 +2516,15 @@ export type Database = {
       }
     }
     Functions: {
+      _clear_current_game: { Args: { p_game_id: string }; Returns: undefined }
+      abort_online_game: { Args: { p_game_id: string }; Returns: Json }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      assert_can_queue: { Args: never; Returns: Json }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
       claim_daily_mission: { Args: { p_key: string }; Returns: Json }
       claim_daily_reward: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
+      cleanup_stale_game: { Args: { p_user_id: string }; Returns: string }
       commit_online_move: {
         Args: {
           p_black_time: number
@@ -2612,6 +2619,17 @@ export type Database = {
       resolve_ref_code: { Args: { _ref_code: string }; Returns: string }
       server_now: { Args: never; Returns: string }
       settle_bets_for_game: { Args: { p_game_id: string }; Returns: Json }
+      start_online_game: {
+        Args: {
+          p_black_id: string
+          p_black_time: number
+          p_increment: number
+          p_time_control_label: string
+          p_white_id: string
+          p_white_time: number
+        }
+        Returns: Json
+      }
       tournament_color_balance: {
         Args: { _tournament_id: string }
         Returns: {

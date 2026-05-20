@@ -24,6 +24,7 @@ import QuickChat from "@/components/chess/QuickChat";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
 import CountryFlag from "@/components/CountryFlag";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -74,7 +75,7 @@ const PlayOnline = () => {
   const initialTcIdx = resolveTcParam(tcParam);
   const {
     status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult,
-    searchMatch, cancelSearch, makeMove, endGame, resign, reset: resetOnline,
+    searchMatch, cancelSearch, makeMove, endGame, resign, abortGame, reset: resetOnline, loadGameById,
   } = useOnlineGame();
 
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
@@ -100,6 +101,7 @@ const PlayOnline = () => {
   const [rematchOfferedByMe, setRematchOfferedByMe] = useState(false);
   const [rematchOfferedByOpponent, setRematchOfferedByOpponent] = useState(false);
   const [rematchInProgress, setRematchInProgress] = useState(false);
+  const [confirmResignOpen, setConfirmResignOpen] = useState(false);
   const { toast, dismiss } = useToast();
   const boardFocusRef = useRef<HTMLDivElement>(null);
 
@@ -591,22 +593,27 @@ const PlayOnline = () => {
     // Swap colors for fairness
     const newWhite = onlineGame.black_player_id;
     const newBlack = onlineGame.white_player_id;
-    const { data: created, error: createErr } = await supabase
-      .from("online_games")
-      .insert({
-        white_player_id: newWhite,
-        black_player_id: newBlack,
-        white_time: tc.seconds || 600,
-        black_time: tc.seconds || 600,
-        time_control_label: onlineGame.time_control_label,
-        increment: onlineGame.increment,
-        is_rated: onlineGame.is_rated ?? true,
-      })
-      .select()
-      .single();
-    if (createErr || !created) {
+    // Use the atomic start_online_game RPC so the 1-game-per-user rule is enforced.
+    const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
+      p_white_id: newWhite,
+      p_black_id: newBlack,
+      p_white_time: tc.seconds || 600,
+      p_black_time: tc.seconds || 600,
+      p_time_control_label: onlineGame.time_control_label,
+      p_increment: onlineGame.increment,
+    });
+    const startOk = startRes && (startRes as any).ok === true;
+    const created = startOk ? ((startRes as any).game as { id: string }) : null;
+    if (startErr || !created) {
       setRematchInProgress(false);
-      toast({ title: "Rematch failed", description: "Could not create the new game.", variant: "destructive" });
+      const reason = (startRes as any)?.error;
+      toast({
+        title: "Rematch failed",
+        description: reason === "white_busy" || reason === "black_busy"
+          ? "One of the players is already in another game."
+          : "Could not create the new game.",
+        variant: "destructive",
+      });
       return;
     }
     // Tell the opponent which game id to join
@@ -696,6 +703,22 @@ const PlayOnline = () => {
           </motion.div>
 
           <div className="max-w-lg mx-auto space-y-5">
+            {/* Resume active game banner — 1 user = 1 active game rule */}
+            {profile?.current_game_id && onlineStatus === "idle" && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl border border-primary/50 bg-primary/10 p-4 flex items-center justify-between gap-3"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-primary">You have an active game</p>
+                  <p className="text-xs text-muted-foreground">Resume it before starting a new one.</p>
+                </div>
+                <Button size="sm" onClick={() => loadGameById(profile.current_game_id!)}>
+                  Resume
+                </Button>
+              </motion.div>
+            )}
             {/* Quick Start */}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full">
               <button
@@ -1012,9 +1035,26 @@ const PlayOnline = () => {
             {/* Game Controls */}
             {!isGameOver && onlineStatus === "playing" && (
               <div className="flex flex-wrap gap-2">
-                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" onClick={resign}>
+                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" onClick={() => setConfirmResignOpen(true)}>
                   <Flag className="h-3.5 w-3.5" /> Resign
                 </Button>
+                {(onlineGame?.move_number ?? 0) === 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 min-w-[100px] gap-1"
+                    onClick={async () => {
+                      const r = await abortGame();
+                      if (!r.ok) {
+                        toast({ title: "Cannot abort", description: r.error === "moves_played" ? "Moves have already been played." : "Try again.", variant: "destructive" });
+                      } else {
+                        toast({ title: "Game aborted", description: "No rating change." });
+                      }
+                    }}
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Abort
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -1114,6 +1154,25 @@ const PlayOnline = () => {
         onSelect={handlePromotionSelect}
         onCancel={() => setPendingPromotion(null)}
       />
+      <AlertDialog open={confirmResignOpen} onOpenChange={setConfirmResignOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resign this game?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will lose the game and your rating will drop. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep playing</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => { setConfirmResignOpen(false); resign(); }}
+            >
+              Resign
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

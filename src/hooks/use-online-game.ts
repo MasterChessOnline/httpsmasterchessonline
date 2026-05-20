@@ -302,11 +302,26 @@ export function useOnlineGame() {
   const searchMatch = useCallback(async (timeControlIdx: number) => {
     if (!user || !profile) return;
     setError(null);
+
+    // Phase 1 guard: 1 user = 1 active game. Server clears stale links + queue rows.
+    const { data: gate } = await supabase.rpc("assert_can_queue" as any);
+    if (gate && (gate as any).ok === false) {
+      const activeId = (gate as any).game_id as string | undefined;
+      if ((gate as any).error === "already_in_game" && activeId) {
+        setError("You already have an active game. Resume it before starting a new one.");
+        // Auto-load the in-progress game so the player can continue.
+        await loadGameById(activeId);
+      } else {
+        setError("Cannot join queue right now.");
+      }
+      return;
+    }
+
     setStatus("searching");
 
     const tc = TIME_CONTROLS[timeControlIdx];
 
-    // First clean up any stale queue entries from this user
+    // (Server already cleaned queue rows in assert_can_queue, but keep this for safety.)
     await supabase.from("matchmaking_queue").delete().eq("user_id", user.id);
 
     // Look for an opponent in queue
@@ -327,21 +342,24 @@ export function useOnlineGame() {
       const whiteId = iAmWhite ? user.id : opponent.user_id;
       const blackId = iAmWhite ? opponent.user_id : user.id;
 
-      const { data: newGame, error: createError } = await supabase
-        .from("online_games")
-        .insert({
-          white_player_id: whiteId,
-          black_player_id: blackId,
-          white_time: tc.seconds || 600,
-          black_time: tc.seconds || 600,
-          time_control_label: tc.label,
-          increment: tc.increment,
-        })
-        .select()
-        .single();
-
-      if (createError || !newGame) {
-        setError("Failed to create game");
+      // Atomic creation with 1-game-per-user enforcement.
+      const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
+        p_white_id: whiteId,
+        p_black_id: blackId,
+        p_white_time: tc.seconds || 600,
+        p_black_time: tc.seconds || 600,
+        p_time_control_label: tc.label,
+        p_increment: tc.increment,
+      });
+      const startOk = startRes && (startRes as any).ok === true;
+      const newGame = startOk ? ((startRes as any).game as OnlineGame) : null;
+      if (startErr || !newGame) {
+        const reason = (startRes as any)?.error;
+        if (reason === "white_busy" || reason === "black_busy") {
+          setError("One of the players is already in another game.");
+        } else {
+          setError("Failed to create game");
+        }
         setStatus("idle");
         return;
       }
@@ -571,6 +589,21 @@ export function useOnlineGame() {
     await endGame(myColor === "w" ? "0-1" : "1-0", "resignation");
   }, [game, myColor, endGame]);
 
+  // Abort: only valid before the first move. No Elo change.
+  const abortGame = useCallback(async () => {
+    if (!game) return { ok: false, error: "no_game" as const };
+    if ((game.move_number ?? 0) > 0) return { ok: false, error: "moves_played" as const };
+    const { data, error: rpcErr } = await supabase.rpc("abort_online_game" as any, {
+      p_game_id: game.id,
+    });
+    if (rpcErr || (data as any)?.ok === false) {
+      return { ok: false, error: ((data as any)?.error ?? "failed") as string };
+    }
+    setGame(prev => prev ? { ...prev, status: "aborted", end_reason: "agreement" } : prev);
+    setStatus("finished");
+    return { ok: true as const };
+  }, [game]);
+
   const reset = useCallback(() => {
     cleanupChannels();
     setGame(null);
@@ -616,5 +649,5 @@ export function useOnlineGame() {
     };
   }, [user, cleanupChannels]);
 
-  return { status, game, myColor, error, ratingResult, searchMatch, cancelSearch, makeMove, endGame, resign, reset, loadGameById };
+  return { status, game, myColor, error, ratingResult, searchMatch, cancelSearch, makeMove, endGame, resign, abortGame, reset, loadGameById };
 }

@@ -1,106 +1,114 @@
 
-# Plan: Dati MasterChess-u dušu
+# MasterChess Online — Production Hardening Plan
 
-Cilj: sajt da se **oseti živo** prvih 5 sekundi i da svaka partija ima emocionalni vrhunac. Bez novih stranica, bez novih feature-a — samo poliranje + zvuk + cinematic momenti.
-
----
-
-## 1. Tihi, elegantni audio sloj
-
-Suptilan zvuk koji **dodaje, ne smeta**. Sve može da se ugasi iz Settings → Sound (default uključeno, tiho na 30%).
-
-Zvuci koje uvodimo:
-- **Move** — meki "tap" drvene figure (kratko, < 100ms)
-- **Capture** — nešto teži udarac
-- **Check** — suptilan zlatni "ding"
-- **Checkmate / pobeda** — kratka cinematic fanfara (2s, ne više)
-- **Poraz** — tihi minor akord
-- **Hover na CTA dugme (Play, Install App)** — jedva čujan klik
-- **Notification (rival pronađen, izazov)** — meki gong
-
-Implementacija:
-- Generišemo SFX preko ElevenLabs API (Edge function) jednom, kešujemo kao `.mp3` fajlove u `public/sounds/`
-- `useSound()` hook sa globalnim volume controlom + master mute u Settings
-- `localStorage` čuva preference, podrazumevano: volume 30%, muted=false
-- Prvi put ulazak: tihi welcome chime (1.5s) **samo na prvom učitavanju ikad**, pa nikad više
-
-## 2. Jači prvi utisak (homepage hero)
-
-Trenutno: korisnik vidi puno informacija, ali ne **oseća** zašto je MasterChess poseban.
-
-Promene u hero sekciji:
-- **Velika headline animacija**: jedna jaka rečenica koja se ispisuje slovo-po-slovo prvih 0.8s ("Šah. Bez asistenta. Bez varanja. Samo igrači.")
-- **Subline ispod**: jedna mirna linija sa key brojkama (X partija danas, X aktivnih igrača — samo ako su brojke realne)
-- **Cinematic 3D scena**: 2-3 figure koje **lebde tiho** sa parallax-om na pokret miša (već ima 4D Visual Mode — pojačati ovde)
-- **Glavni CTA "Play Now"** dobija jedan jak gold pulse svake ~4s (ne stalno)
-- **Install App** ostaje gde jeste, ali manje agresivan u hero-u
-- Hero visina: zauzima ~85vh tako da prvi utisak nije pretrpan — sve ostalo je "ispod fold-a"
-
-Klar hijerarhija: **jedan H1, jedan glavni CTA, jedan secondary**. Ostalo se vidi kad skroluje.
-
-## 3. Cinematic momenti pobede / mata
-
-Ovo je gde "duša" najviše dolazi. Trenutno game-over je verovatno tekstualni modal.
-
-Novi flow nakon pobede (3-4s):
-1. Tabla blago **dim-uje** osim mat-figure (spotlight efekat)
-2. Mat figura dobija zlatni glow + lagani spin
-3. Cinematic fanfara (2s)
-4. Fullscreen overlay sa zlatnom particle erupcijom (Framer Motion + canvas confetti)
-5. "VICTORY" tekst koji se ispisuje masivnim display fontom
-6. ELO change pokazan sa **count-up animacijom** (1450 → 1462, broji uživo)
-7. Tek tada se pojavljuju dugmad (Rematch, Review, Share Moment)
-
-Za poraz: kraći, dostojanstven — sivi overlay, "Defeat" u manjem fontu, tihi akord, fokus odmah na "Review".
-
-Za draw: neutralno, plavi accent.
-
-## 4. Sitne UX cake (micro-delights)
-
-Stvari koje korisnik ne registruje svesno ali oseti:
-- **Hover na figure** u tabli: jedva primetan zlatni outline + 1px lift
-- **Loading states**: zameniti spinner-e sa **animiranim figurama** (peška koji "korača")
-- **Empty states**: kratka rečenica + ilustracija figure (ne "No data found")
-- **Toast notifikacije**: subtilni slide-in sa zvonom ako je tihi mode dozvoljen
-- **Page transitions**: 200ms crossfade umesto hard cut između stranica
-
-## 5. Mali "potpis" autora na footer-u
-
-Tihi, ne previše uočljiv potpis koji daje sajtu **lični identitet**:
-- "Made with passion · MasterChess 2026"
-- Mali zlatni kralj ikonica koja se rotira na hover
-- Link ka About / Manifesto stranici (ako želiš da napravimo i jednostavnu "Why MasterChess" stranicu kasnije)
+Scope strictly limited to the 4 picked priorities + MultiPV for training. No new pages, no rewrites of existing flows that already work.
 
 ---
 
-## Tehnički detalji
+## Phase 1 — One active game per user (server-enforced)
 
-- **Audio**: `<audio>` HTML elementi + `Howler.js` (lightweight) ili native Web Audio API; ElevenLabs Edge function za inicijalnu generaciju, fajlovi kešovani u `public/sounds/`
-- **Settings store**: proširiti postojeći `localStorage` settings sa `audio: { enabled, volume, moveSound, victorySound }`
-- **Particle erupcija**: `canvas-confetti` library (lagan, 8kb)
-- **Count-up za ELO**: jednostavan custom hook sa `requestAnimationFrame`
-- **Hero refactor**: izmena postojeće Hero komponente, bez dodavanja novih stranica
-- **Game-over overlay**: nova `<VictoryOverlay />` / `<DefeatOverlay />` komponenta koja se zove iz postojeće game-state logike
+Goal: a user can NEVER be in two ranked games or two queues at once. Ghost games auto-clear on finalize.
 
-Bez novih ruta, bez novih tabela u bazi, bez novih biblioteka osim `canvas-confetti` i jedne ElevenLabs Edge function za inicijalnu generaciju SFX-a.
+**DB migration**
+- Add `profiles.current_game_id uuid NULL` (FK soft-ref to `online_games.id`).
+- Partial unique index: `UNIQUE (user_id) WHERE current_game_id IS NOT NULL` is implicit — instead enforce via RPC.
+- New RPC `start_online_game(white_id, black_id, ...)`:
+  - locks both profile rows `FOR UPDATE`
+  - rejects if either has `current_game_id IS NOT NULL` AND that game is still `active`
+  - inserts game, sets `current_game_id` on both profiles, deletes both queue rows
+  - returns the game row
+- Patch `finalize_online_game` + `commit_online_move` (when result is set): clear `current_game_id` for both players in the same transaction.
+- New RPC `cleanup_stale_game(user_id)`: if `current_game_id` points to a game whose `status='finished'` or `updated_at < now() - interval '2 hours'` with no moves, clear it.
+
+**Matchmaking guard (`use-online-game.ts → searchMatch`)**
+- Before joining queue: call new RPC `assert_can_queue()` which checks `current_game_id` and runs `cleanup_stale_game`. If still blocked → return `{ error: "You already have an active game", activeGameId }`.
+- UI surfaces a toast with a "Resume game" button → `loadGameById`.
+- Always delete this user's queue rows first (already done) AND verify no other queue rows for this user across ALL time controls.
+
+**Lobby UI (`PlayOnline.tsx`)**
+- Banner at top if `profile.current_game_id` is set: "You have an active game — Resume / Resign".
 
 ---
 
-## Šta NE radim u ovom planu
+## Phase 2 — Resign / Draw / Abort / Rematch
 
-- ❌ Native mobilna aplikacija (Capacitor) — odložiti dok ne budeš spreman za App Store
-- ❌ Novi feature-i (puzzles, novi modovi, novi alati)
-- ❌ Promena postojećih stranica osim homepage hero-a
-- ❌ Ambijentalni soundtrack — previše agresivno za šah
+Most exists; gaps to close:
+
+**Resign** — already wired via `resign()` → `finalize_online_game(..., 'resignation')`. Add confirm dialog with `AlertDialog`. ✅ small.
+
+**Draw offer (NEW)**
+- New table `online_draw_offers (id, game_id, from_user_id, created_at, status: pending|accepted|declined|expired)`.
+- Realtime: opponent sees toast "Player offered a draw" with Accept/Decline.
+- Accept → call `finalize_online_game(game_id, '1/2-1/2', 'agreement')`.
+- Decline → mark declined; sender sees toast.
+- Auto-expire after 30s or after a move is played.
+- Rate-limit: 1 active offer per side; cooldown 20s after decline.
+
+**Abort (NEW)**
+- Button shown ONLY when `game.move_number === 0` AND it's caller's turn or within first 10s.
+- New RPC `abort_online_game(game_id)`: requires `move_number = 0`, sets status `aborted`, clears `current_game_id` on both players, NO Elo applied.
+- Add `'aborted'` status handling in `GameOverOverlay` (shows "Game aborted — no rating change").
+
+**Rematch** — keep existing handler if present; add explicit rematch challenge via `game_invites` table reuse (same time control, swapped colors). Both players see "Rematch offered" → accept creates new game via `start_online_game` (which itself respects 1-game rule, so rematch is blocked if either is in another game).
 
 ---
 
-## Predloženi redosled implementacije
+## Phase 3 — Disconnect / AFK auto-loss
 
-1. **Audio sistem + Settings toggle** (osnov za sve ostalo)
-2. **Cinematic Victory / Defeat overlay** (najveći emocionalni impact)
-3. **Hero redesign** (jači prvi utisak)
-4. **Micro-delights** (hover, loading, empty states)
-5. **Footer potpis**
+**Presence** — extend existing `use-presence` so each player in an active game has a heartbeat row `online_game_presence (game_id, user_id, last_seen)` updated every 5s.
 
-Ako ti se sviđa pravac, klikni Implement i krećemo od koraka 1.
+**Edge function `online-game-watchdog`** (cron every 15s):
+- For each `online_games WHERE status='active'`:
+  - if it's player X's turn AND `presence(X).last_seen < now() - 30s` AND no move in 30s → grant opponent win with `end_reason='abandonment'`, call `finalize_online_game`.
+  - if either clock hits 0 server-side using `last_move_at` + remaining time → finalize with `end_reason='timeout'`.
+
+**Client UX**
+- Show "Opponent disconnected — auto-win in Ns" countdown in `Play.tsx` when peer presence stale.
+- On reconnect (visibilitychange / online event) re-subscribe + force refetch.
+
+---
+
+## Phase 4 — Animations + Optimistic UI polish
+
+Strictly visual, in `ChessBoard` component:
+- Smooth piece move: CSS transform transition 180ms cubic-bezier(0.4,0,0.2,1) keyed on `from→to`.
+- Last-move highlight: subtle gold tint on origin+destination squares (2 squares, no flicker).
+- Legal-move dots (already exist?) — make glow softer on hover.
+- Check animation: red pulse on king square 600ms.
+- Capture: tiny scale+fade-out of captured piece (Framer Motion `AnimatePresence`).
+- Premove visual: dashed gold ring on premove squares.
+- Optimistic move already implemented in `makeMove`; add rollback toast "Move rejected" if RPC returns `ok:false`.
+
+No changes to move-validation logic.
+
+---
+
+## Phase 5 — Puzzle MultiPV acceptance
+
+Apply to `GuessTheMove.tsx`, `PlayLikeGM.tsx`, `OpeningTrainer.tsx` (train mode):
+- Replace exact-SAN compare with: run Stockfish MultiPV=3 on the position; accept the user's move if its eval is within 30cp of the best line OR shares same mate distance.
+- Cache eval per FEN in `stockfish-eval-cache`.
+- Keep "expected" move shown as the primary hint but don't reject equivalents.
+
+---
+
+## Technical notes (not for end-user)
+
+- All new RPCs `SECURITY DEFINER`, `SET search_path=public`, auth checks inside.
+- New table RLS: only the two players can SELECT their own draw_offers / presence rows.
+- `commit_online_move` patched to clear `current_game_id` when `p_result IS NOT NULL`.
+- `finalize_online_game` patched same way (idempotent).
+- Migration order: tables → RPCs → backfill (`UPDATE profiles SET current_game_id = (SELECT id FROM online_games WHERE status='active' AND ...)`).
+- Frontend types regenerate automatically after migration approval.
+
+---
+
+## Delivery order
+
+1. Phase 1 migration (await approval) → Phase 1 client code.
+2. Phase 2 migration → UI dialogs.
+3. Phase 3 migration + edge function + cron + client presence.
+4. Phase 4 pure-frontend polish.
+5. Phase 5 puzzle MultiPV.
+
+I'll pause after each phase so you can test before I move on.

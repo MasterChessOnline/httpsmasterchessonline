@@ -13,6 +13,7 @@ interface Profile {
   games_won: number;
   games_lost: number;
   games_drawn: number;
+  current_game_id?: string | null;
 }
 
 interface AuthContextType {
