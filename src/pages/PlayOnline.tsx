@@ -100,6 +100,7 @@ const PlayOnline = () => {
   const [rematchOfferedByMe, setRematchOfferedByMe] = useState(false);
   const [rematchOfferedByOpponent, setRematchOfferedByOpponent] = useState(false);
   const [rematchInProgress, setRematchInProgress] = useState(false);
+  const [confirmResignOpen, setConfirmResignOpen] = useState(false);
   const { toast, dismiss } = useToast();
   const boardFocusRef = useRef<HTMLDivElement>(null);
 
