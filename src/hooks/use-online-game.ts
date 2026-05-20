@@ -342,21 +342,24 @@ export function useOnlineGame() {
       const whiteId = iAmWhite ? user.id : opponent.user_id;
       const blackId = iAmWhite ? opponent.user_id : user.id;
 
-      const { data: newGame, error: createError } = await supabase
-        .from("online_games")
-        .insert({
-          white_player_id: whiteId,
-          black_player_id: blackId,
-          white_time: tc.seconds || 600,
-          black_time: tc.seconds || 600,
-          time_control_label: tc.label,
-          increment: tc.increment,
-        })
-        .select()
-        .single();
-
-      if (createError || !newGame) {
-        setError("Failed to create game");
+      // Atomic creation with 1-game-per-user enforcement.
+      const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
+        p_white_id: whiteId,
+        p_black_id: blackId,
+        p_white_time: tc.seconds || 600,
+        p_black_time: tc.seconds || 600,
+        p_time_control_label: tc.label,
+        p_increment: tc.increment,
+      });
+      const startOk = startRes && (startRes as any).ok === true;
+      const newGame = startOk ? ((startRes as any).game as OnlineGame) : null;
+      if (startErr || !newGame) {
+        const reason = (startRes as any)?.error;
+        if (reason === "white_busy" || reason === "black_busy") {
+          setError("One of the players is already in another game.");
+        } else {
+          setError("Failed to create game");
+        }
         setStatus("idle");
         return;
       }
