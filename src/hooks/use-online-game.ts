@@ -302,11 +302,26 @@ export function useOnlineGame() {
   const searchMatch = useCallback(async (timeControlIdx: number) => {
     if (!user || !profile) return;
     setError(null);
+
+    // Phase 1 guard: 1 user = 1 active game. Server clears stale links + queue rows.
+    const { data: gate } = await supabase.rpc("assert_can_queue" as any);
+    if (gate && (gate as any).ok === false) {
+      const activeId = (gate as any).game_id as string | undefined;
+      if ((gate as any).error === "already_in_game" && activeId) {
+        setError("You already have an active game. Resume it before starting a new one.");
+        // Auto-load the in-progress game so the player can continue.
+        await loadGameById(activeId);
+      } else {
+        setError("Cannot join queue right now.");
+      }
+      return;
+    }
+
     setStatus("searching");
 
     const tc = TIME_CONTROLS[timeControlIdx];
 
-    // First clean up any stale queue entries from this user
+    // (Server already cleaned queue rows in assert_can_queue, but keep this for safety.)
     await supabase.from("matchmaking_queue").delete().eq("user_id", user.id);
 
     // Look for an opponent in queue
