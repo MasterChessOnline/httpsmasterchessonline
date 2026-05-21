@@ -23,13 +23,15 @@ import { fetchExplorerData, fetchMasterExplorerData } from "./lichess-explorer";
 
 export type Verdict =
   | "book"
+  | "brilliant"
+  | "great"
   | "best"
   | "excellent"
   | "good"
   | "inaccuracy"
   | "mistake"
-  | "blunder"
-  | "brilliant";
+  | "miss"
+  | "blunder";
 
 export interface TopLine {
   san: string;        // first move of the line in SAN
