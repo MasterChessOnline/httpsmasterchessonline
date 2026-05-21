@@ -920,8 +920,8 @@ export default function Analysis() {
             </div>
 
             <div className="flex items-center gap-2 mt-1 self-start ml-8 sm:ml-10">
-              <div className="w-4 h-4 rounded-sm bg-[hsl(60,10%,90%)] border border-border/30" />
-              <span className="text-xs font-semibold text-foreground/80">White</span>
+              <div className={`w-4 h-4 rounded-sm ${flipped ? "bg-[hsl(220,15%,20%)]" : "bg-[hsl(60,10%,90%)]"} border border-border/30`} />
+              <span className="text-xs font-semibold text-foreground/80">{flipped ? "Black" : "White"}</span>
             </div>
 
             {/* Board controls */}
