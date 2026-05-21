@@ -250,7 +250,24 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
       verdict = "book";
     } else {
       verdict = classifyByCpLoss(cpLoss);
-      // Brilliant: sacrificed material AND still played near-best AND there
+
+      // GREAT: only move — best line is dramatically better than second
+      // best (>=150cp), and the player found it.
+      const second = topLines[1];
+      const gap = topLines[0] && second
+        ? Math.abs(topLines[0].eval - second.eval)
+        : 0;
+      if (cpLoss <= 10 && gap >= 150 && verdict !== "best") {
+        verdict = "great";
+      }
+
+      // MISS: had a winning chance (best move was at least +200 from mover
+      // POV) but the played move dropped that advantage by 150cp or more.
+      if (moverPovBest >= 200 && cpLoss >= 150 && (verdict === "mistake" || verdict === "blunder" || verdict === "inaccuracy")) {
+        verdict = "miss";
+      }
+
+      // BRILLIANT: sacrificed material AND still played near-best AND there
       // was a clearly worse alternative.
       const sacrificed = materialDelta(fenBefore, fenAfter, moverColor);
       const isCapture = /x/.test(move.san);
