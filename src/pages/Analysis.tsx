@@ -866,8 +866,8 @@ export default function Analysis() {
           {/* ── LEFT: Eval Bar + Board ── */}
           <div className="flex flex-col items-center w-full lg:w-auto">
             <div className="flex items-center gap-2 mb-1 self-start ml-8 sm:ml-10">
-              <div className="w-4 h-4 rounded-sm bg-[hsl(220,15%,20%)] border border-border/30" />
-              <span className="text-xs font-semibold text-foreground/80">Black</span>
+              <div className={`w-4 h-4 rounded-sm ${flipped ? "bg-[hsl(60,10%,90%)]" : "bg-[hsl(220,15%,20%)]"} border border-border/30`} />
+              <span className="text-xs font-semibold text-foreground/80">{flipped ? "White" : "Black"}</span>
               {explorerData?.opening && (
                 <Badge variant="outline" className="text-[10px] ml-2">{explorerData.opening.eco} {explorerData.opening.name}</Badge>
               )}
