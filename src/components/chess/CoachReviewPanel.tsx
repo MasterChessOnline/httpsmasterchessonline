@@ -99,8 +99,8 @@ export default function CoachReviewPanel({
         .filter(m => m.verdict !== "book" && m.verdict !== "best" && m.verdict !== "excellent")
         .sort((a, b) => {
           const rank: Record<Verdict, number> = {
-            blunder: 0, brilliant: 1, mistake: 2, inaccuracy: 3,
-            good: 4, excellent: 5, best: 6, book: 7,
+            blunder: 0, miss: 1, brilliant: 2, great: 3, mistake: 4, inaccuracy: 5,
+            good: 6, excellent: 7, best: 8, book: 9,
           };
           return rank[a.verdict] - rank[b.verdict];
         })
