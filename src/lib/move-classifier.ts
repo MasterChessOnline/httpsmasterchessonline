@@ -289,7 +289,8 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
   };
 
   const counts: Record<Verdict, number> = {
-    book: 0, best: 0, excellent: 0, good: 0, inaccuracy: 0, mistake: 0, blunder: 0, brilliant: 0,
+    book: 0, best: 0, excellent: 0, good: 0, great: 0, miss: 0,
+    inaccuracy: 0, mistake: 0, blunder: 0, brilliant: 0,
   };
   for (const m of out) counts[m.verdict]++;
 
