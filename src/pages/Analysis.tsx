@@ -353,6 +353,14 @@ export default function Analysis() {
         }
       }
 
+      // Auto-orient the board to the current user's color when reviewing
+      // one of their own games (mirrors Chess.com / Lichess behavior).
+      if (user && row && row.black_player_id === user.id) {
+        setFlipped(true);
+      } else if (user && row && row.white_player_id === user.id) {
+        setFlipped(false);
+      }
+
       if (pgn && pgn.trim()) {
         setPgnInput(pgn);
         setBottomTab("import");
