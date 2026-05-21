@@ -23,13 +23,15 @@ import { fetchExplorerData, fetchMasterExplorerData } from "./lichess-explorer";
 
 export type Verdict =
   | "book"
+  | "brilliant"
+  | "great"
   | "best"
   | "excellent"
   | "good"
   | "inaccuracy"
   | "mistake"
-  | "blunder"
-  | "brilliant";
+  | "miss"
+  | "blunder";
 
 export interface TopLine {
   san: string;        // first move of the line in SAN
@@ -248,7 +250,24 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
       verdict = "book";
     } else {
       verdict = classifyByCpLoss(cpLoss);
-      // Brilliant: sacrificed material AND still played near-best AND there
+
+      // GREAT: only move — best line is dramatically better than second
+      // best (>=150cp), and the player found it.
+      const second = topLines[1];
+      const gap = topLines[0] && second
+        ? Math.abs(topLines[0].eval - second.eval)
+        : 0;
+      if (cpLoss <= 10 && gap >= 150 && verdict !== "best") {
+        verdict = "great";
+      }
+
+      // MISS: had a winning chance (best move was at least +200 from mover
+      // POV) but the played move dropped that advantage by 150cp or more.
+      if (moverPovBest >= 200 && cpLoss >= 150 && (verdict === "mistake" || verdict === "blunder" || verdict === "inaccuracy")) {
+        verdict = "miss";
+      }
+
+      // BRILLIANT: sacrificed material AND still played near-best AND there
       // was a clearly worse alternative.
       const sacrificed = materialDelta(fenBefore, fenAfter, moverColor);
       const isCapture = /x/.test(move.san);
@@ -287,7 +306,8 @@ export async function classifyGame(pgn: string, opts: ClassifyOptions = {}): Pro
   };
 
   const counts: Record<Verdict, number> = {
-    book: 0, best: 0, excellent: 0, good: 0, inaccuracy: 0, mistake: 0, blunder: 0, brilliant: 0,
+    book: 0, best: 0, excellent: 0, good: 0, great: 0, miss: 0,
+    inaccuracy: 0, mistake: 0, blunder: 0, brilliant: 0,
   };
   for (const m of out) counts[m.verdict]++;
 

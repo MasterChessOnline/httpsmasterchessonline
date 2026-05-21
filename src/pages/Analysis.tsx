@@ -353,6 +353,14 @@ export default function Analysis() {
         }
       }
 
+      // Auto-orient the board to the current user's color when reviewing
+      // one of their own games (mirrors Chess.com / Lichess behavior).
+      if (user && row && row.black_player_id === user.id) {
+        setFlipped(true);
+      } else if (user && row && row.white_player_id === user.id) {
+        setFlipped(false);
+      }
+
       if (pgn && pgn.trim()) {
         setPgnInput(pgn);
         setBottomTab("import");
@@ -866,8 +874,8 @@ export default function Analysis() {
           {/* ── LEFT: Eval Bar + Board ── */}
           <div className="flex flex-col items-center w-full lg:w-auto">
             <div className="flex items-center gap-2 mb-1 self-start ml-8 sm:ml-10">
-              <div className="w-4 h-4 rounded-sm bg-[hsl(220,15%,20%)] border border-border/30" />
-              <span className="text-xs font-semibold text-foreground/80">Black</span>
+              <div className={`w-4 h-4 rounded-sm ${flipped ? "bg-[hsl(60,10%,90%)]" : "bg-[hsl(220,15%,20%)]"} border border-border/30`} />
+              <span className="text-xs font-semibold text-foreground/80">{flipped ? "White" : "Black"}</span>
               {explorerData?.opening && (
                 <Badge variant="outline" className="text-[10px] ml-2">{explorerData.opening.eco} {explorerData.opening.name}</Badge>
               )}
@@ -920,8 +928,8 @@ export default function Analysis() {
             </div>
 
             <div className="flex items-center gap-2 mt-1 self-start ml-8 sm:ml-10">
-              <div className="w-4 h-4 rounded-sm bg-[hsl(60,10%,90%)] border border-border/30" />
-              <span className="text-xs font-semibold text-foreground/80">White</span>
+              <div className={`w-4 h-4 rounded-sm ${flipped ? "bg-[hsl(220,15%,20%)]" : "bg-[hsl(60,10%,90%)]"} border border-border/30`} />
+              <span className="text-xs font-semibold text-foreground/80">{flipped ? "Black" : "White"}</span>
             </div>
 
             {/* Board controls */}

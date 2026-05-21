@@ -1,114 +1,78 @@
+# MasterChess — Final Hardening Plan
 
-# MasterChess Online — Production Hardening Plan
-
-Scope strictly limited to the 4 picked priorities + MultiPV for training. No new pages, no rewrites of existing flows that already work.
-
----
-
-## Phase 1 — One active game per user (server-enforced)
-
-Goal: a user can NEVER be in two ranked games or two queues at once. Ghost games auto-clear on finalize.
-
-**DB migration**
-- Add `profiles.current_game_id uuid NULL` (FK soft-ref to `online_games.id`).
-- Partial unique index: `UNIQUE (user_id) WHERE current_game_id IS NOT NULL` is implicit — instead enforce via RPC.
-- New RPC `start_online_game(white_id, black_id, ...)`:
-  - locks both profile rows `FOR UPDATE`
-  - rejects if either has `current_game_id IS NOT NULL` AND that game is still `active`
-  - inserts game, sets `current_game_id` on both profiles, deletes both queue rows
-  - returns the game row
-- Patch `finalize_online_game` + `commit_online_move` (when result is set): clear `current_game_id` for both players in the same transaction.
-- New RPC `cleanup_stale_game(user_id)`: if `current_game_id` points to a game whose `status='finished'` or `updated_at < now() - interval '2 hours'` with no moves, clear it.
-
-**Matchmaking guard (`use-online-game.ts → searchMatch`)**
-- Before joining queue: call new RPC `assert_can_queue()` which checks `current_game_id` and runs `cleanup_stale_game`. If still blocked → return `{ error: "You already have an active game", activeGameId }`.
-- UI surfaces a toast with a "Resume game" button → `loadGameById`.
-- Always delete this user's queue rows first (already done) AND verify no other queue rows for this user across ALL time controls.
-
-**Lobby UI (`PlayOnline.tsx`)**
-- Banner at top if `profile.current_game_id` is set: "You have an active game — Resume / Resign".
+Big scope, so I'll do it in 6 phases and pause for testing between each. Nothing here adds new pages; everything fixes/finishes what exists.
 
 ---
 
-## Phase 2 — Resign / Draw / Abort / Rematch
+## Phase 1 — Online play core (finish what's left)
 
-Most exists; gaps to close:
+Already done: 1-user-1-game enforcement, Resign confirm, Abort, rematch via `start_online_game`.
 
-**Resign** — already wired via `resign()` → `finalize_online_game(..., 'resignation')`. Add confirm dialog with `AlertDialog`. ✅ small.
+Remaining:
+- **Draw offer** — new table `online_draw_offers`, RPCs `offer_draw` / `respond_draw_offer`, toast UI with Accept/Decline, 30s expiry, auto-cancel on move.
+- **Disconnect / AFK auto-loss** — `online_game_presence` table heartbeat every 5s; edge function `online-game-watchdog` (cron 15s) finalizes games where the player on move has `last_seen < now()-30s` OR clock ≤ 0; client toast "Opponent disconnected — auto-win in Ns".
+- **Reconnect** — on `visibilitychange`/`online` event, force refetch game + re-subscribe channel; clear stale optimistic state.
+- **Instant moves / sync** — already optimistic in `commit_online_move`; add server-clock drift correction using `last_move_at + remaining` on every poll; rollback toast on `ok:false`.
+- **Premoves** — visual dashed gold ring + execute on opponent's move arrival (already partially wired — finish & test).
 
-**Draw offer (NEW)**
-- New table `online_draw_offers (id, game_id, from_user_id, created_at, status: pending|accepted|declined|expired)`.
-- Realtime: opponent sees toast "Player offered a draw" with Accept/Decline.
-- Accept → call `finalize_online_game(game_id, '1/2-1/2', 'agreement')`.
-- Decline → mark declined; sender sees toast.
-- Auto-expire after 30s or after a move is played.
-- Rate-limit: 1 active offer per side; cooldown 20s after decline.
+## Phase 2 — Spectate / Watch Live
 
-**Abort (NEW)**
-- Button shown ONLY when `game.move_number === 0` AND it's caller's turn or within first 10s.
-- New RPC `abort_online_game(game_id)`: requires `move_number = 0`, sets status `aborted`, clears `current_game_id` on both players, NO Elo applied.
-- Add `'aborted'` status handling in `GameOverOverlay` (shows "Game aborted — no rating change").
+- Remove all 6 placeholder games from `StreamHub` / "Watch Live Games".
+- Query: `online_games WHERE status='active' AND move_number >= 2 ORDER BY updated_at DESC LIMIT 12`.
+- Empty state: "No live games right now — be the first to play".
+- Subscribe to realtime updates on `online_games` for the live list.
+- `Spectate.tsx` already exists — verify no-lag broadcast subscription, fall back to 3s poll.
 
-**Rematch** — keep existing handler if present; add explicit rematch challenge via `game_invites` table reuse (same time control, swapped colors). Both players see "Rematch offered" → accept creates new game via `start_online_game` (which itself respects 1-game rule, so rematch is blocked if either is in another game).
+## Phase 3 — Game Review (Chess.com / Lichess-style)
 
----
+`GameReview.tsx` + `CoachReviewPanel` already classify moves. Finish & polish:
+- Auto-run review on game-end navigation (button "Review game" in `GameOverOverlay` → `/review?game=<id>`; auto-start Stockfish sweep at depth 14, MultiPV=3, cached per FEN).
+- Per-move classifications with the **full set**: Brilliant `!!`, Great `!`, Best ★, Excellent ◆, Good ·, Book 📖, Inaccuracy `?!`, Mistake `?`, Blunder `??`, Miss ✗.
+  - Extend `MoveClass` type + `CLASS_META` (colors, icons, labels).
+  - Update `classifyMove` with thresholds for Excellent (wpLoss < 1, not best) and Miss (was winning ≥+200, dropped ≥150cp AND best move was forced mate or +300 swing).
+- UI per move: colored chip + icon + Framer Motion fade-in (180ms) + Radix Tooltip with explanation.
+- Accuracy %, centipawn loss, best-move arrow on board for each ply (already partial).
 
-## Phase 3 — Disconnect / AFK auto-loss
+## Phase 4 — Mobile responsive overhaul
 
-**Presence** — extend existing `use-presence` so each player in an active game has a heartbeat row `online_game_presence (game_id, user_id, last_seen)` updated every 5s.
+Screenshot shows scaling/coords/layout issues. Fixes:
+- `ChessBoard`: change sizing to `min(100vw - 32px, 100vh - 360px, 560px)`; board + pieces scale together.
+- Coordinates: move file labels INSIDE board edge (absolute bottom-1 left-1, opacity-50, text-[10px] on mobile) — no more overflow gap.
+- Analysis panel: collapse below board with `mt-2` (was `mt-8`), full-width card, "Start analysis" button directly under board with `sticky bottom-0` on mobile.
+- Eval bar: position `left-0 top-0 h-full w-2 md:w-3` flush against board, gradient bg, value label hidden < 360px.
+- Global: `overflow-x-hidden` on `body`, remove fixed widths > 100vw, replace `gap-8` with responsive `gap-2 md:gap-6` on Play/Analysis layouts.
 
-**Edge function `online-game-watchdog`** (cron every 15s):
-- For each `online_games WHERE status='active'`:
-  - if it's player X's turn AND `presence(X).last_seen < now() - 30s` AND no move in 30s → grant opponent win with `end_reason='abandonment'`, call `finalize_online_game`.
-  - if either clock hits 0 server-side using `last_move_at` + remaining time → finalize with `end_reason='timeout'`.
+## Phase 5 — Review board orientation + Bot hints
 
-**Client UX**
-- Show "Opponent disconnected — auto-win in Ns" countdown in `Play.tsx` when peer presence stale.
-- On reconnect (visibilitychange / online event) re-subscribe + force refetch.
+- `GameReview.tsx`: read `game.black_player_id === user.id` → set `boardOrientation='black'` by default; flip button still works.
+- `Play.tsx` (vs bots): "Hints" toggle calls Stockfish `getBestMove(depth 14)`, draws gold dashed arrow `from→to`, does NOT auto-move. Counter `5 hints left` from `useState`; decrement per use; disabled when 0; reset per game.
 
----
+## Phase 6 — PWA install gating + mobile UX polish
 
-## Phase 4 — Animations + Optimistic UI polish
-
-Strictly visual, in `ChessBoard` component:
-- Smooth piece move: CSS transform transition 180ms cubic-bezier(0.4,0,0.2,1) keyed on `from→to`.
-- Last-move highlight: subtle gold tint on origin+destination squares (2 squares, no flicker).
-- Legal-move dots (already exist?) — make glow softer on hover.
-- Check animation: red pulse on king square 600ms.
-- Capture: tiny scale+fade-out of captured piece (Framer Motion `AnimatePresence`).
-- Premove visual: dashed gold ring on premove squares.
-- Optimistic move already implemented in `makeMove`; add rollback toast "Move rejected" if RPC returns `ok:false`.
-
-No changes to move-validation logic.
-
----
-
-## Phase 5 — Puzzle MultiPV acceptance
-
-Apply to `GuessTheMove.tsx`, `PlayLikeGM.tsx`, `OpeningTrainer.tsx` (train mode):
-- Replace exact-SAN compare with: run Stockfish MultiPV=3 on the position; accept the user's move if its eval is within 30cp of the best line OR shares same mate distance.
-- Cache eval per FEN in `stockfish-eval-cache`.
-- Keep "expected" move shown as the primary hint but don't reject equivalents.
+- `useInstallStatus` hook: detect `display-mode: standalone` → never show banner again. Persist dismissal in `localStorage`.
+- iOS detection (`/iPad|iPhone|iPod/.test(ua) && !window.MSStream`) → hide Android install UI; show iOS "Add to Home Screen" tooltip only when user taps Share-icon variant.
+- Android Chrome / Desktop Chrome/Edge → only show install banner if `beforeinstallprompt` fired.
+- Global mobile polish: audit `Play`, `PlayOnline`, `Analysis`, `GameReview`, `StreamHub` for overflow / overlap / cut elements. Add `touch-manipulation` + `select-none` on board squares.
 
 ---
 
-## Technical notes (not for end-user)
+## Technical notes
 
-- All new RPCs `SECURITY DEFINER`, `SET search_path=public`, auth checks inside.
-- New table RLS: only the two players can SELECT their own draw_offers / presence rows.
-- `commit_online_move` patched to clear `current_game_id` when `p_result IS NOT NULL`.
-- `finalize_online_game` patched same way (idempotent).
-- Migration order: tables → RPCs → backfill (`UPDATE profiles SET current_game_id = (SELECT id FROM online_games WHERE status='active' AND ...)`).
-- Frontend types regenerate automatically after migration approval.
+- New tables: `online_draw_offers`, `online_game_presence`. Both RLS-restricted to the two players.
+- New edge function: `online-game-watchdog` (scheduled cron).
+- New RPCs: `offer_draw`, `respond_draw_offer`, `heartbeat_online_game`, `claim_afk_win`.
+- Classifier extension: pure frontend, no migration.
+- Mobile fixes: pure CSS/Tailwind in `ChessBoard`, `Play`, `GameReview`, `Analysis`.
 
 ---
 
-## Delivery order
+## Delivery order & pauses
 
-1. Phase 1 migration (await approval) → Phase 1 client code.
-2. Phase 2 migration → UI dialogs.
-3. Phase 3 migration + edge function + cron + client presence.
-4. Phase 4 pure-frontend polish.
-5. Phase 5 puzzle MultiPV.
+1. **Phase 1** (DB + RPCs + edge function + client) — pause for testing.
+2. **Phase 2** (live games list) — short, pause.
+3. **Phase 3** (Game Review full classifications) — pause.
+4. **Phase 4** (mobile responsive) — pause, you screenshot again.
+5. **Phase 5** (orientation + hints).
+6. **Phase 6** (PWA + final polish).
 
-I'll pause after each phase so you can test before I move on.
+Approve and I start with Phase 1.
