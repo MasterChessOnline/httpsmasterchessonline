@@ -952,6 +952,41 @@ export type Database = {
         }
         Relationships: []
       }
+      online_draw_offers: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          game_id: string
+          id: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          game_id: string
+          id?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          game_id?: string
+          id?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_draw_offers_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "online_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       online_game_moves: {
         Row: {
           black_time: number
@@ -1005,6 +1040,32 @@ export type Database = {
           white_time?: number
         }
         Relationships: []
+      }
+      online_game_presence: {
+        Row: {
+          game_id: string
+          last_seen: string
+          user_id: string
+        }
+        Insert: {
+          game_id: string
+          last_seen?: string
+          user_id: string
+        }
+        Update: {
+          game_id?: string
+          last_seen?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_game_presence_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "online_games"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       online_games: {
         Row: {
@@ -2521,6 +2582,7 @@ export type Database = {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       assert_can_queue: { Args: never; Returns: Json }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
+      claim_afk_win: { Args: { p_game_id: string }; Returns: Json }
       claim_daily_mission: { Args: { p_key: string }; Returns: Json }
       claim_daily_reward: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
@@ -2581,6 +2643,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      heartbeat_online_game: { Args: { p_game_id: string }; Returns: undefined }
       is_club_member: {
         Args: { _club: string; _user: string }
         Returns: boolean
@@ -2595,6 +2658,7 @@ export type Database = {
         Returns: number
       }
       my_referral_stats: { Args: never; Returns: Json }
+      offer_draw: { Args: { p_game_id: string }; Returns: Json }
       place_spectator_bet: {
         Args: {
           p_game_id: string
@@ -2617,6 +2681,10 @@ export type Database = {
         Returns: undefined
       }
       resolve_ref_code: { Args: { _ref_code: string }; Returns: string }
+      respond_draw_offer: {
+        Args: { p_accept: boolean; p_offer_id: string }
+        Returns: Json
+      }
       server_now: { Args: never; Returns: string }
       settle_bets_for_game: { Args: { p_game_id: string }; Returns: Json }
       start_online_game: {
