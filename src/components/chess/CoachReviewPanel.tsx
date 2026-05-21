@@ -30,20 +30,41 @@ interface Props {
   sourceGameId?: string;
 }
 
-const VERDICT_STYLES: Record<string, string> = {
+const VERDICT_STYLES: Record<Verdict, string> = {
   book:        "text-sky-300 bg-sky-500/10 border-sky-500/30",
+  brilliant:   "text-cyan-300 bg-cyan-500/15 border-cyan-400/40",
+  great:       "text-indigo-300 bg-indigo-500/10 border-indigo-400/40",
   best:        "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
-  excellent:   "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
+  excellent:   "text-teal-300 bg-teal-500/10 border-teal-500/30",
   good:        "text-emerald-200 bg-emerald-500/5 border-emerald-500/20",
   inaccuracy:  "text-yellow-300 bg-yellow-500/10 border-yellow-500/30",
   mistake:     "text-orange-300 bg-orange-500/10 border-orange-500/30",
+  miss:        "text-rose-300 bg-rose-500/10 border-rose-400/30",
   blunder:     "text-red-300 bg-red-500/10 border-red-500/30",
-  brilliant:   "text-amber-300 bg-amber-500/10 border-amber-500/30",
 };
 
 const VERDICT_LABEL: Record<Verdict, string> = {
-  book: "Book", best: "Best", excellent: "Excellent", good: "Good",
-  inaccuracy: "Inaccuracy", mistake: "Mistake", blunder: "Blunder", brilliant: "Brilliant",
+  book: "Book", brilliant: "Brilliant", great: "Great", best: "Best",
+  excellent: "Excellent", good: "Good", inaccuracy: "Inaccuracy",
+  mistake: "Mistake", miss: "Miss", blunder: "Blunder",
+};
+
+const VERDICT_SYMBOL: Record<Verdict, string> = {
+  book: "📖", brilliant: "!!", great: "!", best: "★", excellent: "◆",
+  good: "·", inaccuracy: "?!", mistake: "?", miss: "✗", blunder: "??",
+};
+
+const VERDICT_TOOLTIP: Record<Verdict, string> = {
+  book: "Opening theory — a known book move.",
+  brilliant: "A creative sacrifice that engine still rates near-best.",
+  great: "The only good move — every other choice was clearly worse.",
+  best: "Matches the engine's top choice exactly.",
+  excellent: "Very precise — within ~20cp of best.",
+  good: "Solid move with only a small concession.",
+  inaccuracy: "Small drop in evaluation.",
+  mistake: "A serious error that worsens the position.",
+  miss: "Missed a winning chance.",
+  blunder: "A big loss of material or position.",
 };
 
 export default function CoachReviewPanel({
