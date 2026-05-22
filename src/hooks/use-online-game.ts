@@ -560,18 +560,25 @@ export function useOnlineGame() {
   // Atomic finalize via RPC: marks finished + sets end_reason + applies Elo exactly once.
   // Safe to call from BOTH players concurrently — only one mutation actually lands.
   const endGame = useCallback(async (result: string, endReason: EndReason = "checkmate") => {
-    if (!game) return;
-    const { data, error: rpcErr } = await supabase.rpc("finalize_online_game" as any, {
+    if (!game) return { ok: false as const, error: "no_game" };
+    const { error: rpcErr } = await supabase.rpc("finalize_online_game" as any, {
       p_game_id: game.id,
       p_result: result,
       p_end_reason: endReason,
     });
     if (rpcErr) {
       console.warn("finalize_online_game failed, falling back to direct update", rpcErr);
-      await supabase.from("online_games").update({ status: "finished", result, end_reason: endReason }).eq("id", game.id);
+      const { error: updErr } = await supabase
+        .from("online_games")
+        .update({ status: "finished", result, end_reason: endReason })
+        .eq("id", game.id);
+      if (updErr) return { ok: false as const, error: updErr.message };
     }
 
-    // Mark locally so realtime echo doesn't re-trigger applyEloAndLog.
+    // Immediate local UI flip — don't wait for realtime echo / 750ms poll.
+    setGame(prev => prev ? ({ ...prev, status: "finished", result, end_reason: endReason } as OnlineGame) : prev);
+    setStatus("finished");
+
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
       await applyEloAndLog({
@@ -582,11 +589,12 @@ export function useOnlineGame() {
         is_rated: game.is_rated,
       });
     }
+    return { ok: true as const };
   }, [game, applyEloAndLog]);
 
   const resign = useCallback(async () => {
-    if (!game || !myColor) return;
-    await endGame(myColor === "w" ? "0-1" : "1-0", "resignation");
+    if (!game || !myColor) return { ok: false as const, error: "no_game" };
+    return endGame(myColor === "w" ? "0-1" : "1-0", "resignation");
   }, [game, myColor, endGame]);
 
   // Abort: only valid before the first move. No Elo change.
