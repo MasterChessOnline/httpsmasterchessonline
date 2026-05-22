@@ -1167,9 +1167,21 @@ const PlayOnline = () => {
             <AlertDialogCancel>Keep playing</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => { setConfirmResignOpen(false); resign(); }}
+              disabled={isResigning}
+              onClick={async (e) => {
+                e.preventDefault();
+                setIsResigning(true);
+                const r = await resign();
+                setIsResigning(false);
+                setConfirmResignOpen(false);
+                if (r && r.ok === false) {
+                  toast({ title: "Resign failed", description: r.error || "Try again.", variant: "destructive" });
+                } else {
+                  toast({ title: "Game resigned", description: "Opponent wins." });
+                }
+              }}
             >
-              Resign
+              {isResigning ? "Resigning…" : "Resign"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
