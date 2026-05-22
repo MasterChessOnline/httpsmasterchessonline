@@ -1036,8 +1036,8 @@ const PlayOnline = () => {
             {/* Game Controls */}
             {!isGameOver && onlineStatus === "playing" && (
               <div className="flex flex-wrap gap-2">
-                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" onClick={() => setConfirmResignOpen(true)}>
-                  <Flag className="h-3.5 w-3.5" /> Resign
+                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" disabled={isResigning} onClick={() => setConfirmResignOpen(true)}>
+                  <Flag className="h-3.5 w-3.5" /> {isResigning ? "Resigning…" : "Resign"}
                 </Button>
                 {(onlineGame?.move_number ?? 0) === 0 && (
                   <Button
