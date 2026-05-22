@@ -245,13 +245,13 @@ export default function ChessBoard({
   };
   const handlePieceDragEnd = () => { setDragFrom(null); };
 
-  const fileLabelClass = "flex-1 text-center text-[11px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]";
-  const rankLabelClass = "flex-1 flex items-center justify-center text-[11px] sm:text-[12px] font-mono font-bold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]";
+  const fileLabelClass = "flex-1 text-center text-[10px] sm:text-[12px] font-mono font-bold text-foreground/80 [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]";
+  const rankLabelClass = "flex-1 flex items-center justify-center text-[10px] sm:text-[12px] font-mono font-bold text-foreground/80 [text-shadow:0_1px_2px_rgba(0,0,0,0.85)]";
 
   return (
-    <div className={className ?? "w-full max-w-[min(90vw,520px)] mx-auto"}>
+    <div className={className ?? "w-full max-w-[min(100vw-1.5rem,calc(100dvh-22rem),560px)] mx-auto touch-manipulation"}>
       {/* Coordinate labels top */}
-      <div className="flex ml-7 mr-7 mb-0.5">
+      <div className="flex ml-4 sm:ml-7 mr-4 sm:mr-7 mb-0.5">
         {displayFiles.map((f) => (
           <span key={`top-${f}`} className={fileLabelClass}>{f}</span>
         ))}
@@ -259,11 +259,12 @@ export default function ChessBoard({
 
       <div className="flex">
         {/* Rank labels left */}
-        <div className="flex flex-col w-7 flex-shrink-0">
+        <div className="flex flex-col w-4 sm:w-7 flex-shrink-0">
           {displayRanks.map((r) => (
             <span key={`l-${r}`} className={rankLabelClass}>{r}</span>
           ))}
         </div>
+
 
         {/* Board */}
         <motion.div
@@ -613,7 +614,7 @@ export default function ChessBoard({
         </motion.div>
 
         {/* Rank labels right */}
-        <div className="flex flex-col w-7 flex-shrink-0">
+        <div className="flex flex-col w-4 sm:w-7 flex-shrink-0">
           {displayRanks.map((r) => (
             <span key={`r-${r}`} className={rankLabelClass}>{r}</span>
           ))}
@@ -621,7 +622,7 @@ export default function ChessBoard({
       </div>
 
       {/* Coordinate labels bottom */}
-      <div className="flex ml-7 mr-7 mt-0.5">
+      <div className="flex ml-4 sm:ml-7 mr-4 sm:mr-7 mt-0.5">
         {displayFiles.map((f) => (
           <span key={`bot-${f}`} className={fileLabelClass}>{f}</span>
         ))}

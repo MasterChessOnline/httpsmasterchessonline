@@ -102,6 +102,7 @@ const PlayOnline = () => {
   const [rematchOfferedByOpponent, setRematchOfferedByOpponent] = useState(false);
   const [rematchInProgress, setRematchInProgress] = useState(false);
   const [confirmResignOpen, setConfirmResignOpen] = useState(false);
+  const [isResigning, setIsResigning] = useState(false);
   const { toast, dismiss } = useToast();
   const boardFocusRef = useRef<HTMLDivElement>(null);
 
@@ -1035,8 +1036,8 @@ const PlayOnline = () => {
             {/* Game Controls */}
             {!isGameOver && onlineStatus === "playing" && (
               <div className="flex flex-wrap gap-2">
-                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" onClick={() => setConfirmResignOpen(true)}>
-                  <Flag className="h-3.5 w-3.5" /> Resign
+                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" disabled={isResigning} onClick={() => setConfirmResignOpen(true)}>
+                  <Flag className="h-3.5 w-3.5" /> {isResigning ? "Resigning…" : "Resign"}
                 </Button>
                 {(onlineGame?.move_number ?? 0) === 0 && (
                   <Button
@@ -1166,9 +1167,21 @@ const PlayOnline = () => {
             <AlertDialogCancel>Keep playing</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => { setConfirmResignOpen(false); resign(); }}
+              disabled={isResigning}
+              onClick={async (e) => {
+                e.preventDefault();
+                setIsResigning(true);
+                const r = await resign();
+                setIsResigning(false);
+                setConfirmResignOpen(false);
+                if (r && r.ok === false) {
+                  toast({ title: "Resign failed", description: r.error || "Try again.", variant: "destructive" });
+                } else {
+                  toast({ title: "Game resigned", description: "Opponent wins." });
+                }
+              }}
             >
-              Resign
+              {isResigning ? "Resigning…" : "Resign"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
