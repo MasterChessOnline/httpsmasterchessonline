@@ -1086,19 +1086,19 @@ const Play = () => {
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
       <Navbar />
-      <main className="container mx-auto px-4 pt-24 pb-16">
+      <main className="container mx-auto px-2 sm:px-4 pt-16 sm:pt-24 pb-16">
         {/* Header */}
-        <div className="text-center mb-4">
-          <div className="flex justify-center gap-2 mb-2 flex-wrap">
-            <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
+        <div className="text-center mb-2 sm:mb-4">
+          <div className="flex justify-center gap-1.5 mb-1.5 flex-wrap">
+            <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] sm:text-xs">
               <Swords className="w-3 h-3 mr-1" /> Live Game
             </Badge>
-            <Badge className={`text-xs ${playerColor === "w" ? "bg-white/20 text-foreground border-white/30" : "bg-zinc-800 text-foreground border-zinc-600"}`}>
+            <Badge className={`text-[10px] sm:text-xs ${playerColor === "w" ? "bg-white/20 text-foreground border-white/30" : "bg-zinc-800 text-foreground border-zinc-600"}`}>
               {playerColor === "w" ? "♔ White" : "♚ Black"}
             </Badge>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button onClick={() => setStreamerMode(true)} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all">
+                <button onClick={() => setStreamerMode(true)} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-border/50 bg-card text-[10px] sm:text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all">
                   <Monitor className="w-3 h-3" /> Streamer
                 </button>
               </TooltipTrigger>
@@ -1106,18 +1106,19 @@ const Play = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button onClick={() => setMode4D(prev => !prev)} className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-xs transition-all ${mode4D ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40" : "border-border/50 bg-card text-muted-foreground hover:text-primary hover:border-primary/30"}`}>
+                <button onClick={() => setMode4D(prev => !prev)} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] sm:text-xs transition-all ${mode4D ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40" : "border-border/50 bg-card text-muted-foreground hover:text-primary hover:border-primary/30"}`}>
                   <Layers className="w-3 h-3" /> 4D
                 </button>
               </TooltipTrigger>
               <TooltipContent>Toggle 4D Visual Mode</TooltipContent>
             </Tooltip>
           </div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
+          <h1 className="font-display text-base sm:text-2xl md:text-3xl font-bold text-foreground">
             You vs <span className="text-gradient-gold">{currentBot.avatar} {currentBot.name}</span>
-            <span className="text-base ml-2 text-muted-foreground">({currentBot.rating})</span>
+            <span className="text-xs sm:text-base ml-2 text-muted-foreground">({currentBot.rating})</span>
           </h1>
         </div>
+
 
         {/* Bot message — rendered absolutely below the board (see board column) so the layout never jumps */}
 
