@@ -381,6 +381,9 @@ const Index = () => {
           </SectionHeader>
         </section>
 
+        {/* ── Founder note: handwritten "letter" from Nikola, breaks the polish on purpose ── */}
+        <FounderNote />
+
         {/* User Preferences */}
         <motion.div
           className="flex items-center justify-between flex-wrap gap-3"
