@@ -52,18 +52,19 @@ export default function FounderNote() {
 
         <div className="font-display text-foreground/90 text-[15px] sm:text-[17px] leading-relaxed space-y-3">
           <p>
-            I'm 13. I build this site by myself, after school, while the normal
-            kids are outside. No team, no manager, no investors. Just me, one
-            laptop, and way too many ideas about chess.
+            I'm 13. I've had a lot of success in chess — tournaments, late
+            nights studying lines, that quiet thrill when a plan finally
+            clicks. The board has given me a lot, so I wanted to give
+            something back.
           </p>
           <p>
-            Chess.com and Lichess are great — but they feel like they were built
-            by people who don't actually sit down and play. I wanted a place
-            that feels like it was made by someone it actually <em>matters</em> to.
+            For a long time I dreamed about building my own chess app — a
+            place that feels the way the game actually feels when you love
+            it. So I started. After school, on weekends, by myself.
           </p>
           <p>
-            If something breaks, tell me. If something feels good, tell me that
-            too. I read every message myself.
+            If something breaks, or if something here makes you smile,
+            tell me. I read every message.
           </p>
         </div>
 
@@ -76,11 +77,11 @@ export default function FounderNote() {
             </p>
           </div>
 
-          <Link
-            to="/contact"
+          <a
+            href="mailto:checkmatebros44@gmail.com"
             className="group inline-flex items-center gap-1.5 font-hand text-primary text-xl hover:text-primary/80 transition-colors"
           >
-            write to me
+            checkmatebros44@gmail.com
             {/* hand-drawn arrow */}
             <svg width="42" height="14" viewBox="0 0 42 14" fill="none" aria-hidden
               className="group-hover:translate-x-1 transition-transform">
@@ -89,7 +90,7 @@ export default function FounderNote() {
                 stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"
               />
             </svg>
-          </Link>
+          </a>
         </div>
 
         {/* Margin scribble bottom-left */}
