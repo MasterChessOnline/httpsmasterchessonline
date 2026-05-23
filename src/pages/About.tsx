@@ -98,6 +98,85 @@ const About = () => (
         </div>
       </section>
 
+      {/* Who built this — the human behind the site */}
+      <section className="pb-20 container mx-auto px-6">
+        <motion.div
+          className="max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div
+            className="relative rounded-2xl border border-primary/20 px-7 py-9 sm:px-12 sm:py-12 backdrop-blur-md overflow-hidden"
+            style={{
+              background:
+                "linear-gradient(140deg, hsl(40 25% 12% / 0.85) 0%, hsl(30 20% 8% / 0.85) 60%, hsl(35 22% 10% / 0.85) 100%)",
+              boxShadow:
+                "0 30px 60px -20px hsl(0 0% 0% / 0.6), inset 0 1px 0 hsl(43 60% 70% / 0.06)",
+            }}
+          >
+            <p className="font-hand text-primary/90 text-2xl sm:text-3xl leading-none mb-4 -rotate-1">
+              who actually built this —
+            </p>
+
+            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-6">
+              A 13-year-old kid with a dream
+            </h2>
+
+            <div className="font-display text-foreground/90 text-[15px] sm:text-[17px] leading-relaxed space-y-4">
+              <p>
+                My name is Nikola Šakotić. I'm 13 years old, and I built this entire
+                site by myself — no team, no investors, no studio. Just one laptop,
+                a lot of late nights, and a stubborn idea that wouldn't let me sleep.
+              </p>
+              <p>
+                Chess gave me a lot. Tournaments, friendships, the quiet thrill of a
+                plan finally clicking on the board. I had real success playing, and at
+                some point I started dreaming about building my own chess app — a place
+                that feels the way the game actually feels when you love it. Not a
+                product. A home.
+              </p>
+              <p>
+                So I started. After school, on weekends, between homework and matches.
+                Every page on this site, every animation, every clumsy first version
+                that I rewrote three times — that was me, learning as I went. Some days
+                things broke. Some days they were beautiful. Both kinds of days made
+                this what it is.
+              </p>
+              <p>
+                I'm not pretending to be a company. I'm a kid who loves chess and
+                wanted other people who love chess to have somewhere good to play.
+                If you're reading this, thank you — really. You're part of the dream now.
+              </p>
+            </div>
+
+            <div className="mt-8 flex items-end justify-between gap-4 flex-wrap">
+              <div>
+                <p className="font-hand text-primary text-3xl sm:text-4xl leading-none">
+                  Nikola
+                </p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-1">
+                  Nikola Šakotić · founder, age 13
+                </p>
+              </div>
+              <a
+                href="mailto:checkmatebros44@gmail.com"
+                className="font-hand text-primary text-xl hover:text-primary/80 transition-colors"
+              >
+                checkmatebros44@gmail.com
+              </a>
+            </div>
+
+            <p className="mt-6 font-hand text-muted-foreground/70 text-sm -rotate-1">
+              p.s. if you spot a bug, it's mine. write to me — I'll fix it.
+            </p>
+          </div>
+        </motion.div>
+      </section>
+
+
+
       {/* CTA */}
       <section className="pb-24 container mx-auto px-6">
         <div className="max-w-2xl mx-auto text-center space-y-6">
