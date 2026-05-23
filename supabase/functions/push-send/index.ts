@@ -89,6 +89,17 @@ Deno.serve(async (req) => {
     }
     const { user_ids, type, payload } = parsed.data;
 
+    // Non-service-role callers may only push to themselves.
+    if (!isServiceRole) {
+      if (user_ids.length !== 1 || user_ids[0] !== callerUserId) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden: may only target your own user_id" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
