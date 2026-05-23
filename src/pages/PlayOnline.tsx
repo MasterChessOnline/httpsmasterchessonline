@@ -75,7 +75,7 @@ const PlayOnline = () => {
   const tcParam = searchParams.get("tc") || "";
   const initialTcIdx = resolveTcParam(tcParam);
   const {
-    status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult,
+    status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult, connection,
     searchMatch, cancelSearch, makeMove, endGame, resign, abortGame, reset: resetOnline, loadGameById,
   } = useOnlineGame();
 
@@ -890,6 +890,18 @@ const PlayOnline = () => {
         {!isGameOver && onlineGame && !opponentOnline && (
           <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
             Opponent disconnected — they have until their clock runs out to return, or they forfeit on time.
+          </div>
+        )}
+        {!isGameOver && onlineGame && connection === "reconnecting" && (
+          <div className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-xs text-amber-400 flex items-center gap-2">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Reconnecting to server… your moves are still saved.
+          </div>
+        )}
+        {!isGameOver && onlineGame && connection === "live" && (
+          <div className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-emerald-400/80">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Live sync
           </div>
         )}
         <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor} isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />

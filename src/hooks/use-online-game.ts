@@ -39,18 +39,22 @@ export interface OnlineGame {
   elo_applied?: boolean;
 }
 
+export type ConnectionState = "connecting" | "live" | "reconnecting";
+
 export function useOnlineGame() {
   const { user, profile, refreshProfile } = useAuth();
   const [status, setStatus] = useState<OnlineGameStatus>("idle");
   const [game, setGame] = useState<OnlineGame | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ratingResult, setRatingResult] = useState<RatingCalcResult | null>(null);
+  const [connection, setConnection] = useState<ConnectionState>("connecting");
   const queueEntryId = useRef<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const eloUpdatedRef = useRef(false);
   const endingRef = useRef(false);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
 
   const myColor = game
     ? game.white_player_id === user?.id ? "w" : "b"
@@ -165,6 +169,11 @@ export function useOnlineGame() {
       clearInterval(pollRef.current);
       pollRef.current = null;
     }
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+    }
+    setConnection("connecting");
   }, []);
 
   const subscribeToGame = useCallback((gameId: string) => {
@@ -274,11 +283,16 @@ export function useOnlineGame() {
           return snapshot;
         });
       })
-      .subscribe();
+      .subscribe((sbStatus) => {
+        if (sbStatus === "SUBSCRIBED") setConnection("live");
+        else if (sbStatus === "CHANNEL_ERROR" || sbStatus === "TIMED_OUT" || sbStatus === "CLOSED") {
+          setConnection("reconnecting");
+        }
+      });
 
     gameChannelRef.current = channel;
 
-    // Backup poll — 1.5s so even if realtime stalls, both sides converge fast.
+    // Backup poll — 750ms so even if realtime stalls, both sides converge fast.
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
       const { data } = await supabase
@@ -286,8 +300,23 @@ export function useOnlineGame() {
         .select("*")
         .eq("id", gameId)
         .single();
-      if (data) applyServerSnapshot(data as OnlineGame);
+      if (data) {
+        applyServerSnapshot(data as OnlineGame);
+        // Successful poll = backend is reachable even if realtime is stalled.
+        setConnection(prev => prev === "reconnecting" ? "live" : prev);
+      }
     }, 750);
+
+    // Server-side presence heartbeat — required for opponent's claim_afk_win RPC
+    // to detect actual abandonment (45s threshold). Without this, AFK detection
+    // never triggers and the abandoning player keeps the game frozen until the
+    // 30-min stale-game watchdog. 10s cadence gives a clean signal.
+    if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+    const sendHeartbeat = () => {
+      void supabase.rpc("heartbeat_online_game" as any, { p_game_id: gameId }).then(() => {}, () => {});
+    };
+    sendHeartbeat();
+    heartbeatRef.current = setInterval(sendHeartbeat, 10_000);
   }, [applyEloAndLog, buildRatingPreview]);
 
   // Recover active game on mount — prefer ?game=ID from URL if present
@@ -739,5 +768,5 @@ export function useOnlineGame() {
     };
   }, [user, cleanupChannels]);
 
-  return { status, game, myColor, error, ratingResult, searchMatch, cancelSearch, makeMove, endGame, resign, abortGame, reset, loadGameById };
+  return { status, game, myColor, error, ratingResult, connection, searchMatch, cancelSearch, makeMove, endGame, resign, abortGame, reset, loadGameById };
 }
