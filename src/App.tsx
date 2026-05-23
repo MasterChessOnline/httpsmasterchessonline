@@ -44,6 +44,7 @@ const Press = lazy(() => import("./pages/Press"));
 const Streamers = lazy(() => import("./pages/Streamers"));
 const EmbedRating = lazy(() => import("./pages/EmbedRating"));
 const Topics = lazy(() => import("./pages/Topics"));
+const Resources = lazy(() => import("./pages/Resources"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
@@ -200,6 +201,7 @@ function AnimatedRoutes() {
           <Route path="/streamers" element={<Streamers />} />
           <Route path="/embed/rating/:username" element={<EmbedRating />} />
           <Route path="/topics" element={<Topics />} />
+          <Route path="/resources" element={<Resources />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/login" element={<Login />} />
