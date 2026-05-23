@@ -1,78 +1,83 @@
-# MasterChess — Final Hardening Plan
+# Plan: Popraviti sve u Online Play sistemu
 
-Big scope, so I'll do it in 6 phases and pause for testing between each. Nothing here adds new pages; everything fixes/finishes what exists.
+Cilj: svako dugme radi, bez bugova, sa zvukovima i smooth UX-om.
 
----
+## 1. Resign (instant, bez laga)
+- Optimistic UI: odmah lock board + overlay "You Lost"
+- `endingRef` guard protiv duplog klika (već postoji — verifikovati)
+- RPC `finalize_online_game` + direct UPDATE fallback
+- Loading state na dugmetu ("Resigning…") + disabled
+- Trigger `playGameOverSound()` + `triggerHaptic("loss")` lokalno
+- Protivnik dobija realtime event → "You Won" overlay + `playVictoryMelody()`
 
-## Phase 1 — Online play core (finish what's left)
+## 2. Draw offers
+- Klik "Offer Draw" → poziv `offer_draw` RPC
+- Toast "Draw offered" + dugme menja state na "Offered…" 30s cooldown
+- Protivnik vidi modal "Opponent offers draw" sa Accept/Decline + `playChessSound("notify")`
+- Accept → `respond_draw_offer(true)` → oba igrača overlay "STALEMATE" + `playDrawMelody()`
+- Decline → toast both sides, board ostaje aktivan
+- Auto-expire posle 60s
 
-Already done: 1-user-1-game enforcement, Resign confirm, Abort, rematch via `start_online_game`.
+## 3. Timeout
+- Klijent koji vidi clock=0 zove `commit_online_move` sa `result` i `end_reason='time'` (ili novi RPC `claim_timeout`)
+- Overlay "TIME OUT" + odgovarajući zvuk pobedniku/gubitniku
+- `playGameOverSound()` + haptic
 
-Remaining:
-- **Draw offer** — new table `online_draw_offers`, RPCs `offer_draw` / `respond_draw_offer`, toast UI with Accept/Decline, 30s expiry, auto-cancel on move.
-- **Disconnect / AFK auto-loss** — `online_game_presence` table heartbeat every 5s; edge function `online-game-watchdog` (cron 15s) finalizes games where the player on move has `last_seen < now()-30s` OR clock ≤ 0; client toast "Opponent disconnected — auto-win in Ns".
-- **Reconnect** — on `visibilitychange`/`online` event, force refetch game + re-subscribe channel; clear stale optimistic state.
-- **Instant moves / sync** — already optimistic in `commit_online_move`; add server-clock drift correction using `last_move_at + remaining` on every poll; rollback toast on `ok:false`.
-- **Premoves** — visual dashed gold ring + execute on opponent's move arrival (already partially wired — finish & test).
+## 4. Checkmate / stalemate detekcija
+- Posle svakog poteza chess.js proverava `isCheckmate` / `isStalemate` / `isDraw`
+- `commit_online_move` već prima `p_result` — proslediti tačan rezultat
+- Overlay variant "checkmate" + konfeti + `playVictoryMelody()` za pobednika
 
-## Phase 2 — Spectate / Watch Live
+## 5. Zvukovi (svi event-i)
+| Event | Zvuk |
+|---|---|
+| Move | `playMoveSound` |
+| Capture | `playCaptureSound` |
+| Check | `playCheckSound` |
+| Game start (match found) | `playGameStartSound` |
+| Win | `playVictoryMelody` + `playGameOverSound` |
+| Loss | `playGameOverSound` |
+| Draw | `playDrawMelody` |
+| Draw offer received | `playChessSound("notify")` |
 
-- Remove all 6 placeholder games from `StreamHub` / "Watch Live Games".
-- Query: `online_games WHERE status='active' AND move_number >= 2 ORDER BY updated_at DESC LIMIT 12`.
-- Empty state: "No live games right now — be the first to play".
-- Subscribe to realtime updates on `online_games` for the live list.
-- `Spectate.tsx` already exists — verify no-lag broadcast subscription, fall back to 3s poll.
+Sve gated kroz `isMuted()` (već u `chess-sounds.ts`).
 
-## Phase 3 — Game Review (Chess.com / Lichess-style)
+## 6. Game End Overlay
+- Koristi postojeći `GameEndOverlay` komponentu
+- Variant: `checkmate` / `resign` / `timeout` / `draw`
+- `winnerLabel` lokalizovan ("You Won" / "You Lost" / "Draw")
+- Board lock dok je overlay aktivan
 
-`GameReview.tsx` + `CoachReviewPanel` already classify moves. Finish & polish:
-- Auto-run review on game-end navigation (button "Review game" in `GameOverOverlay` → `/review?game=<id>`; auto-start Stockfish sweep at depth 14, MultiPV=3, cached per FEN).
-- Per-move classifications with the **full set**: Brilliant `!!`, Great `!`, Best ★, Excellent ◆, Good ·, Book 📖, Inaccuracy `?!`, Mistake `?`, Blunder `??`, Miss ✗.
-  - Extend `MoveClass` type + `CLASS_META` (colors, icons, labels).
-  - Update `classifyMove` with thresholds for Excellent (wpLoss < 1, not best) and Miss (was winning ≥+200, dropped ≥150cp AND best move was forced mate or +300 swing).
-- UI per move: colored chip + icon + Framer Motion fade-in (180ms) + Radix Tooltip with explanation.
-- Accuracy %, centipawn loss, best-move arrow on board for each ply (already partial).
+## 7. Reconnect / refresh sync
+- Na mount `PlayOnline` → fetch trenutni `online_games` red po `current_game_id`
+- Server authoritative: FEN, PGN, turn, clocks iz baze
+- Realtime subscribe na `online_games` i `online_draw_offers` za taj `game_id`
 
-## Phase 4 — Mobile responsive overhaul
+## 8. Stale game cleanup
+- Edge function `online-game-watchdog` (već postoji) → cron svakih 5 min
+- Auto-abort partije sa `last_move_at < now() - 1h` AND `move_number = 0`
+- Auto-resign igrača koji je odsutan >5 min posle prvog poteza (presence tabela)
 
-Screenshot shows scaling/coords/layout issues. Fixes:
-- `ChessBoard`: change sizing to `min(100vw - 32px, 100vh - 360px, 560px)`; board + pieces scale together.
-- Coordinates: move file labels INSIDE board edge (absolute bottom-1 left-1, opacity-50, text-[10px] on mobile) — no more overflow gap.
-- Analysis panel: collapse below board with `mt-2` (was `mt-8`), full-width card, "Start analysis" button directly under board with `sticky bottom-0` on mobile.
-- Eval bar: position `left-0 top-0 h-full w-2 md:w-3` flush against board, gradient bg, value label hidden < 360px.
-- Global: `overflow-x-hidden` on `body`, remove fixed widths > 100vw, replace `gap-8` with responsive `gap-2 md:gap-6` on Play/Analysis layouts.
+## 9. Testiranje (manual checklist nakon implementacije)
+1. Start partije → start zvuk, board unlock
+2. Klik Resign → instant lock + "You Lost" overlay + zvuk
+3. Protivnik vidi "You Won" + konfeti bez refresh
+4. Offer Draw → modal kod protivnika
+5. Accept Draw → oba vide "STALEMATE" + draw melody
+6. Decline Draw → game continues
+7. Checkmate → konfeti pobedniku
+8. Timeout → "TIME OUT" overlay
+9. Refresh u sred partije → state ostaje tačan
+10. Rating se update-uje samo jednom (`elo_applied` guard)
 
-## Phase 5 — Review board orientation + Bot hints
+## Files koji se menjaju
+- `src/hooks/use-online-game.ts` — resign/draw/timeout flow, zvukovi, overlay state
+- `src/pages/PlayOnline.tsx` — overlay rendering, draw offer modal, loading states na dugmadima
+- (opciono) `src/components/chess/DrawOfferModal.tsx` — novi mali komponent
+- Nijedna database migracija nije potrebna — sve RPC funkcije već postoje
 
-- `GameReview.tsx`: read `game.black_player_id === user.id` → set `boardOrientation='black'` by default; flip button still works.
-- `Play.tsx` (vs bots): "Hints" toggle calls Stockfish `getBestMove(depth 14)`, draws gold dashed arrow `from→to`, does NOT auto-move. Counter `5 hints left` from `useState`; decrement per use; disabled when 0; reset per game.
-
-## Phase 6 — PWA install gating + mobile UX polish
-
-- `useInstallStatus` hook: detect `display-mode: standalone` → never show banner again. Persist dismissal in `localStorage`.
-- iOS detection (`/iPad|iPhone|iPod/.test(ua) && !window.MSStream`) → hide Android install UI; show iOS "Add to Home Screen" tooltip only when user taps Share-icon variant.
-- Android Chrome / Desktop Chrome/Edge → only show install banner if `beforeinstallprompt` fired.
-- Global mobile polish: audit `Play`, `PlayOnline`, `Analysis`, `GameReview`, `StreamHub` for overflow / overlap / cut elements. Add `touch-manipulation` + `select-none` on board squares.
-
----
-
-## Technical notes
-
-- New tables: `online_draw_offers`, `online_game_presence`. Both RLS-restricted to the two players.
-- New edge function: `online-game-watchdog` (scheduled cron).
-- New RPCs: `offer_draw`, `respond_draw_offer`, `heartbeat_online_game`, `claim_afk_win`.
-- Classifier extension: pure frontend, no migration.
-- Mobile fixes: pure CSS/Tailwind in `ChessBoard`, `Play`, `GameReview`, `Analysis`.
-
----
-
-## Delivery order & pauses
-
-1. **Phase 1** (DB + RPCs + edge function + client) — pause for testing.
-2. **Phase 2** (live games list) — short, pause.
-3. **Phase 3** (Game Review full classifications) — pause.
-4. **Phase 4** (mobile responsive) — pause, you screenshot again.
-5. **Phase 5** (orientation + hints).
-6. **Phase 6** (PWA + final polish).
-
-Approve and I start with Phase 1.
+## Šta NIJE deo ovog plana
+- Matchmaking refactor
+- Spectate sistem
+- Mobile UI dalje izmene (već urađene)
+- 100 internet resources lista
