@@ -420,9 +420,12 @@ export default function DevOnlineSim() {
 
   useEffect(() => {
     if (!user) { setIsAdmin(false); return; }
-    supabase.rpc("has_role" as any, { _user_id: user.id, _role: "admin" })
-      .then(({ data }) => setIsAdmin(!!data))
-      .catch(() => setIsAdmin(false));
+    (async () => {
+      try {
+        const { data } = await supabase.rpc("has_role" as any, { _user_id: user.id, _role: "admin" });
+        setIsAdmin(!!data);
+      } catch { setIsAdmin(false); }
+    })();
   }, [user]);
 
   // Two isolated clients: left reuses the page's primary session via the
