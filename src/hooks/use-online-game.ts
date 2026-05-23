@@ -339,7 +339,8 @@ export function useOnlineGame() {
       // Remove opponent from queue
       await supabase.from("matchmaking_queue").delete().eq("id", opponent.id);
 
-      const iAmWhite = Math.random() > 0.5;
+      // User always plays white (white moves first).
+      const iAmWhite = true;
       const whiteId = iAmWhite ? user.id : opponent.user_id;
       const blackId = iAmWhite ? opponent.user_id : user.id;
 
