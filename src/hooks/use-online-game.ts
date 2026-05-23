@@ -39,18 +39,22 @@ export interface OnlineGame {
   elo_applied?: boolean;
 }
 
+export type ConnectionState = "connecting" | "live" | "reconnecting";
+
 export function useOnlineGame() {
   const { user, profile, refreshProfile } = useAuth();
   const [status, setStatus] = useState<OnlineGameStatus>("idle");
   const [game, setGame] = useState<OnlineGame | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ratingResult, setRatingResult] = useState<RatingCalcResult | null>(null);
+  const [connection, setConnection] = useState<ConnectionState>("connecting");
   const queueEntryId = useRef<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const eloUpdatedRef = useRef(false);
   const endingRef = useRef(false);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
 
   const myColor = game
     ? game.white_player_id === user?.id ? "w" : "b"
