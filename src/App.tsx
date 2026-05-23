@@ -201,6 +201,7 @@ function AnimatedRoutes() {
           <Route path="/streamers" element={<Streamers />} />
           <Route path="/embed/rating/:username" element={<EmbedRating />} />
           <Route path="/topics" element={<Topics />} />
+          <Route path="/resources" element={<Resources />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/login" element={<Login />} />
