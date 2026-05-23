@@ -3,7 +3,7 @@
 // signature in Caveat. Sits between the polished luxury sections like a torn
 // page someone left on the desk.
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+
 
 export default function FounderNote() {
   return (
