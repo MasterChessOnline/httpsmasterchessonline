@@ -36,7 +36,11 @@ Deno.serve(async (req) => {
   try {
     if (req.method === "POST") {
       const body = await req.json().catch(() => ({}));
-      if (Array.isArray(body?.urls)) urlList = body.urls.filter((u: any) => typeof u === "string");
+      if (Array.isArray(body?.urls)) {
+        urlList = body.urls.filter(
+          (u: any) => typeof u === "string" && u.startsWith(`https://${HOST}`)
+        );
+      }
     }
   } catch (_) { /* noop */ }
 

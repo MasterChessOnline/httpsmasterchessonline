@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Article {
   title: string;
@@ -53,17 +54,16 @@ export default function WorldTournaments() {
 
     force ? setRefreshing(true) : setLoading(true);
     try {
-      const resp = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({}),
+      const { data: sessionRes } = await supabase.auth.getSession();
+      if (!sessionRes?.session) {
+        toast({ title: "Sign in required", description: "Please log in to load world tournaments." });
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke<ApiResp>("world-tournaments", {
+        body: {},
       });
-      const data = (await resp.json()) as ApiResp;
-      if (!resp.ok || data.error || !data.articles?.length) {
-        toast({ title: "Couldn't load tournaments", description: data.error ?? "Try again in a moment." });
+      if (error || !data || data.error || !data.articles?.length) {
+        toast({ title: "Couldn't load tournaments", description: data?.error ?? error?.message ?? "Try again in a moment." });
         return;
       }
       setArticles(data.articles);

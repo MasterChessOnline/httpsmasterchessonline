@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { safeReturnUrl } from "../_shared/return-url.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,7 +25,7 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
-    const { priceId } = await req.json().catch(() => ({ priceId: null }));
+    const { priceId, returnUrl } = await req.json().catch(() => ({ priceId: null, returnUrl: null }));
     if (!priceId) throw new Error("No priceId provided");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -37,13 +38,15 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
+    const safeReturn = safeReturnUrl(returnUrl, req.headers.get("origin"));
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/premium?success=true`,
-      cancel_url: `${req.headers.get("origin")}/premium?canceled=true`,
+      success_url: `${safeReturn}/premium?success=true`,
+      cancel_url: `${safeReturn}/premium?canceled=true`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
@@ -51,7 +54,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
