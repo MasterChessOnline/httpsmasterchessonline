@@ -867,11 +867,11 @@ const PlayOnline = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="px-2 sm:px-3 pt-14 sm:pt-16 pb-3">
+      <main className="px-1 sm:px-3 pt-14 sm:pt-16 pb-24 lg:pb-3">
         <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-3 lg:items-start">
           {/* Board + Clocks — fills the full viewport */}
           <div className="min-w-0 flex flex-col items-center">
-            <div className="w-full max-w-[min(98vw,calc(100svh-7rem))] space-y-1.5">
+            <div className="w-full max-w-[min(100vw,calc(100svh-7rem),640px)] space-y-1.5">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
               <div className="flex items-center gap-2">
@@ -929,7 +929,7 @@ const PlayOnline = () => {
                 hintSquare={null}
                 onSquareClick={handleSquareClick}
                 premove={premove}
-                className="w-full max-w-[min(98vw,calc(100svh-9rem))] mx-auto"
+                className="w-full max-w-[min(100vw,calc(100svh-14rem),640px)] mx-auto"
               />
               <GameStatusOverlay
                 kind={(() => {
@@ -972,6 +972,31 @@ const PlayOnline = () => {
                 </span>
               )}
             </div>
+
+            {/* Mobile-only Resign / Draw row — directly under the board for one-tap access. */}
+            {!isGameOver && onlineStatus === "playing" && (
+              <div className="lg:hidden flex gap-2 pt-1">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="flex-1 h-9 gap-1"
+                  disabled={isResigning}
+                  onClick={() => setConfirmResignOpen(true)}
+                >
+                  <Flag className="h-3.5 w-3.5" /> {isResigning ? "Resigning…" : "Resign"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 gap-1"
+                  onClick={offerDraw}
+                  disabled={drawOfferedByMe || drawOfferedByOpponent}
+                >
+                  <Handshake className="h-3.5 w-3.5" />
+                  {drawOfferedByMe ? "Offered…" : "Draw"}
+                </Button>
+              </div>
+            )}
 
             {/* Clock ticker (hidden) */}
             <ChessClock
