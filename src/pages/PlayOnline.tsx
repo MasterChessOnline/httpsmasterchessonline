@@ -291,7 +291,7 @@ const PlayOnline = () => {
     }
   }, [isGameOver, onlineStatus, dismiss]);
 
-  // Centralized end-of-game melody — fires once with a 1s delay so the final
+  // Centralized end-of-game melody — fires once with a delay so the final
   // move animates in fully before any winner/draw sound plays.
   useEffect(() => {
     if (!isGameOver) return;
@@ -300,8 +300,10 @@ const PlayOnline = () => {
     else if (timeoutWinner) result = timeoutWinner === "White" ? "1-0" : "0-1";
     else if (game.isCheckmate()) result = game.turn() === "w" ? "0-1" : "1-0";
     else if (game.isDraw() || game.isStalemate()) result = "1/2-1/2";
-    if (result) playEndSound(result);
-  }, [isGameOver, onlineGame?.result, timeoutWinner, playEndSound, game]);
+    const reasonHint = (onlineGame as any)?.end_reason as string | undefined
+      ?? (timeoutWinner ? "timeout" : undefined);
+    if (result) playEndSound(result, reasonHint);
+  }, [isGameOver, onlineGame?.result, (onlineGame as any)?.end_reason, timeoutWinner, playEndSound, game]);
 
   // Chat subscription — kept active during BOTH `playing` and `finished` states
   // so post-game rematch signaling works on the game-over screen too.
