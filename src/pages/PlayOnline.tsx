@@ -26,7 +26,6 @@ import QuickChat from "@/components/chess/QuickChat";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
 import CountryFlag from "@/components/CountryFlag";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -103,7 +102,6 @@ const PlayOnline = () => {
   const [rematchOfferedByMe, setRematchOfferedByMe] = useState(false);
   const [rematchOfferedByOpponent, setRematchOfferedByOpponent] = useState(false);
   const [rematchInProgress, setRematchInProgress] = useState(false);
-  const [confirmResignOpen, setConfirmResignOpen] = useState(false);
   const [isResigning, setIsResigning] = useState(false);
   const { toast, dismiss } = useToast();
   const boardFocusRef = useRef<HTMLDivElement>(null);
@@ -580,6 +578,18 @@ const PlayOnline = () => {
     setDrawOfferedByOpponent(false);
   };
 
+  const handleResignNow = useCallback(() => {
+    if (isResigning || isGameOver || onlineStatus !== "playing") return;
+    setIsResigning(true);
+    resign().then((r) => {
+      if (r && r.ok === false) {
+        toast({ title: "Resign failed", description: r.error || "Try again.", variant: "destructive" });
+      } else {
+        toast({ title: "You lost", description: "Game finished by resignation." });
+      }
+    }).finally(() => setIsResigning(false));
+  }, [isResigning, isGameOver, onlineStatus, resign, toast]);
+
   const resetAll = () => {
     resetOnline();
     gameRef.current = new Chess();
@@ -1010,7 +1020,7 @@ const PlayOnline = () => {
                   size="sm"
                   className="flex-1 h-9 gap-1"
                   disabled={isResigning}
-                  onClick={() => setConfirmResignOpen(true)}
+                  onClick={handleResignNow}
                 >
                   <Flag className="h-3.5 w-3.5" /> {isResigning ? "Resigning…" : "Resign"}
                 </Button>
@@ -1090,7 +1100,7 @@ const PlayOnline = () => {
             {/* Game Controls */}
             {!isGameOver && onlineStatus === "playing" && (
               <div className="flex flex-wrap gap-2">
-                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" disabled={isResigning} onClick={() => setConfirmResignOpen(true)}>
+                <Button variant="destructive" size="sm" className="flex-1 min-w-[100px] gap-1" disabled={isResigning} onClick={handleResignNow}>
                   <Flag className="h-3.5 w-3.5" /> {isResigning ? "Resigning…" : "Resign"}
                 </Button>
                 {(onlineGame?.move_number ?? 0) === 0 && (
@@ -1209,37 +1219,6 @@ const PlayOnline = () => {
         onSelect={handlePromotionSelect}
         onCancel={() => setPendingPromotion(null)}
       />
-      <AlertDialog open={confirmResignOpen} onOpenChange={setConfirmResignOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Resign this game?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You will lose the game and your rating will drop. This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep playing</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={isResigning}
-              onClick={async (e) => {
-                e.preventDefault();
-                setIsResigning(true);
-                const r = await resign();
-                setIsResigning(false);
-                setConfirmResignOpen(false);
-                if (r && r.ok === false) {
-                  toast({ title: "Resign failed", description: r.error || "Try again.", variant: "destructive" });
-                } else {
-                  toast({ title: "Game resigned", description: "Opponent wins." });
-                }
-              }}
-            >
-              {isResigning ? "Resigning…" : "Resign"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
       <GameEndOverlay
         show={!!endOverlay}
         variant={endOverlay?.variant ?? "draw"}
