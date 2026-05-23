@@ -12,6 +12,7 @@ import PromotionDialog, { type PromotionPiece } from "@/components/chess/Promoti
 import { useToast } from "@/hooks/use-toast";
 import RatingChange from "@/components/RatingChange";
 import { playChessSound } from "@/lib/chess-sounds";
+import { triggerHaptic } from "@/lib/haptics";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import DynamicBackground from "@/components/DynamicBackground";
 import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
+import GameEndOverlay, { type GameEndVariant } from "@/components/effects/GameEndOverlay";
 import QuickChat from "@/components/chess/QuickChat";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
