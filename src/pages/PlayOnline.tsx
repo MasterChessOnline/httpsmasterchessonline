@@ -973,6 +973,31 @@ const PlayOnline = () => {
               )}
             </div>
 
+            {/* Mobile-only Resign / Draw row — directly under the board for one-tap access. */}
+            {!isGameOver && onlineStatus === "playing" && (
+              <div className="lg:hidden flex gap-2 pt-1">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="flex-1 h-9 gap-1"
+                  disabled={isResigning}
+                  onClick={() => setConfirmResignOpen(true)}
+                >
+                  <Flag className="h-3.5 w-3.5" /> {isResigning ? "Resigning…" : "Resign"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 gap-1"
+                  onClick={offerDraw}
+                  disabled={drawOfferedByMe || drawOfferedByOpponent}
+                >
+                  <Handshake className="h-3.5 w-3.5" />
+                  {drawOfferedByMe ? "Offered…" : "Draw"}
+                </Button>
+              </div>
+            )}
+
             {/* Clock ticker (hidden) */}
             <ChessClock
               whiteTime={whiteTime} blackTime={blackTime}
