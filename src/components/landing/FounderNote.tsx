@@ -47,20 +47,23 @@ export default function FounderNote() {
         </svg>
 
         <p className="font-hand text-primary/90 text-xl sm:text-2xl leading-none mb-3 -rotate-1">
-          a small note —
+          a quick note —
         </p>
 
         <div className="font-display text-foreground/90 text-[15px] sm:text-[17px] leading-relaxed space-y-3">
           <p>
-            Imam 13 godina. Pravim ovaj sajt sam, posle škole, kad bi normalna deca igrala napolju.
-            Nisam timskog player-a, nisam menadžera. Samo ja, jedan laptop, i previše ideja.
+            I'm 13. I build this site by myself, after school, while the normal
+            kids are outside. No team, no manager, no investors. Just me, one
+            laptop, and way too many ideas about chess.
           </p>
           <p>
-            Chess.com i Lichess su super — ali deluju kao da su ih pravili ljudi koji ne igraju šah.
-            Hteo sam mesto koje izgleda kao da ga je pravio neko kome to <em>znači</em>.
+            Chess.com and Lichess are great — but they feel like they were built
+            by people who don't actually sit down and play. I wanted a place
+            that feels like it was made by someone it actually <em>matters</em> to.
           </p>
           <p>
-            Ako negde puca, javi mi. Ako ti se nešto baš sviđa, javi mi i to. Čitam sve.
+            If something breaks, tell me. If something feels good, tell me that
+            too. I read every message myself.
           </p>
         </div>
 
@@ -69,7 +72,7 @@ export default function FounderNote() {
           <div>
             <p className="font-hand text-primary text-3xl sm:text-4xl leading-none">Nikola</p>
             <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mt-1">
-              Nikola Šakotić · osnivač
+              Nikola Šakotić · founder, age 13
             </p>
           </div>
 
@@ -77,7 +80,7 @@ export default function FounderNote() {
             to="/contact"
             className="group inline-flex items-center gap-1.5 font-hand text-primary text-xl hover:text-primary/80 transition-colors"
           >
-            piši mi
+            write to me
             {/* hand-drawn arrow */}
             <svg width="42" height="14" viewBox="0 0 42 14" fill="none" aria-hidden
               className="group-hover:translate-x-1 transition-transform">
@@ -91,7 +94,7 @@ export default function FounderNote() {
 
         {/* Margin scribble bottom-left */}
         <p className="absolute -bottom-2 left-6 font-hand text-muted-foreground/60 text-sm -rotate-2 select-none pointer-events-none">
-          p.s. hvala što si stigao do ovde
+          p.s. thanks for scrolling this far — really
         </p>
       </div>
     </motion.section>
