@@ -49,6 +49,7 @@ export function useOnlineGame() {
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const eloUpdatedRef = useRef(false);
+  const endingRef = useRef(false);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const myColor = game
