@@ -39,10 +39,10 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
-    const origin = req.headers.get("origin") || "http://localhost:3000";
+    const safeReturn = safeReturnUrl(undefined, req.headers.get("origin"));
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${origin}/donate`,
+      return_url: `${safeReturn}/donate`,
     });
 
     return new Response(JSON.stringify({ url: portalSession.url }), {
