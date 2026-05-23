@@ -559,25 +559,44 @@ export function useOnlineGame() {
 
   // Atomic finalize via RPC: marks finished + sets end_reason + applies Elo exactly once.
   // Safe to call from BOTH players concurrently — only one mutation actually lands.
+  // CRITICAL: optimistically flip local state FIRST so the UI locks instantly and the
+  // user sees Game Over even if the network round-trip is slow or fails.
+  const endingRef = useRef(false);
   const endGame = useCallback(async (result: string, endReason: EndReason = "checkmate") => {
     if (!game) return { ok: false as const, error: "no_game" };
-    const { error: rpcErr } = await supabase.rpc("finalize_online_game" as any, {
-      p_game_id: game.id,
-      p_result: result,
-      p_end_reason: endReason,
-    });
-    if (rpcErr) {
-      console.warn("finalize_online_game failed, falling back to direct update", rpcErr);
+    if (endingRef.current) return { ok: true as const };
+    endingRef.current = true;
+
+    // 1) Instant local UI flip — board locks, overlay shows, sounds trigger.
+    setGame(prev => prev ? ({ ...prev, status: "finished", result, end_reason: endReason } as OnlineGame) : prev);
+    setStatus("finished");
+
+    // 2) Server-authoritative finalize. Try RPC, fall back to direct update.
+    let serverOk = false;
+    try {
+      const { data, error: rpcErr } = await supabase.rpc("finalize_online_game" as any, {
+        p_game_id: game.id,
+        p_result: result,
+        p_end_reason: endReason,
+      });
+      if (!rpcErr && (data as any)?.ok !== false) serverOk = true;
+      else console.warn("finalize_online_game RPC failed", rpcErr, data);
+    } catch (e) {
+      console.warn("finalize_online_game threw", e);
+    }
+    if (!serverOk) {
       const { error: updErr } = await supabase
         .from("online_games")
         .update({ status: "finished", result, end_reason: endReason })
         .eq("id", game.id);
-      if (updErr) return { ok: false as const, error: updErr.message };
+      if (updErr) {
+        console.error("Direct finalize update also failed", updErr);
+        endingRef.current = false;
+        return { ok: false as const, error: updErr.message };
+      }
+      // Clear current_game_id locks best-effort
+      await supabase.from("profiles").update({ current_game_id: null }).in("user_id", [game.white_player_id, game.black_player_id]);
     }
-
-    // Immediate local UI flip — don't wait for realtime echo / 750ms poll.
-    setGame(prev => prev ? ({ ...prev, status: "finished", result, end_reason: endReason } as OnlineGame) : prev);
-    setStatus("finished");
 
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
@@ -594,6 +613,7 @@ export function useOnlineGame() {
 
   const resign = useCallback(async () => {
     if (!game || !myColor) return { ok: false as const, error: "no_game" };
+    if (game.status !== "active") return { ok: true as const };
     return endGame(myColor === "w" ? "0-1" : "1-0", "resignation");
   }, [game, myColor, endGame]);
 
