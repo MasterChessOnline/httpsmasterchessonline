@@ -210,6 +210,11 @@ export function useOnlineGame() {
       if (incoming.status === "finished") {
         setStatus("finished");
         const ratingIsAuthoritative = incoming.is_rated === false || incoming.elo_applied === true;
+        if (!ratingIsAuthoritative && incoming.result) {
+          // Instant preview for the non-resigning side while waiting for the
+          // authoritative Elo-applied row to arrive from the backend.
+          buildRatingPreview(incoming).catch(() => {});
+        }
         if (!eloUpdatedRef.current && incoming.result && ratingIsAuthoritative) {
           eloUpdatedRef.current = true;
           applyEloAndLog({
@@ -283,7 +288,7 @@ export function useOnlineGame() {
         .single();
       if (data) applyServerSnapshot(data as OnlineGame);
     }, 750);
-  }, [applyEloAndLog]);
+  }, [applyEloAndLog, buildRatingPreview]);
 
   // Recover active game on mount — prefer ?game=ID from URL if present
   useEffect(() => {
