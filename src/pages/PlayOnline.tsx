@@ -12,6 +12,7 @@ import PromotionDialog, { type PromotionPiece } from "@/components/chess/Promoti
 import { useToast } from "@/hooks/use-toast";
 import RatingChange from "@/components/RatingChange";
 import { playChessSound } from "@/lib/chess-sounds";
+import { triggerHaptic } from "@/lib/haptics";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import DynamicBackground from "@/components/DynamicBackground";
 import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
+import GameEndOverlay, { type GameEndVariant } from "@/components/effects/GameEndOverlay";
 import QuickChat from "@/components/chess/QuickChat";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
@@ -116,26 +118,49 @@ const PlayOnline = () => {
   const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
   const boardFlipped = myColor === "b";
 
-  // End-of-game audio: small 1s delay so the final move is fully shown to both
-  // players before any victory/draw melody plays. The melody is chosen based on
-  // the player's POV (win → victory, lose → soft gameOver, draw → drawMelody).
+  // End-of-game audio + haptics + cinematic overlay. Fires once, with a 1s delay
+  // so the final move animates in fully before the winner/draw sound plays.
   const endSoundFiredRef = useRef(false);
-  const playEndSound = useCallback((result: string) => {
+  const [endOverlay, setEndOverlay] = useState<{ variant: GameEndVariant; winnerLabel: string; detail: string } | null>(null);
+  const playEndSound = useCallback((result: string, endReasonHint?: string) => {
     if (endSoundFiredRef.current) return;
     endSoundFiredRef.current = true;
+    const isDraw = result === "1/2-1/2";
+    const winnerColor = result === "1-0" ? "w" : result === "0-1" ? "b" : null;
+    const iWon = !!winnerColor && winnerColor === myColor;
+    const iLost = !!winnerColor && winnerColor !== myColor;
+
+    // Haptics fire immediately (no sound delay) — feels punchy on mobile.
+    if (isDraw) triggerHaptic("draw");
+    else if (iWon) triggerHaptic("win");
+    else if (iLost) triggerHaptic("loss");
+
+    // Cinematic overlay variant: prefer the server's end_reason hint.
+    const variant: GameEndVariant =
+      endReasonHint === "resignation" ? "resign" :
+      endReasonHint === "timeout"     ? "timeout" :
+      isDraw                          ? "draw" :
+                                        "checkmate";
+    setEndOverlay({
+      variant,
+      winnerLabel: isDraw ? "Draw" : iWon ? "You Won" : "You Lost",
+      detail:
+        endReasonHint === "resignation" ? "by resignation" :
+        endReasonHint === "timeout"     ? "on time" :
+        endReasonHint === "agreement"   ? "by agreement" :
+        isDraw                          ? "by draw" :
+                                          "by checkmate",
+    });
+
     setTimeout(() => {
-      if (result === "1/2-1/2") {
-        playChessSound("drawMelody");
-      } else {
-        const winnerColor = result === "1-0" ? "w" : "b";
-        if (winnerColor === myColor) playChessSound("victory");
-        else playChessSound("gameOver");
-      }
-    }, 1000);
+      if (isDraw) playChessSound("drawMelody");
+      else if (iWon) playChessSound("victory");
+      else playChessSound("gameOver");
+    }, 800);
   }, [myColor]);
   // Reset the latch when a fresh game starts.
   useEffect(() => {
-    if (onlineStatus === "playing") endSoundFiredRef.current = false;
+    if (onlineStatus === "playing") { endSoundFiredRef.current = false; setEndOverlay(null); }
   }, [onlineStatus]);
 
   // Live opening detection — recomputed on every move from the SAN history.
@@ -266,7 +291,7 @@ const PlayOnline = () => {
     }
   }, [isGameOver, onlineStatus, dismiss]);
 
-  // Centralized end-of-game melody — fires once with a 1s delay so the final
+  // Centralized end-of-game melody — fires once with a delay so the final
   // move animates in fully before any winner/draw sound plays.
   useEffect(() => {
     if (!isGameOver) return;
@@ -275,8 +300,10 @@ const PlayOnline = () => {
     else if (timeoutWinner) result = timeoutWinner === "White" ? "1-0" : "0-1";
     else if (game.isCheckmate()) result = game.turn() === "w" ? "0-1" : "1-0";
     else if (game.isDraw() || game.isStalemate()) result = "1/2-1/2";
-    if (result) playEndSound(result);
-  }, [isGameOver, onlineGame?.result, timeoutWinner, playEndSound, game]);
+    const reasonHint = (onlineGame as any)?.end_reason as string | undefined
+      ?? (timeoutWinner ? "timeout" : undefined);
+    if (result) playEndSound(result, reasonHint);
+  }, [isGameOver, onlineGame?.result, (onlineGame as any)?.end_reason, timeoutWinner, playEndSound, game]);
 
   // Chat subscription — kept active during BOTH `playing` and `finished` states
   // so post-game rematch signaling works on the game-over screen too.
@@ -298,6 +325,8 @@ const PlayOnline = () => {
           if (msg.message === "__draw_offer__") {
             if (isGameOver) return;
             setDrawOfferedByOpponent(true);
+            playChessSound("check");
+            triggerHaptic("notify");
             toast({ title: "Draw offer", description: "Your opponent offers a draw." });
           } else if (msg.message === "__draw_accept__") {
             if (drawOfferedByMe) {
@@ -1211,6 +1240,14 @@ const PlayOnline = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <GameEndOverlay
+        show={!!endOverlay}
+        variant={endOverlay?.variant ?? "draw"}
+        winnerLabel={endOverlay?.winnerLabel}
+        detail={endOverlay?.detail}
+        onClose={() => setEndOverlay(null)}
+        autoCloseMs={5000}
+      />
     </div>
   );
 };
