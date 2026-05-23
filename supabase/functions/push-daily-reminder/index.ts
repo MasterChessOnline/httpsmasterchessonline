@@ -5,6 +5,8 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
+
 
 const MESSAGES = [
   { title: "♟️ Time for a game", body: "Your daily move awaits. One quick blitz?", url: "/play/online" },
