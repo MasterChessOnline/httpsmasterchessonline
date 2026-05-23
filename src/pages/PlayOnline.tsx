@@ -1258,14 +1258,9 @@ const PlayOnline = () => {
         onSelect={handlePromotionSelect}
         onCancel={() => setPendingPromotion(null)}
       />
-      <GameEndOverlay
-        show={!!endOverlay}
-        variant={endOverlay?.variant ?? "draw"}
-        winnerLabel={endOverlay?.winnerLabel}
-        detail={endOverlay?.detail}
-        onClose={() => setEndOverlay(null)}
-        autoCloseMs={5000}
-      />
+      {/* Fullscreen end-of-game overlay disabled — end state now renders directly over the board
+          via GameOverOverlay so it doesn't black out the whole screen. */}
+
     </div>
   );
 };
