@@ -169,6 +169,11 @@ export function useOnlineGame() {
       clearInterval(pollRef.current);
       pollRef.current = null;
     }
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+    }
+    setConnection("connecting");
   }, []);
 
   const subscribeToGame = useCallback((gameId: string) => {
