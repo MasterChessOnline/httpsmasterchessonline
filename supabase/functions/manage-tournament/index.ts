@@ -1,10 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -24,8 +26,14 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { body = {}; }
   const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes, arena_duration_minutes } = body;
 
-  // Public action: auto-start due tournaments (called by cron). No user required.
+  // Public action: auto-start due tournaments (called by cron). Requires shared-secret / service-role auth.
   if (action === "auto_start_due") {
+    if (!isAuthorizedCronCaller(req)) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     try {
       return await handleAutoStartDue(supabase);
     } catch (err) {
@@ -35,6 +43,7 @@ Deno.serve(async (req) => {
       });
     }
   }
+
 
   const { data: { user } } = await userClient.auth.getUser();
   if (!user) {
