@@ -118,26 +118,49 @@ const PlayOnline = () => {
   const isGameOver = game.isGameOver() || !!timeoutWinner || onlineStatus === "finished";
   const boardFlipped = myColor === "b";
 
-  // End-of-game audio: small 1s delay so the final move is fully shown to both
-  // players before any victory/draw melody plays. The melody is chosen based on
-  // the player's POV (win → victory, lose → soft gameOver, draw → drawMelody).
+  // End-of-game audio + haptics + cinematic overlay. Fires once, with a 1s delay
+  // so the final move animates in fully before the winner/draw sound plays.
   const endSoundFiredRef = useRef(false);
-  const playEndSound = useCallback((result: string) => {
+  const [endOverlay, setEndOverlay] = useState<{ variant: GameEndVariant; winnerLabel: string; detail: string } | null>(null);
+  const playEndSound = useCallback((result: string, endReasonHint?: string) => {
     if (endSoundFiredRef.current) return;
     endSoundFiredRef.current = true;
+    const isDraw = result === "1/2-1/2";
+    const winnerColor = result === "1-0" ? "w" : result === "0-1" ? "b" : null;
+    const iWon = !!winnerColor && winnerColor === myColor;
+    const iLost = !!winnerColor && winnerColor !== myColor;
+
+    // Haptics fire immediately (no sound delay) — feels punchy on mobile.
+    if (isDraw) triggerHaptic("draw");
+    else if (iWon) triggerHaptic("win");
+    else if (iLost) triggerHaptic("loss");
+
+    // Cinematic overlay variant: prefer the server's end_reason hint.
+    const variant: GameEndVariant =
+      endReasonHint === "resignation" ? "resign" :
+      endReasonHint === "timeout"     ? "timeout" :
+      isDraw                          ? "draw" :
+                                        "checkmate";
+    setEndOverlay({
+      variant,
+      winnerLabel: isDraw ? "Draw" : iWon ? "You Won" : "You Lost",
+      detail:
+        endReasonHint === "resignation" ? "by resignation" :
+        endReasonHint === "timeout"     ? "on time" :
+        endReasonHint === "agreement"   ? "by agreement" :
+        isDraw                          ? "by draw" :
+                                          "by checkmate",
+    });
+
     setTimeout(() => {
-      if (result === "1/2-1/2") {
-        playChessSound("drawMelody");
-      } else {
-        const winnerColor = result === "1-0" ? "w" : "b";
-        if (winnerColor === myColor) playChessSound("victory");
-        else playChessSound("gameOver");
-      }
-    }, 1000);
+      if (isDraw) playChessSound("drawMelody");
+      else if (iWon) playChessSound("victory");
+      else playChessSound("gameOver");
+    }, 800);
   }, [myColor]);
   // Reset the latch when a fresh game starts.
   useEffect(() => {
-    if (onlineStatus === "playing") endSoundFiredRef.current = false;
+    if (onlineStatus === "playing") { endSoundFiredRef.current = false; setEndOverlay(null); }
   }, [onlineStatus]);
 
   // Live opening detection — recomputed on every move from the SAN history.
