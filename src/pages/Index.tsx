@@ -39,6 +39,8 @@ import WallOfReasons from "@/components/landing/WallOfReasons";
 import StickyJoinBar from "@/components/landing/StickyJoinBar";
 import InstallAppButton from "@/components/InstallAppButton";
 import PlayAnywhereSection from "@/components/PlayAnywhereSection";
+import FounderNote from "@/components/landing/FounderNote";
+import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 
 interface RecentGame {
   id: string;
