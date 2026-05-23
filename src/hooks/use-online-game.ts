@@ -313,7 +313,7 @@ export function useOnlineGame() {
     // 30-min stale-game watchdog. 10s cadence gives a clean signal.
     if (heartbeatRef.current) clearInterval(heartbeatRef.current);
     const sendHeartbeat = () => {
-      supabase.rpc("heartbeat_online_game" as any, { p_game_id: gameId }).catch(() => {});
+      void supabase.rpc("heartbeat_online_game" as any, { p_game_id: gameId }).then(() => {}, () => {});
     };
     sendHeartbeat();
     heartbeatRef.current = setInterval(sendHeartbeat, 10_000);
