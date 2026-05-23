@@ -614,10 +614,11 @@ export function useOnlineGame() {
     // Broadcast finished snapshot instantly. The opponent should see "You Won"
     // without waiting for database realtime/polling.
     if (gameChannelRef.current) {
+      const finishedAt = new Date().toISOString();
       gameChannelRef.current.send({
         type: "broadcast",
         event: "move",
-        payload: { ...game, status: "finished", result, end_reason: endReason },
+        payload: { ...game, status: "finished", result, end_reason: endReason, last_move_at: finishedAt },
       });
     }
 
