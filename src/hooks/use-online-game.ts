@@ -562,7 +562,6 @@ export function useOnlineGame() {
   // Safe to call from BOTH players concurrently — only one mutation actually lands.
   // CRITICAL: optimistically flip local state FIRST so the UI locks instantly and the
   // user sees Game Over even if the network round-trip is slow or fails.
-  const endingRef = useRef(false);
   const endGame = useCallback(async (result: string, endReason: EndReason = "checkmate") => {
     if (!game) return { ok: false as const, error: "no_game" };
     if (endingRef.current) return { ok: true as const };
