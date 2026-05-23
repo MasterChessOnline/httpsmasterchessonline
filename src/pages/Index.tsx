@@ -39,6 +39,8 @@ import WallOfReasons from "@/components/landing/WallOfReasons";
 import StickyJoinBar from "@/components/landing/StickyJoinBar";
 import InstallAppButton from "@/components/InstallAppButton";
 import PlayAnywhereSection from "@/components/PlayAnywhereSection";
+import FounderNote from "@/components/landing/FounderNote";
+import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 
 interface RecentGame {
   id: string;
@@ -273,6 +275,14 @@ const Index = () => {
             <InstallAppButton variant="hero" />
           </motion.div>
 
+          {/* Handwritten margin note — small human signal under the CTAs */}
+          <div className="mt-4 flex justify-center items-center gap-2 text-primary/70">
+            <ScribbleArrow className="hidden sm:block text-primary/50" />
+            <MarginNote rotate={-2} className="text-base sm:text-lg">
+              pravi šah, pravi ljudi — bez botova koji se prave da su ljudi
+            </MarginNote>
+          </div>
+
           {/* Quick Actions with hover lift */}
           <motion.div
             className="flex justify-center gap-3 sm:gap-4 mt-8"
@@ -370,6 +380,9 @@ const Index = () => {
             </div>
           </SectionHeader>
         </section>
+
+        {/* ── Founder note: handwritten "letter" from Nikola, breaks the polish on purpose ── */}
+        <FounderNote />
 
         {/* User Preferences */}
         <motion.div

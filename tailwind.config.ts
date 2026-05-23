@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         display: ['Cormorant Garamond', 'Times New Roman', 'serif'],
         body: ['Inter', 'sans-serif'],
+        hand: ['Caveat', 'Bradley Hand', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",
