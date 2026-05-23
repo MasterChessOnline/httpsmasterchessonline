@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { safeReturnUrl } from "../_shared/return-url.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,6 +47,8 @@ serve(async (req) => {
       throw new Error("Price ID is required for subscriptions");
     }
 
+    const safeReturn = safeReturnUrl(returnUrl, req.headers.get("origin"));
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user?.email,
@@ -55,9 +59,10 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${returnUrl || req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${returnUrl || req.headers.get("origin")}/payment-canceled`,
+      success_url: `${safeReturn}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${safeReturn}/payment-canceled`,
     });
+
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

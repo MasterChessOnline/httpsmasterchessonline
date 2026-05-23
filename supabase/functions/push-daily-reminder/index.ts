@@ -5,6 +5,8 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
+
 
 const MESSAGES = [
   { title: "♟️ Time for a game", body: "Your daily move awaits. One quick blitz?", url: "/play/online" },
@@ -22,6 +24,14 @@ function pickMessage() {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  if (!isAuthorizedCronCaller(req)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
 
   try {
     const supabase = createClient(

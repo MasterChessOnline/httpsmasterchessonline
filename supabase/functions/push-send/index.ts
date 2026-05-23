@@ -36,6 +36,36 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Authentication: allow service-role callers (internal cron / other functions),
+  // or an authenticated user who can only push to themselves.
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const isServiceRole = serviceKey !== "" && authHeader === `Bearer ${serviceKey}`;
+
+  let callerUserId: string | null = null;
+  if (!isServiceRole) {
+    if (!authHeader.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data, error } = await userClient.auth.getUser();
+    if (error || !data?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    callerUserId = data.user.id;
+  }
+
+
   try {
     const vapidPublic = Deno.env.get("VAPID_PUBLIC_KEY");
     const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY");
@@ -58,6 +88,17 @@ Deno.serve(async (req) => {
       );
     }
     const { user_ids, type, payload } = parsed.data;
+
+    // Non-service-role callers may only push to themselves.
+    if (!isServiceRole) {
+      if (user_ids.length !== 1 || user_ids[0] !== callerUserId) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden: may only target your own user_id" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { safeReturnUrl } from "../_shared/return-url.ts";
+import { lookupPrice } from "../_shared/pricing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,7 +23,7 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     let user = null;
     let customerId;
-    
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -30,7 +32,7 @@ serve(async (req) => {
       const token = authHeader.replace("Bearer ", "");
       const { data } = await supabaseClient.auth.getUser(token);
       user = data?.user;
-      
+
       if (user?.email) {
         const customers = await stripe.customers.list({ email: user.email, limit: 1 });
         if (customers.data.length > 0) {
@@ -39,16 +41,19 @@ serve(async (req) => {
       }
     }
 
-    const { amount, currency = "usd", itemType, itemId, returnUrl } = await req.json();
+    const { amount, currency, itemType, itemId, returnUrl } = await req.json();
 
-    if (!amount || amount <= 0) {
-      throw new Error("Invalid amount");
+    // Authoritative server-side price lookup. Client `amount`/`currency` are
+    // only honoured for donation flows where variable amounts are intentional.
+    const priced = lookupPrice(itemType, itemId, amount, currency);
+    if ("error" in priced) {
+      return new Response(JSON.stringify({ error: priced.error }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Determine the product name based on itemType
-    let productName = "Donation";
-    if (itemType === "course") productName = `Premium Course: ${itemId}`;
-    if (itemType === "tournament") productName = `Tournament Entry: ${itemId}`;
+    const safeReturn = safeReturnUrl(returnUrl, req.headers.get("origin"));
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -56,11 +61,9 @@ serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: currency,
-            product_data: {
-              name: productName,
-            },
-            unit_amount: amount,
+            currency: priced.currency,
+            product_data: { name: priced.productName },
+            unit_amount: priced.amount,
           },
           quantity: 1,
         },
@@ -68,11 +71,11 @@ serve(async (req) => {
       mode: "payment",
       metadata: {
         itemType,
-        itemId,
+        itemId: itemId ?? "",
         userId: user?.id || "guest",
       },
-      success_url: `${returnUrl || req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${returnUrl || req.headers.get("origin")}/payment-canceled`,
+      success_url: `${safeReturn}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${safeReturn}/payment-canceled`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
@@ -80,7 +83,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
