@@ -75,7 +75,7 @@ const PlayOnline = () => {
   const tcParam = searchParams.get("tc") || "";
   const initialTcIdx = resolveTcParam(tcParam);
   const {
-    status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult,
+    status: onlineStatus, game: onlineGame, myColor, error: onlineError, ratingResult, connection,
     searchMatch, cancelSearch, makeMove, endGame, resign, abortGame, reset: resetOnline, loadGameById,
   } = useOnlineGame();
 
