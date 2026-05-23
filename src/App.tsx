@@ -99,6 +99,8 @@ const Titles = lazy(() => import("./pages/Titles"));
 const Missions = lazy(() => import("./pages/Missions"));
 const Pitch = lazy(() => import("./pages/Pitch"));
 const TeamBattles = lazy(() => import("./pages/TeamBattles"));
+const DevOnlineSim = lazy(() => import("./pages/DevOnlineSim"));
+
 
 // Eager components (used in every page chrome)
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
@@ -221,7 +223,9 @@ function AnimatedRoutes() {
           <Route path="/players" element={<Grandmasters />} />
           <Route path="/players/:slug" element={<GrandmasterDetail />} />
           <Route path="/team-battles" element={<TeamBattles />} />
+          <Route path="/dev/online-sim" element={<DevOnlineSim />} />
           <Route path="*" element={<NotFound />} />
+
         </Routes>
   );
 
