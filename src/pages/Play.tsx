@@ -1232,6 +1232,31 @@ const Play = () => {
               )}
             </div>
 
+            {/* Mobile-only Resign / Draw row — directly under the board for one-tap access. */}
+            {!isGameOver && moveHistory.length > 0 && (
+              <div className="lg:hidden flex gap-2 pt-0.5">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="flex-1 h-9 gap-1"
+                  onClick={handleResign}
+                >
+                  <Flag className="h-3.5 w-3.5" /> Resign
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 gap-1"
+                  onClick={handleOfferDraw}
+                  disabled={drawOfferPending || moveHistory.length < 2}
+                >
+                  <Handshake className="h-3.5 w-3.5" />
+                  {drawOfferPending ? "Offered…" : "Draw"}
+                </Button>
+              </div>
+            )}
+
+
             {/* Rating change — directly under the board */}
             {botRatingResult && mode === "ai" && isGameOver && (
               <RatingChange result={botRatingResult} ratingType="bot" />
