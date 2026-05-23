@@ -22,7 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers, BookOpen, Sparkles } from "lucide-react";
+import { Swords, TrendingUp, Trophy, Target, Monitor, MonitorOff, Keyboard, MessageCircle, Search, Zap, Layers, BookOpen, Sparkles, Flag, Handshake } from "lucide-react";
 import ChessBoard4D from "@/components/chess/ChessBoard4D";
 import { getBotByDifficulty, getDefaultBot, type BotProfile } from "@/lib/bot-profiles";
 import { BOT_PROFILES } from "@/lib/bots/profiles";
@@ -1086,19 +1086,19 @@ const Play = () => {
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
       <Navbar />
-      <main className="container mx-auto px-4 pt-24 pb-16">
+      <main className="container mx-auto px-2 sm:px-4 pt-16 sm:pt-24 pb-24 lg:pb-16">
         {/* Header */}
-        <div className="text-center mb-4">
-          <div className="flex justify-center gap-2 mb-2 flex-wrap">
-            <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
+        <div className="text-center mb-2 sm:mb-4">
+          <div className="flex justify-center gap-1.5 mb-1.5 flex-wrap">
+            <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] sm:text-xs">
               <Swords className="w-3 h-3 mr-1" /> Live Game
             </Badge>
-            <Badge className={`text-xs ${playerColor === "w" ? "bg-white/20 text-foreground border-white/30" : "bg-zinc-800 text-foreground border-zinc-600"}`}>
+            <Badge className={`text-[10px] sm:text-xs ${playerColor === "w" ? "bg-white/20 text-foreground border-white/30" : "bg-zinc-800 text-foreground border-zinc-600"}`}>
               {playerColor === "w" ? "♔ White" : "♚ Black"}
             </Badge>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button onClick={() => setStreamerMode(true)} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-border/50 bg-card text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all">
+                <button onClick={() => setStreamerMode(true)} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-border/50 bg-card text-[10px] sm:text-xs text-muted-foreground hover:text-primary hover:border-primary/30 transition-all">
                   <Monitor className="w-3 h-3" /> Streamer
                 </button>
               </TooltipTrigger>
@@ -1106,18 +1106,19 @@ const Play = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button onClick={() => setMode4D(prev => !prev)} className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-xs transition-all ${mode4D ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40" : "border-border/50 bg-card text-muted-foreground hover:text-primary hover:border-primary/30"}`}>
+                <button onClick={() => setMode4D(prev => !prev)} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] sm:text-xs transition-all ${mode4D ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/40" : "border-border/50 bg-card text-muted-foreground hover:text-primary hover:border-primary/30"}`}>
                   <Layers className="w-3 h-3" /> 4D
                 </button>
               </TooltipTrigger>
               <TooltipContent>Toggle 4D Visual Mode</TooltipContent>
             </Tooltip>
           </div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
+          <h1 className="font-display text-base sm:text-2xl md:text-3xl font-bold text-foreground">
             You vs <span className="text-gradient-gold">{currentBot.avatar} {currentBot.name}</span>
-            <span className="text-base ml-2 text-muted-foreground">({currentBot.rating})</span>
+            <span className="text-xs sm:text-base ml-2 text-muted-foreground">({currentBot.rating})</span>
           </h1>
         </div>
+
 
         {/* Bot message — rendered absolutely below the board (see board column) so the layout never jumps */}
 
@@ -1141,9 +1142,10 @@ const Play = () => {
           )}
         </AnimatePresence>
 
-        <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:justify-center">
+        <div className="flex flex-col items-center gap-4 lg:gap-6 lg:flex-row lg:items-start lg:justify-center">
           {/* Board column */}
-          <div className="w-full max-w-[min(85vw,520px)] space-y-1.5 relative">
+          <div className="w-full max-w-[min(96vw,520px)] space-y-1.5 relative">
+
             {/* Opponent bar (top) */}
             <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all ${
               game.turn() === aiColor && !isGameOver
@@ -1229,6 +1231,31 @@ const Play = () => {
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               )}
             </div>
+
+            {/* Mobile-only Resign / Draw row — directly under the board for one-tap access. */}
+            {!isGameOver && moveHistory.length > 0 && (
+              <div className="lg:hidden flex gap-2 pt-0.5">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="flex-1 h-9 gap-1"
+                  onClick={handleResign}
+                >
+                  <Flag className="h-3.5 w-3.5" /> Resign
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 gap-1"
+                  onClick={handleOfferDraw}
+                  disabled={drawOfferPending || moveHistory.length < 2}
+                >
+                  <Handshake className="h-3.5 w-3.5" />
+                  {drawOfferPending ? "Offered…" : "Draw"}
+                </Button>
+              </div>
+            )}
+
 
             {/* Rating change — directly under the board */}
             {botRatingResult && mode === "ai" && isGameOver && (
