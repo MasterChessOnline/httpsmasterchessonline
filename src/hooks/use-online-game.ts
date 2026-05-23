@@ -56,11 +56,49 @@ export function useOnlineGame() {
     ? game.white_player_id === user?.id ? "w" : "b"
     : null;
 
+  type RatingPreview = {
+    calc: RatingCalcResult;
+    opponentRating: number;
+    opponentLabel: string;
+    myResult: "win" | "loss" | "draw";
+  };
+
+  const buildRatingPreview = useCallback(async (g: { white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }): Promise<RatingPreview | null> => {
+    if (!user || g.is_rated === false) return null;
+
+    const isWhite = g.white_player_id === user.id;
+    const opponentId = isWhite ? g.black_player_id : g.white_player_id;
+    const [{ data: meBefore }, { data: oppBefore }] = await Promise.all([
+      supabase.from("profiles").select("rating, games_played").eq("user_id", user.id).maybeSingle(),
+      supabase.from("profiles").select("rating, display_name, username").eq("user_id", opponentId).maybeSingle(),
+    ]);
+
+    // Prefer the AuthContext profile as the user's OLD rating. It is still the
+    // pre-finalization value while the backend RPC applies the official change.
+    const myOld = profile?.rating ?? (meBefore as any)?.rating ?? 1200;
+    const myGames = profile?.games_played ?? (meBefore as any)?.games_played ?? 0;
+    const opponentRating = (oppBefore as any)?.rating ?? 1200;
+    const opponentLabel = (oppBefore as any)?.display_name ?? (oppBefore as any)?.username ?? "Player";
+    const myResult: "win" | "loss" | "draw" =
+      g.result === "1/2-1/2" ? "draw"
+      : (g.result === "1-0" && isWhite) || (g.result === "0-1" && !isWhite) ? "win"
+      : "loss";
+
+    const calc = calculateRatingChange({
+      playerRating: myOld,
+      opponentRating,
+      result: myResult,
+      gamesPlayed: myGames,
+    });
+    setRatingResult(calc);
+    return { calc, opponentRating, opponentLabel, myResult };
+  }, [user, profile?.rating, profile?.games_played]);
+
   // Helper: log rating history + compute the user's RatingCalcResult.
   // NOTE: Elo on the profiles table is now applied atomically by the
   // `finalize_online_game` RPC (server-side, exactly once per game).
   // This function ONLY snapshots ratings + writes a rating_history row + bumps missions.
-  const applyEloAndLog = useCallback(async (g: { id: string; white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }) => {
+  const applyEloAndLog = useCallback(async (g: { id: string; white_player_id: string; black_player_id: string; result: string; is_rated?: boolean }, preview?: RatingPreview | null) => {
     if (!user) return;
 
     // Casual games: skip rating display entirely.
@@ -70,43 +108,34 @@ export function useOnlineGame() {
       return;
     }
 
-    // Snapshot opponent + my OLD rating BEFORE the server RPC runs.
-    // Race-safe because finalize_online_game uses FOR UPDATE + elo_applied flag,
-    // so even if both clients call it, only ONE actually mutates the ratings.
-    const isWhite = g.white_player_id === user.id;
-    const opponentId = isWhite ? g.black_player_id : g.white_player_id;
-    const [{ data: meBefore }, { data: oppBefore }] = await Promise.all([
-      supabase.from("profiles").select("rating, games_played").eq("user_id", user.id).maybeSingle(),
-      supabase.from("profiles").select("rating, display_name, username").eq("user_id", opponentId).maybeSingle(),
-    ]);
-    const myOld = (meBefore as any)?.rating ?? 1200;
-    const oppRating = (oppBefore as any)?.rating ?? 1200;
-    const myGames = (meBefore as any)?.games_played ?? 0;
-    const oppLabel = (oppBefore as any)?.display_name ?? (oppBefore as any)?.username ?? "Player";
+    const rating = preview ?? await buildRatingPreview(g);
+    if (!rating) return;
 
-    const myResult: "win" | "loss" | "draw" =
-      g.result === "1/2-1/2" ? "draw"
-      : (g.result === "1-0" && isWhite) || (g.result === "0-1" && !isWhite) ? "win"
-      : "loss";
-
-    const calc = calculateRatingChange({
-      playerRating: myOld,
-      opponentRating: oppRating,
-      result: myResult,
-      gamesPlayed: myGames,
-    });
-    setRatingResult(calc);
+    // After the RPC, fetch the official server rating so the card shows the
+    // exact loss/gain that was applied, not only a client-side prediction.
+    const { data: meAfter } = await supabase
+      .from("profiles")
+      .select("rating")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const officialNew = (meAfter as any)?.rating ?? rating.calc.newRating;
+    const finalCalc: RatingCalcResult = {
+      ...rating.calc,
+      newRating: officialNew,
+      change: officialNew - rating.calc.oldRating,
+    };
+    setRatingResult(finalCalc);
 
     // Log to rating_history (idempotent? — checked by uniqueness on (user_id, created_at) in practice).
     // Wrapped so a duplicate insert never crashes the UI.
     try {
       await logOnlineRatingChange({
         userId: user.id,
-        oldRating: myOld,
-        newRating: calc.newRating,
-        opponentRating: oppRating,
-        opponentLabel: oppLabel,
-        result: myResult,
+        oldRating: finalCalc.oldRating,
+        newRating: finalCalc.newRating,
+        opponentRating: rating.opponentRating,
+        opponentLabel: rating.opponentLabel,
+        result: rating.myResult,
       });
     } catch (err) {
       console.warn("rating_history log failed (likely duplicate)", err);
@@ -115,11 +144,11 @@ export function useOnlineGame() {
 
     try {
       await bumpMissionProgress(user.id, "games_played", 1);
-      if (myResult === "win") await bumpMissionProgress(user.id, "games_won", 1);
+      if (rating.myResult === "win") await bumpMissionProgress(user.id, "games_won", 1);
     } catch (err) {
       console.warn("Mission bump failed", err);
     }
-  }, [user, refreshProfile]);
+  }, [user, refreshProfile, buildRatingPreview]);
 
 
   // Clean up all channels
