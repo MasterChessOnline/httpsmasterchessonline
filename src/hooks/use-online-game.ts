@@ -271,7 +271,7 @@ export function useOnlineGame() {
           // Don't auto-resume a finished game — that would re-show the old
           // result on the lobby and block the user from starting a new match.
           if (byId.status === "finished") return;
-          eloUpdatedRef.current = false;
+          eloUpdatedRef.current = false; endingRef.current = false;
           setGame(byId as OnlineGame);
           setStatus(byId.status === "finished" ? "finished" : "playing");
           subscribeToGame(byId.id);
@@ -290,7 +290,7 @@ export function useOnlineGame() {
 
       if (activeGames && activeGames.length > 0) {
         const activeGame = activeGames[0] as OnlineGame;
-        eloUpdatedRef.current = false;
+        eloUpdatedRef.current = false; endingRef.current = false;
         setGame(activeGame);
         setStatus("playing");
         subscribeToGame(activeGame.id);
@@ -364,7 +364,7 @@ export function useOnlineGame() {
         return;
       }
 
-      eloUpdatedRef.current = false;
+      eloUpdatedRef.current = false; endingRef.current = false;
       setGame(newGame as OnlineGame);
       setStatus("playing");
       subscribeToGame(newGame.id);
@@ -398,7 +398,7 @@ export function useOnlineGame() {
         }, async (payload) => {
           const newGame = payload.new as OnlineGame;
           if (newGame.white_player_id === user.id || newGame.black_player_id === user.id) {
-            eloUpdatedRef.current = false;
+            eloUpdatedRef.current = false; endingRef.current = false;
             setGame(newGame);
             setStatus("playing");
             subscribeToGame(newGame.id);
@@ -429,7 +429,7 @@ export function useOnlineGame() {
         if (games && games.length > 0) {
           clearInterval(pollInterval);
           const foundGame = games[0] as OnlineGame;
-          eloUpdatedRef.current = false;
+          eloUpdatedRef.current = false; endingRef.current = false;
           setGame(foundGame);
           setStatus("playing");
           subscribeToGame(foundGame.id);
@@ -637,14 +637,14 @@ export function useOnlineGame() {
     setGame(null);
     setStatus("idle");
     setError(null);
-    eloUpdatedRef.current = false;
+    eloUpdatedRef.current = false; endingRef.current = false;
   }, [cleanupChannels]);
 
   // Load a specific game by id without a full page reload (used by rematch flow).
   const loadGameById = useCallback(async (gameId: string) => {
     if (!user || !gameId) return;
     cleanupChannels();
-    eloUpdatedRef.current = false;
+    eloUpdatedRef.current = false; endingRef.current = false;
     setError(null);
     const { data: byId } = await supabase
       .from("online_games")
