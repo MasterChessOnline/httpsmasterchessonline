@@ -183,9 +183,10 @@ export function useOnlineGame() {
           lastAppliedAt = ts;
           return incoming;
         }
-        // Stale snapshot — older move timestamp than what we already applied.
-        // This is the main defense against echo-overwrite ("ghost double move").
-        if (ts && ts < lastAppliedAt) return prev;
+        // Stale move snapshot — older move timestamp than what we already applied.
+        // Finished snapshots are never dropped: a resign/draw/timeout update may
+        // keep the old last_move_at while carrying the authoritative result/Elo.
+        if (ts && ts < lastAppliedAt && incoming.status !== "finished") return prev;
         // Same timestamp & same FEN as what we already have → it's our own
         // optimistic write coming back. Keep referential equality so React
         // doesn't re-render the board (which would briefly flicker pieces).
