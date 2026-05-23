@@ -325,6 +325,8 @@ const PlayOnline = () => {
           if (msg.message === "__draw_offer__") {
             if (isGameOver) return;
             setDrawOfferedByOpponent(true);
+            playChessSound("check");
+            triggerHaptic("notify");
             toast({ title: "Draw offer", description: "Your opponent offers a draw." });
           } else if (msg.message === "__draw_accept__") {
             if (drawOfferedByMe) {
