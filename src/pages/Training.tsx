@@ -339,15 +339,47 @@ const Training = () => {
     }
   }
 
-  function processUserMove(uci: string) {
+  async function processUserMove(uci: string) {
     if (!chess || !position) return;
     const sol = (position as PuzzlePosition).solutionUci || [position.bestMove];
     const expected = sol[stepIndexRef.current];
     setLastMoveSquares({ from: uci.slice(0, 2) as Square, to: uci.slice(2, 4) as Square });
 
-    if (!expected || uci !== expected) {
+    if (!expected) {
+      try { chess.undo(); } catch {}
+      return;
+    }
+
+    let acceptedExpected = uci === expected;
+    let workingSolution = sol;
+
+    // Multi-solution check: ask Stockfish whether the user's move is equally
+    // winning. If so, splice it into the working solution so the opponent's
+    // pre-scripted reply still flows naturally.
+    if (!acceptedExpected) {
+      // Reconstruct FEN BEFORE the user's move (chess already has the move applied).
+      let fenBeforeMove: string | null = null;
+      try {
+        const undone = chess.undo();
+        fenBeforeMove = chess.fen();
+        // Re-apply so board state is consistent for downstream code.
+        if (undone) chess.move(undone);
+      } catch { fenBeforeMove = null; }
+
+      if (fenBeforeMove) {
+        const alt = await isAlternativeSolution(fenBeforeMove, expected, uci);
+        if (alt.accepted) {
+          acceptedExpected = true;
+          // Replace just this step so any pre-scripted opponent reply is dropped
+          // gracefully — we'll let Stockfish answer instead on the next tick.
+          workingSolution = [...sol.slice(0, stepIndexRef.current), uci, ...sol.slice(stepIndexRef.current + 1)];
+        }
+      }
+    }
+
+    if (!acceptedExpected) {
       // Wrong move — undo + fail
-      try { chess.undo(); } catch { /* noop */ }
+      try { chess.undo(); } catch {}
       streak.reset();
       setCorrect(false);
       setScore(s => ({ correct: s.correct, total: s.total + 1 }));
@@ -356,8 +388,7 @@ const Training = () => {
     }
 
     const nextIdx = stepIndexRef.current + 1;
-    // If solution exhausted → puzzle solved
-    if (nextIdx >= sol.length) {
+    if (nextIdx >= workingSolution.length) {
       stepIndexRef.current = nextIdx;
       setStepIndex(nextIdx);
       streak.increment();
@@ -366,16 +397,14 @@ const Training = () => {
       setPhase("feedback");
       return;
     }
-    // Auto-play opponent reply with a small delay for nicer animation
     setStepIndex(nextIdx);
     stepIndexRef.current = nextIdx;
     setTimeout(() => {
-      const r = autoPlayOpponent(chess, sol, nextIdx);
+      const r = autoPlayOpponent(chess, workingSolution, nextIdx);
       stepIndexRef.current = r.advanced;
       setStepIndex(r.advanced);
-      setChess(new Chess(chess.fen())); // force refresh
-      // Check if everything done
-      if (r.advanced >= sol.length) {
+      setChess(new Chess(chess.fen()));
+      if (r.advanced >= workingSolution.length) {
         streak.increment();
         setCorrect(true);
         setScore(s => ({ correct: s.correct + 1, total: s.total + 1 }));
