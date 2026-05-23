@@ -597,9 +597,28 @@ export function useOnlineGame() {
     if (endingRef.current) return { ok: true as const };
     endingRef.current = true;
 
+    // Snapshot rating immediately, BEFORE the server mutates profiles, so the
+    // player sees the rating loss/gain as soon as the game is resigned/ended.
+    const ratingPreview = await buildRatingPreview({
+      white_player_id: game.white_player_id,
+      black_player_id: game.black_player_id,
+      result,
+      is_rated: game.is_rated,
+    });
+
     // 1) Instant local UI flip — board locks, overlay shows, sounds trigger.
     setGame(prev => prev ? ({ ...prev, status: "finished", result, end_reason: endReason } as OnlineGame) : prev);
     setStatus("finished");
+
+    // Broadcast finished snapshot instantly. The opponent should see "You Won"
+    // without waiting for database realtime/polling.
+    if (gameChannelRef.current) {
+      gameChannelRef.current.send({
+        type: "broadcast",
+        event: "move",
+        payload: { ...game, status: "finished", result, end_reason: endReason },
+      });
+    }
 
     // 2) Server-authoritative finalize. Try RPC, fall back to direct update.
     let serverOk = false;
@@ -611,6 +630,8 @@ export function useOnlineGame() {
       });
       if (!rpcErr && (data as any)?.ok !== false) serverOk = true;
       else console.warn("finalize_online_game RPC failed", rpcErr, data);
+      const rpcGame = (data as any)?.game as OnlineGame | undefined;
+      if (rpcGame) setGame(rpcGame);
     } catch (e) {
       console.warn("finalize_online_game threw", e);
     }
@@ -636,10 +657,10 @@ export function useOnlineGame() {
         black_player_id: game.black_player_id,
         result,
         is_rated: game.is_rated,
-      });
+      }, ratingPreview);
     }
     return { ok: true as const };
-  }, [game, applyEloAndLog]);
+  }, [game, applyEloAndLog, buildRatingPreview]);
 
   const resign = useCallback(async () => {
     if (!game || !myColor) return { ok: false as const, error: "no_game" };
