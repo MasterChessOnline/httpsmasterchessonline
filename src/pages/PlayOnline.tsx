@@ -1177,6 +1177,9 @@ const PlayOnline = () => {
                     </Link>
                   </Button>
                 )}
+                <Button asChild variant="ghost" className="w-full text-muted-foreground hover:text-foreground">
+                  <Link to="/">Back to Home</Link>
+                </Button>
               </div>
             )}
 
