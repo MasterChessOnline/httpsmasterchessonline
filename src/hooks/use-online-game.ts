@@ -49,6 +49,7 @@ export function useOnlineGame() {
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const eloUpdatedRef = useRef(false);
+  const endingRef = useRef(false);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const myColor = game
@@ -271,7 +272,7 @@ export function useOnlineGame() {
           // Don't auto-resume a finished game — that would re-show the old
           // result on the lobby and block the user from starting a new match.
           if (byId.status === "finished") return;
-          eloUpdatedRef.current = false;
+          eloUpdatedRef.current = false; endingRef.current = false;
           setGame(byId as OnlineGame);
           setStatus(byId.status === "finished" ? "finished" : "playing");
           subscribeToGame(byId.id);
@@ -290,7 +291,7 @@ export function useOnlineGame() {
 
       if (activeGames && activeGames.length > 0) {
         const activeGame = activeGames[0] as OnlineGame;
-        eloUpdatedRef.current = false;
+        eloUpdatedRef.current = false; endingRef.current = false;
         setGame(activeGame);
         setStatus("playing");
         subscribeToGame(activeGame.id);
@@ -364,7 +365,7 @@ export function useOnlineGame() {
         return;
       }
 
-      eloUpdatedRef.current = false;
+      eloUpdatedRef.current = false; endingRef.current = false;
       setGame(newGame as OnlineGame);
       setStatus("playing");
       subscribeToGame(newGame.id);
@@ -398,7 +399,7 @@ export function useOnlineGame() {
         }, async (payload) => {
           const newGame = payload.new as OnlineGame;
           if (newGame.white_player_id === user.id || newGame.black_player_id === user.id) {
-            eloUpdatedRef.current = false;
+            eloUpdatedRef.current = false; endingRef.current = false;
             setGame(newGame);
             setStatus("playing");
             subscribeToGame(newGame.id);
@@ -429,7 +430,7 @@ export function useOnlineGame() {
         if (games && games.length > 0) {
           clearInterval(pollInterval);
           const foundGame = games[0] as OnlineGame;
-          eloUpdatedRef.current = false;
+          eloUpdatedRef.current = false; endingRef.current = false;
           setGame(foundGame);
           setStatus("playing");
           subscribeToGame(foundGame.id);
@@ -559,25 +560,43 @@ export function useOnlineGame() {
 
   // Atomic finalize via RPC: marks finished + sets end_reason + applies Elo exactly once.
   // Safe to call from BOTH players concurrently — only one mutation actually lands.
+  // CRITICAL: optimistically flip local state FIRST so the UI locks instantly and the
+  // user sees Game Over even if the network round-trip is slow or fails.
   const endGame = useCallback(async (result: string, endReason: EndReason = "checkmate") => {
     if (!game) return { ok: false as const, error: "no_game" };
-    const { error: rpcErr } = await supabase.rpc("finalize_online_game" as any, {
-      p_game_id: game.id,
-      p_result: result,
-      p_end_reason: endReason,
-    });
-    if (rpcErr) {
-      console.warn("finalize_online_game failed, falling back to direct update", rpcErr);
+    if (endingRef.current) return { ok: true as const };
+    endingRef.current = true;
+
+    // 1) Instant local UI flip — board locks, overlay shows, sounds trigger.
+    setGame(prev => prev ? ({ ...prev, status: "finished", result, end_reason: endReason } as OnlineGame) : prev);
+    setStatus("finished");
+
+    // 2) Server-authoritative finalize. Try RPC, fall back to direct update.
+    let serverOk = false;
+    try {
+      const { data, error: rpcErr } = await supabase.rpc("finalize_online_game" as any, {
+        p_game_id: game.id,
+        p_result: result,
+        p_end_reason: endReason,
+      });
+      if (!rpcErr && (data as any)?.ok !== false) serverOk = true;
+      else console.warn("finalize_online_game RPC failed", rpcErr, data);
+    } catch (e) {
+      console.warn("finalize_online_game threw", e);
+    }
+    if (!serverOk) {
       const { error: updErr } = await supabase
         .from("online_games")
         .update({ status: "finished", result, end_reason: endReason })
         .eq("id", game.id);
-      if (updErr) return { ok: false as const, error: updErr.message };
+      if (updErr) {
+        console.error("Direct finalize update also failed", updErr);
+        endingRef.current = false;
+        return { ok: false as const, error: updErr.message };
+      }
+      // Clear current_game_id locks best-effort
+      await supabase.from("profiles").update({ current_game_id: null }).in("user_id", [game.white_player_id, game.black_player_id]);
     }
-
-    // Immediate local UI flip — don't wait for realtime echo / 750ms poll.
-    setGame(prev => prev ? ({ ...prev, status: "finished", result, end_reason: endReason } as OnlineGame) : prev);
-    setStatus("finished");
 
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
@@ -594,6 +613,7 @@ export function useOnlineGame() {
 
   const resign = useCallback(async () => {
     if (!game || !myColor) return { ok: false as const, error: "no_game" };
+    if (game.status !== "active") return { ok: true as const };
     return endGame(myColor === "w" ? "0-1" : "1-0", "resignation");
   }, [game, myColor, endGame]);
 
@@ -617,14 +637,14 @@ export function useOnlineGame() {
     setGame(null);
     setStatus("idle");
     setError(null);
-    eloUpdatedRef.current = false;
+    eloUpdatedRef.current = false; endingRef.current = false;
   }, [cleanupChannels]);
 
   // Load a specific game by id without a full page reload (used by rematch flow).
   const loadGameById = useCallback(async (gameId: string) => {
     if (!user || !gameId) return;
     cleanupChannels();
-    eloUpdatedRef.current = false;
+    eloUpdatedRef.current = false; endingRef.current = false;
     setError(null);
     const { data: byId } = await supabase
       .from("online_games")
