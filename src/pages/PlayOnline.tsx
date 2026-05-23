@@ -990,11 +990,8 @@ const PlayOnline = () => {
                   // for a position that actually ended by draw agreement / resignation / timeout,
                   // which caused the "checkmate flashes before draw" bug.
                   if (onlineStatus === "finished") {
-                    if (!onlineGame?.result) return null; // wait for server result
-                    if (onlineGame.result === "1/2-1/2") return "draw";
-                    if (endReason === "checkmate") return "checkmate";
-                    // resignation / timeout / other decisive endings: no big banner,
-                    // the result panel under the board explains it.
+                    // Suppress the small banner — the GameOverOverlay below now covers all
+                    // decisive endings (checkmate / draw / resign / timeout) directly over the board.
                     return null;
                   }
                   if (timeoutWinner) return null;
@@ -1005,29 +1002,36 @@ const PlayOnline = () => {
                 })()}
                 subtitle={isGameOver ? statusText : undefined}
               />
-            </div>
 
-            {/* Player info */}
-            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
-              <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-xs">
-                  {boardFlipped ? "♚" : "♔"}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-primary flex items-center"><CountryFlag country={(profile as any)?.country} country_flag={(profile as any)?.country_flag} />{profile?.display_name || "You"}</p>
-                  <p className="text-[10px] text-muted-foreground">{profile?.rating || 1200} ELO</p>
-                </div>
-              </div>
-              {!unlimited && (
-                <span className={`font-mono text-lg font-bold ${(boardFlipped ? blackTime : whiteTime) <= 30 ? "text-destructive" : "text-foreground"}`}>
-                  {formatClock(boardFlipped ? blackTime : whiteTime)}
-                </span>
+              {/* End-of-game overlay — covers the board only (not full screen).
+                  Shows "You Won" / "You Lost" / "Draw" with the reason underneath. */}
+              {isGameOver && onlineStatus === "finished" && onlineGame?.result && (
+                <GameOverOverlay
+                  type={
+                    onlineGame.result === "1/2-1/2"
+                      ? "draw"
+                      : endReason === "resignation"
+                      ? "resign"
+                      : endReason === "timeout"
+                      ? "timeout"
+                      : "checkmate"
+                  }
+                  winner={
+                    onlineGame.result === "1-0"
+                      ? "white"
+                      : onlineGame.result === "0-1"
+                      ? "black"
+                      : null
+                  }
+                  reason={statusText}
+                  myColor={myColor === "w" ? "white" : myColor === "b" ? "black" : undefined}
+                />
               )}
             </div>
 
             {/* Mobile-only Resign / Draw row — directly under the board for one-tap access. */}
             {!isGameOver && onlineStatus === "playing" && (
-              <div className="lg:hidden flex gap-2 pt-1">
+              <div className="lg:hidden flex gap-2 pt-0.5">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -1049,6 +1053,25 @@ const PlayOnline = () => {
                 </Button>
               </div>
             )}
+
+            {/* Player info */}
+            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-xs">
+                  {boardFlipped ? "♚" : "♔"}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-primary flex items-center"><CountryFlag country={(profile as any)?.country} country_flag={(profile as any)?.country_flag} />{profile?.display_name || "You"}</p>
+                  <p className="text-[10px] text-muted-foreground">{profile?.rating || 1200} ELO</p>
+                </div>
+              </div>
+              {!unlimited && (
+                <span className={`font-mono text-lg font-bold ${(boardFlipped ? blackTime : whiteTime) <= 30 ? "text-destructive" : "text-foreground"}`}>
+                  {formatClock(boardFlipped ? blackTime : whiteTime)}
+                </span>
+              )}
+            </div>
+
 
             {/* Clock ticker (hidden) */}
             <ChessClock
