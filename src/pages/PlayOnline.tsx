@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import DynamicBackground from "@/components/DynamicBackground";
 import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
 import GameEndOverlay, { type GameEndVariant } from "@/components/effects/GameEndOverlay";
+import GameOverOverlay from "@/components/chess/GameOverOverlay";
 import QuickChat from "@/components/chess/QuickChat";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
