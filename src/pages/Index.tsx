@@ -279,7 +279,7 @@ const Index = () => {
           <div className="mt-4 flex justify-center items-center gap-2 text-primary/70">
             <ScribbleArrow className="hidden sm:block text-primary/50" />
             <MarginNote rotate={-2} className="text-base sm:text-lg">
-              pravi šah, pravi ljudi — bez botova koji se prave da su ljudi
+              real chess, real people — no bots pretending to be human
             </MarginNote>
           </div>
 
