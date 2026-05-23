@@ -1240,6 +1240,14 @@ const PlayOnline = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <GameEndOverlay
+        show={!!endOverlay}
+        variant={endOverlay?.variant ?? "draw"}
+        winnerLabel={endOverlay?.winnerLabel}
+        detail={endOverlay?.detail}
+        onClose={() => setEndOverlay(null)}
+        autoCloseMs={5000}
+      />
     </div>
   );
 };
