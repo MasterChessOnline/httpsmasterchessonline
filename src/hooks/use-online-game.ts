@@ -208,7 +208,8 @@ export function useOnlineGame() {
 
       if (incoming.status === "finished") {
         setStatus("finished");
-        if (!eloUpdatedRef.current && incoming.result) {
+        const ratingIsAuthoritative = incoming.is_rated === false || incoming.elo_applied === true;
+        if (!eloUpdatedRef.current && incoming.result && ratingIsAuthoritative) {
           eloUpdatedRef.current = true;
           applyEloAndLog({
             id: incoming.id,
@@ -599,7 +600,7 @@ export function useOnlineGame() {
 
     // Snapshot rating immediately, BEFORE the server mutates profiles, so the
     // player sees the rating loss/gain as soon as the game is resigned/ended.
-    const ratingPreview = await buildRatingPreview({
+    const ratingPreviewPromise = buildRatingPreview({
       white_player_id: game.white_player_id,
       black_player_id: game.black_player_id,
       result,
@@ -640,10 +641,12 @@ export function useOnlineGame() {
         .from("online_games")
         .update({ status: "finished", result, end_reason: endReason })
         .eq("id", game.id);
-      if (updErr) {
+      const { data: verifyGame } = await supabase.from("online_games").select("*").eq("id", game.id).single();
+      if (verifyGame) setGame(verifyGame as OnlineGame);
+      if (updErr || verifyGame?.status !== "finished" || verifyGame?.result !== result) {
         console.error("Direct finalize update also failed", updErr);
         endingRef.current = false;
-        return { ok: false as const, error: updErr.message };
+        return { ok: false as const, error: updErr?.message ?? "finalize_failed" };
       }
       // Clear current_game_id locks best-effort
       await supabase.from("profiles").update({ current_game_id: null }).in("user_id", [game.white_player_id, game.black_player_id]);
@@ -651,6 +654,7 @@ export function useOnlineGame() {
 
     if (!eloUpdatedRef.current) {
       eloUpdatedRef.current = true;
+      const ratingPreview = await ratingPreviewPromise;
       await applyEloAndLog({
         id: game.id,
         white_player_id: game.white_player_id,
