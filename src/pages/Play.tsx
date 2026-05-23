@@ -1086,7 +1086,7 @@ const Play = () => {
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "var(--font-body)" }}>
       <Navbar />
-      <main className="container mx-auto px-2 sm:px-4 pt-16 sm:pt-24 pb-16">
+      <main className="container mx-auto px-2 sm:px-4 pt-16 sm:pt-24 pb-24 lg:pb-16">
         {/* Header */}
         <div className="text-center mb-2 sm:mb-4">
           <div className="flex justify-center gap-1.5 mb-1.5 flex-wrap">
