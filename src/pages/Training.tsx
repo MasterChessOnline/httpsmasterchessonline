@@ -21,6 +21,73 @@ import { loadPuzzles as loadLichessPuzzles, type PuzzlePosition } from "@/lib/ma
 import { useTrainingStreak } from "@/hooks/use-training-streak";
 import AchievementToast from "@/components/training/AchievementToast";
 import { toast } from "sonner";
+import { getStockfishEngine } from "@/lib/stockfish-engine";
+
+/**
+ * Multi-solution puzzle acceptance.
+ * Some tactical puzzles have more than one winning move (e.g. two different
+ * mating ideas, equally winning captures). We compare Stockfish's evaluation
+ * of the position AFTER the "expected" move vs AFTER the user's move, from
+ * the side-to-move's perspective. If the user's move is within a small
+ * tolerance (or also mates in the same number), we treat it as a valid
+ * alternate solution and let the puzzle continue.
+ *
+ * Cheap depth (10) keeps this snappy (~150-300ms) on the main thread.
+ */
+async function isAlternativeSolution(
+  fenBeforeMove: string,
+  expectedUci: string,
+  userUci: string,
+): Promise<{ accepted: boolean; replacementSolutionUci?: string }> {
+  if (expectedUci === userUci) return { accepted: true };
+  try {
+    const eng = getStockfishEngine();
+    await eng.init();
+    // Side-to-move BEFORE the move was played.
+    const mover = new Chess(fenBeforeMove).turn(); // "w" | "b"
+
+    // Apply both candidate moves and evaluate the resulting positions.
+    const apply = (uci: string) => {
+      const c = new Chess(fenBeforeMove);
+      try {
+        c.move({ from: uci.slice(0, 2) as Square, to: uci.slice(2, 4) as Square, promotion: (uci[4] as any) || "q" });
+        return c.fen();
+      } catch { return null; }
+    };
+    const expectedFen = apply(expectedUci);
+    const userFen = apply(userUci);
+    if (!expectedFen || !userFen) return { accepted: false };
+
+    const [expectedEval, userEval] = await Promise.all([
+      eng.evaluate(expectedFen, 10),
+      eng.evaluate(userFen, 10),
+    ]);
+
+    // Normalize: evaluations are returned from the side-to-move's perspective
+    // AFTER our move, which means the opponent is now to move. Flip to the
+    // mover's perspective by negating.
+    const expScore = -(expectedEval.evaluation || 0);
+    const userScore = -(userEval.evaluation || 0);
+    const expMate = expectedEval.mate != null ? -expectedEval.mate : null;
+    const userMate = userEval.mate != null ? -userEval.mate : null;
+
+    // Mate-vs-mate: both winning mates count.
+    if (expMate != null && expMate > 0 && userMate != null && userMate > 0) {
+      return { accepted: true, replacementSolutionUci: userUci };
+    }
+    // If expected is mate but user isn't → require user to also mate.
+    if (expMate != null && expMate > 0) return { accepted: false };
+
+    // Centipawn comparison from mover's perspective.
+    const diff = expScore - userScore; // positive => user is worse
+    if (diff <= 30) {
+      return { accepted: true, replacementSolutionUci: userUci };
+    }
+    return { accepted: false };
+  } catch {
+    return { accepted: false };
+  }
+}
 
 type SessionMode = "classic" | "timeattack" | "survival";
 const TIME_ATTACK_SECONDS = 300; // 5 minutes
@@ -272,15 +339,47 @@ const Training = () => {
     }
   }
 
-  function processUserMove(uci: string) {
+  async function processUserMove(uci: string) {
     if (!chess || !position) return;
     const sol = (position as PuzzlePosition).solutionUci || [position.bestMove];
     const expected = sol[stepIndexRef.current];
     setLastMoveSquares({ from: uci.slice(0, 2) as Square, to: uci.slice(2, 4) as Square });
 
-    if (!expected || uci !== expected) {
+    if (!expected) {
+      try { chess.undo(); } catch {}
+      return;
+    }
+
+    let acceptedExpected = uci === expected;
+    let workingSolution = sol;
+
+    // Multi-solution check: ask Stockfish whether the user's move is equally
+    // winning. If so, splice it into the working solution so the opponent's
+    // pre-scripted reply still flows naturally.
+    if (!acceptedExpected) {
+      // Reconstruct FEN BEFORE the user's move (chess already has the move applied).
+      let fenBeforeMove: string | null = null;
+      try {
+        const undone = chess.undo();
+        fenBeforeMove = chess.fen();
+        // Re-apply so board state is consistent for downstream code.
+        if (undone) chess.move(undone);
+      } catch { fenBeforeMove = null; }
+
+      if (fenBeforeMove) {
+        const alt = await isAlternativeSolution(fenBeforeMove, expected, uci);
+        if (alt.accepted) {
+          acceptedExpected = true;
+          // Replace just this step so any pre-scripted opponent reply is dropped
+          // gracefully — we'll let Stockfish answer instead on the next tick.
+          workingSolution = [...sol.slice(0, stepIndexRef.current), uci, ...sol.slice(stepIndexRef.current + 1)];
+        }
+      }
+    }
+
+    if (!acceptedExpected) {
       // Wrong move — undo + fail
-      try { chess.undo(); } catch { /* noop */ }
+      try { chess.undo(); } catch {}
       streak.reset();
       setCorrect(false);
       setScore(s => ({ correct: s.correct, total: s.total + 1 }));
@@ -289,8 +388,7 @@ const Training = () => {
     }
 
     const nextIdx = stepIndexRef.current + 1;
-    // If solution exhausted → puzzle solved
-    if (nextIdx >= sol.length) {
+    if (nextIdx >= workingSolution.length) {
       stepIndexRef.current = nextIdx;
       setStepIndex(nextIdx);
       streak.increment();
@@ -299,16 +397,14 @@ const Training = () => {
       setPhase("feedback");
       return;
     }
-    // Auto-play opponent reply with a small delay for nicer animation
     setStepIndex(nextIdx);
     stepIndexRef.current = nextIdx;
     setTimeout(() => {
-      const r = autoPlayOpponent(chess, sol, nextIdx);
+      const r = autoPlayOpponent(chess, workingSolution, nextIdx);
       stepIndexRef.current = r.advanced;
       setStepIndex(r.advanced);
-      setChess(new Chess(chess.fen())); // force refresh
-      // Check if everything done
-      if (r.advanced >= sol.length) {
+      setChess(new Chess(chess.fen()));
+      if (r.advanced >= workingSolution.length) {
         streak.increment();
         setCorrect(true);
         setScore(s => ({ correct: s.correct + 1, total: s.total + 1 }));
