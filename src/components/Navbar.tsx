@@ -246,16 +246,16 @@ const Navbar = () => {
             }`}
           >
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 min-w-0" aria-label="MasterChess home">
+            <Link to="/" className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0 min-w-0" aria-label="MasterChess home">
               <motion.div
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:border-primary/40 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] transition-all duration-300 shrink-0"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/30 group-hover:border-primary/50 group-hover:shadow-[0_0_28px_rgba(212,175,55,0.28)] transition-all duration-300 shrink-0"
                 whileHover={{ rotate: 12, scale: 1.08 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <Crown className="h-6 w-6 sm:h-7 sm:w-7 text-primary drop-shadow-[0_0_8px_rgba(212,175,55,0.55)]" />
               </motion.div>
               <span
-                className="font-display font-bold tracking-wide text-foreground uppercase text-base sm:text-2xl whitespace-nowrap shrink-0"
+                className="font-display font-bold tracking-wide text-foreground uppercase text-lg sm:text-2xl whitespace-nowrap shrink-0"
                 style={{ wordBreak: "keep-all", overflowWrap: "normal", whiteSpace: "nowrap" }}
               >
                 Master<span className="text-gradient-gold">Chess</span>
@@ -520,24 +520,10 @@ const Navbar = () => {
             transition={{ duration: 0.25 }}
             className="fixed inset-0 z-40 bg-[hsl(220,15%,5%)]/98 backdrop-blur-xl overflow-y-auto pt-16 pb-28"
           >
-            {/* Sticky CTA header — primary actions always reachable */}
-            <div className="sticky top-0 z-10 -mt-16 pt-16 pb-4 px-4 bg-[hsl(220,15%,5%)] backdrop-blur-xl border-b border-border/20 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.8)]">
-              <div className="max-w-lg mx-auto grid grid-cols-2 gap-2.5">
-                <Link to="/play/online" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full h-12 bg-primary text-primary-foreground font-bold shadow-[0_6px_20px_-4px_hsl(var(--primary)/0.55)]">
-                    <Zap className="h-4 w-4 mr-1.5" />
-                    Quick Match
-                  </Button>
-                </Link>
-                <Link to="/play" onClick={() => setMobileOpen(false)}>
-                  <Button variant="outline" className="w-full h-12 font-semibold border-primary/30 text-primary hover:bg-primary/10">
-                    <Play className="h-4 w-4 mr-1.5 fill-current" />
-                    Play vs Bot
-                  </Button>
-                </Link>
-              </div>
-              {!user && (
-                <div className="max-w-lg mx-auto grid grid-cols-2 gap-2.5 mt-2.5">
+            {/* Sticky CTA header — auth actions only (Play CTAs live in bottom nav) */}
+            {!user && (
+              <div className="sticky top-0 z-10 -mt-16 pt-16 pb-4 px-4 bg-[hsl(220,15%,5%)] backdrop-blur-xl border-b border-border/20 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.8)]">
+                <div className="max-w-lg mx-auto grid grid-cols-2 gap-2.5">
                   <Link to="/login" onClick={() => setMobileOpen(false)}>
                     <Button variant="ghost" className="w-full h-10 text-sm border border-border/30">Sign In</Button>
                   </Link>
@@ -545,8 +531,8 @@ const Navbar = () => {
                     <Button className="w-full h-10 text-sm font-bold bg-foreground text-background hover:bg-foreground/90">Create Account</Button>
                   </Link>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="max-w-lg mx-auto space-y-3 px-4 pt-4">
 

@@ -870,7 +870,7 @@ export default function Analysis() {
         )}
 
         {/* ── TOP ROW: Board + Analysis Sidebar ── */}
-        <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-3 w-full max-w-[920px]">
+        <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-4 w-full max-w-[1280px]">
           {/* ── LEFT: Eval Bar + Board ── */}
           <div className="flex flex-col items-center w-full lg:w-auto">
             <div className="flex items-center gap-2 mb-1 self-start ml-8 sm:ml-10">
@@ -883,7 +883,7 @@ export default function Analysis() {
 
             <div className="flex items-stretch w-full justify-center">
               {/* Eval Bar — wider, with side arrow marker */}
-              <div className="w-9 sm:w-11 shrink-0 rounded-md overflow-hidden mr-2 relative flex flex-col border border-border/40 shadow-[0_0_0_1px_hsl(43_90%_55%/0.15)]" style={{ minHeight: 320 }}>
+              <div className="w-9 sm:w-11 shrink-0 rounded-md overflow-hidden mr-2 relative flex flex-col border border-border/40 shadow-[0_0_0_1px_hsl(43_90%_55%/0.15)]" style={{ minHeight: 360 }}>
                 <motion.div className="bg-[hsl(220,15%,12%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${100 - evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
                 <motion.div className="bg-[hsl(60,8%,92%)]" initial={{ flexBasis: "50%" }} animate={{ flexBasis: `${evalPercent}%` }} transition={{ type: "spring", stiffness: 180, damping: 22 }} style={{ flexShrink: 0 }} />
                 {/* Center reference line */}
@@ -913,7 +913,7 @@ export default function Analysis() {
               </div>
 
               {/* Board */}
-              <div className="w-[min(88vw,460px)] lg:w-[min(50vw,460px)]">
+              <div className="w-[min(92vw,500px)] lg:w-[min(58vw,720px)] xl:w-[min(56vw,780px)]">
                 <ChessBoard
                   game={boardGame}
                   flipped={flipped}
@@ -1077,9 +1077,12 @@ export default function Analysis() {
                   </div>
                 </div>
                 <div className="grid grid-cols-4 gap-1 text-[9px]">
-                  {(["best", "book", "inaccuracy", "mistake", "blunder"] as MoveClass[]).map(k => (
+                  {(["brilliant", "great", "best", "book", "good", "inaccuracy", "mistake", "blunder"] as MoveClass[]).map(k => (
                     <div key={k} className={`rounded border px-1 py-0.5 ${CLASS_META[k].bg} ${CLASS_META[k].color}`}>
-                      <div className="font-bold uppercase tracking-wider truncate">{CLASS_META[k].label}</div>
+                      <div className="font-bold uppercase tracking-wider truncate flex items-center gap-1">
+                        <span className="leading-none">{CLASS_META[k].symbol}</span>
+                        <span className="truncate">{CLASS_META[k].label}</span>
+                      </div>
                       <div className="font-mono">W{reviewSummary[k].w} · B{reviewSummary[k].b}</div>
                     </div>
                   ))}
