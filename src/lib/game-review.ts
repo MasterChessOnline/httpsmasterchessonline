@@ -80,6 +80,19 @@ export function classifyMove(args: {
   if (stillCompletelyWinning && classification !== "best") classification = "good";
   else if (stillWinning && (classification === "blunder" || classification === "mistake")) classification = "inaccuracy";
 
+  // Upgrade "best" to brilliant/great when the move dramatically improves a
+  // bad/equal position. Brilliant = saved a losing or sharply worse spot and
+  // swung evaluation in the mover's favor. Great = found the only strong reply
+  // in a difficult or balanced position.
+  if (classification === "best") {
+    const swing = after - before; // mover-POV centipawn swing
+    if (before <= -200 && after >= 50 && swing >= 250) {
+      classification = "brilliant";
+    } else if (before <= 30 && after >= 200 && swing >= 150) {
+      classification = "great";
+    }
+  }
+
   return { classification, cpLoss };
 }
 

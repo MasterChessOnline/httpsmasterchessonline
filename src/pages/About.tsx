@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 
 const About = () => (
   <div className="min-h-screen bg-background grid-bg flex flex-col">
-    <Seo title={"About MasterChessOnline & DailyChess_12"} description={"Learn about MasterChess and the DailyChess_12 teaching method — accessible chess education for every level."} path="/about" type="website" />
+    <Seo title={"About MasterChessOnline — built by Nikola Šakotić, age 13"} description={"MasterChess is a chess platform handcrafted by Nikola Šakotić, a 13-year-old chess player from Serbia. Free lessons, tournaments and a welcoming community."} path="/about" type="website" />
     <Navbar />
     <main className="flex-1">
       {/* Hero */}
@@ -28,7 +28,7 @@ const About = () => (
             Master<span className="text-gradient-gold">Chess</span>Online
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            MasterChessOnline is the home of <span className="font-semibold text-foreground">DailyChess_12</span> — a chess learning platform built by a passionate instructor who believes every player deserves access to quality lessons, free tournaments, and a welcoming community.
+            MasterChessOnline was handcrafted by <span className="font-semibold text-foreground">Nikola Šakotić</span>, a 13-year-old chess player from Serbia who believes every player deserves access to quality lessons, free tournaments, and a welcoming community.
           </p>
         </motion.div>
       </section>
@@ -60,15 +60,15 @@ const About = () => (
         </div>
       </section>
 
-      {/* DailyChess_12 Teaching Method */}
+      {/* Teaching Method */}
       <section className="pb-20 container mx-auto px-6">
         <div className="max-w-3xl mx-auto space-y-8">
           <div className="text-center space-y-3">
             <h2 className="text-3xl font-bold font-display">
-              The DailyChess_12 Method
+              How I teach chess on MasterChess
             </h2>
             <p className="text-muted-foreground">
-              A structured approach to chess improvement, refined through thousands of hours of teaching.
+              A structured approach to chess improvement, shaped by my own years over the board.
             </p>
           </div>
 
@@ -76,7 +76,7 @@ const About = () => (
             {[
               { icon: BookOpen, title: "Pattern Recognition", desc: "Every lesson starts with real-game positions. You learn to spot tactical and strategic patterns that repeat across all levels of play — from club games to grandmaster battles." },
               { icon: Trophy, title: "Competitive Practice", desc: "Theory alone doesn't make you stronger. Our free daily and weekly tournaments give you the arena to test what you've learned under real time pressure." },
-              { icon: Brain, title: "Deep Analysis", desc: "The DailyChess_12 method features game breakdowns, opening guides, and endgame technique — explained in plain language with interactive board examples." },
+              { icon: Brain, title: "Deep Analysis", desc: "Game breakdowns, opening guides, and endgame technique — explained in plain language with interactive board examples." },
               { icon: Target, title: "AI-Powered Feedback", desc: "After every game, our AI analyzes your moves, identifies blunders and missed tactics, and gives you a personalized improvement plan — so you always know what to work on next." },
             ].map(({ icon: Icon, title, desc }, i) => (
               <motion.div
