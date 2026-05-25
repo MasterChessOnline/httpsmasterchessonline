@@ -870,7 +870,7 @@ export default function Analysis() {
         )}
 
         {/* ── TOP ROW: Board + Analysis Sidebar ── */}
-        <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-4 w-full max-w-[1280px]">
+        <div className="flex flex-col lg:flex-row justify-center items-center lg:items-start gap-4 w-full max-w-[1600px]">
           {/* ── LEFT: Eval Bar + Board ── */}
           <div className="flex flex-col items-center w-full lg:w-auto">
             <div className="flex items-center gap-2 mb-1 self-start ml-8 sm:ml-10">
