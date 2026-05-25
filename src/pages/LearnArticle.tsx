@@ -196,6 +196,35 @@ export default function LearnArticle() {
             })}
           </div>
         </section>
+
+        {/* Every guide deep-links into the live Analysis board so the reader
+            can immediately drag pieces around and test the ideas. */}
+        <section className="mt-10 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-background/40 to-amber-400/8 p-5 sm:p-6">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-primary font-bold mb-1.5">
+            Try it on the board
+          </p>
+          <h3 className="font-display text-xl sm:text-2xl font-bold text-foreground mb-2">
+            Drag the moves yourself. Stockfish will tell you the truth.
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+            Open the starting position in Analysis — drag pieces, branch new lines, and let the
+            engine grade every move. Every lesson on MasterChess plugs into the same board.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/analysis?fen=rnbqkbnr%2Fpppppppp%2F8%2F8%2F8%2F8%2FPPPPPPPP%2FRNBQKBNR%20w%20KQkq%20-%200%201"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 py-2 text-xs font-bold shadow-md hover:scale-[1.03] transition-all"
+            >
+              Open Analysis board <ArrowLeft className="h-3.5 w-3.5 rotate-180" />
+            </Link>
+            <Link
+              to="/openings"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-4 py-2 text-xs font-semibold text-foreground hover:border-primary/40 hover:text-primary transition-colors"
+            >
+              Browse openings
+            </Link>
+          </div>
+        </section>
       </article>
     </div>
   );
