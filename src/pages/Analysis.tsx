@@ -266,14 +266,18 @@ export default function Analysis() {
     for (let i = 0; i < pgnMoveEvals.length; i++) {
       const cur = pgnMoveEvals[i];
       const prev = i === 0 ? { eval: 0, mate: null as number | null } : pgnMoveEvals[i - 1];
-      // First ~12 plies treated as book (rough heuristic — replaces network book lookup)
-      const isBookMove = i < 12;
-      out.push(classifyMove({
+      // Classify first using engine data only. A move is only labeled "book"
+      // if it's in the opening AND the engine considers it best/good. A blunder
+      // in the opening must NOT be hidden behind a Book label.
+      const raw = classifyMove({
         beforeEval: { cp: prev.eval, mate: prev.mate },
         afterEval: { cp: cur.eval, mate: cur.mate },
         color: cur.color,
-        isBookMove,
-      }).classification);
+        isBookMove: false,
+      }).classification;
+      const inOpening = i < 12;
+      const isTheoryQuality = raw === "best" || raw === "good";
+      out.push(inOpening && isTheoryQuality ? "book" : raw);
     }
     return out;
   }, [pgnComplete, pgnMoveEvals]);
