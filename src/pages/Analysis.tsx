@@ -313,6 +313,20 @@ export default function Analysis() {
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get("game");
     const pgnParam = params.get("pgn");
+    const fenParam = params.get("fen");
+
+    // Deep-link from a lesson / course / blog: load a FEN directly into the
+    // live analysis board so the user can drag moves and explore variations.
+    if (fenParam && fenParam.trim()) {
+      try {
+        const g = new Chess(fenParam.trim());
+        setLiveGame(g);
+        setLiveFen(g.fen());
+        setLiveMoveHistory([]);
+        setLiveViewIdx(-1);
+        setBottomTab("explorer");
+      } catch { /* invalid FEN — ignore */ }
+    }
 
     if (pgnParam && pgnParam.trim()) {
       const pgn = pgnParam;
