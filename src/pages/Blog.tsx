@@ -66,9 +66,20 @@ export default function Blog() {
         >
           Learn chess. <span className="text-primary">Faster.</span>
         </motion.h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mb-12">
+        <p className="text-lg text-muted-foreground max-w-2xl mb-8">
           Guides written for real improvement — every move verified with Stockfish, every plan
           tested against modern theory. From your first game to your first 2000 ELO.
+        </p>
+
+        {/* Fresh, hand-written note that rotates every day */}
+        <DailyNote />
+
+        {/* Tiny handwritten margin scribble — keeps the blog feeling like a notebook */}
+        <p
+          className="mb-8 -mt-2 text-primary/80 text-base sm:text-lg select-none"
+          style={{ fontFamily: "Caveat, ui-sans-serif, system-ui", transform: "rotate(-1.5deg)" }}
+        >
+          ↑ a new one of these every day. I write them between school and dinner.
         </p>
 
         {featured && (
