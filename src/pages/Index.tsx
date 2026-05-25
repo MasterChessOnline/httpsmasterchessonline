@@ -224,21 +224,50 @@ const Index = () => {
             </p>
           </motion.div>
 
-          {/* Login prompt for guests above Play Online */}
+          {/* Attractive sign-up hero card for guests */}
           {!user && (
             <motion.div
-              className="mb-3 flex items-center justify-center"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.4 }}
+              className="mb-5 mx-auto max-w-2xl"
+              initial={{ opacity: 0, y: 14, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
             >
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 backdrop-blur-sm text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-                <span className="text-primary">🔥 {t("hero.signupCta")}</span>
-                <span className="text-muted-foreground">—</span>
-                <Link to="/signup" className="text-primary hover:text-primary/80 underline underline-offset-2">{t("hero.joinFree")}</Link>
-                <span className="text-muted-foreground">{t("common.or", "or")}</span>
-                <Link to="/login" className="text-muted-foreground hover:text-foreground underline underline-offset-2">{t("hero.login")}</Link>
-              </span>
+              <div className="relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 via-background/60 to-amber-400/10 backdrop-blur-md p-4 sm:p-5 shadow-[0_0_40px_-8px_hsl(var(--primary)/0.4)]">
+                {/* shimmer */}
+                <motion.div
+                  className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-primary/25 to-transparent"
+                  animate={{ x: ["0%", "400%"] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
+                />
+                <div className="relative flex flex-col sm:flex-row items-center gap-3 sm:gap-5 text-center sm:text-left">
+                  <div className="text-3xl sm:text-4xl shrink-0 drop-shadow-[0_0_12px_hsl(var(--primary)/0.6)]">👑</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-primary mb-0.5">
+                      Free Forever · No Credit Card
+                    </p>
+                    <h2 className="text-base sm:text-lg font-bold text-foreground leading-tight">
+                      Join MasterChess — your ELO, your puzzles, your story.
+                    </h2>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                      Play online · climb the leaderboard · unlock missions, daily puzzles & game review.
+                    </p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Link
+                      to="/signup"
+                      className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-5 py-2 text-xs sm:text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/60 hover:scale-[1.04] active:scale-[0.97] transition-all"
+                    >
+                      Create account
+                    </Link>
+                    <Link
+                      to="/login"
+                      className="inline-flex items-center justify-center rounded-full border border-border/60 bg-card/60 text-foreground px-4 py-2 text-xs sm:text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all"
+                    >
+                      Log in
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
 

@@ -86,9 +86,16 @@ export async function loadPuzzles(): Promise<PuzzlePosition[]> {
         if (!p.solution || p.solution.length === 0) continue;
         // MasterChess-branded id (strip any third-party prefix from the raw file)
         const id = p.id.startsWith("lichess-") ? p.id.replace(/^lichess-/, "mc-") : `mc-${p.id}`;
+        // Re-derive training mode from themes so all 4 modes get plenty of
+        // content. The raw `mode` field only used best-move / convert.
+        const t = (p.themes || "").toLowerCase();
+        let mode: TrainingMode = p.mode;
+        if (t.includes("defensivemove") || t.includes("hangingpiece")) mode = "defend";
+        else if (t.includes("endgame") || t.includes("promotion") || t.includes("advancedpawn") || t.includes("rookendgame") || t.includes("queenendgame")) mode = "convert";
+        else if (t.includes("middlegame") && (t.includes("kingsideattack") || t.includes("queensideattack") || t.includes("advantage") || t.includes("positional"))) mode = "find-plan";
         out.push({
           id,
-          mode: p.mode,
+          mode,
           fen: c.fen(),
           side: c.turn() as "w" | "b",
           bestMove: p.solution[0],
