@@ -913,7 +913,7 @@ export default function Analysis() {
               </div>
 
               {/* Board */}
-              <div className="w-[min(92vw,500px)] lg:w-[min(58vw,720px)] xl:w-[min(56vw,780px)]">
+              <div className="w-[min(92vw,500px)] lg:w-[min(62vw,820px)] xl:w-[min(58vw,900px)] 2xl:w-[960px]">
                 <ChessBoard
                   game={boardGame}
                   flipped={flipped}
