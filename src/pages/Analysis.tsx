@@ -324,7 +324,7 @@ export default function Analysis() {
         setLiveFen(g.fen());
         setLiveMoveHistory([]);
         setLiveViewIdx(-1);
-        setBottomTab("play");
+        setBottomTab("explorer");
       } catch { /* invalid FEN — ignore */ }
     }
 
