@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, Clock, TrendingUp } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Seo from "@/components/Seo";
 import { LEARN_ARTICLES } from "@/lib/learn-articles";
+import DailyNote from "@/components/blog/DailyNote";
 
 export default function Blog() {
   const articles = [...LEARN_ARTICLES].sort((a, b) => (a.updated < b.updated ? 1 : -1));
