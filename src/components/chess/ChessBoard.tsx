@@ -398,7 +398,7 @@ export default function ChessBoard({
                         animate={{ x: 0, y: 0, scale: 1, opacity: dragFrom === square ? 0.4 : 1 }}
                         transition={
                           slideOffset
-                            ? { type: "spring", stiffness: 300, damping: 24, mass: 0.8 }
+                            ? { type: "spring", stiffness: 260, damping: 18, mass: 0.95, restDelta: 0.001 }
                             : { type: "spring", stiffness: 500, damping: 25 }
                         }
                         whileHover={
