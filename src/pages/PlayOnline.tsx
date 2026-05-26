@@ -981,7 +981,7 @@ const PlayOnline = () => {
                 hintSquare={null}
                 onSquareClick={handleSquareClick}
                 premove={premove}
-                className="w-full max-w-[min(100vw,calc(100svh-14rem),640px)] lg:max-w-[min(calc(100svh-10rem),820px)] xl:max-w-[900px] mx-auto"
+                className="w-full max-w-[min(100vw,calc(100svh-14rem),640px)] lg:max-w-[min(calc(100svh-8rem),74vw,1180px)] xl:max-w-[min(calc(100svh-8rem),1320px)] mx-auto"
               />
               <GameStatusOverlay
                 kind={(() => {
