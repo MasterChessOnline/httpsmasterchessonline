@@ -243,13 +243,13 @@ const Index = () => {
                   <div className="text-3xl sm:text-4xl shrink-0 drop-shadow-[0_0_12px_hsl(var(--primary)/0.6)]">👑</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-primary mb-0.5">
-                      Free Forever · No Credit Card
+                      Built by Nikola, 13 · For real chess players
                     </p>
                     <h2 className="text-base sm:text-lg font-bold text-foreground leading-tight">
-                      Join MasterChess — your ELO, your puzzles, your story.
+                      Join MasterChess — your ELO, your story, your board.
                     </h2>
                     <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                      Play online · climb the leaderboard · unlock missions, daily puzzles & game review.
+                      Real humans · climb the leaderboard · unlock missions, daily puzzles & honest game review.
                     </p>
                   </div>
                   <div className="flex gap-2 shrink-0">

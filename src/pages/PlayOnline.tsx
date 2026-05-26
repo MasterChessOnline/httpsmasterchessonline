@@ -94,6 +94,8 @@ const PlayOnline = () => {
   const [focusMode, setFocusMode] = useState(false);
   const [drawOfferedByMe, setDrawOfferedByMe] = useState(false);
   const [drawOfferedByOpponent, setDrawOfferedByOpponent] = useState(false);
+  const [drawOffersUsed, setDrawOffersUsed] = useState(0);
+  const DRAW_OFFER_LIMIT = 4;
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const [premove, setPremove] = useState<{ from: Square; to: Square; promotion?: PromotionPiece } | null>(null);
   // Mirror premove in a ref so the FEN-sync effect can read the freshest value
@@ -554,11 +556,16 @@ const PlayOnline = () => {
 
   const offerDraw = async () => {
     if (!user || !onlineGame || drawOfferedByMe) return;
+    if (drawOffersUsed >= DRAW_OFFER_LIMIT) {
+      toast({ title: "Draw offer limit reached", description: `You can only offer a draw ${DRAW_OFFER_LIMIT} times per game.`, variant: "destructive" });
+      return;
+    }
     setDrawOfferedByMe(true);
+    setDrawOffersUsed((n) => n + 1);
     await supabase.from("game_messages").insert({
       game_id: onlineGame.id, user_id: user.id, message: "__draw_offer__",
     });
-    toast({ title: "Draw offered", description: "Waiting for opponent..." });
+    toast({ title: "Draw offered", description: `${DRAW_OFFER_LIMIT - drawOffersUsed - 1} offers remaining this game.` });
   };
 
   const acceptDraw = async () => {
@@ -605,6 +612,7 @@ const PlayOnline = () => {
     setOpponentProfile(null);
     setDrawOfferedByMe(false);
     setDrawOfferedByOpponent(false);
+    setDrawOffersUsed(0);
     setRematchOfferedByMe(false);
     setRematchOfferedByOpponent(false);
     setPremove(null);
@@ -920,10 +928,10 @@ const PlayOnline = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="px-1 sm:px-3 pt-14 sm:pt-16 pb-24 lg:pb-3">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-4 lg:items-start max-w-[1600px] mx-auto">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-4 lg:items-start max-w-[1800px] mx-auto">
           {/* Board + Clocks — fills the full viewport */}
           <div className="min-w-0 flex flex-col items-center">
-            <div className="w-full max-w-[min(100vw,calc(100svh-7rem),640px)] lg:max-w-[min(calc(100svh-7rem),820px)] xl:max-w-[900px] space-y-1.5">
+            <div className="w-full max-w-[min(100vw,calc(100svh-7rem),640px)] lg:max-w-[min(calc(100svh-6rem),74vw,1180px)] xl:max-w-[min(calc(100svh-6rem),1320px)] space-y-1.5">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
               <div className="flex items-center gap-2">
@@ -981,7 +989,7 @@ const PlayOnline = () => {
                 hintSquare={null}
                 onSquareClick={handleSquareClick}
                 premove={premove}
-                className="w-full max-w-[min(100vw,calc(100svh-14rem),640px)] lg:max-w-[min(calc(100svh-10rem),820px)] xl:max-w-[900px] mx-auto"
+                className="w-full max-w-[min(100vw,calc(100svh-14rem),640px)] lg:max-w-[min(calc(100svh-8rem),74vw,1180px)] xl:max-w-[min(calc(100svh-8rem),1320px)] mx-auto"
               />
               <GameStatusOverlay
                 kind={(() => {
@@ -1046,10 +1054,11 @@ const PlayOnline = () => {
                   size="sm"
                   className="flex-1 h-9 gap-1"
                   onClick={offerDraw}
-                  disabled={drawOfferedByMe || drawOfferedByOpponent}
+                  disabled={drawOfferedByMe || drawOfferedByOpponent || drawOffersUsed >= DRAW_OFFER_LIMIT}
+                  title={drawOffersUsed >= DRAW_OFFER_LIMIT ? "Draw offer limit reached" : undefined}
                 >
                   <Handshake className="h-3.5 w-3.5" />
-                  {drawOfferedByMe ? "Offered…" : "Draw"}
+                  {drawOfferedByMe ? "Offered…" : drawOffersUsed >= DRAW_OFFER_LIMIT ? "Draw ✕" : `Draw (${DRAW_OFFER_LIMIT - drawOffersUsed})`}
                 </Button>
               </div>
             )}
@@ -1161,10 +1170,11 @@ const PlayOnline = () => {
                   size="sm"
                   className="flex-1 min-w-[100px] gap-1"
                   onClick={offerDraw}
-                  disabled={drawOfferedByMe || drawOfferedByOpponent}
+                  disabled={drawOfferedByMe || drawOfferedByOpponent || drawOffersUsed >= DRAW_OFFER_LIMIT}
+                  title={drawOffersUsed >= DRAW_OFFER_LIMIT ? "Draw offer limit reached" : undefined}
                 >
                   <Handshake className="h-3.5 w-3.5" />
-                  {drawOfferedByMe ? "Draw offered…" : "Offer Draw"}
+                  {drawOfferedByMe ? "Draw offered…" : drawOffersUsed >= DRAW_OFFER_LIMIT ? "Draw limit reached" : `Offer Draw (${DRAW_OFFER_LIMIT - drawOffersUsed} left)`}
                 </Button>
                 <Button variant="outline" size="sm" className="gap-1" onClick={() => setFocusMode(true)}>
                   <Eye className="h-3.5 w-3.5" /> Focus

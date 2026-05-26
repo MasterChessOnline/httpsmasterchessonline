@@ -63,20 +63,43 @@ export default function WelcomeIntroPopup() {
         >
           {/* Backdrop */}
           <motion.div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/75 backdrop-blur-md"
             onClick={dismiss}
           />
 
           {/* Card */}
           <motion.div
-            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 shadow-[0_30px_80px_-20px_rgba(245,158,11,0.35)]"
-            initial={{ y: 30, opacity: 0, scale: 0.96 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-br from-[#1a0f00] via-zinc-950 to-[#0a0a14] shadow-[0_40px_120px_-20px_rgba(245,158,11,0.5)]"
+            initial={{ y: 40, opacity: 0, scale: 0.94, rotateX: -8 }}
+            animate={{ y: 0, opacity: 1, scale: 1, rotateX: 0 }}
             exit={{ y: 20, opacity: 0, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 220, damping: 22 }}
           >
-            {/* Soft gold glow */}
-            <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-[120%] -translate-x-1/2 rounded-full bg-amber-500/20 blur-3xl" />
+            {/* Animated aurora glows */}
+            <motion.div
+              className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[140%] -translate-x-1/2 rounded-full bg-amber-500/25 blur-3xl"
+              animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.15, 1] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="pointer-events-none absolute -bottom-24 -right-12 h-56 w-56 rounded-full bg-fuchsia-500/15 blur-3xl"
+              animate={{ opacity: [0.3, 0.55, 0.3] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            />
+            <motion.div
+              className="pointer-events-none absolute -bottom-20 -left-12 h-56 w-56 rounded-full bg-emerald-500/15 blur-3xl"
+              animate={{ opacity: [0.25, 0.5, 0.25] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            />
+
+            {/* Floating chess piece */}
+            <motion.div
+              className="pointer-events-none absolute right-6 top-6 text-7xl text-amber-400/15 select-none"
+              animate={{ y: [0, -8, 0], rotate: [0, 4, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            >
+              ♛
+            </motion.div>
 
             <button
               onClick={dismiss}
@@ -86,42 +109,55 @@ export default function WelcomeIntroPopup() {
               <X className="h-4 w-4" />
             </button>
 
-            <div className="relative p-7 sm:p-8">
+            <div className="relative p-7 sm:p-9">
               <div className="flex items-center gap-2 text-amber-400/90">
                 <Sparkles className="h-4 w-4" />
-                <span className="text-xs font-semibold uppercase tracking-[0.2em]">
-                  Welcome aboard
+                <span className="text-xs font-semibold uppercase tracking-[0.22em]">
+                  Welcome home
                 </span>
               </div>
 
-              <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">
+              <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl leading-[1.05]">
                 Welcome to{" "}
                 <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent">
                   MasterChess
                 </span>
               </h2>
 
-              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                A clean, focused home for real human chess. Here's a quick
-                tour of what you can do — your first title unlocks once you
-                start playing.
-              </p>
+              {/* Handwritten note from Nikola */}
+              <div className="mt-4 rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/[0.06] to-transparent p-4">
+                <p
+                  className="text-[15px] leading-relaxed text-amber-100/90"
+                  style={{ fontFamily: "Caveat, cursive", fontSize: "1.05rem", lineHeight: 1.45 }}
+                >
+                  Hi — I'm <span className="font-bold text-amber-300">Nikola</span>, 13, from Serbia.
+                  I built MasterChess because I wanted a place to play chess that feels
+                  <em> honest</em>: no engine help, no fake players, no clutter. Just
+                  you, a board, and the next move. Hope you stay a while.
+                </p>
+                <div className="mt-1 text-right text-[11px] uppercase tracking-widest text-amber-400/60">
+                  — Nikola Šakotić
+                </div>
+              </div>
 
-              <div className="mt-6 space-y-2.5">
+              <div className="mt-5 space-y-2.5">
                 <FeatureRow
                   icon={<Swords className="h-4 w-4" />}
-                  title="Play"
-                  desc="Challenge bots or jump into an online match."
+                  title="Play real humans"
+                  desc="Rated matches against actual people. Your ELO actually moves."
+                  tone="amber"
                 />
                 <FeatureRow
                   icon={<GraduationCap className="h-4 w-4" />}
-                  title="Learn"
-                  desc="Openings, courses, and game review at your pace."
+                  title="Learn at your pace"
+                  desc="Openings, courses, and Stockfish-powered game review."
+                  tone="emerald"
                 />
                 <FeatureRow
                   icon={<Crown className="h-4 w-4" />}
                   title="Earn titles"
                   desc="Climb from Rookie to Singularity by winning games."
+                  tone="violet"
                 />
               </div>
 
@@ -129,15 +165,15 @@ export default function WelcomeIntroPopup() {
                 <Link
                   to="/play"
                   onClick={dismiss}
-                  className="flex-1 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 px-4 py-2.5 text-center text-sm font-semibold text-black transition hover:brightness-110"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 px-4 py-3 text-center text-sm font-bold text-black shadow-[0_10px_30px_-8px_rgba(245,158,11,0.6)] transition hover:brightness-110 hover:scale-[1.02]"
                 >
-                  Play your first game
+                  Play your first game →
                 </Link>
                 <button
                   onClick={dismiss}
-                  className="rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-white/10"
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-zinc-300 transition hover:bg-white/10"
                 >
-                  Look around first
+                  Look around
                 </button>
               </div>
             </div>
@@ -152,14 +188,21 @@ function FeatureRow({
   icon,
   title,
   desc,
+  tone = "amber",
 }: {
   icon: React.ReactNode;
   title: string;
   desc: string;
+  tone?: "amber" | "emerald" | "violet";
 }) {
+  const toneMap = {
+    amber: "bg-amber-500/15 text-amber-300 border-amber-500/20",
+    emerald: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20",
+    violet: "bg-violet-500/15 text-violet-300 border-violet-500/20",
+  };
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/[0.03] px-3.5 py-3">
-      <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-amber-500/15 text-amber-300">
+    <div className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/[0.03] px-3.5 py-3 transition hover:bg-white/[0.05]">
+      <div className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border ${toneMap[tone]}`}>
         {icon}
       </div>
       <div className="min-w-0">
