@@ -481,7 +481,7 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md lg:max-w-[680px] xl:max-w-[820px] 2xl:max-w-[920px] mx-auto">
       {/* Mode tabs */}
       {hasMoves && (
         <div className="flex rounded-lg border border-border/50 overflow-hidden mb-3">
@@ -801,8 +801,8 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
 
       {/* Move list (guided mode) */}
       {mode === "guided" && effectiveMoves.length > 0 && (
-        <div className="rounded-lg border border-border/50 bg-card p-3 mb-3 max-h-[100px] overflow-y-auto">
-          <div className="flex flex-wrap gap-1 text-sm">
+        <div className="rounded-lg border border-border/50 bg-card p-3 mb-3 max-h-[140px] lg:max-h-[220px] xl:max-h-[300px] overflow-y-auto">
+          <div className="flex flex-wrap gap-1 text-sm leading-relaxed">
             {effectiveMoves.map((step, idx) => {
               const moveNum = getMoveNumber(idx);
               const isActive = idx + 1 === moveIndex;
