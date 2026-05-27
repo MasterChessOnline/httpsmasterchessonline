@@ -262,19 +262,37 @@ export default function Analysis() {
   // ── Game Review: classify each PGN move and compute accuracy ──
   const reviewClassifications = useMemo<MoveClass[]>(() => {
     if (!pgnComplete || pgnMoveEvals.length === 0) return [];
+    const PIECE_VAL: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+    const materialFor = (fen: string, color: "w" | "b"): number => {
+      try {
+        const board = new Chess(fen).board();
+        let sum = 0;
+        for (const row of board) for (const cell of row) {
+          if (cell && cell.color === color) sum += PIECE_VAL[cell.type] || 0;
+        }
+        return sum;
+      } catch { return 0; }
+    };
+    const legalCountFor = (fen: string): number => {
+      try { return new Chess(fen).moves().length; } catch { return 99; }
+    };
     const out: MoveClass[] = [];
     for (let i = 0; i < pgnMoveEvals.length; i++) {
       const cur = pgnMoveEvals[i];
       const prev = i === 0 ? { eval: 0, mate: null as number | null } : pgnMoveEvals[i - 1];
-      // Classify first using engine data only. A move is only labeled "book"
-      // if it's in the opening AND the engine considers it best/good. A blunder
-      // in the opening must NOT be hidden behind a Book label.
+      const matBefore = materialFor(cur.fenBefore, cur.color);
+      const matAfter = materialFor(cur.fen, cur.color);
+      const sacrificed = Math.max(0, matBefore - matAfter);
       const raw = classifyMove({
         beforeEval: { cp: prev.eval, mate: prev.mate },
         afterEval: { cp: cur.eval, mate: cur.mate },
         color: cur.color,
         isBookMove: false,
+        legalCount: legalCountFor(cur.fenBefore),
+        materialSacrificed: sacrificed,
       }).classification;
+      // Only call it "book" when it's plausibly theory (early ply + engine-approved).
+      // A blunder in the opening must NOT be hidden behind a Book label.
       const inOpening = i < 12;
       const isTheoryQuality = raw === "best" || raw === "good";
       out.push(inOpening && isTheoryQuality ? "book" : raw);
@@ -294,8 +312,10 @@ export default function Analysis() {
   const reviewSummary = useMemo(() => {
     const counts: Record<MoveClass, { w: number; b: number }> = {
       brilliant: { w: 0, b: 0 }, great: { w: 0, b: 0 }, best: { w: 0, b: 0 },
-      book: { w: 0, b: 0 }, good: { w: 0, b: 0 }, inaccuracy: { w: 0, b: 0 },
+      book: { w: 0, b: 0 }, good: { w: 0, b: 0 }, forced: { w: 0, b: 0 },
+      sacrifice: { w: 0, b: 0 }, inaccuracy: { w: 0, b: 0 }, dubious: { w: 0, b: 0 },
       mistake: { w: 0, b: 0 }, blunder: { w: 0, b: 0 },
+      missed_win: { w: 0, b: 0 }, missed_draw: { w: 0, b: 0 },
     };
     reviewClassifications.forEach((c, i) => {
       const color = pgnMoveEvals[i].color;
@@ -1094,8 +1114,10 @@ export default function Analysis() {
                     <div className="text-sm font-bold font-mono text-foreground">{reviewAccuracy.black.toFixed(1)}%</div>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-1 text-[9px]">
-                  {(["brilliant", "great", "best", "book", "good", "inaccuracy", "mistake", "blunder"] as MoveClass[]).map(k => (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-1 text-[9px]">
+                  {(["brilliant", "great", "best", "book", "good", "forced", "sacrifice", "inaccuracy", "dubious", "mistake", "blunder", "missed_win", "missed_draw"] as MoveClass[])
+                    .filter(k => reviewSummary[k].w + reviewSummary[k].b > 0 || ["best","good","inaccuracy","mistake","blunder"].includes(k))
+                    .map(k => (
                     <div key={k} className={`rounded border px-1 py-0.5 ${CLASS_META[k].bg} ${CLASS_META[k].color}`}>
                       <div className="font-bold uppercase tracking-wider truncate flex items-center gap-1">
                         <span className="leading-none">{CLASS_META[k].symbol}</span>
