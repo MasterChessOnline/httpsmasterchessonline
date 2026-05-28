@@ -876,3 +876,84 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
     </div>
   );
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Move list panel: paired rows (white/black), autoscrolls active row
+   into view. Designed so a 15-move variation reads top-to-bottom and
+   the active move is always visible.
+   ───────────────────────────────────────────────────────────────────── */
+interface MoveListPanelProps {
+  moves: MoveStep[];
+  activeIdx: number; // 0 = before first move
+  branchAt: number | null;
+  onJump: (moveIndexZeroBased: number) => void;
+}
+
+function MoveListPanel({ moves, activeIdx, branchAt, onJump }: MoveListPanelProps) {
+  const activeRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (activeRef.current) {
+      activeRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [activeIdx]);
+
+  // Group into pairs: [{ num, white, black }]
+  const rows: { num: number; w?: { san: string; idx: number }; b?: { san: string; idx: number } }[] = [];
+  for (let i = 0; i < moves.length; i++) {
+    const num = Math.floor(i / 2) + 1;
+    if (i % 2 === 0) {
+      rows.push({ num, w: { san: moves[i].san, idx: i } });
+    } else {
+      rows[rows.length - 1].b = { san: moves[i].san, idx: i };
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-border/50 bg-card p-2 mb-3 max-h-[180px] lg:max-h-[340px] xl:max-h-[440px] overflow-y-auto">
+      <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-0.5 text-xs">
+        {rows.map((row) => {
+          const isWActive = row.w && row.w.idx + 1 === activeIdx;
+          const isBActive = row.b && row.b.idx + 1 === activeIdx;
+          const isWBranch = branchAt !== null && row.w && row.w.idx >= branchAt;
+          const isBBranch = branchAt !== null && row.b && row.b.idx >= branchAt;
+          return (
+            <div key={row.num} className="contents">
+              <span className="text-muted-foreground font-mono text-[11px] tabular-nums pt-0.5 pr-1">{row.num}.</span>
+              {row.w ? (
+                <button
+                  ref={isWActive ? activeRef : undefined}
+                  onClick={() => onJump(row.w!.idx)}
+                  className={`text-left px-1.5 py-0.5 rounded font-mono transition-colors ${
+                    isWActive
+                      ? "bg-primary text-primary-foreground font-bold shadow-[0_0_12px_hsl(var(--primary)/0.45)]"
+                      : isWBranch
+                        ? "text-amber-400/90 hover:bg-amber-500/10"
+                        : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {row.w.san}
+                </button>
+              ) : <span />}
+              {row.b ? (
+                <button
+                  ref={isBActive ? activeRef : undefined}
+                  onClick={() => onJump(row.b!.idx)}
+                  className={`text-left px-1.5 py-0.5 rounded font-mono transition-colors ${
+                    isBActive
+                      ? "bg-primary text-primary-foreground font-bold shadow-[0_0_12px_hsl(var(--primary)/0.45)]"
+                      : isBBranch
+                        ? "text-amber-400/90 hover:bg-amber-500/10"
+                        : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {row.b.san}
+                </button>
+              ) : <span />}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
