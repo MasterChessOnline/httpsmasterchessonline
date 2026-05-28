@@ -102,6 +102,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
       { label: "Stats", href: "/stats", icon: BarChart3, desc: "Detailed analytics", subheading: "Insights", separator: true },
       { label: "Achievements", href: "/achievements", icon: Medal, desc: "Unlocked milestones" },
+      { label: "Reward Chests", href: "/chests", icon: Gift, desc: "Open chests, unlock boards & pieces", highlight: true },
       { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true, subheading: "Account" },
     ],
   },
