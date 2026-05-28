@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Radio, UserPlus } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Radio, UserPlus, Gift } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -102,6 +102,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
       { label: "Stats", href: "/stats", icon: BarChart3, desc: "Detailed analytics", subheading: "Insights", separator: true },
       { label: "Achievements", href: "/achievements", icon: Medal, desc: "Unlocked milestones" },
+      { label: "Reward Chests", href: "/chests", icon: Gift, desc: "Open chests, unlock boards & pieces", highlight: true },
       { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true, subheading: "Account" },
     ],
   },

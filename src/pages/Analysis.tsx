@@ -951,7 +951,7 @@ export default function Analysis() {
               </div>
 
               {/* Board */}
-              <div className="w-[min(92vw,500px)] lg:w-[min(calc(100svh-9rem),68vw,1100px)] xl:w-[min(calc(100svh-8rem),64vw,1280px)] 2xl:w-[min(calc(100svh-7rem),1450px)]">
+              <div className="w-[min(92vw,540px)] lg:w-[min(calc(100svh-7rem),74vw,1280px)] xl:w-[min(calc(100svh-6rem),68vw,1480px)] 2xl:w-[min(calc(100svh-5rem),1640px)]">
                 <ChessBoard
                   game={boardGame}
                   flipped={flipped}
@@ -962,6 +962,28 @@ export default function Analysis() {
                   isPlayerTurn={(!pgnComplete && liveViewIdx < 0) || pgnComplete}
                   onSquareClick={handleInteractiveSquareClick}
                 />
+
+                {/* Move navigation directly under the board — finger-friendly on mobile,
+                    Nikola's request: "milimetar ispod table". */}
+                {activeEvals.length > 0 && (
+                  <div className="mt-2 flex items-center justify-center gap-1.5 px-1">
+                    <Button variant="outline" size="icon" className="h-10 w-10 lg:h-9 lg:w-9 rounded-xl bg-card/80 backdrop-blur active:scale-95" onClick={() => goFn(-1)} aria-label="Start">
+                      <ChevronsLeft className="h-5 w-5" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-12 w-14 lg:h-10 lg:w-12 rounded-xl bg-card/80 backdrop-blur active:scale-95 border-primary/30" onClick={() => goFn(activeIdx - 1)} disabled={activeIdx <= -1} aria-label="Previous move">
+                      <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                    <span className="text-[11px] font-mono font-bold text-muted-foreground min-w-[58px] text-center tabular-nums">
+                      {Math.max(0, activeIdx + 1)} / {activeEvals.length}
+                    </span>
+                    <Button variant="outline" size="icon" className="h-12 w-14 lg:h-10 lg:w-12 rounded-xl bg-card/80 backdrop-blur active:scale-95 border-primary/30" onClick={() => goFn(activeIdx + 1)} disabled={activeIdx >= activeEvals.length - 1} aria-label="Next move">
+                      <ChevronRight className="h-6 w-6" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-10 w-10 lg:h-9 lg:w-9 rounded-xl bg-card/80 backdrop-blur active:scale-95" onClick={() => goFn(activeEvals.length - 1)} aria-label="End">
+                      <ChevronsRight className="h-5 w-5" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 
