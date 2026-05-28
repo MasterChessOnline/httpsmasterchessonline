@@ -88,6 +88,7 @@ const GlossaryTerm = lazy(() => import("./pages/GlossaryTerm"));
 const ShareStreak = lazy(() => import("./pages/ShareStreak"));
 const Tools = lazy(() => import("./pages/Tools"));
 const ToolDetail = lazy(() => import("./pages/ToolDetail"));
+const Chests = lazy(() => import("./pages/Chests"));
 const CheckmatePatterns = lazy(() => import("./pages/CheckmatePatterns"));
 const CheckmatePatternDetail = lazy(() => import("./pages/CheckmatePatternDetail"));
 const EloLanding = lazy(() => import("./pages/EloLanding"));
@@ -226,6 +227,7 @@ function AnimatedRoutes() {
           <Route path="/players/:slug" element={<GrandmasterDetail />} />
           <Route path="/team-battles" element={<TeamBattles />} />
           <Route path="/dev/online-sim" element={<DevOnlineSim />} />
+          <Route path="/chests" element={<Chests />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
