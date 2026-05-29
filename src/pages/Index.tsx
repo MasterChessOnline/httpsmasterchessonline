@@ -38,7 +38,7 @@ import Manifesto from "@/components/landing/Manifesto";
 import WallOfReasons from "@/components/landing/WallOfReasons";
 import StickyJoinBar from "@/components/landing/StickyJoinBar";
 import InstallAppButton from "@/components/InstallAppButton";
-import PlayAnywhereSection from "@/components/PlayAnywhereSection";
+
 import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 
@@ -726,8 +726,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Install MasterChess — Play Anywhere */}
-      <PlayAnywhereSection />
+      {/* Install MasterChess section removed per request */}
 
       {/* Share MasterChess — site-wide share card */}
       <section className="px-4 pb-16">
