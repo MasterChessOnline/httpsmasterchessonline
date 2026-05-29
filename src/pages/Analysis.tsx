@@ -914,9 +914,29 @@ export default function Analysis() {
 
   // ── Render ──
   return (
-    <div className="min-h-screen bg-[hsl(220,20%,12%)]">
-      <Navbar />
-      <main className="flex flex-col items-center pt-4 pb-8 px-2 lg:px-4 min-h-[calc(100vh-64px)]">
+    <div className={`min-h-screen bg-[hsl(220,20%,12%)] ${focusMode ? "is-focus-mode" : ""}`}>
+      {!focusMode && <Navbar />}
+
+      {/* Floating Focus / Fullscreen / Flip toolbar — always visible */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+        <Button size="icon" variant="outline" onClick={() => setFocusMode(v => !v)}
+          className="h-11 w-11 rounded-full bg-card/90 backdrop-blur border-primary/40 shadow-lg shadow-primary/20 hover:bg-primary/20"
+          title={focusMode ? "Exit Focus Mode (F)" : "Focus Mode (F)"}>
+          {focusMode ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </Button>
+        <Button size="icon" variant="outline" onClick={toggleFullscreen}
+          className="h-11 w-11 rounded-full bg-card/90 backdrop-blur border-primary/40 shadow-lg shadow-primary/20 hover:bg-primary/20"
+          title={isFullscreen ? "Exit Fullscreen (Shift+F)" : "Fullscreen (Shift+F)"}>
+          {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+        </Button>
+        <Button size="icon" variant="outline" onClick={() => setFlipped(v => !v)}
+          className="h-11 w-11 rounded-full bg-card/90 backdrop-blur border-primary/40 shadow-lg shadow-primary/20 hover:bg-primary/20"
+          title="Flip board (X)">
+          <FlipVertical className="h-5 w-5" />
+        </Button>
+      </div>
+
+      <main className={`flex flex-col items-center ${focusMode ? "pt-2" : "pt-4"} pb-8 px-2 lg:px-4 min-h-[calc(100vh-64px)]`}>
         {/* ── PLAYER BANNER (when reviewing a saved game) ── */}
         {gameMeta && (gameMeta.white || gameMeta.black) && (
           <div className="w-full max-w-[920px] mb-3 rounded-lg border border-border/30 bg-[hsl(220,18%,16%)] px-4 py-3 flex items-center justify-between gap-3">
@@ -1031,8 +1051,8 @@ export default function Analysis() {
             </div>
           </div>
 
-          {/* ── RIGHT: Analysis Sidebar ── */}
-          <div className="w-full lg:w-[340px] xl:w-[380px] lg:shrink-0 lg:ml-3 flex flex-col bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden" style={{ minHeight: 320 }}>
+          {/* ── RIGHT: Analysis Sidebar (hidden in Focus Mode) ── */}
+          <div className={`${focusMode ? "hidden" : ""} w-full lg:w-[340px] xl:w-[380px] lg:shrink-0 lg:ml-3 flex flex-col bg-[hsl(220,18%,16%)] rounded-lg border border-border/20 overflow-hidden`} style={{ minHeight: 320 }}>
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/20 bg-[hsl(220,18%,14%)]">
               <Brain className="h-4 w-4 text-primary" />
