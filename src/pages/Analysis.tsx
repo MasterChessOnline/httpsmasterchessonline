@@ -13,7 +13,8 @@ import { Slider } from "@/components/ui/slider";
 import {
   Brain, Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Upload, Trash2, Download, MousePointerClick, RotateCcw,
-  Database, Trophy, FlipVertical, Swords, Calendar, Sparkles, History
+  Database, Trophy, FlipVertical, Swords, Calendar, Sparkles, History,
+  Maximize2, Minimize2, Eye, EyeOff
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -669,6 +670,26 @@ export default function Analysis() {
     setSelectedSquare(null); setLegalMoves([]);
   }, [variation, pgnCurrentIdx, pgnMoveEvals]);
 
+  // ── Focus & Fullscreen modes (Chess.com-style immersive analysis) ──
+  const [focusMode, setFocusMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const toggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch { /* ignore */ }
+  }, []);
+  useEffect(() => {
+    const onFs = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
+
   useEffect(() => {
     if (!pgnComplete && liveMoveHistory.length === 0) return;
     const handler = (e: KeyboardEvent) => {
@@ -681,11 +702,18 @@ export default function Analysis() {
         case "ArrowRight": goFn(idx + 1); break;
         case "Home": goFn(-1); break;
         case "End": goFn(evals.length - 1); break;
+        case "f": case "F":
+          if (e.shiftKey) { e.preventDefault(); toggleFullscreen(); }
+          else { e.preventDefault(); setFocusMode(v => !v); }
+          break;
+        case "x": case "X": e.preventDefault(); setFlipped(v => !v); break;
+        case "Escape": if (focusMode) setFocusMode(false); break;
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [pgnComplete, pgnCurrentIdx, goToPgnMove, pgnMoveEvals.length, liveMoveHistory, liveViewIdx, goToLiveMove]);
+  }, [pgnComplete, pgnCurrentIdx, goToPgnMove, pgnMoveEvals.length, liveMoveHistory, liveViewIdx, goToLiveMove, focusMode, toggleFullscreen]);
+
 
   const runAnalysis = async () => {
     if (analyzing) return; // hard guard against double-click re-entry
