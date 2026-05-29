@@ -22,6 +22,7 @@ import RankBadge from "@/components/RankBadge";
 import TitleBadge from "@/components/TitleBadge";
 import { COUNTRIES, findCountry } from "@/lib/countries";
 import { BOARD_THEMES, PIECE_STYLES, applyBoardTheme, applyPieceStyle } from "@/lib/board-themes";
+import { isBoardLocked, isPieceLocked } from "@/lib/chests";
 import { useMoveInputMode as _unused, getMoveInputMode, setMoveInputMode, type MoveInputMode } from "@/hooks/use-move-input-mode";
 import { SOUND_PACKS, applySoundPack, playMoveSound, setMasterVolume, setMuted, getMasterVolume, isMuted } from "@/lib/chess-sounds";
 import BoardThemeCard from "@/components/settings/BoardThemeCard";
@@ -548,19 +549,34 @@ const Settings = () => {
                 <span className="text-[10px] text-muted-foreground/60 font-mono">{BOARD_THEMES.length} options</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {BOARD_THEMES.map(t => (
-                  <BoardThemeCard
-                    key={t.key}
-                    theme={t}
-                    active={boardTheme === t.key}
-                    onSelect={() => {
-                      setBoardTheme(t.key);
-                      saveSetting("boardTheme", t.key);
-                      applyBoardTheme(t.key);
-                      toast.success(`Board: ${t.label}`);
-                    }}
-                  />
-                ))}
+                {BOARD_THEMES.map(t => {
+                  const locked = isBoardLocked(t.key);
+                  return (
+                    <div key={t.key} className="relative">
+                      <BoardThemeCard
+                        theme={t}
+                        active={boardTheme === t.key}
+                        onSelect={() => {
+                          if (locked) {
+                            toast.error("Locked — open a Reward Chest to unlock this board.");
+                            navigate("/chests");
+                            return;
+                          }
+                          setBoardTheme(t.key);
+                          saveSetting("boardTheme", t.key);
+                          applyBoardTheme(t.key);
+                          toast.success(`Board: ${t.label}`);
+                        }}
+                      />
+                      {locked && (
+                        <div className="pointer-events-none absolute inset-0 rounded-xl bg-background/70 backdrop-blur-[2px] flex flex-col items-center justify-center gap-1">
+                          <span className="text-2xl">🔒</span>
+                          <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Chest</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -571,21 +587,37 @@ const Settings = () => {
                 <span className="text-[10px] text-muted-foreground/60 font-mono">{PIECE_STYLES.length} options</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {PIECE_STYLES.map(ps => (
-                  <PieceStyleCard
-                    key={ps.key}
-                    style={ps}
-                    active={pieceStyle === ps.key}
-                    onSelect={() => {
-                      setPieceStyle(ps.key);
-                      saveSetting("pieceStyle", ps.key);
-                      applyPieceStyle(ps.key);
-                      toast.success(`Pieces: ${ps.label}`);
-                    }}
-                  />
-                ))}
+                {PIECE_STYLES.map(ps => {
+                  const locked = isPieceLocked(ps.key);
+                  return (
+                    <div key={ps.key} className="relative">
+                      <PieceStyleCard
+                        style={ps}
+                        active={pieceStyle === ps.key}
+                        onSelect={() => {
+                          if (locked) {
+                            toast.error("Locked — open a Reward Chest to unlock these pieces.");
+                            navigate("/chests");
+                            return;
+                          }
+                          setPieceStyle(ps.key);
+                          saveSetting("pieceStyle", ps.key);
+                          applyPieceStyle(ps.key);
+                          toast.success(`Pieces: ${ps.label}`);
+                        }}
+                      />
+                      {locked && (
+                        <div className="pointer-events-none absolute inset-0 rounded-xl bg-background/70 backdrop-blur-[2px] flex flex-col items-center justify-center gap-1">
+                          <span className="text-2xl">🔒</span>
+                          <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Chest</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
+
 
             {/* Animation level */}
             <div className="rounded-xl border border-border/50 bg-card/60 p-4">
