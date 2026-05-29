@@ -328,6 +328,14 @@ export default function ChessBoard({
                     onDrop={(e) => handleSquareDrop(e, square)}
                     tabIndex={0}
                   >
+                    {/* Animated glowing last-move ring */}
+                    {isLastMv && (
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 pointer-events-none rounded-[2px] animate-pulse"
+                        style={{ boxShadow: "inset 0 0 0 2px hsl(43 95% 60% / 0.55), 0 0 18px hsl(43 95% 60% / 0.35)" }}
+                      />
+                    )}
                     {/* Right-click highlight ring */}
                     {isHighlighted && (
                       <span
