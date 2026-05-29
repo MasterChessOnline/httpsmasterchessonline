@@ -1144,7 +1144,7 @@ const Play = () => {
 
         <div className="flex flex-col items-center gap-4 lg:gap-6 lg:flex-row lg:items-start lg:justify-center">
           {/* Board column */}
-          <div className="w-full max-w-[min(96vw,520px)] lg:max-w-[min(calc(100svh-6rem),70vw,1200px)] xl:max-w-[min(calc(100svh-5rem),1340px)] 2xl:max-w-[min(calc(100svh-5rem),1450px)] space-y-1.5 relative">
+          <div className="w-full max-w-[min(96vw,560px)] lg:max-w-[min(calc(100svh-4rem),82vw,1400px)] xl:max-w-[min(calc(100svh-4rem),80vw,1600px)] 2xl:max-w-[min(calc(100svh-4rem),1800px)] space-y-1.5 relative">
 
             {/* Opponent bar (top) */}
             <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all ${

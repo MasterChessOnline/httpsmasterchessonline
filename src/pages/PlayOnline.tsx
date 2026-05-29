@@ -931,7 +931,7 @@ const PlayOnline = () => {
         <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-4 lg:items-start max-w-[1800px] mx-auto">
           {/* Board + Clocks — fills the full viewport */}
           <div className="min-w-0 flex flex-col items-center">
-            <div className="w-full max-w-[min(100vw,calc(100svh-7rem),640px)] lg:max-w-[min(calc(100svh-5rem),72vw,1240px)] xl:max-w-[min(calc(100svh-5rem),1380px)] 2xl:max-w-[min(calc(100svh-5rem),1500px)] space-y-1.5">
+            <div className="w-full max-w-[min(100vw,calc(100svh-6rem),660px)] lg:max-w-[min(calc(100svh-4rem),82vw,1400px)] xl:max-w-[min(calc(100svh-4rem),80vw,1600px)] 2xl:max-w-[min(calc(100svh-4rem),1800px)] space-y-1.5">
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
               <div className="flex items-center gap-2">
@@ -989,7 +989,7 @@ const PlayOnline = () => {
                 hintSquare={null}
                 onSquareClick={handleSquareClick}
                 premove={premove}
-                className="w-full max-w-[min(100vw,calc(100svh-14rem),640px)] lg:max-w-[min(calc(100svh-7rem),72vw,1240px)] xl:max-w-[min(calc(100svh-7rem),1380px)] 2xl:max-w-[min(calc(100svh-7rem),1500px)] mx-auto"
+                className="w-full max-w-[min(100vw,calc(100svh-12rem),660px)] lg:max-w-[min(calc(100svh-5rem),82vw,1400px)] xl:max-w-[min(calc(100svh-5rem),80vw,1600px)] 2xl:max-w-[min(calc(100svh-5rem),1800px)] mx-auto"
               />
               <GameStatusOverlay
                 kind={(() => {
