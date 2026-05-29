@@ -46,8 +46,9 @@ export const CHESTS: ChestDef[] = [
     glow: "shadow-[0_0_40px_hsl(30,60%,40%,0.45)]",
     blurb: "A humble starter. Cracks open with a satisfying creak.",
     loot: [
-      { kind: "board", key: "board_dark_wood", label: "Dark Wood Board", preview: "🪵" },
-      { kind: "pieces", key: "merida", label: "Merida Pieces", preview: "♞" },
+      { kind: "board", key: "forest", label: "Forest Board", preview: "🌲" },
+      { kind: "board", key: "sand", label: "Desert Sand Board", preview: "🏜️" },
+      { kind: "pieces", key: "cardinal", label: "Cardinal Pieces", preview: "♚" },
       { kind: "xp", key: "xp_50", label: "+50 XP", preview: "✨", amount: 50 },
     ],
   },
@@ -61,9 +62,10 @@ export const CHESTS: ChestDef[] = [
     glow: "shadow-[0_0_50px_hsl(220,15%,75%,0.45)]",
     blurb: "Silver-bound. Smells faintly of old tournament halls.",
     loot: [
-      { kind: "board", key: "board_marble", label: "Marble Board", preview: "🏛️" },
-      { kind: "board", key: "board_ocean", label: "Ocean Board", preview: "🌊" },
-      { kind: "pieces", key: "cburnett", label: "Cburnett Pieces", preview: "♛" },
+      { kind: "board", key: "marble", label: "Marble Board", preview: "🏛️" },
+      { kind: "board", key: "ice", label: "Glacier Ice Board", preview: "🧊" },
+      { kind: "board", key: "sapphire", label: "Sapphire Board", preview: "💙" },
+      { kind: "pieces", key: "pixel", label: "Pixel Pieces", preview: "👾" },
       { kind: "xp", key: "xp_150", label: "+150 XP", preview: "✨", amount: 150 },
     ],
   },
@@ -77,9 +79,9 @@ export const CHESTS: ChestDef[] = [
     glow: "shadow-[0_0_70px_hsl(43,90%,55%,0.55)]",
     blurb: "The classic Nikola-special. Heavy. Loud when it opens.",
     loot: [
-      { kind: "board", key: "board_galaxy", label: "Galaxy Board", preview: "🌌" },
-      { kind: "pieces", key: "cardinal", label: "Cardinal Pieces", preview: "♚" },
-      { kind: "pieces", key: "pixel", label: "Pixel Pieces", preview: "👾" },
+      { kind: "board", key: "gold", label: "Black & Gold Board", preview: "👑" },
+      { kind: "board", key: "midnight", label: "Midnight Board", preview: "🌌" },
+      { kind: "board", key: "emerald", label: "Emerald Board", preview: "💚" },
       { kind: "xp", key: "xp_500", label: "+500 XP", preview: "✨", amount: 500 },
     ],
   },
@@ -93,12 +95,31 @@ export const CHESTS: ChestDef[] = [
     glow: "shadow-[0_0_90px_hsl(200,90%,70%,0.6)]",
     blurb: "The crown jewel. Reserved for those who really live in the game.",
     loot: [
-      { kind: "board", key: "board_royal_purple", label: "Royal Purple Board", preview: "👑" },
-      { kind: "pieces", key: "cburnett", label: "Cburnett Pieces", preview: "♛" },
+      { kind: "board", key: "neon", label: "Neon Cyber Board", preview: "🟣" },
+      { kind: "board", key: "purple", label: "Royal Purple Board", preview: "👑" },
+      { kind: "board", key: "halloween", label: "Halloween Board", preview: "🎃" },
       { kind: "xp", key: "xp_2000", label: "+2000 XP", preview: "✨", amount: 2000 },
     ],
   },
 ];
+
+/** Keys that are free for everyone — never gated by chests. */
+export const FREE_BOARD_KEYS = new Set<string>([
+  "classic", "green", "blue", "dark", "contrast", "minimal", "brown", "blue3", "rose",
+  "coral", "olive", "sunset", "mint", "tournament", "glassmorph", "carbon", "ivory",
+  "ruby", "winter", "spring",
+]);
+export const FREE_PIECE_KEYS = new Set<string>(["merida", "cburnett"]);
+
+export function isBoardLocked(key: string): boolean {
+  if (FREE_BOARD_KEYS.has(key)) return false;
+  return !isUnlocked(key);
+}
+export function isPieceLocked(key: string): boolean {
+  if (FREE_PIECE_KEYS.has(key)) return false;
+  return !isUnlocked(key);
+}
+
 
 const UNLOCK_KEY = "mc:chests:unlocked";
 const SPEND_KEY = "mc:chests:xp_spent";
