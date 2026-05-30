@@ -93,11 +93,30 @@ export function useDailyMissions() {
         return { ok: false };
       }
       await refresh();
+      const xp = (data as any).xp_awarded as number | undefined;
+      const newBadges = (data as any).new_badges ?? [];
+      if (xp) {
+        const { emitReward } = await import("@/lib/reward-fx");
+        emitReward({
+          kind: "xp",
+          title: m.title || "Mission complete",
+          subtitle: "Daily mission claimed",
+          amount: xp,
+        });
+        for (const b of newBadges) {
+          emitReward({
+            kind: "achievement",
+            title: `New badge: ${b}`,
+            subtitle: "Unlocked from missions",
+            rare: true,
+          });
+        }
+      }
       return {
         ok: true,
-        xp: (data as any).xp_awarded,
+        xp,
         total: (data as any).total_xp,
-        newBadges: (data as any).new_badges ?? [],
+        newBadges,
       };
     },
     [user, missions, refresh],

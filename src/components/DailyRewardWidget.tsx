@@ -75,8 +75,16 @@ export default function DailyRewardWidget() {
     setBestStreak(r.best_streak || 0);
     setAlreadyClaimed(true);
     setJustClaimed(r);
-    toast.success(`+${r.coins_awarded} 🪙  ·  Dan ${r.streak} u nizu!`, {
-      description: `+${r.xp_awarded} XP. Nastavi niz!`,
+    // Premium reward FX (sound + floating toast)
+    const { emitReward } = await import("@/lib/reward-fx");
+    emitReward({
+      kind: "coin",
+      title: `Day ${r.streak} reward claimed`,
+      subtitle: `+${r.xp_awarded} XP · keep the streak alive`,
+      amount: r.coins_awarded,
+    });
+    toast.success(`+${r.coins_awarded} 🪙  ·  Day ${r.streak} in a row!`, {
+      description: `+${r.xp_awarded} XP. Keep the streak going!`,
       duration: 5000,
     });
   };

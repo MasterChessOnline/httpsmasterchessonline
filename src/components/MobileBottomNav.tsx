@@ -64,21 +64,39 @@ const MobileBottomNav = () => {
         className={`relative flex flex-col items-center justify-center gap-1 h-full min-h-11 ${focusRing}`}
       >
         {active && (
-          <motion.span
-            layoutId="mobile-nav-indicator"
-            className="absolute top-0 h-[2px] w-8 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.6)]"
-            transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            aria-hidden="true"
-          />
+          <>
+            <motion.span
+              layoutId="mobile-nav-indicator"
+              className="absolute top-0 h-[2px] w-10 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.85)]"
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              aria-hidden="true"
+            />
+            <motion.span
+              aria-hidden="true"
+              className="absolute inset-x-3 inset-y-1 rounded-xl pointer-events-none"
+              animate={{ opacity: [0.25, 0.6, 0.25] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                background:
+                  "radial-gradient(closest-side, hsl(var(--primary) / 0.22), transparent 70%)",
+              }}
+            />
+          </>
         )}
-        <item.icon
+        <motion.span
           aria-hidden="true"
-          className={`h-5 w-5 transition-colors ${
-            active ? "text-primary" : "text-muted-foreground"
-          }`}
-        />
+          animate={active ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+          transition={{ duration: 1.8, repeat: active ? Infinity : 0, ease: "easeInOut" }}
+          className="inline-flex"
+        >
+          <item.icon
+            className={`h-5 w-5 transition-colors ${
+              active ? "text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.75)]" : "text-muted-foreground"
+            }`}
+          />
+        </motion.span>
         <span
-          className={`text-[10px] font-medium leading-none ${
+          className={`text-[10px] font-medium leading-none transition-colors ${
             active ? "text-primary" : "text-muted-foreground"
           }`}
         >

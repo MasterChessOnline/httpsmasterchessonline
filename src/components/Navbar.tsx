@@ -304,15 +304,27 @@ const Navbar = () => {
                         style={{ color: accentColor }}
                       />
                       {isActive && (
-                        <motion.span
-                          layoutId="nav-active"
-                          className="absolute -bottom-[1px] left-3 right-3 h-[2px] rounded-full"
-                          style={{
-                            background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
-                            boxShadow: `0 0 10px hsla(${section.accent} / 0.55)`,
-                          }}
-                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                        />
+                        <>
+                          {/* Pulsing glow halo behind active item */}
+                          <motion.span
+                            aria-hidden
+                            className="absolute inset-0 rounded-lg pointer-events-none"
+                            animate={{ opacity: [0.35, 0.7, 0.35] }}
+                            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                            style={{
+                              boxShadow: `inset 0 0 0 1px hsla(${section.accent} / 0.45), 0 0 22px -4px hsla(${section.accent} / 0.55)`,
+                            }}
+                          />
+                          <motion.span
+                            layoutId="nav-active"
+                            className="absolute -bottom-[1px] left-3 right-3 h-[2px] rounded-full"
+                            style={{
+                              background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
+                              boxShadow: `0 0 14px hsla(${section.accent} / 0.8)`,
+                            }}
+                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                          />
+                        </>
                       )}
                     </button>
 

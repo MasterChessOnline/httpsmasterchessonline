@@ -120,6 +120,7 @@ const IOSInstallOverlay = lazy(() => import("@/components/IOSInstallOverlay"));
 const DailyReminderNotifier = lazy(() => import("@/components/DailyReminderNotifier"));
 const SmartNotifier = lazy(() => import("@/components/SmartNotifier"));
 const AppBadgeSync = lazy(() => import("@/components/AppBadgeSync"));
+const RewardFXLayer = lazy(() => import("@/components/RewardFXLayer"));
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -281,6 +282,7 @@ const App = () => (
             <DailyReminderNotifier />
             <SmartNotifier />
             <AppBadgeSync />
+            <RewardFXLayer />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>

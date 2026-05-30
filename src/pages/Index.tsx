@@ -41,6 +41,8 @@ import InstallAppButton from "@/components/InstallAppButton";
 
 import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
+import LiveActivityFeed from "@/components/LiveActivityFeed";
+import WinStreakFlame from "@/components/WinStreakFlame";
 
 interface RecentGame {
   id: string;
@@ -338,14 +340,15 @@ const Index = () => {
             ))}
           </motion.div>
 
-          {/* Live player counter — real-time engagement signal */}
+          {/* Live player counter + streak flame */}
           <motion.div
-            className="mt-6 flex justify-center"
+            className="mt-6 flex justify-center items-center gap-3 flex-wrap"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
             <LivePlayerCounter />
+            {winStreak >= 3 && <WinStreakFlame streak={winStreak} />}
           </motion.div>
         </motion.div>
       </div>
@@ -399,6 +402,11 @@ const Index = () => {
             </div>
           </div>
         </motion.section>
+
+        {/* Live Activity Feed — real wins, ratings, tournaments */}
+        <section id="live-activity" className="scroll-mt-24">
+          <LiveActivityFeed />
+        </section>
 
         {/* Daily Challenge — directly below the hero, first thing users see */}
         <section id="daily-missions" className="scroll-mt-24 -mt-4">
