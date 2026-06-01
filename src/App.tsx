@@ -229,6 +229,7 @@ function AnimatedRoutes() {
           <Route path="/team-battles" element={<TeamBattles />} />
           <Route path="/dev/online-sim" element={<DevOnlineSim />} />
           <Route path="/chests" element={<Chests />} />
+          <Route path="/shop" element={<Shop />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
@@ -274,11 +275,10 @@ const App = () => (
             <AntiTiltWatcher />
             <TitleUnlockGate />
             <WelcomeIntroPopup />
+            <CinematicIntro />
             <GameInviteListener />
             <MobileBottomNav />
-            <InstallPrompt />
             <NotificationPrompt />
-            <IOSInstallOverlay />
             <DailyReminderNotifier />
             <SmartNotifier />
             <AppBadgeSync />
