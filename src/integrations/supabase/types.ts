@@ -2445,6 +2445,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_inventory: {
+        Row: {
+          acquired_at: string
+          id: string
+          item_key: string
+          item_type: string
+          price_paid: number
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          id?: string
+          item_key: string
+          item_type: string
+          price_paid?: number
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          id?: string
+          item_key?: string
+          item_type?: string
+          price_paid?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_mission_progress: {
         Row: {
           claimed: boolean
@@ -2581,6 +2608,14 @@ export type Database = {
       abort_online_game: { Args: { p_game_id: string }; Returns: Json }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       assert_can_queue: { Args: never; Returns: Json }
+      award_bot_game_coins: {
+        Args: { p_bot_rating: number; p_result: string; p_win_streak?: number }
+        Returns: Json
+      }
+      award_online_game_coins: {
+        Args: { p_game_id: string; p_win_streak?: number }
+        Returns: Json
+      }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
       claim_afk_win: { Args: { p_game_id: string }; Returns: Json }
       claim_daily_mission: { Args: { p_key: string }; Returns: Json }
@@ -2666,6 +2701,10 @@ export type Database = {
           p_side: string
           p_stake: number
         }
+        Returns: Json
+      }
+      purchase_shop_item: {
+        Args: { p_item_key: string; p_item_type: string; p_price: number }
         Returns: Json
       }
       read_email_batch: {

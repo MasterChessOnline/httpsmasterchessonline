@@ -165,6 +165,12 @@ export async function applyBotRatingChange(opts: {
         time_control_label: opts.timeControlLabel ?? "Casual",
         rating_change: finalCalc.change,
       } as any);
+      // Award coins server-side based on bot rating + result + streak
+      try {
+        const { awardBotCoins, bumpWinStreak, getWinStreak } = await import("./coins");
+        const nextStreak = bumpWinStreak(opts.result);
+        await awardBotCoins({ botRating: opts.botRating, result: opts.result, winStreak: opts.result === "win" ? nextStreak : getWinStreak() });
+      } catch (e) { console.warn("coin award failed", e); }
     } catch (e) {
       console.warn("Failed to save bot game:", e);
     }

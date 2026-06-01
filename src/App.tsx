@@ -113,14 +113,14 @@ import AppLaunchSplash from "@/components/AppLaunchSplash";
 import ReferralTracker from "@/hooks/useReferralTracker";
 
 // Non-critical overlays — lazy-loaded so they don't block first paint.
+const CinematicIntro = lazy(() => import("@/components/CinematicIntro"));
 const WelcomeIntroPopup = lazy(() => import("@/components/WelcomeIntroPopup"));
-const InstallPrompt = lazy(() => import("@/components/InstallPrompt"));
 const NotificationPrompt = lazy(() => import("@/components/NotificationPrompt"));
-const IOSInstallOverlay = lazy(() => import("@/components/IOSInstallOverlay"));
 const DailyReminderNotifier = lazy(() => import("@/components/DailyReminderNotifier"));
 const SmartNotifier = lazy(() => import("@/components/SmartNotifier"));
 const AppBadgeSync = lazy(() => import("@/components/AppBadgeSync"));
 const RewardFXLayer = lazy(() => import("@/components/RewardFXLayer"));
+const Shop = lazy(() => import("./pages/Shop"));
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -229,6 +229,7 @@ function AnimatedRoutes() {
           <Route path="/team-battles" element={<TeamBattles />} />
           <Route path="/dev/online-sim" element={<DevOnlineSim />} />
           <Route path="/chests" element={<Chests />} />
+          <Route path="/shop" element={<Shop />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
@@ -274,11 +275,10 @@ const App = () => (
             <AntiTiltWatcher />
             <TitleUnlockGate />
             <WelcomeIntroPopup />
+            <CinematicIntro />
             <GameInviteListener />
             <MobileBottomNav />
-            <InstallPrompt />
             <NotificationPrompt />
-            <IOSInstallOverlay />
             <DailyReminderNotifier />
             <SmartNotifier />
             <AppBadgeSync />
