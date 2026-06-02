@@ -120,6 +120,7 @@ const DailyReminderNotifier = lazy(() => import("@/components/DailyReminderNotif
 const SmartNotifier = lazy(() => import("@/components/SmartNotifier"));
 const AppBadgeSync = lazy(() => import("@/components/AppBadgeSync"));
 const RewardFXLayer = lazy(() => import("@/components/RewardFXLayer"));
+const MatchResultLayer = lazy(() => import("@/components/MatchResultLayer"));
 const Shop = lazy(() => import("./pages/Shop"));
 const queryClient = new QueryClient();
 
@@ -283,6 +284,7 @@ const App = () => (
             <SmartNotifier />
             <AppBadgeSync />
             <RewardFXLayer />
+            <MatchResultLayer />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
