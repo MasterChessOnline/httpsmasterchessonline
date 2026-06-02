@@ -9,6 +9,7 @@ import { calculateXP } from "@/lib/gamification";
 import {
   CHESTS, ChestDef, ChestReward, openChest, getUnlocked, getSpendableXP, getOpenCount, isUnlocked,
 } from "@/lib/chests";
+import ChestOpenCinematic from "@/components/ChestOpenCinematic";
 
 export default function Chests() {
   const { profile } = useAuth();
@@ -161,47 +162,8 @@ export default function Chests() {
         </section>
       </main>
 
-      {/* Opening animation overlay */}
-      <AnimatePresence>
-        {opening && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-            onClick={revealed ? closeReveal : undefined}
-          >
-            <div className="text-center">
-              {!revealed ? (
-                <motion.div
-                  initial={{ scale: 0.6, rotate: -10 }}
-                  animate={{ scale: [0.6, 1.1, 1], rotate: [0, -8, 8, -4, 4, 0] }}
-                  transition={{ duration: 1.1 }}
-                  className={`text-[10rem] drop-shadow-[0_0_60px_hsl(43,90%,55%,0.6)]`}
-                >
-                  {opening.emoji}
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 240, damping: 18 }}
-                  className="space-y-4"
-                >
-                  <div className="text-7xl">{revealed.reward.preview}</div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-primary mb-1">
-                      {revealed.isNew ? "New unlock!" : revealed.reward.kind === "xp" ? "Bonus" : "Duplicate"}
-                    </p>
-                    <h3 className="font-display text-3xl font-bold text-foreground">{revealed.reward.label}</h3>
-                  </div>
-                  <Button onClick={closeReveal} size="lg" className="mt-4">Nice — keep going</Button>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Cinematic opening overlay with tier-based VFX */}
+      <ChestOpenCinematic chest={opening} revealed={revealed} onClose={closeReveal} />
     </div>
   );
 }
