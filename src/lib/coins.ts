@@ -44,6 +44,7 @@ export async function awardBotCoins(opts: {
   const res = data as CoinAward;
   if (res?.ok && res.total) {
     emitReward({ kind: "coin", title: `+${res.total} Coins`, subtitle: res.streak_bonus ? `Streak bonus +${res.streak_bonus}` : undefined, amount: res.total });
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("mc:coins-changed"));
   }
   return res;
 }
@@ -60,6 +61,7 @@ export async function awardOnlineCoins(opts: {
   const res = data as CoinAward;
   if (res?.ok && !res.already && res.total) {
     emitReward({ kind: "coin", title: `+${res.total} Coins`, subtitle: res.streak_bonus ? `Streak bonus +${res.streak_bonus}` : undefined, amount: res.total });
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("mc:coins-changed"));
   }
   return res;
 }
@@ -75,6 +77,9 @@ export async function purchaseShopItem(opts: {
     p_price: opts.price,
   });
   if (error) return { ok: false, error: error.message };
+  if ((data as any)?.ok && typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("mc:coins-changed"));
+  }
   return data as any;
 }
 

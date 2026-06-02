@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import StreakIndicator from "@/components/StreakIndicator";
+import CoinBalancePill from "@/components/CoinBalancePill";
 import NavSearchPalette from "@/components/NavSearchPalette";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
@@ -480,6 +481,7 @@ const Navbar = () => {
                 <div className="h-9 w-9 bg-muted/20 rounded-xl animate-pulse" />
               ) : user ? (
                 <>
+                  <CoinBalancePill className="hidden sm:inline-flex" />
                   <StreakIndicator />
                   <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden xl:flex" aria-label="Sign out">
                     <LogOut className="h-4 w-4" />

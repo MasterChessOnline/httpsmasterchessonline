@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
+import CoinBalancePill from "@/components/CoinBalancePill";
 
 const NAV_ITEMS = [
   { icon: Crown, label: "Home", href: "/" },
@@ -117,6 +118,13 @@ const MobileBottomNav = () => {
         aria-hidden="true"
         className="pointer-events-none absolute -top-6 left-0 right-0 h-6 bg-gradient-to-t from-[hsl(220,15%,5%)] to-transparent"
       />
+
+      {/* Floating coin balance pill — always visible to logged-in users */}
+      {user && (
+        <div className="pointer-events-auto absolute -top-9 right-4 z-10">
+          <CoinBalancePill />
+        </div>
+      )}
 
       <div className="relative mx-3 mb-4 rounded-2xl border border-border/40 bg-[hsl(220,15%,7%)]/95 backdrop-blur-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.5),inset_0_1px_0_hsl(var(--primary)/0.08)]">
         <ul
