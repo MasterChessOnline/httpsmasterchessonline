@@ -120,7 +120,9 @@ const DailyReminderNotifier = lazy(() => import("@/components/DailyReminderNotif
 const SmartNotifier = lazy(() => import("@/components/SmartNotifier"));
 const AppBadgeSync = lazy(() => import("@/components/AppBadgeSync"));
 const RewardFXLayer = lazy(() => import("@/components/RewardFXLayer"));
+const MatchResultLayer = lazy(() => import("@/components/MatchResultLayer"));
 const Shop = lazy(() => import("./pages/Shop"));
+const SpinWheel = lazy(() => import("./pages/SpinWheel"));
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -230,6 +232,7 @@ function AnimatedRoutes() {
           <Route path="/dev/online-sim" element={<DevOnlineSim />} />
           <Route path="/chests" element={<Chests />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/spin" element={<SpinWheel />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
@@ -283,6 +286,7 @@ const App = () => (
             <SmartNotifier />
             <AppBadgeSync />
             <RewardFXLayer />
+            <MatchResultLayer />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>

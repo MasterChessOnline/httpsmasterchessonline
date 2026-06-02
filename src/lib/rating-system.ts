@@ -165,12 +165,29 @@ export async function applyBotRatingChange(opts: {
         time_control_label: opts.timeControlLabel ?? "Casual",
         rating_change: finalCalc.change,
       } as any);
-      // Award coins server-side based on bot rating + result + streak
+      // Award coins server-side based on bot rating + result + streak, then
+      // surface the unified Match Result modal (coins + rating + streak).
       try {
         const { awardBotCoins, bumpWinStreak, getWinStreak } = await import("./coins");
         const nextStreak = bumpWinStreak(opts.result);
-        await awardBotCoins({ botRating: opts.botRating, result: opts.result, winStreak: opts.result === "win" ? nextStreak : getWinStreak() });
-      } catch (e) { console.warn("coin award failed", e); }
+        const award = await awardBotCoins({
+          botRating: opts.botRating,
+          result: opts.result,
+          winStreak: opts.result === "win" ? nextStreak : getWinStreak(),
+        });
+        const { emitMatchResult } = await import("./match-result");
+        emitMatchResult({
+          outcome: opts.result,
+          coinsEarned: award?.total ?? 0,
+          coinsBase: award?.base,
+          streakBonus: award?.streak_bonus,
+          newBalance: award?.balance,
+          ratingChange: finalCalc.change,
+          newRating: finalCalc.newRating,
+          opponentLabel: opts.botLabel,
+          opponentRating: opts.botRating,
+        });
+      } catch (e) { console.warn("coin award / match result failed", e); }
     } catch (e) {
       console.warn("Failed to save bot game:", e);
     }
