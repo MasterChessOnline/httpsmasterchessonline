@@ -152,6 +152,30 @@ export function useOnlineGame() {
     } catch (err) {
       console.warn("Mission bump failed", err);
     }
+
+    // Coin award + global Match Result modal (coins + rating + streak)
+    try {
+      const { awardOnlineCoins, bumpWinStreak, getWinStreak } = await import("@/lib/coins");
+      const nextStreak = bumpWinStreak(rating.myResult);
+      const award = await awardOnlineCoins({
+        gameId: g.id,
+        winStreak: rating.myResult === "win" ? nextStreak : getWinStreak(),
+      });
+      const { emitMatchResult } = await import("@/lib/match-result");
+      emitMatchResult({
+        outcome: rating.myResult,
+        coinsEarned: award?.total ?? 0,
+        coinsBase: award?.base,
+        streakBonus: award?.streak_bonus,
+        newBalance: award?.balance,
+        ratingChange: finalCalc.change,
+        newRating: finalCalc.newRating,
+        opponentLabel: rating.opponentLabel,
+        opponentRating: rating.opponentRating,
+      });
+    } catch (err) {
+      console.warn("online coin / match result failed", err);
+    }
   }, [user, refreshProfile, buildRatingPreview]);
 
 
