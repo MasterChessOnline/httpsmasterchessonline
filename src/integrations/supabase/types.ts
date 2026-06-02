@@ -476,6 +476,30 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_spin_claims: {
+        Row: {
+          claim_date: string
+          coins_awarded: number
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          claim_date?: string
+          coins_awarded: number
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          claim_date?: string
+          coins_awarded?: number
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       direct_messages: {
         Row: {
           created_at: string
@@ -2620,6 +2644,7 @@ export type Database = {
       claim_afk_win: { Args: { p_game_id: string }; Returns: Json }
       claim_daily_mission: { Args: { p_key: string }; Returns: Json }
       claim_daily_reward: { Args: never; Returns: Json }
+      claim_daily_spin: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
       cleanup_stale_game: { Args: { p_user_id: string }; Returns: string }
       commit_online_move: {
