@@ -22,6 +22,7 @@ export interface CoinAward {
   total?: number;
   base?: number;
   streak_bonus?: number;
+  first_win_bonus?: number;
   balance?: number;
   error?: string;
   already?: boolean;
@@ -43,6 +44,9 @@ export async function awardBotCoins(opts: {
   if (error) return { ok: false, error: error.message };
   const res = data as CoinAward;
   if (res?.ok && res.total) {
+    if (res.first_win_bonus) {
+      emitReward({ kind: "achievement", title: "First Win of the Day!", subtitle: `+${res.first_win_bonus} bonus coins`, rare: true });
+    }
     emitReward({ kind: "coin", title: `+${res.total} Coins`, subtitle: res.streak_bonus ? `Streak bonus +${res.streak_bonus}` : undefined, amount: res.total });
     if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("mc:coins-changed"));
   }
@@ -60,6 +64,9 @@ export async function awardOnlineCoins(opts: {
   if (error) return { ok: false, error: error.message };
   const res = data as CoinAward;
   if (res?.ok && !res.already && res.total) {
+    if (res.first_win_bonus) {
+      emitReward({ kind: "achievement", title: "First Win of the Day!", subtitle: `+${res.first_win_bonus} bonus coins`, rare: true });
+    }
     emitReward({ kind: "coin", title: `+${res.total} Coins`, subtitle: res.streak_bonus ? `Streak bonus +${res.streak_bonus}` : undefined, amount: res.total });
     if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("mc:coins-changed"));
   }

@@ -42,6 +42,7 @@ import InstallAppButton from "@/components/InstallAppButton";
 import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import LiveActivityFeed from "@/components/LiveActivityFeed";
+import SpinWheelHomeWidget from "@/components/SpinWheelHomeWidget";
 import WinStreakFlame from "@/components/WinStreakFlame";
 
 interface RecentGame {
@@ -355,6 +356,12 @@ const Index = () => {
 
       {/* ── MAIN CONTENT ── */}
       <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
+
+        {/* Spin The Wheel — hero-adjacent reward CTA */}
+        <section id="spin-wheel" className="scroll-mt-24">
+          <SpinWheelHomeWidget />
+        </section>
+
 
         {/* Instagram poster + follow CTA — directly under hero, above Daily */}
         <motion.section

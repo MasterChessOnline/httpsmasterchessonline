@@ -181,6 +181,7 @@ export async function applyBotRatingChange(opts: {
           coinsEarned: award?.total ?? 0,
           coinsBase: award?.base,
           streakBonus: award?.streak_bonus,
+          firstWinBonus: award?.first_win_bonus,
           newBalance: award?.balance,
           ratingChange: finalCalc.change,
           newRating: finalCalc.newRating,

@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public._mc_claim_first_win_today(uuid) FROM PUBLIC, anon, authenticated;
