@@ -2629,6 +2629,7 @@ export type Database = {
     }
     Functions: {
       _clear_current_game: { Args: { p_game_id: string }; Returns: undefined }
+      _mc_claim_first_win_today: { Args: { p_user: string }; Returns: boolean }
       abort_online_game: { Args: { p_game_id: string }; Returns: Json }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       assert_can_queue: { Args: never; Returns: Json }
