@@ -22,6 +22,7 @@ export interface CoinAward {
   total?: number;
   base?: number;
   streak_bonus?: number;
+  first_win_bonus?: number;
   balance?: number;
   error?: string;
   already?: boolean;
