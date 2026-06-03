@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Crown, UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
-import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
+
 import AuthAura from "@/components/auth/AuthAura";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
@@ -44,7 +44,19 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [googleOpen, setGoogleOpen] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      setError(result.error.message);
+      setGoogleLoading(false);
+    }
+  };
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -137,7 +149,8 @@ const Signup = () => {
               <Button
                 variant="outline"
                 className="w-full h-11 bg-white text-gray-800 border-white/20 hover:bg-white/90 font-medium text-sm"
-                onClick={() => setGoogleOpen(true)}
+                onClick={handleGoogleLogin}
+                disabled={googleLoading}
               >
                 <svg className="mr-2.5 h-4.5 w-4.5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -261,7 +274,7 @@ const Signup = () => {
           </p>
         </div>
       </motion.div>
-      <GoogleCountryNameModal open={googleOpen} onClose={() => setGoogleOpen(false)} onError={setError} />
+      
     </div>
   );
 };
