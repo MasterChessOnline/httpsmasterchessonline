@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Crown, UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
-import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
+
 import AuthAura from "@/components/auth/AuthAura";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
