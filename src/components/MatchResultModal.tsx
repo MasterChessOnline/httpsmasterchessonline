@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles } from "lucide-react";
+import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface MatchResultData {
@@ -7,6 +7,7 @@ export interface MatchResultData {
   coinsEarned: number;
   coinsBase?: number;
   streakBonus?: number;
+  firstWinBonus?: number;
   newBalance?: number;
   ratingChange?: number;
   newRating?: number;
