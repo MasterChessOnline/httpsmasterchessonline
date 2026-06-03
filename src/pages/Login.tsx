@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Crown, LogIn, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
-import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
+
 import AuthAura from "@/components/auth/AuthAura";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
