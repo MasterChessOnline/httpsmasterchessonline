@@ -80,6 +80,34 @@ export default function MatchResultModal({ open, data, onClose, onRematch, onRev
                   vs {data.opponentLabel}{data.opponentRating ? ` (${data.opponentRating})` : ""}
                 </p>
               )}
+              {/* First Win of the Day banner */}
+              {data.firstWinBonus ? (
+                <motion.div
+                  initial={{ scale: 0.6, opacity: 0, y: 10 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 220 }}
+                  className="mt-5 relative overflow-hidden rounded-2xl border border-amber-300/50 bg-gradient-to-r from-amber-500/25 via-yellow-400/20 to-amber-500/25 px-4 py-3"
+                >
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{ x: ["-100%", "100%"] }}
+                    transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <div className="relative flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-amber-100">
+                      <Star className="h-5 w-5 text-amber-300" fill="currentColor" />
+                      <div>
+                        <div className="text-xs font-bold uppercase tracking-widest text-amber-200">First Win of the Day</div>
+                        <div className="text-[11px] text-amber-100/80">Come back tomorrow for another!</div>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-extrabold text-amber-200 drop-shadow-[0_0_10px_rgba(252,211,77,0.6)]">
+                      +{data.firstWinBonus}
+                    </div>
+                  </div>
+                </motion.div>
+              ) : null}
+
 
               {/* Coins row */}
               <motion.div
