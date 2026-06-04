@@ -1,83 +1,75 @@
-# Plan: Popraviti sve u Online Play sistemu
+# Plan: 5 Viral Growth Features for MasterChess
 
-Cilj: svako dugme radi, bez bugova, sa zvukovima i smooth UX-om.
+## Current State
 
-## 1. Resign (instant, bez laga)
-- Optimistic UI: odmah lock board + overlay "You Lost"
-- `endingRef` guard protiv duplog klika (već postoji — verifikovati)
-- RPC `finalize_online_game` + direct UPDATE fallback
-- Loading state na dugmetu ("Resigning…") + disabled
-- Trigger `playGameOverSound()` + `triggerHaptic("loss")` lokalno
-- Protivnik dobija realtime event → "You Won" overlay + `playVictoryMelody()`
+MasterChess already has a strong foundation: Spin Wheel, Daily Rewards, Chests, Missions, XP/Levels, Shop, Referrals, Share Cards, Tournaments, Stream Hub, Team Battles, Arena, Bot personalities, Opening Trainer, and mobile PWA. These features create a solid core, but to "explode" and attract mass audience, we need **social bonds, competitive spectacle, and FOMO-driven habit loops** that Chess.com and Lichess do not have.
 
-## 2. Draw offers
-- Klik "Offer Draw" → poziv `offer_draw` RPC
-- Toast "Draw offered" + dugme menja state na "Offered…" 30s cooldown
-- Protivnik vidi modal "Opponent offers draw" sa Accept/Decline + `playChessSound("notify")`
-- Accept → `respond_draw_offer(true)` → oba igrača overlay "STALEMATE" + `playDrawMelody()`
-- Decline → toast both sides, board ostaje aktivan
-- Auto-expire posle 60s
+## Proposed Features (Ranked by Impact)
 
-## 3. Timeout
-- Klijent koji vidi clock=0 zove `commit_online_move` sa `result` i `end_reason='time'` (ili novi RPC `claim_timeout`)
-- Overlay "TIME OUT" + odgovarajući zvuk pobedniku/gubitniku
-- `playGameOverSound()` + haptic
+### 1. Clan / Guild System — Social Retention Engine
+**Impact: Highest — this is what keeps people in mobile games for years.**
 
-## 4. Checkmate / stalemate detekcija
-- Posle svakog poteza chess.js proverava `isCheckmate` / `isStalemate` / `isDraw`
-- `commit_online_move` već prima `p_result` — proslediti tačan rezultat
-- Overlay variant "checkmate" + konfeti + `playVictoryMelody()` za pobednika
+- Players create or join clans (max 50 members) with custom name, tag, and badge color
+- Clan chat (realtime via Supabase), clan leaderboard, clan tag shown before username in games
+- **Clan Wars**: Weekly auto-scheduled 5v5 or 10v10 team matches. Winning clan gets massive coin reward + exclusive clan border
+- **Clan Quests**: Shared daily missions (e.g., "Win 50 games as a clan today") with group rewards
+- **Why it explodes**: Friends drag friends in. Leaving = abandoning your team. Social pressure > any game mechanic.
 
-## 5. Zvukovi (svi event-i)
-| Event | Zvuk |
-|---|---|
-| Move | `playMoveSound` |
-| Capture | `playCaptureSound` |
-| Check | `playCheckSound` |
-| Game start (match found) | `playGameStartSound` |
-| Win | `playVictoryMelody` + `playGameOverSound` |
-| Loss | `playGameOverSound` |
-| Draw | `playDrawMelody` |
-| Draw offer received | `playChessSound("notify")` |
+### 2. Chess Battle Royale (Survival Mode) — Spectacle + Addiction
+**Impact: Viral content goldmine. Short, high-stakes, shareable.**
 
-Sve gated kroz `isMuted()` (već u `chess-sounds.ts`).
+- 8 players enter a bracket. 1-minute Blitz games. Loser eliminated each round.
+- Winner takes 500-1000 coins. Match takes 5-7 minutes total.
+- **Spectator mode**: Non-players watch live, bet coins on who wins, send emoji reactions
+- **Auto-generated highlight reel**: After each Battle Royale, a 10-second clip of the final checkmate is generated for sharing
+- **Why it explodes**: YouTube/TikTok clips of "I won a Chess Battle Royale" drive massive organic traffic. Stakes make every game feel important.
 
-## 6. Game End Overlay
-- Koristi postojeći `GameEndOverlay` komponentu
-- Variant: `checkmate` / `resign` / `timeout` / `draw`
-- `winnerLabel` lokalizovan ("You Won" / "You Lost" / "Draw")
-- Board lock dok je overlay aktivan
+### 3. Season Battle Pass — Monetization + Urgency Loop
+**Impact: Revenue + retention. Fortnite made billions with this.**
 
-## 7. Reconnect / refresh sync
-- Na mount `PlayOnline` → fetch trenutni `online_games` red po `current_game_id`
-- Server authoritative: FEN, PGN, turn, clocks iz baze
-- Realtime subscribe na `online_games` i `online_draw_offers` za taj `game_id`
+- 30-day "Seasons" with a free track and Premium track ($4.99)
+- Players earn "Battle Points" from playing games, winning, completing missions
+- **Premium rewards**: Exclusive animated piece sets, golden board themes, legendary titles, profile frames, emotes
+- **Free rewards**: Coins, chests, XP boosts, basic cosmetics
+- **Countdown timer everywhere**: "Season 3 ends in 2 days 14 hours" creates FOMO
+- **Why it explodes**: Players who buy the pass play 3x more to "get their money's worth." Season resets create fresh-start energy.
 
-## 8. Stale game cleanup
-- Edge function `online-game-watchdog` (već postoji) → cron svakih 5 min
-- Auto-abort partije sa `last_move_at < now() - 1h` AND `move_number = 0`
-- Auto-resign igrača koji je odsutan >5 min posle prvog poteza (presence tabela)
+### 4. Smart Push Notification Engine — Re-engagement Loop
+**Impact: Brings dead users back. Converts "maybe tomorrow" into "one game now."**
 
-## 9. Testiranje (manual checklist nakon implementacije)
-1. Start partije → start zvuk, board unlock
-2. Klik Resign → instant lock + "You Lost" overlay + zvuk
-3. Protivnik vidi "You Won" + konfeti bez refresh
-4. Offer Draw → modal kod protivnika
-5. Accept Draw → oba vide "STALEMATE" + draw melody
-6. Decline Draw → game continues
-7. Checkmate → konfeti pobedniku
-8. Timeout → "TIME OUT" overlay
-9. Refresh u sred partije → state ostaje tačan
-10. Rating se update-uje samo jednom (`elo_applied` guard)
+- **Rival Alerts**: "Alex just overtook you on the leaderboard — reclaim your spot!"
+- **Time-Limited Events**: "Boss Battle starts in 15 min. Beat the 7-win streak champion for 2x coins."
+- **Clan Pressure**: "Your clan needs 3 more wins for today's quest. You're the top player — don't let them down."
+- **Daily Reward FOMO**: "Your daily reward expires in 1 hour. Don't break your 12-day streak!"
+- **Why it explodes**: Push notifications have 40%+ open rates when personalized. This turns casual visitors into daily players.
 
-## Files koji se menjaju
-- `src/hooks/use-online-game.ts` — resign/draw/timeout flow, zvukovi, overlay state
-- `src/pages/PlayOnline.tsx` — overlay rendering, draw offer modal, loading states na dugmadima
-- (opciono) `src/components/chess/DrawOfferModal.tsx` — novi mali komponent
-- Nijedna database migracija nije potrebna — sve RPC funkcije već postoje
+### 5. Voice Chat in Games — The "Real Club" Differentiator
+**Impact: Massive differentiation. No major chess platform does this well.**
 
-## Šta NIJE deo ovog plana
-- Matchmaking refactor
-- Spectate sistem
-- Mobile UI dalje izmene (već urađene)
-- 100 internet resources lista
+- Optional voice chat toggle per game (both players must agree)
+- Post-game lobby voice for analysis/gloating
+- Voice reactions ("Nice move!", "Ouch!", laugh) as quick audio clips
+- **Streamer mode**: Streamers can voice-chat with viewers during spectated games
+- **Why it explodes**: Chess is traditionally silent online. Voice makes it memorable, emotional, and social. Players will tell friends "You have to try this chess app with voice chat."
+
+## Implementation Order (Recommended)
+
+| Phase | Feature | Est. Complexity | Why First |
+|---|---|---|---|
+| 1 | Clan System | High | Highest retention impact; all other features enhance it |
+| 2 | Smart Push Notifications | Medium | Cheap to build, immediate daily active user boost |
+| 3 | Season Battle Pass | Medium | Monetization; pairs perfectly with clans + missions |
+| 4 | Battle Royale | High | Viral content engine; needs clan system as player pool |
+| 5 | Voice Chat | High | Differentiator; best done after player base grows |
+
+## What About the Existing "No Puzzles" Constraint?
+
+All 5 features respect this:
+- No static tactics or puzzle solving
+- All competitive modes use real games against real humans
+- Battle Royale = real Blitz games, not puzzles
+- Voice chat enhances human-to-human play, the core promise
+
+## Next Step
+
+Tell me which feature(s) to build first. I recommend starting with **Clan System** (biggest retention) + **Smart Push Notifications** (fastest ROI) in parallel.
