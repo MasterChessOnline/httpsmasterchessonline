@@ -25,6 +25,7 @@ import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
 import GameEndOverlay, { type GameEndVariant } from "@/components/effects/GameEndOverlay";
 import GameOverOverlay from "@/components/chess/GameOverOverlay";
 import QuickChat from "@/components/chess/QuickChat";
+import VoiceChatPanel from "@/components/VoiceChatPanel";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
 import CountryFlag from "@/components/CountryFlag";
