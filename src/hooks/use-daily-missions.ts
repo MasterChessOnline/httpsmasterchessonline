@@ -157,47 +157,10 @@ export async function bumpMissionProgress(
   setAbsolute?: number
 ) {
   if (!userId) return;
-  const date = todayIso();
-
-  // Only bump missions that are in TODAY's rotated set + match this type
-  const { data: todays } = await supabase.rpc("get_today_missions" as any);
-  const defs = ((todays as any[]) || []).filter((d) => d.mission_type === missionType);
-  if (!defs || defs.length === 0) return;
-
-  for (const def of defs as any[]) {
-    // Read current row
-    const { data: existing } = await supabase
-      .from("user_mission_progress" as any)
-      .select("id, current_value, completed")
-      .eq("user_id", userId)
-      .eq("mission_key", def.key)
-      .eq("mission_date", date)
-      .maybeSingle();
-
-    const baseValue = (existing as any)?.current_value ?? 0;
-    const newValue =
-      setAbsolute !== undefined ? setAbsolute : baseValue + amount;
-    const completed = newValue >= def.target_value;
-
-    if (existing) {
-      if ((existing as any).completed) continue;
-      await supabase
-        .from("user_mission_progress" as any)
-        .update({
-          current_value: newValue,
-          completed,
-          completed_at: completed ? new Date().toISOString() : null,
-        })
-        .eq("id", (existing as any).id);
-    } else {
-      await supabase.from("user_mission_progress" as any).insert({
-        user_id: userId,
-        mission_key: def.key,
-        mission_date: date,
-        current_value: newValue,
-        completed,
-        completed_at: completed ? new Date().toISOString() : null,
-      });
-    }
-  }
+  // Server-validated bump — clients cannot self-mark missions complete.
+  await supabase.rpc("bump_mission_progress" as any, {
+    p_mission_type: missionType,
+    p_amount: amount,
+    p_set_absolute: setAbsolute ?? null,
+  });
 }
