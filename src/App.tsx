@@ -21,6 +21,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import PlayGuest from "./pages/PlayGuest";
 import IgLanding from "./pages/IgLanding";
+import IgBonus from "./pages/IgBonus";
 
 // Lazy-loaded routes — split into separate chunks to shrink initial bundle
 const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
@@ -126,6 +127,7 @@ const AppBadgeSync = lazy(() => import("@/components/AppBadgeSync"));
 const RewardFXLayer = lazy(() => import("@/components/RewardFXLayer"));
 const MatchResultLayer = lazy(() => import("@/components/MatchResultLayer"));
 const WelcomeBonusModal = lazy(() => import("@/components/WelcomeBonusModal"));
+const ExitIntentModal = lazy(() => import("@/components/ExitIntentModal"));
 const Shop = lazy(() => import("./pages/Shop"));
 const SpinWheel = lazy(() => import("./pages/SpinWheel"));
 const queryClient = new QueryClient();
@@ -221,6 +223,7 @@ function AnimatedRoutes() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/play-guest" element={<PlayGuest />} />
           <Route path="/ig" element={<IgLanding />} />
+          <Route path="/ig-bonus" element={<IgBonus />} />
           <Route path="/start" element={<IgLanding />} />
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
           <Route path="/guides" element={<Guides />} />
@@ -298,6 +301,7 @@ const App = () => (
             <RewardFXLayer />
             <MatchResultLayer />
             <WelcomeBonusModal />
+            <ExitIntentModal />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
