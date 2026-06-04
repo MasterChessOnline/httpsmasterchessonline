@@ -12,6 +12,7 @@ import TitleBadge from "@/components/TitleBadge";
 import { getRank } from "@/lib/ranks";
 import { getTitle, getNextTitle, getTitleProgress } from "@/lib/titles";
 import { Progress } from "@/components/ui/progress";
+import BotAvatar from "@/components/BotAvatar";
 
 // Deterministic pseudo-stats so a bot's "career" feels stable across visits.
 function botSeededStats(bot: { id: string; rating: number }) {
