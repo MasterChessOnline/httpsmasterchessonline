@@ -29,7 +29,7 @@ export default function BoardThemeCard({ theme, active, onSelect }: Props) {
       )}
 
       <div className="mb-2.5 transition-transform duration-300 group-hover:scale-[1.03]">
-        <BoardSwatch light={theme.light} dark={theme.dark} size={4} />
+        <BoardSwatch light={theme.light} dark={theme.dark} size={4} themeKey={theme.key} />
       </div>
 
       <div className="mt-auto">
