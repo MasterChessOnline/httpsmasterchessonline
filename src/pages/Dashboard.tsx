@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import DailyChallenges from "@/components/DailyChallenges";
 import DailyMissions from "@/components/DailyMissions";
 import OnboardingProgressCard from "@/components/OnboardingProgressCard";
+import WelcomeCalendarCard from "@/components/WelcomeCalendarCard";
 import XPLevelBadge from "@/components/XPLevelBadge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
