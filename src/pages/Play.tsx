@@ -1,4 +1,5 @@
 import Seo from "@/components/Seo";
+import BotAvatar from "@/components/BotAvatar";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Chess, Square } from "chess.js";
 import { Link } from "react-router-dom";
