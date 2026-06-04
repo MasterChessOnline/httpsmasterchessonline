@@ -124,5 +124,87 @@ export default function SmartNotifier() {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id]);
 
+  // Daily-reward FOMO: nudge users who haven't claimed today's reward.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const tid = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("welcome_last_claim")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      const today = new Date().toISOString().slice(0, 10);
+      const last = (data as any)?.welcome_last_claim?.slice?.(0, 10);
+      if (last !== today) {
+        toast("🎁 Daily reward waiting", {
+          description: "Open your chest before midnight.",
+          action: { label: "Claim", onClick: () => { window.location.href = "/chests"; } },
+        });
+      }
+    }, 90_000);
+    return () => { cancelled = true; clearTimeout(tid); };
+  }, [user?.id]);
+
+  // Battle Royale queue alert: nudge when the lobby is filling up.
+  useEffect(() => {
+    if (!user) return;
+    let lastSeen = -1;
+    const ch = supabase
+      .channel(`br-queue-watch-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "battle_royale_queue" }, async () => {
+        const { count } = await supabase
+          .from("battle_royale_queue" as any)
+          .select("user_id", { count: "exact", head: true });
+        const n = count ?? 0;
+        if (n >= 6 && n < 8 && lastSeen < 6) {
+          toast(`⚔️ Battle Royale ${n}/8`, {
+            description: "Almost full — jump in.",
+            action: { label: "Join", onClick: () => { window.location.href = "/battle-royale"; } },
+          });
+        }
+        lastSeen = n;
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.id]);
+
+  // Clan-quest pressure: toast when the player's clan completes a quest milestone.
+  useEffect(() => {
+    if (!user) return;
+    let myClubId: string | null = null;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("club_members" as any)
+        .select("club_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      myClubId = (data as any)?.club_id ?? null;
+      if (!myClubId) return;
+      const ch = supabase
+        .channel(`clan-quest-watch-${myClubId}`)
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "clan_quests", filter: `club_id=eq.${myClubId}` },
+          (payload: any) => {
+            const prev = payload?.old?.progress ?? 0;
+            const next = payload?.new?.progress ?? 0;
+            const target = payload?.new?.target ?? 1;
+            if (next >= target && prev < target) {
+              toast.success("🏆 Clan quest complete!", {
+                description: "Everyone in your clan earned coins.",
+              });
+            }
+          }
+        )
+        .subscribe();
+      return () => { supabase.removeChannel(ch); };
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
   return null;
 }
