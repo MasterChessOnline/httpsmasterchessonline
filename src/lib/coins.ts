@@ -96,3 +96,28 @@ export async function getInventory(userId: string): Promise<string[]> {
     .eq("user_id", userId);
   return ((data as any[]) ?? []).map((r) => r.item_key);
 }
+
+/** Paid wheel spin (100 coins). Server returns the random reward + new balance. */
+export async function paidSpinWheel(): Promise<{ ok: boolean; coins?: number; cost?: number; new_balance?: number; error?: string; needed?: number }> {
+  const { data, error } = await (supabase.rpc as any)("spin_wheel_paid");
+  if (error) return { ok: false, error: error.message };
+  const r = data as any;
+  if (r?.ok) {
+    emitReward({ kind: "coin", title: `+${r.coins} Coins`, subtitle: `Spin cost ${r.cost} · net +${r.coins - r.cost}`, amount: r.coins });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("mc:coins-changed"));
+      window.dispatchEvent(new CustomEvent("mc:spin-claimed"));
+    }
+  }
+  return r;
+}
+
+/** Trigger referral first-games bonus check (no-op if already paid / not enough games). */
+export async function claimReferralFirstGames(): Promise<void> {
+  try {
+    const { data } = await (supabase.rpc as any)("claim_referral_first_games");
+    if ((data as any)?.referrer_bonus && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("mc:coins-changed"));
+    }
+  } catch {}
+}
