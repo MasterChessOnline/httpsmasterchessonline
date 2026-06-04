@@ -362,16 +362,8 @@ const Index = () => {
                 />
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-primary flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-sm overflow-hidden shrink-0 shadow-sm">
-                      <svg viewBox="0 0 30 20" className="w-full h-full">
-                        <rect x="0" y="0" width="30" height="6.67" fill="#C6363C" />
-                        <rect x="0" y="6.67" width="30" height="6.67" fill="#1C3B88" />
-                        <rect x="0" y="13.33" width="30" height="6.67" fill="#FFFFFF" />
-                        <g transform="translate(4.5, 6.5) scale(0.38)">
-                          <path d="M12 2L15 8L21 8L16.5 12.5L18 19L12 15.5L6 19L7.5 12.5L3 8L9 8Z" fill="#FFFFFF" stroke="#C6363C" strokeWidth="1.2" />
-                          <circle cx="12" cy="11" r="3" fill="#1C3B88" />
-                        </g>
-                      </svg>
+                    <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-sm overflow-hidden shrink-0 shadow-sm ring-1 ring-foreground/10">
+                      <img src={serbiaFlag.url} alt="Serbia" className="w-full h-full object-cover" />
                     </span>
                     Nikola Sakotić · Creator · 3500
                   </p>
