@@ -81,12 +81,6 @@ export default function AnimatedLogoHero({ tagline }: { tagline?: string }) {
             Master
           </span>
           <span className="text-foreground">Chess</span>
-          <span
-            className="ml-2 align-baseline text-[0.32em] font-bold tracking-[0.25em] text-primary/80"
-            style={{ verticalAlign: "0.55em" }}
-          >
-            .LIVE
-          </span>
         </span>
 
         {/* sweep highlight bar */}
