@@ -1,75 +1,84 @@
-# Plan: 5 Viral Growth Features for MasterChess
+## Dijagnoza — zašto 10k poseta = 0 prijava
 
-## Current State
+Instagram saobraćaj je 95%+ mobilni, brzo skroluje, dolazi "u prolazu". Trenutni MasterChess landing traži od posetioca da **odluči, klikne CTA, otvori signup, popuni email + password + display name + starting level** pre nego što išta vidi. To je 5+ koraka friction. Drugi problemi koje sam našao:
 
-MasterChess already has a strong foundation: Spin Wheel, Daily Rewards, Chests, Missions, XP/Levels, Shop, Referrals, Share Cards, Tournaments, Stream Hub, Team Battles, Arena, Bot personalities, Opening Trainer, and mobile PWA. These features create a solid core, but to "explode" and attract mass audience, we need **social bonds, competitive spectacle, and FOMO-driven habit loops** that Chess.com and Lichess do not have.
+1. **Nema "Play instantly" guest moda** — posetilac mora da napravi nalog da bi probao igru. Konkurencija (chess.com, lichess) pušta gosta odmah na šahovsku tablu.
+2. **Hero ne pokazuje proizvod** — slika + tekst, ali nema žive table ili 5-sekundnog demoa. Mobilni korisnik ne razume šta dobija.
+3. **Signup forma traži 4 polja** (email, password, ime, level) — svaki dodatni field obara conversion ~7%. Google login postoji ali nije dovoljno istaknut.
+4. **IG-specific landing ne postoji** — svi linkovi vode na `/` koji je pretrpan (DailyMissions, SpinWheel, LiveActivityFeed, TestimonialsCarousel, Manifesto, WallOfReasons, FounderNote, StickyJoinBar). Mobilno = spor, težak za parsiranje.
+5. **Nema mernih signala** — ne znamo gde tačno odustaju (hero, scroll, signup forma). Bez funela letimo na slepo.
+6. **`?ref=` tracker postoji** ali nema link-in-bio sa eksplicitnim incentivom ("100 coins + special badge ako se registruješ preko @dailychess_12").
 
-## Proposed Features (Ranked by Impact)
+## Plan — 6 ciljanih popravki
 
-### 1. Clan / Guild System — Social Retention Engine
-**Impact: Highest — this is what keeps people in mobile games for years.**
+### 1. Guest "Play Now" mod (najveći impact)
+Dodaj **`/play-guest` rutu**: posetilac odmah pada na šahovsku tablu protiv bota (Easy 800). Posle prve pobede/poraza appear soft prompt: *"Sačuvaj progress i osvoji 200 coins → 1-click Google signup"*. Nema email forme.
 
-- Players create or join clans (max 50 members) with custom name, tag, and badge color
-- Clan chat (realtime via Supabase), clan leaderboard, clan tag shown before username in games
-- **Clan Wars**: Weekly auto-scheduled 5v5 or 10v10 team matches. Winning clan gets massive coin reward + exclusive clan border
-- **Clan Quests**: Shared daily missions (e.g., "Win 50 games as a clan today") with group rewards
-- **Why it explodes**: Friends drag friends in. Leaving = abandoning your team. Social pressure > any game mechanic.
+- Reuse `BotProfile.tsx` / `bot-engine` logiku, samo bez auth wrappera.
+- Posle 1 odigrane partije: modal sa **jednim** Google dugmetom + "Continue as guest".
+- localStorage čuva guest rating dok se ne uloguje, onda merge u profil.
 
-### 2. Chess Battle Royale (Survival Mode) — Spectacle + Addiction
-**Impact: Viral content goldmine. Short, high-stakes, shareable.**
+### 2. Mobile-first IG landing `/ig` (ili `/start`)
+Posebna minimalna stranica za Instagram bio link:
 
-- 8 players enter a bracket. 1-minute Blitz games. Loser eliminated each round.
-- Winner takes 500-1000 coins. Match takes 5-7 minutes total.
-- **Spectator mode**: Non-players watch live, bet coins on who wins, send emoji reactions
-- **Auto-generated highlight reel**: After each Battle Royale, a 10-second clip of the final checkmate is generated for sharing
-- **Why it explodes**: YouTube/TikTok clips of "I won a Chess Battle Royale" drive massive organic traffic. Stakes make every game feel important.
+```text
+┌──────────────────────────┐
+│  [Live mini šah board]   │  ← animira poslednje 3 partije
+│                          │
+│  Play chess. No ads.     │  ← H1, 6 reči
+│  100% human players.     │
+│                          │
+│  [▶ PLAY NOW] ← big      │  ← vodi na /play-guest
+│  [G] Continue with Google│
+│                          │
+│  ★★★★★ 1,247 igrača      │
+└──────────────────────────┘
+```
 
-### 3. Season Battle Pass — Monetization + Urgency Loop
-**Impact: Revenue + retention. Fortnite made billions with this.**
+Bez Navbara, bez Footera, bez Daily Missions — samo jedan ekran, jedan CTA. Cilj: <2s LCP, 1 odluka.
 
-- 30-day "Seasons" with a free track and Premium track ($4.99)
-- Players earn "Battle Points" from playing games, winning, completing missions
-- **Premium rewards**: Exclusive animated piece sets, golden board themes, legendary titles, profile frames, emotes
-- **Free rewards**: Coins, chests, XP boosts, basic cosmetics
-- **Countdown timer everywhere**: "Season 3 ends in 2 days 14 hours" creates FOMO
-- **Why it explodes**: Players who buy the pass play 3x more to "get their money's worth." Season resets create fresh-start energy.
+### 3. Skrati signup formu na 1 polje
+Trenutno: email, password, displayName, startingLevel = 4 polja.
+Novo:
+- **Default**: samo Google dugme (veliko, prvo).
+- "Or email" toggle otkriva **samo email + password** (display_name auto-generisan iz emaila, level postavljen na default 1200, kasnije menja u Settings).
+- Starting level slider premešten u onboarding posle prve partije.
 
-### 4. Smart Push Notification Engine — Re-engagement Loop
-**Impact: Brings dead users back. Converts "maybe tomorrow" into "one game now."**
+### 4. Hero sa živim demoom umesto static slike
+Zameni `heroImage` sa **autoplay loop** poslednje brze partije iz `online_games` (PGN replay, 1 potez/sec). Pokazuje da je sajt živ. Format: ~300px visine, ispod odmah CTA.
 
-- **Rival Alerts**: "Alex just overtook you on the leaderboard — reclaim your spot!"
-- **Time-Limited Events**: "Boss Battle starts in 15 min. Beat the 7-win streak champion for 2x coins."
-- **Clan Pressure**: "Your clan needs 3 more wins for today's quest. You're the top player — don't let them down."
-- **Daily Reward FOMO**: "Your daily reward expires in 1 hour. Don't break your 12-day streak!"
-- **Why it explodes**: Push notifications have 40%+ open rates when personalized. This turns casual visitors into daily players.
+### 5. Analytics funel za IG saobraćaj
+Doda 4 event-tracking tačke u `referrals` ili novu `funnel_events` tabelu:
+- `landing_view` (sa ref kodom)
+- `cta_click` (Play Now / Sign Up)
+- `signup_start` (otvorio formu)
+- `signup_complete`
 
-### 5. Voice Chat in Games — The "Real Club" Differentiator
-**Impact: Massive differentiation. No major chess platform does this well.**
+Onda imaš pravu sliku — možda 9000 odlazi na heru, možda 800 klikne CTA i odustane na signup formi. Bez ovog popravljamo na slepo.
 
-- Optional voice chat toggle per game (both players must agree)
-- Post-game lobby voice for analysis/gloating
-- Voice reactions ("Nice move!", "Ouch!", laugh) as quick audio clips
-- **Streamer mode**: Streamers can voice-chat with viewers during spectated games
-- **Why it explodes**: Chess is traditionally silent online. Voice makes it memorable, emotional, and social. Players will tell friends "You have to try this chess app with voice chat."
+### 6. IG-specific incentive
+Generiši **link `masterchess.live/?ref=IG&bonus=ig100`** koji:
+- Pokazuje banner: *"@dailychess_12 te poklanja 100 coins + Instagram Founder badge"*
+- Auto-aplicira bonus na prvi signup (kroz postojeći referral RPC, doda se badge insert)
+- Stavi taj link u IG bio sa "swipe up" pričom
 
-## Implementation Order (Recommended)
+## Tehnički detalji
 
-| Phase | Feature | Est. Complexity | Why First |
-|---|---|---|---|
-| 1 | Clan System | High | Highest retention impact; all other features enhance it |
-| 2 | Smart Push Notifications | Medium | Cheap to build, immediate daily active user boost |
-| 3 | Season Battle Pass | Medium | Monetization; pairs perfectly with clans + missions |
-| 4 | Battle Royale | High | Viral content engine; needs clan system as player pool |
-| 5 | Voice Chat | High | Differentiator; best done after player base grows |
+- **`/play-guest`**: nova ruta, lazy-loaded, koristi postojeći `bot-engine.ts`. Bez `useAuth` poziva.
+- **`/ig` landing**: jedna komponenta, ne učitava DailyMissions/SpinWheel/Manifesto chunk. Vite lazy import samo neophodnog.
+- **Signup form refactor**: postojeća `Signup.tsx`, sakrij naprednu sekciju iza `<details>` accordion.
+- **Funnel tabela**: `funnel_events (id, event_type, ref_code, session_fp, user_id nullable, created_at)`, owner-only INSERT preko RPC-a. Anon write dozvoljen jer prati anonimne posete.
+- **Hero replay**: SSR-friendly, učitava 1 partiju iz `online_games` (već ima RLS public read jer su online_games čisto za gledanje preko Spectate).
+- **IG badge**: dodaje se u `player_badges` kao `instagram_founder` kad ref=IG.
 
-## What About the Existing "No Puzzles" Constraint?
+## Šta NE radimo u ovoj iteraciji
 
-All 5 features respect this:
-- No static tactics or puzzle solving
-- All competitive modes use real games against real humans
-- Battle Royale = real Blitz games, not puzzles
-- Voice chat enhances human-to-human play, the core promise
+- Ne menjamo glavni `/` landing dramatično (postoji veliki rad oko Manifesto / FounderNote / Human Soul Layer — to ostaje za logovane).
+- Ne diramo postojeću ekonomiju coin-a (samo +100 IG bonus kao referral reward).
+- Ne dodajemo nove auth provajdere.
 
-## Next Step
+## Očekivani rezultat
 
-Tell me which feature(s) to build first. I recommend starting with **Clan System** (biggest retention) + **Smart Push Notifications** (fastest ROI) in parallel.
+Conversion rate sa ~0% na 3–8% na IG saobraćaju (industrijski prosek za gaming landing sa instant play je 5–12%). Od 10k poseta = 300–800 novih naloga umesto 0.
+
+Reci mi koje od ovih 6 popravki da implementiram prvo, ili "uradi sve" da krenem redom (preporučujem #1 Guest Play + #2 IG landing + #3 skraćena forma kao prvi paket — to su 80% impacta).
