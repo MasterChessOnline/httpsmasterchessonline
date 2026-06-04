@@ -56,7 +56,9 @@ import InstallAppButton from "@/components/InstallAppButton";
 import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import LiveActivityFeed from "@/components/LiveActivityFeed";
-import HomeSpinWheelSection from "@/components/HomeSpinWheelSection";
+import AnimatedLogoHero from "@/components/AnimatedLogoHero";
+import LazyMount from "@/components/LazyMount";
+const HomeSpinWheelSection = React.lazy(() => import("@/components/HomeSpinWheelSection"));
 import WinStreakFlame from "@/components/WinStreakFlame";
 
 interface RecentGame {
@@ -241,30 +243,7 @@ const Index = () => {
             className="container mx-auto max-w-4xl text-center relative z-10 pt-8"
             style={{ opacity: heroOpacity }}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <motion.div
-                className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5 animate-glow-pulse"
-                style={{
-                  background: "linear-gradient(135deg, hsl(43 90% 55% / 0.15), hsl(30 60% 40% / 0.1))",
-                  border: "1px solid hsl(43 90% 55% / 0.2)",
-                }}
-                whileHover={{ scale: 1.1, rotate: 5 }}
-              >
-                <Crown className="h-7 w-7 text-primary" />
-              </motion.div>
-
-              <h1 className="relative font-display text-5xl sm:text-7xl lg:text-8xl font-black mb-3 tracking-tight uppercase [text-shadow:0_0_40px_hsl(var(--primary)/0.22),0_0_90px_hsl(var(--primary)/0.14),0_0_160px_hsl(var(--primary)/0.08)]">
-                <span className="text-gradient-gold">Master</span>
-                <span className="text-foreground">Chess</span>
-              </h1>
-              <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-2 font-light tracking-wide uppercase">
-                {t("hero.tagline")}
-              </p>
-            </motion.div>
+            <AnimatedLogoHero tagline={t("hero.tagline")} />
 
             {/* Attractive sign-up hero card for guests */}
             {!user && (
@@ -401,7 +380,11 @@ const Index = () => {
         <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
           {/* Spin The Wheel — hero-adjacent reward CTA */}
           <section id="spin-wheel" className="scroll-mt-24">
-            <HomeSpinWheelSection />
+            <LazyMount minHeight={520} eager>
+              <React.Suspense fallback={<div style={{ minHeight: 520 }} />}>
+                <HomeSpinWheelSection />
+              </React.Suspense>
+            </LazyMount>
           </section>
 
           {/* Instagram poster + follow CTA — directly under hero, above Daily */}
@@ -453,7 +436,9 @@ const Index = () => {
 
           {/* Live Activity Feed — real wins, ratings, tournaments */}
           <section id="live-activity" className="scroll-mt-24">
-            <LiveActivityFeed />
+            <LazyMount minHeight={320}>
+              <LiveActivityFeed />
+            </LazyMount>
           </section>
 
           {/* Daily Challenge — directly below the hero, first thing users see */}
