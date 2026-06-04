@@ -33,6 +33,7 @@ import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
 import posterImage from "@/assets/masterchess-poster.jpg";
+import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 import { Instagram } from "lucide-react";
 
 import ParallaxCard from "@/components/ParallaxCard";
@@ -326,6 +327,54 @@ const Index = () => {
                 </motion.div>
               </Link>
               <InstallAppButton variant="hero" />
+            </motion.div>
+
+            {/* Play vs Nikola — direct challenge against the creator's AI clone */}
+            <motion.div
+              className="mt-4 mx-auto max-w-xl"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.5 }}
+            >
+              <Link
+                to="/play"
+                onClick={() => {
+                  try {
+                    sessionStorage.setItem(
+                      "play-from-position",
+                      JSON.stringify({
+                        fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                        botId: "nikola-sakotic",
+                        playerColor: "w",
+                      })
+                    );
+                  } catch { /* ignore */ }
+                }}
+                className="group flex items-center gap-3 sm:gap-4 rounded-2xl border border-primary/40 bg-gradient-to-r from-amber-500/10 via-background/70 to-amber-500/10 backdrop-blur-md p-3 sm:p-4 shadow-[0_0_30px_-10px_hsl(var(--primary)/0.5)] hover:border-primary/70 hover:shadow-[0_0_40px_-6px_hsl(var(--primary)/0.7)] transition-all"
+              >
+                <img
+                  src={nikolaAvatar}
+                  alt="Nikola Šakotić — creator's AI clone, 3500 rated"
+                  width={64}
+                  height={64}
+                  loading="lazy"
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-primary/50 shadow-lg shrink-0"
+                />
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-primary">
+                    Play vs Nikola · 🇷🇸 3500
+                  </p>
+                  <h3 className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
+                    Challenge the creator's AI clone
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                    Knows every opening, every variation. Beat me and you've made history.
+                  </p>
+                </div>
+                <span className="hidden sm:inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold px-4 py-2 shadow-md group-hover:scale-105 transition-transform shrink-0">
+                  Play now →
+                </span>
+              </Link>
             </motion.div>
 
             {/* Handwritten margin note — small human signal under the CTAs */}
