@@ -1115,9 +1115,11 @@ const Play = () => {
               <TooltipContent>Toggle 4D Visual Mode</TooltipContent>
             </Tooltip>
           </div>
-          <h1 className="font-display text-base sm:text-2xl md:text-3xl font-bold text-foreground">
-            You vs <span className="text-gradient-gold">{currentBot.avatar} {currentBot.name}</span>
-            <span className="text-xs sm:text-base ml-2 text-muted-foreground">({currentBot.rating})</span>
+          <h1 className="font-display text-base sm:text-2xl md:text-3xl font-bold text-foreground flex items-center justify-center gap-2 flex-wrap">
+            <span>You vs</span>
+            <BotAvatar avatar={currentBot.avatar} alt={currentBot.name} className="w-8 h-8 sm:w-10 sm:h-10 inline-block" emojiClassName="text-2xl sm:text-3xl" />
+            <span className="text-gradient-gold">{currentBot.name}</span>
+            <span className="text-xs sm:text-base text-muted-foreground">({currentBot.rating})</span>
           </h1>
         </div>
 
@@ -1154,7 +1156,7 @@ const Play = () => {
                 ? "bg-primary/5 border-primary/30"
                 : "bg-card/50 border-border/20"
             }`}>
-              <span className="text-xl">{currentBot.avatar}</span>
+              <BotAvatar avatar={currentBot.avatar} alt={currentBot.name} className="w-7 h-7 shrink-0" emojiClassName="text-xl" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <p className="text-xs font-bold text-foreground truncate">{currentBot.name} {currentBot.countryFlag}</p>
@@ -1276,7 +1278,7 @@ const Play = () => {
                   className="absolute left-1/2 -translate-x-1/2 -bottom-16 z-30 pointer-events-none"
                 >
                   <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card/95 backdrop-blur-sm border border-primary/30 shadow-lg max-w-sm">
-                    <span className="text-2xl">{currentBot.avatar}</span>
+                    <BotAvatar avatar={currentBot.avatar} alt={currentBot.name} className="w-8 h-8 shrink-0" emojiClassName="text-2xl" />
                     <div className="min-w-0">
                       <p className="text-[10px] font-semibold text-primary leading-tight">{currentBot.name}</p>
                       <p className="text-sm text-foreground leading-snug">{botMessage}</p>
