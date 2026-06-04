@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { memo, useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Chess, Square } from "chess.js";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { usePieceGlyphs } from "@/lib/piece-glyphs";
@@ -62,7 +62,7 @@ function findKingSquare(board: ReturnType<Chess["board"]>, color: "w" | "b"): st
   return null;
 }
 
-export default function ChessBoard({
+function ChessBoardImpl({
   game, flipped, selectedSquare, legalMoves, lastMove,
   isGameOver, isPlayerTurn, hintSquare, hintToSquare, premove, onSquareClick, overlay, className,
 }: ChessBoardProps) {
@@ -406,12 +406,12 @@ export default function ChessBoard({
                         animate={{ x: 0, y: 0, scale: 1, opacity: dragFrom === square ? 0.4 : 1 }}
                         transition={
                           slideOffset
-                            ? { type: "spring", stiffness: 260, damping: 18, mass: 0.95, restDelta: 0.001 }
-                            : { type: "spring", stiffness: 500, damping: 25 }
+                            ? { type: "tween", duration: 0.18, ease: [0.4, 0, 0.2, 1] }
+                            : { type: "tween", duration: 0.08, ease: "easeOut" }
                         }
                         whileHover={
                           isPlayerTurn && !isGameOver
-                            ? { scale: 1.15, y: -3, filter: pd.white ? "drop-shadow(0 0 12px rgba(255,215,0,0.6))" : "drop-shadow(0 0 12px rgba(100,180,255,0.5))", transition: { duration: 0.15 } }
+                            ? { scale: 1.12, y: -2, transition: { duration: 0.12, ease: "easeOut" } }
                             : undefined
                         }
                         draggable={!isGameOver && allowDrag}
@@ -428,6 +428,9 @@ export default function ChessBoard({
                         } ${isSelected ? "drop-shadow-[0_0_10px_hsl(43_80%_55%/0.6)] scale-110" : ""}`}
                         style={{
                           position: "relative",
+                          willChange: "transform",
+                          transform: "translateZ(0)",
+                          backfaceVisibility: "hidden",
                           ...(pd.svgUrl
                             ? {}
                             : {
@@ -638,3 +641,9 @@ export default function ChessBoard({
     </div>
   );
 }
+
+// Memoized export — skips re-render when props are referentially equal.
+// All callers already pass stable callbacks / primitives, so this dramatically
+// cuts wasted work during bot thinking, opponent latency, or clock ticks.
+const ChessBoard = memo(ChessBoardImpl);
+export default ChessBoard;
