@@ -124,28 +124,7 @@ export default function SmartNotifier() {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id]);
 
-  // Daily-reward FOMO: nudge users who haven't claimed today's reward.
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    const tid = setTimeout(async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("welcome_last_claim")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (cancelled) return;
-      const today = new Date().toISOString().slice(0, 10);
-      const last = (data as any)?.welcome_last_claim?.slice?.(0, 10);
-      if (last !== today) {
-        toast("🎁 Daily reward waiting", {
-          description: "Open your chest before midnight.",
-          action: { label: "Claim", onClick: () => { window.location.href = "/chests"; } },
-        });
-      }
-    }, 90_000);
-    return () => { cancelled = true; clearTimeout(tid); };
-  }, [user?.id]);
+  // Daily-reward FOMO notifier was removed per request — no daily-reward toast.
 
   // Battle Royale queue alert: nudge when the lobby is filling up.
   useEffect(() => {
