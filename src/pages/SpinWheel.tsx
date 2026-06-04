@@ -237,6 +237,27 @@ export default function SpinWheel() {
                 </div>
               );
             })}
+
+            {/* Winning segment glow + pulse (renders inside the wheel so it rotates with it) */}
+            {result?.segment && !spinning && (
+              <motion.div
+                aria-hidden
+                className="absolute inset-0 pointer-events-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0.35, 0.95, 0.35] }}
+                transition={{ duration: 1.4, repeat: Infinity }}
+                style={{
+                  background: `conic-gradient(from -${SEG / 2}deg,
+                    transparent ${result.segment.idx * SEG}deg,
+                    hsla(45,95%,60%,0.55) ${result.segment.idx * SEG}deg,
+                    hsla(45,100%,75%,0.85) ${result.segment.idx * SEG + SEG / 2}deg,
+                    hsla(45,95%,60%,0.55) ${(result.segment.idx + 1) * SEG}deg,
+                    transparent ${(result.segment.idx + 1) * SEG}deg)`,
+                  mixBlendMode: "screen",
+                  filter: "blur(2px)",
+                }}
+              />
+            )}
           </motion.div>
 
           {/* Hub */}
