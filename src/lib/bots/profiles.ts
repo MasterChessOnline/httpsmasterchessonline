@@ -54,8 +54,10 @@ export const BOT_PROFILES: BotProfile[] = [
     personality: "creator",
     playstyle: "universal",
     openings: [
-      "ruy-lopez", "queens-gambit", "sicilian", "english", "caro-kann",
-      "kings-indian", "french", "italian",
+      // Nikola knows every opening — uses the full repertoire catalogue.
+      "italian", "ruy-lopez", "sicilian", "french", "caro-kann",
+      "queens-gambit", "kings-indian", "london", "kings-gambit",
+      "scandinavian", "english", "universal",
     ],
     accuracy: 1.0,
     blunderRate: 0,
@@ -64,8 +66,9 @@ export const BOT_PROFILES: BotProfile[] = [
     country: "Serbia",
     countryFlag: "🇷🇸",
     style: "Creator AI — knows every opening, every variation",
-    bio: "I'm Nikola Sakotić, the creator of MasterChess — and this is my AI clone. I know every opening, every variation, every endgame. Beat me and you've made history.",
-    drawAcceptThreshold: 200,
+    bio: "I'm Nikola Sakotić, the creator of MasterChess — and this is my AI clone. I know every opening, every variation, every endgame. I never accept draws — beat me or lose. Defeat me and you've made history.",
+    // Set absurdly high so the "long game" condition is never met.
+    drawAcceptThreshold: 9999,
     resignThreshold: 0,
     taunts: {
       greeting: "I built this place. Now let's see how you play. 🇷🇸",
@@ -75,8 +78,8 @@ export const BOT_PROFILES: BotProfile[] = [
       onWin: "GG. Welcome to MasterChess. 👑",
       onLose: "You actually did it. Legendary.",
       onDraw: "Respect. You held your ground.",
-      onDrawOffer: "A draw against me is already a win. Accepted.",
-      onDrawDecline: "I see a path forward. Let's play it out.",
+      onDrawOffer: "I don't accept draws. Keep playing.",
+      onDrawDecline: "No draws. Beat me or lose. 👑",
     },
   },
 
