@@ -170,9 +170,9 @@ const GameReview = () => {
             </span>
           </div>
         )}
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,480px)_minmax(0,320px)_minmax(0,420px)] gap-6 justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)_minmax(0,420px)] gap-6 justify-center">
           {/* Board */}
-          <div className="w-full max-w-[min(90vw,480px)] mx-auto space-y-3">
+          <div className="w-full max-w-[min(100vw-1rem,calc(100svh-12rem),660px)] lg:max-w-[min(calc(100svh-8rem),720px)] mx-auto space-y-3">
             <div className="rounded-xl overflow-hidden shadow-lg border border-border/30">
               {RANKS.map((rank, ri) => (
                 <div key={rank} className="flex">

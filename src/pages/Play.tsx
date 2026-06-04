@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
+import { BOARD_CONTAINER_CLASS, BOARD_CONTAINER_FOCUS_CLASS } from "@/lib/board-sizing";
 import CapturedPieces from "@/components/chess/CapturedPieces";
 // LiveCoach removed per user request
 import GameControls from "@/components/chess/GameControls";
@@ -1073,8 +1074,8 @@ const Play = () => {
         <button onClick={() => setStreamerMode(false)} className="absolute top-4 right-4 z-20 px-3 py-1.5 rounded-lg bg-card/80 border border-border/50 text-xs text-muted-foreground hover:text-foreground transition-colors backdrop-blur-sm">
           <MonitorOff className="w-3.5 h-3.5 inline mr-1.5" /> Exit
         </button>
-        <div className="w-full max-w-[min(90vw,600px)]">
-          <ChessBoard game={game} flipped={boardFlipped} selectedSquare={selectedSquare} legalMoves={legalMoves} lastMove={lastMove} isGameOver={isGameOver} isPlayerTurn={isPlayerTurn} hintSquare={hintSquare} hintToSquare={hintToSquare} onSquareClick={handleSquareClick} premove={premove} />
+        <div className={BOARD_CONTAINER_FOCUS_CLASS}>
+          <ChessBoard game={game} flipped={boardFlipped} selectedSquare={selectedSquare} legalMoves={legalMoves} lastMove={lastMove} isGameOver={isGameOver} isPlayerTurn={isPlayerTurn} hintSquare={hintSquare} hintToSquare={hintToSquare} onSquareClick={handleSquareClick} premove={premove} className="w-full" />
         </div>
         <p className="mt-4 text-sm text-muted-foreground font-mono">{statusText}</p>
         <PromotionDialog isOpen={!!pendingPromotion} color={game.turn()} onSelect={handlePromotionSelect} onCancel={() => setPendingPromotion(null)} />
@@ -1190,6 +1191,7 @@ const Play = () => {
                 hintToSquare={hintToSquare}
                 onSquareClick={handleSquareClick}
                 premove={premove}
+                className={BOARD_CONTAINER_CLASS}
                 overlay={
                   <>
                     {!gameOverInfo && <GameStatusOverlay kind={statusKind} subtitle={statusSubtitle} />}
