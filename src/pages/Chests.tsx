@@ -267,7 +267,7 @@ function UnlockOverlay({ item, onClose }: { item: ShopItem | null; onClose: () =
             </div>
             <div className="mt-5 flex items-center justify-center">
               {preview.kind === "board" ? (
-                <div className="w-44"><BoardSwatch light={preview.light} dark={preview.dark} size={8} /></div>
+                <div className="w-44"><BoardSwatch light={preview.light} dark={preview.dark} size={8} themeKey={preview.themeKey} /></div>
               ) : preview.kind === "pieces" ? (
                 <div className="w-64"><PieceSetPreview style={preview.style} rich /></div>
               ) : (
