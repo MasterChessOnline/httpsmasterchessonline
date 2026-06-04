@@ -13,8 +13,12 @@ export interface ChestReward {
   /** matches keys used in user-settings (board theme key / piece set key) */
   key: string;
   label: string;
-  /** emoji preview */
+  /** emoji preview (fallback only) */
   preview: string;
+  /** registry key (BOARD_THEMES key) — enables real mini-board preview */
+  boardThemeKey?: string;
+  /** registry key (PIECE_STYLES key) — enables real piece preview */
+  pieceStyleKey?: string;
   /** xp granted (only when kind === 'xp') */
   amount?: number;
 }
