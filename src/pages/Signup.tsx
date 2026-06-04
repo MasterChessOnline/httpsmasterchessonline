@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
 
 import AuthAura from "@/components/auth/AuthAura";
+import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
