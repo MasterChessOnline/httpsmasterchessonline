@@ -83,6 +83,7 @@ export const BOT_PROFILES: BotProfile[] = [
   // ===== 👑 MASTERCHESS — THE UNBEATABLE BOSS BOT =====
   // Pure Stockfish at maximum strength. No blunders, no inaccuracies, full opening prep.
   // Engine settings give this bot uncapped UCI strength + max depth/time (see bot-engine.ts).
+  {
     id: "masterchess",
     name: "MasterChess",
     avatar: "👑",
