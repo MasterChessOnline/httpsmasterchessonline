@@ -13,7 +13,7 @@
 import { Chess } from "chess.js";
 import { evaluateBoard, getAIMove, type Difficulty } from "../chess-ai";
 import type { BotProfile } from "./profiles";
-import { OPENING_BOOKS, PLAYSTYLES, type Playstyle } from "./playstyles";
+import { OPENING_BOOKS, PLAYSTYLES, type Playstyle, type OpeningRepertoire } from "./playstyles";
 import { getStockfishEngine } from "../stockfish-engine";
 
 export interface BotMoveDecision {
