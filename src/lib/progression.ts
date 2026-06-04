@@ -65,44 +65,22 @@ export async function updateStreakState(
   ratingType: RatingType,
   result: GameResult,
 ): Promise<StreakState> {
-  const prev = await getStreakState(userId, ratingType);
-  let current = prev.current_streak;
-  let lossStreak = prev.loss_streak;
-  if (result === "win") {
-    current = current + 1;
-    lossStreak = 0;
-  } else if (result === "loss") {
-    current = 0;
-    lossStreak = lossStreak + 1;
-  } else {
-    current = 0;
-    // draws don't extend the loss streak
+  // Server-validated streak update — clients cannot fabricate values.
+  const { data, error } = await supabase.rpc("bump_win_streak" as any, {
+    p_rating_type: ratingType,
+    p_result: result,
+  });
+  if (error || !data || (data as any).ok === false) {
+    // Fall back to a read so callers still get a sane shape
+    return await getStreakState(userId, ratingType);
   }
-  const best = Math.max(prev.best_streak, current);
-  const next: StreakState = {
-    current_streak: current,
-    best_streak: best,
-    loss_streak: lossStreak,
-    last_result: result,
+  const d: any = data;
+  return {
+    current_streak: d.current_streak ?? 0,
+    best_streak: d.best_streak ?? 0,
+    loss_streak: d.loss_streak ?? 0,
+    last_result: d.last_result ?? result,
   };
-
-  // Upsert
-  await supabase
-    .from("win_streaks" as any)
-    .upsert(
-      {
-        user_id: userId,
-        rating_type: ratingType,
-        current_streak: next.current_streak,
-        best_streak: next.best_streak,
-        loss_streak: next.loss_streak,
-        last_result: next.last_result,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id,rating_type" },
-    );
-
-  return next;
 }
 
 // ----------------------------------------------------------------
