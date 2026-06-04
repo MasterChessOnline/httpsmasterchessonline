@@ -98,8 +98,8 @@ export default function BotProfile() {
             className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md p-6 glass-border"
           >
             <div className="flex items-center gap-4">
-              <div className="h-20 w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center text-4xl shadow-glow shrink-0">
-                {bot.avatar}
+              <div className="h-20 w-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center text-4xl shadow-glow shrink-0 overflow-hidden">
+                <BotAvatar avatar={bot.avatar} alt={bot.name} className="h-full w-full" emojiClassName="text-4xl" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
