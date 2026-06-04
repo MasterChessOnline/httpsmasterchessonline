@@ -1308,6 +1308,7 @@ export type Database = {
           last_login_reward_date: string | null
           login_streak: number
           login_streak_best: number
+          loss_streak: number
           master_coins: number
           peak_rating: number
           profile_banner: string | null
@@ -1317,6 +1318,7 @@ export type Database = {
           updated_at: string
           user_id: string
           username: string | null
+          win_streak: number
         }
         Insert: {
           avatar_frame?: string | null
@@ -1347,6 +1349,7 @@ export type Database = {
           last_login_reward_date?: string | null
           login_streak?: number
           login_streak_best?: number
+          loss_streak?: number
           master_coins?: number
           peak_rating?: number
           profile_banner?: string | null
@@ -1356,6 +1359,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           username?: string | null
+          win_streak?: number
         }
         Update: {
           avatar_frame?: string | null
@@ -1386,6 +1390,7 @@ export type Database = {
           last_login_reward_date?: string | null
           login_streak?: number
           login_streak_best?: number
+          loss_streak?: number
           master_coins?: number
           peak_rating?: number
           profile_banner?: string | null
@@ -1395,6 +1400,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string | null
+          win_streak?: number
         }
         Relationships: [
           {
@@ -1561,10 +1567,12 @@ export type Database = {
         Row: {
           converted_at: string | null
           created_at: string
+          first_game_bonus_paid: boolean
           id: string
           ref_code: string
           referred_user_id: string | null
           referrer_user_id: string | null
+          signup_bonus_paid: boolean
           status: string
           user_agent: string | null
           visitor_fingerprint: string | null
@@ -1572,10 +1580,12 @@ export type Database = {
         Insert: {
           converted_at?: string | null
           created_at?: string
+          first_game_bonus_paid?: boolean
           id?: string
           ref_code: string
           referred_user_id?: string | null
           referrer_user_id?: string | null
+          signup_bonus_paid?: boolean
           status?: string
           user_agent?: string | null
           visitor_fingerprint?: string | null
@@ -1583,10 +1593,12 @@ export type Database = {
         Update: {
           converted_at?: string | null
           created_at?: string
+          first_game_bonus_paid?: boolean
           id?: string
           ref_code?: string
           referred_user_id?: string | null
           referrer_user_id?: string | null
+          signup_bonus_paid?: boolean
           status?: string
           user_agent?: string | null
           visitor_fingerprint?: string | null
@@ -2646,6 +2658,7 @@ export type Database = {
       claim_daily_mission: { Args: { p_key: string }; Returns: Json }
       claim_daily_reward: { Args: never; Returns: Json }
       claim_daily_spin: { Args: never; Returns: Json }
+      claim_referral_first_games: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
       cleanup_stale_game: { Args: { p_user_id: string }; Returns: string }
       commit_online_move: {
@@ -2752,6 +2765,7 @@ export type Database = {
       }
       server_now: { Args: never; Returns: string }
       settle_bets_for_game: { Args: { p_game_id: string }; Returns: Json }
+      spin_wheel_paid: { Args: never; Returns: Json }
       start_online_game: {
         Args: {
           p_black_id: string
