@@ -115,6 +115,8 @@ const Dashboard = () => {
             </div>
           </motion.div>
 
+          <WelcomeCalendarCard />
+
           <OnboardingProgressCard />
 
 
