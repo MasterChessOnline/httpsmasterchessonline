@@ -132,7 +132,7 @@ export default function Shop() {
                 <div className="relative h-36 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 flex items-center justify-center overflow-hidden p-3">
                   {preview.kind === "board" ? (
                     <div className="w-full max-w-[120px]">
-                      <BoardSwatch light={preview.light} dark={preview.dark} size={6} />
+                      <BoardSwatch light={preview.light} dark={preview.dark} size={6} themeKey={preview.themeKey} />
                     </div>
                   ) : preview.kind === "pieces" ? (
                     <div className="w-full max-w-[150px]">
