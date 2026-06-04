@@ -257,11 +257,6 @@ export default function HomeSpinWheelSection() {
             {spinning ? "Spinning…" : alreadyClaimed ? "Come back tomorrow" : "SPIN THE WHEEL"}
           </button>
 
-          <div className="mt-3">
-            <Link to="/spin" className="text-xs text-amber-300/80 hover:text-amber-200 underline-offset-4 hover:underline">
-              Open full wheel page →
-            </Link>
-          </div>
         </div>
       </div>
 
