@@ -70,8 +70,34 @@ export async function awardOnlineCoins(opts: {
     }
     emitReward({ kind: "coin", title: `+${res.total} Coins`, subtitle: res.streak_bonus ? `Streak bonus +${res.streak_bonus}` : undefined, amount: res.total });
     if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("mc:coins-changed"));
+    if (res.outcome === "win") contributeClanQuest("team_wins", 1);
   }
   return res;
+}
+
+/** Fire-and-forget: bump the team_wins counter on every clan the caller belongs to. */
+export async function contributeClanQuest(metric: string, amount = 1): Promise<void> {
+  try {
+    const { data } = await (supabase.rpc as any)("contribute_clan_quest", {
+      p_metric: metric,
+      p_amount: amount,
+    });
+    const completed = (data as any)?.completed_clubs as string[] | undefined;
+    if (completed && completed.length) {
+      emitReward({
+        kind: "achievement",
+        title: "Clan Quest complete! 🛡️",
+        subtitle: "Your clan earned coins for everyone",
+        rare: true,
+      });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("mc:coins-changed"));
+        window.dispatchEvent(new CustomEvent("mc:clan-quest-complete", { detail: { clubIds: completed } }));
+      }
+    }
+  } catch {
+    /* non-fatal */
+  }
 }
 
 export async function purchaseShopItem(opts: {
