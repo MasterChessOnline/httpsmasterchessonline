@@ -18,13 +18,10 @@ export function useCoinBalance(): { balance: number | null; loading: boolean; re
     const fetchBal = async () => {
       if (!user) { setBalance(null); setLoading(false); return; }
       setLoading(true);
-      const { data } = await supabase
-        .from("profiles")
-        .select("master_coins")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data } = await supabase.rpc("get_my_profile");
+      const row = Array.isArray(data) ? data[0] : data;
       if (!cancelled) {
-        setBalance(((data as any)?.master_coins ?? 0) as number);
+        setBalance(((row as any)?.master_coins ?? 0) as number);
         setLoading(false);
       }
     };

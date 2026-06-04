@@ -81,11 +81,8 @@ export default function HomeSpinWheelSection() {
         const next = new Date(today + "T00:00:00Z").getTime() + 24 * 3600 * 1000;
         setNextSpinAt(next);
       }
-      const { data: prof } = await (supabase as any)
-        .from("profiles")
-        .select("login_streak")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data: rpcData } = await (supabase as any).rpc("get_my_profile");
+      const prof: any = Array.isArray(rpcData) ? rpcData[0] : rpcData;
       if (prof?.login_streak != null) setStreak(prof.login_streak);
     })();
   }, [user?.id]);

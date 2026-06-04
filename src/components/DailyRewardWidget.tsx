@@ -33,11 +33,8 @@ export default function DailyRewardWidget() {
     }
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("login_streak, login_streak_best, last_login_reward_date")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data: rpcData } = await supabase.rpc("get_my_profile");
+      const data: any = Array.isArray(rpcData) ? rpcData[0] : rpcData;
       if (cancelled) return;
       if (data) {
         setStreak(data.login_streak || 0);

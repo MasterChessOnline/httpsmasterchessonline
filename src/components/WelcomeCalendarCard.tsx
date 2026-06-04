@@ -47,11 +47,8 @@ export default function WelcomeCalendarCard({ forceModal = false }: { forceModal
     if (!user) { setLoading(false); return; }
     let off = false;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("welcome_day, welcome_last_claim")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data: rpcData } = await supabase.rpc("get_my_profile");
+      const data: any = Array.isArray(rpcData) ? rpcData[0] : rpcData;
       if (off) return;
       const w = (data as any) ?? {};
       setDay(w.welcome_day || 0);
