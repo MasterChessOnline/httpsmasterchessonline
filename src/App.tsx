@@ -19,6 +19,8 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import PlayGuest from "./pages/PlayGuest";
+import IgLanding from "./pages/IgLanding";
 
 // Lazy-loaded routes — split into separate chunks to shrink initial bundle
 const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
@@ -217,6 +219,9 @@ function AnimatedRoutes() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/play-guest" element={<PlayGuest />} />
+          <Route path="/ig" element={<IgLanding />} />
+          <Route path="/start" element={<IgLanding />} />
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
           <Route path="/guides" element={<Guides />} />
           <Route path="/guide/:slug" element={<Guide />} />
