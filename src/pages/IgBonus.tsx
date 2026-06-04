@@ -49,6 +49,7 @@ export default function IgBonus() {
   return (
     <>
       <Seo
+        path="/ig-bonus"
         title="Instagram Bonus · MasterChess"
         description="Exclusive welcome pack for visitors from Instagram: 500 coins, Founder badge, 7 days of premium themes."
       />
