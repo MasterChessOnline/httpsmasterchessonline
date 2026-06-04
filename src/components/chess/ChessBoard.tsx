@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { memo, useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Chess, Square } from "chess.js";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { usePieceGlyphs } from "@/lib/piece-glyphs";
