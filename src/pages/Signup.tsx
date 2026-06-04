@@ -39,8 +39,7 @@ const FloatingPiece = ({ piece, index }: { piece: string; index: number }) => (
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [levelKey, setLevelKey] = useState<string>(DEFAULT_STARTING_LEVEL_KEY);
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,14 +63,20 @@ const Signup = () => {
     setError(null);
     setLoading(true);
 
-    const startingLevel = getStartingLevel(levelKey);
+    // Auto-derive display name from the local-part of the email so the form
+    // stays single-step. Users can edit it later in Settings.
+    const autoDisplay = (email.split("@")[0] || "Player")
+      .replace(/[^a-zA-Z0-9]/g, " ")
+      .trim()
+      .slice(0, 32) || "Player";
+    const startingLevel = getStartingLevel(DEFAULT_STARTING_LEVEL_KEY);
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          display_name: displayName || "Player",
+          display_name: autoDisplay,
           starting_level: startingLevel.key,
           starting_rating: startingLevel.rating,
         },
@@ -85,8 +90,6 @@ const Signup = () => {
       return;
     }
 
-    // Seed the new profile with the chosen starting ONLINE rating.
-    // (handle_new_user trigger creates the row with defaults; we bump it.)
     const newUserId = data.user?.id;
     if (newUserId) {
       await new Promise((r) => setTimeout(r, 400));
