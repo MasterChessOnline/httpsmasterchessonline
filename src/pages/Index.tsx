@@ -436,7 +436,9 @@ const Index = () => {
 
           {/* Live Activity Feed — real wins, ratings, tournaments */}
           <section id="live-activity" className="scroll-mt-24">
-            <LiveActivityFeed />
+            <LazyMount minHeight={320}>
+              <LiveActivityFeed />
+            </LazyMount>
           </section>
 
           {/* Daily Challenge — directly below the hero, first thing users see */}
