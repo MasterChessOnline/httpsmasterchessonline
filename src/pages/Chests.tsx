@@ -10,6 +10,9 @@ import {
   CHESTS, ChestDef, ChestReward, openChest, getUnlocked, getSpendableXP, getOpenCount, isUnlocked,
 } from "@/lib/chests";
 import ChestOpenCinematic from "@/components/ChestOpenCinematic";
+import BoardSwatch from "@/components/previews/BoardSwatch";
+import PieceSetPreview from "@/components/previews/PieceSetPreview";
+import { getBoardTheme, getPieceStyle } from "@/lib/shop-previews";
 
 export default function Chests() {
   const { profile } = useAuth();
