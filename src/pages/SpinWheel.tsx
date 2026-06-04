@@ -84,18 +84,22 @@ export default function SpinWheel() {
     check();
   }, [user?.id]);
 
-  const spin = async () => {
-    if (!user) { toast({ title: "Sign in to spin", description: "Create a free account to claim daily rewards." }); return; }
-    if (spinning || alreadyClaimed) return;
+  const runSpin = async (paid: boolean) => {
+    if (!user) { toast({ title: "Sign in to spin", description: "Create a free account to claim rewards." }); return; }
+    if (spinning) return;
+    if (!paid && alreadyClaimed) return;
     setSpinning(true);
     setResult(null);
 
-    const { data, error } = await (supabase.rpc as any)("claim_daily_spin");
+    const rpc = paid ? "spin_wheel_paid" : "claim_daily_spin";
+    const { data, error } = await (supabase.rpc as any)(rpc);
     if (error || !data?.ok) {
       setSpinning(false);
-      if (data?.error === "already_claimed") {
+      if (!paid && data?.error === "already_claimed") {
         setAlreadyClaimed(true);
-        toast({ title: "Already spun today", description: "Come back tomorrow for another spin." });
+        toast({ title: "Already spun today", description: "Use a paid spin (100 coins) or come back tomorrow." });
+      } else if (data?.error === "insufficient_coins") {
+        toast({ title: "Not enough coins", description: `You need ${data.needed} more coins.`, variant: "destructive" });
       } else {
         toast({ title: "Spin failed", description: data?.error ?? error?.message ?? "Try again.", variant: "destructive" });
       }
@@ -103,23 +107,29 @@ export default function SpinWheel() {
     }
 
     const seg = pickSegmentForCoins(data.coins);
-    // Land segment center at top pointer. Add 7 full turns for drama.
     const target = 360 * 7 + (360 - (seg.idx * SEG + SEG / 2));
     setAngle(target);
 
     setTimeout(() => {
       setSpinning(false);
-      setAlreadyClaimed(true);
+      if (!paid) setAlreadyClaimed(true);
       setResult({ coins: data.coins, new_balance: data.new_balance, segment: seg });
       emitReward({
         kind: data.coins >= 1000 ? "achievement" : "coin",
         title: `+${data.coins} Coins`,
-        subtitle: data.coins >= 1000 ? "Daily Spin Jackpot!" : "Daily Spin reward",
+        subtitle: paid
+          ? `Paid spin · cost ${data.cost ?? 100}`
+          : data.coins >= 1000 ? "Daily Spin Jackpot!" : "Daily Spin reward",
         amount: data.coins,
       });
       window.dispatchEvent(new CustomEvent("mc:coins-changed"));
+      window.dispatchEvent(new CustomEvent("mc:spin-claimed"));
     }, 4400);
   };
+
+  const spin = () => runSpin(false);
+  const paidSpin = () => runSpin(true);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
