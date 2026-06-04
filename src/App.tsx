@@ -287,6 +287,7 @@ const App = () => (
             <AppBadgeSync />
             <RewardFXLayer />
             <MatchResultLayer />
+            <WelcomeBonusModal />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
