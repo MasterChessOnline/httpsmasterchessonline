@@ -482,7 +482,9 @@ const Play = () => {
         const isEqual = Math.abs(eval_) < 100;
         const longGame = movesPlayed >= currentBot.drawAcceptThreshold;
         const botWinning = aiAdvantage > 200;
-        if ((isEqual || longGame) && !botWinning) {
+        // Nikola (creator's AI clone) never accepts a draw — beat him or lose.
+        const neverDraws = currentBot.id === "nikola-sakotic";
+        if (!neverDraws && (isEqual || longGame) && !botWinning) {
           setDrawAgreed(true);
           setDrawReason("by agreement");
           showBotMessage(currentBot.taunts.onDrawOffer);

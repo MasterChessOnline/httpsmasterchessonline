@@ -3,6 +3,7 @@ import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
+import { BOARD_CONTAINER_CLASS } from "@/lib/board-sizing";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -209,8 +210,8 @@ function PuzzleSolver({ puzzle, tier, onSolved, onBack, replayMode }: SolverProp
 
   return (
     <div className="grid gap-4 md:gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-3 md:space-y-4">
-        <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-3 md:p-4">
+      <div className="space-y-3 md:space-y-4 flex flex-col items-center">
+        <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm p-3 md:p-4 w-full">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Button variant="ghost" size="sm" onClick={onBack} className="h-8 px-2">← Tiers</Button>
@@ -234,17 +235,21 @@ function PuzzleSolver({ puzzle, tier, onSolved, onBack, replayMode }: SolverProp
           </div>
         </div>
 
-        <ChessBoard
-          game={game}
-          flipped={puzzle.side === "b"}
-          selectedSquare={selectedSquare}
-          legalMoves={legalMoves}
-          lastMove={lastMove}
-          isGameOver={status !== "playing"}
-          isPlayerTurn={status === "playing" && playerTurn}
-          hintSquare={hintSquare}
-          onSquareClick={onSquareClick}
-        />
+        {/* Board sized to match Play (Play Online + vs Bots) — large, responsive, capped to viewport. */}
+        <div className="w-full max-w-[min(96vw,560px)] lg:max-w-[min(calc(100svh-8rem),72vw,1200px)]">
+          <ChessBoard
+            game={game}
+            flipped={puzzle.side === "b"}
+            selectedSquare={selectedSquare}
+            legalMoves={legalMoves}
+            lastMove={lastMove}
+            isGameOver={status !== "playing"}
+            isPlayerTurn={status === "playing" && playerTurn}
+            hintSquare={hintSquare}
+            onSquareClick={onSquareClick}
+            className={BOARD_CONTAINER_CLASS}
+          />
+        </div>
 
         <div className="flex flex-wrap gap-2 justify-center">
           {status === "playing" && playerTurn && (
