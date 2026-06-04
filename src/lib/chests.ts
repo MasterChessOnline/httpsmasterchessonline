@@ -13,8 +13,12 @@ export interface ChestReward {
   /** matches keys used in user-settings (board theme key / piece set key) */
   key: string;
   label: string;
-  /** emoji preview */
+  /** emoji preview (fallback only) */
   preview: string;
+  /** registry key (BOARD_THEMES key) — enables real mini-board preview */
+  boardThemeKey?: string;
+  /** registry key (PIECE_STYLES key) — enables real piece preview */
+  pieceStyleKey?: string;
   /** xp granted (only when kind === 'xp') */
   amount?: number;
 }
@@ -46,9 +50,10 @@ export const CHESTS: ChestDef[] = [
     glow: "shadow-[0_0_40px_hsl(30,60%,40%,0.45)]",
     blurb: "A humble starter. Cracks open with a satisfying creak.",
     loot: [
-      { kind: "board", key: "forest", label: "Forest Board", preview: "🌲" },
-      { kind: "board", key: "sand", label: "Desert Sand Board", preview: "🏜️" },
-      { kind: "pieces", key: "cardinal", label: "Cardinal Pieces", preview: "♚" },
+      { kind: "board", key: "forest", label: "Forest Board", preview: "🌲", boardThemeKey: "forest" },
+      { kind: "board", key: "sand", label: "Desert Sand Board", preview: "🏜️", boardThemeKey: "sand" },
+      { kind: "board", key: "brown", label: "Classic Brown Board", preview: "🪵", boardThemeKey: "brown" },
+      { kind: "pieces", key: "cburnett", label: "Cburnett Pieces", preview: "♚", pieceStyleKey: "cburnett" },
       { kind: "xp", key: "xp_50", label: "+50 XP", preview: "✨", amount: 50 },
     ],
   },
@@ -62,10 +67,11 @@ export const CHESTS: ChestDef[] = [
     glow: "shadow-[0_0_50px_hsl(220,15%,75%,0.45)]",
     blurb: "Silver-bound. Smells faintly of old tournament halls.",
     loot: [
-      { kind: "board", key: "marble", label: "Marble Board", preview: "🏛️" },
-      { kind: "board", key: "ice", label: "Glacier Ice Board", preview: "🧊" },
-      { kind: "board", key: "sapphire", label: "Sapphire Board", preview: "💙" },
-      { kind: "pieces", key: "pixel", label: "Pixel Pieces", preview: "👾" },
+      { kind: "board", key: "marble", label: "Marble Royal Board", preview: "🏛️", boardThemeKey: "marble" },
+      { kind: "board", key: "ice", label: "Glacier Ice Board", preview: "🧊", boardThemeKey: "ice" },
+      { kind: "board", key: "sapphire", label: "Sapphire Board", preview: "💙", boardThemeKey: "sapphire" },
+      { kind: "pieces", key: "pixel", label: "Pixel (8-bit) Pieces", preview: "👾", pieceStyleKey: "pixel" },
+      { kind: "pieces", key: "minimal", label: "Modern Minimal Pieces", preview: "♟", pieceStyleKey: "minimal" },
       { kind: "xp", key: "xp_150", label: "+150 XP", preview: "✨", amount: 150 },
     ],
   },
@@ -79,9 +85,11 @@ export const CHESTS: ChestDef[] = [
     glow: "shadow-[0_0_70px_hsl(43,90%,55%,0.55)]",
     blurb: "The classic Nikola-special. Heavy. Loud when it opens.",
     loot: [
-      { kind: "board", key: "gold", label: "Black & Gold Board", preview: "👑" },
-      { kind: "board", key: "midnight", label: "Midnight Board", preview: "🌌" },
-      { kind: "board", key: "emerald", label: "Emerald Board", preview: "💚" },
+      { kind: "board", key: "gold", label: "Black & Gold Board", preview: "👑", boardThemeKey: "gold" },
+      { kind: "board", key: "midnight", label: "Midnight Board", preview: "🌌", boardThemeKey: "midnight" },
+      { kind: "board", key: "emerald", label: "Emerald Board", preview: "💚", boardThemeKey: "emerald" },
+      { kind: "pieces", key: "royal", label: "Golden Royal Pieces", preview: "♛", pieceStyleKey: "royal" },
+      { kind: "pieces", key: "wood3d", label: "Polished Walnut Pieces", preview: "♞", pieceStyleKey: "wood3d" },
       { kind: "xp", key: "xp_500", label: "+500 XP", preview: "✨", amount: 500 },
     ],
   },
@@ -95,9 +103,12 @@ export const CHESTS: ChestDef[] = [
     glow: "shadow-[0_0_90px_hsl(200,90%,70%,0.6)]",
     blurb: "The crown jewel. Reserved for those who really live in the game.",
     loot: [
-      { kind: "board", key: "neon", label: "Neon Cyber Board", preview: "🟣" },
-      { kind: "board", key: "purple", label: "Royal Purple Board", preview: "👑" },
-      { kind: "board", key: "halloween", label: "Halloween Board", preview: "🎃" },
+      { kind: "board", key: "neon", label: "Neon Cyber Board", preview: "🟣", boardThemeKey: "neon" },
+      { kind: "board", key: "purple", label: "Royal Purple Board", preview: "👑", boardThemeKey: "purple" },
+      { kind: "board", key: "halloween", label: "Halloween Board", preview: "🎃", boardThemeKey: "halloween" },
+      { kind: "board", key: "ruby", label: "Ruby Board", preview: "❤️", boardThemeKey: "ruby" },
+      { kind: "pieces", key: "fantasy", label: "Fantasy Pieces", preview: "🦄", pieceStyleKey: "fantasy" },
+      { kind: "pieces", key: "glass", label: "Glass Pieces", preview: "💎", pieceStyleKey: "glass" },
       { kind: "xp", key: "xp_2000", label: "+2000 XP", preview: "✨", amount: 2000 },
     ],
   },
