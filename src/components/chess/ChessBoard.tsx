@@ -638,3 +638,9 @@ function ChessBoardImpl({
     </div>
   );
 }
+
+// Memoized export — skips re-render when props are referentially equal.
+// All callers already pass stable callbacks / primitives, so this dramatically
+// cuts wasted work during bot thinking, opponent latency, or clock ticks.
+const ChessBoard = memo(ChessBoardImpl);
+export default ChessBoard;
