@@ -2702,6 +2702,58 @@ export type Database = {
         Returns: Json
       }
       get_club_role: { Args: { _club: string; _user: string }; Returns: string }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          avatar_frame: string | null
+          avatar_url: string | null
+          bio: string | null
+          bot_games_drawn: number
+          bot_games_lost: number
+          bot_games_played: number
+          bot_games_won: number
+          bot_peak_rating: number
+          bot_rating: number
+          city_key: string | null
+          country: string | null
+          country_flag: string | null
+          created_at: string
+          current_game_id: string | null
+          display_name: string | null
+          favorite_openings: string[] | null
+          followers_count: number
+          following_count: number
+          games_drawn: number
+          games_lost: number
+          games_played: number
+          games_won: number
+          highest_title_key: string | null
+          id: string
+          is_streamer: boolean
+          last_login_reward_date: string | null
+          login_streak: number
+          login_streak_best: number
+          loss_streak: number
+          master_coins: number
+          peak_rating: number
+          profile_banner: string | null
+          push_notifications_enabled: boolean
+          rating: number
+          total_xp: number
+          updated_at: string
+          user_id: string
+          username: string | null
+          welcome_day: number
+          welcome_last_claim: string | null
+          win_streak: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_today_missions: {
         Args: { p_date?: string }
         Returns: {
