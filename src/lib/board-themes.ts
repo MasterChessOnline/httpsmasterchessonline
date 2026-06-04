@@ -226,6 +226,72 @@ export const PIECE_STYLES: PieceStyle[] = [
     glyphs: GLYPHS_STANDARD,
     render: { whiteFill: "#e0f7ff", blackFill: "#2a0a3a", whiteStroke: "rgba(120,200,255,0.9)", blackStroke: "rgba(220,140,255,0.7)", fontWeight: 600, glow: "rgba(160,120,255,0.55)" },
   },
+
+  // === LEGENDARY ELEMENTAL SETS — distinct themed pieces ===
+  {
+    key: "ember",
+    label: "Ember",
+    description: "Glowing coals — radiant orange & deep crimson",
+    mode: "unicode",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#ffd27a", blackFill: "#3a0a04", whiteStroke: "rgba(180,40,0,0.85)", blackStroke: "rgba(255,140,40,0.55)", fontWeight: 600, glow: "rgba(255,120,30,0.7)" },
+  },
+  {
+    key: "aqua",
+    label: "Aqua Crystal",
+    description: "Translucent ocean glass — cyan bloom",
+    mode: "unicode",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#d8f5ff", blackFill: "#062a45", whiteStroke: "rgba(40,140,200,0.9)", blackStroke: "rgba(120,220,255,0.7)", fontWeight: 500, glow: "rgba(80,200,255,0.65)" },
+  },
+  {
+    key: "aurora_p",
+    label: "Aurora",
+    description: "Polar mint-violet shimmer",
+    mode: "unicode",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#c8ffe0", blackFill: "#26143a", whiteStroke: "rgba(60,255,180,0.8)", blackStroke: "rgba(200,140,255,0.7)", fontWeight: 500, glow: "rgba(140,255,200,0.6)" },
+  },
+  {
+    key: "obsidian_p",
+    label: "Obsidian",
+    description: "Volcanic glass with gold edge",
+    mode: "unicode",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#f2c97a", blackFill: "#08070a", whiteStroke: "rgba(120,80,0,0.9)", blackStroke: "rgba(255,200,80,0.55)", fontWeight: 700, glow: "rgba(255,200,80,0.55)" },
+  },
+  {
+    key: "blood_ruby",
+    label: "Blood Ruby",
+    description: "Deep red gemstone with dark facets",
+    mode: "unicode",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#ff8a8a", blackFill: "#3a0010", whiteStroke: "rgba(140,0,20,0.9)", blackStroke: "rgba(255,80,80,0.55)", fontWeight: 600, glow: "rgba(220,40,60,0.6)" },
+  },
+  {
+    key: "jade",
+    label: "Imperial Jade",
+    description: "Carved jade with imperial gold",
+    mode: "unicode",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#bfffd9", blackFill: "#0a2a1a", whiteStroke: "rgba(20,90,50,0.9)", blackStroke: "rgba(180,255,210,0.55)", fontWeight: 600, glow: "rgba(80,220,140,0.55)" },
+  },
+  {
+    key: "frost",
+    label: "Frost Bite",
+    description: "Pure ice — icy blue glow",
+    mode: "unicode",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#eaf8ff", blackFill: "#0c2238", whiteStroke: "rgba(120,180,220,0.9)", blackStroke: "rgba(200,230,255,0.65)", fontWeight: 500, glow: "rgba(180,220,255,0.7)" },
+  },
+  {
+    key: "sakura",
+    label: "Sakura",
+    description: "Cherry blossom petals on dark stone",
+    mode: "unicode",
+    glyphs: GLYPHS_STANDARD,
+    render: { whiteFill: "#ffd6e6", blackFill: "#2a0a18", whiteStroke: "rgba(180,40,90,0.8)", blackStroke: "rgba(255,180,210,0.6)", fontWeight: 500, glow: "rgba(255,120,170,0.6)" },
+  },
 ];
 
 const STORAGE_KEY = "chess-settings";
