@@ -29,12 +29,18 @@ const ACCENT: Record<RewardPayload["kind"], string> = {
 
 export default function RewardFXLayer() {
   const [toasts, setToasts] = useState<ActiveToast[]>([]);
+  const [burst, setBurst] = useState<number | null>(null);
 
   useEffect(() => {
     return onReward((p) => {
       const id = Date.now() + Math.random();
       setToasts((t) => [...t, { ...p, id }]);
       playRewardSound(p.kind, p.rare);
+      // Coin events spawn a floating-coin particle burst across the viewport
+      if (p.kind === "coin" || p.kind === "achievement") {
+        setBurst(id);
+        setTimeout(() => setBurst((b) => (b === id ? null : b)), 1800);
+      }
       setTimeout(() => {
         setToasts((t) => t.filter((x) => x.id !== id));
       }, p.rare ? 3800 : 2600);
@@ -43,6 +49,35 @@ export default function RewardFXLayer() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[300] flex flex-col items-center justify-start pt-24 gap-2">
+      {/* Floating coin particles on coin gain */}
+      {burst != null && (
+        <div className="absolute inset-0 overflow-hidden">
+          {Array.from({ length: 18 }).map((_, i) => (
+            <motion.div
+              key={`p-${burst}-${i}`}
+              className="absolute text-amber-300"
+              initial={{
+                x: typeof window !== "undefined" ? window.innerWidth / 2 : 200,
+                y: typeof window !== "undefined" ? window.innerHeight / 2 : 200,
+                opacity: 0,
+                scale: 0,
+              }}
+              animate={{
+                x: (typeof window !== "undefined" ? window.innerWidth / 2 : 200) + (Math.random() - 0.5) * 600,
+                y: (typeof window !== "undefined" ? window.innerHeight / 2 : 200) + (Math.random() - 0.5) * 500,
+                opacity: [0, 1, 0],
+                scale: [0, 1.2, 0.6],
+                rotate: Math.random() * 540,
+              }}
+              transition={{ duration: 1.5 + Math.random() * 0.4, ease: "easeOut", delay: i * 0.02 }}
+              style={{ fontSize: `${14 + (i % 4) * 6}px`, textShadow: "0 0 12px rgba(251,191,36,0.8)" }}
+            >
+              ●
+            </motion.div>
+          ))}
+        </div>
+      )}
+
       <AnimatePresence>
         {toasts.map((t) => {
           const Icon = ICON[t.kind];
