@@ -5,6 +5,7 @@ import { Crown, Play, Users, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
 import { useEffect, useState } from "react";
+import LiveSocialProof from "@/components/LiveSocialProof";
 
 /**
  * Mobile-first single-screen landing for Instagram bio traffic.
@@ -128,6 +129,9 @@ export default function IgLanding() {
             <p className="text-sm text-muted-foreground">
               No ads. No bot farms. Free forever.
             </p>
+            <div className="flex justify-center pt-2">
+              <LiveSocialProof compact />
+            </div>
           </div>
 
           <div className="space-y-2.5">

@@ -1,84 +1,57 @@
-## Dijagnoza — zašto 10k poseta = 0 prijava
+## Cilj
+Pretvoriti 10k IG posetilaca u registrovane igrace. Trenutno imamo `/ig`, `/play-guest` i skraceni signup. Dodajemo psiholoske okidace + frikciju ka registraciji.
 
-Instagram saobraćaj je 95%+ mobilni, brzo skroluje, dolazi "u prolazu". Trenutni MasterChess landing traži od posetioca da **odluči, klikne CTA, otvori signup, popuni email + password + display name + starting level** pre nego što išta vidi. To je 5+ koraka friction. Drugi problemi koje sam našao:
+## 10 novih mehanizama
 
-1. **Nema "Play instantly" guest moda** — posetilac mora da napravi nalog da bi probao igru. Konkurencija (chess.com, lichess) pušta gosta odmah na šahovsku tablu.
-2. **Hero ne pokazuje proizvod** — slika + tekst, ali nema žive table ili 5-sekundnog demoa. Mobilni korisnik ne razume šta dobija.
-3. **Signup forma traži 4 polja** (email, password, ime, level) — svaki dodatni field obara conversion ~7%. Google login postoji ali nije dovoljno istaknut.
-4. **IG-specific landing ne postoji** — svi linkovi vode na `/` koji je pretrpan (DailyMissions, SpinWheel, LiveActivityFeed, TestimonialsCarousel, Manifesto, WallOfReasons, FounderNote, StickyJoinBar). Mobilno = spor, težak za parsiranje.
-5. **Nema mernih signala** — ne znamo gde tačno odustaju (hero, scroll, signup forma). Bez funela letimo na slepo.
-6. **`?ref=` tracker postoji** ali nema link-in-bio sa eksplicitnim incentivom ("100 coins + special badge ako se registruješ preko @dailychess_12").
+### 1. Exit-Intent Modal sa poklonom
+Kad korisnik krene da zatvori tab (mouse leave gore) → modal: "Cekaj! 500 coina + Bronze badge ako se prijavis sad." CTA Google login. Trigger samo 1x po sesiji (localStorage).
 
-## Plan — 6 ciljanih popravki
+### 2. "Nastavi gde si stao" posle 1. goste igre
+Trenutno `/play-guest` ima modal posle 1 igre. Pojacati: prikazati guest rating ("Tvoj rating: 812") + "Sacuvaj napredak — bez prijave nestaje za 24h". Countdown timer pojacava FOMO.
 
-### 1. Guest "Play Now" mod (najveći impact)
-Dodaj **`/play-guest` rutu**: posetilac odmah pada na šahovsku tablu protiv bota (Easy 800). Posle prve pobede/poraza appear soft prompt: *"Sačuvaj progress i osvoji 200 coins → 1-click Google signup"*. Nema email forme.
+### 3. Social proof traka na `/ig` i `/`
+Live brojac: "🔴 247 igraca online • 1,832 partija danas • Nikola iz Beograda upravo pobedio". Realni podaci iz `online_games` + `profiles`. Auto-rotacija svakih 4s.
 
-- Reuse `BotProfile.tsx` / `bot-engine` logiku, samo bez auth wrappera.
-- Posle 1 odigrane partije: modal sa **jednim** Google dugmetom + "Continue as guest".
-- localStorage čuva guest rating dok se ne uloguje, onda merge u profil.
+### 4. Instagram-only nagrade stranica `/ig-bonus`
+Otkljucava se iz `?ref=ig`. Pokazuje 3 ekskluzivna IG bonusa: 500 coina, "IG Founder" badge, 7 dana Premium tema. CTA "Uzmi sad (Google login)".
 
-### 2. Mobile-first IG landing `/ig` (ili `/start`)
-Posebna minimalna stranica za Instagram bio link:
+### 5. Progressive profiling
+Umesto svih polja odjednom: signup samo email+password → posle 1. pobede pita username → posle 3. partije pita avatar/level. Smanjuje psiholosku barijeru.
 
-```text
-┌──────────────────────────┐
-│  [Live mini šah board]   │  ← animira poslednje 3 partije
-│                          │
-│  Play chess. No ads.     │  ← H1, 6 reči
-│  100% human players.     │
-│                          │
-│  [▶ PLAY NOW] ← big      │  ← vodi na /play-guest
-│  [G] Continue with Google│
-│                          │
-│  ★★★★★ 1,247 igrača      │
-└──────────────────────────┘
-```
+### 6. WhatsApp/Telegram share posle pobede
+Posle guest pobede dugme "Podeli pobedu" → generise sliku finalne pozicije + link `masterchess.live/ig?ref=friend`. Viralna petlja.
 
-Bez Navbara, bez Footera, bez Daily Missions — samo jedan ekran, jedan CTA. Cilj: <2s LCP, 1 odluka.
+### 7. "Igraj sa prijateljem" guest link
+Guest moze generisati 1-click link za partiju sa prijateljem (bez prijave). Posle partije OBA igraca dobijaju prompt za signup sa bonusom.
 
-### 3. Skrati signup formu na 1 polje
-Trenutno: email, password, displayName, startingLevel = 4 polja.
-Novo:
-- **Default**: samo Google dugme (veliko, prvo).
-- "Or email" toggle otkriva **samo email + password** (display_name auto-generisan iz emaila, level postavljen na default 1200, kasnije menja u Settings).
-- Starting level slider premešten u onboarding posle prve partije.
+### 8. Mobilni "Add to Home Screen" prompt
+PWA install banner na `/ig` posle 30s — "Dodaj MasterChess na pocetni ekran". Instalirana app = 5x veca verovatnoca registracije.
 
-### 4. Hero sa živim demoom umesto static slike
-Zameni `heroImage` sa **autoplay loop** poslednje brze partije iz `online_games` (PGN replay, 1 potez/sec). Pokazuje da je sajt živ. Format: ~300px visine, ispod odmah CTA.
+### 9. Streak teaser na guest modu
+Posle 1. partije: "Imas 1-dan streak! Prijavi se da ga sacuvas + udvostrucis coine sutra." Pokazuje vizuelni 7-dan streak grid sa praznim kockicama.
 
-### 5. Analytics funel za IG saobraćaj
-Doda 4 event-tracking tačke u `referrals` ili novu `funnel_events` tabelu:
-- `landing_view` (sa ref kodom)
-- `cta_click` (Play Now / Sign Up)
-- `signup_start` (otvorio formu)
-- `signup_complete`
+### 10. Personalizovani onboarding na osnovu ?ref
+- `?ref=ig` → "Dobrodosao sa Instagrama!" + IG ikonica + bonus
+- `?ref=ig-story` → drugaciji bonus
+- `?ref=ig-reel` → drugaciji
+Sve trackovano u `funnel_events` da znamo koji IG post najbolje radi.
 
-Onda imaš pravu sliku — možda 9000 odlazi na heru, možda 800 klikne CTA i odustane na signup formi. Bez ovog popravljamo na slepo.
+## Prioritet (preporuka)
+**Faza A (max impact, 1 dan):** #1 Exit-intent, #3 Social proof, #9 Streak teaser
+**Faza B (viralnost, 1 dan):** #6 Share pobede, #7 Friend link
+**Faza C (zadrzavanje):** #2 pojacan modal, #4 IG bonus stranica, #5 Progressive profiling, #8 PWA, #10 ref tracking
 
-### 6. IG-specific incentive
-Generiši **link `masterchess.live/?ref=IG&bonus=ig100`** koji:
-- Pokazuje banner: *"@dailychess_12 te poklanja 100 coins + Instagram Founder badge"*
-- Auto-aplicira bonus na prvi signup (kroz postojeći referral RPC, doda se badge insert)
-- Stavi taj link u IG bio sa "swipe up" pričom
+## Tehnicki detalji
+- Exit intent: `mouseleave` event na `document.documentElement` sa `e.clientY < 0`
+- Social proof: novi hook `useLiveActivity()` koji cita iz `online_games` + `profiles` preko Realtime
+- Share image: `html2canvas` na board → blob → Web Share API (fallback download)
+- Friend link: koristi postojeci `online_games` sistem sa `guest_token` u localStorage
+- PWA: vec imamo manifest, dodati `beforeinstallprompt` handler
+- `funnel_events`: nova tabela sa RLS (insert anon, select admin)
 
-## Tehnički detalji
+## Sta NE diramo
+- Postojeci `/play-guest`, `/ig`, `Signup.tsx` core flow ostaje isti
+- Bez izmena RLS politika osim nove `funnel_events` tabele
+- Bez puzzle/static sadrzaja (postuje constraint memory)
 
-- **`/play-guest`**: nova ruta, lazy-loaded, koristi postojeći `bot-engine.ts`. Bez `useAuth` poziva.
-- **`/ig` landing**: jedna komponenta, ne učitava DailyMissions/SpinWheel/Manifesto chunk. Vite lazy import samo neophodnog.
-- **Signup form refactor**: postojeća `Signup.tsx`, sakrij naprednu sekciju iza `<details>` accordion.
-- **Funnel tabela**: `funnel_events (id, event_type, ref_code, session_fp, user_id nullable, created_at)`, owner-only INSERT preko RPC-a. Anon write dozvoljen jer prati anonimne posete.
-- **Hero replay**: SSR-friendly, učitava 1 partiju iz `online_games` (već ima RLS public read jer su online_games čisto za gledanje preko Spectate).
-- **IG badge**: dodaje se u `player_badges` kao `instagram_founder` kad ref=IG.
-
-## Šta NE radimo u ovoj iteraciji
-
-- Ne menjamo glavni `/` landing dramatično (postoji veliki rad oko Manifesto / FounderNote / Human Soul Layer — to ostaje za logovane).
-- Ne diramo postojeću ekonomiju coin-a (samo +100 IG bonus kao referral reward).
-- Ne dodajemo nove auth provajdere.
-
-## Očekivani rezultat
-
-Conversion rate sa ~0% na 3–8% na IG saobraćaju (industrijski prosek za gaming landing sa instant play je 5–12%). Od 10k poseta = 300–800 novih naloga umesto 0.
-
-Reci mi koje od ovih 6 popravki da implementiram prvo, ili "uradi sve" da krenem redom (preporučujem #1 Guest Play + #2 IG landing + #3 skraćena forma kao prvi paket — to su 80% impacta).
+Koju fazu prvo? Ili sve odjednom?

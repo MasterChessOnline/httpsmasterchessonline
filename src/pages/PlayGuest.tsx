@@ -256,6 +256,30 @@ export default function PlayGuest() {
                 <p className="text-sm text-muted-foreground">
                   Save your progress, earn <span className="text-primary font-semibold">200 coins</span>, and unlock real opponents.
                 </p>
+
+                {/* Streak teaser */}
+                <div className="rounded-xl border border-primary/25 bg-primary/5 p-3 space-y-2">
+                  <div className="text-[11px] uppercase tracking-wider text-primary font-semibold">
+                    🔥 Day 1 streak started
+                  </div>
+                  <div className="flex justify-center gap-1.5">
+                    {Array.from({ length: 7 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-6 w-6 rounded-md border ${
+                          i === 0
+                            ? "bg-primary/80 border-primary text-[10px] font-bold text-background flex items-center justify-center"
+                            : "bg-card/40 border-border/60"
+                        }`}
+                      >
+                        {i === 0 ? "1" : ""}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    Sign up to keep it · day 7 = <span className="text-primary font-semibold">2× coins</span>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2.5">
