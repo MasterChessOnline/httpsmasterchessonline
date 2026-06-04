@@ -53,7 +53,7 @@ export default function PlayGuest() {
       if (g.isCheckmate()) result = g.turn() === "b" ? "win" : "loss";
       setOutcome(result);
       setPhase("ended");
-      playChessSound("game-end");
+      playChessSound(result === "win" ? "victory" : "gameOver");
     }
   }, []);
 
@@ -149,6 +149,7 @@ export default function PlayGuest() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <Seo
+        path="/play-guest"
         title="Play Chess Instantly — No Signup Needed | MasterChess"
         description="Play a free game of chess against our friendly bot. No account, no email. Just click and play."
       />

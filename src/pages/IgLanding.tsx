@@ -37,6 +37,7 @@ export default function IgLanding() {
   return (
     <div className="min-h-[100dvh] relative overflow-hidden bg-gradient-to-b from-background via-background to-background/90 flex flex-col">
       <Seo
+        path="/ig"
         title="MasterChess — Play Chess Now"
         description="Play live chess instantly. No ads, no bots farming you. 100% human players. Free forever."
       />
