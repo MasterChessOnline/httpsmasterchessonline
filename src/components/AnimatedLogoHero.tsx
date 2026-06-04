@@ -4,7 +4,7 @@ import { Crown } from "lucide-react";
 const PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
 /**
- * Massive cinematic MASTERCHESS.LIVE wordmark.
+ * Massive cinematic MASTERCHESS wordmark.
  * - Gold gradient sweep across the type
  * - Floating chess-piece particles
  * - GPU-only transforms (translate/scale/opacity) for 60fps on mobile
