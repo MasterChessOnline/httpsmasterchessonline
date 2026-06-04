@@ -121,6 +121,7 @@ const SmartNotifier = lazy(() => import("@/components/SmartNotifier"));
 const AppBadgeSync = lazy(() => import("@/components/AppBadgeSync"));
 const RewardFXLayer = lazy(() => import("@/components/RewardFXLayer"));
 const MatchResultLayer = lazy(() => import("@/components/MatchResultLayer"));
+const WelcomeBonusModal = lazy(() => import("@/components/WelcomeBonusModal"));
 const Shop = lazy(() => import("./pages/Shop"));
 const SpinWheel = lazy(() => import("./pages/SpinWheel"));
 const queryClient = new QueryClient();
@@ -287,6 +288,7 @@ const App = () => (
             <AppBadgeSync />
             <RewardFXLayer />
             <MatchResultLayer />
+            <WelcomeBonusModal />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
