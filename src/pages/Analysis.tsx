@@ -261,7 +261,10 @@ export default function Analysis() {
   }, [currentFen, depth, engineReady]);
 
   // ── Game Review: classify each PGN move and compute accuracy ──
-  const reviewClassifications = useMemo<MoveClass[]>(() => {
+  // Base classifications (purely from engine eval + material). Book labels are
+  // applied AFTER, only when the played move is actually verified in the
+  // MasterChess opening database. A blunder is never hidden behind "Book".
+  const baseClassifications = useMemo<MoveClass[]>(() => {
     if (!pgnComplete || pgnMoveEvals.length === 0) return [];
     const PIECE_VAL: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
     const materialFor = (fen: string, color: "w" | "b"): number => {
@@ -284,22 +287,62 @@ export default function Analysis() {
       const matBefore = materialFor(cur.fenBefore, cur.color);
       const matAfter = materialFor(cur.fen, cur.color);
       const sacrificed = Math.max(0, matBefore - matAfter);
-      const raw = classifyMove({
+      out.push(classifyMove({
         beforeEval: { cp: prev.eval, mate: prev.mate },
         afterEval: { cp: cur.eval, mate: cur.mate },
         color: cur.color,
         isBookMove: false,
         legalCount: legalCountFor(cur.fenBefore),
         materialSacrificed: sacrificed,
-      }).classification;
-      // Only call it "book" when it's plausibly theory (early ply + engine-approved).
-      // A blunder in the opening must NOT be hidden behind a Book label.
-      const inOpening = i < 12;
-      const isTheoryQuality = raw === "best" || raw === "good";
-      out.push(inOpening && isTheoryQuality ? "book" : raw);
+      }).classification);
     }
     return out;
   }, [pgnComplete, pgnMoveEvals]);
+
+  // Async-verified book moves. Index → true if that move's position exists in
+  // the master DB AND the played SAN is a real master continuation with at
+  // least a handful of games. If lookup fails or the move isn't in book, the
+  // engine-derived classification is used instead.
+  const [bookFlags, setBookFlags] = useState<boolean[]>([]);
+  useEffect(() => {
+    if (!pgnComplete || pgnMoveEvals.length === 0) { setBookFlags([]); return; }
+    let cancelled = false;
+    (async () => {
+      const flags: boolean[] = new Array(pgnMoveEvals.length).fill(false);
+      // Walk plies in order; stop scanning after we leave book on the same side.
+      let whiteOutOfBook = false;
+      let blackOutOfBook = false;
+      const MAX_PLY = 30;
+      for (let i = 0; i < Math.min(pgnMoveEvals.length, MAX_PLY); i++) {
+        const m = pgnMoveEvals[i];
+        const sideOut = m.color === "w" ? whiteOutOfBook : blackOutOfBook;
+        if (sideOut) continue;
+        try {
+          const data = await fetchMasterChessExplorer(m.fenBefore);
+          if (cancelled) return;
+          const hit = data.moves.find(x => x.san === m.san);
+          if (hit && hit.games >= 5) {
+            flags[i] = true;
+          } else {
+            if (m.color === "w") whiteOutOfBook = true; else blackOutOfBook = true;
+          }
+        } catch {
+          if (m.color === "w") whiteOutOfBook = true; else blackOutOfBook = true;
+        }
+      }
+      if (!cancelled) setBookFlags(flags);
+    })();
+    return () => { cancelled = true; };
+  }, [pgnComplete, pgnMoveEvals]);
+
+  const reviewClassifications = useMemo<MoveClass[]>(() => {
+    return baseClassifications.map((c, i) => {
+      // Only override with "book" when (a) DB-verified AND (b) move wasn't a
+      // mistake/blunder/etc — an opening blunder stays a blunder.
+      if (bookFlags[i] && (c === "best" || c === "good")) return "book";
+      return c;
+    });
+  }, [baseClassifications, bookFlags]);
 
   const reviewAccuracy = useMemo(() => {
     if (!pgnComplete || pgnMoveEvals.length === 0) return { white: 0, black: 0 };
