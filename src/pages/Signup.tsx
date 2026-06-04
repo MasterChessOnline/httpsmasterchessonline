@@ -39,8 +39,7 @@ const FloatingPiece = ({ piece, index }: { piece: string; index: number }) => (
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [levelKey, setLevelKey] = useState<string>(DEFAULT_STARTING_LEVEL_KEY);
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,14 +63,20 @@ const Signup = () => {
     setError(null);
     setLoading(true);
 
-    const startingLevel = getStartingLevel(levelKey);
+    // Auto-derive display name from the local-part of the email so the form
+    // stays single-step. Users can edit it later in Settings.
+    const autoDisplay = (email.split("@")[0] || "Player")
+      .replace(/[^a-zA-Z0-9]/g, " ")
+      .trim()
+      .slice(0, 32) || "Player";
+    const startingLevel = getStartingLevel(DEFAULT_STARTING_LEVEL_KEY);
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          display_name: displayName || "Player",
+          display_name: autoDisplay,
           starting_level: startingLevel.key,
           starting_rating: startingLevel.rating,
         },
@@ -85,8 +90,6 @@ const Signup = () => {
       return;
     }
 
-    // Seed the new profile with the chosen starting ONLINE rating.
-    // (handle_new_user trigger creates the row with defaults; we bump it.)
     const newUserId = data.user?.id;
     if (newUserId) {
       await new Promise((r) => setTimeout(r, 400));
@@ -174,97 +177,99 @@ const Signup = () => {
             </motion.div>
           </div>
 
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/50" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card/80 px-3 text-muted-foreground tracking-wider">or</span>
-            </div>
-          </div>
-
-          {/* Email form */}
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="displayName" className="text-xs font-medium text-muted-foreground">Display Name</Label>
-              <Input
-                id="displayName"
-                type="text"
-                placeholder="GrandmasterX"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                maxLength={50}
-                autoComplete="name"
-                className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="At least 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  autoComplete="new-password"
-                  className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 pr-10 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+          {/* Divider — only when email form is open */}
+          {showEmailForm && (
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border/50" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card/80 px-3 text-muted-foreground tracking-wider">or with email</span>
               </div>
             </div>
+          )}
 
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2.5 border border-destructive/20"
-                role="alert"
-              >
-                {error}
-              </motion.p>
-            )}
+          {!showEmailForm ? (
+            <button
+              type="button"
+              onClick={() => setShowEmailForm(true)}
+              className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors py-2"
+            >
+              Or sign up with email →
+            </button>
+          ) : (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="At least 6 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 pr-10 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
 
-            <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
-              <Button
-                type="submit"
-                className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-glow relative overflow-hidden group"
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Create Account
-                  </>
-                )}
-                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-              </Button>
-            </motion.div>
-          </form>
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2.5 border border-destructive/20"
+                  role="alert"
+                >
+                  {error}
+                </motion.p>
+              )}
+
+              <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-glow relative overflow-hidden group"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Create Account
+                    </>
+                  )}
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                </Button>
+              </motion.div>
+
+              <p className="text-[11px] text-center text-muted-foreground">
+                We'll generate a display name from your email — you can change it later in Settings.
+              </p>
+            </form>
+          )}
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{" "}
