@@ -9,6 +9,9 @@ import { SHOP_ITEMS, SHOP_CATEGORIES, RARITY_META, type ShopItem, type ShopItemT
 import { purchaseShopItem, getInventory } from "@/lib/coins";
 import { emitReward } from "@/lib/reward-fx";
 import { toast } from "@/hooks/use-toast";
+import { getShopPreview } from "@/lib/shop-previews";
+import BoardSwatch from "@/components/previews/BoardSwatch";
+import PieceSetPreview from "@/components/previews/PieceSetPreview";
 
 export default function Shop() {
   const { user, profile, refreshProfile } = useAuth();
