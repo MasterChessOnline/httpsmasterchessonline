@@ -132,7 +132,7 @@ export default function Shop() {
                 <div className="relative h-36 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 flex items-center justify-center overflow-hidden p-3">
                   {preview.kind === "board" ? (
                     <div className="w-full max-w-[120px]">
-                      <BoardSwatch light={preview.light} dark={preview.dark} size={6} />
+                      <BoardSwatch light={preview.light} dark={preview.dark} size={6} themeKey={preview.themeKey} />
                     </div>
                   ) : preview.kind === "pieces" ? (
                     <div className="w-full max-w-[150px]">
@@ -237,7 +237,7 @@ function UnlockOverlay({ item, onClose }: { item: ShopItem | null; onClose: () =
             </div>
             <div className="mt-5 flex items-center justify-center">
               {preview.kind === "board" ? (
-                <div className="w-44"><BoardSwatch light={preview.light} dark={preview.dark} size={8} /></div>
+                <div className="w-44"><BoardSwatch light={preview.light} dark={preview.dark} size={8} themeKey={preview.themeKey} /></div>
               ) : preview.kind === "pieces" ? (
                 <div className="w-56"><PieceSetPreview style={preview.style} rich /></div>
               ) : (

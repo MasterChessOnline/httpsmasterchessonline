@@ -33,6 +33,10 @@ const SHOP_BOARD_ALIAS: Record<string, string> = {
   "board:obsidian_gold": "obsidian",
   "board:magma_glass": "magma",
   "board:cosmic_nebula": "nebula",
+  "board:lava_river": "lava_alt",
+  "board:tidal_wave": "aqua_alt",
+  "board:polar_aurora": "aurora_alt",
+  "board:andromeda": "nebula_alt",
 };
 
 // Exotic palettes invented purely for shop-only boards that don't map cleanly
@@ -51,11 +55,18 @@ const SHOP_PIECE_ALIAS: Record<string, string> = {
   "pieces:dragon": "fantasy",
   "pieces:cyber_neon": "neon",
   "pieces:mythic": "fantasy",
-  // New legendary piece sets — reuse strongest visual styles
-  "pieces:inferno": "fantasy",
-  "pieces:abyssal": "glass",
-  "pieces:celestial": "royal",
-  "pieces:obsidian": "monochrome",
+  // New legendary piece sets → distinct elemental styles
+  "pieces:inferno": "ember",
+  "pieces:abyssal": "aqua",
+  "pieces:celestial": "aurora_p",
+  "pieces:obsidian": "obsidian_p",
+  "pieces:ember": "ember",
+  "pieces:aqua_crystal": "aqua",
+  "pieces:aurora_set": "aurora_p",
+  "pieces:blood_ruby": "blood_ruby",
+  "pieces:jade": "jade",
+  "pieces:frost": "frost",
+  "pieces:sakura": "sakura",
 };
 
 export function getShopPreview(key: string, fallbackEmoji: string): ShopPreview {

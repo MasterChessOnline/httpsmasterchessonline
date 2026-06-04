@@ -60,6 +60,10 @@ export const SHOP_ITEMS: ShopItem[] = [
   { key: "board:obsidian_gold", name: "Obsidian Gold Board", type: "board", price: 4800, rarity: "legendary", preview: "🖤", blurb: "Pure black with gold inlay." },
   { key: "board:magma_glass", name: "Magma Glass Board", type: "board", price: 5200, rarity: "legendary", preview: "🌋", blurb: "Cooled lava sealed under crystal." },
   { key: "board:cosmic_nebula", name: "Cosmic Nebula Board", type: "board", price: 5500, rarity: "legendary", preview: "💫", blurb: "Pink-violet starfield." },
+  { key: "board:lava_river", name: "Lava River Board", type: "board", price: 5200, rarity: "legendary", preview: "🔥", blurb: "Rivers of liquid fire." },
+  { key: "board:tidal_wave", name: "Tidal Wave Board", type: "board", price: 5200, rarity: "legendary", preview: "🌊", blurb: "Shimmering tropical lagoon." },
+  { key: "board:polar_aurora", name: "Polar Aurora Board", type: "board", price: 5400, rarity: "legendary", preview: "🌈", blurb: "Mint & violet sky-veils." },
+  { key: "board:andromeda", name: "Andromeda Board", type: "board", price: 5800, rarity: "legendary", preview: "🌠", blurb: "Cyan & magenta star-dust." },
 
   // ───── PIECES ─────
   { key: "pieces:bronze", name: "Bronze Set", type: "pieces", price: 400, rarity: "common", preview: "🥉" },
@@ -77,6 +81,14 @@ export const SHOP_ITEMS: ShopItem[] = [
   { key: "pieces:abyssal", name: "Abyssal Pieces", type: "pieces", price: 4200, rarity: "legendary", preview: "🌊", blurb: "Carved from deep coral." },
   { key: "pieces:celestial", name: "Celestial Pieces", type: "pieces", price: 4500, rarity: "legendary", preview: "🌠", blurb: "Star-forged royalty." },
   { key: "pieces:obsidian", name: "Obsidian Pieces", type: "pieces", price: 4800, rarity: "legendary", preview: "🖤", blurb: "Black volcanic glass." },
+  // ── New legendary elemental piece sets ──
+  { key: "pieces:ember", name: "Ember Pieces", type: "pieces", price: 4000, rarity: "legendary", preview: "🟥", blurb: "Glowing coals — radiant orange." },
+  { key: "pieces:aqua_crystal", name: "Aqua Crystal Pieces", type: "pieces", price: 4000, rarity: "legendary", preview: "🟦", blurb: "Translucent ocean glass." },
+  { key: "pieces:aurora_set", name: "Aurora Pieces", type: "pieces", price: 4400, rarity: "legendary", preview: "🟩", blurb: "Polar mint-violet shimmer." },
+  { key: "pieces:blood_ruby", name: "Blood Ruby Pieces", type: "pieces", price: 4600, rarity: "legendary", preview: "❤️", blurb: "Deep red gemstone facets." },
+  { key: "pieces:jade", name: "Imperial Jade Pieces", type: "pieces", price: 4600, rarity: "legendary", preview: "🟢", blurb: "Carved jade & imperial gold." },
+  { key: "pieces:frost", name: "Frost Bite Pieces", type: "pieces", price: 4400, rarity: "legendary", preview: "❄️", blurb: "Pure ice with icy glow." },
+  { key: "pieces:sakura", name: "Sakura Pieces", type: "pieces", price: 4400, rarity: "legendary", preview: "🌸", blurb: "Cherry blossom on dark stone." },
 
   // ───── GRAFFITI / STREET ─────
   { key: "board:graffiti_1", name: "Graffiti Set #1", type: "board", price: 1500, rarity: "rare", preview: "🎨" },
