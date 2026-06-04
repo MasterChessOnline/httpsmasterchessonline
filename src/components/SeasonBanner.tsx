@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Calendar } from "lucide-react";
+import { Trophy, Calendar, Crown } from "lucide-react";
+import { Link } from "react-router-dom";
 import { fetchActiveSeason, getSeasonProgress, type SeasonRow } from "@/lib/progression";
 
 export default function SeasonBanner({ compact = false }: { compact?: boolean }) {
