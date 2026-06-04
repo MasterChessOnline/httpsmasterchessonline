@@ -21,8 +21,12 @@ type FX =
 
 function fxFor(key?: string): FX {
   switch (key) {
-    case "lava": case "magma": return key as FX;
-    case "aqua": case "aurora": case "nebula": case "obsidian": return key as FX;
+    case "lava": case "lava_alt": return "lava";
+    case "magma": return "magma";
+    case "aqua": case "aqua_alt": return "aqua";
+    case "aurora": case "aurora_alt": return "aurora";
+    case "nebula": case "nebula_alt": return "nebula";
+    case "obsidian": return "obsidian";
     default: return null;
   }
 }
