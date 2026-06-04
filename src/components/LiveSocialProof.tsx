@@ -16,21 +16,23 @@ export default function LiveSocialProof({ compact = false }: { compact?: boolean
     let alive = true;
     const load = async () => {
       try {
-        const since = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const since = new Date(Date.now() - 3 * 60 * 1000).toISOString();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const [{ count: online }, { count: gamesToday }] = await Promise.all([
+        const [{ count: activeGames }, { count: gamesToday }] = await Promise.all([
           supabase
-            .from("profiles")
+            .from("online_games")
             .select("id", { count: "exact", head: true })
-            .gte("last_seen", since),
+            .eq("status", "active")
+            .gte("last_move_at", since),
           supabase
             .from("online_games")
             .select("id", { count: "exact", head: true })
             .gte("created_at", today.toISOString()),
         ]);
         if (!alive) return;
-        setStats({ online: online ?? 0, gamesToday: gamesToday ?? 0 });
+        // Players online ≈ active games × 2 (lower bound — real, not faked)
+        setStats({ online: (activeGames ?? 0) * 2, gamesToday: gamesToday ?? 0 });
       } catch {
         // silent — hide bar
       }
