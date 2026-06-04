@@ -253,8 +253,19 @@ export default function SpinWheel() {
             className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-extrabold px-12 py-7 text-xl rounded-2xl shadow-[0_0_30px_rgba(251,191,36,0.45)] hover:brightness-110 hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <Sparkles className="w-5 h-5 mr-2" />
-            {checking ? "Loading…" : spinning ? "Spinning…" : alreadyClaimed ? "Come back tomorrow" : user ? "SPIN — Free" : "Sign in to spin"}
+            {checking ? "Loading…" : spinning ? "Spinning…" : alreadyClaimed ? "Daily spin claimed" : user ? "SPIN — Free" : "Sign in to spin"}
           </Button>
+          {user && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={spinning}
+              onClick={paidSpin}
+              className="border-amber-500/50 text-amber-200 hover:bg-amber-500/10"
+            >
+              <Coins className="w-3.5 h-3.5 mr-1.5" /> Spin again — 100 coins
+            </Button>
+          )}
           {!user && (
             <Link to="/signup" className="text-xs text-primary hover:underline">Create a free account →</Link>
           )}
