@@ -42,12 +42,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    setProfile(data as Profile | null);
+    // Sensitive columns (master_coins, login_streak, welcome_*, push_notifications_enabled, etc.)
+    // are not exposed through PostgREST. Use SECURITY DEFINER RPC for the owner's full row.
+    const { data } = await supabase.rpc("get_my_profile");
+    const row = Array.isArray(data) ? data[0] : data;
+    setProfile((row ?? null) as Profile | null);
   };
 
   const refreshProfile = async () => {
