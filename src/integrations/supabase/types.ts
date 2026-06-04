@@ -2846,6 +2846,18 @@ export type Database = {
           season_xp: number
         }[]
       }
+      bump_mission_progress: {
+        Args: {
+          p_amount?: number
+          p_mission_type: string
+          p_set_absolute?: number
+        }
+        Returns: Json
+      }
+      bump_win_streak: {
+        Args: { p_rating_type: string; p_result: string }
+        Returns: Json
+      }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
       claim_afk_win: { Args: { p_game_id: string }; Returns: Json }
       claim_battle_pass_tier: { Args: { _tier: number }; Returns: Json }
