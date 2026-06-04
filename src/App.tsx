@@ -41,6 +41,7 @@ const About = lazy(() => import("./pages/About"));
 const FairPlay = lazy(() => import("./pages/FairPlay"));
 const Referrals = lazy(() => import("./pages/Referrals"));
 const BattlePass = lazy(() => import("./pages/BattlePass"));
+const BattleRoyale = lazy(() => import("./pages/BattleRoyale"));
 const Press = lazy(() => import("./pages/Press"));
 const Streamers = lazy(() => import("./pages/Streamers"));
 const EmbedRating = lazy(() => import("./pages/EmbedRating"));
@@ -204,6 +205,7 @@ function AnimatedRoutes() {
           <Route path="/fair-play" element={<FairPlay />} />
           <Route path="/referrals" element={<Referrals />} />
           <Route path="/battle-pass" element={<BattlePass />} />
+          <Route path="/battle-royale" element={<BattleRoyale />} />
           <Route path="/press" element={<Press />} />
           <Route path="/streamers" element={<Streamers />} />
           <Route path="/embed/rating/:username" element={<EmbedRating />} />
