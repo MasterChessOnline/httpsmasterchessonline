@@ -13,18 +13,36 @@ interface Props {
 export default function CoinBalancePill({ compact, className = "" }: Props) {
   const { balance } = useCoinBalance();
   const prev = useRef<number | null>(null);
+  const [display, setDisplay] = useState<number>(0);
   const [delta, setDelta] = useState<number | null>(null);
 
+  // Animated count-up between previous and new balance
   useEffect(() => {
     if (balance == null) return;
-    if (prev.current != null && balance !== prev.current) {
-      const d = balance - prev.current;
-      setDelta(d);
-      const t = setTimeout(() => setDelta(null), 1400);
-      return () => clearTimeout(t);
+    const from = prev.current ?? balance;
+    const to = balance;
+    if (from === to) {
+      setDisplay(to);
+      return;
     }
-    prev.current = balance;
+    const diff = to - from;
+    setDelta(diff);
+    const duration = Math.min(1200, 380 + Math.abs(diff) * 4);
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(Math.round(from + diff * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else prev.current = to;
+    };
+    raf = requestAnimationFrame(tick);
+    const t = setTimeout(() => setDelta(null), 1400);
+    return () => { cancelAnimationFrame(raf); clearTimeout(t); };
   }, [balance]);
+
 
   if (balance == null) return null;
   const formatted = balance.toLocaleString();
