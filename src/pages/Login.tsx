@@ -282,7 +282,11 @@ const Login = () => {
           </p>
         </div>
       </motion.div>
-      
+      <GoogleCountryNameModal
+        open={googleModalOpen}
+        onClose={() => setGoogleModalOpen(false)}
+        onError={(msg) => setError(msg)}
+      />
     </div>
   );
 };
