@@ -45,17 +45,11 @@ const Signup = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleModalOpen, setGoogleModalOpen] = useState(false);
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setError(null);
-    setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      setError(result.error.message);
-      setGoogleLoading(false);
-    }
+    setGoogleModalOpen(true);
   };
   const navigate = useNavigate();
 
