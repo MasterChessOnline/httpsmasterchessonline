@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, X } from "lucide-react";
 import type { ChestDef, ChestReward } from "@/lib/chests";
+import BoardSwatch from "@/components/previews/BoardSwatch";
+import PieceSetPreview from "@/components/previews/PieceSetPreview";
+import { getBoardTheme, getPieceStyle } from "@/lib/shop-previews";
 
 interface Props {
   chest: ChestDef | null;
