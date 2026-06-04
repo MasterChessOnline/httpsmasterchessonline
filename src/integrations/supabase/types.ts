@@ -125,6 +125,41 @@ export type Database = {
         }
         Relationships: []
       }
+      battle_pass_claims: {
+        Row: {
+          claimed_at: string
+          id: string
+          reward_coins: number
+          season_id: string
+          tier_index: number
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          id?: string
+          reward_coins?: number
+          season_id: string
+          tier_index: number
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          id?: string
+          reward_coins?: number
+          season_id?: string
+          tier_index?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_pass_claims_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bot_games: {
         Row: {
           bot_key: string | null
@@ -2719,8 +2754,18 @@ export type Database = {
         Args: { p_game_id: string; p_win_streak?: number }
         Returns: Json
       }
+      battle_pass_progress: {
+        Args: { _user: string }
+        Returns: {
+          ends_at: string
+          season_id: string
+          season_name: string
+          season_xp: number
+        }[]
+      }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
       claim_afk_win: { Args: { p_game_id: string }; Returns: Json }
+      claim_battle_pass_tier: { Args: { _tier: number }; Returns: Json }
       claim_daily_mission: { Args: { p_key: string }; Returns: Json }
       claim_daily_reward: { Args: never; Returns: Json }
       claim_daily_spin: { Args: never; Returns: Json }
