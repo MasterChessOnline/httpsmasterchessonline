@@ -329,7 +329,7 @@ const Index = () => {
               <InstallAppButton variant="hero" />
             </motion.div>
 
-            {/* Play vs Nikola — direct challenge against the creator's AI clone */}
+            {/* Play vs Nikola — direct challenge against the creator */}
             <motion.div
               className="mt-4 mx-auto max-w-xl"
               initial={{ opacity: 0, y: 10 }}
@@ -354,7 +354,7 @@ const Index = () => {
               >
                 <img
                   src={nikolaAvatar}
-                  alt="Nikola Šakotić — creator's AI clone, 3500 rated"
+                  alt="Nikola Šakotić — creator of MasterChess, 3500 rated"
                   width={64}
                   height={64}
                   loading="lazy"
@@ -362,17 +362,17 @@ const Index = () => {
                 />
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-primary">
-                    Play vs Nikola · 🇷🇸 3500
+                    🇷🇸 Nikola Sakotić · Creator · 3500
                   </p>
                   <h3 className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
-                    Challenge the creator's AI clone
+                    Play against the MasterChess creator himself
                   </h3>
                   <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                    Knows every opening, every variation. Beat me and you've made history.
+                    I built this entire site. I know every opening, every trap, every endgame. Think you can beat me?
                   </p>
                 </div>
                 <span className="hidden sm:inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold px-4 py-2 shadow-md group-hover:scale-105 transition-transform shrink-0">
-                  Play now →
+                  Challenge me →
                 </span>
               </Link>
             </motion.div>
