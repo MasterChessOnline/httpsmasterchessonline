@@ -22,6 +22,8 @@ import NotFound from "./pages/NotFound";
 import PlayGuest from "./pages/PlayGuest";
 import IgLanding from "./pages/IgLanding";
 import IgBonus from "./pages/IgBonus";
+const StyleQuiz = lazy(() => import("./pages/StyleQuiz"));
+const BeatMe = lazy(() => import("./pages/BeatMe"));
 
 // Lazy-loaded routes — split into separate chunks to shrink initial bundle
 const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
@@ -225,6 +227,9 @@ function AnimatedRoutes() {
           <Route path="/ig" element={<IgLanding />} />
           <Route path="/ig-bonus" element={<IgBonus />} />
           <Route path="/start" element={<IgLanding />} />
+          <Route path="/quiz" element={<StyleQuiz />} />
+          <Route path="/beat-me" element={<BeatMe />} />
+          <Route path="/beat-me/:handle" element={<BeatMe />} />
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
           <Route path="/guides" element={<Guides />} />
           <Route path="/guide/:slug" element={<Guide />} />
