@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
 
 import AuthAura from "@/components/auth/AuthAura";
+import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -44,17 +45,11 @@ const Signup = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleModalOpen, setGoogleModalOpen] = useState(false);
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setError(null);
-    setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      setError(result.error.message);
-      setGoogleLoading(false);
-    }
+    setGoogleModalOpen(true);
   };
   const navigate = useNavigate();
 
@@ -279,7 +274,11 @@ const Signup = () => {
           </p>
         </div>
       </motion.div>
-      
+      <GoogleCountryNameModal
+        open={googleModalOpen}
+        onClose={() => setGoogleModalOpen(false)}
+        onError={(msg) => setError(msg)}
+      />
     </div>
   );
 };

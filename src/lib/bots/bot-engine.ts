@@ -13,7 +13,7 @@
 import { Chess } from "chess.js";
 import { evaluateBoard, getAIMove, type Difficulty } from "../chess-ai";
 import type { BotProfile } from "./profiles";
-import { OPENING_BOOKS, PLAYSTYLES, type Playstyle } from "./playstyles";
+import { OPENING_BOOKS, PLAYSTYLES, type Playstyle, type OpeningRepertoire } from "./playstyles";
 import { getStockfishEngine } from "../stockfish-engine";
 
 export interface BotMoveDecision {
@@ -117,6 +117,32 @@ function settingsForRating(rating: number): EngineSettings {
 
 /* ---------- Opening book lookup ---------- */
 
+// Per-bot "current game" repertoire lock. When a fresh game starts (history
+// length === 0), the bot picks ONE random repertoire from its catalog and
+// commits to it for the entire game. Next game ⇒ different opening.
+// This makes Nikola (and any bot with multiple repertoires) actually rotate
+// through openings instead of statistically favoring the first few.
+const sessionOpeningByBot = new Map<string, OpeningRepertoire>();
+let lastHistoryLenByBot = new Map<string, number>();
+
+function pickSessionRepertoire(bot: BotProfile, ply: number): OpeningRepertoire[] {
+  if (bot.openings.length <= 1) return bot.openings;
+  const prevLen = lastHistoryLenByBot.get(bot.id) ?? -1;
+  // Reset whenever we're at the start of a new game OR ply has gone backwards
+  // (e.g. takebacks, "New game" button). Re-pick one repertoire that's
+  // different from the previous one when possible.
+  if (ply === 0 || ply < prevLen) {
+    const prior = sessionOpeningByBot.get(bot.id);
+    const pool = bot.openings.filter((o) => o !== prior);
+    const choices = pool.length > 0 ? pool : bot.openings;
+    const pick = choices[Math.floor(Math.random() * choices.length)];
+    sessionOpeningByBot.set(bot.id, pick);
+  }
+  lastHistoryLenByBot.set(bot.id, ply);
+  const locked = sessionOpeningByBot.get(bot.id);
+  return locked ? [locked] : bot.openings;
+}
+
 function tryOpeningBook(game: Chess, bot: BotProfile): string | null {
   const ply = game.history().length;
   if (ply >= bot.bookDepth) return null;
@@ -124,8 +150,10 @@ function tryOpeningBook(game: Chess, bot: BotProfile): string | null {
   const history = game.history(); // SAN
   const legal = game.moves();
 
+  const activeRepertoires = pickSessionRepertoire(bot, ply);
+
   const candidates: string[] = [];
-  for (const repertoire of bot.openings) {
+  for (const repertoire of activeRepertoires) {
     const lines = OPENING_BOOKS[repertoire];
     if (!lines) continue;
     for (const line of lines) {
