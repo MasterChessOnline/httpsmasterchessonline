@@ -86,12 +86,21 @@ const Profile = () => {
   useEffect(() => {
     if (!userId) return;
 
-    supabase.from("profiles").select("*").eq("user_id", userId).single()
-      .then(({ data }) => {
+    const loadProfile = async () => {
+      if (isOwnProfile) {
+        const { data } = await supabase.rpc("get_my_profile");
+        const row = Array.isArray(data) ? data[0] : data;
+        setProfileData(row as ProfileData | null);
+        if (row) setEditName((row as ProfileData).display_name || "");
+      } else {
+        const safeCols = "id,user_id,username,display_name,avatar_url,rating,peak_rating,bio,country,country_flag,city_key,games_played,games_won,games_lost,games_drawn,followers_count,following_count,highest_title_key,is_streamer,bot_rating,bot_peak_rating,bot_games_played,bot_games_won,bot_games_lost,bot_games_drawn,favorite_openings,avatar_frame,profile_banner,total_xp,current_game_id,created_at,updated_at";
+        const { data } = await supabase.from("profiles").select(safeCols).eq("user_id", userId).single();
         setProfileData(data as ProfileData | null);
         if (data) setEditName((data as ProfileData).display_name || "");
-        setLoading(false);
-      });
+      }
+      setLoading(false);
+    };
+    loadProfile();
 
     supabase.from("online_games").select("*")
       .or(`white_player_id.eq.${userId},black_player_id.eq.${userId}`)
