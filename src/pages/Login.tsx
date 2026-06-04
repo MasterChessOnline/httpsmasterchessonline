@@ -10,6 +10,7 @@ import { Crown, LogIn, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
 import AuthAura from "@/components/auth/AuthAura";
+import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
