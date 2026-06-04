@@ -13,6 +13,7 @@ import { playChessSound } from "@/lib/chess-sounds";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { celebrate } from "@/lib/celebrate";
 
 // Easy bot — friendly first experience
 const GUEST_BOT = BOT_PROFILES.find((b) => b.id === "pawn-pablo") ?? BOT_PROFILES[1];
@@ -54,6 +55,7 @@ export default function PlayGuest() {
       setOutcome(result);
       setPhase("ended");
       playChessSound(result === "win" ? "victory" : "gameOver");
+      if (result === "win") celebrate("big");
     }
   }, []);
 

@@ -42,7 +42,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [magicLoading, setMagicLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
@@ -61,6 +63,7 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -71,6 +74,23 @@ const Login = () => {
     } else {
       navigate("/dashboard");
     }
+  };
+
+  const handleMagicLink = async () => {
+    setError(null);
+    setInfo(null);
+    if (!email) {
+      setError("Enter your email above first.");
+      return;
+    }
+    setMagicLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+    });
+    setMagicLoading(false);
+    if (error) setError(error.message);
+    else setInfo("Check your inbox — we sent you a one-click sign-in link.");
   };
 
   const handleAppleLogin = async () => {
@@ -221,6 +241,15 @@ const Login = () => {
                 {error}
               </motion.p>
             )}
+            {info && (
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-primary bg-primary/10 rounded-lg px-3 py-2.5 border border-primary/20"
+              >
+                {info}
+              </motion.p>
+            )}
 
             <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
               <Button
@@ -239,6 +268,15 @@ const Login = () => {
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
               </Button>
             </motion.div>
+
+            <button
+              type="button"
+              onClick={handleMagicLink}
+              disabled={magicLoading}
+              className="w-full text-xs text-muted-foreground hover:text-primary transition-colors py-1"
+            >
+              {magicLoading ? "Sending magic link…" : "Or email me a one-click sign-in link →"}
+            </button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
