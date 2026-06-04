@@ -190,9 +190,9 @@ export default function SmartNotifier() {
           "postgres_changes",
           { event: "UPDATE", schema: "public", table: "clan_quests", filter: `club_id=eq.${myClubId}` },
           (payload: any) => {
-            const prev = payload?.old?.progress ?? 0;
-            const next = payload?.new?.progress ?? 0;
-            const target = payload?.new?.target ?? 1;
+            const prev = payload?.old?.current_value ?? 0;
+            const next = payload?.new?.current_value ?? 0;
+            const target = payload?.new?.target_value ?? 1;
             if (next >= target && prev < target) {
               toast.success("🏆 Clan quest complete!", {
                 description: "Everyone in your clan earned coins.",
