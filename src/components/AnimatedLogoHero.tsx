@@ -4,7 +4,7 @@ import { Crown } from "lucide-react";
 const PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
 /**
- * Massive cinematic MASTERCHESS.LIVE wordmark.
+ * Massive cinematic MASTERCHESS wordmark.
  * - Gold gradient sweep across the type
  * - Floating chess-piece particles
  * - GPU-only transforms (translate/scale/opacity) for 60fps on mobile
@@ -81,12 +81,6 @@ export default function AnimatedLogoHero({ tagline }: { tagline?: string }) {
             Master
           </span>
           <span className="text-foreground">Chess</span>
-          <span
-            className="ml-2 align-baseline text-[0.32em] font-bold tracking-[0.25em] text-primary/80"
-            style={{ verticalAlign: "0.55em" }}
-          >
-            .LIVE
-          </span>
         </span>
 
         {/* sweep highlight bar */}
