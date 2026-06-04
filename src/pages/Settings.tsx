@@ -548,7 +548,7 @@ const Settings = () => {
                 <Label className="text-xs text-muted-foreground">Board theme</Label>
                 <span className="text-[10px] text-muted-foreground/60 font-mono">{BOARD_THEMES.length} options</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 auto-rows-fr items-stretch">
                 {BOARD_THEMES.map(t => {
                   const locked = isBoardLocked(t.key);
                   return (
