@@ -925,7 +925,7 @@ const Play = () => {
                   onClick={() => startMatchmaking(bot)}
                   className="rounded-xl p-3 text-center transition-all border border-border/40 bg-card hover:border-primary/40 hover:shadow-glow basis-[calc(33.333%-0.5rem)] sm:basis-[calc(25%-0.5rem)] max-w-[140px]"
                 >
-                  <span className="text-3xl block mb-1">{bot.avatar}</span>
+                  <BotAvatar avatar={bot.avatar} alt={bot.name} className="block mb-1 mx-auto w-10 h-10" emojiClassName="text-3xl block mb-1" />
                   <span className="text-xs font-bold block text-foreground leading-tight">{bot.name}</span>
                   <span className="text-[10px] text-muted-foreground block">{bot.countryFlag} {bot.rating} Elo</span>
                 </motion.button>
