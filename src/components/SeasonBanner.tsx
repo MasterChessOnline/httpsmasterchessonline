@@ -64,6 +64,14 @@ export default function SeasonBanner({ compact = false }: { compact?: boolean })
           <span>Season end</span>
         </div>
       </div>
+      <Link
+        to="/battle-pass"
+        className="mt-4 inline-flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/15 hover:bg-primary/25 transition px-4 py-2 text-sm font-semibold text-foreground"
+      >
+        <Crown className="h-4 w-4 text-primary" />
+        Open Battle Pass
+        <span className="text-primary">→</span>
+      </Link>
     </motion.div>
   );
 }
