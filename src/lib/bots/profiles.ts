@@ -41,10 +41,48 @@ export interface BotProfile {
 }
 
 export const BOT_PROFILES: BotProfile[] = [
+  // ===== 🇷🇸 NIKOLA SAKOTIĆ — CREATOR'S AI CLONE, STRONGEST BOT ON THE SITE =====
+  // Nikola is the founder of MasterChess. This is his AI clone — pure Stockfish
+  // at uncapped strength, complete opening prep, no blunders, no inaccuracies.
+  // Officially the highest-rated bot in the catalog.
+  {
+    id: "nikola-sakotic",
+    name: "Nikola Sakotić",
+    avatar: nikolaAvatar,
+    rating: 3500,
+    difficulty: "master",
+    personality: "creator",
+    playstyle: "universal",
+    openings: [
+      "ruy-lopez", "queens-gambit", "sicilian", "english", "caro-kann",
+      "kings-indian", "french", "italian",
+    ],
+    accuracy: 1.0,
+    blunderRate: 0,
+    inaccuracyRate: 0,
+    bookDepth: 40,
+    country: "Serbia",
+    countryFlag: "🇷🇸",
+    style: "Creator AI — knows every opening, every variation",
+    bio: "I'm Nikola Sakotić, the creator of MasterChess — and this is my AI clone. I know every opening, every variation, every endgame. Beat me and you've made history.",
+    drawAcceptThreshold: 200,
+    resignThreshold: 0,
+    taunts: {
+      greeting: "I built this place. Now let's see how you play. 🇷🇸",
+      onCheck: "Calculated 30 moves ago.",
+      onCapture: "Every piece has its purpose.",
+      onBlunder: "Impossible — recalculating.",
+      onWin: "GG. Welcome to MasterChess. 👑",
+      onLose: "You actually did it. Legendary.",
+      onDraw: "Respect. You held your ground.",
+      onDrawOffer: "A draw against me is already a win. Accepted.",
+      onDrawDecline: "I see a path forward. Let's play it out.",
+    },
+  },
+
   // ===== 👑 MASTERCHESS — THE UNBEATABLE BOSS BOT =====
   // Pure Stockfish at maximum strength. No blunders, no inaccuracies, full opening prep.
   // Engine settings give this bot uncapped UCI strength + max depth/time (see bot-engine.ts).
-  {
     id: "masterchess",
     name: "MasterChess",
     avatar: "👑",
