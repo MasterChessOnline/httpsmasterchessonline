@@ -62,7 +62,7 @@ function findKingSquare(board: ReturnType<Chess["board"]>, color: "w" | "b"): st
   return null;
 }
 
-export default function ChessBoard({
+function ChessBoardImpl({
   game, flipped, selectedSquare, legalMoves, lastMove,
   isGameOver, isPlayerTurn, hintSquare, hintToSquare, premove, onSquareClick, overlay, className,
 }: ChessBoardProps) {
