@@ -209,6 +209,51 @@ export type Database = {
         }
         Relationships: []
       }
+      clan_quests: {
+        Row: {
+          club_id: string
+          coin_reward_per_member: number
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          description: string
+          id: string
+          quest_date: string
+          quest_key: string
+          rewarded_at: string | null
+          target_value: number
+          title: string
+        }
+        Insert: {
+          club_id: string
+          coin_reward_per_member?: number
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          description?: string
+          id?: string
+          quest_date?: string
+          quest_key?: string
+          rewarded_at?: string | null
+          target_value?: number
+          title?: string
+        }
+        Update: {
+          club_id?: string
+          coin_reward_per_member?: number
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          description?: string
+          id?: string
+          quest_date?: string
+          quest_key?: string
+          rewarded_at?: string | null
+          target_value?: number
+          title?: string
+        }
+        Relationships: []
+      }
       club_members: {
         Row: {
           club_id: string
@@ -276,6 +321,7 @@ export type Database = {
       clubs: {
         Row: {
           avg_rating: number
+          banner_color: string
           created_at: string
           description: string
           icon: string
@@ -284,10 +330,15 @@ export type Database = {
           member_count: number
           name: string
           owner_id: string
+          tag: string | null
+          total_wins: number
           updated_at: string
+          weekly_reset_at: string
+          weekly_wins: number
         }
         Insert: {
           avg_rating?: number
+          banner_color?: string
           created_at?: string
           description?: string
           icon?: string
@@ -296,10 +347,15 @@ export type Database = {
           member_count?: number
           name: string
           owner_id: string
+          tag?: string | null
+          total_wins?: number
           updated_at?: string
+          weekly_reset_at?: string
+          weekly_wins?: number
         }
         Update: {
           avg_rating?: number
+          banner_color?: string
           created_at?: string
           description?: string
           icon?: string
@@ -308,7 +364,11 @@ export type Database = {
           member_count?: number
           name?: string
           owner_id?: string
+          tag?: string | null
+          total_wins?: number
           updated_at?: string
+          weekly_reset_at?: string
+          weekly_wins?: number
         }
         Relationships: []
       }
@@ -2688,6 +2748,10 @@ export type Database = {
         }
         Returns: Json
       }
+      contribute_clan_quest: {
+        Args: { p_amount?: number; p_metric: string }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -2752,6 +2816,29 @@ export type Database = {
           to: "profiles"
           isOneToOne: false
           isSetofReturn: true
+        }
+      }
+      get_or_create_clan_quest: {
+        Args: { p_club_id: string }
+        Returns: {
+          club_id: string
+          coin_reward_per_member: number
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          description: string
+          id: string
+          quest_date: string
+          quest_key: string
+          rewarded_at: string | null
+          target_value: number
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "clan_quests"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       get_today_missions: {
@@ -2835,6 +2922,20 @@ export type Database = {
           p_white_time: number
         }
         Returns: Json
+      }
+      top_clans: {
+        Args: { p_limit?: number }
+        Returns: {
+          avg_rating: number
+          banner_color: string
+          icon: string
+          id: string
+          member_count: number
+          name: string
+          tag: string
+          total_wins: number
+          weekly_wins: number
+        }[]
       }
       tournament_color_balance: {
         Args: { _tournament_id: string }
