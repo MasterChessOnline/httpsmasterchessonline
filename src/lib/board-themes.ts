@@ -51,6 +51,14 @@ export const BOARD_THEMES: BoardTheme[] = [
   { key: "halloween", label: "Halloween",         description: "Pumpkin & shadow",             light: "30 80% 60%",  dark: "270 50% 14%" },
   { key: "winter",    label: "Winter",            description: "Snow & frost",                 light: "200 30% 95%", dark: "215 25% 35%" },
   { key: "spring",    label: "Spring Bloom",      description: "Cherry blossom pastel",        light: "340 55% 90%", dark: "120 25% 40%" },
+
+  // — Legendary elemental boards (Reward Chests) —
+  { key: "lava",      label: "Lava Forge",        description: "Molten obsidian & ember",      light: "20 90% 60%",  dark: "10 75% 18%" },
+  { key: "aqua",      label: "Deep Aquatic",      description: "Sunken reef glow",             light: "190 85% 78%", dark: "215 80% 18%" },
+  { key: "aurora",    label: "Aurora Borealis",   description: "Polar lights on ice",          light: "160 80% 80%", dark: "275 65% 22%" },
+  { key: "obsidian",  label: "Obsidian Gold",     description: "Pure black with gold inlay",   light: "43 75% 55%",  dark: "0 0% 6%" },
+  { key: "magma",     label: "Magma Glass",       description: "Cooled lava under crystal",    light: "35 95% 65%",  dark: "350 70% 12%" },
+  { key: "nebula",    label: "Cosmic Nebula",     description: "Pink-violet starfield",        light: "300 70% 78%", dark: "250 70% 14%" },
 ];
 
 export interface PieceGlyphSet {

@@ -586,7 +586,7 @@ const Settings = () => {
                 <Label className="text-xs text-muted-foreground">Piece style</Label>
                 <span className="text-[10px] text-muted-foreground/60 font-mono">{PIECE_STYLES.length} options</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 auto-rows-fr items-stretch">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 auto-rows-fr items-stretch">
                 {PIECE_STYLES.map(ps => {
                   const locked = isPieceLocked(ps.key);
                   return (
