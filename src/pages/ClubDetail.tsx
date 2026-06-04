@@ -182,18 +182,29 @@ const ClubDetail = () => {
         </button>
 
         {/* Header */}
-        <div className="rounded-2xl border border-border/40 bg-card/80 p-6 mb-6 flex items-center gap-5">
+        <div
+          className="rounded-2xl border bg-card/80 p-6 mb-4 flex items-center gap-5"
+          style={{ borderColor: `${club.banner_color || "#d4a843"}55` }}
+        >
           <div className="text-5xl">{club.icon}</div>
           <div className="flex-1 min-w-0">
-            <h1 className="font-display text-2xl font-bold text-foreground">{club.name}</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="font-display text-2xl font-bold text-foreground">{club.name}</h1>
+              <ClanTag tag={club.tag} color={club.banner_color || "#d4a843"} size="md" />
+            </div>
             <p className="text-sm text-muted-foreground mt-1">{club.description || "No description"}</p>
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center gap-4 mt-2 flex-wrap">
               <span className="text-xs text-muted-foreground flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {members.length} members</span>
               <span className="text-xs text-muted-foreground flex items-center gap-1.5"><Trophy className="h-3.5 w-3.5" /> Avg {avgRating} ELO</span>
+              {(club.weekly_wins ?? 0) > 0 && (
+                <span className="text-xs flex items-center gap-1.5" style={{ color: club.banner_color || "#d4a843" }}>
+                  🔥 {club.weekly_wins} wins this week
+                </span>
+              )}
             </div>
           </div>
           {!isMember ? (
-            <Button onClick={joinClub}>Join Club</Button>
+            <Button onClick={joinClub}>Join Clan</Button>
           ) : myRole !== "owner" ? (
             <Button variant="outline" size="sm" onClick={leaveClub}><LogOut className="h-3.5 w-3.5 mr-1.5" /> Leave</Button>
           ) : (
@@ -202,6 +213,12 @@ const ClubDetail = () => {
             </span>
           )}
         </div>
+
+        {/* Daily Clan Quest — visible to everyone, contributes when members win */}
+        <div className="mb-6">
+          <ClanQuestCard clubId={club.id} color={club.banner_color || "#d4a843"} />
+        </div>
+
 
         <Tabs defaultValue="chat" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-sm">
