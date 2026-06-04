@@ -49,6 +49,7 @@ export async function awardBotCoins(opts: {
     }
     emitReward({ kind: "coin", title: `+${res.total} Coins`, subtitle: res.streak_bonus ? `Streak bonus +${res.streak_bonus}` : undefined, amount: res.total });
     if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("mc:coins-changed"));
+    if (opts.result === "win") contributeClanQuest("team_wins", 1);
   }
   return res;
 }
