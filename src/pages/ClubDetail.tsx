@@ -11,10 +11,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import EmojiPicker, { EmojiStyle, Theme } from "emoji-picker-react";
 import { formatDistanceToNow } from "date-fns";
+import ClanTag from "@/components/ClanTag";
+import ClanQuestCard from "@/components/clans/ClanQuestCard";
 
 interface Club {
   id: string; name: string; description: string; icon: string;
   owner_id: string; member_count: number; avg_rating: number;
+  tag?: string | null; banner_color?: string | null;
+  weekly_wins?: number; total_wins?: number;
 }
 interface Member {
   user_id: string; role: string; joined_at: string;
