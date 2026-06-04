@@ -1019,8 +1019,8 @@ const Play = () => {
               transition={{ delay: 0.2, type: "spring" }}
               className="text-center"
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-card border-2 border-border flex items-center justify-center text-3xl sm:text-4xl mx-auto mb-2">
-                {currentBot.avatar}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-card border-2 border-border flex items-center justify-center text-3xl sm:text-4xl mx-auto mb-2 overflow-hidden">
+                <BotAvatar avatar={currentBot.avatar} alt={currentBot.name} className="h-full w-full" emojiClassName="text-3xl sm:text-4xl" />
               </div>
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 <p className="text-sm font-bold text-foreground">{currentBot.name} {currentBot.countryFlag}</p>
