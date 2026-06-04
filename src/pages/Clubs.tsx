@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { Shield, Users, Trophy, Plus, Search, Loader2 } from "lucide-react";
+import { Shield, Users, Trophy, Plus, Search, Loader2, Flame, Crown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import ClanTag from "@/components/ClanTag";
 
 interface Club {
   id: string;
@@ -19,9 +21,26 @@ interface Club {
   member_count: number;
   avg_rating: number;
   is_public: boolean;
+  tag?: string | null;
+  banner_color?: string | null;
+  weekly_wins?: number;
+  total_wins?: number;
+}
+
+interface TopClan {
+  id: string;
+  name: string;
+  tag: string | null;
+  icon: string;
+  banner_color: string;
+  member_count: number;
+  avg_rating: number;
+  weekly_wins: number;
+  total_wins: number;
 }
 
 const ICON_OPTIONS = ["♞", "♛", "🏆", "⚡", "📚", "🎯", "🏅", "♚", "🛡️", "⚔️", "🔥", "💎"];
+const COLOR_OPTIONS = ["#d4a843", "#e94560", "#3b82f6", "#22c55e", "#a855f7", "#f97316", "#06b6d4", "#ec4899"];
 
 const Clubs = () => {
   const { user } = useAuth();
