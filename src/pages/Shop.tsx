@@ -106,17 +106,18 @@ export default function Shop() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 auto-rows-fr items-stretch">
           {items.map((item) => {
             const r = RARITY_META[item.rarity];
             const isOwned = owned.has(item.key);
             const canAfford = coins >= item.price;
             const busy = busyKey === item.key;
+            const preview = getShopPreview(item.key, item.preview);
             return (
               <motion.div
                 key={item.key}
                 whileHover={{ y: -4 }}
-                className={`group relative rounded-2xl border border-border/40 bg-card overflow-hidden ring-1 ${r.ring} ${r.glow} transition`}
+                className={`group relative rounded-2xl border border-border/40 bg-card overflow-hidden ring-1 ${r.ring} ${r.glow} transition flex flex-col h-full`}
               >
                 {/* Rarity tag */}
                 <div className={`absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-black/50 backdrop-blur ${r.color}`}>
@@ -127,21 +128,31 @@ export default function Shop() {
                     <Check className="h-3 w-3" /> Owned
                   </div>
                 )}
-                {/* Preview */}
-                <div className="relative h-32 sm:h-36 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 flex items-center justify-center overflow-hidden">
-                  <motion.div
-                    animate={{ y: [0, -6, 0], rotate: [0, -3, 3, 0] }}
-                    transition={{ duration: 4 + Math.random() * 2, repeat: Infinity, ease: "easeInOut" }}
-                    className="text-6xl drop-shadow-[0_10px_25px_rgba(0,0,0,0.6)]"
-                  >
-                    {item.preview}
-                  </motion.div>
+                {/* Preview — real board / real pieces / fallback emoji */}
+                <div className="relative h-36 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 flex items-center justify-center overflow-hidden p-3">
+                  {preview.kind === "board" ? (
+                    <div className="w-full max-w-[120px]">
+                      <BoardSwatch light={preview.light} dark={preview.dark} size={6} />
+                    </div>
+                  ) : preview.kind === "pieces" ? (
+                    <div className="w-full max-w-[150px]">
+                      <PieceSetPreview style={preview.style} />
+                    </div>
+                  ) : (
+                    <motion.div
+                      animate={{ y: [0, -6, 0], rotate: [0, -3, 3, 0] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="text-6xl drop-shadow-[0_10px_25px_rgba(0,0,0,0.6)]"
+                    >
+                      {preview.emoji}
+                    </motion.div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                 </div>
-                <div className="p-3">
+                <div className="p-3 flex flex-col flex-1">
                   <div className="text-sm font-semibold text-foreground line-clamp-1">{item.name}</div>
                   {item.blurb && <div className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{item.blurb}</div>}
-                  <div className="mt-2 flex items-center justify-between gap-2">
+                  <div className="mt-auto pt-2 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1 text-amber-300 font-bold text-sm">
                       <Coins className="h-3.5 w-3.5" />
                       {item.price.toLocaleString()}
