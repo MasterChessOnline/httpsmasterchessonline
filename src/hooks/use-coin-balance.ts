@@ -21,7 +21,7 @@ export function useCoinBalance(): { balance: number | null; loading: boolean; re
       const { data } = await supabase.rpc("get_my_profile");
       const row = Array.isArray(data) ? data[0] : data;
       if (!cancelled) {
-        setBalance(((data as any)?.master_coins ?? 0) as number);
+        setBalance(((row as any)?.master_coins ?? 0) as number);
         setLoading(false);
       }
     };
