@@ -34,6 +34,7 @@ import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
 import posterImage from "@/assets/masterchess-poster.jpg";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
+import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
 
 import ParallaxCard from "@/components/ParallaxCard";
