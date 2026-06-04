@@ -59,6 +59,11 @@ export const BOARD_THEMES: BoardTheme[] = [
   { key: "obsidian",  label: "Obsidian Gold",     description: "Pure black with gold inlay",   light: "43 75% 55%",  dark: "0 0% 6%" },
   { key: "magma",     label: "Magma Glass",       description: "Cooled lava under crystal",    light: "35 95% 65%",  dark: "350 70% 12%" },
   { key: "nebula",    label: "Cosmic Nebula",     description: "Pink-violet starfield",        light: "300 70% 78%", dark: "250 70% 14%" },
+  // — More legendary elementals —
+  { key: "lava_alt",  label: "Lava River",        description: "Flowing rivers of orange fire", light: "15 95% 55%", dark: "5 80% 12%" },
+  { key: "aqua_alt",  label: "Tidal Wave",        description: "Shimmering tropical lagoon",   light: "175 85% 72%", dark: "200 85% 20%" },
+  { key: "aurora_alt",label: "Polar Aurora",      description: "Mint & violet sky-veils",      light: "150 75% 78%", dark: "260 70% 18%" },
+  { key: "nebula_alt",label: "Andromeda",         description: "Cyan & magenta star-dust",     light: "195 80% 75%", dark: "310 65% 18%" },
 ];
 
 export interface PieceGlyphSet {
