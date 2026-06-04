@@ -26,6 +26,13 @@ const SHOP_BOARD_ALIAS: Record<string, string> = {
   "board:urban_street": "olive",
   "board:neon_graffiti": "neon",
   "board:street_art_animated": "sunset",
+  // New legendary elemental boards
+  "board:lava_forge": "lava",
+  "board:deep_aquatic": "aqua",
+  "board:aurora_borealis": "aurora",
+  "board:obsidian_gold": "obsidian",
+  "board:magma_glass": "magma",
+  "board:cosmic_nebula": "nebula",
 };
 
 // Exotic palettes invented purely for shop-only boards that don't map cleanly
@@ -44,6 +51,11 @@ const SHOP_PIECE_ALIAS: Record<string, string> = {
   "pieces:dragon": "fantasy",
   "pieces:cyber_neon": "neon",
   "pieces:mythic": "fantasy",
+  // New legendary piece sets — reuse strongest visual styles
+  "pieces:inferno": "fantasy",
+  "pieces:abyssal": "glass",
+  "pieces:celestial": "royal",
+  "pieces:obsidian": "monochrome",
 };
 
 export function getShopPreview(key: string, fallbackEmoji: string): ShopPreview {
