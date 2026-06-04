@@ -25,6 +25,7 @@ import GameStatusOverlay from "@/components/chess/GameStatusOverlay";
 import GameEndOverlay, { type GameEndVariant } from "@/components/effects/GameEndOverlay";
 import GameOverOverlay from "@/components/chess/GameOverOverlay";
 import QuickChat from "@/components/chess/QuickChat";
+import VoiceChatPanel from "@/components/VoiceChatPanel";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
 import CountryFlag from "@/components/CountryFlag";
@@ -1240,6 +1241,10 @@ const PlayOnline = () => {
                   </div>
                 ))}
                 <div ref={chatEndRef} />
+              </div>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">In-game chat</span>
+                <VoiceChatPanel roomId={onlineGame?.id ?? null} userId={user?.id ?? null} />
               </div>
               <QuickChat
                 disabled={!user || !onlineGame}
