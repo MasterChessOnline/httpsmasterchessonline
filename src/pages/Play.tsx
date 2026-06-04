@@ -288,6 +288,20 @@ const Play = () => {
                 setTimeout(() => showBotMessage(currentBot.taunts.onBlunder), 500);
               }
             }
+
+            // Nikola gives running commentary on his own moves (creator's AI clone).
+            if (currentBot.id === "nikola-sakotic" && !game.isCheckmate()) {
+              const line = nikolaCommentary({
+                ply: moveHistory.length + 1,
+                fromBook: !!decision.fromBook,
+                cpLoss: decision.cpLoss,
+                isCheck: game.isCheck(),
+                isCheckmate: false,
+                captured: !!move.captured,
+                san: move.san,
+              });
+              if (line) setTimeout(() => showBotMessage(line), 350);
+            }
           }
         }
         setAiThinking(false);
