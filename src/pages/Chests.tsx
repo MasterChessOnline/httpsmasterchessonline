@@ -118,21 +118,38 @@ export default function Chests() {
                       {chest.blurb}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {chest.loot.map((r) => (
-                      <span
-                        key={r.key}
-                        title={r.label + (r.kind !== "xp" && isUnlocked(r.key) ? " (owned)" : "")}
-                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] border ${
-                          r.kind !== "xp" && isUnlocked(r.key)
-                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
-                            : "bg-muted/30 border-border/40 text-muted-foreground"
-                        }`}
-                      >
-                        <span>{r.preview}</span>
-                        <span>{r.label}</span>
-                      </span>
-                    ))}
+                  <div className="grid grid-cols-2 gap-2">
+                    {chest.loot.map((r) => {
+                      const owned = r.kind !== "xp" && isUnlocked(r.key);
+                      const themeKey = (r as any).boardThemeKey;
+                      const pieceKey = (r as any).pieceStyleKey;
+                      const theme = themeKey ? getBoardTheme(themeKey) : undefined;
+                      const piece = pieceKey ? getPieceStyle(pieceKey) : undefined;
+                      return (
+                        <div
+                          key={r.key}
+                          title={r.label + (owned ? " (owned)" : "")}
+                          className={`relative rounded-md border p-1.5 flex flex-col gap-1 ${
+                            owned
+                              ? "bg-emerald-500/10 border-emerald-500/30"
+                              : "bg-muted/20 border-border/40"
+                          }`}
+                        >
+                          <div className="h-10 flex items-center justify-center overflow-hidden rounded-sm">
+                            {theme ? (
+                              <BoardSwatch light={theme.light} dark={theme.dark} size={4} />
+                            ) : piece ? (
+                              <PieceSetPreview style={piece} />
+                            ) : (
+                              <span className="text-2xl">{r.preview}</span>
+                            )}
+                          </div>
+                          <p className={`text-[9px] leading-tight text-center truncate ${owned ? "text-emerald-300" : "text-muted-foreground"}`}>
+                            {r.label}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                   <Button
                     onClick={() => handleOpen(chest)}
