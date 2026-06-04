@@ -875,19 +875,3 @@ const Index = () => {
 };
 
 export default Index;
-import { supabase } from "@/integrations/supabase/client";
-
-export async function getCoins(userId: string) {
-  const { data } = await supabase.from("user_coins").select("coins").eq("user_id", userId).single();
-
-  return data?.coins ?? 0;
-}
-
-export async function addCoins(userId: string, amount: number) {
-  const current = await getCoins(userId);
-
-  await supabase.from("user_coins").upsert({
-    user_id: userId,
-    coins: current + amount,
-  });
-}
