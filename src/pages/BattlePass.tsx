@@ -98,10 +98,11 @@ export default function BattlePass() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Seo
-        title="Season Battle Pass — MasterChess"
-        description="Climb 30 tiers, earn coins every win. Season Battle Pass on MasterChess.live."
-      />
+        <Seo
+          title="Season Battle Pass — MasterChess"
+          description="Climb 30 tiers, earn coins every win. Season Battle Pass on MasterChess.live."
+          path="/battle-pass"
+        />
 
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header */}
