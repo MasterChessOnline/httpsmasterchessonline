@@ -160,6 +160,89 @@ export type Database = {
           },
         ]
       }
+      battle_royale_matches: {
+        Row: {
+          created_at: string
+          id: string
+          player_a: string | null
+          player_b: string | null
+          round: number
+          session_id: string
+          slot: number
+          status: string
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_a?: string | null
+          player_b?: string | null
+          round: number
+          session_id: string
+          slot: number
+          status?: string
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_a?: string | null
+          player_b?: string | null
+          round?: number
+          session_id?: string
+          slot?: number
+          status?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_royale_matches_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "battle_royale_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      battle_royale_queue: {
+        Row: {
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      battle_royale_sessions: {
+        Row: {
+          finished_at: string | null
+          id: string
+          started_at: string
+          status: string
+          winner_id: string | null
+        }
+        Insert: {
+          finished_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          winner_id?: string | null
+        }
+        Update: {
+          finished_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
       bot_games: {
         Row: {
           bot_key: string | null
@@ -2913,6 +2996,7 @@ export type Database = {
         Args: { _club: string; _user: string }
         Returns: boolean
       }
+      join_battle_royale: { Args: never; Returns: Json }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -2948,6 +3032,10 @@ export type Database = {
       recalc_tournament_tiebreaks: {
         Args: { _tid: string }
         Returns: undefined
+      }
+      report_battle_royale_winner: {
+        Args: { _match: string; _winner: string }
+        Returns: Json
       }
       resolve_ref_code: { Args: { _ref_code: string }; Returns: string }
       respond_draw_offer: {
