@@ -401,7 +401,7 @@ const Index = () => {
         <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
           {/* Spin The Wheel — hero-adjacent reward CTA */}
           <section id="spin-wheel" className="scroll-mt-24">
-            <SpinWheelHomeWidget />
+            <HomeSpinWheelSection />
           </section>
 
           {/* Instagram poster + follow CTA — directly under hero, above Daily */}
