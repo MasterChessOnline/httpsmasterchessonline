@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Sparkles, Coins, Gift } from "lucide-react";
+import { ArrowLeft, Sparkles, Coins, Gift, Crown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,26 +10,61 @@ import { useToast } from "@/hooks/use-toast";
 import { emitReward } from "@/lib/reward-fx";
 
 /**
- * Spec reward table (matches the `claim_daily_spin` server RPC weights).
- * Index here is used to rotate the wheel to the matching segment.
+ * Chess-themed Spin The Wheel.
+ * - 8 equal segments (each = 45deg) for perfectly fair visual balance
+ * - every segment uses a chess piece glyph + reward label
+ * - server RPC (`claim_daily_spin`) returns one of 7 coin tiers; we map
+ *   each coin tier to a piece-themed segment, and fold the "Mystery"
+ *   segment onto the lowest tier so total weight stays 100%.
  */
-const SEGMENTS = [
-  { idx: 0, coins: 25,   label: "25",    color: "from-amber-700 to-amber-500",   weight: 35 },
-  { idx: 1, coins: 50,   label: "50",    color: "from-emerald-700 to-emerald-500", weight: 25 },
-  { idx: 2, coins: 100,  label: "100",   color: "from-sky-700 to-sky-500",       weight: 18 },
-  { idx: 3, coins: 250,  label: "250",   color: "from-violet-700 to-violet-500", weight: 12 },
-  { idx: 4, coins: 500,  label: "500",   color: "from-fuchsia-700 to-fuchsia-500", weight: 6 },
-  { idx: 5, coins: 1000, label: "1,000", color: "from-rose-700 to-rose-500",     weight: 3 },
-  { idx: 6, coins: 2500, label: "2,500 ★", color: "from-yellow-400 to-amber-300 text-black", weight: 1 },
+type Segment = {
+  idx: number;
+  coins: number;
+  label: string;
+  piece: string;           // chess unicode glyph
+  rarity: "common" | "rare" | "epic" | "legendary" | "mythic";
+  gradient: string;
+  textColor?: string;
+};
+
+const SEGMENTS: Segment[] = [
+  { idx: 0, coins: 25,   label: "+25 Coins",    piece: "♙", rarity: "common",    gradient: "from-amber-900 to-amber-700" },
+  { idx: 1, coins: 50,   label: "+50 Coins",    piece: "♙", rarity: "common",    gradient: "from-emerald-800 to-emerald-600" },
+  { idx: 2, coins: 100,  label: "+100 Coins",   piece: "♘", rarity: "common",    gradient: "from-sky-800 to-sky-600" },
+  { idx: 3, coins: 250,  label: "+250 Coins",   piece: "♗", rarity: "rare",      gradient: "from-violet-800 to-violet-600" },
+  { idx: 4, coins: 25,   label: "Mystery",      piece: "🎁", rarity: "common",   gradient: "from-zinc-800 to-zinc-600" }, // maps to lowest tier
+  { idx: 5, coins: 500,  label: "+500 Coins",   piece: "♖", rarity: "epic",      gradient: "from-fuchsia-800 to-fuchsia-600" },
+  { idx: 6, coins: 1000, label: "+1,000 Coins", piece: "♕", rarity: "legendary", gradient: "from-rose-800 to-rose-600" },
+  { idx: 7, coins: 2500, label: "JACKPOT",      piece: "♔", rarity: "mythic",    gradient: "from-yellow-400 to-amber-300", textColor: "text-black" },
 ];
-const SEG = 360 / SEGMENTS.length;
+const N = SEGMENTS.length;
+const SEG = 360 / N; // 45 deg
+
+const ODDS: { coins: number; label: string; piece: string; pct: number }[] = [
+  { coins: 25,   label: "+25",    piece: "♙", pct: 35 },
+  { coins: 50,   label: "+50",    piece: "♙", pct: 25 },
+  { coins: 100,  label: "+100",   piece: "♘", pct: 18 },
+  { coins: 250,  label: "+250",   piece: "♗", pct: 12 },
+  { coins: 500,  label: "+500",   piece: "♖", pct: 6 },
+  { coins: 1000, label: "+1,000", piece: "♕", pct: 3 },
+  { coins: 2500, label: "JACKPOT", piece: "♔", pct: 1 },
+];
+
+function pickSegmentForCoins(coins: number): Segment {
+  // Map server reward tier → preferred segment. 25-coin reward biased to the
+  // ♙ segment; we'll occasionally hit the Mystery segment for variety.
+  const exact = SEGMENTS.find((s) => s.coins === coins);
+  if (!exact) return SEGMENTS[0];
+  if (coins === 25 && Math.random() < 0.35) return SEGMENTS[4]; // Mystery
+  return exact;
+}
 
 export default function SpinWheel() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [angle, setAngle] = useState(0);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState<{ coins: number; new_balance?: number } | null>(null);
+  const [result, setResult] = useState<{ coins: number; new_balance?: number; segment?: Segment } | null>(null);
   const [alreadyClaimed, setAlreadyClaimed] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
 
@@ -67,15 +102,15 @@ export default function SpinWheel() {
       return;
     }
 
-    const seg = SEGMENTS.find((s) => s.coins === data.coins) ?? SEGMENTS[0];
-    // Land segment center at top pointer (0deg). Add 6 full turns for drama.
-    const target = 360 * 6 + (360 - (seg.idx * SEG + SEG / 2));
+    const seg = pickSegmentForCoins(data.coins);
+    // Land segment center at top pointer. Add 7 full turns for drama.
+    const target = 360 * 7 + (360 - (seg.idx * SEG + SEG / 2));
     setAngle(target);
 
     setTimeout(() => {
       setSpinning(false);
       setAlreadyClaimed(true);
-      setResult({ coins: data.coins, new_balance: data.new_balance });
+      setResult({ coins: data.coins, new_balance: data.new_balance, segment: seg });
       emitReward({
         kind: data.coins >= 1000 ? "achievement" : "coin",
         title: `+${data.coins} Coins`,
@@ -83,13 +118,25 @@ export default function SpinWheel() {
         amount: data.coins,
       });
       window.dispatchEvent(new CustomEvent("mc:coins-changed"));
-    }, 4200);
+    }, 4400);
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      {/* Ambient chess pieces */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06] select-none">
+        {["♔","♕","♖","♗","♘","♙","♚","♛","♜","♝","♞","♟"].map((c, i) => (
+          <div key={i} className="absolute font-bold text-foreground" style={{
+            fontSize: `${80 + (i % 5) * 30}px`,
+            left: `${(i * 13) % 95}%`,
+            top: `${(i * 23) % 90}%`,
+            transform: `rotate(${(i * 37) % 360}deg)`,
+          }}>{c}</div>
+        ))}
+      </div>
+
       <Navbar />
-      <main className="container max-w-3xl mx-auto px-4 pt-24 pb-24">
+      <main className="container max-w-3xl mx-auto px-4 pt-24 pb-24 relative">
         <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary mb-4">
           <ArrowLeft className="w-3.5 h-3.5" /> Back home
         </Link>
@@ -98,69 +145,93 @@ export default function SpinWheel() {
             <Gift className="w-3.5 h-3.5" /> Daily Spin
           </div>
           <h1 className="font-display text-4xl md:text-5xl font-bold leading-tight bg-gradient-to-br from-amber-300 via-primary to-amber-500 bg-clip-text text-transparent">
-            One free spin every 24 hours
+            Royal Wheel of Rewards
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Land on a jackpot — every spin pays Coins. Rare prizes are rare.
+            One free spin every 24 hours · 8 chess-themed prizes · land the King for the Jackpot.
           </p>
         </div>
 
         {/* Wheel */}
-        <div className="relative mx-auto aspect-square w-[min(86vw,440px)]">
-          {/* Pointer */}
-          <div
-            aria-hidden
-            className="absolute left-1/2 -translate-x-1/2 -top-2 z-10"
-            style={{ width: 0, height: 0, borderLeft: "14px solid transparent", borderRight: "14px solid transparent", borderTop: "22px solid hsl(45,90%,55%)" }}
-          />
-          {/* Ambient glow */}
+        <div className="relative mx-auto aspect-square w-[min(86vw,460px)]">
+          {/* Pointer (crown) */}
+          <div aria-hidden className="absolute left-1/2 -translate-x-1/2 -top-3 z-20 flex flex-col items-center">
+            <Crown className="w-7 h-7 text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]" strokeWidth={2} />
+            <div style={{ width: 0, height: 0, borderLeft: "14px solid transparent", borderRight: "14px solid transparent", borderTop: "22px solid hsl(45,90%,55%)", marginTop: -2, filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.5))" }} />
+          </div>
+
+          {/* Outer ambient glow */}
           <motion.div
             aria-hidden
-            className="absolute inset-[-12%] rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, hsla(45,90%,55%,0.25), transparent 60%)" }}
-            animate={{ opacity: [0.4, 0.9, 0.4] }}
+            className="absolute inset-[-14%] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, hsla(45,90%,55%,0.28), transparent 62%)" }}
+            animate={{ opacity: [0.4, 0.95, 0.4], scale: [1, 1.04, 1] }}
             transition={{ duration: 2.4, repeat: Infinity }}
           />
+
+          {/* Decorative outer ring */}
+          <div aria-hidden className="absolute inset-[-3%] rounded-full border-[6px] border-amber-500/40 shadow-[inset_0_0_30px_rgba(251,191,36,0.3)]" />
+
+          {/* The wheel */}
           <motion.div
-            className="relative h-full w-full rounded-full border-4 border-amber-400/70 overflow-hidden shadow-[0_0_60px_-10px_hsl(45,90%,55%,0.55)]"
+            className="relative h-full w-full rounded-full border-4 border-amber-400/80 overflow-hidden shadow-[0_0_60px_-10px_hsl(45,90%,55%,0.6)]"
             style={{ transformOrigin: "50% 50%" }}
             animate={{ rotate: angle }}
-            transition={{ duration: 4, ease: [0.18, 0.9, 0.2, 1] }}
+            transition={{ duration: 4.2, ease: [0.16, 0.84, 0.2, 1] }}
           >
-            {SEGMENTS.map((s) => {
-              const start = s.idx * SEG;
-              return (
-                <div
-                  key={s.idx}
-                  className={`absolute left-1/2 top-1/2 origin-top-left bg-gradient-to-br ${s.color}`}
-                  style={{
-                    width: "50%",
-                    height: "50%",
-                    transform: `rotate(${start}deg) skewY(-${90 - SEG}deg)`,
-                  }}
-                />
-              );
-            })}
-            {/* Labels (counter-skewed) */}
+            {/* Segment slices via conic-gradient — guaranteed equal sizes */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `conic-gradient(from -${SEG / 2}deg, ${SEGMENTS.map((s, i) => {
+                  const colorMap: Record<Segment["rarity"], string> = {
+                    common:    i === 0 ? "#78350f" : i === 1 ? "#065f46" : "#0c4a6e",
+                    rare:      "#5b21b6",
+                    epic:      "#86198f",
+                    legendary: "#9f1239",
+                    mythic:    "#fbbf24",
+                  };
+                  // For segment 4 (mystery) use zinc
+                  const c = i === 4 ? "#3f3f46" : colorMap[s.rarity];
+                  return `${c} ${i * SEG}deg ${(i + 1) * SEG}deg`;
+                }).join(", ")})`,
+              }}
+            />
+            {/* Spoke dividers */}
+            {SEGMENTS.map((_, i) => (
+              <div
+                key={`sp-${i}`}
+                aria-hidden
+                className="absolute left-1/2 top-1/2 origin-top h-1/2 w-px bg-amber-300/60"
+                style={{ transform: `translate(-50%, -100%) rotate(${i * SEG + SEG / 2}deg)`, transformOrigin: "bottom center" }}
+              />
+            ))}
+            {/* Segment labels — piece glyph + reward */}
             {SEGMENTS.map((s) => {
               const mid = s.idx * SEG + SEG / 2;
               return (
                 <div
                   key={`lbl-${s.idx}`}
-                  className="absolute left-1/2 top-1/2 text-xs sm:text-sm font-bold text-white drop-shadow"
+                  className={`absolute left-1/2 top-1/2 ${s.textColor ?? "text-white"} drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
                   style={{
-                    transform: `translate(-50%, -50%) rotate(${mid}deg) translateY(-36%)`,
+                    transform: `translate(-50%, -50%) rotate(${mid}deg) translateY(-38%)`,
                     transformOrigin: "center",
                   }}
                 >
-                  <span className="inline-flex items-center gap-1"><Coins className="w-3 h-3 text-amber-200" />{s.label}</span>
+                  <div className="flex flex-col items-center gap-0.5 leading-none">
+                    <span className="text-3xl sm:text-4xl">{s.piece}</span>
+                    <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider whitespace-nowrap">
+                      {s.label}
+                    </span>
+                  </div>
                 </div>
               );
             })}
           </motion.div>
+
           {/* Hub */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 rounded-full bg-gradient-to-br from-amber-200 to-amber-600 border-4 border-black/60 shadow-inner flex items-center justify-center">
-            <Sparkles className="w-7 h-7 text-black" />
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-20 w-20 rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-700 border-4 border-black/70 shadow-[inset_0_0_20px_rgba(0,0,0,0.4),0_0_20px_rgba(251,191,36,0.4)] flex items-center justify-center z-10">
+            <Crown className="w-8 h-8 text-black drop-shadow" strokeWidth={2.5} />
           </div>
         </div>
 
@@ -169,8 +240,9 @@ export default function SpinWheel() {
             size="lg"
             disabled={spinning || alreadyClaimed || checking || !user}
             onClick={spin}
-            className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold px-10 py-6 text-lg hover:brightness-110 disabled:opacity-50"
+            className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-extrabold px-12 py-7 text-xl rounded-2xl shadow-[0_0_30px_rgba(251,191,36,0.45)] hover:brightness-110 hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50"
           >
+            <Sparkles className="w-5 h-5 mr-2" />
             {checking ? "Loading…" : spinning ? "Spinning…" : alreadyClaimed ? "Come back tomorrow" : user ? "SPIN — Free" : "Sign in to spin"}
           </Button>
           {!user && (
@@ -180,12 +252,15 @@ export default function SpinWheel() {
 
         {/* Odds table */}
         <section className="mt-12">
-          <h2 className="font-display text-lg font-bold mb-3 text-center">Drop rates</h2>
+          <h2 className="font-display text-lg font-bold mb-3 text-center inline-flex items-center justify-center gap-2 w-full">
+            <Coins className="w-4 h-4 text-amber-400" /> Drop rates
+          </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {SEGMENTS.map((s) => (
-              <div key={s.idx} className="rounded-lg border border-border/40 bg-card/60 px-3 py-2 text-center">
-                <div className="text-sm font-bold text-amber-300 inline-flex items-center gap-1"><Coins className="w-3 h-3" />{s.label}</div>
-                <div className="text-[10px] text-muted-foreground">{s.weight}%</div>
+            {ODDS.map((o) => (
+              <div key={o.coins} className="rounded-lg border border-amber-500/30 bg-card/60 backdrop-blur px-3 py-2.5 text-center hover:border-amber-500/60 transition">
+                <div className="text-2xl mb-0.5">{o.piece}</div>
+                <div className="text-sm font-bold text-amber-300">{o.label}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{o.pct}% chance</div>
               </div>
             ))}
           </div>
@@ -195,17 +270,36 @@ export default function SpinWheel() {
           {result && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
               onClick={() => setResult(null)}
             >
+              {/* Confetti pieces */}
+              {Array.from({ length: 24 }).map((_, i) => (
+                <motion.div
+                  key={`c-${i}`}
+                  className="absolute text-2xl"
+                  initial={{ x: 0, y: 0, opacity: 1, scale: 0 }}
+                  animate={{
+                    x: (Math.random() - 0.5) * 800,
+                    y: (Math.random() - 0.5) * 600,
+                    opacity: 0,
+                    scale: 1 + Math.random(),
+                    rotate: Math.random() * 720,
+                  }}
+                  transition={{ duration: 1.8, ease: "easeOut" }}
+                  style={{ color: ["#fbbf24","#f59e0b","#fde68a","#fff"][i % 4] }}
+                >
+                  {["♔","♕","♖","♗","♘","♙","★","✦"][i % 8]}
+                </motion.div>
+              ))}
               <motion.div
                 initial={{ scale: 0.6, opacity: 0, rotateY: -90 }}
                 animate={{ scale: 1, opacity: 1, rotateY: 0 }}
                 transition={{ type: "spring", stiffness: 200, damping: 18 }}
-                className="rounded-3xl border border-amber-400/40 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-8 text-center shadow-[0_0_80px_rgba(251,191,36,0.5)] max-w-sm"
+                className="relative rounded-3xl border-2 border-amber-400/50 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-8 text-center shadow-[0_0_100px_rgba(251,191,36,0.55)] max-w-sm"
               >
-                <div className="text-6xl mb-3">🎉</div>
-                <p className="text-xs uppercase tracking-[0.3em] text-amber-300 mb-1">You won</p>
+                <div className="text-7xl mb-2">{result.segment?.piece ?? "🎉"}</div>
+                <p className="text-xs uppercase tracking-[0.35em] text-amber-300 mb-1">You won</p>
                 <h3 className="text-5xl font-extrabold bg-gradient-to-br from-amber-200 to-yellow-400 bg-clip-text text-transparent">
                   +{result.coins.toLocaleString()}
                 </h3>
