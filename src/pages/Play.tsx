@@ -1,4 +1,5 @@
 import Seo from "@/components/Seo";
+import BotAvatar from "@/components/BotAvatar";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Chess, Square } from "chess.js";
 import { Link } from "react-router-dom";
@@ -924,7 +925,7 @@ const Play = () => {
                   onClick={() => startMatchmaking(bot)}
                   className="rounded-xl p-3 text-center transition-all border border-border/40 bg-card hover:border-primary/40 hover:shadow-glow basis-[calc(33.333%-0.5rem)] sm:basis-[calc(25%-0.5rem)] max-w-[140px]"
                 >
-                  <span className="text-3xl block mb-1">{bot.avatar}</span>
+                  <BotAvatar avatar={bot.avatar} alt={bot.name} className="block mb-1 mx-auto w-10 h-10" emojiClassName="text-3xl block mb-1" />
                   <span className="text-xs font-bold block text-foreground leading-tight">{bot.name}</span>
                   <span className="text-[10px] text-muted-foreground block">{bot.countryFlag} {bot.rating} Elo</span>
                 </motion.button>
@@ -1018,8 +1019,8 @@ const Play = () => {
               transition={{ delay: 0.2, type: "spring" }}
               className="text-center"
             >
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-card border-2 border-border flex items-center justify-center text-3xl sm:text-4xl mx-auto mb-2">
-                {currentBot.avatar}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-card border-2 border-border flex items-center justify-center text-3xl sm:text-4xl mx-auto mb-2 overflow-hidden">
+                <BotAvatar avatar={currentBot.avatar} alt={currentBot.name} className="h-full w-full" emojiClassName="text-3xl sm:text-4xl" />
               </div>
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 <p className="text-sm font-bold text-foreground">{currentBot.name} {currentBot.countryFlag}</p>
