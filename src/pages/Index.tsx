@@ -56,7 +56,7 @@ import InstallAppButton from "@/components/InstallAppButton";
 import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import LiveActivityFeed from "@/components/LiveActivityFeed";
-import SpinWheelHomeWidget from "@/components/SpinWheelHomeWidget";
+import HomeSpinWheelSection from "@/components/HomeSpinWheelSection";
 import WinStreakFlame from "@/components/WinStreakFlame";
 
 interface RecentGame {
