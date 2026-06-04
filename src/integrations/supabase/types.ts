@@ -1318,6 +1318,8 @@ export type Database = {
           updated_at: string
           user_id: string
           username: string | null
+          welcome_day: number
+          welcome_last_claim: string | null
           win_streak: number
         }
         Insert: {
@@ -1359,6 +1361,8 @@ export type Database = {
           updated_at?: string
           user_id: string
           username?: string | null
+          welcome_day?: number
+          welcome_last_claim?: string | null
           win_streak?: number
         }
         Update: {
@@ -1400,6 +1404,8 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string | null
+          welcome_day?: number
+          welcome_last_claim?: string | null
           win_streak?: number
         }
         Relationships: [
@@ -2660,6 +2666,7 @@ export type Database = {
       claim_daily_spin: { Args: never; Returns: Json }
       claim_referral_first_games: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
+      claim_welcome_reward: { Args: never; Returns: Json }
       cleanup_stale_game: { Args: { p_user_id: string }; Returns: string }
       commit_online_move: {
         Args: {
