@@ -8,6 +8,7 @@ import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake, 
 import ChessClock, { TIME_CONTROLS } from "@/components/ChessClock";
 import { useOnlineGame } from "@/hooks/use-online-game";
 import ChessBoard from "@/components/chess/ChessBoard";
+import { BOARD_CONTAINER_CLASS, BOARD_CONTAINER_FOCUS_CLASS } from "@/lib/board-sizing";
 import PromotionDialog, { type PromotionPiece } from "@/components/chess/PromotionDialog";
 import { useToast } from "@/hooks/use-toast";
 import RatingChange from "@/components/RatingChange";
@@ -864,7 +865,7 @@ const PlayOnline = () => {
         <button onClick={() => setFocusMode(false)} className="absolute top-4 right-4 z-20 px-3 py-1.5 rounded-lg bg-card/80 border border-border/50 text-xs text-muted-foreground hover:text-foreground transition-colors backdrop-blur-sm">
           <MonitorOff className="w-3.5 h-3.5 inline mr-1.5" /> Exit Focus
         </button>
-        <div className="w-full max-w-[min(90vw,560px)]">
+        <div className={BOARD_CONTAINER_FOCUS_CLASS}>
           {/* Opponent clock */}
           {!unlimited && (
             <div className="flex justify-end mb-2">
@@ -884,7 +885,7 @@ const PlayOnline = () => {
             hintSquare={null}
             onSquareClick={handleSquareClick}
             premove={premove}
-            className="w-full max-w-[min(94vw,calc(100svh-8rem),620px)] mx-auto"
+            className={BOARD_CONTAINER_FOCUS_CLASS}
           />
           {/* Player clock */}
           {!unlimited && (
@@ -931,7 +932,7 @@ const PlayOnline = () => {
         <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-4 lg:items-start max-w-[1800px] mx-auto">
           {/* Board + Clocks — fills the full viewport */}
           <div className="min-w-0 flex flex-col items-center">
-            <div className="w-full max-w-[min(100vw,calc(100svh-6rem),660px)] lg:max-w-[min(calc(100svh-4rem),82vw,1400px)] xl:max-w-[min(calc(100svh-4rem),80vw,1600px)] 2xl:max-w-[min(calc(100svh-4rem),1800px)] space-y-1.5">
+            <div className={`${BOARD_CONTAINER_CLASS} space-y-1.5`}>
             {/* Opponent info */}
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-card/80 px-3 py-2">
               <div className="flex items-center gap-2">
@@ -989,7 +990,7 @@ const PlayOnline = () => {
                 hintSquare={null}
                 onSquareClick={handleSquareClick}
                 premove={premove}
-                className="w-full max-w-[min(100vw,calc(100svh-12rem),660px)] lg:max-w-[min(calc(100svh-5rem),82vw,1400px)] xl:max-w-[min(calc(100svh-5rem),80vw,1600px)] 2xl:max-w-[min(calc(100svh-5rem),1800px)] mx-auto"
+                className={BOARD_CONTAINER_CLASS}
               />
               <GameStatusOverlay
                 kind={(() => {

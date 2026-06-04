@@ -1191,6 +1191,7 @@ const Play = () => {
                 hintToSquare={hintToSquare}
                 onSquareClick={handleSquareClick}
                 premove={premove}
+                className={BOARD_CONTAINER_CLASS}
                 overlay={
                   <>
                     {!gameOverInfo && <GameStatusOverlay kind={statusKind} subtitle={statusSubtitle} />}
