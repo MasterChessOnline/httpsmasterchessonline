@@ -51,7 +51,9 @@ const Clubs = () => {
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ name: "", description: "", icon: "♞" });
+  const [form, setForm] = useState({ name: "", description: "", icon: "♞", tag: "", banner_color: "#d4a843" });
+  const [topClans, setTopClans] = useState<TopClan[]>([]);
+  const [loadingTop, setLoadingTop] = useState(false);
 
   const loadClubs = async () => {
     setLoading(true);
@@ -71,12 +73,24 @@ const Clubs = () => {
     setLoading(false);
   };
 
-  useEffect(() => { loadClubs(); }, [user]);
+  const loadTopClans = async () => {
+    setLoadingTop(true);
+    const { data } = await (supabase.rpc as any)("top_clans", { p_limit: 20 });
+    setTopClans(((data as unknown) as TopClan[]) || []);
+    setLoadingTop(false);
+  };
+
+  useEffect(() => { loadClubs(); loadTopClans(); }, [user]);
 
   const filtered = clubs.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()));
 
   const createClub = async () => {
     if (!user || !form.name.trim()) return;
+    const tagRaw = form.tag.trim().toUpperCase();
+    if (tagRaw && !/^[A-Z0-9]{2,5}$/.test(tagRaw)) {
+      toast({ title: "Invalid tag", description: "Tag must be 2–5 letters or numbers (A–Z, 0–9).", variant: "destructive" });
+      return;
+    }
     setCreating(true);
     const { data, error } = await supabase
       .from("clubs" as any)
@@ -85,17 +99,24 @@ const Clubs = () => {
         description: form.description.trim().slice(0, 300),
         icon: form.icon,
         owner_id: user.id,
+        tag: tagRaw || null,
+        banner_color: form.banner_color,
       })
       .select()
       .single();
     setCreating(false);
     if (error) {
-      toast({ title: "Could not create club", description: error.message, variant: "destructive" });
+      const isTag = /tag/i.test(error.message);
+      toast({
+        title: isTag ? "Tag already taken" : "Could not create club",
+        description: isTag ? "Pick a different clan tag." : error.message,
+        variant: "destructive",
+      });
       return;
     }
     setCreateOpen(false);
-    setForm({ name: "", description: "", icon: "♞" });
-    toast({ title: "Club created!", description: `Welcome to ${form.name}` });
+    setForm({ name: "", description: "", icon: "♞", tag: "", banner_color: "#d4a843" });
+    toast({ title: "Clan created!", description: `Welcome to ${form.name}` });
     if (data) navigate(`/clubs/${(data as any).id}`);
   };
 
