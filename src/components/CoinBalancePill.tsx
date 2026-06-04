@@ -45,7 +45,8 @@ export default function CoinBalancePill({ compact, className = "" }: Props) {
 
 
   if (balance == null) return null;
-  const formatted = balance.toLocaleString();
+  const formatted = display.toLocaleString();
+
 
   return (
     <Link
