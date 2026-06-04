@@ -53,6 +53,14 @@ export const SHOP_ITEMS: ShopItem[] = [
   { key: "board:master_elite", name: "Master Elite 3D Board", type: "board", price: 3800, rarity: "legendary", preview: "👑", blurb: "Tournament prestige." },
   { key: "board:universe_animated", name: "Animated Universe Board", type: "board", price: 5000, rarity: "legendary", preview: "✨", blurb: "Living nebula." },
 
+  // ── Legendary Elemental Boards ──
+  { key: "board:lava_forge", name: "Lava Forge Board", type: "board", price: 4200, rarity: "legendary", preview: "🔥", blurb: "Molten ember & obsidian." },
+  { key: "board:deep_aquatic", name: "Deep Aquatic Board", type: "board", price: 4200, rarity: "legendary", preview: "🌊", blurb: "Sunken reef under turquoise glow." },
+  { key: "board:aurora_borealis", name: "Aurora Borealis Board", type: "board", price: 4500, rarity: "legendary", preview: "🌌", blurb: "Polar lights frozen on ice." },
+  { key: "board:obsidian_gold", name: "Obsidian Gold Board", type: "board", price: 4800, rarity: "legendary", preview: "🖤", blurb: "Pure black with gold inlay." },
+  { key: "board:magma_glass", name: "Magma Glass Board", type: "board", price: 5200, rarity: "legendary", preview: "🌋", blurb: "Cooled lava sealed under crystal." },
+  { key: "board:cosmic_nebula", name: "Cosmic Nebula Board", type: "board", price: 5500, rarity: "legendary", preview: "💫", blurb: "Pink-violet starfield." },
+
   // ───── PIECES ─────
   { key: "pieces:bronze", name: "Bronze Set", type: "pieces", price: 400, rarity: "common", preview: "🥉" },
   { key: "pieces:silver", name: "Silver Set", type: "pieces", price: 700, rarity: "common", preview: "🥈" },
@@ -63,6 +71,12 @@ export const SHOP_ITEMS: ShopItem[] = [
   { key: "pieces:dragon", name: "Dragon Flame Set", type: "pieces", price: 3200, rarity: "epic", preview: "🐉" },
   { key: "pieces:cyber_neon", name: "Cyber Neon Set", type: "pieces", price: 3800, rarity: "legendary", preview: "🤖" },
   { key: "pieces:mythic", name: "Mythic Legendary Set", type: "pieces", price: 5000, rarity: "legendary", preview: "🦄" },
+
+  // ── Legendary Piece Sets ──
+  { key: "pieces:inferno", name: "Inferno Pieces", type: "pieces", price: 4200, rarity: "legendary", preview: "🔥", blurb: "Forged in lava." },
+  { key: "pieces:abyssal", name: "Abyssal Pieces", type: "pieces", price: 4200, rarity: "legendary", preview: "🌊", blurb: "Carved from deep coral." },
+  { key: "pieces:celestial", name: "Celestial Pieces", type: "pieces", price: 4500, rarity: "legendary", preview: "🌠", blurb: "Star-forged royalty." },
+  { key: "pieces:obsidian", name: "Obsidian Pieces", type: "pieces", price: 4800, rarity: "legendary", preview: "🖤", blurb: "Black volcanic glass." },
 
   // ───── GRAFFITI / STREET ─────
   { key: "board:graffiti_1", name: "Graffiti Set #1", type: "board", price: 1500, rarity: "rare", preview: "🎨" },
