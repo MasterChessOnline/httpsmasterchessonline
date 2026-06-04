@@ -361,8 +361,9 @@ const Index = () => {
                   className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-primary/50 shadow-lg shrink-0"
                 />
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-primary">
-                    🇷🇸 Nikola Sakotić · Creator · 3500
+                  <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-primary flex items-center gap-1.5">
+                    <span className="inline-block text-base sm:text-lg leading-none">🇷🇸</span>
+                    Nikola Sakotić · Creator · 3500
                   </p>
                   <h3 className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
                     Play against the MasterChess creator himself
