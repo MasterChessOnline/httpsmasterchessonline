@@ -192,6 +192,7 @@ export default function Shop() {
 function UnlockOverlay({ item, onClose }: { item: ShopItem | null; onClose: () => void }) {
   if (!item) return null;
   const r = RARITY_META[item.rarity];
+  const preview = getShopPreview(item.key, item.preview);
   return (
     <AnimatePresence>
       {item && (
@@ -234,14 +235,22 @@ function UnlockOverlay({ item, onClose }: { item: ShopItem | null; onClose: () =
             <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-bold bg-black/40 ${r.color}`}>
               <Sparkles className="h-3 w-3" /> {r.label} unlock
             </div>
-            <motion.div
-              animate={{ rotateY: [0, 360] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-              className="mt-4 text-8xl"
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              {item.preview}
-            </motion.div>
+            <div className="mt-5 flex items-center justify-center">
+              {preview.kind === "board" ? (
+                <div className="w-44"><BoardSwatch light={preview.light} dark={preview.dark} size={8} /></div>
+              ) : preview.kind === "pieces" ? (
+                <div className="w-56"><PieceSetPreview style={preview.style} rich /></div>
+              ) : (
+                <motion.div
+                  animate={{ rotateY: [0, 360] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                  className="text-8xl"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  {preview.emoji}
+                </motion.div>
+              )}
+            </div>
             <h3 className="mt-4 text-2xl font-bold text-white">{item.name}</h3>
             <p className="mt-1 text-sm text-zinc-400">{item.blurb || "Permanently added to your collection."}</p>
             <Button
