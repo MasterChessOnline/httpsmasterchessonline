@@ -1,5 +1,6 @@
 import { type Difficulty } from "../chess-ai";
 import type { Playstyle, OpeningRepertoire } from "./playstyles";
+import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 
 export interface BotProfile {
   id: string;
