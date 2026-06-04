@@ -149,14 +149,45 @@ export default function ChestOpenCinematic({ chest, revealed, onClose }: Props) 
                 className="space-y-5"
                 style={{ perspective: 800 }}
               >
-                <motion.div
-                  className="text-8xl sm:text-9xl inline-block"
-                  style={{ filter: `drop-shadow(0 0 50px ${fx.glow})` }}
-                  animate={{ rotateY: [0, 360], y: [0, -8, 0] }}
-                  transition={{ rotateY: { duration: 6, repeat: Infinity, ease: "linear" }, y: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
-                >
-                  {revealed.reward.preview}
-                </motion.div>
+                {(() => {
+                  const r = revealed.reward;
+                  const theme = (r as any).boardThemeKey ? getBoardTheme((r as any).boardThemeKey) : undefined;
+                  const piece = (r as any).pieceStyleKey ? getPieceStyle((r as any).pieceStyleKey) : undefined;
+                  if (theme) {
+                    return (
+                      <motion.div
+                        className="mx-auto w-48 sm:w-56"
+                        style={{ filter: `drop-shadow(0 0 40px ${fx.glow})` }}
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <BoardSwatch light={theme.light} dark={theme.dark} size={8} />
+                      </motion.div>
+                    );
+                  }
+                  if (piece) {
+                    return (
+                      <motion.div
+                        className="mx-auto w-64"
+                        style={{ filter: `drop-shadow(0 0 40px ${fx.glow})` }}
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <PieceSetPreview style={piece} rich />
+                      </motion.div>
+                    );
+                  }
+                  return (
+                    <motion.div
+                      className="text-8xl sm:text-9xl inline-block"
+                      style={{ filter: `drop-shadow(0 0 50px ${fx.glow})` }}
+                      animate={{ rotateY: [0, 360], y: [0, -8, 0] }}
+                      transition={{ rotateY: { duration: 6, repeat: Infinity, ease: "linear" }, y: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
+                    >
+                      {r.preview}
+                    </motion.div>
+                  );
+                })()}
                 <div>
                   <p className={`text-xs font-bold uppercase tracking-[0.35em] mb-2 ${fx.rarityColor}`}>
                     {revealed.isNew ? <><Sparkles className="inline w-3 h-3 mr-1" />New unlock!</> : revealed.reward.kind === "xp" ? "Bonus" : "Duplicate"}
