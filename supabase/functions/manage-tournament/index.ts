@@ -429,7 +429,7 @@ async function handleReportResult(supabase: any, game_id: string, result: string
   // OR an admin/organizer.
   const { data: pairingCheck } = await supabase
     .from("tournament_pairings")
-    .select("white_player_id, black_player_id")
+    .select("white_player_id, black_player_id, result")
     .eq("game_id", game_id)
     .single();
 
@@ -437,16 +437,22 @@ async function handleReportResult(supabase: any, game_id: string, result: string
     return jsonRes({ error: "Pairing not found" }, 404);
   }
 
+  // Idempotency guard: if a result is already recorded, do not accumulate scores again.
+  if (pairingCheck.result) {
+    return jsonRes({ ok: true, already: true });
+  }
+
   const isPlayer =
     pairingCheck.white_player_id === callerId ||
     pairingCheck.black_player_id === callerId;
 
+  let isAdminOrOrganizer = false;
   if (!isPlayer) {
     const { data: roleRows } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", callerId);
-    const isAdminOrOrganizer = (roleRows || []).some(
+    isAdminOrOrganizer = (roleRows || []).some(
       (r: any) => r.role === "admin" || r.role === "organizer"
     );
     if (!isAdminOrOrganizer) {
@@ -454,10 +460,43 @@ async function handleReportResult(supabase: any, game_id: string, result: string
     }
   }
 
-  await supabase
+  // Cross-check submitted result against the authoritative online_games row.
+  // Players may only report a result that matches the finished game; admins/organizers
+  // may override (e.g. forfeits) but the game must still be finished if it exists.
+  const { data: game } = await supabase
+    .from("online_games")
+    .select("status, result")
+    .eq("id", game_id)
+    .maybeSingle();
+
+  if (game) {
+    if (game.status !== "finished" || !game.result) {
+      return jsonRes({ error: "Game not finished" }, 409);
+    }
+    if (!isAdminOrOrganizer && game.result !== result) {
+      return jsonRes({ error: "Result does not match game outcome" }, 409);
+    }
+  } else if (!isAdminOrOrganizer) {
+    // No backing online_games row — only organizers/admins can record a manual result.
+    return jsonRes({ error: "Game record not found" }, 404);
+  }
+
+  // Conditional update: only set the result if it is still NULL to prevent any
+  // race where two concurrent calls both pass the idempotency check above.
+  const { data: updated, error: updErr } = await supabase
     .from("tournament_pairings")
     .update({ result })
-    .eq("game_id", game_id);
+    .eq("game_id", game_id)
+    .is("result", null)
+    .select("id");
+
+  if (updErr) {
+    return jsonRes({ error: updErr.message }, 500);
+  }
+  if (!updated || updated.length === 0) {
+    return jsonRes({ ok: true, already: true });
+  }
+
 
   const { data: pairing } = await supabase
     .from("tournament_pairings")
