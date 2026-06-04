@@ -114,6 +114,10 @@ const Dashboard = () => {
             </div>
           </motion.div>
 
+          <OnboardingProgressCard />
+
+
+
           {/* Active tournament banner */}
           {activeTournament && (
             <motion.div
