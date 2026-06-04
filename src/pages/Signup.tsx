@@ -274,9 +274,6 @@ const Signup = () => {
           </p>
         </div>
       </motion.div>
-      
-        </div>
-      </motion.div>
       <GoogleCountryNameModal
         open={googleModalOpen}
         onClose={() => setGoogleModalOpen(false)}
