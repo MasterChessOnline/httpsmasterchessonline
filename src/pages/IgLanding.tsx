@@ -16,16 +16,15 @@ export default function IgLanding() {
   const navigate = useNavigate();
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Tag visit so future analytics can split IG traffic. Reuses the global
-  // ReferralTracker (?ref=ig) if present; otherwise marks the session.
+  // IG visitors: drop them straight into a live game vs a friendly bot.
+  // Signup is offered inside PlayGuest after the game ends.
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      if (!params.get("ref")) {
-        localStorage.setItem("mc_ig_session", "1");
-      }
+      if (!params.get("ref")) localStorage.setItem("mc_ig_session", "1");
     } catch { /* noop */ }
-  }, []);
+    navigate("/play-guest", { replace: true });
+  }, [navigate]);
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
