@@ -149,7 +149,7 @@ export default function PlayGuest() {
   const moveCount = useMemo(() => Math.ceil(game.history().length / 2), [game, fen]);
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-background relative overflow-x-hidden overscroll-none flex flex-col" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
       <Seo
         path="/play-guest"
         title="Play Chess Instantly — No Signup Needed | MasterChess"
@@ -157,10 +157,10 @@ export default function PlayGuest() {
       />
 
       {/* Minimal top bar */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+      <header className="flex items-center justify-between px-3 py-2 border-b border-border/40 shrink-0">
         <Link to="/" className="flex items-center gap-2">
           <Crown className="h-5 w-5 text-primary" />
-          <span className="font-display font-bold text-foreground tracking-wide">
+          <span className="font-display font-bold text-foreground tracking-wide text-sm">
             Master<span className="text-gradient-gold">Chess</span>
           </span>
         </Link>
@@ -172,23 +172,23 @@ export default function PlayGuest() {
         </button>
       </header>
 
-      <main className="max-w-md mx-auto px-3 py-4 space-y-4">
+      <main className="flex-1 w-full max-w-md mx-auto px-2 py-2 space-y-2 flex flex-col min-h-0">
         {/* Bot strip */}
-        <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-card/40 border border-border/40 backdrop-blur">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl">{GUEST_BOT.avatar}</span>
-            <div className="leading-tight">
-              <div className="text-sm font-semibold text-foreground">{GUEST_BOT.name}</div>
-              <div className="text-[11px] text-muted-foreground">Rating {GUEST_BOT.rating} · {GUEST_BOT.countryFlag}</div>
+        <div className="flex items-center justify-between gap-3 px-3 py-1.5 rounded-xl bg-card/40 border border-border/40 backdrop-blur shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-xl shrink-0">{GUEST_BOT.avatar}</span>
+            <div className="leading-tight min-w-0">
+              <div className="text-sm font-semibold text-foreground truncate">{GUEST_BOT.name}</div>
+              <div className="text-[11px] text-muted-foreground truncate">Rating {GUEST_BOT.rating} · {GUEST_BOT.countryFlag}</div>
             </div>
           </div>
-          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
             {botThinking ? "thinking…" : `move ${moveCount}`}
           </div>
         </div>
 
         {/* Board */}
-        <div className={BOARD_CONTAINER_CLASS}>
+        <div className={BOARD_CONTAINER_CLASS + " touch-none select-none"}>
           <ChessBoard
             game={game}
             flipped={false}
@@ -202,19 +202,19 @@ export default function PlayGuest() {
         </div>
 
         {/* You strip */}
-        <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-card/40 border border-border/40 backdrop-blur">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl">🎮</span>
-            <div className="leading-tight">
-              <div className="text-sm font-semibold text-foreground">You (Guest)</div>
-              <div className="text-[11px] text-muted-foreground">No account — playing as White</div>
+        <div className="flex items-center justify-between gap-3 px-3 py-1.5 rounded-xl bg-card/40 border border-border/40 backdrop-blur shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-xl shrink-0">🎮</span>
+            <div className="leading-tight min-w-0">
+              <div className="text-sm font-semibold text-foreground truncate">You (Guest)</div>
+              <div className="text-[11px] text-muted-foreground truncate">Playing as White</div>
             </div>
           </div>
           <Button
             size="sm"
             variant="ghost"
             onClick={resetGame}
-            className="h-8 text-xs"
+            className="h-8 text-xs shrink-0"
           >
             <RotateCcw className="h-3.5 w-3.5 mr-1" /> New
           </Button>
@@ -225,7 +225,7 @@ export default function PlayGuest() {
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center text-[12px] text-muted-foreground"
+            className="text-center text-[11px] text-muted-foreground px-2"
           >
             <Sparkles className="inline h-3.5 w-3.5 text-primary mr-1" />
             Save this game + claim <span className="text-primary font-semibold">200 coins</span> by signing up

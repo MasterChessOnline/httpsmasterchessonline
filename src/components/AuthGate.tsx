@@ -10,7 +10,12 @@ import { getPendingProfile, clearPendingProfile } from "@/components/auth/Google
 const PUBLIC_PATHS = new Set([
   "/login", "/signup", "/forgot-password", "/reset-password",
   "/about", "/privacy", "/terms", "/contact",
+  "/play-guest", "/ig", "/ig/", "/play-guest/",
 ]);
+
+// First impression for unregistered visitors: drop them straight into a
+// live game vs a friendly bot instead of a wall. They sign up after the game.
+const BOT_ENTRY_REDIRECT = "/play-guest";
 
 const SEEN_KEY = "mc:welcome-gate-seen";
 
@@ -47,8 +52,11 @@ export default function AuthGate() {
     if (loading) return;
     if (user) { setShow(false); return; }
     const isPublic = PUBLIC_PATHS.has(location.pathname);
-    setShow(!isPublic);
-  }, [user, loading, location.pathname]);
+    if (isPublic) { setShow(false); return; }
+    // Unregistered → never show a wall. Redirect to the instant bot game.
+    setShow(false);
+    navigate(BOT_ENTRY_REDIRECT, { replace: true });
+  }, [user, loading, location.pathname, navigate]);
 
   // Mark seen so we don't bombard with animations if they bounce around
   useEffect(() => {
