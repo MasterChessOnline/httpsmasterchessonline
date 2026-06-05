@@ -45,23 +45,18 @@ export default function InstallPrompt() {
           exit={{ y: 100, opacity: 0 }}
           className="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:right-6 z-[60] max-w-sm"
         >
-          <div className="rounded-2xl border border-amber-400/30 bg-gradient-to-br from-zinc-900/95 to-black/95 backdrop-blur-xl p-4 shadow-2xl">
-            <div className="flex items-start gap-3">
+          <div className="rounded-2xl border border-amber-400/30 bg-gradient-to-br from-zinc-900/95 to-black/95 backdrop-blur-xl p-3 shadow-2xl">
+            <div className="flex items-center gap-3">
               <div className="rounded-xl bg-amber-400/15 p-2">
                 <Download className="h-5 w-5 text-amber-300" />
               </div>
-              <div className="flex-1">
-                <div className="font-semibold text-amber-100">Install MasterChess</div>
-                <div className="text-xs text-zinc-400 mt-0.5">
-                  Quick access, offline mode, no app store.
-                </div>
-                <div className="flex gap-2 mt-3">
-                  <Button size="sm" onClick={install} className="bg-amber-500 hover:bg-amber-400 text-black">
-                    Install
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={dismiss}>Later</Button>
-                </div>
-              </div>
+              <Button
+                size="sm"
+                onClick={install}
+                className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-semibold"
+              >
+                Install MasterChess
+              </Button>
               <button onClick={dismiss} className="text-zinc-500 hover:text-zinc-300">
                 <X className="h-4 w-4" />
               </button>

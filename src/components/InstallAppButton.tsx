@@ -142,9 +142,8 @@ export default function InstallAppButton({
       return;
     }
     // 3. iOS — Apple blocks fully automatic installs. Open the Share sheet
-    //    immediately AND show the step-by-step guide as backup.
+    //    directly so the user can tap "Add to Home Screen" — no extra dialog.
     if (isIos) {
-      setShowIosHelp(true);
       if (navigator.share) {
         try {
           await navigator.share({
@@ -152,16 +151,12 @@ export default function InstallAppButton({
             text: "Install MasterChess on your iPhone.",
             url: window.location.origin,
           });
-        } catch {
-          // user dismissed; modal stays visible with steps
-        }
+        } catch {/* user dismissed */}
       }
       return;
     }
-    // 4. Desktop/Android without a deferred prompt — show the step-by-step
-    //    guide modal (covers Chrome/Edge/Brave install icon + Safari macOS
-    //    File → Add to Dock) so the user can still add the app manually.
-    setShowAndroidHelp(true);
+    // 4. Desktop/Android without a deferred prompt — silently no-op.
+    //    User asked: no instructions, no "how to" dialogs.
   };
 
   const sizeClass =
