@@ -47,22 +47,25 @@ import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
 import LivePlayerCounter from "@/components/LivePlayerCounter";
-import WhyMasterChess from "@/components/landing/WhyMasterChess";
-import WhyInvest from "@/components/landing/WhyInvest";
-import TestimonialsCarousel from "@/components/landing/TestimonialsCarousel";
-import ProofStrip from "@/components/landing/ProofStrip";
-import Manifesto from "@/components/landing/Manifesto";
-import WallOfReasons from "@/components/landing/WallOfReasons";
-import StickyJoinBar from "@/components/landing/StickyJoinBar";
 import InstallAppButton from "@/components/InstallAppButton";
 
 import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
-import LiveActivityFeed from "@/components/LiveActivityFeed";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import LazyMount from "@/components/LazyMount";
-const HomeSpinWheelSection = React.lazy(() => import("@/components/HomeSpinWheelSection"));
 import WinStreakFlame from "@/components/WinStreakFlame";
+
+// Below-the-fold heavy sections — code-split to shrink initial JS bundle
+// and stabilize first paint on mobile.
+const HomeSpinWheelSection = React.lazy(() => import("@/components/HomeSpinWheelSection"));
+const LiveActivityFeed = React.lazy(() => import("@/components/LiveActivityFeed"));
+const WhyMasterChess = React.lazy(() => import("@/components/landing/WhyMasterChess"));
+const WhyInvest = React.lazy(() => import("@/components/landing/WhyInvest"));
+const TestimonialsCarousel = React.lazy(() => import("@/components/landing/TestimonialsCarousel"));
+const ProofStrip = React.lazy(() => import("@/components/landing/ProofStrip"));
+const Manifesto = React.lazy(() => import("@/components/landing/Manifesto"));
+const WallOfReasons = React.lazy(() => import("@/components/landing/WallOfReasons"));
+const StickyJoinBar = React.lazy(() => import("@/components/landing/StickyJoinBar"));
 
 interface RecentGame {
   id: string;
