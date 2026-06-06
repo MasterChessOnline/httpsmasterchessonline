@@ -47,22 +47,25 @@ import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
 import LivePlayerCounter from "@/components/LivePlayerCounter";
-import WhyMasterChess from "@/components/landing/WhyMasterChess";
-import WhyInvest from "@/components/landing/WhyInvest";
-import TestimonialsCarousel from "@/components/landing/TestimonialsCarousel";
-import ProofStrip from "@/components/landing/ProofStrip";
-import Manifesto from "@/components/landing/Manifesto";
-import WallOfReasons from "@/components/landing/WallOfReasons";
-import StickyJoinBar from "@/components/landing/StickyJoinBar";
 import InstallAppButton from "@/components/InstallAppButton";
 
 import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
-import LiveActivityFeed from "@/components/LiveActivityFeed";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import LazyMount from "@/components/LazyMount";
-const HomeSpinWheelSection = React.lazy(() => import("@/components/HomeSpinWheelSection"));
 import WinStreakFlame from "@/components/WinStreakFlame";
+
+// Below-the-fold heavy sections — code-split to shrink initial JS bundle
+// and stabilize first paint on mobile.
+const HomeSpinWheelSection = React.lazy(() => import("@/components/HomeSpinWheelSection"));
+const LiveActivityFeed = React.lazy(() => import("@/components/LiveActivityFeed"));
+const WhyMasterChess = React.lazy(() => import("@/components/landing/WhyMasterChess"));
+const WhyInvest = React.lazy(() => import("@/components/landing/WhyInvest"));
+const TestimonialsCarousel = React.lazy(() => import("@/components/landing/TestimonialsCarousel"));
+const ProofStrip = React.lazy(() => import("@/components/landing/ProofStrip"));
+const Manifesto = React.lazy(() => import("@/components/landing/Manifesto"));
+const WallOfReasons = React.lazy(() => import("@/components/landing/WallOfReasons"));
+const StickyJoinBar = React.lazy(() => import("@/components/landing/StickyJoinBar"));
 
 interface RecentGame {
   id: string;
@@ -462,14 +465,17 @@ const Index = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Open MasterChess Instagram profile"
-                className="block group relative rounded-2xl overflow-hidden border border-primary/30 bg-card/40 backdrop-blur-sm shadow-2xl hover:border-primary/70 transition-all duration-300"
-                style={{ boxShadow: "0 25px 60px -15px hsl(43 90% 55% / 0.25)" }}
+                className="block group relative rounded-2xl overflow-hidden border border-primary/30 bg-card/40 shadow-2xl hover:border-primary/70 transition-all duration-300"
+                style={{ boxShadow: "0 25px 60px -15px hsl(43 90% 55% / 0.25)", aspectRatio: "11 / 16" }}
               >
                 <img
                   src={posterImage}
                   alt="MasterChess — 13 years old, already winning. Founded by Nikola Šakotić."
+                  width={1100}
+                  height={1600}
                   loading="lazy"
-                  className="w-full h-auto object-contain block group-hover:scale-[1.01] transition-transform duration-500"
+                  decoding="async"
+                  className="w-full h-full object-contain block group-hover:scale-[1.01] transition-transform duration-500"
                 />
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
@@ -491,7 +497,9 @@ const Index = () => {
           {/* Live Activity Feed — real wins, ratings, tournaments */}
           <section id="live-activity" className="scroll-mt-24">
             <LazyMount minHeight={320}>
-              <LiveActivityFeed />
+              <React.Suspense fallback={<div style={{ minHeight: 320 }} />}>
+                <LiveActivityFeed />
+              </React.Suspense>
             </LazyMount>
           </section>
 
@@ -883,17 +891,24 @@ const Index = () => {
         </div>
 
         {/* Proof strip — instant differentiators */}
-        <ProofStrip />
+        <LazyMount minHeight={120}>
+          <React.Suspense fallback={<div style={{ minHeight: 120 }} />}>
+            <ProofStrip />
+          </React.Suspense>
+        </LazyMount>
 
-        {/* Marketing landing strips */}
+        {/* Marketing landing strips — heavy, all below the fold, code-split */}
         <section className="px-4">
           <div className="max-w-5xl mx-auto">
-            <WhyInvest />
-
-            <WhyMasterChess />
-            <Manifesto />
-            <WallOfReasons />
-            <TestimonialsCarousel />
+            <LazyMount minHeight={600}>
+              <React.Suspense fallback={<div style={{ minHeight: 600 }} />}>
+                <WhyInvest />
+                <WhyMasterChess />
+                <Manifesto />
+                <WallOfReasons />
+                <TestimonialsCarousel />
+              </React.Suspense>
+            </LazyMount>
           </div>
         </section>
 
@@ -909,7 +924,9 @@ const Index = () => {
 
       <SiteRating />
       <Footer />
-      <StickyJoinBar />
+      <React.Suspense fallback={null}>
+        <StickyJoinBar />
+      </React.Suspense>
     </div>
   );
 };
