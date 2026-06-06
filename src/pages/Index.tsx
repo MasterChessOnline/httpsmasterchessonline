@@ -891,17 +891,24 @@ const Index = () => {
         </div>
 
         {/* Proof strip — instant differentiators */}
-        <ProofStrip />
+        <LazyMount minHeight={120}>
+          <React.Suspense fallback={<div style={{ minHeight: 120 }} />}>
+            <ProofStrip />
+          </React.Suspense>
+        </LazyMount>
 
-        {/* Marketing landing strips */}
+        {/* Marketing landing strips — heavy, all below the fold, code-split */}
         <section className="px-4">
           <div className="max-w-5xl mx-auto">
-            <WhyInvest />
-
-            <WhyMasterChess />
-            <Manifesto />
-            <WallOfReasons />
-            <TestimonialsCarousel />
+            <LazyMount minHeight={600}>
+              <React.Suspense fallback={<div style={{ minHeight: 600 }} />}>
+                <WhyInvest />
+                <WhyMasterChess />
+                <Manifesto />
+                <WallOfReasons />
+                <TestimonialsCarousel />
+              </React.Suspense>
+            </LazyMount>
           </div>
         </section>
 
@@ -917,7 +924,9 @@ const Index = () => {
 
       <SiteRating />
       <Footer />
-      <StickyJoinBar />
+      <React.Suspense fallback={null}>
+        <StickyJoinBar />
+      </React.Suspense>
     </div>
   );
 };
