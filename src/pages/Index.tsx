@@ -497,7 +497,9 @@ const Index = () => {
           {/* Live Activity Feed — real wins, ratings, tournaments */}
           <section id="live-activity" className="scroll-mt-24">
             <LazyMount minHeight={320}>
-              <LiveActivityFeed />
+              <React.Suspense fallback={<div style={{ minHeight: 320 }} />}>
+                <LiveActivityFeed />
+              </React.Suspense>
             </LazyMount>
           </section>
 
