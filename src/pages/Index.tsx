@@ -465,14 +465,17 @@ const Index = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Open MasterChess Instagram profile"
-                className="block group relative rounded-2xl overflow-hidden border border-primary/30 bg-card/40 backdrop-blur-sm shadow-2xl hover:border-primary/70 transition-all duration-300"
-                style={{ boxShadow: "0 25px 60px -15px hsl(43 90% 55% / 0.25)" }}
+                className="block group relative rounded-2xl overflow-hidden border border-primary/30 bg-card/40 shadow-2xl hover:border-primary/70 transition-all duration-300"
+                style={{ boxShadow: "0 25px 60px -15px hsl(43 90% 55% / 0.25)", aspectRatio: "11 / 16" }}
               >
                 <img
                   src={posterImage}
                   alt="MasterChess — 13 years old, already winning. Founded by Nikola Šakotić."
+                  width={1100}
+                  height={1600}
                   loading="lazy"
-                  className="w-full h-auto object-contain block group-hover:scale-[1.01] transition-transform duration-500"
+                  decoding="async"
+                  className="w-full h-full object-contain block group-hover:scale-[1.01] transition-transform duration-500"
                 />
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
