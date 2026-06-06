@@ -157,41 +157,65 @@ function PuzzleSolver({ puzzle, tier, onSolved, onBack, replayMode }: SolverProp
   const onSquareClick = useCallback((square: Square) => {
     if (status !== "playing" || !playerTurn) return;
     const piece = game.get(square);
-    if (selectedSquare) {
-      const expected = puzzle.solutionUci[moveIndex];
-      const tryUci = `${selectedSquare}${square}`;
-      const isMatch =
-        tryUci === expected ||
-        tryUci + "q" === expected ||
-        tryUci === expected.slice(0, 4);
-      setAttempts((a) => a + 1);
-      if (isMatch) {
-        const next = new Chess(game.fen());
-        const mv = next.move({
-          from: selectedSquare, to: square,
-          promotion: expected.length > 4 ? expected[4] : "q",
-        });
-        if (mv) {
-          setGame(next);
-          setLastMove({ from: mv.from, to: mv.to });
-          setSelectedSquare(null);
-          setLegalMoves([]);
-          setHintSquare(null);
-          setCombo((c) => c + 1);
-          const newIdx = moveIndex + 1;
-          setMoveIndex(newIdx);
-          if (newIdx >= puzzle.solutionUci.length) setStatus("solved");
-        }
-      } else {
-        setCombo(0);
-        setStatus("failed");
+
+    // Allow free piece exploration: clicking own piece always (re)selects it,
+    // never counts as a move attempt. Only a click on a LEGAL destination
+    // square completes a move and triggers validation.
+    if (piece && piece.color === game.turn()) {
+      if (selectedSquare === square) {
+        // Toggle off
         setSelectedSquare(null);
         setLegalMoves([]);
+        return;
       }
-    } else if (piece && piece.color === game.turn()) {
       setSelectedSquare(square);
       const moves = game.moves({ square, verbose: true });
       setLegalMoves(moves.map((m: any) => m.to));
+      return;
+    }
+
+    if (!selectedSquare) return;
+
+    // Clicked an empty / opponent square that is NOT a legal destination —
+    // just deselect, do not penalize the player for exploring.
+    const legal = game.moves({ square: selectedSquare, verbose: true }) as any[];
+    const legalDest = legal.find((m) => m.to === square);
+    if (!legalDest) {
+      setSelectedSquare(null);
+      setLegalMoves([]);
+      return;
+    }
+
+    // A legal move was completed — now validate against the puzzle solution.
+    const expected = puzzle.solutionUci[moveIndex];
+    const tryUci = `${selectedSquare}${square}`;
+    const isMatch =
+      tryUci === expected ||
+      tryUci + "q" === expected ||
+      tryUci === expected.slice(0, 4);
+    setAttempts((a) => a + 1);
+    if (isMatch) {
+      const next = new Chess(game.fen());
+      const mv = next.move({
+        from: selectedSquare, to: square,
+        promotion: expected.length > 4 ? expected[4] : "q",
+      });
+      if (mv) {
+        setGame(next);
+        setLastMove({ from: mv.from, to: mv.to });
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        setHintSquare(null);
+        setCombo((c) => c + 1);
+        const newIdx = moveIndex + 1;
+        setMoveIndex(newIdx);
+        if (newIdx >= puzzle.solutionUci.length) setStatus("solved");
+      }
+    } else {
+      setCombo(0);
+      setStatus("failed");
+      setSelectedSquare(null);
+      setLegalMoves([]);
     }
   }, [selectedSquare, game, status, moveIndex, puzzle.solutionUci, playerTurn]);
 
