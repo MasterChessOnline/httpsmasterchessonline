@@ -42,6 +42,7 @@ import DynamicBackground from "@/components/DynamicBackground";
 import DailyMissions from "@/components/DailyMissions";
 import DailyMysteryBox from "@/components/DailyMysteryBox";
 import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
+import DailyRewards7Strip from "@/components/DailyRewards7Strip";
 
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
@@ -503,8 +504,13 @@ const Index = () => {
             </LazyMount>
           </section>
 
+          {/* Daily Rewards 7-day strip — premium mobile-game progression loop */}
+          <section id="daily-rewards" className="scroll-mt-24 -mt-4">
+            <DailyRewards7Strip />
+          </section>
+
           {/* Daily Challenge — directly below the hero, first thing users see */}
-          <section id="daily-missions" className="scroll-mt-24 -mt-4 space-y-4">
+          <section id="daily-missions" className="scroll-mt-24 space-y-4">
             <DailyMysteryBox />
             <SectionHeader title="Daily Challenge" icon={Target}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

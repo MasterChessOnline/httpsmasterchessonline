@@ -481,7 +481,7 @@ const Navbar = () => {
                 <div className="h-9 w-9 bg-muted/20 rounded-xl animate-pulse" />
               ) : user ? (
                 <>
-                  <CoinBalancePill className="hidden sm:inline-flex" />
+                  <CoinBalancePill />
                   <StreakIndicator />
                   <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden xl:flex" aria-label="Sign out">
                     <LogOut className="h-4 w-4" />
