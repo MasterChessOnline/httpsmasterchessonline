@@ -298,6 +298,7 @@ const App = () => (
             <TitleUnlockGate />
             <WelcomeIntroPopup />
             <CinematicIntro />
+            <EntryQuickDashboard />
             <GameInviteListener />
             <MobileBottomNav />
             <NotificationPrompt />
