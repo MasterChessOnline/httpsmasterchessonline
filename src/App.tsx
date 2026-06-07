@@ -117,6 +117,7 @@ import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
 import AppLaunchSplash from "@/components/AppLaunchSplash";
+import EntryQuickDashboard from "@/components/EntryQuickDashboard";
 import ReferralTracker from "@/hooks/useReferralTracker";
 
 // Non-critical overlays — lazy-loaded so they don't block first paint.
