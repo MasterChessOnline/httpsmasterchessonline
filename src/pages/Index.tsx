@@ -510,6 +510,11 @@ const Index = () => {
             <DailyRewards7Strip />
           </section>
 
+          {/* Shop teaser — drives discovery of cosmetics */}
+          <section id="shop" className="scroll-mt-24">
+            <ShopHomeStrip />
+          </section>
+
           {/* Daily Challenge — directly below the hero, first thing users see */}
           <section id="daily-missions" className="scroll-mt-24 space-y-4">
             <DailyMysteryBox />
