@@ -120,7 +120,9 @@ export const FREE_BOARD_KEYS = new Set<string>([
   "coral", "olive", "sunset", "mint", "tournament", "glassmorph", "carbon", "ivory",
   "ruby", "winter", "spring",
 ]);
-export const FREE_PIECE_KEYS = new Set<string>(["merida", "cburnett"]);
+export const FREE_PIECE_KEYS = new Set<string>([
+  "merida", "cburnett", "neo", "standard", "minimal", "bold", "outline",
+]);
 
 export function isBoardLocked(key: string): boolean {
   if (FREE_BOARD_KEYS.has(key)) return false;
