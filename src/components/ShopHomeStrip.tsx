@@ -57,7 +57,7 @@ export default function ShopHomeStrip() {
                 className={`group relative flex flex-col items-center justify-center aspect-square rounded-2xl border bg-card/60 hover:bg-card/90 transition ${meta.ring} ring-1`}
               >
                 <span className="text-3xl sm:text-4xl drop-shadow">{it.preview}</span>
-                <span className="absolute top-1 right-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-black/60 backdrop-blur ${meta.color}">
+                <span className={`absolute top-1 right-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-black/60 backdrop-blur ${meta.color}`}>
                   {meta.label.charAt(0)}
                 </span>
                 <span className="absolute bottom-1 left-1 right-1 flex items-center justify-center gap-0.5 text-[10px] font-bold text-amber-300">
