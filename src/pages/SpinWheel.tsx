@@ -67,6 +67,7 @@ export default function SpinWheel() {
   const [result, setResult] = useState<{ coins: number; new_balance?: number; segment?: Segment } | null>(null);
   const [alreadyClaimed, setAlreadyClaimed] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
+  const [oddsOpen, setOddsOpen] = useState(false);
 
   useEffect(() => {
     const check = async () => {
@@ -107,7 +108,7 @@ export default function SpinWheel() {
     }
 
     const seg = pickSegmentForCoins(data.coins);
-    const target = 360 * 7 + (360 - (seg.idx * SEG + SEG / 2));
+    const target = 360 * 5 + (360 - (seg.idx * SEG + SEG / 2));
     setAngle(target);
 
     setTimeout(() => {
@@ -124,7 +125,7 @@ export default function SpinWheel() {
       });
       window.dispatchEvent(new CustomEvent("mc:coins-changed"));
       window.dispatchEvent(new CustomEvent("mc:spin-claimed"));
-    }, 4400);
+    }, 2700);
   };
 
   const spin = () => runSpin(false);
@@ -187,7 +188,7 @@ export default function SpinWheel() {
             className="relative h-full w-full rounded-full border-4 border-amber-400/80 overflow-hidden shadow-[0_0_60px_-10px_hsl(45,90%,55%,0.6)]"
             style={{ transformOrigin: "50% 50%" }}
             animate={{ rotate: angle }}
-            transition={{ duration: 4.2, ease: [0.16, 0.84, 0.2, 1] }}
+            transition={{ duration: 2.6, ease: [0.16, 0.84, 0.2, 1] }}
           >
             {/* Segment slices via conic-gradient — guaranteed equal sizes */}
             <div
