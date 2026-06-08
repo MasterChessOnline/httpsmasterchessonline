@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Sparkles, Coins, Gift, Crown } from "lucide-react";
+import { ArrowLeft, Sparkles, Coins, Gift, Crown, Info, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +67,7 @@ export default function SpinWheel() {
   const [result, setResult] = useState<{ coins: number; new_balance?: number; segment?: Segment } | null>(null);
   const [alreadyClaimed, setAlreadyClaimed] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
+  const [oddsOpen, setOddsOpen] = useState(false);
 
   useEffect(() => {
     const check = async () => {
@@ -107,7 +108,7 @@ export default function SpinWheel() {
     }
 
     const seg = pickSegmentForCoins(data.coins);
-    const target = 360 * 7 + (360 - (seg.idx * SEG + SEG / 2));
+    const target = 360 * 5 + (360 - (seg.idx * SEG + SEG / 2));
     setAngle(target);
 
     setTimeout(() => {
@@ -124,7 +125,7 @@ export default function SpinWheel() {
       });
       window.dispatchEvent(new CustomEvent("mc:coins-changed"));
       window.dispatchEvent(new CustomEvent("mc:spin-claimed"));
-    }, 4400);
+    }, 2700);
   };
 
   const spin = () => runSpin(false);
@@ -187,7 +188,7 @@ export default function SpinWheel() {
             className="relative h-full w-full rounded-full border-4 border-amber-400/80 overflow-hidden shadow-[0_0_60px_-10px_hsl(45,90%,55%,0.6)]"
             style={{ transformOrigin: "50% 50%" }}
             animate={{ rotate: angle }}
-            transition={{ duration: 4.2, ease: [0.16, 0.84, 0.2, 1] }}
+            transition={{ duration: 2.6, ease: [0.16, 0.84, 0.2, 1] }}
           >
             {/* Segment slices via conic-gradient — guaranteed equal sizes */}
             <div
@@ -290,23 +291,79 @@ export default function SpinWheel() {
           {!user && (
             <Link to="/signup" className="text-xs text-primary hover:underline">Create a free account →</Link>
           )}
+          <button
+            type="button"
+            onClick={() => setOddsOpen(true)}
+            className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-200 text-xs font-semibold hover:bg-amber-500/20 transition"
+          >
+            <Info className="w-3.5 h-3.5" /> View winning chances
+          </button>
         </div>
 
-        {/* Odds table */}
-        <section className="mt-12">
-          <h2 className="font-display text-lg font-bold mb-3 text-center inline-flex items-center justify-center gap-2 w-full">
-            <Coins className="w-4 h-4 text-amber-400" /> Drop rates
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {ODDS.map((o) => (
-              <div key={o.coins} className="rounded-lg border border-amber-500/30 bg-card/60 backdrop-blur px-3 py-2.5 text-center hover:border-amber-500/60 transition">
-                <div className="text-2xl mb-0.5">{o.piece}</div>
-                <div className="text-sm font-bold text-amber-300">{o.label}</div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">{o.pct}% chance</div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Odds Modal — clear popup with exact win chances */}
+        <AnimatePresence>
+          {oddsOpen && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+              onClick={() => setOddsOpen(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.92, opacity: 0, y: 12 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                className="relative w-full max-w-sm rounded-3xl border border-amber-400/40 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-6 shadow-[0_0_80px_rgba(251,191,36,0.35)]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setOddsOpen(false)}
+                  aria-label="Close"
+                  className="absolute top-3 right-3 p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="text-center mb-4">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-[11px] font-bold uppercase tracking-widest mb-2">
+                    <Info className="w-3 h-3" /> Exact Drop Rates
+                  </div>
+                  <h3 className="font-display text-xl font-bold">Your winning chances</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Probabilities are fixed and shown per spin. Totals always equal 100%.
+                  </p>
+                </div>
+                <ul className="space-y-1.5">
+                  {ODDS.map((o) => (
+                    <li
+                      key={o.coins}
+                      className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-card/60 px-3 py-2"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl w-7 text-center">{o.piece}</span>
+                        <span className="text-sm font-bold text-amber-200">{o.label} coins</span>
+                      </div>
+                      <div className="flex items-center gap-2 min-w-[110px]">
+                        <div className="relative h-1.5 flex-1 rounded-full bg-zinc-800 overflow-hidden">
+                          <div
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-500 to-yellow-300"
+                            style={{ width: `${Math.max(2, o.pct)}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] font-bold text-amber-300 w-9 text-right">{o.pct}%</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  onClick={() => setOddsOpen(false)}
+                  className="w-full mt-5 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold"
+                >
+                  Got it
+                </Button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {result && (

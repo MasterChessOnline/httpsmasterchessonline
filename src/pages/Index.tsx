@@ -38,11 +38,12 @@ import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
 
 import ParallaxCard from "@/components/ParallaxCard";
-import DynamicBackground from "@/components/DynamicBackground";
+import ChessUniverseBackground from "@/components/ChessUniverseBackground";
 import DailyMissions from "@/components/DailyMissions";
 import DailyMysteryBox from "@/components/DailyMysteryBox";
 import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
 import DailyRewards7Strip from "@/components/DailyRewards7Strip";
+import ShopHomeStrip from "@/components/ShopHomeStrip";
 
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
@@ -216,7 +217,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <DynamicBackground />
+      <ChessUniverseBackground />
       <Seo
         title={"MasterChess — Play Chess Online, Tournaments & Analysis"}
         description={
@@ -507,6 +508,11 @@ const Index = () => {
           {/* Daily Rewards 7-day strip — premium mobile-game progression loop */}
           <section id="daily-rewards" className="scroll-mt-24 -mt-4">
             <DailyRewards7Strip />
+          </section>
+
+          {/* Shop teaser — drives discovery of cosmetics */}
+          <section id="shop" className="scroll-mt-24">
+            <ShopHomeStrip />
           </section>
 
           {/* Daily Challenge — directly below the hero, first thing users see */}
