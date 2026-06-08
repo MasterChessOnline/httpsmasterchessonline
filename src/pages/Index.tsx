@@ -38,11 +38,12 @@ import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
 
 import ParallaxCard from "@/components/ParallaxCard";
-import DynamicBackground from "@/components/DynamicBackground";
+import ChessUniverseBackground from "@/components/ChessUniverseBackground";
 import DailyMissions from "@/components/DailyMissions";
 import DailyMysteryBox from "@/components/DailyMysteryBox";
 import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
 import DailyRewards7Strip from "@/components/DailyRewards7Strip";
+import ShopHomeStrip from "@/components/ShopHomeStrip";
 
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
@@ -216,7 +217,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <DynamicBackground />
+      <ChessUniverseBackground />
       <Seo
         title={"MasterChess — Play Chess Online, Tournaments & Analysis"}
         description={
