@@ -112,7 +112,23 @@ export default function SpinWheel() {
     }
 
     const seg = pickSegmentForCoins(data.coins);
-    const target = 360 * 5 + (360 - (seg.idx * SEG + SEG / 2));
+    // Random rotations: 4-7 full turns + variable easing & duration → no two spins identical
+    const rotations = 4 + Math.floor(Math.random() * 4); // 4..7
+    const jitter = (Math.random() - 0.5) * (SEG * 0.45); // land off-center within segment
+    const target = angle + 360 * rotations + (360 - (seg.idx * SEG + SEG / 2)) + jitter;
+    const dur = 2.2 + Math.random() * 1.6; // 2.2s..3.8s
+    const easings: [number, number, number, number][] = [
+      [0.16, 0.84, 0.2, 1],
+      [0.22, 1.0, 0.36, 1],
+      [0.1, 0.9, 0.1, 1],
+      [0.33, 1, 0.68, 1],
+    ];
+    const ease = easings[Math.floor(Math.random() * easings.length)];
+    setSpinDuration(dur);
+    setSpinEase(ease);
+    // Tiny pre-spin shake for tactility
+    setShake(true);
+    setTimeout(() => setShake(false), 180);
     setAngle(target);
 
     setTimeout(() => {
@@ -129,7 +145,7 @@ export default function SpinWheel() {
       });
       window.dispatchEvent(new CustomEvent("mc:coins-changed"));
       window.dispatchEvent(new CustomEvent("mc:spin-claimed"));
-    }, 2700);
+    }, Math.round(dur * 1000) + 120);
   };
 
   const spin = () => runSpin(false);
