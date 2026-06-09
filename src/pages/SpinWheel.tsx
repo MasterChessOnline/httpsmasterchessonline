@@ -207,8 +207,8 @@ export default function SpinWheel() {
           <motion.div
             className="relative h-full w-full rounded-full border-4 border-amber-400/80 overflow-hidden shadow-[0_0_60px_-10px_hsl(45,90%,55%,0.6)]"
             style={{ transformOrigin: "50% 50%" }}
-            animate={{ rotate: angle }}
-            transition={{ duration: 2.6, ease: [0.16, 0.84, 0.2, 1] }}
+            animate={shake ? { rotate: angle, x: [0, -3, 3, -2, 2, 0] } : { rotate: angle }}
+            transition={{ duration: spinDuration, ease: spinEase, x: { duration: 0.18 } }}
           >
             {/* Segment slices via conic-gradient — guaranteed equal sizes */}
             <div
