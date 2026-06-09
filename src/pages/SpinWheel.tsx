@@ -68,6 +68,10 @@ export default function SpinWheel() {
   const [alreadyClaimed, setAlreadyClaimed] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
   const [oddsOpen, setOddsOpen] = useState(false);
+  // Per-spin randomized motion params for unpredictability
+  const [spinDuration, setSpinDuration] = useState(2.6);
+  const [spinEase, setSpinEase] = useState<[number, number, number, number]>([0.16, 0.84, 0.2, 1]);
+  const [shake, setShake] = useState(false);
 
   useEffect(() => {
     const check = async () => {
