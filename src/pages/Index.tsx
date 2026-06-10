@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SiteRating from "@/components/SiteRating";
+import SeasonBanner from "@/components/SeasonBanner";
 import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -509,6 +510,9 @@ const Index = () => {
           <section id="daily-rewards" className="scroll-mt-24 -mt-4">
             <DailyRewards7Strip />
           </section>
+
+          {/* Season banner — main return-driver, links to Season Hub */}
+          <SeasonBanner />
 
           {/* Shop teaser — drives discovery of cosmetics */}
           <section id="shop" className="scroll-mt-24">
