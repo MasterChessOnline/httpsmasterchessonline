@@ -20,10 +20,6 @@ export default function AppLaunchSplash() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const isStandalone =
-      window.matchMedia?.("(display-mode: standalone)").matches ||
-      // @ts-expect-error iOS Safari
-      window.navigator.standalone === true;
     const isInIframe = (() => {
       try {
         return window.self !== window.top;
@@ -31,25 +27,16 @@ export default function AppLaunchSplash() {
         return true;
       }
     })();
-    const ua = navigator.userAgent || "";
-    // Detect Apple iPhone/iPad (including iPadOS pretending to be Mac with touch)
-    const isIOS =
-      /iPhone|iPad|iPod/i.test(ua) ||
-      (ua.includes("Macintosh") && "ontouchend" in document);
-    const isMobile =
-      window.matchMedia?.("(max-width: 768px)").matches ||
-      /Android|Mobile/i.test(ua);
-    // Never show on iPhone/iPad — they can't install the app, so no intro.
-    if (isIOS) return;
-    // Show on PWA standalone OR mobile browsers (per-session). Never inside the editor iframe.
+    // Never show inside the Lovable editor iframe.
     if (isInIframe) return;
-    if (!isStandalone && !isMobile) return;
+    // Show once per browser session on every entry (mobile, desktop, PWA).
     if (sessionStorage.getItem("mc.splash.shown") === "1") return;
     sessionStorage.setItem("mc.splash.shown", "1");
     setVisible(true);
-    const t = setTimeout(() => setVisible(false), 3600);
+    const t = setTimeout(() => setVisible(false), 3500);
     return () => clearTimeout(t);
   }, []);
+
 
   const letters = "MASTERCHESS".split("");
 
