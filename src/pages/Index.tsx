@@ -526,6 +526,10 @@ const Index = () => {
             </SectionHeader>
           </section>
 
+          {/* Rate this site — placed directly below daily missions */}
+          <SiteRating />
+
+
           {/* ── Founder note: handwritten "letter" from Nikola, breaks the polish on purpose ── */}
           <FounderNote />
 
@@ -934,8 +938,8 @@ const Index = () => {
         </section>
       </main>
 
-      <SiteRating />
       <Footer />
+
       <React.Suspense fallback={null}>
         <StickyJoinBar />
       </React.Suspense>
