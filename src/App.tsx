@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import ChessLoadingScreen from "@/components/ChessLoadingScreen";
+import RouteLoader from "@/components/RouteLoader";
+import SiteRatingJsonLd from "@/components/SiteRatingJsonLd";
 import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -290,7 +292,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Suspense fallback={<ChessLoadingScreen />}>
+          <SiteRatingJsonLd />
+          <Suspense fallback={<RouteLoader />}>
             <div className="pb-16 md:pb-0">
               <AnimatedRoutes />
             </div>
