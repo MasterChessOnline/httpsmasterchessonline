@@ -132,6 +132,7 @@ export type Database = {
           reward_coins: number
           season_id: string
           tier_index: number
+          track: string
           user_id: string
         }
         Insert: {
@@ -140,6 +141,7 @@ export type Database = {
           reward_coins?: number
           season_id: string
           tier_index: number
+          track?: string
           user_id: string
         }
         Update: {
@@ -148,11 +150,44 @@ export type Database = {
           reward_coins?: number
           season_id?: string
           tier_index?: number
+          track?: string
           user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "battle_pass_claims_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      battle_pass_premium: {
+        Row: {
+          granted_at: string
+          id: string
+          price_paid: number
+          season_id: string
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          id?: string
+          price_paid?: number
+          season_id: string
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          id?: string
+          price_paid?: number
+          season_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "battle_pass_premium_season_id_fkey"
             columns: ["season_id"]
             isOneToOne: false
             referencedRelation: "seasons"
@@ -2858,9 +2893,12 @@ export type Database = {
         Args: { p_rating_type: string; p_result: string }
         Returns: Json
       }
+      buy_premium_pass: { Args: never; Returns: Json }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
       claim_afk_win: { Args: { p_game_id: string }; Returns: Json }
-      claim_battle_pass_tier: { Args: { _tier: number }; Returns: Json }
+      claim_battle_pass_tier:
+        | { Args: { _tier: number }; Returns: Json }
+        | { Args: { _tier: number; _track?: string }; Returns: Json }
       claim_daily_mission: { Args: { p_key: string }; Returns: Json }
       claim_daily_reward: { Args: never; Returns: Json }
       claim_daily_spin: { Args: never; Returns: Json }
@@ -2995,6 +3033,10 @@ export type Database = {
           title: string
           xp_reward: number
         }[]
+      }
+      has_premium_pass: {
+        Args: { _season: string; _user: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
