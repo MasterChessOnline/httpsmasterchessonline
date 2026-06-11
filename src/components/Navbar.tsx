@@ -473,8 +473,7 @@ const Navbar = () => {
                 </Button>
               </Link>
 
-              {/* Language switcher */}
-              <div className="hidden md:block"><LanguageSwitcher compact /></div>
+              {/* Language switcher removed — site is English-only */}
 
               {/* User streak + sign out */}
               {loading ? (
