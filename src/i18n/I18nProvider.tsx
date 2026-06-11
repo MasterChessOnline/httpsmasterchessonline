@@ -13,9 +13,8 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 const STORAGE_KEY = "mc.lang.v1";
 
 function detectInitial(): Lang {
-  if (typeof window === "undefined") return "en";
-  const stored = localStorage.getItem(STORAGE_KEY) as Lang | null;
-  if (stored && stored in DICTS) return stored;
+  // Site is English-only. Ignore any previously stored locale and always
+  // boot in English so every button, label, toast and page renders in EN.
   return "en";
 }
 
