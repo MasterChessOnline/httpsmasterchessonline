@@ -2846,6 +2846,33 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_spin_claims: {
+        Row: {
+          coins_awarded: number
+          created_at: string
+          id: string
+          iso_week: number
+          iso_year: number
+          user_id: string
+        }
+        Insert: {
+          coins_awarded: number
+          created_at?: string
+          id?: string
+          iso_week: number
+          iso_year: number
+          user_id: string
+        }
+        Update: {
+          coins_awarded?: number
+          created_at?: string
+          id?: string
+          iso_week?: number
+          iso_year?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       win_streaks: {
         Row: {
           best_streak: number
@@ -2960,6 +2987,7 @@ export type Database = {
       claim_daily_spin: { Args: never; Returns: Json }
       claim_referral_first_games: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
+      claim_weekly_spin: { Args: never; Returns: Json }
       claim_welcome_reward: { Args: never; Returns: Json }
       cleanup_stale_game: { Args: { p_user_id: string }; Returns: string }
       commit_online_move: {
@@ -3154,6 +3182,7 @@ export type Database = {
       }
       server_now: { Args: never; Returns: string }
       settle_bets_for_game: { Args: { p_game_id: string }; Returns: Json }
+      spin_wheel_legendary: { Args: never; Returns: Json }
       spin_wheel_paid: { Args: never; Returns: Json }
       start_online_game: {
         Args: {
