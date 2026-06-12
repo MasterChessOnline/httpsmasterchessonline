@@ -325,16 +325,42 @@ export default function SpinWheel() {
         </div>
 
         <div className="mt-8 flex flex-col items-center gap-3">
-          <Button
-            size="lg"
-            disabled={spinning || alreadyClaimed || checking || !user}
-            onClick={spin}
-            className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-extrabold px-12 py-7 text-xl rounded-2xl shadow-[0_0_30px_rgba(251,191,36,0.45)] hover:brightness-110 hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50"
-          >
-            <Sparkles className="w-5 h-5 mr-2" />
-            {checking ? "Loading…" : spinning ? "Spinning…" : alreadyClaimed ? "Daily spin claimed" : user ? "SPIN — Free" : "Sign in to spin"}
-          </Button>
-          {user && (
+          {(() => {
+            const isDaily = tier === "daily";
+            const isWeekly = tier === "weekly";
+            const isLeg = tier === "legendary";
+            const disabled =
+              spinning || checking || !user ||
+              (isDaily && alreadyClaimed) ||
+              (isWeekly && weeklyClaimed);
+            const label = !user
+              ? "Sign in to spin"
+              : checking
+                ? "Loading…"
+                : spinning
+                  ? "Spinning…"
+                  : isDaily
+                    ? alreadyClaimed ? "Daily spin claimed" : "SPIN — Free Daily"
+                    : isWeekly
+                      ? weeklyClaimed ? "Weekly spin claimed" : "SPIN — Free Weekly"
+                      : "SPIN — Legendary · 1,000 coins";
+            return (
+              <Button
+                size="lg"
+                disabled={disabled}
+                onClick={spin}
+                className={`${
+                  isLeg
+                    ? "bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400"
+                    : "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500"
+                } text-black font-extrabold px-12 py-7 text-xl rounded-2xl shadow-[0_0_30px_rgba(251,191,36,0.45)] hover:brightness-110 hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50`}
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                {label}
+              </Button>
+            );
+          })()}
+          {user && tier === "daily" && (
             <Button
               variant="outline"
               size="sm"
