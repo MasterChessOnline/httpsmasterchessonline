@@ -197,6 +197,27 @@ export default function SpinWheel() {
           <p className="mt-2 text-sm text-muted-foreground">
             One free spin every 24 hours · 8 chess-themed prizes · land the King for the Jackpot.
           </p>
+
+          {/* Tier selector */}
+          <div className="mt-5 inline-flex rounded-full border border-amber-400/30 bg-card/60 backdrop-blur p-1">
+            {([
+              { id: "daily", label: "Daily", sub: "Free" },
+              { id: "weekly", label: "Weekly", sub: "Free" },
+              { id: "legendary", label: "Legendary", sub: "1,000" },
+            ] as { id: Tier; label: string; sub: string }[]).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTier(t.id)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
+                  tier === t.id
+                    ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow"
+                    : "text-amber-200 hover:bg-amber-500/10"
+                }`}
+              >
+                {t.label} <span className="opacity-70 ml-1">· {t.sub}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Wheel */}
