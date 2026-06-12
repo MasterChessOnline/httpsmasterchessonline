@@ -49,6 +49,7 @@ const FairPlay = lazy(() => import("./pages/FairPlay"));
 const Referrals = lazy(() => import("./pages/Referrals"));
 const BattlePass = lazy(() => import("./pages/BattlePass"));
 const SeasonHub = lazy(() => import("./pages/SeasonHub"));
+const Reviews = lazy(() => import("./pages/Reviews"));
 const BattleRoyale = lazy(() => import("./pages/BattleRoyale"));
 const Press = lazy(() => import("./pages/Press"));
 const Streamers = lazy(() => import("./pages/Streamers"));
