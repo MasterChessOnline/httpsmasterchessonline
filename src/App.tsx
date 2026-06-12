@@ -217,6 +217,7 @@ function AnimatedRoutes() {
           <Route path="/referrals" element={<Referrals />} />
           <Route path="/battle-pass" element={<BattlePass />} />
           <Route path="/season" element={<SeasonHub />} />
+          <Route path="/reviews" element={<Reviews />} />
           <Route path="/battle-royale" element={<BattleRoyale />} />
           <Route path="/press" element={<Press />} />
           <Route path="/streamers" element={<Streamers />} />
