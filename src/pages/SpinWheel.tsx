@@ -59,16 +59,19 @@ function pickSegmentForCoins(coins: number): Segment {
   return exact;
 }
 
+type Tier = "daily" | "weekly" | "legendary";
+
 export default function SpinWheel() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [tier, setTier] = useState<Tier>("daily");
   const [angle, setAngle] = useState(0);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState<{ coins: number; new_balance?: number; segment?: Segment } | null>(null);
+  const [result, setResult] = useState<{ coins: number; new_balance?: number; segment?: Segment; tier?: string } | null>(null);
   const [alreadyClaimed, setAlreadyClaimed] = useState<boolean>(false);
+  const [weeklyClaimed, setWeeklyClaimed] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
   const [oddsOpen, setOddsOpen] = useState(false);
-  // Per-spin randomized motion params for unpredictability
   const [spinDuration, setSpinDuration] = useState(2.6);
   const [spinEase, setSpinEase] = useState<[number, number, number, number]>([0.16, 0.84, 0.2, 1]);
   const [shake, setShake] = useState(false);
@@ -77,32 +80,40 @@ export default function SpinWheel() {
     const check = async () => {
       if (!user) { setChecking(false); return; }
       const today = new Date().toISOString().slice(0, 10);
-      const { data } = await (supabase as any)
-        .from("daily_spin_claims")
-        .select("claim_date")
-        .eq("user_id", user.id)
-        .eq("claim_date", today)
-        .maybeSingle();
-      setAlreadyClaimed(!!data);
+      const [{ data: daily }, { data: weekly }] = await Promise.all([
+        (supabase as any).from("daily_spin_claims").select("claim_date").eq("user_id", user.id).eq("claim_date", today).maybeSingle(),
+        (supabase as any).from("weekly_spin_claims").select("id").eq("user_id", user.id)
+          .gte("created_at", new Date(Date.now() - 7 * 864e5).toISOString()).maybeSingle(),
+      ]);
+      setAlreadyClaimed(!!daily);
+      setWeeklyClaimed(!!weekly);
       setChecking(false);
     };
     check();
   }, [user?.id]);
 
-  const runSpin = async (paid: boolean) => {
+  const runSpin = async (mode: "daily" | "daily-paid" | "weekly" | "legendary") => {
     if (!user) { toast({ title: "Sign in to spin", description: "Create a free account to claim rewards." }); return; }
     if (spinning) return;
-    if (!paid && alreadyClaimed) return;
+    if (mode === "daily" && alreadyClaimed) return;
+    if (mode === "weekly" && weeklyClaimed) return;
     setSpinning(true);
     setResult(null);
 
-    const rpc = paid ? "spin_wheel_paid" : "claim_daily_spin";
+    const rpc =
+      mode === "daily" ? "claim_daily_spin"
+      : mode === "daily-paid" ? "spin_wheel_paid"
+      : mode === "weekly" ? "claim_weekly_spin"
+      : "spin_wheel_legendary";
     const { data, error } = await (supabase.rpc as any)(rpc);
     if (error || !data?.ok) {
       setSpinning(false);
-      if (!paid && data?.error === "already_claimed") {
+      if (mode === "daily" && data?.error === "already_claimed") {
         setAlreadyClaimed(true);
         toast({ title: "Already spun today", description: "Use a paid spin (100 coins) or come back tomorrow." });
+      } else if (mode === "weekly" && data?.error === "already_claimed") {
+        setWeeklyClaimed(true);
+        toast({ title: "Weekly spin already claimed", description: "Come back next week for a fresh free spin." });
       } else if (data?.error === "insufficient_coins") {
         toast({ title: "Not enough coins", description: `You need ${data.needed} more coins.`, variant: "destructive" });
       } else {
@@ -112,11 +123,10 @@ export default function SpinWheel() {
     }
 
     const seg = pickSegmentForCoins(data.coins);
-    // Random rotations: 4-7 full turns + variable easing & duration → no two spins identical
-    const rotations = 4 + Math.floor(Math.random() * 4); // 4..7
-    const jitter = (Math.random() - 0.5) * (SEG * 0.45); // land off-center within segment
+    const rotations = 4 + Math.floor(Math.random() * 4);
+    const jitter = (Math.random() - 0.5) * (SEG * 0.45);
     const target = angle + 360 * rotations + (360 - (seg.idx * SEG + SEG / 2)) + jitter;
-    const dur = 2.2 + Math.random() * 1.6; // 2.2s..3.8s
+    const dur = 2.2 + Math.random() * 1.6;
     const easings: [number, number, number, number][] = [
       [0.16, 0.84, 0.2, 1],
       [0.22, 1.0, 0.36, 1],
@@ -126,20 +136,22 @@ export default function SpinWheel() {
     const ease = easings[Math.floor(Math.random() * easings.length)];
     setSpinDuration(dur);
     setSpinEase(ease);
-    // Tiny pre-spin shake for tactility
     setShake(true);
     setTimeout(() => setShake(false), 180);
     setAngle(target);
 
     setTimeout(() => {
       setSpinning(false);
-      if (!paid) setAlreadyClaimed(true);
-      setResult({ coins: data.coins, new_balance: data.new_balance, segment: seg });
+      if (mode === "daily") setAlreadyClaimed(true);
+      if (mode === "weekly") setWeeklyClaimed(true);
+      setResult({ coins: data.coins, new_balance: data.new_balance, segment: seg, tier: mode });
       emitReward({
         kind: data.coins >= 1000 ? "achievement" : "coin",
         title: `+${data.coins} Coins`,
-        subtitle: paid
-          ? `Paid spin · cost ${data.cost ?? 100}`
+        subtitle:
+          mode === "legendary" ? `Legendary spin · cost ${data.cost ?? 1000}`
+          : mode === "weekly" ? "Weekly Spin reward"
+          : mode === "daily-paid" ? `Paid spin · cost ${data.cost ?? 100}`
           : data.coins >= 1000 ? "Daily Spin Jackpot!" : "Daily Spin reward",
         amount: data.coins,
       });
@@ -148,8 +160,12 @@ export default function SpinWheel() {
     }, Math.round(dur * 1000) + 120);
   };
 
-  const spin = () => runSpin(false);
-  const paidSpin = () => runSpin(true);
+  const spin = () => {
+    if (tier === "daily") runSpin("daily");
+    else if (tier === "weekly") runSpin("weekly");
+    else runSpin("legendary");
+  };
+  const paidSpin = () => runSpin("daily-paid");
 
 
   return (
@@ -181,6 +197,27 @@ export default function SpinWheel() {
           <p className="mt-2 text-sm text-muted-foreground">
             One free spin every 24 hours · 8 chess-themed prizes · land the King for the Jackpot.
           </p>
+
+          {/* Tier selector */}
+          <div className="mt-5 inline-flex rounded-full border border-amber-400/30 bg-card/60 backdrop-blur p-1">
+            {([
+              { id: "daily", label: "Daily", sub: "Free" },
+              { id: "weekly", label: "Weekly", sub: "Free" },
+              { id: "legendary", label: "Legendary", sub: "1,000" },
+            ] as { id: Tier; label: string; sub: string }[]).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTier(t.id)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
+                  tier === t.id
+                    ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow"
+                    : "text-amber-200 hover:bg-amber-500/10"
+                }`}
+              >
+                {t.label} <span className="opacity-70 ml-1">· {t.sub}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Wheel */}
@@ -288,16 +325,42 @@ export default function SpinWheel() {
         </div>
 
         <div className="mt-8 flex flex-col items-center gap-3">
-          <Button
-            size="lg"
-            disabled={spinning || alreadyClaimed || checking || !user}
-            onClick={spin}
-            className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-extrabold px-12 py-7 text-xl rounded-2xl shadow-[0_0_30px_rgba(251,191,36,0.45)] hover:brightness-110 hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50"
-          >
-            <Sparkles className="w-5 h-5 mr-2" />
-            {checking ? "Loading…" : spinning ? "Spinning…" : alreadyClaimed ? "Daily spin claimed" : user ? "SPIN — Free" : "Sign in to spin"}
-          </Button>
-          {user && (
+          {(() => {
+            const isDaily = tier === "daily";
+            const isWeekly = tier === "weekly";
+            const isLeg = tier === "legendary";
+            const disabled =
+              spinning || checking || !user ||
+              (isDaily && alreadyClaimed) ||
+              (isWeekly && weeklyClaimed);
+            const label = !user
+              ? "Sign in to spin"
+              : checking
+                ? "Loading…"
+                : spinning
+                  ? "Spinning…"
+                  : isDaily
+                    ? alreadyClaimed ? "Daily spin claimed" : "SPIN — Free Daily"
+                    : isWeekly
+                      ? weeklyClaimed ? "Weekly spin claimed" : "SPIN — Free Weekly"
+                      : "SPIN — Legendary · 1,000 coins";
+            return (
+              <Button
+                size="lg"
+                disabled={disabled}
+                onClick={spin}
+                className={`${
+                  isLeg
+                    ? "bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400"
+                    : "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500"
+                } text-black font-extrabold px-12 py-7 text-xl rounded-2xl shadow-[0_0_30px_rgba(251,191,36,0.45)] hover:brightness-110 hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50`}
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                {label}
+              </Button>
+            );
+          })()}
+          {user && tier === "daily" && (
             <Button
               variant="outline"
               size="sm"
