@@ -1908,28 +1908,84 @@ export type Database = {
         Row: {
           comment: string | null
           created_at: string
+          featured: boolean
+          helpful_count: number
+          hidden: boolean
           id: string
+          like_count: number
+          love_count: number
+          pinned: boolean
           rating: number
+          report_count: number
+          title: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           comment?: string | null
           created_at?: string
+          featured?: boolean
+          helpful_count?: number
+          hidden?: boolean
           id?: string
+          like_count?: number
+          love_count?: number
+          pinned?: boolean
           rating: number
+          report_count?: number
+          title?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           comment?: string | null
           created_at?: string
+          featured?: boolean
+          helpful_count?: number
+          hidden?: boolean
           id?: string
+          like_count?: number
+          love_count?: number
+          pinned?: boolean
           rating?: number
+          report_count?: number
+          title?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      site_review_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction: string
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction: string
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_review_reactions_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "site_ratings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spectator_bets: {
         Row: {
