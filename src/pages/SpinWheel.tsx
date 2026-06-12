@@ -80,26 +80,31 @@ export default function SpinWheel() {
     const check = async () => {
       if (!user) { setChecking(false); return; }
       const today = new Date().toISOString().slice(0, 10);
-      const { data } = await (supabase as any)
-        .from("daily_spin_claims")
-        .select("claim_date")
-        .eq("user_id", user.id)
-        .eq("claim_date", today)
-        .maybeSingle();
-      setAlreadyClaimed(!!data);
+      const [{ data: daily }, { data: weekly }] = await Promise.all([
+        (supabase as any).from("daily_spin_claims").select("claim_date").eq("user_id", user.id).eq("claim_date", today).maybeSingle(),
+        (supabase as any).from("weekly_spin_claims").select("id").eq("user_id", user.id)
+          .gte("created_at", new Date(Date.now() - 7 * 864e5).toISOString()).maybeSingle(),
+      ]);
+      setAlreadyClaimed(!!daily);
+      setWeeklyClaimed(!!weekly);
       setChecking(false);
     };
     check();
   }, [user?.id]);
 
-  const runSpin = async (paid: boolean) => {
+  const runSpin = async (mode: "daily" | "daily-paid" | "weekly" | "legendary") => {
     if (!user) { toast({ title: "Sign in to spin", description: "Create a free account to claim rewards." }); return; }
     if (spinning) return;
-    if (!paid && alreadyClaimed) return;
+    if (mode === "daily" && alreadyClaimed) return;
+    if (mode === "weekly" && weeklyClaimed) return;
     setSpinning(true);
     setResult(null);
 
-    const rpc = paid ? "spin_wheel_paid" : "claim_daily_spin";
+    const rpc =
+      mode === "daily" ? "claim_daily_spin"
+      : mode === "daily-paid" ? "spin_wheel_paid"
+      : mode === "weekly" ? "claim_weekly_spin"
+      : "spin_wheel_legendary";
     const { data, error } = await (supabase.rpc as any)(rpc);
     if (error || !data?.ok) {
       setSpinning(false);
