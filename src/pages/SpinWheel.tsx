@@ -59,16 +59,19 @@ function pickSegmentForCoins(coins: number): Segment {
   return exact;
 }
 
+type Tier = "daily" | "weekly" | "legendary";
+
 export default function SpinWheel() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [tier, setTier] = useState<Tier>("daily");
   const [angle, setAngle] = useState(0);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState<{ coins: number; new_balance?: number; segment?: Segment } | null>(null);
+  const [result, setResult] = useState<{ coins: number; new_balance?: number; segment?: Segment; tier?: string } | null>(null);
   const [alreadyClaimed, setAlreadyClaimed] = useState<boolean>(false);
+  const [weeklyClaimed, setWeeklyClaimed] = useState<boolean>(false);
   const [checking, setChecking] = useState(true);
   const [oddsOpen, setOddsOpen] = useState(false);
-  // Per-spin randomized motion params for unpredictability
   const [spinDuration, setSpinDuration] = useState(2.6);
   const [spinEase, setSpinEase] = useState<[number, number, number, number]>([0.16, 0.84, 0.2, 1]);
   const [shake, setShake] = useState(false);
