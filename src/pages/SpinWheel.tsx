@@ -108,9 +108,12 @@ export default function SpinWheel() {
     const { data, error } = await (supabase.rpc as any)(rpc);
     if (error || !data?.ok) {
       setSpinning(false);
-      if (!paid && data?.error === "already_claimed") {
+      if (mode === "daily" && data?.error === "already_claimed") {
         setAlreadyClaimed(true);
         toast({ title: "Already spun today", description: "Use a paid spin (100 coins) or come back tomorrow." });
+      } else if (mode === "weekly" && data?.error === "already_claimed") {
+        setWeeklyClaimed(true);
+        toast({ title: "Weekly spin already claimed", description: "Come back next week for a fresh free spin." });
       } else if (data?.error === "insufficient_coins") {
         toast({ title: "Not enough coins", description: `You need ${data.needed} more coins.`, variant: "destructive" });
       } else {
@@ -120,11 +123,10 @@ export default function SpinWheel() {
     }
 
     const seg = pickSegmentForCoins(data.coins);
-    // Random rotations: 4-7 full turns + variable easing & duration → no two spins identical
-    const rotations = 4 + Math.floor(Math.random() * 4); // 4..7
-    const jitter = (Math.random() - 0.5) * (SEG * 0.45); // land off-center within segment
+    const rotations = 4 + Math.floor(Math.random() * 4);
+    const jitter = (Math.random() - 0.5) * (SEG * 0.45);
     const target = angle + 360 * rotations + (360 - (seg.idx * SEG + SEG / 2)) + jitter;
-    const dur = 2.2 + Math.random() * 1.6; // 2.2s..3.8s
+    const dur = 2.2 + Math.random() * 1.6;
     const easings: [number, number, number, number][] = [
       [0.16, 0.84, 0.2, 1],
       [0.22, 1.0, 0.36, 1],
@@ -134,20 +136,22 @@ export default function SpinWheel() {
     const ease = easings[Math.floor(Math.random() * easings.length)];
     setSpinDuration(dur);
     setSpinEase(ease);
-    // Tiny pre-spin shake for tactility
     setShake(true);
     setTimeout(() => setShake(false), 180);
     setAngle(target);
 
     setTimeout(() => {
       setSpinning(false);
-      if (!paid) setAlreadyClaimed(true);
-      setResult({ coins: data.coins, new_balance: data.new_balance, segment: seg });
+      if (mode === "daily") setAlreadyClaimed(true);
+      if (mode === "weekly") setWeeklyClaimed(true);
+      setResult({ coins: data.coins, new_balance: data.new_balance, segment: seg, tier: mode });
       emitReward({
         kind: data.coins >= 1000 ? "achievement" : "coin",
         title: `+${data.coins} Coins`,
-        subtitle: paid
-          ? `Paid spin · cost ${data.cost ?? 100}`
+        subtitle:
+          mode === "legendary" ? `Legendary spin · cost ${data.cost ?? 1000}`
+          : mode === "weekly" ? "Weekly Spin reward"
+          : mode === "daily-paid" ? `Paid spin · cost ${data.cost ?? 100}`
           : data.coins >= 1000 ? "Daily Spin Jackpot!" : "Daily Spin reward",
         amount: data.coins,
       });
@@ -156,8 +160,12 @@ export default function SpinWheel() {
     }, Math.round(dur * 1000) + 120);
   };
 
-  const spin = () => runSpin(false);
-  const paidSpin = () => runSpin(true);
+  const spin = () => {
+    if (tier === "daily") runSpin("daily");
+    else if (tier === "weekly") runSpin("weekly");
+    else runSpin("legendary");
+  };
+  const paidSpin = () => runSpin("daily-paid");
 
 
   return (
