@@ -2,48 +2,49 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Injects AggregateRating JSON-LD for the site based on real `site_ratings`
- * rows. Google can use this to show star ratings in search results.
- * Falls back to a published baseline so the schema is always valid.
+ * Injects AggregateRating JSON-LD for MasterChess based ONLY on real
+ * `site_ratings` rows. Google's structured data guidelines require ratings
+ * to come from actual user reviews — we never bake a baseline number into
+ * the schema. When there are no ratings yet we ship the WebSite payload
+ * without aggregateRating so the snippet stays valid and empty.
  */
 export default function SiteRatingJsonLd() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      let avg = 4.9;
-      let count = 1280;
+      let avg = 0;
+      let count = 0;
       try {
         const { data } = await supabase
           .from("site_ratings")
-          .select("rating");
+          .select("rating")
+          .eq("hidden", false);
         if (data && data.length > 0) {
           const sum = data.reduce((s: number, r: any) => s + (r.rating || 0), 0);
-          const realAvg = sum / data.length;
-          // Blend baseline + real ratings so new authentic ratings push the score
-          const blended =
-            (avg * count + sum) / (count + data.length);
-          avg = Math.round(blended * 10) / 10;
-          count = count + data.length;
+          avg = Math.round((sum / data.length) * 10) / 10;
+          count = data.length;
         }
       } catch {
-        /* keep baseline */
+        /* no schema injection on error */
       }
       if (!alive) return;
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         "@context": "https://schema.org",
         "@type": "WebSite",
         name: "MasterChess",
         url: "https://masterchess.live",
-        aggregateRating: {
+      };
+      if (count > 0) {
+        payload.aggregateRating = {
           "@type": "AggregateRating",
           ratingValue: avg.toFixed(1),
           bestRating: "5",
           worstRating: "1",
           ratingCount: String(count),
           reviewCount: String(count),
-        },
-      };
+        };
+      }
 
       const id = "mc-aggregate-rating-jsonld";
       const existing = document.getElementById(id);
