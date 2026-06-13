@@ -474,14 +474,14 @@ export default function Reviews() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 text-center">
             <div className="text-5xl font-display font-bold text-yellow-400 tabular-nums">
-              {(stats.avg || 4.9).toFixed(1)}
+              {stats.total > 0 ? stats.avg.toFixed(1) : "—"}
             </div>
             <div className="flex justify-center mt-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <Star
                   key={n}
                   className={`w-4 h-4 ${
-                    (stats.avg || 4.9) >= n - 0.25
+                    stats.avg >= n - 0.25
                       ? "fill-yellow-400 text-yellow-400"
                       : "text-muted-foreground/30"
                   }`}
@@ -494,7 +494,7 @@ export default function Reviews() {
           <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6">
             {[5, 4, 3, 2, 1].map((n) => {
               const count = stats.dist[n - 1];
-              const pct = stats.total ? (count / stats.total) * 100 : n === 5 ? 90 : n === 4 ? 7 : 1;
+              const pct = stats.total ? (count / stats.total) * 100 : 0;
               return (
                 <div key={n} className="flex items-center gap-2 mb-1.5 last:mb-0">
                   <span className="text-xs w-7 text-muted-foreground tabular-nums">{n}★</span>
@@ -508,7 +508,7 @@ export default function Reviews() {
                     />
                   </div>
                   <span className="text-xs w-10 text-right text-muted-foreground tabular-nums">
-                    {Math.round(pct)}%
+                    {stats.total ? `${Math.round(pct)}%` : "—"}
                   </span>
                 </div>
               );
@@ -516,7 +516,7 @@ export default function Reviews() {
           </div>
 
           <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 grid grid-cols-2 gap-3 text-center">
-            <Stat label="Total reviews" value={Math.max(stats.total, 1280).toLocaleString()} />
+            <Stat label="Total reviews" value={stats.total.toLocaleString()} />
             <Stat label="Helpful votes" value={stats.helpful.toLocaleString()} />
             <Stat label="Verified players" value={stats.verifiedCount.toLocaleString()} />
             <Stat label="5★ count" value={stats.dist[4].toLocaleString()} />
