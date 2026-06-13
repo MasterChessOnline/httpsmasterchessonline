@@ -2947,10 +2947,24 @@ export type Database = {
       abort_online_game: { Args: { p_game_id: string }; Returns: Json }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       assert_can_queue: { Args: never; Returns: Json }
-      award_bot_game_coins: {
-        Args: { p_bot_rating: number; p_result: string; p_win_streak?: number }
-        Returns: Json
-      }
+      award_bot_game_coins:
+        | {
+            Args: {
+              p_bot_rating: number
+              p_result: string
+              p_win_streak?: number
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_bot_game_id?: string
+              p_bot_rating: number
+              p_result: string
+              p_win_streak?: number
+            }
+            Returns: Json
+          }
       award_online_game_coins: {
         Args: { p_game_id: string; p_win_streak?: number }
         Returns: Json

@@ -152,7 +152,7 @@ export async function applyBotRatingChange(opts: {
   // Persist the full bot game so it appears in Bot game history & Analysis.
   if (opts.pgn && opts.playerColor && opts.resultString) {
     try {
-      await supabase.from("bot_games" as any).insert({
+      const { data: inserted } = await supabase.from("bot_games" as any).insert({
         user_id: opts.userId,
         bot_key: opts.botKey ?? null,
         bot_name: opts.botLabel,
@@ -164,9 +164,9 @@ export async function applyBotRatingChange(opts: {
         move_count: opts.moveCount ?? 0,
         time_control_label: opts.timeControlLabel ?? "Casual",
         rating_change: finalCalc.change,
-      } as any);
-      // Award coins server-side based on bot rating + result + streak, then
-      // surface the unified Match Result modal (coins + rating + streak).
+      } as any).select("id").single();
+      const botGameId = (inserted as any)?.id as string | undefined;
+      // Award coins server-side based on the verified bot_games row.
       try {
         const { awardBotCoins, bumpWinStreak, getWinStreak } = await import("./coins");
         const nextStreak = bumpWinStreak(opts.result);
@@ -174,6 +174,7 @@ export async function applyBotRatingChange(opts: {
           botRating: opts.botRating,
           result: opts.result,
           winStreak: opts.result === "win" ? nextStreak : getWinStreak(),
+          botGameId: botGameId ?? null,
         });
         const { emitMatchResult } = await import("./match-result");
         emitMatchResult({

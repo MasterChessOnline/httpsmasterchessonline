@@ -35,11 +35,13 @@ export async function awardBotCoins(opts: {
   botRating: number;
   result: "win" | "loss" | "draw";
   winStreak: number;
+  botGameId?: string | null;
 }): Promise<CoinAward> {
   const { data, error } = await (supabase.rpc as any)("award_bot_game_coins", {
     p_bot_rating: opts.botRating,
     p_result: opts.result,
     p_win_streak: opts.winStreak,
+    p_bot_game_id: opts.botGameId ?? null,
   });
   if (error) return { ok: false, error: error.message };
   const res = data as CoinAward;
