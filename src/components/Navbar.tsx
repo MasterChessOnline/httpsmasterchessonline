@@ -461,6 +461,19 @@ const Navbar = () => {
                 <Search className="h-4 w-4" />
               </button>
 
+              {/* Rate MasterChess button */}
+              <Link to="/rate-masterchess" className="hidden xl:block">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 px-3 border-yellow-400/40 text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-300 font-semibold"
+                  title="Rate MasterChess"
+                >
+                  <Star className="h-4 w-4 mr-1.5 fill-current" />
+                  Rate
+                </Button>
+              </Link>
+
               {/* Play Now button */}
               <Link to="/play" className="hidden lg:block">
                 <Button
