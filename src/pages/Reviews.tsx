@@ -270,25 +270,31 @@ export default function Reviews() {
     }
   }
 
-  // JSON-LD aggregate rating + reviews
+  // JSON-LD aggregate rating + reviews — REAL data only. When there are no
+  // ratings yet we omit aggregateRating entirely so Google never sees a fake
+  // number (per https://developers.google.com/search/docs/appearance/structured-data/review-snippet).
   const jsonLd = useMemo(() => {
-    const rated = reviews.length || 1;
-    return {
+    const base: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Product",
       name: "MasterChess",
       description: "Play chess online — tournaments, bots, lessons, and a worldwide community.",
       brand: { "@type": "Brand", name: "MasterChess" },
-      aggregateRating: {
+    };
+    if (stats.total > 0) {
+      base.aggregateRating = {
         "@type": "AggregateRating",
-        ratingValue: (stats.avg || 4.9).toFixed(1),
-        reviewCount: Math.max(rated, 1),
+        ratingValue: stats.avg.toFixed(1),
+        reviewCount: stats.total,
+        ratingCount: stats.total,
         bestRating: 5,
         worstRating: 1,
-      },
-      review: topReviews.map((r) => ({
+      };
+    }
+    if (topReviews.length > 0) {
+      base.review = topReviews.map((r) => ({
         "@type": "Review",
-        reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
+        reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
         author: {
           "@type": "Person",
           name: profiles[r.user_id]?.display_name || "MasterChess player",
@@ -296,26 +302,30 @@ export default function Reviews() {
         datePublished: r.created_at,
         name: r.title || "MasterChess review",
         reviewBody: r.comment || "",
-      })),
-    };
-  }, [reviews, stats.avg, topReviews, profiles]);
+      }));
+    }
+    return base;
+  }, [stats.total, stats.avg, topReviews, profiles]);
+
+  const avgDisplay = stats.total > 0 ? stats.avg.toFixed(1) : "—";
+  const titleTag = stats.total > 0
+    ? `MasterChess Reviews — Rated ${avgDisplay}/5 by ${stats.total} Chess Players`
+    : "MasterChess Reviews — Real Player Ratings & Feedback";
+  const descTag = stats.total > 0
+    ? `Read ${stats.total} real player reviews of MasterChess. Average rating ${avgDisplay}/5. Write your own review and share your chess experience.`
+    : "Read real player reviews of MasterChess. Tournaments, AI coach, puzzles, lessons — rated by the community. Write your own review and share your experience.";
 
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>MasterChess Reviews — Rated 4.9/5 by Chess Players Worldwide</title>
-        <meta
-          name="description"
-          content="Read real player reviews of MasterChess. Tournaments, AI coach, puzzles, lessons — rated by the community. Write your own review and share your experience."
-        />
+        <title>{titleTag}</title>
+        <meta name="description" content={descTag} />
         <link rel="canonical" href="https://masterchess.live/reviews" />
-        <meta property="og:title" content="MasterChess Reviews — Trusted by Chess Players Worldwide" />
-        <meta
-          property="og:description"
-          content="See why players rate MasterChess 4.9/5. Read community reviews and share yours."
-        />
+        <meta property="og:title" content={titleTag} />
+        <meta property="og:description" content={descTag} />
         <meta property="og:url" content="https://masterchess.live/reviews" />
         <meta property="og:type" content="website" />
+        <meta name="robots" content="index, follow" />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
@@ -348,11 +358,19 @@ export default function Reviews() {
               ))}
             </div>
             <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight">
-              <span className="text-yellow-400">{(stats.avg || 4.9).toFixed(1)}</span>
-              <span className="text-muted-foreground">/5</span> Average Rating
+              {stats.total > 0 ? (
+                <>
+                  <span className="text-yellow-400">{stats.avg.toFixed(1)}</span>
+                  <span className="text-muted-foreground">/5</span> Average Rating
+                </>
+              ) : (
+                <>Be the first to rate <span className="text-gradient-gold">MasterChess</span></>
+              )}
             </h1>
             <p className="mt-3 text-muted-foreground text-sm sm:text-base">
-              Based on {Math.max(stats.total, 1280).toLocaleString()}+ reviews from real players
+              {stats.total > 0
+                ? `Based on ${stats.total.toLocaleString()} ${stats.total === 1 ? "review" : "reviews"} from real players`
+                : "Real reviews only — no fake ratings, no baseline numbers."}
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -456,14 +474,14 @@ export default function Reviews() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 text-center">
             <div className="text-5xl font-display font-bold text-yellow-400 tabular-nums">
-              {(stats.avg || 4.9).toFixed(1)}
+              {stats.total > 0 ? stats.avg.toFixed(1) : "—"}
             </div>
             <div className="flex justify-center mt-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <Star
                   key={n}
                   className={`w-4 h-4 ${
-                    (stats.avg || 4.9) >= n - 0.25
+                    stats.avg >= n - 0.25
                       ? "fill-yellow-400 text-yellow-400"
                       : "text-muted-foreground/30"
                   }`}
@@ -476,7 +494,7 @@ export default function Reviews() {
           <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6">
             {[5, 4, 3, 2, 1].map((n) => {
               const count = stats.dist[n - 1];
-              const pct = stats.total ? (count / stats.total) * 100 : n === 5 ? 90 : n === 4 ? 7 : 1;
+              const pct = stats.total ? (count / stats.total) * 100 : 0;
               return (
                 <div key={n} className="flex items-center gap-2 mb-1.5 last:mb-0">
                   <span className="text-xs w-7 text-muted-foreground tabular-nums">{n}★</span>
@@ -490,7 +508,7 @@ export default function Reviews() {
                     />
                   </div>
                   <span className="text-xs w-10 text-right text-muted-foreground tabular-nums">
-                    {Math.round(pct)}%
+                    {stats.total ? `${Math.round(pct)}%` : "—"}
                   </span>
                 </div>
               );
@@ -498,7 +516,7 @@ export default function Reviews() {
           </div>
 
           <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 grid grid-cols-2 gap-3 text-center">
-            <Stat label="Total reviews" value={Math.max(stats.total, 1280).toLocaleString()} />
+            <Stat label="Total reviews" value={stats.total.toLocaleString()} />
             <Stat label="Helpful votes" value={stats.helpful.toLocaleString()} />
             <Stat label="Verified players" value={stats.verifiedCount.toLocaleString()} />
             <Stat label="5★ count" value={stats.dist[4].toLocaleString()} />

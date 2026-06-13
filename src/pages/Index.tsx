@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SiteRating from "@/components/SiteRating";
+import ReviewsCta from "@/components/ReviewsCta";
 import SeasonBanner from "@/components/SeasonBanner";
 import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
 import { Link } from "react-router-dom";
@@ -533,30 +534,9 @@ const Index = () => {
           {/* Rate this site — placed directly below daily missions */}
           <SiteRating />
 
-          {/* Reviews CTA → /reviews public hub */}
-          <section className="container mx-auto px-4 pb-10 max-w-3xl">
-            <Link
-              to="/reviews"
-              className="block rounded-2xl border border-yellow-400/30 bg-gradient-to-br from-yellow-400/10 via-card/60 to-card/40 backdrop-blur p-5 sm:p-6 hover:border-yellow-400/60 transition-colors group"
-            >
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                  <div className="flex items-center gap-1 mb-1">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <span key={n} className="text-yellow-400 text-lg">★</span>
-                    ))}
-                    <span className="ml-2 font-display text-lg font-bold">4.9/5</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    1,280+ reviews from real chess players worldwide
-                  </p>
-                </div>
-                <span className="text-sm font-semibold text-yellow-400 group-hover:translate-x-1 transition-transform">
-                  View all reviews →
-                </span>
-              </div>
-            </Link>
-          </section>
+          {/* Reviews CTA → /reviews public hub. Real numbers only — pulled live. */}
+          <ReviewsCta />
+
 
 
           {/* ── Founder note: handwritten "letter" from Nikola, breaks the polish on purpose ── */}

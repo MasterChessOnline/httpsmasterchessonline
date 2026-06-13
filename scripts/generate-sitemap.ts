@@ -88,6 +88,8 @@ const staticEntries: SitemapEntry[] = [
   { path: "/signup", changefreq: "yearly", priority: "0.3" },
   { path: "/privacy", changefreq: "yearly", priority: "0.2" },
   { path: "/terms", changefreq: "yearly", priority: "0.2" },
+  { path: "/reviews", changefreq: "weekly", priority: "0.8" },
+  { path: "/rate-masterchess", changefreq: "weekly", priority: "0.7" },
 ];
 
 // Programmatic openings — auto-generated from ALL_OPENING_SLUGS (60+ pages)

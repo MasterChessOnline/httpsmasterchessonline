@@ -50,6 +50,7 @@ const Referrals = lazy(() => import("./pages/Referrals"));
 const BattlePass = lazy(() => import("./pages/BattlePass"));
 const SeasonHub = lazy(() => import("./pages/SeasonHub"));
 const Reviews = lazy(() => import("./pages/Reviews"));
+const RateMasterChess = lazy(() => import("./pages/RateMasterChess"));
 const BattleRoyale = lazy(() => import("./pages/BattleRoyale"));
 const Press = lazy(() => import("./pages/Press"));
 const Streamers = lazy(() => import("./pages/Streamers"));
@@ -218,6 +219,7 @@ function AnimatedRoutes() {
           <Route path="/battle-pass" element={<BattlePass />} />
           <Route path="/season" element={<SeasonHub />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/rate-masterchess" element={<RateMasterChess />} />
           <Route path="/battle-royale" element={<BattleRoyale />} />
           <Route path="/press" element={<Press />} />
           <Route path="/streamers" element={<Streamers />} />
