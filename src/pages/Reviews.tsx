@@ -358,11 +358,19 @@ export default function Reviews() {
               ))}
             </div>
             <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight">
-              <span className="text-yellow-400">{(stats.avg || 4.9).toFixed(1)}</span>
-              <span className="text-muted-foreground">/5</span> Average Rating
+              {stats.total > 0 ? (
+                <>
+                  <span className="text-yellow-400">{stats.avg.toFixed(1)}</span>
+                  <span className="text-muted-foreground">/5</span> Average Rating
+                </>
+              ) : (
+                <>Be the first to rate <span className="text-gradient-gold">MasterChess</span></>
+              )}
             </h1>
             <p className="mt-3 text-muted-foreground text-sm sm:text-base">
-              Based on {Math.max(stats.total, 1280).toLocaleString()}+ reviews from real players
+              {stats.total > 0
+                ? `Based on ${stats.total.toLocaleString()} ${stats.total === 1 ? "review" : "reviews"} from real players`
+                : "Real reviews only — no fake ratings, no baseline numbers."}
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
