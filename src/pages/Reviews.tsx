@@ -270,25 +270,31 @@ export default function Reviews() {
     }
   }
 
-  // JSON-LD aggregate rating + reviews
+  // JSON-LD aggregate rating + reviews — REAL data only. When there are no
+  // ratings yet we omit aggregateRating entirely so Google never sees a fake
+  // number (per https://developers.google.com/search/docs/appearance/structured-data/review-snippet).
   const jsonLd = useMemo(() => {
-    const rated = reviews.length || 1;
-    return {
+    const base: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Product",
       name: "MasterChess",
       description: "Play chess online — tournaments, bots, lessons, and a worldwide community.",
       brand: { "@type": "Brand", name: "MasterChess" },
-      aggregateRating: {
+    };
+    if (stats.total > 0) {
+      base.aggregateRating = {
         "@type": "AggregateRating",
-        ratingValue: (stats.avg || 4.9).toFixed(1),
-        reviewCount: Math.max(rated, 1),
+        ratingValue: stats.avg.toFixed(1),
+        reviewCount: stats.total,
+        ratingCount: stats.total,
         bestRating: 5,
         worstRating: 1,
-      },
-      review: topReviews.map((r) => ({
+      };
+    }
+    if (topReviews.length > 0) {
+      base.review = topReviews.map((r) => ({
         "@type": "Review",
-        reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
+        reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5, worstRating: 1 },
         author: {
           "@type": "Person",
           name: profiles[r.user_id]?.display_name || "MasterChess player",
@@ -296,26 +302,30 @@ export default function Reviews() {
         datePublished: r.created_at,
         name: r.title || "MasterChess review",
         reviewBody: r.comment || "",
-      })),
-    };
-  }, [reviews, stats.avg, topReviews, profiles]);
+      }));
+    }
+    return base;
+  }, [stats.total, stats.avg, topReviews, profiles]);
+
+  const avgDisplay = stats.total > 0 ? stats.avg.toFixed(1) : "—";
+  const titleTag = stats.total > 0
+    ? `MasterChess Reviews — Rated ${avgDisplay}/5 by ${stats.total} Chess Players`
+    : "MasterChess Reviews — Real Player Ratings & Feedback";
+  const descTag = stats.total > 0
+    ? `Read ${stats.total} real player reviews of MasterChess. Average rating ${avgDisplay}/5. Write your own review and share your chess experience.`
+    : "Read real player reviews of MasterChess. Tournaments, AI coach, puzzles, lessons — rated by the community. Write your own review and share your experience.";
 
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>MasterChess Reviews — Rated 4.9/5 by Chess Players Worldwide</title>
-        <meta
-          name="description"
-          content="Read real player reviews of MasterChess. Tournaments, AI coach, puzzles, lessons — rated by the community. Write your own review and share your experience."
-        />
+        <title>{titleTag}</title>
+        <meta name="description" content={descTag} />
         <link rel="canonical" href="https://masterchess.live/reviews" />
-        <meta property="og:title" content="MasterChess Reviews — Trusted by Chess Players Worldwide" />
-        <meta
-          property="og:description"
-          content="See why players rate MasterChess 4.9/5. Read community reviews and share yours."
-        />
+        <meta property="og:title" content={titleTag} />
+        <meta property="og:description" content={descTag} />
         <meta property="og:url" content="https://masterchess.live/reviews" />
         <meta property="og:type" content="website" />
+        <meta name="robots" content="index, follow" />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
