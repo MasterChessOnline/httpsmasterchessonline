@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SiteRating from "@/components/SiteRating";
+import ReviewsCta from "@/components/ReviewsCta";
 import SeasonBanner from "@/components/SeasonBanner";
 import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
 import { Link } from "react-router-dom";
