@@ -477,6 +477,13 @@ const Profile = () => {
             </motion.div>
           )}
 
+          {/* Style Twin — AI-detected GM your play resembles */}
+          <StyleTwinCard
+            userId={profileData.user_id}
+            username={profileData.username}
+            isOwner={!!isOwnProfile}
+          />
+
           {/* Season Banner */}
           <SeasonBanner />
 
