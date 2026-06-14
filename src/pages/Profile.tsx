@@ -13,6 +13,8 @@ import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import RankBadge from "@/components/RankBadge";
 import TitleBadge from "@/components/TitleBadge";
+import StyleTwinCard from "@/components/StyleTwinCard";
+import DailyKingCrown from "@/components/DailyKingCrown";
 import { getRank as getRankFromLib } from "@/lib/ranks";
 import { getTitle, getNextTitle, getTitleProgress } from "@/lib/titles";
 import { findCountry } from "@/lib/countries";
@@ -298,6 +300,7 @@ const Profile = () => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground truncate">
                       {profileData.display_name || profileData.username || "Player"}
+                      <DailyKingCrown userId={profileData.user_id} size="md" />
                     </h1>
                     {isOwnProfile && (
                       <button onClick={() => setEditing(true)} className="text-muted-foreground hover:text-primary transition-colors">
