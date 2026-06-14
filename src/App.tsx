@@ -50,6 +50,8 @@ const Referrals = lazy(() => import("./pages/Referrals"));
 const BattlePass = lazy(() => import("./pages/BattlePass"));
 const SeasonHub = lazy(() => import("./pages/SeasonHub"));
 const Reviews = lazy(() => import("./pages/Reviews"));
+const Brag = lazy(() => import("./pages/Brag"));
+const DailyKingPage = lazy(() => import("./pages/DailyKing"));
 const RateMasterChess = lazy(() => import("./pages/RateMasterChess"));
 const BattleRoyale = lazy(() => import("./pages/BattleRoyale"));
 const Press = lazy(() => import("./pages/Press"));
@@ -118,6 +120,7 @@ const DevOnlineSim = lazy(() => import("./pages/DevOnlineSim"));
 
 // Eager components (used in every page chrome)
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
+import StreakFlexController from "@/components/StreakFlexController";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
@@ -219,6 +222,8 @@ function AnimatedRoutes() {
           <Route path="/battle-pass" element={<BattlePass />} />
           <Route path="/season" element={<SeasonHub />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/brag/:username" element={<Brag />} />
+          <Route path="/daily-king" element={<DailyKingPage />} />
           <Route path="/rate-masterchess" element={<RateMasterChess />} />
           <Route path="/battle-royale" element={<BattleRoyale />} />
           <Route path="/press" element={<Press />} />
@@ -318,6 +323,7 @@ const App = () => (
             <MatchResultLayer />
             <WelcomeBonusModal />
             <ExitIntentModal />
+            <StreakFlexController />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
