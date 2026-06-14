@@ -109,7 +109,7 @@ export default function Brag() {
 
     ctx.fillStyle = "#aaa";
     ctx.font = "30px system-ui, -apple-system, sans-serif";
-    ctx.fillText(`@${data.username}  ·  ${rank.tier}`, 60, 430);
+    ctx.fillText(`@${data.username}  ·  ${rank.label}`, 60, 430);
 
     // Stats blocks
     const drawStat = (x: number, y: number, label: string, value: string, accent: string) => {
