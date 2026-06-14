@@ -644,6 +644,33 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_kings: {
+        Row: {
+          computed_at: string
+          games_played: number
+          id: string
+          rating_gain: number
+          reign_date: string
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string
+          games_played: number
+          id?: string
+          rating_gain: number
+          reign_date: string
+          user_id: string
+        }
+        Update: {
+          computed_at?: string
+          games_played?: number
+          id?: string
+          rating_gain?: number
+          reign_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_missions: {
         Row: {
           created_at: string
@@ -2224,6 +2251,33 @@ export type Database = {
         }
         Relationships: []
       }
+      style_twins: {
+        Row: {
+          computed_at: string
+          games_analyzed: number
+          gm_name: string
+          match_pct: number
+          reasoning: string
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string
+          games_analyzed?: number
+          gm_name: string
+          match_pct: number
+          reasoning: string
+          user_id: string
+        }
+        Update: {
+          computed_at?: string
+          games_analyzed?: number
+          gm_name?: string
+          match_pct?: number
+          reasoning?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -3024,6 +3078,23 @@ export type Database = {
         }
         Returns: Json
       }
+      compute_daily_king: {
+        Args: { p_date?: string }
+        Returns: {
+          computed_at: string
+          games_played: number
+          id: string
+          rating_gain: number
+          reign_date: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "daily_kings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       contribute_clan_quest: {
         Args: { p_amount?: number; p_metric: string }
         Returns: Json
@@ -3042,6 +3113,18 @@ export type Database = {
         Returns: Json
       }
       get_club_role: { Args: { _club: string; _user: string }; Returns: string }
+      get_current_daily_king: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          display_name: string
+          games_played: number
+          rating_gain: number
+          reign_date: string
+          user_id: string
+          username: string
+        }[]
+      }
       get_my_profile: {
         Args: never
         Returns: {
@@ -3116,6 +3199,17 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      get_public_style_twin: {
+        Args: { p_username: string }
+        Returns: {
+          avatar_url: string
+          computed_at: string
+          display_name: string
+          gm_name: string
+          match_pct: number
+          username: string
+        }[]
       }
       get_today_missions: {
         Args: { p_date?: string }
