@@ -539,7 +539,8 @@ const Settings = () => {
               </div>
               <Switch checked={quietHour} onCheckedChange={v => { setQuietHour(v); saveSetting("quietHour", v); toast.success(v ? "Quiet Hour enabled" : "Quiet Hour disabled"); }} />
             </div>
-          </div>
+
+            <div>
 
             <div>
               <h4 className="text-sm font-display font-semibold text-foreground mb-2 mt-2">Rating display</h4>
