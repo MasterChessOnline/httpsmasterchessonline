@@ -1160,6 +1160,41 @@ export type Database = {
         }
         Relationships: []
       }
+      heartbeats: {
+        Row: {
+          created_at: string | null
+          game_id: string
+          id: string
+          move_number: number
+          think_time_ms: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          game_id: string
+          id?: string
+          move_number: number
+          think_time_ms: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          game_id?: string
+          id?: string
+          move_number?: number
+          think_time_ms?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heartbeats_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "online_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_streaks: {
         Row: {
           current_streak: number
@@ -3232,6 +3267,14 @@ export type Database = {
       finalize_online_game: {
         Args: { p_end_reason: string; p_game_id: string; p_result: string }
         Returns: Json
+      }
+      game_heartbeats: {
+        Args: { p_game_id: string }
+        Returns: {
+          move_number: number
+          think_time_ms: number
+          user_id: string
+        }[]
       }
       get_beat_nikola_leaderboard: {
         Args: { _limit?: number }
