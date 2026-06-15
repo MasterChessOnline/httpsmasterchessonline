@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import EvalReviewPanel from "@/components/chess/EvalReviewPanel";
 import { detectOpening } from "@/lib/openings-detector";
 import TurningPointsStrip from "@/components/game/TurningPointsStrip";
+import EchoReactions from "@/components/game/EchoReactions";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -272,6 +273,10 @@ const GameReview = () => {
           <div className="w-full">
             <EvalReviewPanel moves={moves} currentMove={currentMove} />
           </div>
+
+          {gameId && meta && (
+            <EchoReactions gameId={gameId} />
+          )}
         </div>
       </main>
     </div>
