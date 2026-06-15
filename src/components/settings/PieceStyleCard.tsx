@@ -9,15 +9,15 @@ interface Props {
 }
 
 /**
- * Visual preview card for a piece style — shows white & black rows
- * separately so every piece is legible. Uniform height across the grid.
+ * Visual preview card for a piece style — preview is forced into a square
+ * frame so every card matches the board cards beside it.
  */
 export default function PieceStyleCard({ style, active, onSelect }: Props) {
   return (
     <button
       type="button"
       onClick={onSelect}
-      className={`group relative rounded-xl border p-3 text-left transition-all h-full flex flex-col ${
+      className={`group relative rounded-xl border p-2.5 text-left transition-all h-full flex flex-col ${
         active
           ? "border-primary bg-primary/10 shadow-lg shadow-primary/20"
           : "border-border/50 bg-card/60 hover:border-primary/30 hover:bg-card/80"
@@ -29,16 +29,15 @@ export default function PieceStyleCard({ style, active, onSelect }: Props) {
         </div>
       )}
 
-      <div className="mb-2.5 transition-transform duration-300 group-hover:scale-[1.02]">
-        <PieceSetPreview style={style} />
+      <div className="w-full aspect-square mb-2 flex items-center justify-center rounded-lg bg-gradient-to-b from-background/40 to-background/10 overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
+        <div className="w-full px-1">
+          <PieceSetPreview style={style} />
+        </div>
       </div>
 
       <div className="mt-auto">
         <p className={`text-xs font-semibold leading-tight line-clamp-1 ${active ? "text-primary" : "text-foreground"}`}>
           {style.label}
-        </p>
-        <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug line-clamp-2 min-h-[2.2em]">
-          {style.description}
         </p>
       </div>
     </button>
