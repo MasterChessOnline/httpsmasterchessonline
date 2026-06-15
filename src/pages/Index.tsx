@@ -401,9 +401,9 @@ const Index = () => {
 
         {/* ── MAIN CONTENT ── */}
         <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
-          {/* Spin The Wheel — hero-adjacent reward CTA */}
+          {/* Spin The Wheel — reward CTA, lazy-mount on scroll (was eager → caused mobile jank) */}
           <section id="spin-wheel" className="scroll-mt-24">
-            <LazyMount minHeight={520} eager>
+            <LazyMount minHeight={520}>
               <React.Suspense fallback={<div style={{ minHeight: 520 }} />}>
                 <HomeSpinWheelSection />
               </React.Suspense>
