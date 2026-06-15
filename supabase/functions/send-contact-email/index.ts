@@ -1,4 +1,7 @@
 import { corsHeaders } from "../_shared/cors.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+
+
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const RECIPIENT_EMAIL = "checkmatebros44@gmail.com";
@@ -9,7 +12,40 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authenticated caller to prevent anonymous flooding of admin inbox
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "").trim();
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    );
+    const { data: userData } = await supabaseAuth.auth.getUser(token);
+    if (!userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { name, email, message } = await req.json();
+
+    // Server-side length limits (mirror DB CHECK constraints)
+    if (
+      typeof name !== "string" || name.length > 120 ||
+      typeof email !== "string" || email.length > 255 ||
+      typeof message !== "string" || message.length > 4000
+    ) {
+      return new Response(JSON.stringify({ error: "Invalid input" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const esc = (s: string) =>
       String(s)
