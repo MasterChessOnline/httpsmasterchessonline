@@ -512,8 +512,34 @@ const Settings = () => {
               ))}
             </div>
 
-            <div>
-              <h4 className="text-sm font-display font-semibold text-foreground mb-2 mt-2">Rating display</h4>
+            {/* Cover Your Tracks — opening anonymity */}
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <Shield className="h-3.5 w-3.5 text-primary" />
+                  Cover Your Tracks
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Hide your opening from the Opening Explorer for your next 5 games. Respect for the human craft.
+                </p>
+              </div>
+              <Switch checked={coverTracks} onCheckedChange={v => { setCoverTracks(v); saveSetting("coverTracks", v); toast.success(v ? "Cover Your Tracks enabled — next 5 games hidden" : "Cover Your Tracks disabled"); }} />
+            </div>
+
+            {/* Quiet Hour */}
+            <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <VolumeX className="h-3.5 w-3.5 text-indigo-400" />
+                  Quiet Hour
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Every day 03:00–04:00 your local time: monochrome lobby, no chat, no taunts. Pure focus mode.
+                </p>
+              </div>
+              <Switch checked={quietHour} onCheckedChange={v => { setQuietHour(v); saveSetting("quietHour", v); toast.success(v ? "Quiet Hour enabled" : "Quiet Hour disabled"); }} />
+            </div>
+          </div>
               <p className="text-xs text-muted-foreground mb-3">Control how rating changes appear after each game.</p>
               <div className="space-y-3">
                 {[
