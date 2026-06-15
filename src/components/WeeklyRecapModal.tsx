@@ -59,9 +59,6 @@ export default function WeeklyRecapModal() {
         .gte("updated_at", since.toISOString())
         .order("updated_at", { ascending: true });
 
-      // re-bind for downstream code
-      const _games = data;
-        .order("ended_at", { ascending: true });
 
       if (error || !data || data.length === 0) {
         // No games — don't show empty recap
