@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import {
   MessageCircle,
   Send,
@@ -7,7 +6,6 @@ import {
   Linkedin,
   Mail,
   Copy,
-  Code2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -70,15 +68,14 @@ export default function ShareSiteStrip() {
 
   return (
     <div className="mt-8 rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm p-4 sm:p-5">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-primary">
-            Spread MasterChess
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Help us grow — share with a friend who plays chess.
-          </p>
-        </div>
+      <div className="mb-3">
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-primary">
+          Spread MasterChess
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Help us grow — share with a friend who plays chess.
+        </p>
+      </div>
         <Link
           to="/embed-rating"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors self-start sm:self-auto"
