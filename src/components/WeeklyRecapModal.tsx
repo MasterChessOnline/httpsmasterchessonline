@@ -53,10 +53,14 @@ export default function WeeklyRecapModal() {
     (async () => {
       const { data, error } = await supabase
         .from("online_games")
-        .select("id,result,white_player_id,black_player_id,ended_at")
+        .select("id,result,white_player_id,black_player_id,updated_at")
         .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
         .eq("status", "finished")
-        .gte("ended_at", since.toISOString())
+        .gte("updated_at", since.toISOString())
+        .order("updated_at", { ascending: true });
+
+      // re-bind for downstream code
+      const _games = data;
         .order("ended_at", { ascending: true });
 
       if (error || !data || data.length === 0) {
