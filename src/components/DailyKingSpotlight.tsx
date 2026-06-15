@@ -76,7 +76,7 @@ export default function DailyKingSpotlight() {
 
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-lg font-bold text-amber-300">
-          {king.display_name?.charAt(0).toUpperCase() ?? "?"}
+          {king.profile?.display_name?.charAt(0).toUpperCase() ?? "?"}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">
