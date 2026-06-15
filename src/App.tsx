@@ -340,6 +340,7 @@ function AnimatedRoutes() {
       <Analytics />
       <ReferralTracker />
       <DonationMilestoneBodyAttr />
+      <TheDoorButton />
       {lite ? (
         routes
       ) : (
