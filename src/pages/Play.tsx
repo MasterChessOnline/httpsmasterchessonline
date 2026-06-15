@@ -38,6 +38,7 @@ import RatingChange from "@/components/RatingChange";
 import TitleBadge from "@/components/TitleBadge";
 import StreakBadge from "@/components/StreakBadge";
 import BadgeUnlockToast from "@/components/BadgeUnlockToast";
+import BeatNikolaShareCard from "@/components/BeatNikolaShareCard";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -92,6 +93,7 @@ const Play = () => {
   const [botRatingResult, setBotRatingResult] = useState<RatingCalcResult | null>(null);
   const [streakAfter, setStreakAfter] = useState<StreakState | null>(null);
   const [unlockedBadges, setUnlockedBadges] = useState<BadgeRow[]>([]);
+  const [showBeatNikola, setShowBeatNikola] = useState(false);
   const ratingAppliedRef = useRef(false);
 
   // --- Per-move accuracy tracking (player + bot) ---
