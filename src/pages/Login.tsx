@@ -49,11 +49,19 @@ const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setError(null);
-    setGoogleModalOpen(true);
+    setGoogleLoading(true);
+    // 1-click Google. No country/name modal — that was killing conversion.
+    // Profile gets sensible defaults; user can edit in Settings later.
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/dashboard",
+    });
+    if (result.error) {
+      setError(result.error.message);
+      setGoogleLoading(false);
+    }
   };
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
