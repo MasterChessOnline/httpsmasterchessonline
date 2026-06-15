@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star } from "lucide-react";
+import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star, Share2, Copy, Check, MessageCircle, Send, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface MatchResultData {
   outcome: "win" | "loss" | "draw";
@@ -24,6 +26,8 @@ interface Props {
 }
 
 export default function MatchResultModal({ open, data, onClose, onRematch, onReview }: Props) {
+  const { profile } = useAuth() as any;
+  const [copied, setCopied] = useState(false);
   if (!data) return null;
   const titleMap = {
     win: { text: "Victory!", icon: <Trophy className="w-8 h-8" />, color: "from-amber-400 to-yellow-200", glow: "shadow-[0_0_80px_hsl(43,95%,60%,0.5)]" },
@@ -168,6 +172,71 @@ export default function MatchResultModal({ open, data, onClose, onRematch, onRev
                   )}
                 </motion.div>
               )}
+
+              {/* Share Victory — only on win. The single biggest viral mechanism on the site. */}
+              {data.outcome === "win" && (() => {
+                const handle = (profile?.username || profile?.display_name || "").toString().trim();
+                const slug = handle ? handle.replace(/[^a-zA-Z0-9_-]/g, "").toLowerCase() : "";
+                const challengeUrl = slug
+                  ? `https://masterchess.live/vs/${slug}`
+                  : `https://masterchess.live/play/online`;
+                const winLine = handle
+                  ? `Just won a chess game on MasterChess! 🏆 Think you can beat me? ${challengeUrl}`
+                  : `Just won a chess game on MasterChess! 🏆 Free, no ads, real human play. ${challengeUrl}`;
+                const copy = async () => {
+                  try {
+                    await navigator.clipboard.writeText(challengeUrl);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1800);
+                  } catch {}
+                };
+                return (
+                  <motion.div
+                    initial={{ y: 12, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.45 }}
+                    className="mt-3 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-4"
+                  >
+                    <div className="flex items-center gap-2 text-amber-200 mb-3">
+                      <Share2 className="h-4 w-4" />
+                      <span className="text-xs font-bold uppercase tracking-widest">Challenge a friend</span>
+                    </div>
+                    <button
+                      onClick={copy}
+                      className="w-full mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-black/40 border border-amber-500/20 hover:border-amber-500/50 transition-colors text-left"
+                    >
+                      <code className="flex-1 truncate text-xs text-amber-300 font-mono">{challengeUrl}</code>
+                      {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 text-zinc-400" />}
+                    </button>
+                    <div className="grid grid-cols-3 gap-2">
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(winLine)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-colors"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                      </a>
+                      <a
+                        href={`https://t.me/share/url?url=${encodeURIComponent(challengeUrl)}&text=${encodeURIComponent("I just won on MasterChess — your turn 🏆")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-semibold transition-colors"
+                      >
+                        <Send className="h-3.5 w-3.5" /> Telegram
+                      </a>
+                      <a
+                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(winLine)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-zinc-700/40 hover:bg-zinc-700/60 border border-zinc-600/40 text-zinc-200 text-xs font-semibold transition-colors"
+                      >
+                        <Twitter className="h-3.5 w-3.5" /> X
+                      </a>
+                    </div>
+                  </motion.div>
+                );
+              })()}
 
               {/* Actions */}
               <div className="mt-6 flex flex-col gap-2 sm:flex-row">
