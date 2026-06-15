@@ -887,6 +887,11 @@ const Play = () => {
             </motion.div>
           </Link>
 
+          {/* Challenge-a-friend share link */}
+          <div className="mb-8 flex justify-center">
+            <ChallengeLinkCreator />
+          </div>
+
           {/* Time control selector */}
           <div className="mb-6 w-full max-w-md">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Time</p>
