@@ -43,8 +43,25 @@ serve(async (req) => {
 
     const { priceId, returnUrl } = await req.json();
 
-    if (!priceId) {
+    if (!priceId || typeof priceId !== "string") {
       throw new Error("Price ID is required for subscriptions");
+    }
+
+    // Server-side allowlist of valid subscription price IDs — prevents
+    // callers from substituting arbitrary Stripe prices.
+    const ALLOWED_PRICE_IDS = new Set(
+      [
+        Deno.env.get("STRIPE_SUPPORTER_PRICE_ID"),
+        Deno.env.get("STRIPE_PRO_PRICE_ID"),
+        Deno.env.get("STRIPE_PREMIUM_PRICE_ID"),
+        Deno.env.get("STRIPE_SUBSCRIPTION_PRICE_ID"),
+      ].filter((v): v is string => typeof v === "string" && v.length > 0),
+    );
+    if (ALLOWED_PRICE_IDS.size > 0 && !ALLOWED_PRICE_IDS.has(priceId)) {
+      return new Response(JSON.stringify({ error: "Invalid price" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const safeReturn = safeReturnUrl(returnUrl, req.headers.get("origin"));
