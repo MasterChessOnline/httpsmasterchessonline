@@ -225,7 +225,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <ChessUniverseBackground />
+      {/* Heavy animated bg: skip entirely on mobile/low-end to protect LCP & INP. */}
+      {allowHeavy && (
+        <React.Suspense fallback={null}>
+          <ChessUniverseBackground />
+        </React.Suspense>
+      )}
       <Seo
         title={"MasterChess — Play Chess Online, Tournaments & Analysis"}
         description={
