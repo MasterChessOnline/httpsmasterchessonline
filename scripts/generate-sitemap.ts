@@ -113,6 +113,18 @@ const botEntries: SitemapEntry[] = botIds.map((id) => ({
   priority: "0.6",
 }));
 
+// "How to beat X" SEO landing pages — long-tail target per bot
+const beatBotEntries: SitemapEntry[] = BOT_PROFILES.map((b) => ({
+  path: `/beat/${b.id}`,
+  changefreq: "monthly" as const,
+  priority: "0.75",
+}));
+
+// Daily puzzle hub
+const puzzleEntries: SitemapEntry[] = [
+  { path: "/puzzles", changefreq: "daily", priority: "0.85" },
+];
+
 // Programmatic glossary — every chess term becomes its own indexable URL
 const glossaryEntries: SitemapEntry[] = [
   { path: "/learn/glossary", changefreq: "weekly", priority: "0.8" },
