@@ -51,11 +51,9 @@ const ODDS: { coins: number; label: string; piece: string; pct: number }[] = [
 ];
 
 function pickSegmentForCoins(coins: number): Segment {
-  // Map server reward tier → preferred segment. 25-coin reward biased to the
-  // ♙ segment; we'll occasionally hit the Mystery segment for variety.
+  // Fair mapping: pointer lands on the exact segment that matches the reward.
   const exact = SEGMENTS.find((s) => s.coins === coins);
   if (!exact) return SEGMENTS[0];
-  if (coins === 25 && Math.random() < 0.35) return SEGMENTS[4]; // Mystery
   return exact;
 }
 
