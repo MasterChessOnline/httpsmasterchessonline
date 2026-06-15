@@ -59,8 +59,8 @@ export default function CinematicIntro() {
               className="absolute text-amber-300/15 select-none font-bold"
               style={{ fontSize: `${56 + i * 16}px`, left: `${10 + i * 18}%`, top: `${20 + (i % 3) * 22}%` }}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 0.5, y: [0, -8, 0] }}
-              transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut", delay: i * 0.08 }}
+              animate={{ opacity: 0.5, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.05 }}
             >
               {c}
             </motion.div>
@@ -76,8 +76,8 @@ export default function CinematicIntro() {
               <Crown className="h-24 w-24 md:h-28 md:w-28 text-amber-400 drop-shadow-[0_0_40px_rgba(251,191,36,0.65)]" strokeWidth={1.5} />
               <motion.div
                 className="absolute inset-0 rounded-full bg-amber-400/25 blur-3xl"
-                animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.9, 0.4] }}
-                transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                animate={{ scale: 1.2, opacity: 0.7 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
               />
             </motion.div>
             <motion.h1

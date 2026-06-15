@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Gift, Trophy, Sparkles, Eye, Crown } from "lucide-react";
 
 const CARDS = [
@@ -8,8 +7,8 @@ const CARDS = [
     icon: Gift,
     title: "Invite friends",
     desc: "100 coins each",
-    color: "from-emerald-500/20 to-emerald-700/10",
-    border: "border-emerald-500/30",
+    color: "from-emerald-500/15 to-emerald-900/10",
+    border: "border-emerald-500/25",
     accent: "text-emerald-400",
   },
   {
@@ -17,26 +16,26 @@ const CARDS = [
     icon: Trophy,
     title: "Leaderboard",
     desc: "Top players live",
-    color: "from-yellow-500/20 to-yellow-700/10",
-    border: "border-yellow-500/30",
-    accent: "text-yellow-400",
+    color: "from-amber-500/15 to-amber-900/10",
+    border: "border-amber-500/30",
+    accent: "text-amber-400",
   },
   {
     to: "/quiz",
     icon: Sparkles,
     title: "Chess personality",
     desc: "60-sec quiz",
-    color: "from-fuchsia-500/20 to-fuchsia-700/10",
-    border: "border-fuchsia-500/30",
-    accent: "text-fuchsia-400",
+    color: "from-amber-500/10 to-zinc-900/30",
+    border: "border-amber-400/25",
+    accent: "text-amber-300",
   },
   {
     to: "/spectate",
     icon: Eye,
     title: "Watch live",
     desc: "Spectate games now",
-    color: "from-sky-500/20 to-sky-700/10",
-    border: "border-sky-500/30",
+    color: "from-sky-500/15 to-sky-900/10",
+    border: "border-sky-500/25",
     accent: "text-sky-400",
   },
   {
@@ -44,9 +43,9 @@ const CARDS = [
     icon: Crown,
     title: "Daily King",
     desc: "Today's champion",
-    color: "from-rose-500/20 to-rose-700/10",
-    border: "border-rose-500/30",
-    accent: "text-rose-400",
+    color: "from-amber-500/15 to-amber-900/10",
+    border: "border-amber-500/30",
+    accent: "text-amber-400",
   },
 ];
 
@@ -62,29 +61,20 @@ export default function DiscoverStrip() {
         </span>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {CARDS.map((c, i) => {
+        {CARDS.map((c) => {
           const Icon = c.icon;
           return (
-            <motion.div
+            <Link
               key={c.to}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05, duration: 0.4 }}
+              to={c.to}
+              className={`group block rounded-2xl border ${c.border} bg-gradient-to-br ${c.color} p-4 backdrop-blur-sm transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg animate-fade-in`}
             >
-              <Link
-                to={c.to}
-                className={`group block rounded-2xl border ${c.border} bg-gradient-to-br ${c.color} p-4 backdrop-blur-sm transition hover:scale-[1.02] hover:shadow-lg`}
-              >
-                <Icon
-                  className={`mb-2 h-6 w-6 ${c.accent} transition group-hover:scale-110`}
-                />
-                <div className="text-sm font-semibold text-white">
-                  {c.title}
-                </div>
-                <div className="text-xs text-zinc-400">{c.desc}</div>
-              </Link>
-            </motion.div>
+              <Icon
+                className={`mb-2 h-6 w-6 ${c.accent} transition-transform group-hover:scale-110`}
+              />
+              <div className="text-sm font-semibold text-white">{c.title}</div>
+              <div className="text-xs text-zinc-400">{c.desc}</div>
+            </Link>
           );
         })}
       </div>
