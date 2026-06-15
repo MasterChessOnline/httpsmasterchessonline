@@ -59,6 +59,7 @@ import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import LazyMount from "@/components/LazyMount";
 import WinStreakFlame from "@/components/WinStreakFlame";
+import { useDeviceCapability } from "@/hooks/use-device-capability";
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
 // and stabilize first paint on mobile.
@@ -172,15 +173,18 @@ const PreferenceToggles = () => {
 const Index = () => {
   const { user, profile } = useAuth();
   const { t } = useI18n();
+  const { allowHeavy } = useDeviceCapability();
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
   const [winStreak, setWinStreak] = useState(0);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const imgY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
+  // Parallax / scale only on capable devices. On mobile/low-end this caused
+  // scroll lag because the hero image was constantly transformed.
+  const imgY = useTransform(scrollYProgress, [0, 1], allowHeavy ? ["0%", "25%"] : ["0%", "0%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], allowHeavy ? [1, 0.95] : [1, 1]);
 
   useEffect(() => {
     const fetchData = async () => {
