@@ -69,6 +69,30 @@ const PaymentCanceled = lazy(() => import("./pages/PaymentCanceled"));
 const PressKit = lazy(() => import("./pages/PressKit"));
 const BuiltByAKid = lazy(() => import("./pages/BuiltByAKid"));
 const NoAdsChess = lazy(() => import("./pages/NoAdsChess"));
+const SeoLandings = lazy(() =>
+  import("./pages/seo-landings").then((m) => ({ default: m.PlayChessWithFriendsFree })),
+);
+const BestFreeChessSite2026 = lazy(() =>
+  import("./pages/seo-landings").then((m) => ({ default: m.BestFreeChessSite2026 })),
+);
+const ChessOpeningTrainerFree = lazy(() =>
+  import("./pages/seo-landings").then((m) => ({ default: m.ChessOpeningTrainerFree })),
+);
+const DailyChessPuzzleRedirect = lazy(() =>
+  import("./pages/seo-landings").then((m) => ({ default: m.DailyChessPuzzleRedirect })),
+);
+const ChessRatingExplained = lazy(() =>
+  import("./pages/seo-landings").then((m) => ({ default: m.ChessRatingExplained })),
+);
+const LearnChessIn7Days = lazy(() =>
+  import("./pages/seo-landings").then((m) => ({ default: m.LearnChessIn7Days })),
+);
+const Changelog = lazy(() =>
+  import("./pages/seo-landings").then((m) => ({ default: m.Changelog })),
+);
+const AlternativeToMajorChessSites = lazy(() =>
+  import("./pages/seo-landings").then((m) => ({ default: m.AlternativeToMajorChessSites })),
+);
 const Viral = lazy(() => import("./pages/Viral"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -270,6 +294,14 @@ function AnimatedRoutes() {
           <Route path="/press-kit" element={<PressKit />} />
           <Route path="/built-by-a-kid" element={<BuiltByAKid />} />
           <Route path="/no-ads-chess" element={<NoAdsChess />} />
+          <Route path="/play-chess-with-friends-free" element={<SeoLandings />} />
+          <Route path="/best-free-chess-site-2026" element={<BestFreeChessSite2026 />} />
+          <Route path="/chess-opening-trainer-free" element={<ChessOpeningTrainerFree />} />
+          <Route path="/daily-chess-puzzle" element={<DailyChessPuzzleRedirect />} />
+          <Route path="/chess-rating-explained" element={<ChessRatingExplained />} />
+          <Route path="/learn-chess-in-7-days" element={<LearnChessIn7Days />} />
+          <Route path="/changelog" element={<Changelog />} />
+          <Route path="/alternative-to-major-chess-sites" element={<AlternativeToMajorChessSites />} />
 
           <Route path="/viral" element={<Viral />} />
           <Route path="/resources" element={<Navigate to="/" replace />} />
