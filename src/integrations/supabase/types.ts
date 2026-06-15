@@ -326,6 +326,59 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_links: {
+        Row: {
+          claimed_by: string | null
+          code: string
+          created_at: string
+          creator_id: string | null
+          expires_at: string
+          game_id: string | null
+          id: string
+          increment: number
+          initial_time: number
+          is_rated: boolean
+          status: string
+          time_control_label: string
+        }
+        Insert: {
+          claimed_by?: string | null
+          code: string
+          created_at?: string
+          creator_id?: string | null
+          expires_at?: string
+          game_id?: string | null
+          id?: string
+          increment?: number
+          initial_time?: number
+          is_rated?: boolean
+          status?: string
+          time_control_label?: string
+        }
+        Update: {
+          claimed_by?: string | null
+          code?: string
+          created_at?: string
+          creator_id?: string | null
+          expires_at?: string
+          game_id?: string | null
+          id?: string
+          increment?: number
+          initial_time?: number
+          is_rated?: boolean
+          status?: string
+          time_control_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_links_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "online_games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           country_code: string

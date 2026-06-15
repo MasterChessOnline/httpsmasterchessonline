@@ -113,6 +113,18 @@ const botEntries: SitemapEntry[] = botIds.map((id) => ({
   priority: "0.6",
 }));
 
+// "How to beat X" SEO landing pages — long-tail target per bot
+const beatBotEntries: SitemapEntry[] = BOT_PROFILES.map((b) => ({
+  path: `/beat/${b.id}`,
+  changefreq: "monthly" as const,
+  priority: "0.75",
+}));
+
+// Daily puzzle hub
+const puzzleEntries: SitemapEntry[] = [
+  { path: "/puzzles", changefreq: "daily", priority: "0.85" },
+];
+
 // Programmatic glossary — every chess term becomes its own indexable URL
 const glossaryEntries: SitemapEntry[] = [
   { path: "/learn/glossary", changefreq: "weekly", priority: "0.8" },
@@ -215,6 +227,8 @@ const imageEntries: SitemapEntry[] = [
 writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
 writeFileSync(resolve("public/sitemap-openings.xml"), buildUrlset(openingEntries));
 writeFileSync(resolve("public/sitemap-bots.xml"), buildUrlset(botEntries));
+writeFileSync(resolve("public/sitemap-beat-bots.xml"), buildUrlset(beatBotEntries));
+writeFileSync(resolve("public/sitemap-puzzles.xml"), buildUrlset(puzzleEntries));
 writeFileSync(resolve("public/sitemap-glossary.xml"), buildUrlset(glossaryEntries));
 writeFileSync(resolve("public/sitemap-tools.xml"), buildUrlset(toolsEntries));
 writeFileSync(resolve("public/sitemap-mates.xml"), buildUrlset(mateEntries));
@@ -229,6 +243,8 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-openings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-bots.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-beat-bots.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-puzzles.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-glossary.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-tools.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-mates.xml</loc><lastmod>${today}</lastmod></sitemap>`,

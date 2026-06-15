@@ -39,6 +39,7 @@ import TitleBadge from "@/components/TitleBadge";
 import StreakBadge from "@/components/StreakBadge";
 import BadgeUnlockToast from "@/components/BadgeUnlockToast";
 import BeatNikolaShareCard from "@/components/BeatNikolaShareCard";
+import ChallengeLinkCreator from "@/components/ChallengeLinkCreator";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -885,6 +886,11 @@ const Play = () => {
               <span className="text-[10px] uppercase tracking-wider text-primary font-bold border border-primary/30 px-2 py-0.5 rounded-full">Bot · Online</span>
             </motion.div>
           </Link>
+
+          {/* Challenge-a-friend share link */}
+          <div className="mb-8 flex justify-center">
+            <ChallengeLinkCreator />
+          </div>
 
           {/* Time control selector */}
           <div className="mb-6 w-full max-w-md">
