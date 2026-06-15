@@ -274,53 +274,66 @@ const Index = () => {
           >
             <AnimatedLogoHero tagline={t("hero.tagline")} />
 
-            {/* Prominent donation card inside hero */}
+            {/* 1 ▸ DONATION — first thing under the title, most prominent */}
             <HeroDonationCard />
 
-            {/* Above-fold rule: ONE big CTA. The signup card was moved below fold
-                to remove friction for first-time visitors. */}
-
-
-            {/* CTA Buttons with ripple + glow */}
+            {/* 2 ▸ PRIMARY PLAY CTAs — two clear buttons, breathing room */}
             <motion.div
-              className="flex flex-col sm:flex-row items-center justify-center gap-3"
+              className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
+              transition={{ delay: 0.35, duration: 0.6 }}
             >
               {/* Guests → instant /play-guest (no signup wall). Logged-in users → real online matchmaking. */}
-              <Link to={user ? "/play/online" : "/play-guest"}>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Link to={user ? "/play/online" : "/play-guest"} className="w-full sm:w-auto">
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
-                    className="ripple-btn h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
+                    className="ripple-btn w-full sm:w-auto h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
                   >
                     <Play className="h-5 w-5 mr-2 fill-current" />
-                    {user ? t("hero.playOnline") : "Play Now"}
+                    {user ? t("hero.playOnline") : "Play Online"}
                   </Button>
                 </motion.div>
               </Link>
-              <Link to="/play">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Link to="/play" className="w-full sm:w-auto">
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
                     variant="outline"
-                    className="ripple-btn h-14 px-8 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
+                    className="ripple-btn w-full sm:w-auto h-14 px-10 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
                   >
                     <Swords className="h-5 w-5 mr-2" />
                     vs Bots
                   </Button>
                 </motion.div>
               </Link>
+            </motion.div>
+
+            {/* 3 ▸ INSTALL APP — secondary, on its own row, subtle */}
+            <motion.div
+              className="mt-5 flex justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
               <InstallAppButton variant="hero" />
             </motion.div>
 
-            {/* Play vs Nikola — direct challenge against the creator */}
+            {/* 4 ▸ HUMAN SIGNAL — handwritten note */}
+            <div className="mt-8 flex justify-center items-center gap-2 text-primary/70">
+              <ScribbleArrow className="hidden sm:block text-primary/50" />
+              <MarginNote rotate={-2} className="text-base sm:text-lg">
+                real chess, real people — no bots pretending to be human
+              </MarginNote>
+            </div>
+
+            {/* 5 ▸ NIKOLA CHALLENGE — own section, generous spacing */}
             <motion.div
-              className="mt-4 mx-auto max-w-xl"
-              initial={{ opacity: 0, y: 10 }}
+              className="mt-10 sm:mt-12 mx-auto max-w-xl"
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.5 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
             >
               <Link
                 to="/beat-nikola"
@@ -345,7 +358,7 @@ const Index = () => {
                     Play against the MasterChess creator himself
                   </h3>
                   <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                    I built this entire site. I know every opening, every trap, every endgame. Think you can beat me?
+                    I built this entire site. Think you can beat me?
                   </p>
                 </div>
                 <span className="hidden sm:inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold px-4 py-2 shadow-md group-hover:scale-105 transition-transform shrink-0">
@@ -354,26 +367,15 @@ const Index = () => {
               </Link>
             </motion.div>
 
-            {/* Handwritten margin note — small human signal under the CTAs */}
-            <div className="mt-4 flex justify-center items-center gap-2 text-primary/70">
-              <ScribbleArrow className="hidden sm:block text-primary/50" />
-              <MarginNote rotate={-2} className="text-base sm:text-lg">
-                real chess, real people — no bots pretending to be human
-              </MarginNote>
-            </div>
-
-            {/* Quick Actions removed — duplicated below in "Between matches" row to declutter hero. */}
-
-            {/* Live player counter + streak flame */}
+            {/* 6 ▸ LIVE STATUS — bottom of hero, light touch */}
             <motion.div
-              className="mt-6 flex justify-center items-center gap-3 flex-wrap"
+              className="mt-8 flex justify-center items-center gap-3 flex-wrap"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
+              transition={{ delay: 0.75 }}
             >
               <LivePlayerCounter />
               {winStreak >= 3 && <WinStreakFlame streak={winStreak} />}
-              <BeatNikolaTeaser />
             </motion.div>
           </motion.div>
         </div>
