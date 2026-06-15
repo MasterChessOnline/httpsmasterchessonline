@@ -1,29 +1,38 @@
-# Plan: Brži, čistiji homepage (bez purple flash-a)
+# Plan: Fer Spin the Wheel + ručno aktiviran spin
 
-## 1. Ukloniti purple/fuchsia
-- `DiscoverStrip` — promeniti **fuchsia** karticu (Personality) u **amber/gold** (brend boja). Sve kartice ostaju vidljive ali u gold-paleti sa diskretnim akcentom (emerald/sky/rose dozvoljene jer su tamne i ne "blješte").
-- Zameniti `from-fuchsia-500/20` → `from-amber-500/15` da nestane ljubičasti flash kad scroll otkrije karticu.
+## Šta je problem
+- Server RPC `claim_daily_spin` daje **25 coina u 35%** slučajeva i **50 coina u 25%** = 60% spin-ova završi na jedno od ta dva polja. Zato deluje "uvek isto".
+- Klijent dodatno preusmerava 35% rezultata sa 25 → Mystery polje, ali distribucija ostaje skewed.
 
-## 2. Brži start
-- **AppLaunchSplash**: 3000ms → **1200ms**. Trenutno blokira prvi smisleni paint 3s.
-- **CinematicIntro**: već 1400ms, ali ima 5 floating chess figura sa `repeat: Infinity` — promeniti u jednokratnu animaciju (bez infinite loop) da CPU ne troši.
+## Šta menjam
 
-## 3. Manje motion-a na mobilnom
-- `DiscoverStrip`: `whileInView` motion → ukloniti na mobilnom (<768px), samo CSS fade-in. Trenutno svaka kartica ima zaseban Framer Motion observer što na 369px ekranu znači 5 paralelnih scroll listenera.
-- Smanjiti `transition.duration` 0.4s → 0.25s.
+### 1. Server: ravnomernija raspodela
+Migracija — **`claim_daily_spin`** dobija ravniju distribuciju preko 7 nivoa (zbir = 100):
 
-## 4. Ostalo
-- Verifikovati da `DepthLayers` i `CursorGlow` već skip-uju mobile (jesu — preko `useDeviceCapability`).
-- Ne dirati postojeće lazy-loaded sekcije (već optimizovano).
+```
+25   →  18%   (bilo 35%)
+50   →  18%   (bilo 25%)
+100  →  20%   (bilo 18%)
+250  →  18%   (bilo 12%)
+500  →  14%   (bilo 6%)
+1000 →   8%   (bilo 3%)
+2500 →   4%   (bilo 1%)
+```
+Svako polje sada ima realnu šansu — više nikad ne deluje "uvek 25/50". Najveće nagrade i dalje ostaju retke (4–8%) da bi spin ostao uzbudljiv.
 
-## Fajlovi koje menjam
-- `src/components/DiscoverStrip.tsx` — paleta + uslovni motion
-- `src/components/AppLaunchSplash.tsx` — `SPLASH_MS = 1200`
-- `src/components/CinematicIntro.tsx` — ukloniti `repeat: Infinity` na figurama i crown halo
+Isto rebalansiranje za **`spin_wheel_paid`** (100 → 30% umesto 40%).
 
-## Šta NE diram
-- Cloud/DB (problem je čisto frontend)
-- Lazy chunk strategiju (već dobra)
-- Brand identitet — ostaje Gold & Black, samo skidam jedan ljubičasti akcenat
+`claim_weekly_spin` i `spin_wheel_legendary` ostaju nepromenjeni (već su balansiraniji).
+
+### 2. Klijent: ukloniti hardkodovani re-routing
+- U `HomeSpinWheelSection.tsx` i `SpinWheel.tsx` ukloniti liniju `if (coins === 25 && Math.random() < 0.35) return 4` — pošteno mapiranje: pobednički index = polje sa istim coin iznosom.
+
+### 3. Spin = uvek ručno (potvrda)
+Pregled koda potvrđuje: spin se već pokreće isključivo klikom korisnika na "SPIN THE WHEEL" dugme. Nema auto-spina. Ako želiš još "fizičkiji" feeling (drag-to-spin gest prstom), to mogu dodati kao sledeći korak — javi.
+
+## Fajlovi
+- migracija (DB): `claim_daily_spin` + `spin_wheel_paid`
+- `src/components/HomeSpinWheelSection.tsx` — ukloniti random re-routing
+- `src/pages/SpinWheel.tsx` — ukloniti random re-routing
 
 Krećem?

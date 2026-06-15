@@ -32,8 +32,7 @@ const SEGMENTS: (WheelSegment & { coins: number })[] = [
 const SEG_DEG = 360 / SEGMENTS.length;
 
 function pickSegmentForCoins(coins: number): number {
-  // Map server reward → segment index; small variance for 25-coin tier.
-  if (coins === 25 && Math.random() < 0.35) return 4;
+  // Fair mapping: pointer lands on the exact segment that matches the reward.
   const idx = SEGMENTS.findIndex((s) => s.coins === coins);
   return idx >= 0 ? idx : 0;
 }
