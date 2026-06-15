@@ -3206,6 +3206,7 @@ export type Database = {
           username: string
         }[]
       }
+      get_donation_progress: { Args: never; Returns: Json }
       get_my_profile: {
         Args: never
         Returns: {
