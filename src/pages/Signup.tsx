@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Crown, UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { STARTING_LEVELS, DEFAULT_STARTING_LEVEL_KEY, getStartingLevel } from "@/lib/starting-levels";
+import { track } from "@/lib/track";
 
 import AuthAura from "@/components/auth/AuthAura";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
@@ -107,6 +108,7 @@ const Signup = () => {
         .eq("user_id", newUserId);
     }
 
+    track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key });
     navigate("/dashboard");
   };
 
