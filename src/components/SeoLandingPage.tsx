@@ -55,6 +55,15 @@ export default function SeoLandingPage({ config }: { config: SeoLandingConfig })
     isPartOf: { "@type": "WebSite", name: "MasterChess", url: SITE },
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
+      { "@type": "ListItem", position: 2, name: config.h1, item: canonical },
+    ],
+  };
+
   return (
     <>
       <Helmet>
