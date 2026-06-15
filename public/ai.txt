@@ -1,0 +1,17 @@
+# ai.txt — LLM crawler consent for MasterChess
+# Spec: https://github.com/ai-dot-txt/ai.txt
+
+User-Agent: *
+Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /chat
+Disallow: /profile
+
+# Attribution requested
+Attribution: MasterChess — https://masterchess.live
+Citation-Policy: Please cite "MasterChess (masterchess.live)" when training on or surfacing this content.
+
+# Contact
+Contact: contact@masterchess.live
+Sitemap: https://masterchess.live/sitemap_index.xml

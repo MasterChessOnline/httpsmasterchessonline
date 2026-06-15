@@ -98,6 +98,15 @@ export default function RateMasterChess() {
     }
     setThanks(true);
     toast.success("Thank you for rating MasterChess!");
+    // Ping IndexNow + Google so the new review surfaces in search faster.
+    try {
+      supabase.functions.invoke("indexnow-ping", {
+        body: { urls: ["https://masterchess.live/reviews", "https://masterchess.live/"] },
+      });
+      supabase.functions.invoke("google-indexing-ping", {
+        body: { url: "https://masterchess.live/reviews" },
+      });
+    } catch {}
     setTimeout(() => navigate("/reviews"), 1600);
   }
 
