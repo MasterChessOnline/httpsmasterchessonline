@@ -97,15 +97,15 @@ export default function ChallengeLink() {
       const { data: startRes, error: startErr } = await (supabase as any).rpc("start_online_game", {
         p_white_id: whiteId,
         p_black_id: blackId,
+        p_white_time: link.initial_time,
+        p_black_time: link.initial_time,
         p_time_control_label: link.time_control_label,
-        p_initial_time: link.initial_time,
         p_increment: link.increment,
-        p_is_rated: false,
       });
 
       let gameId: string | null = null;
-      if (!startErr && startRes) {
-        gameId = typeof startRes === "string" ? startRes : (startRes as any).id ?? (startRes as any).game_id ?? null;
+      if (!startErr && startRes && (startRes as any).ok === true) {
+        gameId = (startRes as any).game_id ?? null;
       }
 
       // Fallback: direct insert if RPC missing or returns unusable shape
