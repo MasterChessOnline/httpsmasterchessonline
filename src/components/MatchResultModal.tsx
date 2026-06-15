@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star } from "lucide-react";
+import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star, Share2, Copy, Check, MessageCircle, Send, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface MatchResultData {
   outcome: "win" | "loss" | "draw";
