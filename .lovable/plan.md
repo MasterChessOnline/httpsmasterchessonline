@@ -1,55 +1,46 @@
-# Plan: Završetak Growth Wave 3
+## Šta menjam
 
-Implementiram preostale stavke iz growth plana u jednoj rundi.
+### 1. Skidam "Knock / Door" dugme
+`TheDoorButton` simulira pronalaženje sagovornika sa `setTimeout` i lažnim imenom (`ChessFriend_###`) — to je čista fejk-engagement što krši core pravilo projekta (zero fake activity). Pored toga je vizuelno suvišan plutajući bottom-right element.
 
-## Šta se gradi
+- Uklanjam `<TheDoorButton />` mount iz `src/App.tsx` (linija 348) i import (linija 150).
+- Brišem fajl `src/components/TheDoorButton.tsx`.
 
-### 1. Share Card PNG (post-game)
-- `src/lib/shareCard.ts` — canvas generator (1200×630), brand Gold & Black, prikazuje rezultat, ELO delta, ime
-- Dugme "Podeli kao sliku" u `GameReview.tsx` → download PNG + Web Share API ako postoji
+### 2. Donation traka na vrh homepage-a
+Pravim novu kompaktnu komponentu `src/components/HomeDonationTopStrip.tsx` koja se montira u `src/pages/Index.tsx` **iznad** `<Navbar />` i hero sekcije (tj. iznad "MasterChess" naslova). Postoji samo na `/`, ne globalno — da ne smeta na ostalim stranicama.
 
-### 2. Spectate Hero (homepage boost)
-- `src/components/home/SpectateHero.tsx` — live mini-board najgledanije partije (čita `online_games` gde je `spectator_count > 0`)
-- Ubacuje se u `Index.tsx` ispod hero-a, samo kad postoji live partija (nema fake fallback)
+**Sadržaj trake** (jedan red, gold akcenat):
+- 💛 Mini progress bar (koristi postojeći `useDonationProgress` hook → `$X od $100`).
+- Kratak tekst: "Support MasterChess" + procenat.
+- Primary CTA dugme "Donate" → vodi na `/supporter`.
+- Mali ✕ za sklanjanje na 7 dana (localStorage `mc:donate-top:dismissed-until`).
 
-### 3. Referral wiring
-- Aktivirati postojeću `referrals` tabelu: capture `?ref=USERNAME` u `App.tsx` → localStorage → na signup confirm upisuje red
-- Dodati "Tvoj referral link" blok u `Profile.tsx` sa copy dugmetom i brojem dovedenih
+**Responsive ponašanje:**
+- Desktop (≥640px): jedan red — tekst levo, progress u sredini, dugme desno.
+- Mobile (<640px): kompaktan layout — `[💛 38% • $38/100]  [Donate →]` u jednom redu, bez wrap; tekst se skraćuje.
+- Visina ≤ 44px na mobilu, ≤ 40px na desktopu — neće gurati hero.
+- Sticky? Ne. Statičan na vrhu da bude "iznad natpisa" kako je traženo. Navbar ostaje sticky kao i do sad.
 
-### 4. Streak cron (daily)
-- Edge function `daily-streak-tick` koja u 00:05 UTC resetuje `user_daily_streaks` ako nije bilo aktivnosti
-- pg_cron job (via insert tool, ne migration — sadrži anon key)
+**Stil:** crno staklo + zlatna ivica/akcenat (koristim postojeće `--primary` tokene i `border-primary/30 bg-card/60 backdrop-blur`) — uklapa se u Gold & Black 4D bez novih boja.
 
-### 5. Programmatic opening pages (long-tail SEO)
-- `src/pages/OpeningSEO.tsx` na ruti `/opening/:slug`
-- Statički seed: 20 najpopularnijih otvaranja (Sicilian, Italian, Ruy Lopez, French, Caro-Kann, …)
-- Per-stranica: H1, meta, PGN viewer, "Train this opening" CTA → `/openings?train=:slug`
-- Sitemap update u `public/sitemap.xml`
-
-### 6. Weekly Recap (in-app, ne email)
-- `src/components/WeeklyRecapModal.tsx` — pokazuje se nedeljom: games played, win%, best move, najbolji protivnik
-- Trigger iz `App.tsx` jednom nedeljno (localStorage `last_recap_week`)
-
-### 7. Soul Replay (lightweight, ne MP4)
-- `src/components/game/SoulReplay.tsx` u GameReview — auto-play ključnih poteza sa Caveat captionima ("ovde sam se uplašio…", "ovo je bio plan")
-- Bez video render-a, čisto DOM animacija → može da se snimi screen-om
-
-### 8. Cleanup & polish
-- Dodati `OpeningSEO` rutu u `App.tsx`
-- Dodati Spectate Hero i Weekly Recap mount
-- Footer link na `/opening/sicilian-defense` (jedan primer za SEO crawl)
+### 3. Bez backend / business logic promena
+- Stripe, RPC `get_donation_progress`, donation flow — ništa se ne dira.
+- Nema novih ruta, edge funkcija, ni migracija.
 
 ## Tehnički detalji
 
-- **Migracije**: nema novih tabela; `referrals` i `user_daily_streaks` već postoje
-- **Edge function**: 1 nova (`daily-streak-tick`)
-- **pg_cron**: 1 schedule, kroz `supabase--insert` (ne migration)
-- **Brand policy**: nigde nema konkurenata; sve SEO copy je original
-- **Integrity**: Spectate Hero NE renderuje fake partije — sakriva se ako nema live
+**Files:**
+- ✏️ `src/App.tsx` — ukloniti import + mount `TheDoorButton`.
+- 🗑️ `src/components/TheDoorButton.tsx` — obrisati.
+- ➕ `src/components/HomeDonationTopStrip.tsx` — nova komponenta.
+- ✏️ `src/pages/Index.tsx` — montirati `<HomeDonationTopStrip />` kao prvi child u root fragmentu, pre `<Navbar />`.
 
-## Šta NIJE u planu (već urađeno ili odbijeno)
-- Monetizacija (samo donacije, potvrđeno)
-- Email recap (zamenjeno in-app modalom — brže, bez infra)
-- MP4 export (zamenjeno DOM replay-em)
+**Dismiss logika:**
+```ts
+const KEY = "mc:donate-top:dismissed-until";
+const until = Number(localStorage.getItem(KEY) || 0);
+if (Date.now() < until) return null;
+// on dismiss: localStorage.setItem(KEY, String(Date.now() + 7*864e5));
+```
 
-Reci "ok" pa krećem.
+**Hide kad je cilj ispunjen:** ako `pct >= 100`, sakrij traku (cilj postignut → ne davimo posetioca).
