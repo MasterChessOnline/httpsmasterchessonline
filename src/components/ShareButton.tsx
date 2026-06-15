@@ -1,96 +1,148 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import {
+  Share2,
+  Link as LinkIcon,
+  MessageCircle,
+  Send,
+  Facebook,
+  Twitter,
+  Check,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Share2, Copy, Check } from "lucide-react";
-import { toast } from "sonner";
 
 interface ShareButtonProps {
-  url: string;
-  title: string;
+  url?: string;
+  title?: string;
   text?: string;
-  size?: "sm" | "default";
-  variant?: "default" | "outline" | "ghost" | "secondary";
-  label?: string;
+  variant?: "default" | "outline" | "ghost" | "gold";
+  size?: "sm" | "default" | "lg";
+  className?: string;
+  showLabel?: boolean;
 }
 
-/**
- * Universal share button — copy link + X / Reddit / WhatsApp / Telegram.
- * Reusable across games, openings, mates, profiles, articles.
- */
 export default function ShareButton({
-  url,
-  title,
-  text,
-  size = "sm",
-  variant = "outline",
-  label = "Share",
+  url = typeof window !== "undefined" ? window.location.href : "https://masterchess.live",
+  title = "MasterChess",
+  text = "Join me on MasterChess for free online chess!",
+  variant = "gold",
+  size = "default",
+  className = "",
+  showLabel = true,
 }: ShareButtonProps) {
+  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const absoluteUrl = url.startsWith("http") ? url : `${window.location.origin}${url}`;
-  const shareText = text || title;
 
-  const tryNativeShare = async () => {
-    if (typeof navigator !== "undefined" && (navigator as Navigator & { share?: (data: ShareData) => Promise<void> }).share) {
+  const shareData = { title, text, url };
+
+  const handleNativeShare = useCallback(async () => {
+    if (navigator.share) {
       try {
-        await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({ title, text: shareText, url: absoluteUrl });
-        return true;
+        await navigator.share(shareData);
+        return;
       } catch {
-        return false;
+        // user cancelled
       }
     }
-    return false;
-  };
+    setOpen(true);
+  }, [shareData]);
 
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(absoluteUrl);
+  const copyLink = useCallback(() => {
+    navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
-      toast.success("Link copied!");
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      toast.error("Failed to copy");
-    }
-  };
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [url]);
 
-  const targets: { name: string; href: string }[] = [
-    { name: "X / Twitter", href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(absoluteUrl)}` },
-    { name: "Reddit", href: `https://www.reddit.com/submit?url=${encodeURIComponent(absoluteUrl)}&title=${encodeURIComponent(title)}` },
-    { name: "WhatsApp", href: `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${absoluteUrl}`)}` },
-    { name: "Telegram", href: `https://t.me/share/url?url=${encodeURIComponent(absoluteUrl)}&text=${encodeURIComponent(shareText)}` },
-    { name: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(absoluteUrl)}` },
+  const shareLinks = [
+    {
+      name: "WhatsApp",
+      icon: MessageCircle,
+      href: `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`,
+      color: "bg-green-500 hover:bg-green-400",
+    },
+    {
+      name: "Telegram",
+      icon: Send,
+      href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+      color: "bg-sky-500 hover:bg-sky-400",
+    },
+    {
+      name: "Twitter / X",
+      icon: Twitter,
+      href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      color: "bg-zinc-800 hover:bg-zinc-700",
+    },
+    {
+      name: "Facebook",
+      icon: Facebook,
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      color: "bg-blue-600 hover:bg-blue-500",
+    },
   ];
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          size={size}
-          variant={variant}
-          onClick={async (e) => {
-            // On mobile prefer native share sheet
-            if (await tryNativeShare()) {
-              e.preventDefault();
-            }
-          }}
-          className="gap-2"
-        >
-          <Share2 className="h-4 w-4" />
-          {label}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuItem onClick={copyLink} className="gap-2">
-          {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
-          {copied ? "Copied" : "Copy link"}
-        </DropdownMenuItem>
-        {targets.map((t) => (
-          <DropdownMenuItem key={t.name} asChild>
-            <a href={t.href} target="_blank" rel="noopener noreferrer">
-              Share on {t.name}
-            </a>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="relative inline-block">
+      <Button
+        variant={variant === "gold" ? "default" : variant}
+        size={size}
+        className={`${
+          variant === "gold"
+            ? "bg-yellow-500 hover:bg-yellow-400 text-black font-semibold"
+            : ""
+        } ${className}`}
+        onClick={handleNativeShare}
+      >
+        <Share2 className="w-4 h-4 mr-2" />
+        {showLabel && "Share"}
+      </Button>
+
+      {open && (
+        <div className="absolute z-50 mt-2 right-0 w-72 rounded-xl border border-yellow-500/20 bg-[#1a1a1e] shadow-2xl shadow-black/50 p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-white">Share</span>
+            <button
+              onClick={() => setOpen(false)}
+              className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
+            >
+              <X className="w-3 h-3 text-zinc-400" />
+            </button>
+          </div>
+
+          {/* Copy link */}
+          <button
+            onClick={copyLink}
+            className="w-full flex items-center gap-3 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 transition-colors mb-3 group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+              {copied ? (
+                <Check className="w-4 h-4 text-green-400" />
+              ) : (
+                <LinkIcon className="w-4 h-4 text-yellow-500" />
+              )}
+            </div>
+            <span className="text-sm text-zinc-300 group-hover:text-white transition-colors">
+              {copied ? "Copied!" : "Copy link"}
+            </span>
+          </button>
+
+          {/* Social buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            {shareLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-2 p-2.5 rounded-lg ${link.color} text-white text-xs font-medium transition-transform hover:scale-105`}
+              >
+                <link.icon className="w-4 h-4" />
+                {link.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
