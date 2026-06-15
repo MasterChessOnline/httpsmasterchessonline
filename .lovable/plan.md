@@ -1,53 +1,58 @@
-# Plan: Reviews na Google + više linkova ka sajtu
+# Plan: 5 Viral Growth Features
 
-Cilj: **prave zvezdice + ime usera** vidljive na Google rich-snippet rezultatima, i što više backlinkova ka sajtu sa interneta.
+Implementiram svih 5 predloženih feature-a redosledom po ROI-u.
 
-## 1. Google rich-snippets za review-e (zvezdice u SERP-u)
-- **Per-review JSON-LD** — u `SiteRatingJsonLd.tsx` dodati listu pojedinačnih `Review` objekata (sa `author.name`, `reviewRating`, `reviewBody`, `datePublished`) pored postojećeg `AggregateRating`. Google traži oba da bi prikazao zvezdice + ime ispod linka.
-- **Cap na 20 najnovijih review-a** sa komentarom (Google ignoriše prazne).
-- **Verifikacija**: posle deploy-a — Google Rich Results Test na `masterchess.live`.
+## 1. Referral System
+- **DB:** `referrals` tabela već postoji (vidim u shemi) — proveriću kolone i dopuniti ako treba (inviter_id, invitee_id, code, reward_claimed, created_at)
+- **Route:** `/invite` — generiše unique link `?ref=CODE`, prikazuje stats (pozvani, claimed coins)
+- **Logic:** Edge function `claim-referral` — dodaje 100 coina i inviteru i invitee-ju kad invitee odigra prvu partiju
+- **Badge:** "Recruiter" badge nakon 3 uspešna referrala
+- **UI:** Card na homepage-u "Pozovi prijatelja → 100 coina oboje"
 
-## 2. SiteRating UX — koristiti polja koja već postoje u bazi
-- **`title`** kolona (postoji, prazna) → dodati input "Headline" iznad teksta, prikazati kao bold u listi
-- **`like_count` / `love_count` / `helpful_count`** → dodati reakcije pored svakog review-a (👍 / ❤️ / 🎯) koristeći postojeću `site_review_reactions` tabelu
-- **"Was this helpful?"** sortiranje — najkorisniji review-i na vrhu
+## 2. Global Leaderboard on Homepage
+- **Component:** `<GlobalLeaderboard />` sa 3 tab-a (Top Rating / Most Active / Rising Stars)
+- **Edge function:** `leaderboard-cache` — 5-min cache, vraća top 10 po kategoriji
+- **UI:** "Your Rank: #142" za logovane korisnike, klik na ime → profil
+- **Mount:** Homepage ispod hero sekcije
 
-## 3. Backlink / Distribution Pack
-Da bi linkovi ka sajtu eksplodirali po internetu:
+## 3. Personality Quiz
+- **DB migration:** dodati `chess_personality` kolonu u `profiles`, kreirati `quiz_results` tabelu
+- **Route:** `/personality-quiz` — 5 pitanja, 4 tipa (Aggressive Hawk, Positional Python, Tactical Tiger, Solid Tortoise)
+- **Share card:** kao BeatNikolaShareCard — generiše PNG za WhatsApp/X/IG
+- **Badge:** Personality badge na profilu
 
-- **`/badge` ruta** — javna stranica gde svako kopira HTML embed:
-  ```html
-  <a href="https://masterchess.live">
-    <img src="https://masterchess.live/api/badge.svg" alt="Rated 4.8 on MasterChess"/>
-  </a>
-  ```
-  → svaki streamer/bloger koji embeduje = jedan backlink. SVG se generiše real-time edge funkcijom sa trenutnim ratingom.
-- **Edge funkcija `rating-badge`** vraća dinamični SVG (gold zvezdice + broj) — caching 1h.
-- **"Share MasterChess" footer blok** sa 8 kanala: WhatsApp, X, Telegram, Reddit, Facebook, LinkedIn, Email, Copy link. Postavlja se ispod `SiteRating` + u `Footer.tsx`.
-- **"Embed na svoj sajt"** dugme pored share-a → otvara `/badge`.
+## 4. Live Spectate
+- **Route:** `/spectate` — lista trenutno aktivnih `online_games` (status='in_progress')
+- **Detail:** `/spectate/:gameId` — Realtime subscribe na `online_game_moves`, anonimno gledanje
+- **UI:** Spectator count, live chat (reuse `game_messages` ili novi `spectator_chat`)
+- **Homepage card:** "Watch Live Games (12 active)"
 
-## 4. IndexNow + Sitemap nudge
-- `public/indexnow-key.txt` već postoji → dodati lightweight POST u IndexNow API kad se kreira novi review (preko edge funkcije) da Google brže refresh-uje rating
-- Dodati `/badge` u `sitemap.xml`
+## 5. Interactive Onboarding Wizard
+- **Component:** `<OnboardingWizard />` — 3 koraka (skill level → favorite opening → invite friend)
+- **Trigger:** prikazuje se jednom za nove korisnike (`profiles.onboarding_completed=false`)
+- **Save:** `profiles.skill_level`, `profiles.favorite_opening`, `profiles.onboarding_completed`
+- **Post-wizard:** redirect na personalizovane preporuke (lessons + bot match)
 
-## 5. SEO discovery
-- Trigger `seo--trigger_scan` posle implementacije da scanner vidi nove Review schema-e
-- Pokrenuti rescan kad sajt ima ≥10 review-a (rich snippet eligibility threshold)
+## Tehnički detalji
+- **Nove tabele:** `quiz_results` (user_id, personality_type, scores jsonb)
+- **Profili — nove kolone:** `chess_personality`, `skill_level`, `favorite_opening`, `onboarding_completed`
+- **Nove rute:** `/invite`, `/spectate`, `/spectate/:gameId`, `/personality-quiz`, `/leaderboard`
+- **Edge functions:** `claim-referral`, `leaderboard-cache`
+- **Nove komponente:** `GlobalLeaderboard`, `OnboardingWizard`, `PersonalityQuiz`, `PersonalityShareCard`, `SpectateList`, `SpectateRoom`, `ReferralCard`
+- **Nav update:** dodati `/spectate`, `/leaderboard`, `/personality-quiz` u Command Palette i Header
 
----
+## SEO benefit
+- `/leaderboard` i `/personality-quiz` su nove indeksabilne stranice
+- Share card-ovi → backlinks sa WhatsApp/X/Reddit
+- `/spectate` povećava dwell time
 
-## Tehnički obim
-- **1 nova edge funkcija**: `rating-badge` (vraća SVG, CORS, cache header)
-- **1 nova ruta**: `/badge` (embed copy generator + live preview)
-- **3 izmene komponenti**: `SiteRating.tsx` (title field + reactions), `SiteRatingJsonLd.tsx` (Review[]), `Footer.tsx` (Share strip)
-- **1 nova komponenta**: `ShareSiteStrip.tsx`
-- **Sitemap**: dodati `/badge` URL
-- 0 novih tabela (sve već postoji)
+## Redosled implementacije
+1. DB migracija (sve tabele/kolone odjednom)
+2. Referral system + homepage card
+3. Global Leaderboard
+4. Personality Quiz + share card
+5. Live Spectate
+6. Onboarding Wizard
+7. Update Command Palette + Header + Footer
 
-## Šta NE radim
-- ❌ Ne pravim fake review-e ili lažne zvezdice (constraint: zero fake engagement)
-- ❌ Ne kupujem backlinkove — samo organic distribution tools
-
----
-
-Krećem odmah kad odobriš.
+Da li da krenem?

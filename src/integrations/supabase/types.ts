@@ -1535,6 +1535,7 @@ export type Database = {
           created_at: string
           current_game_id: string | null
           display_name: string | null
+          favorite_opening: string | null
           favorite_openings: string[] | null
           followers_count: number
           following_count: number
@@ -1550,10 +1551,12 @@ export type Database = {
           login_streak_best: number
           loss_streak: number
           master_coins: number
+          onboarding_completed: boolean
           peak_rating: number
           profile_banner: string | null
           push_notifications_enabled: boolean
           rating: number
+          skill_level: string | null
           total_xp: number
           updated_at: string
           user_id: string
@@ -1578,6 +1581,7 @@ export type Database = {
           created_at?: string
           current_game_id?: string | null
           display_name?: string | null
+          favorite_opening?: string | null
           favorite_openings?: string[] | null
           followers_count?: number
           following_count?: number
@@ -1593,10 +1597,12 @@ export type Database = {
           login_streak_best?: number
           loss_streak?: number
           master_coins?: number
+          onboarding_completed?: boolean
           peak_rating?: number
           profile_banner?: string | null
           push_notifications_enabled?: boolean
           rating?: number
+          skill_level?: string | null
           total_xp?: number
           updated_at?: string
           user_id: string
@@ -1621,6 +1627,7 @@ export type Database = {
           created_at?: string
           current_game_id?: string | null
           display_name?: string | null
+          favorite_opening?: string | null
           favorite_openings?: string[] | null
           followers_count?: number
           following_count?: number
@@ -1636,10 +1643,12 @@ export type Database = {
           login_streak_best?: number
           loss_streak?: number
           master_coins?: number
+          onboarding_completed?: boolean
           peak_rating?: number
           profile_banner?: string | null
           push_notifications_enabled?: boolean
           rating?: number
+          skill_level?: string | null
           total_xp?: number
           updated_at?: string
           user_id?: string
@@ -3162,6 +3171,7 @@ export type Database = {
           created_at: string
           current_game_id: string | null
           display_name: string | null
+          favorite_opening: string | null
           favorite_openings: string[] | null
           followers_count: number
           following_count: number
@@ -3177,10 +3187,12 @@ export type Database = {
           login_streak_best: number
           loss_streak: number
           master_coins: number
+          onboarding_completed: boolean
           peak_rating: number
           profile_banner: string | null
           push_notifications_enabled: boolean
           rating: number
+          skill_level: string | null
           total_xp: number
           updated_at: string
           user_id: string
