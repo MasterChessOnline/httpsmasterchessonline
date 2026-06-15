@@ -62,6 +62,7 @@ const Topics = lazy(() => import("./pages/Topics"));
 const SahOnline = lazy(() => import("./pages/SahOnline"));
 const UtmBuilder = lazy(() => import("./pages/UtmBuilder"));
 const LocationPage = lazy(() => import("./pages/Location"));
+const Promo = lazy(() => import("./pages/Promo"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
@@ -240,6 +241,7 @@ function AnimatedRoutes() {
           <Route path="/sah-online" element={<SahOnline />} />
           <Route path="/utm" element={<UtmBuilder />} />
           <Route path="/location" element={<LocationPage />} />
+          <Route path="/promo" element={<Promo />} />
           <Route path="/resources" element={<Navigate to="/" replace />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
