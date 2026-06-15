@@ -81,7 +81,7 @@ export default function Promo() {
         <section className="rounded-2xl border border-yellow-500/10 bg-[#121216] p-6 md:p-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-              <LinkIcon className="w-5 h-5 text-yellow-500" />
+              <Link2 className="w-5 h-5 text-yellow-500" />
             </div>
             <h2 className="text-xl font-bold">Your Referral Link</h2>
           </div>
