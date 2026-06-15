@@ -875,6 +875,19 @@ const PlayOnline = () => {
               </span>
             </div>
           )}
+          {/* Draw offer banner — focus mode, directly above board */}
+          {drawOfferedByOpponent && !isGameOver && (
+            <div className="flex items-center justify-between gap-2 rounded-lg border-2 border-primary bg-primary/15 backdrop-blur-sm px-3 py-2 mb-2 shadow-lg shadow-primary/20 animate-in fade-in slide-in-from-top-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <Handshake className="h-4 w-4 text-primary shrink-0 animate-pulse" />
+                <span className="text-sm font-semibold text-primary truncate">Opponent offers a draw</span>
+              </div>
+              <div className="flex gap-1.5 shrink-0">
+                <Button size="sm" variant="default" className="h-7 px-3 text-xs" onClick={acceptDraw}>Accept</Button>
+                <Button size="sm" variant="outline" className="h-7 px-3 text-xs" onClick={declineDraw}>Decline</Button>
+              </div>
+            </div>
+          )}
           <ChessBoard
             game={game}
             flipped={boardFlipped}
