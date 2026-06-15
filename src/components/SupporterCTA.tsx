@@ -3,6 +3,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, Coffee, Sparkles, Crown } from "lucide-react";
+import DonationProgressBar from "@/components/DonationProgressBar";
 
 const QUICK_TIPS = [
   { amount: 3, label: "Coffee", icon: Coffee },
@@ -40,6 +41,11 @@ export default function SupporterCTA() {
             site helped you, tip whatever feels right — every dollar goes to
             servers and new features.
           </p>
+
+          {/* Live community progress */}
+          <DonationProgressBar variant="card" />
+
+
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
             {QUICK_TIPS.map((t) => {

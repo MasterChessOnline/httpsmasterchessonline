@@ -3,6 +3,7 @@ import { Crown, Instagram, Youtube, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import ShareSiteStrip from "@/components/ShareSiteStrip";
+import DonationProgressBar from "@/components/DonationProgressBar";
 
 const socialLinks = [
   { icon: Instagram, href: "https://www.instagram.com/masterchess.live", label: "Instagram", color: "hover:text-pink-400" },
@@ -89,6 +90,10 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="mb-6 max-w-md mx-auto">
+        <DonationProgressBar variant="inline" />
       </div>
 
       <ShareSiteStrip />
