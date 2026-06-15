@@ -342,6 +342,7 @@ const App = () => (
             <ExitIntentModal />
             <OnboardingWizard />
             <StreakFlexController />
+            <FloatingShareButton />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
