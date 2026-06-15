@@ -14,6 +14,8 @@ import { ELO_TIERS } from "../src/data/eloTiers";
 import { FAMOUS_GAMES } from "../src/data/famousGames";
 import { GRANDMASTERS } from "../src/data/grandmasters";
 import { SEO_CITIES } from "../src/lib/seo-cities";
+import { SR_LANDINGS } from "../src/lib/seo-landings-sr";
+import { EN_LANDINGS } from "../src/lib/seo-landings-en";
 
 const BASE_URL = "https://masterchess.live";
 
