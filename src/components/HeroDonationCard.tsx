@@ -74,14 +74,18 @@ export default function HeroDonationCard() {
         </div>
 
         {/* Numbers row */}
-        <div className="relative z-10 flex items-end justify-between gap-2 mb-2">
+        <div className="relative z-10 grid grid-cols-3 gap-2 mb-3">
           <div>
             <div className="font-display text-2xl sm:text-3xl font-bold text-amber-100 tabular-nums leading-none">
               {cur}{fmt(raised)}
             </div>
-            <div className="text-[10px] sm:text-xs text-amber-200/60 mt-1">
-              raised of {cur}{fmt(target)} goal
+            <div className="text-[10px] sm:text-xs text-amber-200/60 mt-1">raised</div>
+          </div>
+          <div className="text-center border-x border-amber-500/20 px-1">
+            <div className="font-display text-xl sm:text-2xl font-bold text-amber-300 tabular-nums leading-none">
+              {cur}{fmt(Math.max(0, target - raised))}
             </div>
+            <div className="text-[10px] sm:text-xs text-amber-200/60 mt-1">still needed</div>
           </div>
           <div className="text-right">
             <div className="font-display text-xl sm:text-2xl font-bold text-amber-300 tabular-nums leading-none">
@@ -113,10 +117,10 @@ export default function HeroDonationCard() {
           </div>
         </div>
 
-        {/* CTA + mobile donor count */}
+        {/* CTA + tagline */}
         <div className="relative z-10 flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[11px] sm:text-xs text-amber-200/70 max-w-[60%]">
-            Every donation keeps the site <span className="text-amber-300 font-semibold">free & ad-free</span>.
+          <p className="text-[11px] sm:text-xs text-amber-200/70 max-w-[60%] leading-relaxed">
+            100% player-funded. No ads, no paywalls — just pure chess.
           </p>
           <Link
             to="/supporter"
