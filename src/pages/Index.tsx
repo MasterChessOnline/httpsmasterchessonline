@@ -41,7 +41,8 @@ import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
 
 import ParallaxCard from "@/components/ParallaxCard";
-import ChessUniverseBackground from "@/components/ChessUniverseBackground";
+// Heavy animated background — desktop only, lazy-loaded to keep mobile bundle/CPU light.
+const ChessUniverseBackground = React.lazy(() => import("@/components/ChessUniverseBackground"));
 import DailyMissions from "@/components/DailyMissions";
 import DailyMysteryBox from "@/components/DailyMysteryBox";
 import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
@@ -224,7 +225,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <ChessUniverseBackground />
+      {/* Heavy animated bg: skip entirely on mobile/low-end to protect LCP & INP. */}
+      {allowHeavy && (
+        <React.Suspense fallback={null}>
+          <ChessUniverseBackground />
+        </React.Suspense>
+      )}
       <Seo
         title={"MasterChess — Play Chess Online, Tournaments & Analysis"}
         description={
@@ -253,8 +259,8 @@ const Index = () => {
             />
           </motion.div>
           <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
-          {/* Scan-line futuristic overlay */}
-          <div className="absolute inset-0 scan-line pointer-events-none" />
+          {/* Scan-line futuristic overlay — desktop only (pure decoration). */}
+          {allowHeavy && <div className="absolute inset-0 scan-line pointer-events-none" />}
 
           <motion.div
             className="container mx-auto max-w-4xl text-center relative z-10 pt-8"
@@ -633,7 +639,7 @@ const Index = () => {
           {/* Performance Snapshot */}
           {user && profile && (
             <SectionHeader title="Your Performance" icon={BarChart3}>
-              <ParallaxCard className="rounded-xl" intensity={4} glowColor="hsl(43 90% 55% / 0.08)">
+              <ParallaxCard className="rounded-xl" intensity={allowHeavy ? 4 : 0} glowColor="hsl(43 90% 55% / 0.08)">
                 <div className="rounded-xl border border-border/30 glass-4d p-5 sm:p-6">
                   <div className="flex flex-col sm:flex-row items-center gap-5">
                     <div className="flex items-center gap-4">
