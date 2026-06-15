@@ -125,6 +125,7 @@ const DevOnlineSim = lazy(() => import("./pages/DevOnlineSim"));
 const ChallengeLink = lazy(() => import("./pages/ChallengeLink"));
 const Puzzles = lazy(() => import("./pages/Puzzles"));
 const BeatBotLanding = lazy(() => import("./pages/BeatBotLanding"));
+const PlayFromCity = lazy(() => import("./pages/PlayFromCity"));
 
 
 // Eager components (used in every page chrome)
