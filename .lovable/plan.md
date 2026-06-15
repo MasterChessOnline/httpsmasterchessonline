@@ -1,104 +1,128 @@
 
-# Plan rasta MasterChess — 14 dana
+# Mega SEO + Promo Sprint — Sve odjednom
 
-Cilj: prvih **100 pravih korisnika** za 2 nedelje. Sve ostalo (turniri, klanovi, ELO ladder) postaje smisleno tek posle toga.
-
----
-
-## DEO 1 — Šta SAJT radi (ja implementiram)
-
-### A. Sakrij prazne sobe (ne briši — sakrij)
-Korisnik ulazi i vidi 0 ljudi → bounce. Rešenje: prazne sobe se ne prikazuju dok nemaš bazu.
-
-- **Battle Royale, Arena, Team Battles, Tournaments, Clubs** → ulaz iza `/more` linka u footeru. Skidaju se iz glavnog menija i sa home-a.
-- **LivePlayerCounter / TrustStrip** kada vraćaju 0 → komponente se **ne renderuju** umesto da pišu "Be the first" (to potvrđuje da je prazno).
-- **Spin Wheel, Chests, Skill Tree, Missions kartice** sa home-a → ostaju kao stranice, ali se sklanjaju iz home grida.
-- Glavni meni: **Play · Puzzles · Learn · Profile · More**. Pet stavki, ne 15.
-
-Gamification ostaje (XP, Battle Pass, ranks) — to je tvoj retention layer.
-
-### B. Win-flow viral (najjači single fix)
-Trenutno: dobiješ partiju → vidi se rezultat → kraj. Nula viralnog izlaza.
-
-Posle svake pobede (vs bot ili human):
-1. **Auto-popup share card** — generisana slika sa: finalna pozicija + tvoj username + rezultat + QR za rematch link. Već postoji `ChessCard` komponenta, samo treba ubaciti u win modal.
-2. **"Challenge your friend" CTA** — kopira `masterchess.live/vs/{username}` link.
-3. **3 dugmeta**: Download image · Share to WhatsApp · Share to Instagram Story.
-
-Ovo je **jedini razlog zašto bi neko od tvojih korisnika prosledio sajt dalje**.
-
-### C. `/vs/{shortcode}` deep link wiring
-`ChallengeLink.tsx` već postoji. Treba:
-- Generisati kratke linkove (`/vs/abc123`) iz Promo/Viral stranica.
-- Landing page = full-screen "Player X challenges you" + Play Now CTA bez signupa (guest mode već postoji).
-- Tracker u Supabase: ko je kliknuo, ko je odigrao — da vidiš šta zaista konvertuje.
-
-### D. Reduktivni home redesign (mini)
-*Memorija kaže "Do NOT redesign Home — user veto"*, pa **ne diram layout**. Samo:
-- Sklanjam prazne live brojače (gore B).
-- Prvi viewport mora imati **1 jasan CTA**: Play Now.
-- DailyChess_12 sekcija ostaje, ali ide ispod fold-a.
-
-### E. SEO landing strane (programmatic)
-- `/beat/{botId}` — već postoji infrastruktura. Generišem 9 stranica (po botu) sa real meta + JSON-LD.
-- `/openings/{slug}/for-beginners` — 20 najpopularnijih otvaranja, jedna stranica svako.
-- `/play-from/{city}` — 30 gradova (Belgrade, Zagreb, Sarajevo, Skopje, Sofia, Bucharest, Athens...). Long-tail "play chess online from {city}".
-
-Sve ide u sitemap, sve ima unique title/description/og.
+Idemo na sve tri ose: srpski/engleski SEO paralelno + sav tehnički polish + share-after-win viral mehanizam. Realan rok: 1 build sesija.
 
 ---
 
-## DEO 2 — Šta TI radiš (2h/dan)
+## A. Srpski/regionalni SEO landing strane
 
-Sajt sam ne dovodi ljude. Distribucija je tvoj posao. Evo egzaktnog rasporeda:
-
-### Dnevno (60 min)
-- **20 min** — 1 Reels/Short (15-30s): brza pobeda, mat u 4, "kako sam pobedio bota X". Cross-post: Instagram + TikTok + YouTube Shorts. Uvek link u biju `masterchess.live`.
-- **20 min** — 1 Reddit komentar/post u r/chess, r/chessbeginners, r/AnarchyChess. NIKAD goli link — daj vrednost.
-- **20 min** — odgovori na DM-ove, komentare, share `/vs/nikola` link u 3 WhatsApp/Discord grupe.
-
-### Nedeljno (60 min ostatka)
-- **1 duži YouTube video** (5-10 min) na DailyChess_12: "How I built a free chess site" ili "Beating 1800 ELO bot live". Link u opisu + pinned komentar.
-- **1 Reddit "Show & Tell" post** u r/SideProject, r/InternetIsBeautiful: "I built a chess site with zero ads, AMA".
-
-### Šta očekivati realno
-- Nedelja 1: ~50 unique posetilaca, 5-10 signupa.
-- Nedelja 2: ~200 unique, 20-30 signupa.
-- Nedelja 4: ako si dosledan, 500+ unique/nedeljno i Google počinje da rangira SEO landing strane.
-
-**Ako ne odradiš svoj deo — sajt sa najboljim featurima na svetu ostaje prazan.** Ovo je matematika, ne mišljenje.
-
----
-
-## Tehnički deo (za implementaciju)
+Sve nove `/sr/` strane sa unique title/description/canonical/hreflang. Targetiraju keywords gde **nema konkurencije** na srpskom/balkanskom Googlu.
 
 ```
-src/components/PostGameWinModal.tsx       (NOVO) auto-popup share card
-src/components/Header.tsx                 reduce nav to 5 items + More dropdown
-src/pages/Index.tsx                       hide empty-state widgets when count=0
-src/components/LivePlayerCounter.tsx      return null if value === 0
-src/pages/ChallengeLink.tsx               polish guest landing
-src/pages/PlayFromCity.tsx                (NOVO) programmatic SEO route
-src/lib/seo-cities.ts                     (NOVO) city list + metadata
-src/pages/BeatBotLanding.tsx              ensure all 9 bots have full meta
-scripts/generate-sitemap.ts               add /play-from/* and /beat/* + /openings/*/for-beginners
-supabase migration: challenge_link_clicks (id, code, ip_hash, clicked_at, converted)
+/sr/sah-online                       "Šah online besplatno"
+/sr/sah-protiv-prijatelja            "Igraj šah protiv prijatelja preko linka"
+/sr/sah-bez-registracije             "Šah bez registracije — 1 klik"
+/sr/sah-protiv-kompjutera            "Šah protiv kompjutera (9 nivoa)"
+/sr/sah-za-pocetnike                 "Šah za početnike — naučite za 5 min"
+/sr/sah-pravila                      "Pravila šaha — kompletan vodič"
+/sr/sah-otvaranja                    "Najbolja šahovska otvaranja"
+/sr/sahovski-rejting                 "Šahovski ELO rejting kalkulator"
 ```
 
-Bez novih backend feature-a, bez novih gamification sistema, bez novih stranica izvan SEO landing strana. Disciplina = preživljavanje.
+Sve linkovane iz footera (sr-Latn sekcija), sve u sitemap, sve sa `<link rel="alternate" hreflang="sr">` na engleskim parnjacima.
+
+## B. Engleske "for X" landing strane
+
+```
+/chess-for-kids                      "Free Chess for Kids — Safe, Ad-Free"
+/chess-for-beginners                 "Learn Chess from Zero — Free Lessons"
+/chess-no-signup                     "Play Chess Online — No Signup Required"
+/chess-no-ads                        "Free Chess with No Ads, No Tracking"
+/play-chess-vs-friend                "Play Chess vs Friend via Link (1 click)"
+/free-online-chess                   "Free Online Chess — 2026"
+```
+
+## C. Openings "for beginners / counter" mini-landing
+
+20 najpopularnijih otvaranja → `/openings/{slug}/for-beginners`. Već imamo `OPENING_SEO` data, samo treba route + template. Svaka strana: 3 ključna poteza + 2 zamke + CTA "Try in trainer".
+
+## D. Tehnički SEO polish (utiče na SVE strane)
+
+1. **FAQ schema na home** — JSON-LD `FAQPage` sa 6-8 najčešćih pitanja ("Is MasterChess free?", "Do I need to sign up?", "Can I play against friends?"). Google često prikazuje FAQ rich snippet.
+2. **hreflang tagovi** — svaki par EN/SR ima `<link rel="alternate" hreflang>`.
+3. **Internal linking footer** — masivni footer sa 60+ linkova na sve key strane (Google tretira footer linkove kao site-wide signal).
+4. **`sameAs` u Organization JSON-LD** — Instagram, TikTok, YouTube, GitHub, ProductHunt profili (svi koji postoje).
+5. **Breadcrumbs JSON-LD** na svakoj kategorijskoj strani (openings, bots, mates).
+6. **Image alt audit** — `<img>` bez alt-a dobijaju default smislen alt (sajt-wide grep + popravka).
+7. **WebSite SearchAction schema** — Google može prikazati search box ispod našeg rezultata.
+
+## E. Share-after-win — slika sa pozicijom + QR
+
+Trenutni share blok je tekstualni (već uradili). Nadograđujem:
+
+- **Canvas-generated PNG** sa: finalna pozicija + tvoj username + rezultat + ELO + "Beat me at masterchess.live/vs/{slug}" + QR kod (qrcode npm paket, mali).
+- Download dugme (sačuva sliku) + native `navigator.share()` na mobile (otvori IG/WhatsApp/etc) + Instagram Story link (`instagram://story-camera` deep link sa stickerom).
+- Ovo je **jedini** razlog zbog kog bi neko prosledio sajt dalje van usmenog deljenja.
+
+## F. Brand authority outreach (lista za TEBE)
+
+Pripremim ti listu sa **30 mesta** gde da postaviš link u sledećih 7 dana. Stranica `/promotion-checklist` (private, samo za tebe) sa kopirajućim postovima:
+
+- Reddit r/chess, r/SideProject, r/InternetIsBeautiful, r/AnarchyChess, r/chessbeginners — pre-napisani postovi
+- ProductHunt — pre-napisana launch kopija
+- HackerNews "Show HN" — naslov + 3 kometara
+- Wikipedia stub draft (treba ti 3 reliable source — ja ti dam strukturu)
+- IndieHackers, DEV.to, Medium — gotovi članci za copy/paste
+- Quora 10 pitanja sa pre-napisanim odgovorima
+- Chess Discord serveri lista (top 20)
+
+---
+
+## Tehnički deo
+
+```
+src/pages/sr/SahOnline.tsx                  (NOVO)
+src/pages/sr/SahProtivPrijatelja.tsx        (NOVO)
+src/pages/sr/SahBezRegistracije.tsx         (NOVO)
+src/pages/sr/SahProtivKompjutera.tsx        (NOVO)
+src/pages/sr/SahZaPocetnike.tsx             (NOVO)
+src/pages/sr/SahPravila.tsx                 (NOVO)
+src/pages/sr/SahOtvaranja.tsx               (NOVO)
+src/pages/sr/SahovskiRejting.tsx            (NOVO)
+
+src/pages/landing/ChessForKids.tsx          (NOVO)
+src/pages/landing/ChessForBeginners.tsx     (NOVO)
+src/pages/landing/ChessNoSignup.tsx         (NOVO)
+src/pages/landing/ChessNoAds.tsx            (NOVO)
+src/pages/landing/PlayChessVsFriend.tsx     (NOVO)
+src/pages/landing/FreeOnlineChess.tsx       (NOVO)
+
+src/pages/OpeningForBeginners.tsx           (NOVO — /openings/:slug/for-beginners)
+src/lib/seo-faq.ts                          (NOVO — FAQ data)
+src/components/HomeFaqSection.tsx           (NOVO — FAQPage + visible accordion)
+src/components/SeoMegaFooter.tsx            (NOVO — 60+ link footer)
+src/components/SharePositionCard.tsx        (NOVO — canvas PNG generator + QR + share)
+
+src/App.tsx                                  + 16 novih ruta
+scripts/generate-sitemap.ts                  + sve nove strane u sitemap
+index.html                                   + sameAs[] u Organization, WebSite SearchAction
+src/components/MatchResultModal.tsx          ucitaj SharePositionCard umesto tekst-only
+
+src/pages/PromotionChecklist.tsx            (NOVO — privatna /promo-checklist sa svim copy-paste materijalom)
+
+bun add qrcode @types/qrcode
+```
+
+## Procene
+
+- ~16 novih SEO strana → 6-12 nedelja do prvih top-10 rangiranja za pojedine long-tail
+- FAQ + breadcrumbs + sameAs → moguć **rich snippet** za 2-4 nedelje
+- Canvas share card → 5-15% korisnika koji pobede će prosediti (industry standard za share-after-win)
+- Promotion checklist → tvojih 7 dana × 30 platformi = realan šut na ProductHunt #1 daily + 5-10 backlink-ova trajno
 
 ---
 
 ## Šta NE radim (svesno)
 
-- Ne diram layout home-a (tvoj veto).
-- Ne brišem Battle Royale/klanove (samo sakrivam).
-- Ne dodajem phantom bot-fill (krši "zero fake engagement").
-- Ne pravim plaćene reklame setup (Google Ads bacanje love dok cold-start nije rešen).
-- Ne pravim još jedan progression sistem.
+- Ne ciljam "chess" keyword direktno — nemoguće.
+- Ne pravim fake reviews / fake user counts.
+- Ne diram home layout (tvoj veto).
+- Ne dodajem nove gamification sisteme.
+- Ne pravim novi feature dok ove SEO/viral baze ne odradi sledećih 4 nedelje.
 
 ---
 
 ## Sledeći korak
 
-Klikni **Implement plan** i krećem sa DEO 1 (skidanje noise-a + win-flow share card + 1 SEO landing tip kao primer). To je nedelja 1. Posle toga merimo realne brojke pre nego što idemo dalje.
+Klikni **Implement plan**. Idem redom: srpski strane → engleski landing → openings → tehnički schema/footer → canvas share card → promotion checklist. Realno 1 build sesija, posle toga ti igraš svoj content posao.
