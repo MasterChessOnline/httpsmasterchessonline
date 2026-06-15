@@ -265,6 +265,7 @@ writeFileSync(resolve("public/sitemap-elo.xml"), buildUrlset(eloEntries));
 writeFileSync(resolve("public/sitemap-famous-games.xml"), buildUrlset(famousGameEntries));
 writeFileSync(resolve("public/sitemap-players.xml"), buildUrlset(playerEntries));
 writeFileSync(resolve("public/sitemap-cities.xml"), buildUrlset(cityEntries));
+writeFileSync(resolve("public/sitemap-landings.xml"), buildUrlset(seoLandingEntries));
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
