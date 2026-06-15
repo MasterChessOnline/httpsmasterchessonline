@@ -165,6 +165,9 @@ export default function LiveActivityFeed() {
 
   const empty = items.length === 0;
 
+  // Hide the entire feed when empty — "Waiting for the next game..." confirms the site looks dead.
+  if (empty) return null;
+
   return (
     <section
       aria-label="Live activity feed"
