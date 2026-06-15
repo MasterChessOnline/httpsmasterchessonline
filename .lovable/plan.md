@@ -1,66 +1,111 @@
+# MasterChess — "Zašto ljudi ne signupuju" Fix Plan
 
-# MasterChess — Brutal Ideas Pack + Mobile Perf Pass
+Dijagnoza po tvojim odgovorima:
+- Sajt je **pretrpan** → casual igrač ne zna gde da klikne
+- **5s rule fail** → hero ne vrišti "klikni i igraj odmah"
+- **Signup deluje kao obaveza** → modal sa "500 coins + Founder badge" + countdown iskače pre nego što je čovek išta odigrao (vidi se u session replay)
+- **Mobilni lag** → 4D efekti, Framer Motion, video embed, parallax — sve se mountuje na home
 
-Dve faze. Faza A je glavna — biraš koje ideje gradimo iz svakog koša (preporuka: top 1–2 po košu za prvi sprint). Faza B sređuje lag na mobilnoj početnoj posle toga.
-
----
-
-## FAZA A — 16 brutalnih ideja (4 koša × 4)
-
-### 🔥 Koš 1 — Viral / Social Hooks
-1. **Auto-replay highlight reel (15s MP4)** — posle svake pobede, server-side render kratkog klipa partije: tvoja avatar+ELO, ključni potez (clutch moment iz `turning-points`), end-board sa "Checkmate!" overlay-em, MasterChess vodeni žig. Dugme **"Share to IG / TikTok / WhatsApp"**. Svaki share = jedan dolazni klik = viral loop.
-2. **"Brag Card" generator** — svaki igrač dobija deljivu sliku 1080×1350 sa: avatar, rank, win-streak vatra, top-3 opening, "Beat me at masterchess.live/@username". OG image isto se renderuje za link preview u DM-ovima.
-3. **Streak Flex Mode** — kad pređeš 5/10/25/50 wina u nizu, full-screen takeover sa konfetama + auto-share modal. Pozadina menja boju sa rastom streak-a (bronza → ametist → sun).
-4. **Public roast feed (`/roast`)** — javna lista najgorih blunder-a dana (anonimno opcionalno), sa "react" emojima. Tvoj blunder može da postane meme. Nikola komentariše top-3 dnevno.
-
-### ⚔️ Koš 2 — Kompetitivni mod
-5. **Weekly Ladder Season (7-day reset)** — svake nedelje rating se zamrzava u "Season ELO". Top 100 vidi se na `/season`, top 10 dobija profile glow + permanent badge. Brutalno za vraćanje korisnika nedeljom.
-6. **Rivalry System** — kad izgubiš od istog igrača 2x, automatski ti se otvara "Rivalry" kartica: head-to-head skor, last 5 partija, dugme **"Demand Rematch"** koje šalje notifikaciju. Stvara lične priče.
-7. **Daily King (24h champion)** — igrač sa najviše net-rating gain-a u zadnja 24h dobija krunu pored imena svuda na sajtu sutradan. Jedan kralj, ceo sajt zna ko je.
-8. **Draft Arena** — pre meča oba igrača "ban-uju" po 1 otvaranje (Sicilian, Italian, itd). Filtruje opening explorer. Brutalno za sadržaj — niko drugi to nema.
-
-### 💰 Koš 3 — Monetizacija
-9. **MasterChess Pro (€4.99/mo)** — bez reklama, dual-rating history grafovi, neograničeno AI review partija, ekskluzivne piece-sets/board-themes, profil sa "PRO" goldom, Pro-only ladder.
-10. **Coin Shop 2.0 — Animated Avatars** — kupuješ Lottie/WebM avatar koji se vrti, vatra oko avatara, holographic frame. Najjača kozmetika u chess svetu.
-11. **Gifted Pro** — ti plaćaš Pro za prijatelja, oboje dobijete "Patron" badge na profilima 30 dana. Twitch-style social monetizacija.
-12. **Tournament Entry Tiers** — Free turniri ostaju, plus dodaj 100/500/1000 coin entry turnire sa prize pulom (winner uzima 70% pula). Coins se kupuju ili zarađuju.
-
-### 🤖 Koš 4 — AI Nikola layer
-13. **Nikola's Move-of-the-Day** — svako jutro AI generiše kratak (Nikolinim glasom, 13 god, ENG) komentar najboljeg poteza iz juče odigranih partija na sajtu. Pojavljuje se na home + push notifikacija.
-14. **Post-Game Voice Recap (15–20s)** — posle partije, jedan klik → AI generiše tekstualni recap u Nikolinom glasu ("Yo, that bishop sac was insane but you missed Nf6+ on move 22"). Opciono TTS (ElevenLabs) sa Nikolinim klonom.
-15. **AI Coach Chat (Pro feature)** — chat sa "AI Nikola" iz pozicije bilo koje partije iz tvoje istorije. Pita te "zašto si igrao Qd2?", objašnjava planove. Lovable AI Gateway, Gemini Flash.
-16. **Personalized "Style Twin"** — AI analizira tvojih 20 zadnjih partija i kaže "Igraš kao Tal" / "Igraš kao Karpov", sa procentom. Deljiva kartica (loop nazad u Koš 1).
+Strategija: **Casual igrač mora da odigra partiju za <10s bez signup-a. Signup tek POSLE prve pobede, kao reward, ne kao gate.**
 
 ---
 
-## FAZA B — Mobile homepage perf pass (posle Faze A)
+## Sprint 1 — "5 Second Test" Home (cleanup + hook)
 
-Cilj: LCP < 2.5s, INP < 200ms na mid-range Android (4G). Plan koraka:
+**Cilj:** Telefon korisnik vidi home → za 5s zna šta sajt radi → klikne i igra.
 
-1. **Profile pre fix** — `browser--performance_profile` na `/` u mobilnoj rezoluciji, snimi pravi LCP/INP/long-task baseline.
-2. **Lazy + code-split heavy components** na home:
-   - 4D floating pieces (CSS 3D), mouse-parallax, FounderNote, HumanMargin scribbles, DailyChess_12 video embed, Stream Hub preview.
-   - Sve ispod fold-a → `React.lazy` + IntersectionObserver mount.
-3. **Disable parallax/3D na mobilnom** ispod 768px ili kad `matchMedia('(prefers-reduced-motion)')` ili low-end device (`navigator.deviceMemory <= 4`). Hook `use-device-capability` već postoji — koristi ga.
-4. **Image pipeline** — konvertuj hero/splash u AVIF+WebP preko `vite-imagetools`, dodaj `<link rel="preload" as="image" fetchpriority="high">` za LCP sliku, `loading="lazy"` + `decoding="async"` na sve ostale.
-5. **Framer Motion diet** — zameni `motion.div` sa pure CSS keyframes za dekorativne animacije (zlatni shimmer, glow). Motion ostaje samo za stateful tranzicije.
-6. **Stockfish worker** — NE učitavati na home. Loaduje se tek na `/play/*`. Provera + fix ako se importuje eagerly.
-7. **Realtime/presence subscribe** — odloži za "user interacted" (scroll/click), ne na mount.
-8. **Bundle audit** — `rollup-plugin-visualizer`, identifikuj top-10 najtežih chunk-ova, dynamic import gde god ima smisla.
-9. **Re-profile** posle svake izmene, dokaži poboljšanje brojkama (ne osećajem).
+1. **Novi hero (above-fold, mobile-first):**
+   - Jedna brutalna headline: *"Play Chess. Right Now. No Signup."*
+   - Sub: *"Real humans. Live games. 10 seconds to your first move."*
+   - **JEDNO** džinovsko CTA dugme: **▶ PLAY NOW** (vodi na `/play-guest`, već postoji)
+   - Ispod, mali secondary link: "Login if you have account"
+   - Live broj: *"X people playing right now"* (real, iz `online_games`/`presence`)
+   - NIŠTA drugo above fold. Ni 4D pieces, ni FounderNote, ni video, ni Daily King banner.
+
+2. **Skloni / spusti niže / lazy-load:**
+   - Daily King banner → niže (posle fold)
+   - DailyChess_12 video embed → posle fold, lazy mount (IntersectionObserver)
+   - 4D floating pieces → **isključi na mobile** (<768px) i `prefers-reduced-motion`
+   - HumanMargin scribbles → samo desktop
+   - Stream Hub preview → posle fold, lazy
+   - FounderNote → premestiti na `/about`, ne na home
+
+3. **Navbar diet (mobile):**
+   - Trenutno: previše stavki, color-coded submeniji
+   - Novo (mobile burger): **Play / Learn / Profile / More** (samo 4)
+   - "More" otvara sve ostalo (Tournaments, Battle Royale, Shop, Clubs, Stats, itd)
+   - Desktop ostaje bogatiji ali sa max 5 top-level itema, ostalo u dropdownu
+
+4. **Ubij intruzivni signup modal:**
+   - "500 coins + Founder badge" countdown modal se sada otvara odmah — to BLOKIRA casual igrača
+   - Pravilo: **NIKAD ne prikazivati signup modal pre nego što gost odigra bar 1 partiju**
+   - Trigger: posle prve pobede gosta → "Save your win + claim 500 coins" (kontekstualno, ne random)
 
 ---
 
-## Tehnički okvir (FYI, ne moraš čitati)
+## Sprint 2 — Guest → User Funnel (0 friction signup)
 
-- Sve AI funkcije iz Koša 4 → Supabase Edge Functions + Lovable AI Gateway (Gemini Flash default), bez API ključeva za tebe.
-- Pro tier → Stripe (managed payments), tax handling po pravilima.
-- MP4 render za highlight reel → server-side preko `canvas` + `ffmpeg` u edge runtime ili u dedicated render function.
-- Sezone, ladder, rivalry, daily king → nove tabele + RPC + cron edge func (već imaš pattern iz tournament auto-start).
-- Sve nove tabele dobijaju RLS + GRANT po projektnom standardu.
+**Cilj:** Od "klik na Play Now" do prvog poteza < 10s. Signup posle 1. pobede, ne pre.
+
+1. **`/play-guest` flow refresh:**
+   - Klik na PLAY NOW → odmah matchmaking sa botom (400-800 ELO, casual)
+   - Bez ekrana za izbor time control, bez color picker — samo igra počne (10+0 default)
+   - Gornji desni ugao: mali "Settings" za napredne
+
+2. **Post-game signup reward (kontekstualno):**
+   - Posle 1. pobede gosta: **fullscreen takeover** *"You won! Save this win to your profile + claim 500 coins"*
+   - Jedno dugme: **Continue with Google** (1 click, već imaš handler)
+   - Tiny link: "or email"
+   - Bez "country" / "username" / "display name" — sve to se popunjava posle, progressive profile
+
+3. **Signup forma diet (kad MORA email):**
+   - Trenutna forma: email + password + country + username (+ Google country modal)
+   - Novo: **samo email + password**. Username = auto generated (`Player_xxxxx`), country = auto iz IP, sve menjivo kasnije u Settings
+   - Magic link kao primarna opcija (već postoji), password kao secondary
+
+4. **Sidebar wall za zaključane feature:**
+   - Umesto "moraš da se signupuješ" gate-a, gost vidi sve, ali zaključano sa *"Sign up free to unlock"* — ne blokira eksploraciju
+
+---
+
+## Sprint 3 — Mobile Perf (LCP < 2.5s, INP < 200ms)
+
+1. **Baseline profile** sa `browser--performance_profile` na `/` u mobile viewport
+2. **Code-split & lazy:**
+   - 4D pieces, parallax, FounderNote, HumanMargin, Stream Hub, DailyChess_12 embed, Daily King banner → `React.lazy` + IntersectionObserver mount
+   - Stockfish worker ne sme da se importuje na home (samo `/play/*`)
+3. **`use-device-capability` hook (već postoji):** isključi sve dekorativne animacije na low-end / mobile / reduced-motion
+4. **Image pipeline:** hero kao AVIF + WebP preko `vite-imagetools`, `<link rel="preload" as="image" fetchpriority="high">` za LCP
+5. **Framer Motion diet:** dekorativne animacije (shimmer, glow) → CSS keyframes
+6. **Realtime/presence:** subscribe odložiti za "user interacted" (scroll/click), ne na mount
+7. **Fix React warning:** `fetchPriority` → `fetchpriority` na `<img>` (videim u console logs)
+8. **Re-profile** posle svake izmene, dokaži brojkama
+
+---
+
+## Šta NE menjamo
+
+- Sve postojeće feature i podstranice ostaju (samo se sklanjaju iz fokusa home-a)
+- Nema brisanja koda, samo lazy/sakrij/spusti niže
+- Brand identitet (Gold & Black, Nikola, Caveat font) ostaje — ali ne above fold
+
+---
+
+## Tehnički sažetak (FYI)
+
+```text
+src/pages/Index.tsx          → potpuni rewrite hero-a, lazy mount svega ispod fold
+src/components/Navbar.tsx    → mobile burger: 4 itema + More
+src/pages/PlayGuest.tsx      → instant matchmaking, bez setup ekrana
+src/components/PostWinSignupTakeover.tsx (new) → trigger posle 1. win-a
+src/pages/Signup.tsx         → samo email+password, auto username/country
++ ukloni/odloži:
+  - WelcomeOfferModal (founder badge countdown) → trigger samo posle 1 game-a
+  - 4D / parallax / FounderNote / HumanMargin → desktop only ili lazy
+```
 
 ---
 
 ## Šta sledi
 
-Reci mi **koje ideje hoćeš za prvi sprint** (preporuka: 1 iz svakog koša, npr. **1 + 5 + 9 + 14**) i odmah ulazimo u build. Faza B (perf) ide odmah posle toga.
+Reci samo "kreni" → idemo Sprint 1 prvo (cleanup + hero rewrite), zatim Sprint 2 (funnel), zatim Sprint 3 (perf). Možeš i da kažeš "uradi sve odmah" — biće veliki commit ali sve odjednom.
