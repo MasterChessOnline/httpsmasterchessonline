@@ -271,6 +271,9 @@ function AnimatedRoutes() {
           <Route path="/chests" element={<Chests />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/spin" element={<SpinWheel />} />
+          <Route path="/vs/:code" element={<ChallengeLink />} />
+          <Route path="/puzzles" element={<Puzzles />} />
+          <Route path="/beat/:botId" element={<BeatBotLanding />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
