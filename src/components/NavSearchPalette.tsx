@@ -95,6 +95,8 @@ const ENTRIES: SearchEntry[] = [
   { label: "Performance Rating", href: "/rating-calculator", icon: BarChart3, desc: "Tournament performance rating",   category: "tools", keywords: "performance tournament rating" },
   { label: "Quick ELO Widget",   href: "/chess-tools",       icon: BarChart3, desc: "See rating change in real time",  category: "tools", keywords: "quick elo widget" },
   { label: "Daily Challenge",    href: "/daily-challenge",   icon: Target,    desc: "Today's puzzle challenge",        category: "tools", keywords: "daily challenge puzzle" },
+  { label: "Solve a Puzzle",     href: "/puzzles",           icon: Target,    desc: "Tactical training, free",         category: "tools", keywords: "puzzle tactics solve" },
+  { label: "Support the project", href: "/supporter",        icon: Sparkles,  desc: "Tip & keep MasterChess alive",    category: "tools", keywords: "donate support tip" },
   { label: "Skill Tree",         href: "/skill-tree",        icon: Target,    desc: "Unlock tactics & strategy nodes", category: "tools", keywords: "skill tree improve" },
   { label: "Advanced Stats",     href: "/stats",             icon: BarChart3, desc: "Win rate, streaks, time control", category: "tools", keywords: "stats analytics improve" },
   { label: "1v1 Challenge Link", href: "/challenge",         icon: Swords,    desc: "Shareable challenge link",        category: "tools", keywords: "challenge friend link" },

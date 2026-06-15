@@ -149,10 +149,36 @@ const seoLandingEntries: SitemapEntry[] = [
   })),
 ];
 
-// Daily puzzle hub
+// Daily puzzle hub + every individual puzzle in the curated pool.
+// Each puzzle id is sanitized via the same slug rule as the route handler
+// (strip third-party data-source prefix). Caps at 500 entries — Google
+// indexing budget — sampled across difficulty buckets for variety.
+import { readFileSync as _readFileSync } from "fs";
+type RawPuzzle = { id: string; bucket: string; difficulty: string; rating: number };
+let puzzlePool: RawPuzzle[] = [];
+try {
+  puzzlePool = JSON.parse(_readFileSync(resolve("public/data/masterchess-puzzles.json"), "utf8"));
+} catch { /* file missing during early builds */ }
+const puzzleSlug = (id: string) => id.replace(/^lichess-/i, "").replace(/^mc-/i, "").toLowerCase();
+// Sample evenly across buckets, cap at 500
+const byBucket: Record<string, RawPuzzle[]> = {};
+for (const p of puzzlePool) (byBucket[p.bucket] ??= []).push(p);
+const samplePerBucket = Math.max(20, Math.floor(500 / Math.max(1, Object.keys(byBucket).length)));
+const sampledPuzzles: RawPuzzle[] = [];
+for (const list of Object.values(byBucket)) {
+  // pick top-rated and lowest-rated for breadth
+  const sorted = [...list].sort((a, b) => b.rating - a.rating);
+  sampledPuzzles.push(...sorted.slice(0, samplePerBucket));
+}
 const puzzleEntries: SitemapEntry[] = [
   { path: "/puzzles", changefreq: "daily", priority: "0.85" },
+  ...sampledPuzzles.slice(0, 500).map((p) => ({
+    path: `/puzzle/${puzzleSlug(p.id)}`,
+    changefreq: "monthly" as const,
+    priority: "0.55",
+  })),
 ];
+
 
 // Programmatic glossary — every chess term becomes its own indexable URL
 const glossaryEntries: SitemapEntry[] = [
