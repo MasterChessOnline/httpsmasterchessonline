@@ -1,61 +1,53 @@
-# Plan: "Sajt da eksplodira" — Viral + Retention Pack
+# Plan: Reviews na Google + više linkova ka sajtu
 
-Cilj: maksimalan viral coefficient + mobile retention. Sve dugmad, sve hookove, sve što tera ljude da se vrate I da dele.
+Cilj: **prave zvezdice + ime usera** vidljive na Google rich-snippet rezultatima, i što više backlinkova ka sajtu sa interneta.
 
-## 1. Viral Share Layer (najveći ROI)
-- **OG image generator** edge function `og-beat-nikola` → dinamička slika sa imenom igrača, brojem poteza, "Nikola crushed by X" → koristi se kad neko deli `/beat-nikola?u=<id>`
-- **Personal brag URL**: svaka pobeda generiše `/wall/<username>` stranicu sa share dugmadima (X, WhatsApp, Telegram, Instagram Story link, copy)
-- **One-tap share dugmad** u `BeatNikolaShareCard` (WhatsApp + Telegram + X + IG) sa pre-popunjenim tekstom na engleskom
+## 1. Google rich-snippets za review-e (zvezdice u SERP-u)
+- **Per-review JSON-LD** — u `SiteRatingJsonLd.tsx` dodati listu pojedinačnih `Review` objekata (sa `author.name`, `reviewRating`, `reviewBody`, `datePublished`) pored postojećeg `AggregateRating`. Google traži oba da bi prikazao zvezdice + ime ispod linka.
+- **Cap na 20 najnovijih review-a** sa komentarom (Google ignoriše prazne).
+- **Verifikacija**: posle deploy-a — Google Rich Results Test na `masterchess.live`.
 
-## 2. Mobile-first Polish
-- **PWA manifest + service worker** (Workbox) → "Add to Home Screen" prompt posle 2 poseta
-- **Install banner** komponenta sa Nikola avatarom: "Add MasterChess to home screen"
-- **Haptic feedback** na svaki potez na mobile (`navigator.vibrate(10)`)
-- **Bottom nav** floating bar za mobile (Play / Live / Wall / Profile) — uvek dostupan
-- **Pull-to-refresh** disable na board screen-u (sprečava bug)
+## 2. SiteRating UX — koristiti polja koja već postoje u bazi
+- **`title`** kolona (postoji, prazna) → dodati input "Headline" iznad teksta, prikazati kao bold u listi
+- **`like_count` / `love_count` / `helpful_count`** → dodati reakcije pored svakog review-a (👍 / ❤️ / 🎯) koristeći postojeću `site_review_reactions` tabelu
+- **"Was this helpful?"** sortiranje — najkorisniji review-i na vrhu
 
-## 3. Retention Hooks
-- **Daily streak counter** na home (🔥 X days) — localStorage + DB sync, push notif ako prekida
-- **"Nikola te izaziva"** notifikacija svaki dan u 18h (Web Push API + edge cron)
-- **Comeback bonus**: ako se vrati posle 3+ dana → 500 coins + special badge
-- **Email digest** edge function (weekly): tvoja statistika + top 3 wall of fame
+## 3. Backlink / Distribution Pack
+Da bi linkovi ka sajtu eksplodirali po internetu:
 
-## 4. Friction Killers
-- **Guest play bez signup-a** već postoji → dodati "Save your progress" sticky banner posle 1. pobede
-- **One-tap Google signup** prompt (Google One Tap API) na home
-- **Skip tutorial** dugme ako se vidi da je već igrao
+- **`/badge` ruta** — javna stranica gde svako kopira HTML embed:
+  ```html
+  <a href="https://masterchess.live">
+    <img src="https://masterchess.live/api/badge.svg" alt="Rated 4.8 on MasterChess"/>
+  </a>
+  ```
+  → svaki streamer/bloger koji embeduje = jedan backlink. SVG se generiše real-time edge funkcijom sa trenutnim ratingom.
+- **Edge funkcija `rating-badge`** vraća dinamični SVG (gold zvezdice + broj) — caching 1h.
+- **"Share MasterChess" footer blok** sa 8 kanala: WhatsApp, X, Telegram, Reddit, Facebook, LinkedIn, Email, Copy link. Postavlja se ispod `SiteRating` + u `Footer.tsx`.
+- **"Embed na svoj sajt"** dugme pored share-a → otvara `/badge`.
 
-## 5. Social Proof Explosion
-- **Live activity feed** na home: "MarkoNS just beat Nikola in 28 moves" (rolling, realtime iz `bot_games`)
-- **Counter sa tickerom**: "12,847 games played today" (animated count-up)
-- **Trending openings** widget: top 3 otvaranja danas iz `online_games`
+## 4. IndexNow + Sitemap nudge
+- `public/indexnow-key.txt` već postoji → dodati lightweight POST u IndexNow API kad se kreira novi review (preko edge funkcije) da Google brže refresh-uje rating
+- Dodati `/badge` u `sitemap.xml`
 
-## 6. Gamification Boost
-- **First-win confetti** + sound (već imamo win, dodaje se canvas-confetti)
-- **Combo system**: 3 wins in row = 2x XP popup
-- **Mystery box** posle 5 igara: random skin / coins / XP
-
-## 7. SEO / Discovery
-- **Sitemap.xml** dinamički (sve wall stranice, openings, bots)
-- **Schema.org Game markup** na svakoj bot stranici
-- **Meta tags per route** preko react-helmet već postoji → popuniti za /beat-nikola, /live, /wall/*
+## 5. SEO discovery
+- Trigger `seo--trigger_scan` posle implementacije da scanner vidi nove Review schema-e
+- Pokrenuti rescan kad sajt ima ≥10 review-a (rich snippet eligibility threshold)
 
 ---
 
 ## Tehnički obim
-- 1 nova edge funkcija (`og-beat-nikola` za OG slike preko `@vercel/og`-style canvas)
-- 1 RPC + 1 tabela: `daily_streaks (user_id, current, longest, last_play_date)`
-- ~10 novih komponenti (InstallBanner, BottomNav, ActivityFeed, StreakBadge, ComboPopup, MysteryBox, ShareButtons, OneTapAuth, WallProfile, LiveTicker)
-- 1 nova ruta `/wall/:username`
-- PWA: `vite-plugin-pwa`
-- Confetti: `canvas-confetti`
+- **1 nova edge funkcija**: `rating-badge` (vraća SVG, CORS, cache header)
+- **1 nova ruta**: `/badge` (embed copy generator + live preview)
+- **3 izmene komponenti**: `SiteRating.tsx` (title field + reactions), `SiteRatingJsonLd.tsx` (Review[]), `Footer.tsx` (Share strip)
+- **1 nova komponenta**: `ShareSiteStrip.tsx`
+- **Sitemap**: dodati `/badge` URL
+- 0 novih tabela (sve već postoji)
 
-## Šta NE dodajem (poštujem constraint-e)
-- ❌ Nikakva AI/engine analiza u human play
-- ❌ Nikakvi fake/ghost igrači — sve iz realnih `bot_games`/`online_games`
-- ❌ Nikakvi puzzles
-- ❌ Email verification (auto-confirm ostaje)
+## Šta NE radim
+- ❌ Ne pravim fake review-e ili lažne zvezdice (constraint: zero fake engagement)
+- ❌ Ne kupujem backlinkove — samo organic distribution tools
 
 ---
 
-**Pitanje pre kreće**: hoćeš da krenem sve odjednom (jedna velika serija), ili da idem po prioritetu **1 → 2 → 3** pa stop za review? Sve odjednom = ~15-20 fajlova u jednom commit-u.
+Krećem odmah kad odobriš.
