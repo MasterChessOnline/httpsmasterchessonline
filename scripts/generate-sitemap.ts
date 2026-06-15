@@ -13,6 +13,7 @@ import { MATE_PATTERNS } from "../src/data/matePatterns";
 import { ELO_TIERS } from "../src/data/eloTiers";
 import { FAMOUS_GAMES } from "../src/data/famousGames";
 import { GRANDMASTERS } from "../src/data/grandmasters";
+import { SEO_CITIES } from "../src/lib/seo-cities";
 
 const BASE_URL = "https://masterchess.live";
 
@@ -123,6 +124,13 @@ const beatBotEntries: SitemapEntry[] = BOT_PROFILES.map((b) => ({
   path: `/beat/${b.id}`,
   changefreq: "monthly" as const,
   priority: "0.75",
+}));
+
+// Programmatic city SEO — "play chess online from {city}" long-tail
+const cityEntries: SitemapEntry[] = SEO_CITIES.map((c) => ({
+  path: `/play-from/${c.slug}`,
+  changefreq: "monthly" as const,
+  priority: "0.7",
 }));
 
 // Daily puzzle hub
@@ -240,6 +248,7 @@ writeFileSync(resolve("public/sitemap-mates.xml"), buildUrlset(mateEntries));
 writeFileSync(resolve("public/sitemap-elo.xml"), buildUrlset(eloEntries));
 writeFileSync(resolve("public/sitemap-famous-games.xml"), buildUrlset(famousGameEntries));
 writeFileSync(resolve("public/sitemap-players.xml"), buildUrlset(playerEntries));
+writeFileSync(resolve("public/sitemap-cities.xml"), buildUrlset(cityEntries));
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -256,6 +265,7 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap-elo.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-famous-games.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-players.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-cities.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
