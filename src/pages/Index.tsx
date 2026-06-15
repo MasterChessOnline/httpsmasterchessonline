@@ -909,6 +909,9 @@ const Index = () => {
             <InviteFriendsCard variant="share" />
           </div>
         </section>
+
+        {/* Social Follow Strip */}
+        <SocialFollowStrip />
       </main>
 
       <Footer />
