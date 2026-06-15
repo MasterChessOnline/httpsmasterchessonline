@@ -63,6 +63,7 @@ import LazyMount from "@/components/LazyMount";
 import WinStreakFlame from "@/components/WinStreakFlame";
 import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
+import SocialFollowStrip from "@/components/SocialFollowStrip";
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
 // and stabilize first paint on mobile.
