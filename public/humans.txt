@@ -1,0 +1,15 @@
+/* TEAM */
+Founder & Creator: Nikola Šakotić
+Age: 13
+Location: Serbia
+Site: https://masterchess.live/about
+
+/* SITE */
+Name: MasterChess
+Tagline: Real chess. Real people. No noise.
+Standards: HTML5, CSS3, TypeScript, React 18, Vite, Tailwind, Supabase, Stockfish WASM
+Last update: 2026/06/15
+Language: English
+
+/* THANKS */
+To every player who ever clicked "Play" — you keep this site alive.

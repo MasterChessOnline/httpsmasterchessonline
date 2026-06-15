@@ -380,6 +380,13 @@ const Index = () => {
 
         {/* ── MAIN CONTENT ── */}
         <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
+          {/* ─── Daily Spin Wheel — reward hook, FIRST below hero ─── */}
+          <React.Suspense fallback={<div className="h-[280px]" />}>
+            <LazyMount minHeight={280}>
+              <HomeSpinWheelSection />
+            </LazyMount>
+          </React.Suspense>
+
           {/* Daily Challenge — the single daily ritual on home */}
           <section id="daily-missions" className="scroll-mt-24 space-y-4">
             <SectionHeader title="Daily Challenge" icon={Target}>
@@ -684,12 +691,6 @@ const Index = () => {
             </SectionHeader>
           )}
 
-          {/* ─── Daily Spin Wheel — reward loop ─── */}
-          <React.Suspense fallback={<div className="h-[280px]" />}>
-            <LazyMount minHeight={280}>
-              <HomeSpinWheelSection />
-            </LazyMount>
-          </React.Suspense>
 
           {/* ─── Training shortcuts (de-emphasized — for between matches) ─── */}
           <section className="pt-2">
