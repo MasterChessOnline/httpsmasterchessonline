@@ -163,6 +163,8 @@ const Settings = () => {
     const saved = settings.soundPack;
     return SOUND_PACKS.find(p => p.key === saved) ? saved : "wood";
   });
+  const [coverTracks, setCoverTracks] = useState<boolean>(settings.coverTracks ?? false);
+  const [quietHour, setQuietHour] = useState<boolean>(settings.quietHour ?? false);
 
   useEffect(() => {
     if (profile) {
