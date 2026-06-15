@@ -135,6 +135,20 @@ const cityEntries: SitemapEntry[] = SEO_CITIES.map((c) => ({
   priority: "0.7",
 }));
 
+// SEO long-tail landing pages (EN + SR)
+const seoLandingEntries: SitemapEntry[] = [
+  ...Object.values(SR_LANDINGS).map((c) => ({
+    path: c.path,
+    changefreq: "monthly" as const,
+    priority: "0.8",
+  })),
+  ...Object.values(EN_LANDINGS).map((c) => ({
+    path: c.path,
+    changefreq: "monthly" as const,
+    priority: "0.8",
+  })),
+];
+
 // Daily puzzle hub
 const puzzleEntries: SitemapEntry[] = [
   { path: "/puzzles", changefreq: "daily", priority: "0.85" },
