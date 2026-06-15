@@ -9,6 +9,7 @@ import { getAIMove } from "@/lib/chess-ai";
 import { playChessSound } from "@/lib/chess-sounds";
 import { motion, AnimatePresence } from "framer-motion";
 import { Crown, Swords, Shield, Zap, RotateCcw, Trophy, Brain, Target } from "lucide-react";
+import Seo from "@/components/Seo";
 
 interface GMStyle {
   id: string;
@@ -109,6 +110,7 @@ export default function PlayLikeGM() {
   if (!selectedGM) {
     return (
       <div className="min-h-screen bg-background">
+        <Seo title={"Play Like a Grandmaster"} description={"Play chess in the style of Tal, Karpov, Kasparov and other legends. Train against GM-emulating bots and learn their patterns."} path={"/play-like-gm"} />
         <Navbar />
         <div className="container mx-auto px-4 py-8 max-w-5xl">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { COLLECTIBLES, RARITY_COLORS, Collectible } from "@/lib/collectibles-data";
 import { Crown, Trophy, Star, Zap, Brain, Flame, Medal, TrendingUp, Swords, Lock, Gem, Shield } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import Seo from "@/components/Seo";
 
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -104,6 +105,7 @@ const Achievements = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Seo title={"Chess Achievements & Collectibles"} description={"Unlock chess achievements, badges, medals and rare collectibles. Track your progress and climb the ranks on MasterChess."} path={"/achievements"} />
       <Navbar />
       <main className="container mx-auto px-4 pt-24 pb-16 max-w-5xl">
         <div className="text-center mb-8">

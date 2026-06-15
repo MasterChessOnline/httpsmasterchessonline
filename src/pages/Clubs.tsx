@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import ClanTag from "@/components/ClanTag";
+import Seo from "@/components/Seo";
 
 interface Club {
   id: string;
@@ -136,6 +137,7 @@ const Clubs = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
+        <Seo title={"Chess Clubs & Clans"} description={"Join or create a chess club. Compete with your clan, climb the team leaderboard, and play in club tournaments on MasterChess."} path={"/clubs"} />
         <Navbar />
         <main className="container mx-auto px-6 pt-24 pb-16 text-center">
           <Shield className="h-16 w-16 text-primary mx-auto mb-4" />

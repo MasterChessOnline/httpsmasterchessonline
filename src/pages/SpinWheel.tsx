@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { emitReward } from "@/lib/reward-fx";
+import Seo from "@/components/Seo";
 
 /**
  * Chess-themed Spin The Wheel.
@@ -180,6 +181,7 @@ export default function SpinWheel() {
         ))}
       </div>
 
+      <Seo title={"Spin the Wheel — Daily Chess Rewards"} description={"Spin the daily wheel to win coins, XP boosts and rare collectibles. Free daily rewards on MasterChess."} path={"/spin-wheel"} />
       <Navbar />
       <main className="container max-w-3xl mx-auto px-4 pt-24 pb-24 relative">
         <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary mb-4">

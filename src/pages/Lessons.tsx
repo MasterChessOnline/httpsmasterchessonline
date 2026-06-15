@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Swords, Target, Clock, User, Check, Star } from "lucide-react";
 import { MARKETPLACE_LESSONS, type MarketplaceLesson } from "@/lib/lessons-marketplace-data";
+import Seo from "@/components/Seo";
 
 const LEVEL_STYLES: Record<string, string> = {
   beginner: "bg-secondary/20 text-secondary-foreground border-secondary/30",
@@ -109,6 +110,7 @@ const LessonCard = ({ lesson }: { lesson: MarketplaceLesson }) => {
 const Lessons = () => {
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "var(--font-body)" }}>
+      <Seo title={"Chess Lessons & Courses"} description={"Free and premium chess lessons for every level — openings, tactics, endgames and strategy taught by GMs and coaches."} path={"/lessons"} />
       <Navbar />
       <main className="container mx-auto px-4 pt-28 pb-16 max-w-6xl">
         {/* Header */}

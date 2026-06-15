@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getRepertoire, STYLE_INFO, type Color, type Style, type RepertoireLine } from "@/lib/repertoire-data";
+import Seo from "@/components/Seo";
 
 const STORAGE_KEY = "masterchess.repertoire";
 
@@ -54,6 +55,7 @@ export default function Repertoire() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={"Build Your Chess Opening Repertoire"} description={"Create and study your personal chess opening repertoire. Drill your lines and never forget theory again."} path={"/repertoire"} />
       <Navbar />
       <main className="container mx-auto max-w-5xl px-4 pt-24 pb-16">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">

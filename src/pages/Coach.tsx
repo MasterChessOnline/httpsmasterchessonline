@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
+import Seo from "@/components/Seo";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type Level = "beginner" | "intermediate" | "advanced" | "expert";
@@ -159,6 +160,7 @@ export default function Coach() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={"AI Chess Coach"} description={"Get instant chess coaching. Ask questions, review your games and get personalised advice from the AI coach."} path={"/coach"} />
       <Navbar />
       <main className="container mx-auto max-w-4xl px-4 pt-24 pb-16">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
