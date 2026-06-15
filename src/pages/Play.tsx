@@ -766,6 +766,11 @@ const Play = () => {
     const isDraw = gameResult === "1/2-1/2";
     const result: "win" | "loss" | "draw" = isDraw ? "draw" : playerWon ? "win" : "loss";
 
+    // 🏆 Viral hook: beating Nikola = full-screen takeover with shareable card.
+    if (result === "win" && (currentBot as any).id === "nikola-sakotic") {
+      setShowBeatNikola(true);
+    }
+
     const botRating = currentBot.rating;
     const currentBotRating = (profile as any).bot_rating ?? 1200;
     const botGames = (profile as any).bot_games_played ?? 0;
