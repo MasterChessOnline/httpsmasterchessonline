@@ -11,7 +11,8 @@ import { toast } from "sonner";
 
 /**
  * "Share MasterChess" strip — one-tap backlink distribution.
- * Renders in the Footer so it appears on every page.
+ * Renders in the Footer so it appears on every page → maximum exposure
+ * of share targets without nagging users with popups.
  */
 export default function ShareSiteStrip() {
   const url = "https://masterchess.live";
@@ -20,41 +21,13 @@ export default function ShareSiteStrip() {
   const enc = encodeURIComponent;
 
   const targets = [
-    {
-      label: "WhatsApp",
-      icon: MessageCircle,
-      href: `https://wa.me/?text=${enc(`${text} ${url}`)}`,
-    },
-    {
-      label: "Telegram",
-      icon: Send,
-      href: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`,
-    },
-    {
-      label: "X",
-      icon: Twitter,
-      href: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`,
-    },
-    {
-      label: "Reddit",
-      icon: MessageCircle,
-      href: `https://www.reddit.com/submit?url=${enc(url)}&title=${enc("MasterChess — Play chess online free")}`,
-    },
-    {
-      label: "Facebook",
-      icon: Facebook,
-      href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
-    },
-    {
-      label: "LinkedIn",
-      icon: Linkedin,
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`,
-    },
-    {
-      label: "Email",
-      icon: Mail,
-      href: `mailto:?subject=${enc("Check out MasterChess")}&body=${enc(`${text}\n\n${url}`)}`,
-    },
+    { label: "WhatsApp", icon: MessageCircle, href: `https://wa.me/?text=${enc(`${text} ${url}`)}` },
+    { label: "Telegram", icon: Send, href: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}` },
+    { label: "X", icon: Twitter, href: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}` },
+    { label: "Reddit", icon: MessageCircle, href: `https://www.reddit.com/submit?url=${enc(url)}&title=${enc("MasterChess — Play chess online free")}` },
+    { label: "Facebook", icon: Facebook, href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}` },
+    { label: "LinkedIn", icon: Linkedin, href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}` },
+    { label: "Email", icon: Mail, href: `mailto:?subject=${enc("Check out MasterChess")}&body=${enc(`${text}\n\n${url}`)}` },
   ];
 
   const copy = async () => {
@@ -75,14 +48,6 @@ export default function ShareSiteStrip() {
         <p className="text-xs text-muted-foreground mt-0.5">
           Help us grow — share with a friend who plays chess.
         </p>
-      </div>
-        <Link
-          to="/embed-rating"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors self-start sm:self-auto"
-        >
-          <Code2 className="h-3.5 w-3.5" />
-          Embed our rating on your site →
-        </Link>
       </div>
 
       <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
