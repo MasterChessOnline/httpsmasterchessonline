@@ -66,7 +66,6 @@ import WinStreakFlame from "@/components/WinStreakFlame";
 import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
-import HomeDonationTopStrip from "@/components/HomeDonationTopStrip";
 import HeroDonationCard from "@/components/HeroDonationCard";
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
@@ -246,7 +245,6 @@ const Index = () => {
         path="/"
         type="website"
       />
-      <HomeDonationTopStrip />
       <Navbar />
 
       <main>
@@ -364,33 +362,7 @@ const Index = () => {
               </MarginNote>
             </div>
 
-            {/* Quick Actions with hover lift */}
-            <motion.div
-              className="flex justify-center gap-3 sm:gap-4 mt-8"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              {[
-                { to: "/training", icon: Brain, label: "Training" },
-                { to: "/analysis", icon: Eye, label: "Analysis" },
-                { to: "/tournaments", icon: Trophy, label: "Compete" },
-              ].map((item) => (
-                <Link key={item.to} to={item.to}>
-                  <motion.div
-                    className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border border-border/20 glass-4d group"
-                    whileHover={{ y: -4, scale: 1.05 }}
-                    whileTap={{ scale: 0.97 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  >
-                    <item.icon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                      {item.label}
-                    </span>
-                  </motion.div>
-                </Link>
-              ))}
-            </motion.div>
+            {/* Quick Actions removed — duplicated below in "Between matches" row to declutter hero. */}
 
             {/* Live player counter + streak flame */}
             <motion.div
