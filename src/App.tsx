@@ -290,6 +290,7 @@ function AnimatedRoutes() {
           <Route path="/puzzles" element={<Puzzles />} />
           <Route path="/beat/:botId" element={<BeatBotLanding />} />
           <Route path="/play-from/:city" element={<PlayFromCity />} />
+          <Route path="/overlay/:username" element={<StreamerOverlay />} />
           {/* SEO long-tail landings (EN + SR), all served by SeoLandingRoute via path lookup */}
           <Route path="/chess-for-kids" element={<SeoLandingRoute />} />
           <Route path="/chess-for-beginners" element={<SeoLandingRoute />} />
