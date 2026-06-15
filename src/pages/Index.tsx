@@ -67,6 +67,7 @@ import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import HomeDonationTopStrip from "@/components/HomeDonationTopStrip";
+import HeroDonationCard from "@/components/HeroDonationCard";
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
 // and stabilize first paint on mobile.
@@ -274,6 +275,9 @@ const Index = () => {
             style={{ opacity: heroOpacity }}
           >
             <AnimatedLogoHero tagline={t("hero.tagline")} />
+
+            {/* Prominent donation card inside hero */}
+            <HeroDonationCard />
 
             {/* Above-fold rule: ONE big CTA. The signup card was moved below fold
                 to remove friction for first-time visitors. */}
