@@ -246,6 +246,7 @@ function AnimatedRoutes() {
           <Route path="/location" element={<LocationPage />} />
           <Route path="/promo" element={<Promo />} />
           <Route path="/press-kit" element={<PressKit />} />
+          <Route path="/viral" element={<Viral />} />
           <Route path="/resources" element={<Navigate to="/" replace />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
