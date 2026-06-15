@@ -275,10 +275,11 @@ export default function PuzzlePage() {
                         } ${isHint ? "ring-2 ring-cyan-400/70 ring-inset" : ""}`}
                         aria-label={`Square ${sq}`}
                       >
-                        {px && (
+                        {px && style.mode === "svg" && style.svgFolder && (
                           <img
-                            src={`${style.basePath}/${px}.${style.ext}`}
+                            src={`/pieces/${style.svgFolder}/${px[0]}${px[1].toUpperCase()}.svg`}
                             alt={px}
+                            draggable={false}
                             className="w-[88%] h-[88%] object-contain pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)]"
                           />
                         )}
