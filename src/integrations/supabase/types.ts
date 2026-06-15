@@ -3508,6 +3508,7 @@ export type Database = {
         }
         Returns: Json
       }
+      supporter_tier: { Args: { p_user_id: string }; Returns: Json }
       top_clans: {
         Args: { p_limit?: number }
         Returns: {
