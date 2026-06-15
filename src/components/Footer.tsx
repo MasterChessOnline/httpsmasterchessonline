@@ -29,6 +29,20 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
           <p className="text-xs text-muted-foreground leading-relaxed">
             The premium platform for chess players. Play, learn, compete.
           </p>
+          <div className="flex gap-3 mt-3">
+            {socialLinks.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className={`w-8 h-8 rounded-lg bg-zinc-800/60 flex items-center justify-center text-muted-foreground ${s.color} hover:scale-110 transition-all`}
+              >
+                <s.icon className="w-4 h-4" />
+              </a>
+            ))}
+          </div>
         </div>
         {[
           {
