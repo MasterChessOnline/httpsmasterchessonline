@@ -42,6 +42,11 @@ export default function SupporterCTA() {
             servers and new features.
           </p>
 
+          {/* Live community progress */}
+          <DonationProgressBar variant="card" />
+
+
+
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
             {QUICK_TIPS.map((t) => {
               const Icon = t.icon;
