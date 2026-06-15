@@ -243,6 +243,8 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-openings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-bots.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-beat-bots.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-puzzles.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-glossary.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-tools.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-mates.xml</loc><lastmod>${today}</lastmod></sitemap>`,
