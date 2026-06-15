@@ -39,6 +39,7 @@ import TitleBadge from "@/components/TitleBadge";
 import StreakBadge from "@/components/StreakBadge";
 import BadgeUnlockToast from "@/components/BadgeUnlockToast";
 import BeatNikolaShareCard from "@/components/BeatNikolaShareCard";
+import ChallengeLinkCreator from "@/components/ChallengeLinkCreator";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
