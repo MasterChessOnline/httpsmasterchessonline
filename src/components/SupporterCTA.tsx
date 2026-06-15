@@ -3,6 +3,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, Coffee, Sparkles, Crown } from "lucide-react";
+import DonationProgressBar from "@/components/DonationProgressBar";
 
 const QUICK_TIPS = [
   { amount: 3, label: "Coffee", icon: Coffee },
