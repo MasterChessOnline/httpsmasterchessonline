@@ -47,11 +47,21 @@ const Signup = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
 
-  const handleGoogleLogin = () => {
-    setError(null);
-    setGoogleModalOpen(true);
-  };
   const navigate = useNavigate();
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    // 1-click Google: skip country/name modal (killed conversion).
+    // Defaults are applied; user can edit anything in Settings.
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/dashboard",
+    });
+    if (result.error) {
+      setError(result.error.message);
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();

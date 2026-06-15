@@ -56,6 +56,16 @@ export default function PlayGuest() {
       setPhase("ended");
       playChessSound(result === "win" ? "victory" : "gameOver");
       if (result === "win") celebrate("big");
+      // Track finished guest games so other UI (exit-intent, post-win nudges)
+      // can stop blocking first-time visitors and only trigger after real play.
+      try {
+        const prev = Number(localStorage.getItem("mc_guest_games_played") || "0");
+        localStorage.setItem("mc_guest_games_played", String(prev + 1));
+        if (result === "win") {
+          const w = Number(localStorage.getItem("mc_guest_wins") || "0");
+          localStorage.setItem("mc_guest_wins", String(w + 1));
+        }
+      } catch { /* ignore quota */ }
     }
   }, []);
 
