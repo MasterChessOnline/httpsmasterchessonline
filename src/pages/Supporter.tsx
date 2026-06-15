@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import DonationProgressBar from "@/components/DonationProgressBar";
 
 interface Tier {
   id: string;
@@ -103,7 +104,9 @@ export default function Supporter() {
             I'm Nikola, 13, and I run MasterChess after school. No ads, no premium walls — just servers
             that need paying. Tip whatever feels right.
           </p>
+          <DonationProgressBar variant="card" />
         </motion.header>
+
 
         <div className="grid md:grid-cols-3 gap-5">
           {TIERS.map((t, i) => {
