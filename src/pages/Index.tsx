@@ -243,7 +243,9 @@ const Index = () => {
               className="absolute inset-0 w-full h-[120%] object-cover"
               style={{ filter: "brightness(0.28) saturate(0.85)" }}
               loading="eager"
-              fetchPriority="high"
+              decoding="async"
+              // React requires lowercase DOM attribute; uppercase prop name triggers a warning.
+              {...({ fetchpriority: "high" } as any)}
             />
           </motion.div>
           <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
@@ -256,54 +258,9 @@ const Index = () => {
           >
             <AnimatedLogoHero tagline={t("hero.tagline")} />
 
-            {/* Attractive sign-up hero card for guests */}
-            {!user && (
-              <motion.div
-                className="mb-5 mx-auto max-w-2xl"
-                initial={{ opacity: 0, y: 14, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-              >
-                <div className="relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 via-background/60 to-amber-400/10 backdrop-blur-md p-4 sm:p-5 shadow-[0_0_40px_-8px_hsl(var(--primary)/0.4)]">
-                  {/* shimmer */}
-                  <motion.div
-                    className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-primary/25 to-transparent"
-                    animate={{ x: ["0%", "400%"] }}
-                    transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
-                  />
-                  <div className="relative flex flex-col sm:flex-row items-center gap-3 sm:gap-5 text-center sm:text-left">
-                    <div className="text-3xl sm:text-4xl shrink-0 drop-shadow-[0_0_12px_hsl(var(--primary)/0.6)]">
-                      👑
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-primary mb-0.5">
-                        Built by Nikola, 13 · For real chess players
-                      </p>
-                      <h2 className="text-base sm:text-lg font-bold text-foreground leading-tight">
-                        Join MasterChess — your ELO, your story, your board.
-                      </h2>
-                      <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                        Real humans · climb the leaderboard · unlock missions, daily puzzles & honest game review.
-                      </p>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                      <Link
-                        to="/signup"
-                        className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-5 py-2 text-xs sm:text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-primary/60 hover:scale-[1.04] active:scale-[0.97] transition-all"
-                      >
-                        Create account
-                      </Link>
-                      <Link
-                        to="/login"
-                        className="inline-flex items-center justify-center rounded-full border border-border/60 bg-card/60 text-foreground px-4 py-2 text-xs sm:text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all"
-                      >
-                        Log in
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+            {/* Above-fold rule: ONE big CTA. The signup card was moved below fold
+                to remove friction for first-time visitors. */}
+
 
             {/* CTA Buttons with ripple + glow */}
             <motion.div
