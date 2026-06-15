@@ -60,6 +60,7 @@ import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import LazyMount from "@/components/LazyMount";
 import WinStreakFlame from "@/components/WinStreakFlame";
+import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
@@ -390,6 +391,7 @@ const Index = () => {
             >
               <LivePlayerCounter />
               {winStreak >= 3 && <WinStreakFlame streak={winStreak} />}
+              <BeatNikolaTeaser />
             </motion.div>
           </motion.div>
         </div>

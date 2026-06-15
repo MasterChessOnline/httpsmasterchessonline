@@ -1,24 +1,32 @@
 import { useEffect, useRef, useState } from "react";
-import { Download, Share2, X, Crown } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Download, Share2, X, Crown, Skull } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 
 interface Props {
+  mode: "win" | "loss";
   moves: number;
   playerName: string;
   onDismiss: () => void;
 }
 
 /**
- * Full-screen takeover shown after a player beats the Nikola bot.
- * Generates a branded 1080x1350 share image (IG/TikTok 4:5) on a canvas,
- * then offers Download + Web Share. Pure client-side — no backend round-trip.
+ * Full-screen takeover shown after a Nikola-bot game ends.
+ *  - win mode  → branded canvas share card (download + Web Share)
+ *  - loss mode → "you + 99% lost" counter-hook with soft signup nudge
+ * Both share the same dramatic shell so the brand moment stays consistent.
  */
-export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Props) {
+export default function BeatNikolaShareCard({ mode, moves, playerName, onDismiss }: Props) {
+  const { user } = useAuth();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const isWin = mode === "win";
 
+  // Only generate the canvas image when the user actually won.
   useEffect(() => {
+    if (!isWin) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const W = 1080;
@@ -28,7 +36,6 @@ export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Pr
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Background — gold→black radial
     const bg = ctx.createRadialGradient(W / 2, H * 0.3, 80, W / 2, H * 0.5, W);
     bg.addColorStop(0, "#3a2a08");
     bg.addColorStop(0.5, "#1a1206");
@@ -36,18 +43,15 @@ export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Pr
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // Gold border
     ctx.strokeStyle = "#d4a64a";
     ctx.lineWidth = 6;
     ctx.strokeRect(40, 40, W - 80, H - 80);
 
-    // Top label
     ctx.fillStyle = "#d4a64a";
     ctx.font = "bold 36px Inter, sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("MASTERCHESS · BEAT NIKOLA", W / 2, 130);
 
-    // Headline
     ctx.fillStyle = "#f5e9c8";
     ctx.font = "bold 110px 'Cormorant Garamond', serif";
     ctx.fillText("I BEAT THE", W / 2, 320);
@@ -55,21 +59,17 @@ export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Pr
     ctx.fillStyle = "#d4a64a";
     ctx.fillText("FOUNDER", W / 2, 560);
 
-    // Move count
     ctx.fillStyle = "#f5e9c8";
     ctx.font = "bold 80px Inter, sans-serif";
     ctx.fillText(`in ${moves} moves`, W / 2, 680);
 
-    // Player + opponent labels
     ctx.fillStyle = "#9a8b6f";
     ctx.font = "500 32px Inter, sans-serif";
     ctx.fillText(`${playerName.toUpperCase()}  vs  NIKOLA · 3500`, W / 2, 760);
 
-    // Avatar (Nikola)
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      // Circle clip avatar
       ctx.save();
       ctx.beginPath();
       ctx.arc(W / 2, 950, 140, 0, Math.PI * 2);
@@ -77,14 +77,12 @@ export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Pr
       ctx.clip();
       ctx.drawImage(img, W / 2 - 140, 810, 280, 280);
       ctx.restore();
-      // Avatar ring
       ctx.strokeStyle = "#d4a64a";
       ctx.lineWidth = 8;
       ctx.beginPath();
       ctx.arc(W / 2, 950, 140, 0, Math.PI * 2);
       ctx.stroke();
 
-      // CTA
       ctx.fillStyle = "#d4a64a";
       ctx.font = "bold 44px Inter, sans-serif";
       ctx.fillText("masterchess.live/beat-nikola", W / 2, 1230);
@@ -99,10 +97,6 @@ export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Pr
       }
     };
     img.onerror = () => {
-      // fall back without avatar
-      ctx.fillStyle = "#d4a64a";
-      ctx.font = "bold 44px Inter, sans-serif";
-      ctx.fillText("masterchess.live/beat-nikola", W / 2, 1230);
       try {
         setDataUrl(canvas.toDataURL("image/png"));
       } catch {
@@ -110,7 +104,7 @@ export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Pr
       }
     };
     img.src = nikolaAvatar;
-  }, [moves, playerName]);
+  }, [isWin, moves, playerName]);
 
   const download = () => {
     if (!dataUrl) return;
@@ -123,7 +117,6 @@ export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Pr
   const share = async () => {
     const url = `${window.location.origin}/beat-nikola`;
     const text = `I just beat a 13-year-old's 3500-rated chess bot in ${moves} moves. Your turn.`;
-    // Try native share with image first
     if (dataUrl && typeof navigator !== "undefined" && (navigator as any).canShare) {
       try {
         const blob = await (await fetch(dataUrl)).blob();
@@ -162,39 +155,95 @@ export default function BeatNikolaShareCard({ moves, playerName, onDismiss }: Pr
       </button>
 
       <div className="max-w-md w-full text-center my-auto">
-        <div className="flex items-center justify-center gap-2 text-primary mb-3">
-          <Crown className="h-6 w-6" />
-          <p className="text-xs font-bold uppercase tracking-[0.25em]">Wall of Fame</p>
+        <div
+          className={`flex items-center justify-center gap-2 mb-3 ${
+            isWin ? "text-primary" : "text-destructive"
+          }`}
+        >
+          {isWin ? <Crown className="h-6 w-6" /> : <Skull className="h-6 w-6" />}
+          <p className="text-xs font-bold uppercase tracking-[0.25em]">
+            {isWin ? "Wall of Fame" : "Like 99% of players"}
+          </p>
         </div>
         <h2 className="font-display text-3xl sm:text-4xl font-bold uppercase tracking-tight leading-tight">
-          You actually <span className="text-gradient-gold">beat Nikola</span>.
+          {isWin ? (
+            <>
+              You actually <span className="text-gradient-gold">beat Nikola</span>.
+            </>
+          ) : (
+            <>
+              Nikola <span className="text-gradient-gold">crushed you</span>.
+            </>
+          )}
         </h2>
         <p className="text-sm text-muted-foreground mt-2">
-          In {moves} moves. Your name is now on the public leaderboard.
+          {isWin
+            ? `In ${moves} moves. Your name is now on the public leaderboard.`
+            : `It took ${moves} moves. Don't feel bad — almost nobody wins on the first try.`}
         </p>
 
-        <div className="mt-5 rounded-2xl border border-primary/30 bg-card/60 p-3 overflow-hidden">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-auto rounded-lg"
-            style={{ aspectRatio: "4/5" }}
-          />
-        </div>
-
-        <div className="mt-5 flex flex-col sm:flex-row gap-2">
-          <Button
-            onClick={share}
-            size="lg"
-            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            <Share2 className="h-5 w-5 mr-2" />
-            Share the proof
-          </Button>
-          <Button onClick={download} size="lg" variant="outline" className="flex-1">
-            <Download className="h-5 w-5 mr-2" />
-            Download
-          </Button>
-        </div>
+        {isWin ? (
+          <>
+            <div className="mt-5 rounded-2xl border border-primary/30 bg-card/60 p-3 overflow-hidden">
+              <canvas
+                ref={canvasRef}
+                className="w-full h-auto rounded-lg"
+                style={{ aspectRatio: "4/5" }}
+              />
+            </div>
+            <div className="mt-5 flex flex-col sm:flex-row gap-2">
+              <Button
+                onClick={share}
+                size="lg"
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Share2 className="h-5 w-5 mr-2" />
+                Share the proof
+              </Button>
+              <Button onClick={download} size="lg" variant="outline" className="flex-1">
+                <Download className="h-5 w-5 mr-2" />
+                Download
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mt-5 rounded-2xl border border-border/40 bg-card/40 p-5 text-left space-y-3">
+              <p className="text-sm text-foreground">
+                Your rating drops if you keep losing. But the players on the{" "}
+                <Link to="/beat-nikola" className="text-primary underline">
+                  Wall of Fame
+                </Link>{" "}
+                studied openings, practiced endgames, and used the in-built training tools.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Tip: pick a single opening (Italian or London) and play it 10 times in a row vs
+                easier bots first. Then come back.
+              </p>
+            </div>
+            <div className="mt-5 flex flex-col sm:flex-row gap-2">
+              <Button
+                onClick={onDismiss}
+                size="lg"
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Crown className="h-5 w-5 mr-2" />
+                Try again
+              </Button>
+              <Button asChild size="lg" variant="outline" className="flex-1">
+                <Link to="/openings">Train openings</Link>
+              </Button>
+            </div>
+            {!user && (
+              <p className="mt-4 text-xs text-muted-foreground">
+                <Link to="/signup" className="text-primary hover:underline">
+                  Sign up free
+                </Link>{" "}
+                to track your rating, streak, and rematch history.
+              </p>
+            )}
+          </>
+        )}
 
         <button
           onClick={onDismiss}
