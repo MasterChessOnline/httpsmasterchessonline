@@ -1,6 +1,7 @@
 import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import HomeFaqSection from "@/components/HomeFaqSection";
 import DiscoverStrip from "@/components/DiscoverStrip";
 import SiteRating from "@/components/SiteRating";
 import ReviewsCta from "@/components/ReviewsCta";
@@ -913,6 +914,9 @@ const Index = () => {
 
         {/* Social Follow Strip */}
         <SocialFollowStrip />
+
+        {/* FAQ — bottom of home, adds FAQPage rich snippet to Google */}
+        <HomeFaqSection />
       </main>
 
       <Footer />
