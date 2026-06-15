@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Info, Crown, Sparkles } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const PIECES = [
   { name: "Pawn", symbol: "♙", value: 1, color: "text-green-400", bg: "bg-green-500/10", desc: "The soul of chess. Promotes to queen on the 8th rank.", tips: ["Control center with e/d pawns", "Connected pawns are strong", "Passed pawns must be pushed"] },
@@ -24,6 +25,7 @@ const EXCHANGES = [
 
 const PieceValues = () => (
   <div className="min-h-screen bg-background text-foreground">
+    <Seo title={"Chess Piece Values Explained"} description={"What is each chess piece worth? Pawn, knight, bishop, rook and queen values with exchange tips and middlegame strategy."} path={"/tools/piece-values"} />
     <Navbar />
     <main className="container mx-auto px-4 pt-24 pb-16 max-w-5xl">
       <motion.div className="text-center mb-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

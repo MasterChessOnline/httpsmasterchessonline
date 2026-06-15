@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Target, Trophy, Zap, RotateCcw, ChevronRight, Star, CheckCircle, XCircle } from "lucide-react";
+import Seo from "@/components/Seo";
 
 // Curated positions with best moves
 const POSITIONS = [
@@ -88,6 +89,7 @@ export default function GuessTheMove() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={"Guess the Move — Chess Training"} description={"Test your chess vision. Guess the best move in famous positions and earn points. Free move-finding trainer on MasterChess."} path={"/guess-the-move"} />
       <Navbar />
       <div className="container mx-auto px-4 py-6 max-w-5xl">
         {/* Header */}

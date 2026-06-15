@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
+import Seo from "@/components/Seo";
   BookOpen, Lock, CheckCircle, Star, ChevronRight, Swords,
   Trophy, ArrowLeft, Loader2, Play, Video
 } from "lucide-react";
@@ -149,6 +150,7 @@ const StoryMode = () => {
 
     return (
       <div className="min-h-screen bg-background">
+        <Seo title={"Chess Story Mode — Adventure"} description={"Play through a chess adventure: solve themed scenarios, defeat villains and unlock the final boss. Free story mode on MasterChess."} path={"/story"} />
         <Navbar />
         <main className="container mx-auto px-4 pt-24 pb-16">
           <div className="flex items-center gap-3 mb-4">

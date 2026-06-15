@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import {
+import Seo from "@/components/Seo";
   Calculator, TrendingUp, TrendingDown, Target, Trophy,
   Plus, Trash2, BarChart3, Zap, Shield, Award, Info,
   ArrowRight, Swords, Scale,
@@ -113,6 +114,7 @@ const RatingCalculator = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Seo title={"Chess ELO Rating Calculator"} description={"Free chess ELO calculator. Estimate your rating change after a game, compute performance rating, and predict tournament outcomes."} path={"/tools/rating-calculator"} />
       <Navbar />
       <main className="container mx-auto px-4 pt-24 pb-16 max-w-5xl">
         {/* Header */}

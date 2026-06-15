@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Lock, CheckCircle2, ChevronRight, Swords, BookOpen, Crown, Target, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import Seo from "@/components/Seo";
 
 interface SkillNode {
   id: string;
@@ -111,6 +112,7 @@ const SkillTree = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title={"Chess Skill Tree — Unlock Abilities"} description={"Level up your chess skills through a gamified skill tree. Unlock perks, badges and bonuses as you improve."} path={"/skill-tree"} />
       <Navbar />
       <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
