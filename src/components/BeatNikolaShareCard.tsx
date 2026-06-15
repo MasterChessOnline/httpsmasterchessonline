@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Download, Share2, X, Crown, Skull } from "lucide-react";
+import { Download, Share2, X, Crown, Skull, Copy, Send, MessageCircle, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
+import confetti from "canvas-confetti";
+import { toast } from "sonner";
 
 interface Props {
   mode: "win" | "loss";
@@ -23,6 +25,19 @@ export default function BeatNikolaShareCard({ mode, moves, playerName, onDismiss
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const isWin = mode === "win";
+
+  // Fire confetti on win — pure dopamine, no business impact.
+  useEffect(() => {
+    if (!isWin) return;
+    const end = Date.now() + 1200;
+    const colors = ["#d4a64a", "#f5e9c8", "#ffffff"];
+    const frame = () => {
+      confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 }, colors });
+      confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 }, colors });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
+  }, [isWin]);
 
   // Only generate the canvas image when the user actually won.
   useEffect(() => {
@@ -205,6 +220,51 @@ export default function BeatNikolaShareCard({ mode, moves, playerName, onDismiss
                 Download
               </Button>
             </div>
+
+            {/* One-tap social share — viral distribution layer */}
+            {(() => {
+              const url = `${window.location.origin}/beat-nikola`;
+              const text = `I just beat a 13-year-old's 3500-rated chess bot in ${moves} moves. Your turn 👉`;
+              const enc = encodeURIComponent;
+              const targets = [
+                { label: "WhatsApp", icon: MessageCircle, href: `https://wa.me/?text=${enc(`${text} ${url}`)}`, color: "hover:bg-emerald-500/20 hover:text-emerald-400" },
+                { label: "Telegram", icon: Send, href: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`, color: "hover:bg-sky-500/20 hover:text-sky-400" },
+                { label: "X", icon: Twitter, href: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`, color: "hover:bg-foreground/10 hover:text-foreground" },
+              ];
+              const copy = async () => {
+                try {
+                  await navigator.clipboard.writeText(`${text} ${url}`);
+                  toast.success("Link copied — paste it anywhere");
+                } catch {
+                  toast.error("Couldn't copy. Long-press to copy manually.");
+                }
+              };
+              return (
+                <div className="mt-3 grid grid-cols-4 gap-2">
+                  {targets.map((t) => (
+                    <a
+                      key={t.label}
+                      href={t.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl border border-border/40 bg-card/40 text-muted-foreground transition-colors ${t.color}`}
+                      aria-label={`Share to ${t.label}`}
+                    >
+                      <t.icon className="h-4 w-4" />
+                      <span className="text-[10px] font-medium">{t.label}</span>
+                    </a>
+                  ))}
+                  <button
+                    onClick={copy}
+                    className="flex flex-col items-center justify-center gap-1 py-3 rounded-xl border border-border/40 bg-card/40 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                    aria-label="Copy link"
+                  >
+                    <Copy className="h-4 w-4" />
+                    <span className="text-[10px] font-medium">Copy</span>
+                  </button>
+                </div>
+              );
+            })()}
           </>
         ) : (
           <>
