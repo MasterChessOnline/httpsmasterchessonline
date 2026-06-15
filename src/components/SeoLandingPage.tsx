@@ -55,6 +55,15 @@ export default function SeoLandingPage({ config }: { config: SeoLandingConfig })
     isPartOf: { "@type": "WebSite", name: "MasterChess", url: SITE },
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE}/` },
+      { "@type": "ListItem", position: 2, name: config.h1, item: canonical },
+    ],
+  };
+
   return (
     <>
       <Helmet>
@@ -77,6 +86,7 @@ export default function SeoLandingPage({ config }: { config: SeoLandingConfig })
           <link rel="alternate" hrefLang="x-default" href={`${SITE}${config.hreflang.find((h) => h.lang === "en")?.path ?? config.path}`} />
         )}
         <script type="application/ld+json">{JSON.stringify(webPageJsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
         {faqJsonLd && (
           <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
         )}
