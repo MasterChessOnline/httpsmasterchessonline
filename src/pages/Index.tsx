@@ -471,39 +471,39 @@ const Index = () => {
 
           {/* Daily Rewards 7-day strip — premium mobile-game progression loop */}
           <section id="daily-rewards" className="scroll-mt-24 -mt-4">
-            <DailyRewards7Strip />
+            <LazyMount minHeight={140}><DailyRewards7Strip /></LazyMount>
           </section>
 
           {/* Season banner — main return-driver, links to Season Hub */}
-          <SeasonBanner />
+          <LazyMount minHeight={120}><SeasonBanner /></LazyMount>
 
           {/* Shop teaser — drives discovery of cosmetics */}
           <section id="shop" className="scroll-mt-24">
-            <ShopHomeStrip />
+            <LazyMount minHeight={200}><ShopHomeStrip /></LazyMount>
           </section>
 
           {/* Daily Challenge — directly below the hero, first thing users see */}
           <section id="daily-missions" className="scroll-mt-24 space-y-4">
-            <DailyMysteryBox />
+            <LazyMount minHeight={120}><DailyMysteryBox /></LazyMount>
             <SectionHeader title="Daily Challenge" icon={Target}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <DailyPuzzleWidget />
-                <DailyMissions compact />
+                <LazyMount minHeight={180}><DailyPuzzleWidget /></LazyMount>
+                <LazyMount minHeight={180}><DailyMissions compact /></LazyMount>
               </div>
             </SectionHeader>
           </section>
 
           {/* Rate this site — placed directly below daily missions */}
-          <SiteRating />
+          <LazyMount minHeight={200}><SiteRating /></LazyMount>
 
           {/* Reviews CTA → /reviews public hub. Real numbers only — pulled live. */}
-          <DailyKingBanner />
-          <ReviewsCta />
+          <LazyMount minHeight={120}><DailyKingBanner /></LazyMount>
+          <LazyMount minHeight={120}><ReviewsCta /></LazyMount>
 
 
 
           {/* ── Founder note: handwritten "letter" from Nikola, breaks the polish on purpose ── */}
-          <FounderNote />
+          <LazyMount minHeight={240}><FounderNote /></LazyMount>
 
           {/* User Preferences */}
           <motion.div
