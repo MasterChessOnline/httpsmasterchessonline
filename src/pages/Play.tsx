@@ -1435,6 +1435,13 @@ const Play = () => {
       </main>
 
       <PromotionDialog isOpen={!!pendingPromotion} color={game.turn()} onSelect={handlePromotionSelect} onCancel={() => setPendingPromotion(null)} />
+      {showBeatNikola && (
+        <BeatNikolaShareCard
+          moves={moveHistory.length}
+          playerName={(profile as any)?.display_name ?? user?.email?.split("@")[0] ?? "Player"}
+          onDismiss={() => setShowBeatNikola(false)}
+        />
+      )}
       <Footer />
     </div>
   );
