@@ -1,111 +1,133 @@
-# MasterChess — "Zašto ljudi ne signupuju" Fix Plan
+# Plan: Mobile fix + "Beat Nikola" viralna kuka
 
-Dijagnoza po tvojim odgovorima:
-- Sajt je **pretrpan** → casual igrač ne zna gde da klikne
-- **5s rule fail** → hero ne vrišti "klikni i igraj odmah"
-- **Signup deluje kao obaveza** → modal sa "500 coins + Founder badge" + countdown iskače pre nego što je čovek išta odigrao (vidi se u session replay)
-- **Mobilni lag** → 4D efekti, Framer Motion, video embed, parallax — sve se mountuje na home
-
-Strategija: **Casual igrač mora da odigra partiju za <10s bez signup-a. Signup tek POSLE prve pobede, kao reward, ne kao gate.**
+Dva paralelna pravca, jedan posle drugog (perf prvo, hook posle — jer hook bez perf-a ne radi).
 
 ---
 
-## Sprint 1 — "5 Second Test" Home (cleanup + hook)
+## Deo 1 — Mobile Perf Fix (merljivo, ne nagađanje)
 
-**Cilj:** Telefon korisnik vidi home → za 5s zna šta sajt radi → klikne i igra.
+**Cilj:** LCP < 2.5s, INP < 200ms, nema dropova ispod 30fps pri scrollu na 375px viewport.
 
-1. **Novi hero (above-fold, mobile-first):**
-   - Jedna brutalna headline: *"Play Chess. Right Now. No Signup."*
-   - Sub: *"Real humans. Live games. 10 seconds to your first move."*
-   - **JEDNO** džinovsko CTA dugme: **▶ PLAY NOW** (vodi na `/play-guest`, već postoji)
-   - Ispod, mali secondary link: "Login if you have account"
-   - Live broj: *"X people playing right now"* (real, iz `online_games`/`presence`)
-   - NIŠTA drugo above fold. Ni 4D pieces, ni FounderNote, ni video, ni Daily King banner.
+### 1.1 Baseline merenje
+- Pustiti `browser--performance_profile` na `/` u mobile viewport (375x812)
+- Snimiti: LCP, INP, CLS, JS heap, najteže resurse, najduže taskove
+- To je baseline brojka — sve dalje merimo protiv nje
 
-2. **Skloni / spusti niže / lazy-load:**
-   - Daily King banner → niže (posle fold)
-   - DailyChess_12 video embed → posle fold, lazy mount (IntersectionObserver)
-   - 4D floating pieces → **isključi na mobile** (<768px) i `prefers-reduced-motion`
-   - HumanMargin scribbles → samo desktop
-   - Stream Hub preview → posle fold, lazy
-   - FounderNote → premestiti na `/about`, ne na home
+### 1.2 Konkretne intervencije (po prioritetu impacta)
 
-3. **Navbar diet (mobile):**
-   - Trenutno: previše stavki, color-coded submeniji
-   - Novo (mobile burger): **Play / Learn / Profile / More** (samo 4)
-   - "More" otvara sve ostalo (Tournaments, Battle Royale, Shop, Clubs, Stats, itd)
-   - Desktop ostaje bogatiji ali sa max 5 top-level itema, ostalo u dropdownu
+**a) `backdrop-blur` kill na mobile**
+- Trenutno: 136 `backdrop-blur` klasa u `src/components` + `src/pages`
+- Svaki blur = GPU re-sample svakog frame-a → glavni krivac za scroll lag
+- Dodati globalni CSS guard: na `@media (max-width: 768px)` → `backdrop-filter: none !important` za sve dekorativne klase (`.glass-4d`, generic `.backdrop-blur-*`)
+- Solid bg zamena (npr. `bg-card/85`) gde je čitljivost ugrožena
 
-4. **Ubij intruzivni signup modal:**
-   - "500 coins + Founder badge" countdown modal se sada otvara odmah — to BLOKIRA casual igrača
-   - Pravilo: **NIKAD ne prikazivati signup modal pre nego što gost odigra bar 1 partiju**
-   - Trigger: posle prve pobede gosta → "Save your win + claim 500 coins" (kontekstualno, ne random)
+**b) Framer Motion diet na home-u**
+- Trenutno: 50 `motion.*` instanci samo u `Index.tsx`
+- Dekorativne animacije (hover scale, whileInView fade-in na sekcijama koje su uvek vidljive) → zameniti CSS keyframes ili obrisati
+- Zadržati samo: hero CTA tap, glavni headline reveal
+- Bot icon "wiggle" u Quick Match-u radi `repeat: Infinity` na 5 dugmadi paralelno — ubiti na mobile
 
----
+**c) Realtime / subscriptions defer**
+- `LivePlayerCounter`, `LiveActivityFeed`, `ActivityPulse` — konektuju Supabase channel na mount
+- Promeniti: konektuju se tek posle prvog user interakcije (scroll/click) ili posle 3s idle
+- Na mobile sa 3G to znači manje request-a u prvih 3s = brži LCP
 
-## Sprint 2 — Guest → User Funnel (0 friction signup)
+**d) Slike → AVIF/WebP**
+- Hero `hero-chess.jpg`, `masterchess-poster.jpg`, `nikola-bot-avatar.jpg`
+- Konvertovati preko `sharp` skripte u `public/` (ili `vite-imagetools` ako već postoji)
+- Trenutno hero verovatno 300-600KB jpg → očekivano 50-100KB webp
 
-**Cilj:** Od "klik na Play Now" do prvog poteza < 10s. Signup posle 1. pobede, ne pre.
+**e) Bundle audit**
+- Pokrenuti production build, analizirati top 10 chunkova
+- Ako Stockfish/chess.js leak-uju na home (verovatno preko nekog import lanca) — dynamic import-ovati ih samo iz `/play/*` route-a
 
-1. **`/play-guest` flow refresh:**
-   - Klik na PLAY NOW → odmah matchmaking sa botom (400-800 ELO, casual)
-   - Bez ekrana za izbor time control, bez color picker — samo igra počne (10+0 default)
-   - Gornji desni ugao: mali "Settings" za napredne
-
-2. **Post-game signup reward (kontekstualno):**
-   - Posle 1. pobede gosta: **fullscreen takeover** *"You won! Save this win to your profile + claim 500 coins"*
-   - Jedno dugme: **Continue with Google** (1 click, već imaš handler)
-   - Tiny link: "or email"
-   - Bez "country" / "username" / "display name" — sve to se popunjava posle, progressive profile
-
-3. **Signup forma diet (kad MORA email):**
-   - Trenutna forma: email + password + country + username (+ Google country modal)
-   - Novo: **samo email + password**. Username = auto generated (`Player_xxxxx`), country = auto iz IP, sve menjivo kasnije u Settings
-   - Magic link kao primarna opcija (već postoji), password kao secondary
-
-4. **Sidebar wall za zaključane feature:**
-   - Umesto "moraš da se signupuješ" gate-a, gost vidi sve, ali zaključano sa *"Sign up free to unlock"* — ne blokira eksploraciju
+### 1.3 Re-merenje
+- Posle svake intervencije pustiti `performance_profile` ponovo
+- Dokazati brojkama, ne osećajem
 
 ---
 
-## Sprint 3 — Mobile Perf (LCP < 2.5s, INP < 200ms)
+## Deo 2 — "Beat Nikola" viralna kuka
 
-1. **Baseline profile** sa `browser--performance_profile` na `/` u mobile viewport
-2. **Code-split & lazy:**
-   - 4D pieces, parallax, FounderNote, HumanMargin, Stream Hub, DailyChess_12 embed, Daily King banner → `React.lazy` + IntersectionObserver mount
-   - Stockfish worker ne sme da se importuje na home (samo `/play/*`)
-3. **`use-device-capability` hook (već postoji):** isključi sve dekorativne animacije na low-end / mobile / reduced-motion
-4. **Image pipeline:** hero kao AVIF + WebP preko `vite-imagetools`, `<link rel="preload" as="image" fetchpriority="high">` za LCP
-5. **Framer Motion diet:** dekorativne animacije (shimmer, glow) → CSS keyframes
-6. **Realtime/presence:** subscribe odložiti za "user interacted" (scroll/click), ne na mount
-7. **Fix React warning:** `fetchPriority` → `fetchpriority` na `<img>` (videim u console logs)
-8. **Re-profile** posle svake izmene, dokaži brojkama
+**Cilj:** Jedna feature stvar koju gosti screenshot-uju i šalju drugaru. Leverage tvoje lične priče (13yo, 3500, founder).
+
+### 2.1 Šta već postoji
+- Bot `nikola-sakotic` (uncapped Stockfish, najjači bot)
+- Hero već ima "Challenge me" card sa tvojim avatarom
+- Bot games se beleže u `bot_games` tabelu
+
+### 2.2 Šta dodajemo
+
+**a) Nova ruta `/beat-nikola`**
+- Hero: tvoj avatar, "I'm 13. I'm 3500. Nobody has beaten me on this site yet. You think you can?"
+- Live counter: *"X people tried. Y have won."* (real iz `bot_games` filter `bot_id=nikola-sakotic`)
+- JEDNO dugme: **▶ Try me now** → odmah pokrene partiju protiv nikola-sakotic bota (10+0 default)
+
+**b) Wall of Fame (public leaderboard)**
+- Tabela svih ko je pobedio Nikola bota
+- Kolone: avatar, ime, datum, broj poteza, mali "Watch replay" link
+- Pull live iz `bot_games WHERE bot_id='nikola-sakotic' AND result='player_won'`
+- Sortirano po datumu, top 50
+
+**c) Share card (auto-generated)**
+- Posle svake pobede protiv Nikole → fullscreen takeover
+- "You beat the 13yo founder in X moves" + tvoj avatar + njihov avatar + final position mini-board
+- Dugmad: "Download image" (canvas-to-png) + "Share on X/IG/WhatsApp" (Web Share API)
+- Ovo je viralni mehanizam — slika sa MasterChess brendiranjem koja se širi sama
+
+**d) Loss screen (counter-hook)**
+- Ako izgube → "You lost. So did 99% of others. Try again — your rating is now tracked."
+- Soft signup nudge: "Save your progress" (1-click Google)
+
+### 2.3 Integracija
+- Hero CTA na `/` dobija drugu dugmad red: malo *"Or: try to beat the founder →"* link na `/beat-nikola`
+- U Navbar "More" submenu dodati "Beat Nikola"
+- OG image za `/beat-nikola` (custom za bolji preview na share-ovima)
 
 ---
 
-## Šta NE menjamo
-
-- Sve postojeće feature i podstranice ostaju (samo se sklanjaju iz fokusa home-a)
-- Nema brisanja koda, samo lazy/sakrij/spusti niže
-- Brand identitet (Gold & Black, Nikola, Caveat font) ostaje — ali ne above fold
-
----
-
-## Tehnički sažetak (FYI)
+## Tehnički detalji
 
 ```text
-src/pages/Index.tsx          → potpuni rewrite hero-a, lazy mount svega ispod fold
-src/components/Navbar.tsx    → mobile burger: 4 itema + More
-src/pages/PlayGuest.tsx      → instant matchmaking, bez setup ekrana
-src/components/PostWinSignupTakeover.tsx (new) → trigger posle 1. win-a
-src/pages/Signup.tsx         → samo email+password, auto username/country
-+ ukloni/odloži:
-  - WelcomeOfferModal (founder badge countdown) → trigger samo posle 1 game-a
-  - 4D / parallax / FounderNote / HumanMargin → desktop only ili lazy
+Deo 1:
+  src/index.css                      → mobile blur-kill media query
+  src/pages/Index.tsx                → motion diet, gate animacija po allowHeavy
+  src/components/LivePlayerCounter   → defer subscribe (interaction-trigger)
+  src/components/LiveActivityFeed    → defer subscribe
+  src/components/ActivityPulse       → defer subscribe
+  scripts/optimize-images.mjs (new)  → sharp → AVIF/WebP za 3 hero slike
+  vite.config                        → manualChunks za chess.js / stockfish
+
+Deo 2:
+  src/pages/BeatNikola.tsx (new)     → hero + leaderboard + start-game CTA
+  src/components/beat-nikola/
+    LeaderboardWall.tsx (new)        → real-time pull iz bot_games
+    ShareWinCard.tsx (new)           → canvas image generator + Web Share API
+    TriedCounter.tsx (new)           → live counter (pokušaja vs pobeda)
+  src/App.tsx                        → route /beat-nikola
+  src/pages/Play.tsx                 → post-game hook: ako bot=nikola-sakotic & player won → trigger ShareWinCard
+  public/og-beat-nikola.jpg (new)    → OG share image
 ```
+
+**Bez DB izmena:** sve podatke vučemo iz već postojeće `bot_games` tabele.
 
 ---
 
-## Šta sledi
+## Redosled izvršenja
 
-Reci samo "kreni" → idemo Sprint 1 prvo (cleanup + hero rewrite), zatim Sprint 2 (funnel), zatim Sprint 3 (perf). Možeš i da kažeš "uradi sve odmah" — biće veliki commit ali sve odjednom.
+1. **Profile baseline** (5 min, čisto merenje)
+2. **Mobile fix a→e** (najveći impact prvo: blur kill → motion diet)
+3. **Re-profile, dokazati brojkama**
+4. **Beat Nikola: ruta + leaderboard + start CTA** (MVP)
+5. **Share card + loss screen** (viralni layer)
+6. **Hero link sa `/` + Navbar entry**
+
+---
+
+## Šta NE radimo
+
+- Ne diramo postojeće feature, samo dodajemo
+- Ne menjamo brend, fontove, color palette
+- Ne dodajemo nove backend tabele (sve iz `bot_games`)
+- Ne pravimo PWA / offline / push (osim ako tražiš)
+- Ne ubacujemo "fake counters" — Wall of Fame i Tried/Won counter su 100% real query
