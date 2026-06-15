@@ -59,6 +59,12 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (body.pgn.length > 20000 || body.openingName.length > 200 || (body.openingEco && body.openingEco.length > 20)) {
+      return new Response(JSON.stringify({ error: "payload too large" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const sideWord = body.myColor === "w" ? "White" : "Black";
 

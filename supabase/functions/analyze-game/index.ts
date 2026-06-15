@@ -33,6 +33,11 @@ serve(async (req) => {
 
 
     const { pgn, playerColor, result } = await req.json();
+    if (typeof pgn !== "string" || pgn.length === 0 || pgn.length > 20000) {
+      return new Response(JSON.stringify({ error: "Invalid pgn (max 20000 chars)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const systemPrompt = `You are DailyChess_12, an expert chess coach. Analyze the following chess game PGN and provide constructive feedback.
 The player played as ${playerColor === "w" ? "White" : "Black"}. The result was: ${result}.
