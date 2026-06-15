@@ -273,14 +273,15 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <Link to="/play/online">
+              {/* Guests → instant /play-guest (no signup wall). Logged-in users → real online matchmaking. */}
+              <Link to={user ? "/play/online" : "/play-guest"}>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
                     className="ripple-btn h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
                   >
                     <Play className="h-5 w-5 mr-2 fill-current" />
-                    {t("hero.playOnline")}
+                    {user ? t("hero.playOnline") : "Play Now"}
                   </Button>
                 </motion.div>
               </Link>
