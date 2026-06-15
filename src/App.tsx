@@ -64,6 +64,8 @@ const UtmBuilder = lazy(() => import("./pages/UtmBuilder"));
 const LocationPage = lazy(() => import("./pages/Location"));
 const Promo = lazy(() => import("./pages/Promo"));
 const Supporter = lazy(() => import("./pages/Supporter"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const PaymentCanceled = lazy(() => import("./pages/PaymentCanceled"));
 const PressKit = lazy(() => import("./pages/PressKit"));
 const Viral = lazy(() => import("./pages/Viral"));
 const Privacy = lazy(() => import("./pages/Privacy"));
@@ -261,6 +263,8 @@ function AnimatedRoutes() {
           <Route path="/supporter" element={<Supporter />} />
           <Route path="/support" element={<Navigate to="/supporter" replace />} />
           <Route path="/donate" element={<Navigate to="/supporter" replace />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/payment-canceled" element={<PaymentCanceled />} />
           <Route path="/press-kit" element={<PressKit />} />
           <Route path="/viral" element={<Viral />} />
           <Route path="/resources" element={<Navigate to="/" replace />} />
