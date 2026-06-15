@@ -50,32 +50,33 @@ function gscHeaders() {
 }
 
 async function authorize(req: Request): Promise<{ ok: boolean; reason?: string }> {
-  // Cron mode
-  const cronSecret = Deno.env.get("SITEMAP_CRON_SECRET");
-  const cronHeader = req.headers.get("x-cron-secret");
-  if (cronSecret && cronHeader === cronSecret) return { ok: true };
-
-  // Admin mode
-  const auth = req.headers.get("Authorization");
-  if (!auth) return { ok: false, reason: "missing auth" };
-  try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: auth } } },
-    );
-    const { data: userRes } = await supabase.auth.getUser();
-    const user = userRes?.user;
-    if (!user) return { ok: false, reason: "no user" };
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: user.id,
-      _role: "admin",
-    });
-    if (!isAdmin) return { ok: false, reason: "not admin" };
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, reason: e instanceof Error ? e.message : "auth failed" };
+  // Cron mode: pg_cron calls with the project's anon key in apikey/Authorization.
+  // Accept if the bearer matches our own SUPABASE_ANON_KEY (internal call), no user JWT.
+  const auth = req.headers.get("Authorization") ?? "";
+  const apikey = req.headers.get("apikey") ?? "";
+  const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  if (anon && (auth === `Bearer ${anon}` || apikey === anon)) {
+    // Try to upgrade to user-scoped admin check; if no user, treat as cron.
+    try {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        anon,
+        { global: { headers: { Authorization: auth } } },
+      );
+      const { data: userRes } = await supabase.auth.getUser();
+      const user = userRes?.user;
+      if (!user) return { ok: true }; // pure cron call
+      const { data: isAdmin } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
+      if (isAdmin) return { ok: true };
+      return { ok: false, reason: "not admin" };
+    } catch {
+      return { ok: true }; // fall back to cron
+    }
   }
+  return { ok: false, reason: "missing or invalid auth" };
 }
 
 Deno.serve(async (req) => {
