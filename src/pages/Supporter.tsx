@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DonationProgressBar from "@/components/DonationProgressBar";
+import DonorWall from "@/components/DonorWall";
 
 interface Tier {
   id: string;
@@ -106,6 +107,11 @@ export default function Supporter() {
           </p>
           <DonationProgressBar variant="card" />
         </motion.header>
+
+        <div className="max-w-2xl mx-auto mb-10">
+          <DonorWall />
+        </div>
+
 
 
         <div className="grid md:grid-cols-3 gap-5">
