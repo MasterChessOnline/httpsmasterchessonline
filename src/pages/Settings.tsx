@@ -12,7 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  User, Palette, Volume2, Globe, Bell, Shield, Gamepad2,
+  User, Palette, Volume2, VolumeX, Globe, Bell, Shield, Gamepad2,
   LogOut, Check, ChevronRight, Settings2, Brain, Target as TargetIcon,
   Upload, Trash2, Smile, Eye
 } from "lucide-react";
@@ -163,6 +163,8 @@ const Settings = () => {
     const saved = settings.soundPack;
     return SOUND_PACKS.find(p => p.key === saved) ? saved : "wood";
   });
+  const [coverTracks, setCoverTracks] = useState<boolean>(settings.coverTracks ?? false);
+  const [quietHour, setQuietHour] = useState<boolean>(settings.quietHour ?? false);
 
   useEffect(() => {
     if (profile) {
@@ -508,6 +510,34 @@ const Settings = () => {
                   <Switch checked={item.value} onCheckedChange={v => toggle(item.key, v, item.setter)} />
                 </div>
               ))}
+            </div>
+
+            {/* Cover Your Tracks — opening anonymity */}
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <Shield className="h-3.5 w-3.5 text-primary" />
+                  Cover Your Tracks
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Hide your opening from the Opening Explorer for your next 5 games. Respect for the human craft.
+                </p>
+              </div>
+              <Switch checked={coverTracks} onCheckedChange={v => { setCoverTracks(v); saveSetting("coverTracks", v); toast.success(v ? "Cover Your Tracks enabled — next 5 games hidden" : "Cover Your Tracks disabled"); }} />
+            </div>
+
+            {/* Quiet Hour */}
+            <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <VolumeX className="h-3.5 w-3.5 text-indigo-400" />
+                  Quiet Hour
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Every day 03:00–04:00 your local time: monochrome lobby, no chat, no taunts. Pure focus mode.
+                </p>
+              </div>
+              <Switch checked={quietHour} onCheckedChange={v => { setQuietHour(v); saveSetting("quietHour", v); toast.success(v ? "Quiet Hour enabled" : "Quiet Hour disabled"); }} />
             </div>
 
             <div>

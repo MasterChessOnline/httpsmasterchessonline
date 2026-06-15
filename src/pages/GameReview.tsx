@@ -11,6 +11,7 @@ import EvalReviewPanel from "@/components/chess/EvalReviewPanel";
 import { detectOpening } from "@/lib/openings-detector";
 import TurningPointsStrip from "@/components/game/TurningPointsStrip";
 import EchoReactions from "@/components/game/EchoReactions";
+import HeartbeatMoments from "@/components/game/HeartbeatMoments";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -276,6 +277,10 @@ const GameReview = () => {
 
           {gameId && meta && (
             <EchoReactions gameId={gameId} />
+          )}
+
+          {gameId && (
+            <HeartbeatMoments gameId={gameId} myUserId={user?.id} />
           )}
         </div>
       </main>

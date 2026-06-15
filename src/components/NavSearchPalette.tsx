@@ -100,6 +100,7 @@ const ENTRIES: SearchEntry[] = [
   { label: "Skill Tree",         href: "/skill-tree",        icon: Target,    desc: "Unlock tactics & strategy nodes", category: "tools", keywords: "skill tree improve" },
   { label: "Advanced Stats",     href: "/stats",             icon: BarChart3, desc: "Win rate, streaks, time control", category: "tools", keywords: "stats analytics improve" },
   { label: "1v1 Challenge Link", href: "/challenge",         icon: Swords,    desc: "Shareable challenge link",        category: "tools", keywords: "challenge friend link" },
+  { label: "Challenge a Friend (Quick)", href: "/challenge", icon: Swords,    desc: "Generate link & copy instantly",  category: "tools", keywords: "cmdk challenge friend invite quick" },
   { label: "Game Analysis",      href: "/analysis",          icon: Target,    desc: "Stockfish engine review",         category: "tools", keywords: "analyze engine stockfish" },
   { label: "Game History",       href: "/history",           icon: History,   desc: "Review your past games",          category: "tools", keywords: "history past games" },
   { label: "Coming Soon",        href: "/coming-soon",       icon: Clock,     desc: "Upcoming features",               category: "tools", keywords: "coming soon roadmap" },
