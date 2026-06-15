@@ -159,6 +159,7 @@ const MatchResultLayer = lazy(() => import("@/components/MatchResultLayer"));
 const WelcomeBonusModal = lazy(() => import("@/components/WelcomeBonusModal"));
 const ExitIntentModal = lazy(() => import("@/components/ExitIntentModal"));
 const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
+const WeeklyRecapModal = lazy(() => import("@/components/WeeklyRecapModal"));
 const Shop = lazy(() => import("./pages/Shop"));
 const SpinWheel = lazy(() => import("./pages/SpinWheel"));
 const queryClient = new QueryClient();
@@ -391,6 +392,7 @@ const App = () => (
             <WelcomeBonusModal />
             <ExitIntentModal />
             <OnboardingWizard />
+            <WeeklyRecapModal />
             <StreakFlexController />
             <FloatingShareButton />
           </Suspense>
