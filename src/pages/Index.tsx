@@ -66,7 +66,7 @@ import WinStreakFlame from "@/components/WinStreakFlame";
 import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
-import HeroDonationCard from "@/components/HeroDonationCard";
+
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
 // and stabilize first paint on mobile.
@@ -274,8 +274,6 @@ const Index = () => {
           >
             <AnimatedLogoHero tagline={t("hero.tagline")} />
 
-            {/* 1 ▸ DONATION — first thing under the title, most prominent */}
-            <HeroDonationCard />
 
             {/* 2 ▸ PRIMARY PLAY CTAs — two clear buttons, breathing room */}
             <motion.div
