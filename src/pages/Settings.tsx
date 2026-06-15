@@ -541,8 +541,6 @@ const Settings = () => {
             </div>
 
             <div>
-
-            <div>
               <h4 className="text-sm font-display font-semibold text-foreground mb-2 mt-2">Rating display</h4>
               <p className="text-xs text-muted-foreground mb-3">Control how rating changes appear after each game.</p>
               <div className="space-y-3">
