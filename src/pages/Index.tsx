@@ -275,6 +275,9 @@ const Index = () => {
           >
             <AnimatedLogoHero tagline={t("hero.tagline")} />
 
+            {/* Prominent donation card inside hero */}
+            <HeroDonationCard />
+
             {/* Above-fold rule: ONE big CTA. The signup card was moved below fold
                 to remove friction for first-time visitors. */}
 
