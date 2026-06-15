@@ -304,6 +304,18 @@ function AnimatedRoutes() {
           <Route path="/sr/sah-pravila" element={<SeoLandingRoute />} />
           <Route path="/sr/sah-otvaranja" element={<SeoLandingRoute />} />
           <Route path="/sr/sahovski-rejting" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-protiv-kompjutera-besplatno" element={<SeoLandingRoute />} />
+          <Route path="/sr/sahovske-zagonetke" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-turniri-online" element={<SeoLandingRoute />} />
+          <Route path="/sr/kako-igrati-sah" element={<SeoLandingRoute />} />
+          <Route path="/sr/sahovska-tabla" element={<SeoLandingRoute />} />
+          <Route path="/sr/sahovske-figure" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-za-decu" element={<SeoLandingRoute />} />
+          <Route path="/sr/najbolje-sahovsko-otvaranje" element={<SeoLandingRoute />} />
+          <Route path="/sr/kraljev-gambit" element={<SeoLandingRoute />} />
+          <Route path="/sr/sicilijanska-odbrana" element={<SeoLandingRoute />} />
+          <Route path="/sr/sahovska-strategija" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-mat-u-3-poteza" element={<SeoLandingRoute />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>

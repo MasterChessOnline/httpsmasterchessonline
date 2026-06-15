@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star, Share2, Copy, Check, MessageCircle, Send, Twitter } from "lucide-react";
+import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star, Share2, Copy, Check, MessageCircle, Send, Twitter, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import SharePositionCard from "@/components/SharePositionCard";
 
 export interface MatchResultData {
   outcome: "win" | "loss" | "draw";
@@ -28,6 +29,7 @@ interface Props {
 export default function MatchResultModal({ open, data, onClose, onRematch, onReview }: Props) {
   const { profile } = useAuth() as any;
   const [copied, setCopied] = useState(false);
+  const [cardOpen, setCardOpen] = useState(false);
   if (!data) return null;
   const titleMap = {
     win: { text: "Victory!", icon: <Trophy className="w-8 h-8" />, color: "from-amber-400 to-yellow-200", glow: "shadow-[0_0_80px_hsl(43,95%,60%,0.5)]" },
@@ -234,6 +236,12 @@ export default function MatchResultModal({ open, data, onClose, onRematch, onRev
                         <Twitter className="h-3.5 w-3.5" /> X
                       </a>
                     </div>
+                    <button
+                      onClick={() => setCardOpen(true)}
+                      className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-200 text-xs font-bold uppercase tracking-wider transition-colors"
+                    >
+                      <ImageIcon className="h-3.5 w-3.5" /> Generate share card (PNG)
+                    </button>
                   </motion.div>
                 );
               })()}
@@ -258,6 +266,19 @@ export default function MatchResultModal({ open, data, onClose, onRematch, onRev
           </motion.div>
         </motion.div>
       )}
+      <SharePositionCard
+        open={cardOpen}
+        onClose={() => setCardOpen(false)}
+        outcome={data.outcome}
+        username={profile?.username || profile?.display_name}
+        ratingChange={data.ratingChange}
+        newRating={data.newRating}
+        challengeUrl={
+          (profile?.username || profile?.display_name)
+            ? `https://masterchess.live/vs/${String(profile?.username || profile?.display_name).replace(/[^a-zA-Z0-9_-]/g, "").toLowerCase()}`
+            : `https://masterchess.live/play/online`
+        }
+      />
     </AnimatePresence>
   );
 }

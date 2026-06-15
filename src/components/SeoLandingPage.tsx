@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SeoMegaFooter from "@/components/SeoMegaFooter";
 
 export interface SeoLandingConfig {
   path: string;                       // canonical path, e.g. "/chess-for-kids"
@@ -200,6 +201,7 @@ export default function SeoLandingPage({ config }: { config: SeoLandingConfig })
           </section>
         </article>
       </main>
+      <SeoMegaFooter />
     </>
   );
 }
