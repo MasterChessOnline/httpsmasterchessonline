@@ -126,6 +126,13 @@ const beatBotEntries: SitemapEntry[] = BOT_PROFILES.map((b) => ({
   priority: "0.75",
 }));
 
+// Programmatic city SEO — "play chess online from {city}" long-tail
+const cityEntries: SitemapEntry[] = SEO_CITIES.map((c) => ({
+  path: `/play-from/${c.slug}`,
+  changefreq: "monthly" as const,
+  priority: "0.7",
+}));
+
 // Daily puzzle hub
 const puzzleEntries: SitemapEntry[] = [
   { path: "/puzzles", changefreq: "daily", priority: "0.85" },
