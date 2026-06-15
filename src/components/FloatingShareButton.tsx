@@ -1,56 +1,35 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Share2,
-  Link as LinkIcon,
   MessageCircle,
   Send,
   Facebook,
   Twitter,
+  Link as LinkIcon,
   Check,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
-interface ShareButtonProps {
-  url?: string;
-  title?: string;
-  text?: string;
-  variant?: "default" | "outline" | "ghost" | "gold";
-  size?: "sm" | "default" | "lg";
-  className?: string;
-  showLabel?: boolean;
-}
-
-export default function ShareButton({
-  url = typeof window !== "undefined" ? window.location.href : "https://masterchess.live",
-  title = "MasterChess",
-  text = "Join me on MasterChess for free online chess!",
-  variant = "gold",
-  size = "default",
-  className = "",
-  showLabel = true,
-}: ShareButtonProps) {
+export default function FloatingShareButton() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-  const shareData = { title, text, url };
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const handleNativeShare = useCallback(async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        return;
-      } catch {
-        // user cancelled
-      }
-    }
-    setOpen(true);
-  }, [shareData]);
+  const url = typeof window !== "undefined" ? window.location.href : "https://masterchess.live";
+  const text = "Check out MasterChess — free online chess with tournaments, bots & analysis!";
 
   const copyLink = useCallback(() => {
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => {
+        setCopied(false);
+        setOpen(false);
+      }, 1500);
     });
   }, [url]);
 
@@ -68,10 +47,10 @@ export default function ShareButton({
       color: "bg-sky-500 hover:bg-sky-400",
     },
     {
-      name: "Twitter / X",
+      name: "X / Twitter",
       icon: Twitter,
       href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
-      color: "bg-zinc-800 hover:bg-zinc-700",
+      color: "bg-zinc-700 hover:bg-zinc-600",
     },
     {
       name: "Facebook",
@@ -81,24 +60,12 @@ export default function ShareButton({
     },
   ];
 
-  return (
-    <div className="relative inline-block">
-      <Button
-        variant={variant === "gold" ? "default" : variant}
-        size={size}
-        className={`${
-          variant === "gold"
-            ? "bg-yellow-500 hover:bg-yellow-400 text-black font-semibold"
-            : ""
-        } ${className}`}
-        onClick={handleNativeShare}
-      >
-        <Share2 className="w-4 h-4 mr-2" />
-        {showLabel && "Share"}
-      </Button>
+  if (!visible) return null;
 
+  return (
+    <div className="fixed bottom-20 right-4 z-[100] md:bottom-8 md:right-8">
       {open && (
-        <div className="absolute z-50 mt-2 right-0 w-72 rounded-xl border border-yellow-500/20 bg-[#1a1a1e] shadow-2xl shadow-black/50 p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute bottom-14 right-0 w-64 rounded-xl border border-yellow-500/20 bg-[#1a1a1e] shadow-2xl shadow-black/50 p-4 animate-in fade-in slide-in-from-bottom-4 duration-200 mb-2">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-semibold text-white">Share</span>
             <button
@@ -109,10 +76,9 @@ export default function ShareButton({
             </button>
           </div>
 
-          {/* Copy link */}
           <button
             onClick={copyLink}
-            className="w-full flex items-center gap-3 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 transition-colors mb-3 group"
+            className="w-full flex items-center gap-3 p-3 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 transition-colors mb-3"
           >
             <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
               {copied ? (
@@ -121,12 +87,9 @@ export default function ShareButton({
                 <LinkIcon className="w-4 h-4 text-yellow-500" />
               )}
             </div>
-            <span className="text-sm text-zinc-300 group-hover:text-white transition-colors">
-              {copied ? "Copied!" : "Copy link"}
-            </span>
+            <span className="text-sm text-zinc-300">{copied ? "Copied!" : "Copy link"}</span>
           </button>
 
-          {/* Social buttons */}
           <div className="grid grid-cols-2 gap-2">
             {shareLinks.map((link) => (
               <a
@@ -143,6 +106,14 @@ export default function ShareButton({
           </div>
         </div>
       )}
+
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-12 h-12 rounded-full bg-yellow-500 hover:bg-yellow-400 text-black shadow-lg shadow-yellow-500/20 flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+        aria-label="Share"
+      >
+        <Share2 className="w-5 h-5" />
+      </button>
     </div>
   );
 }

@@ -61,6 +61,10 @@ const EmbedRating = lazy(() => import("./pages/EmbedRating"));
 const Topics = lazy(() => import("./pages/Topics"));
 const SahOnline = lazy(() => import("./pages/SahOnline"));
 const UtmBuilder = lazy(() => import("./pages/UtmBuilder"));
+const LocationPage = lazy(() => import("./pages/Location"));
+const Promo = lazy(() => import("./pages/Promo"));
+const PressKit = lazy(() => import("./pages/PressKit"));
+const Viral = lazy(() => import("./pages/Viral"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
@@ -125,6 +129,7 @@ const BeatBotLanding = lazy(() => import("./pages/BeatBotLanding"));
 
 // Eager components (used in every page chrome)
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
+import FloatingShareButton from "@/components/FloatingShareButton";
 import StreakFlexController from "@/components/StreakFlexController";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
@@ -238,6 +243,10 @@ function AnimatedRoutes() {
           <Route path="/topics" element={<Topics />} />
           <Route path="/sah-online" element={<SahOnline />} />
           <Route path="/utm" element={<UtmBuilder />} />
+          <Route path="/location" element={<LocationPage />} />
+          <Route path="/promo" element={<Promo />} />
+          <Route path="/press-kit" element={<PressKit />} />
+          <Route path="/viral" element={<Viral />} />
           <Route path="/resources" element={<Navigate to="/" replace />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
@@ -337,6 +346,7 @@ const App = () => (
             <ExitIntentModal />
             <OnboardingWizard />
             <StreakFlexController />
+            <FloatingShareButton />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>

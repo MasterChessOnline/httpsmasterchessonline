@@ -91,6 +91,10 @@ const staticEntries: SitemapEntry[] = [
   { path: "/terms", changefreq: "yearly", priority: "0.2" },
   { path: "/reviews", changefreq: "weekly", priority: "0.8" },
   { path: "/rate-masterchess", changefreq: "weekly", priority: "0.7" },
+  { path: "/location", changefreq: "monthly", priority: "0.6", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess Location & Contact", caption: "MasterChess headquarters and contact information." } },
+  { path: "/promo", changefreq: "weekly", priority: "0.7", image: { loc: `${BASE_URL}/og-image.jpg`, title: "Promote MasterChess", caption: "Share MasterChess with your friends and community." } },
+  { path: "/press-kit", changefreq: "monthly", priority: "0.5", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess Press Kit", caption: "Media assets and brand guidelines for MasterChess." } },
+  { path: "/viral", changefreq: "weekly", priority: "0.7", image: { loc: `${BASE_URL}/og-image.jpg`, title: "Go Viral with MasterChess", caption: "Challenge friends and share MasterChess on social media." } },
 ];
 
 // Programmatic openings — auto-generated from ALL_OPENING_SLUGS (60+ pages)

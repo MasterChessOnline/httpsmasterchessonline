@@ -1,8 +1,14 @@
 import React from "react";
-import { Crown } from "lucide-react";
+import { Crown, Instagram, Youtube, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import ShareSiteStrip from "@/components/ShareSiteStrip";
+
+const socialLinks = [
+  { icon: Instagram, href: "https://www.instagram.com/masterchess.live", label: "Instagram", color: "hover:text-pink-400" },
+  { icon: Youtube, href: "https://www.youtube.com/channel/UC8W92XBMdu20Z0tKBbwsaWA", label: "YouTube", color: "hover:text-red-400" },
+  { icon: Share2, href: "https://www.tiktok.com/@masterchess.live", label: "TikTok", color: "hover:text-cyan-400" },
+];
 
 const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
   <footer ref={ref} className="relative border-t border-border/30 bg-card/40 backdrop-blur-sm py-12 overflow-hidden">
@@ -23,6 +29,20 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
           <p className="text-xs text-muted-foreground leading-relaxed">
             The premium platform for chess players. Play, learn, compete.
           </p>
+          <div className="flex gap-3 mt-3">
+            {socialLinks.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className={`w-8 h-8 rounded-lg bg-zinc-800/60 flex items-center justify-center text-muted-foreground ${s.color} hover:scale-110 transition-all`}
+              >
+                <s.icon className="w-4 h-4" />
+              </a>
+            ))}
+          </div>
         </div>
         {[
           {
@@ -52,6 +72,8 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
               { label: "About", href: "/about" },
               { label: "Fair Play", href: "/fair-play" },
               { label: "Invite Friends", href: "/referrals" },
+              { label: "Promote", href: "/promo" },
+              { label: "Press Kit", href: "/press-kit" },
             ],
           },
         ].map((section) => (
