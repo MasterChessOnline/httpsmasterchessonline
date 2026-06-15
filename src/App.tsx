@@ -126,6 +126,7 @@ const DevOnlineSim = lazy(() => import("./pages/DevOnlineSim"));
 const ChallengeLink = lazy(() => import("./pages/ChallengeLink"));
 const Puzzles = lazy(() => import("./pages/Puzzles"));
 const PuzzlePage = lazy(() => import("./pages/PuzzlePage"));
+const Confessions = lazy(() => import("./pages/Confessions"));
 const BeatBotLanding = lazy(() => import("./pages/BeatBotLanding"));
 const PlayFromCity = lazy(() => import("./pages/PlayFromCity"));
 const SeoLandingRoute = lazy(() => import("./pages/SeoLandingRoute"));
@@ -229,6 +230,7 @@ function AnimatedRoutes() {
           <Route path="/daily-mate" element={<Navigate to="/daily-puzzle" replace />} />
           <Route path="/daily-puzzle" element={<DailyChallenge />} />
           <Route path="/puzzle/:slug" element={<PuzzlePage />} />
+          <Route path="/confessions" element={<Confessions />} />
           <Route path="/bot/:botId" element={<BotProfile />} />
           <Route path="/admin/email-status" element={<AdminEmailStatus />} />
           <Route path="/admin/seo-status" element={<SeoStatus />} />
