@@ -227,6 +227,8 @@ const imageEntries: SitemapEntry[] = [
 writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
 writeFileSync(resolve("public/sitemap-openings.xml"), buildUrlset(openingEntries));
 writeFileSync(resolve("public/sitemap-bots.xml"), buildUrlset(botEntries));
+writeFileSync(resolve("public/sitemap-beat-bots.xml"), buildUrlset(beatBotEntries));
+writeFileSync(resolve("public/sitemap-puzzles.xml"), buildUrlset(puzzleEntries));
 writeFileSync(resolve("public/sitemap-glossary.xml"), buildUrlset(glossaryEntries));
 writeFileSync(resolve("public/sitemap-tools.xml"), buildUrlset(toolsEntries));
 writeFileSync(resolve("public/sitemap-mates.xml"), buildUrlset(mateEntries));
