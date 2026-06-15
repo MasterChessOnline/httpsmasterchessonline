@@ -314,20 +314,8 @@ const Index = () => {
               transition={{ delay: 0.45, duration: 0.5 }}
             >
               <Link
-                to="/play"
-                onClick={() => {
-                  try {
-                    sessionStorage.setItem(
-                      "play-from-position",
-                      JSON.stringify({
-                        fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-                        botId: "nikola-sakotic",
-                        playerColor: "w",
-                      })
-                    );
-                  } catch { /* ignore */ }
-                }}
-                className="group flex items-center gap-3 sm:gap-4 rounded-2xl border border-primary/40 bg-gradient-to-r from-amber-500/10 via-background/70 to-amber-500/10 backdrop-blur-md p-3 sm:p-4 shadow-[0_0_30px_-10px_hsl(var(--primary)/0.5)] hover:border-primary/70 hover:shadow-[0_0_40px_-6px_hsl(var(--primary)/0.7)] transition-all"
+                to="/beat-nikola"
+                className="group flex items-center gap-3 sm:gap-4 rounded-2xl border border-primary/40 bg-gradient-to-r from-amber-500/10 via-background/70 to-amber-500/10 p-3 sm:p-4 shadow-[0_0_30px_-10px_hsl(var(--primary)/0.5)] hover:border-primary/70 hover:shadow-[0_0_40px_-6px_hsl(var(--primary)/0.7)] transition-all"
               >
                 <img
                   src={nikolaAvatar}
