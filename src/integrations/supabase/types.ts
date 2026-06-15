@@ -3364,6 +3364,15 @@ export type Database = {
         Args: { _tid: string }
         Returns: undefined
       }
+      recent_donors: {
+        Args: { p_limit?: number }
+        Returns: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          display_name: string
+        }[]
+      }
       report_battle_royale_winner: {
         Args: { _match: string; _winner: string }
         Returns: Json

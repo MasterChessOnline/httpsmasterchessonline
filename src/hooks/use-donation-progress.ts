@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface DonationProgress {
   totalCents: number;
   donorCount: number;
+  milestone: 0 | 25 | 50 | 75 | 100;
   goal: {
     title: string;
     targetCents: number;
@@ -27,7 +28,7 @@ export function useDonationProgress(): DonationProgress {
         return { ...cached.data, loading: false };
       }
     } catch {}
-    return { totalCents: 0, donorCount: 0, goal: null, loading: true };
+    return { totalCents: 0, donorCount: 0, milestone: 0, goal: null, loading: true };
   });
 
   useEffect(() => {
@@ -38,9 +39,12 @@ export function useDonationProgress(): DonationProgress {
         if (!cancelled) setState((s) => ({ ...s, loading: false }));
         return;
       }
+      const rawMs = Number(data.milestone ?? 0);
+      const milestone = ([0, 25, 50, 75, 100].includes(rawMs) ? rawMs : 0) as DonationProgress["milestone"];
       const next: DonationProgress = {
         totalCents: Number(data.total_cents ?? 0),
         donorCount: Number(data.donor_count ?? 0),
+        milestone,
         goal: data.goal
           ? {
               title: data.goal.title,

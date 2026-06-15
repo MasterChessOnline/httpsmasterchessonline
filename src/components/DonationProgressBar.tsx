@@ -51,7 +51,8 @@ export default function DonationProgressBar({ variant = "card" }: Props) {
   }
 
   return (
-    <div className="mt-6 rounded-xl border border-primary/30 bg-card/60 backdrop-blur-sm p-4 sm:p-5 max-w-xl mx-auto">
+    <div data-donation-card className="mt-6 rounded-xl border border-primary/30 bg-card/60 backdrop-blur-sm p-4 sm:p-5 max-w-xl mx-auto">
+
       <div className="flex items-end justify-between mb-2 gap-3">
         <div className="text-left">
           <div className="text-[10px] uppercase tracking-widest text-primary flex items-center gap-1">

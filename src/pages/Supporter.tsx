@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DonationProgressBar from "@/components/DonationProgressBar";
+import DonorWall from "@/components/DonorWall";
 
 interface Tier {
   id: string;
@@ -90,9 +91,10 @@ export default function Supporter() {
 
       <main className="container mx-auto max-w-5xl px-4 py-16">
         <motion.header
+          data-donation-hero
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-14"
+          className="relative text-center mb-14"
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs uppercase tracking-widest text-primary mb-6">
             <Heart className="h-3.5 w-3.5" /> No paywall, ever
@@ -106,6 +108,11 @@ export default function Supporter() {
           </p>
           <DonationProgressBar variant="card" />
         </motion.header>
+
+        <div className="max-w-2xl mx-auto mb-10">
+          <DonorWall />
+        </div>
+
 
 
         <div className="grid md:grid-cols-3 gap-5">
