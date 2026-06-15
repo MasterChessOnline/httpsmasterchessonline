@@ -1,8 +1,14 @@
 import React from "react";
-import { Crown } from "lucide-react";
+import { Crown, Instagram, Youtube, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import ShareSiteStrip from "@/components/ShareSiteStrip";
+
+const socialLinks = [
+  { icon: Instagram, href: "https://www.instagram.com/masterchess.live", label: "Instagram", color: "hover:text-pink-400" },
+  { icon: Youtube, href: "https://www.youtube.com/channel/UC8W92XBMdu20Z0tKBbwsaWA", label: "YouTube", color: "hover:text-red-400" },
+  { icon: Share2, href: "https://www.tiktok.com/@masterchess.live", label: "TikTok", color: "hover:text-cyan-400" },
+];
 
 const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
   <footer ref={ref} className="relative border-t border-border/30 bg-card/40 backdrop-blur-sm py-12 overflow-hidden">
