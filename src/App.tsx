@@ -61,6 +61,7 @@ const EmbedRating = lazy(() => import("./pages/EmbedRating"));
 const Topics = lazy(() => import("./pages/Topics"));
 const SahOnline = lazy(() => import("./pages/SahOnline"));
 const UtmBuilder = lazy(() => import("./pages/UtmBuilder"));
+const LocationPage = lazy(() => import("./pages/Location"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
