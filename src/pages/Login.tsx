@@ -49,6 +49,8 @@ const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleGoogleLogin = async () => {
     setError(null);
     setGoogleLoading(true);
