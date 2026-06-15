@@ -402,93 +402,8 @@ const Index = () => {
 
         {/* ── MAIN CONTENT ── */}
         <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
-          {/* Spin The Wheel — reward CTA, lazy-mount on scroll (was eager → caused mobile jank) */}
-          <section id="spin-wheel" className="scroll-mt-24">
-            <LazyMount minHeight={520}>
-              <React.Suspense fallback={<div style={{ minHeight: 520 }} />}>
-                <HomeSpinWheelSection />
-              </React.Suspense>
-            </LazyMount>
-          </section>
-
-          {/* Instagram poster + follow CTA — directly under hero, above Daily */}
-          <motion.section
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="relative -mt-4"
-          >
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-wider mb-2">
-                Follow <span className="text-gradient-gold">MasterChess</span> on Instagram
-              </h2>
-              <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
-                Behind-the-scenes, results, and the story of how a 13-year-old is building the future of chess.
-              </p>
-
-              <a
-                href="https://www.instagram.com/masterchess.live?igsh=MWl6ZjIzcGJuMGllaA=="
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Open MasterChess Instagram profile"
-                className="block group relative rounded-2xl overflow-hidden border border-primary/30 bg-card/40 shadow-2xl hover:border-primary/70 transition-all duration-300"
-                style={{ boxShadow: "0 25px 60px -15px hsl(43 90% 55% / 0.25)", aspectRatio: "11 / 16" }}
-              >
-                <img
-                  src={posterImage}
-                  alt="MasterChess — 13 years old, already winning. Founded by Nikola Šakotić."
-                  width={1100}
-                  height={1600}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-contain block group-hover:scale-[1.01] transition-transform duration-500"
-                />
-                <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </a>
-
-              <div className="mt-6 flex justify-center">
-                <a
-                  href="https://www.instagram.com/masterchess.live?igsh=MWl6ZjIzcGJuMGllaA=="
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold uppercase tracking-wider text-sm shadow-lg hover:shadow-primary/40 hover:scale-105 transition-all duration-300"
-                >
-                  <Instagram className="h-4 w-4" />
-                  @masterchess.live
-                </a>
-              </div>
-            </div>
-          </motion.section>
-
-          {/* Discover strip — surfaces 5 viral features */}
-          <DiscoverStrip />
-
-          {/* Live Activity Feed — real wins, ratings, tournaments */}
-          <section id="live-activity" className="scroll-mt-24">
-            <LazyMount minHeight={320}>
-              <React.Suspense fallback={<div style={{ minHeight: 320 }} />}>
-                <LiveActivityFeed />
-              </React.Suspense>
-            </LazyMount>
-          </section>
-
-          {/* Daily Rewards 7-day strip — premium mobile-game progression loop */}
-          <section id="daily-rewards" className="scroll-mt-24 -mt-4">
-            <LazyMount minHeight={140}><DailyRewards7Strip /></LazyMount>
-          </section>
-
-          {/* Season banner — main return-driver, links to Season Hub */}
-          <LazyMount minHeight={120}><SeasonBanner /></LazyMount>
-
-          {/* Shop teaser — drives discovery of cosmetics */}
-          <section id="shop" className="scroll-mt-24">
-            <LazyMount minHeight={200}><ShopHomeStrip /></LazyMount>
-          </section>
-
-          {/* Daily Challenge — directly below the hero, first thing users see */}
+          {/* Daily Challenge — the single daily ritual on home */}
           <section id="daily-missions" className="scroll-mt-24 space-y-4">
-            <LazyMount minHeight={120}><DailyMysteryBox /></LazyMount>
             <SectionHeader title="Daily Challenge" icon={Target}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <LazyMount minHeight={180}><DailyPuzzleWidget /></LazyMount>
@@ -497,27 +412,8 @@ const Index = () => {
             </SectionHeader>
           </section>
 
-          {/* Rate this site — placed directly below daily missions */}
-          <LazyMount minHeight={200}><SiteRating /></LazyMount>
-
-          {/* Reviews CTA → /reviews public hub. Real numbers only — pulled live. */}
+          {/* Daily King — single recognition banner */}
           <LazyMount minHeight={120}><DailyKingBanner /></LazyMount>
-          <LazyMount minHeight={120}><ReviewsCta /></LazyMount>
-
-
-
-          {/* ── Founder note: handwritten "letter" from Nikola, breaks the polish on purpose ── */}
-          <LazyMount minHeight={240}><FounderNote /></LazyMount>
-
-          {/* User Preferences */}
-          <motion.div
-            className="flex items-center justify-between flex-wrap gap-3"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            <PreferenceToggles />
-          </motion.div>
 
           {/* ─── QUICK MATCH — Arcade-style time control launcher ─── */}
           <SectionHeader title="Quick Match" icon={Zap} action={<ActivityPulse />}>
@@ -847,64 +743,7 @@ const Index = () => {
             </SectionHeader>
           )}
 
-          {/* Quick Links */}
-          <SectionHeader title="Quick Links" icon={ChevronRight}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { to: "/community", icon: Users, label: "Community" },
-                { to: "/leaderboard", icon: BarChart3, label: "Leaderboard" },
-                { to: user ? `/profile/${user.id}` : "/login", icon: Crown, label: "Profile" },
-                { to: "/settings", icon: Zap, label: "Settings" },
-              ].map((item, i) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.06, duration: 0.4 }}
-                >
-                  <Link to={item.to}>
-                    <motion.div
-                      className="rounded-xl border border-border/20 glass-4d p-4 text-center group block transition-all duration-300 hover:border-primary/20"
-                      whileHover={{ y: -4, scale: 1.05 }}
-                      whileTap={{ scale: 0.97 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                    >
-                      <item.icon className="h-5 w-5 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
-                      <p className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">
-                        {item.label}
-                      </p>
-                    </motion.div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </SectionHeader>
         </div>
-
-        {/* Proof strip — instant differentiators */}
-        <LazyMount minHeight={120}>
-          <React.Suspense fallback={<div style={{ minHeight: 120 }} />}>
-            <ProofStrip />
-          </React.Suspense>
-        </LazyMount>
-
-        {/* Marketing landing strips — heavy, all below the fold, code-split */}
-        <section className="px-4">
-          <div className="max-w-5xl mx-auto">
-            <LazyMount minHeight={600}>
-              <React.Suspense fallback={<div style={{ minHeight: 600 }} />}>
-                <WhyInvest />
-                <WhyMasterChess />
-                <Manifesto />
-                <WallOfReasons />
-                <TestimonialsCarousel />
-              </React.Suspense>
-            </LazyMount>
-          </div>
-        </section>
-
-        {/* Install MasterChess section removed per request */}
 
         {/* Share MasterChess — site-wide share card */}
         <section className="px-4 pb-16">
@@ -912,9 +751,6 @@ const Index = () => {
             <InviteFriendsCard variant="share" />
           </div>
         </section>
-
-        {/* Social Follow Strip */}
-        <SocialFollowStrip />
 
         {/* Supporter / tip CTA — keeps the project ad-free */}
         <SupporterCTA />
