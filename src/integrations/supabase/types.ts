@@ -3112,6 +3112,25 @@ export type Database = {
         Args: { p_end_reason: string; p_game_id: string; p_result: string }
         Returns: Json
       }
+      get_beat_nikola_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          move_count: number
+          rating: number
+          time_control_label: string
+          user_id: string
+        }[]
+      }
+      get_beat_nikola_stats: {
+        Args: never
+        Returns: {
+          attempts: number
+          wins: number
+        }[]
+      }
       get_club_role: { Args: { _club: string; _user: string }; Returns: string }
       get_current_daily_king: {
         Args: never
