@@ -22,8 +22,16 @@ export default function ExitIntentModal() {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem(STORAGE_KEY)) return;
     if (!ALLOWED_ROUTES.includes(location.pathname)) return;
-    // Skip on touch (no real mouse leave) — handled via timed fallback below
+
+    // RULE: never interrupt a casual visitor before they've played at least one game.
+    // Mobile users on home see a signup gate before doing anything → instant bounce.
+    // We only fire exit-intent AFTER the guest has finished at least 1 local game.
+    const gamesPlayed = Number(localStorage.getItem("mc_guest_games_played") || "0");
+    if (gamesPlayed < 1) return;
+
+    // Desktop only: real mouse-leave intent. No mobile timed popup.
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouch) return;
 
     const trigger = () => {
       if (sessionStorage.getItem(STORAGE_KEY)) return;
@@ -31,22 +39,11 @@ export default function ExitIntentModal() {
       setOpen(true);
     };
 
-    let timeoutId: number | undefined;
     const onLeave = (e: MouseEvent) => {
       if (e.clientY <= 0) trigger();
     };
-
-    if (isTouch) {
-      // Mobile: trigger after 45s of idle scroll on funnel pages
-      timeoutId = window.setTimeout(trigger, 45000);
-    } else {
-      document.documentElement.addEventListener("mouseleave", onLeave);
-    }
-
-    return () => {
-      document.documentElement.removeEventListener("mouseleave", onLeave);
-      if (timeoutId) window.clearTimeout(timeoutId);
-    };
+    document.documentElement.addEventListener("mouseleave", onLeave);
+    return () => document.documentElement.removeEventListener("mouseleave", onLeave);
   }, [user, location.pathname]);
 
   const handleGoogle = async () => {
