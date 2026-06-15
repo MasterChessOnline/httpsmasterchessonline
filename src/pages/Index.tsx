@@ -1,6 +1,7 @@
 import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import DiscoverStrip from "@/components/DiscoverStrip";
 import SiteRating from "@/components/SiteRating";
 import ReviewsCta from "@/components/ReviewsCta";
 import DailyKingBanner from "@/components/DailyKingBanner";
@@ -456,6 +457,9 @@ const Index = () => {
               </div>
             </div>
           </motion.section>
+
+          {/* Discover strip — surfaces 5 viral features */}
+          <DiscoverStrip />
 
           {/* Live Activity Feed — real wins, ratings, tournaments */}
           <section id="live-activity" className="scroll-mt-24">
