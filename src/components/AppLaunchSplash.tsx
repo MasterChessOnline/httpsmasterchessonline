@@ -13,7 +13,7 @@ import { Crown } from "lucide-react";
  * Shown once per browser session. Never rendered inside the Lovable
  * editor iframe.
  */
-const SPLASH_MS = 3000;
+const SPLASH_MS = 1200;
 
 export default function AppLaunchSplash() {
   const [visible, setVisible] = useState(false);
