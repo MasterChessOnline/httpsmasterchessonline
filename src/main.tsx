@@ -7,10 +7,12 @@ import "./index.css";
 import { bootstrapVisualSettings } from "./lib/board-themes";
 import { bootstrapSoundPack } from "./lib/chess-sounds";
 import { bootstrapA11y } from "./lib/accessibility";
+import { captureAttribution } from "./lib/track";
 
 bootstrapVisualSettings();
 bootstrapSoundPack();
 bootstrapA11y();
+captureAttribution();
 
 // Capture the install prompt at the earliest possible moment so it's never
 // missed by late-mounting components. Chrome fires `beforeinstallprompt`

@@ -29,6 +29,7 @@ const today = new Date().toISOString().slice(0, 10);
 const staticEntries: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess — Play Chess Online Free", caption: "Free online chess platform with AI coach, tournaments, and lessons." } },
   { path: "/play", changefreq: "weekly", priority: "0.9" },
+  { path: "/sah-online", changefreq: "weekly", priority: "0.9" },
   { path: "/play/online", changefreq: "daily", priority: "0.9" },
   { path: "/play/titles", changefreq: "weekly", priority: "0.6" },
   { path: "/learn", changefreq: "weekly", priority: "0.8" },
