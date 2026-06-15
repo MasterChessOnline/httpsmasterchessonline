@@ -12,6 +12,7 @@ import {
   Users,
   Zap,
   Crown,
+  Link2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShareButton from "@/components/ShareButton";
