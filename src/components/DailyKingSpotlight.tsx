@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface DailyKing {
   user_id: string;
-  display_name: string | null;
-  rating: number;
-  games_won: number;
-  crowned_at: string;
+  rating_gain: number;
+  games_played: number;
+  reign_date: string;
+  profile?: { display_name: string | null; rating: number | null } | null;
 }
 
 export default function DailyKingSpotlight() {
@@ -18,13 +18,25 @@ export default function DailyKingSpotlight() {
 
   useEffect(() => {
     async function fetchKing() {
-      const { data } = await supabase
+      const { data: kingRow } = await supabase
         .from("daily_kings")
-        .select("user_id, display_name, rating, games_won, crowned_at")
-        .order("crowned_at", { ascending: false })
+        .select("user_id, rating_gain, games_played, reign_date")
+        .order("reign_date", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data) setKing(data);
+
+      if (!kingRow) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name, rating")
+        .eq("user_id", kingRow.user_id)
+        .maybeSingle();
+
+      setKing({ ...kingRow, profile });
       setLoading(false);
     }
     fetchKing();
@@ -57,7 +69,7 @@ export default function DailyKingSpotlight() {
             Daily King
           </h3>
           <p className="text-[10px] text-amber-300/60">
-            Crowned {new Date(king.crowned_at).toLocaleDateString()}
+            Reigning since {new Date(king.reign_date).toLocaleDateString()}
           </p>
         </div>
       </div>
@@ -68,10 +80,10 @@ export default function DailyKingSpotlight() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground truncate">
-            {king.display_name ?? "Anonymous"}
+            {king.profile?.display_name ?? "Anonymous"}
           </p>
           <p className="text-xs text-muted-foreground">
-            Rating {Math.round(king.rating)} · {king.games_won} wins today
+            Rating {Math.round(king.profile?.rating ?? 0)} · {king.games_played} games today
           </p>
         </div>
         <Link
