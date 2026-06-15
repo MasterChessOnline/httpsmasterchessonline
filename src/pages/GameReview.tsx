@@ -12,6 +12,7 @@ import { detectOpening } from "@/lib/openings-detector";
 import TurningPointsStrip from "@/components/game/TurningPointsStrip";
 import EchoReactions from "@/components/game/EchoReactions";
 import HeartbeatMoments from "@/components/game/HeartbeatMoments";
+import ShareCardButton from "@/components/game/ShareCardButton";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -257,6 +258,27 @@ const GameReview = () => {
                 </div>
               </div>
             </div>
+
+            {meta && (() => {
+              const r = (meta.result || "").toLowerCase();
+              const won = (myColor === "w" && r === "white") || (myColor === "b" && r === "black");
+              const lost = (myColor === "w" && r === "black") || (myColor === "b" && r === "white");
+              const resultText = won ? "Win" : lost ? "Loss" : "Draw";
+              const delta = (myRating && opponentRating)
+                ? Math.round((won ? 1 : lost ? -1 : 0) * (16 + (opponentRating - myRating) * 0.04))
+                : undefined;
+              return (
+                <ShareCardButton
+                  className="w-full"
+                  data={{
+                    resultText,
+                    subText: [meta.end_reason, `${moves.length} moves`].filter(Boolean).join(" · "),
+                    opening: opening?.name,
+                    eloDelta: delta,
+                  }}
+                />
+              );
+            })()}
 
             <Button variant="outline" className="w-full" onClick={() => { setLoaded(false); setPgnInput(""); setMoves([]); setCurrentMove(-1); setMeta(null); }}>
               Load New Game
