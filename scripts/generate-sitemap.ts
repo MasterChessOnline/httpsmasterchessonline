@@ -13,6 +13,7 @@ import { MATE_PATTERNS } from "../src/data/matePatterns";
 import { ELO_TIERS } from "../src/data/eloTiers";
 import { FAMOUS_GAMES } from "../src/data/famousGames";
 import { GRANDMASTERS } from "../src/data/grandmasters";
+import { SEO_CITIES } from "../src/lib/seo-cities";
 
 const BASE_URL = "https://masterchess.live";
 
