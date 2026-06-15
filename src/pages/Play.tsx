@@ -38,6 +38,7 @@ import RatingChange from "@/components/RatingChange";
 import TitleBadge from "@/components/TitleBadge";
 import StreakBadge from "@/components/StreakBadge";
 import BadgeUnlockToast from "@/components/BadgeUnlockToast";
+import BeatNikolaShareCard from "@/components/BeatNikolaShareCard";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -92,6 +93,7 @@ const Play = () => {
   const [botRatingResult, setBotRatingResult] = useState<RatingCalcResult | null>(null);
   const [streakAfter, setStreakAfter] = useState<StreakState | null>(null);
   const [unlockedBadges, setUnlockedBadges] = useState<BadgeRow[]>([]);
+  const [showBeatNikola, setShowBeatNikola] = useState(false);
   const ratingAppliedRef = useRef(false);
 
   // --- Per-move accuracy tracking (player + bot) ---
@@ -764,6 +766,11 @@ const Play = () => {
     const isDraw = gameResult === "1/2-1/2";
     const result: "win" | "loss" | "draw" = isDraw ? "draw" : playerWon ? "win" : "loss";
 
+    // 🏆 Viral hook: beating Nikola = full-screen takeover with shareable card.
+    if (result === "win" && (currentBot as any).id === "nikola-sakotic") {
+      setShowBeatNikola(true);
+    }
+
     const botRating = currentBot.rating;
     const currentBotRating = (profile as any).bot_rating ?? 1200;
     const botGames = (profile as any).bot_games_played ?? 0;
@@ -1428,6 +1435,13 @@ const Play = () => {
       </main>
 
       <PromotionDialog isOpen={!!pendingPromotion} color={game.turn()} onSelect={handlePromotionSelect} onCancel={() => setPendingPromotion(null)} />
+      {showBeatNikola && (
+        <BeatNikolaShareCard
+          moves={moveHistory.length}
+          playerName={(profile as any)?.display_name ?? user?.email?.split("@")[0] ?? "Player"}
+          onDismiss={() => setShowBeatNikola(false)}
+        />
+      )}
       <Footer />
     </div>
   );
