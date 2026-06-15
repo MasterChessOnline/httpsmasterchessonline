@@ -259,12 +259,6 @@ export default function HomeSpinWheelSection() {
         </div>
       </div>
 
-      {/* Live social-proof strip */}
-      <div className="relative mt-6 grid grid-cols-3 gap-2 sm:gap-3 text-center">
-        <Stat icon={<Users className="h-4 w-4" />} label="Online" value={stats.online} accent="text-emerald-300" />
-        <Stat icon={<Coins className="h-4 w-4" />} label="Won today" value={stats.rewardsToday.toLocaleString()} accent="text-amber-300" />
-        <Stat icon={<Trophy className="h-4 w-4" />} label="Top win" value={stats.topWin ? `+${stats.topWin.toLocaleString()}` : "—"} accent="text-fuchsia-300" />
-      </div>
 
       {/* Result modal with shareable card */}
       <AnimatePresence>
