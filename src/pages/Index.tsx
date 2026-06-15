@@ -41,7 +41,8 @@ import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
 
 import ParallaxCard from "@/components/ParallaxCard";
-import ChessUniverseBackground from "@/components/ChessUniverseBackground";
+// Heavy animated background — desktop only, lazy-loaded to keep mobile bundle/CPU light.
+const ChessUniverseBackground = React.lazy(() => import("@/components/ChessUniverseBackground"));
 import DailyMissions from "@/components/DailyMissions";
 import DailyMysteryBox from "@/components/DailyMysteryBox";
 import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
