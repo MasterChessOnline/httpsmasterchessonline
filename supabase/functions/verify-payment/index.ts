@@ -12,83 +12,81 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
+  const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
-  // Require authentication
+  // Optional auth — donations can be made by guests.
+  let callerId: string | null = null;
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claims } = await supabaseAdmin.auth.getClaims(token);
+    callerId = claims?.claims?.sub ?? null;
   }
-  const token = authHeader.replace("Bearer ", "");
-  const { data: claims, error: authErr } = await supabaseClient.auth.getClaims(token);
-  if (authErr || !claims?.claims?.sub) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-  const callerId = claims.claims.sub;
 
   try {
     const { sessionId } = await req.json();
-    if (!sessionId) throw new Error("No session ID provided");
+    if (!sessionId || typeof sessionId !== "string") {
+      return new Response(JSON.stringify({ error: "No session ID provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
 
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    
-    if (session.payment_status === "paid") {
-      const { itemType, itemId, userId } = session.metadata || {};
 
-      // Verify the session belongs to the caller (or is guest)
-      if (userId && userId !== "guest" && userId !== callerId) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Upsert to purchases table to avoid duplicates
-      const { error } = await supabaseClient
-        .from('purchases')
-        .upsert({
-          stripe_session_id: session.id,
-          user_id: userId === "guest" ? null : userId,
-          item_type: itemType || "donation",
-          item_id: itemId,
-          amount: session.amount_total,
-          currency: session.currency,
-          status: 'completed'
-        }, { onConflict: 'stripe_session_id' });
-        
-      if (error) {
-        console.error("Error inserting purchase:", error);
-      }
-      
-      return new Response(JSON.stringify({ 
-        success: true, 
-        metadata: session.metadata,
-        amount: session.amount_total 
-      }), {
+    if (session.payment_status !== "paid") {
+      return new Response(JSON.stringify({ success: false, status: session.payment_status }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    return new Response(JSON.stringify({ success: false }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    const { itemType, itemId, userId } = session.metadata || {};
+    const isDonation = (itemType || "donation") === "donation";
+
+    // For non-donation purchases, require the caller to own the session.
+    if (!isDonation && userId && userId !== "guest" && userId !== callerId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { error } = await supabaseAdmin
+      .from("purchases")
+      .upsert(
+        {
+          stripe_session_id: session.id,
+          user_id: !userId || userId === "guest" ? null : userId,
+          item_type: itemType || "donation",
+          item_id: itemId ?? null,
+          amount: session.amount_total ?? 0,
+          currency: session.currency ?? "usd",
+          status: "completed",
+        },
+        { onConflict: "stripe_session_id" }
+      );
+
+    if (error) console.error("verify-payment upsert error:", error);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        metadata: session.metadata,
+        amount: session.amount_total,
+        currency: session.currency,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+    );
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
