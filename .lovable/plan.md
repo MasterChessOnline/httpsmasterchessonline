@@ -1,98 +1,104 @@
 
-# MasterChess — Brutalno iskrena analiza rasta
+# Plan rasta MasterChess — 14 dana
 
-## Glavni problem (zašto nema ljudi)
-
-Sajt je **funkcionalno ogroman** (40+ stranica, klanovi, battle pass, battle royale, turniri, gamification, AI coach, opening trainer, story mode, missions, ranks, titles, chests, spin wheel, beat nikola, daily king, stream hub...) ali **prazan**. To je #1 razlog odlaska:
-
-1. **Niko nije online** → "ghost town effect". Novi posetilac otvori /play, vidi 0 ljudi u queue, ode za 8 sekundi. Chess.com ima 100k+ online stalno — tvoj competitive moat je **nemoguć** dok ne rešiš cold-start.
-2. **Previše dugmadi, premalo razloga da se vratiš sutra**. Klasičan "feature soup". Korisnik ne razume šta je core loop.
-3. **Nula SEO trafika** za "chess online", "play chess free" — to su brutalno teški KW (KDI 80+). Nemaš šanse direktno; moraš ići na long-tail.
-4. **Nema viralnog mehanizma**. Referrals postoje ali nemaju incentive snagu. Nema share-after-win, nema embed widgeta, nema "chess card" koji ljudi šeruju van sajta.
-5. **Mobile signup gate** = bounce. Već ste delom rešili guest play, ali konverzija nije merena.
-
-## SKINI (manje je više)
-
-Ove stvari **razvodnjavaju** proizvod i ubijaju fokus. Ukloniti ili sakriti iza /more:
-
-- **Battle Royale, Team Battles, Arena, Tournaments** za neulogovane — 0 igrača = mrtva soba. Sakriti dok nema baze. Ostaviti samo "Quick Match" + "Play Bot".
-- **Spin Wheel, Chests, Battle Pass, Missions, Skill Tree, Achievements, Titles, Badges** — previše paralelnih progression sistema. Zadržati JEDAN (preporuka: Battle Pass kao master meta-progression). Ostalo merge ili obrisati.
-- **Stream Hub, DailyChess_12 integracija** na home — niko ne dolazi na chess sajt da gleda tvoj YouTube. Premestiti u footer ili /about.
-- **Beat Nikola, Daily King, Style Twin, Chess DNA, Play Personality, Style Quiz** — gimmicks. Zadržati 1 (Chess Card jer je share-friendly).
-- **Clubs/Clans** dok nema 1000+ aktivnih — prazni klubovi izgledaju gore nego nijedan.
-- **LivePlayerCounter / LiveSocialProof / TrustStrip** na home kada vraćaju 0 — sakrij komponente umesto "Be the first to play today" (to **potvrđuje** da je prazno).
-- **Exit-intent modal sa "Founder badge"** — badge nema vrednost ako niko ne vidi profile.
-
-## DODAJ (brutalno fokusirano na rast)
-
-### A. Cold-start fix (najvažnije)
-1. **Bot lobby kamuflaža** — kada je queue prazan, automatski match sa botom **bez da igrač zna** (osim u rated). Nema laži u brojkama, ali postoji **uvek protivnik za 3 sekunde**. To je *jedini* način da preživiš pre-traction fazu. (Etika: prikaži malu "Practice opponent" oznaku posle partije.)
-2. **Async/Correspondence chess** — 1 potez dnevno. Ne treba ti istovremena publika. Ovo je tajni kanal koji je doneo lichess hiljade igrača u ranim danima.
-3. **Single-link challenge** — `masterchess.live/vs/abc123`. Generiši link, pošalji prijatelju na WhatsApp, igrate bez registracije. Najjači viralni mehanizam u chess prostoru i **nemaš ga**.
-
-### B. SEO long-tail (jedini realan organski kanal)
-Targetiraj stotine niskovolumnih stranica koje **niko ne pokriva dobro**:
-- "How to beat [bot name] chess" — po botu (već imate 9 botova)
-- "[Opening name] for beginners trap" — postoji opening trainer, generiši landing po openingu sa video embed
-- "Chess rating calculator [country]"
-- "Play chess vs friend no signup" — ovo je 8k/mo i niko ne dominira
-- Programmatic SEO: 1 stranica po gradu/zemlji ("Play chess online from Belgrade")
-
-Već imate sitemap-e za openings/mates/glossary/players — proveriti da li su zaista indeksirane (Search Console).
-
-### C. Viral mehanizmi
-1. **Share-after-win card** — auto-generisana slika sa potezima + QR za rematch. Auto-popup posle pobede. (Imate ChessCard, ali nije u win-flowu.)
-2. **Embed widget** — `<iframe>` mini-board za blogove/forume sa "Powered by MasterChess". Free distribution.
-3. **Daily puzzle widget za druge sajtove** (čak iako "no puzzles" policy važi za sajt — embed za eksterne sajtove je drugačiji use case; ALI ovo krši tvoju core constraint, pa preskoči ako je sveto).
-4. **Referral 2.0** — daje konkretno: "Pozovi 3 prijatelja, dobijaš permanent piece set". Trenutni referrals nema dovoljno mrkve.
-
-### D. Retention (D1/D7)
-1. **Push notifications koji rade** — već imate scaffolding, ali real trigger: "Tvoj prijatelj X je online" i "Tvoj turnir počinje za 5 min". Ostalo spam.
-2. **Streak insurance** — 1 free freeze nedeljno. Smanjuje rage-quit pri prekinutom streaku.
-3. **"Continue where you left off"** na home za uloovane — 1 dugme, ne 47 kartica.
-
-### E. Konverzija (signup)
-1. **Magic link / Google one-tap** — već imate Google, dodajte one-tap prompt.
-2. **Play first, signup after 1st win** — guest može odigrati 3 partije, signup gate tek kada želi rating ili coins.
-3. **Mobile signup u 1 polju** — samo email, password kasnije ili magic link.
-
-## UNAPREDI
-
-- **Home page** — trenutno overload. Redizajn na: hero "Play in 5 seconds" → board widget koji odmah radi → 3 CTA (vs friend / vs bot / quick match). Sve ostalo dole.
-- **Onboarding** — 0 koraka. Prvi put na sajtu: 30s skill check pa preporučen bot ili matchmaking range.
-- **Realna metrika "playing now"** — koristite `usePresence` (Realtime presence) umesto online_games count. Već imate hook, koristi se nedovoljno.
-- **Performance** — 40+ stranica + Stockfish WASM + framer-motion svuda = sporo na mobile. Audit Core Web Vitals.
-- **i18n** — ako ciljaš srpski/balkan market prvo, prebaci default na sr-Latn i SEO strane za "šah online besplatno".
-
-## Tehnička dela (kratko)
-
-```
-src/pages/Index.tsx         → drastičan redizajn (instant-play hero)
-src/components/HomeSpinWheelSection.tsx, DiscoverStrip, TrustStrip → ukloniti ili konsolidovati
-src/hooks/use-online-game.ts → dodati "phantom bot fill" kada queue > 8s prazan
-src/pages/PlayGuest.tsx      → generator /vs/{shortcode} linkova
-supabase: tabela `challenge_links` (id, fen, creator_ip, created_at, claimed_by)
-src/pages/Async.tsx (NOVO)   → correspondence chess (1 potez/dan)
-Programmatic SEO route: /play-from/:city → SSG-like generisanje preko sitemap-a
-```
-
-## Predloženi redosled (4 nedelje)
-
-1. **Nedelja 1** — Skini noise sa home, jedan jasan CTA, share-link `/vs/xxx`.
-2. **Nedelja 2** — Bot-fill u matchmaking queue, async chess MVP.
-3. **Nedelja 3** — Share-after-win card auto-popup + embed iframe.
-4. **Nedelja 4** — Programmatic SEO landing pages (50–200 strana long-tail).
-
-## Šta NE raditi
-
-- Ne dodavati nove feature dok rast nije rešen. Imate ih 3x previše.
-- Ne reklamirati plaćeno (Google Ads) dok cold-start nije fiksiran — bacate novac.
-- Ne polirati klanove/turnire dok nema 100+ DAU.
+Cilj: prvih **100 pravih korisnika** za 2 nedelje. Sve ostalo (turniri, klanovi, ELO ladder) postaje smisleno tek posle toga.
 
 ---
 
-**Pitanja pre implementacije:**
-1. Šta ti je top prioritet sledećih 2 nedelje — **rast (novi useri)** ili **retention (postojeći)**?
-2. Da li si OK sa "phantom bot fill" idejom (etično ali kontroverzno), ili strogo držimo "ZERO fake engagement"?
-3. Koliko ti je sveta "No Puzzles" policy — blokira nekoliko najjačih SEO/viral kanala?
-4. Da li redizajn home da bude **radikalan** (sve dole, samo board + CTA) ili inkrementalan?
+## DEO 1 — Šta SAJT radi (ja implementiram)
+
+### A. Sakrij prazne sobe (ne briši — sakrij)
+Korisnik ulazi i vidi 0 ljudi → bounce. Rešenje: prazne sobe se ne prikazuju dok nemaš bazu.
+
+- **Battle Royale, Arena, Team Battles, Tournaments, Clubs** → ulaz iza `/more` linka u footeru. Skidaju se iz glavnog menija i sa home-a.
+- **LivePlayerCounter / TrustStrip** kada vraćaju 0 → komponente se **ne renderuju** umesto da pišu "Be the first" (to potvrđuje da je prazno).
+- **Spin Wheel, Chests, Skill Tree, Missions kartice** sa home-a → ostaju kao stranice, ali se sklanjaju iz home grida.
+- Glavni meni: **Play · Puzzles · Learn · Profile · More**. Pet stavki, ne 15.
+
+Gamification ostaje (XP, Battle Pass, ranks) — to je tvoj retention layer.
+
+### B. Win-flow viral (najjači single fix)
+Trenutno: dobiješ partiju → vidi se rezultat → kraj. Nula viralnog izlaza.
+
+Posle svake pobede (vs bot ili human):
+1. **Auto-popup share card** — generisana slika sa: finalna pozicija + tvoj username + rezultat + QR za rematch link. Već postoji `ChessCard` komponenta, samo treba ubaciti u win modal.
+2. **"Challenge your friend" CTA** — kopira `masterchess.live/vs/{username}` link.
+3. **3 dugmeta**: Download image · Share to WhatsApp · Share to Instagram Story.
+
+Ovo je **jedini razlog zašto bi neko od tvojih korisnika prosledio sajt dalje**.
+
+### C. `/vs/{shortcode}` deep link wiring
+`ChallengeLink.tsx` već postoji. Treba:
+- Generisati kratke linkove (`/vs/abc123`) iz Promo/Viral stranica.
+- Landing page = full-screen "Player X challenges you" + Play Now CTA bez signupa (guest mode već postoji).
+- Tracker u Supabase: ko je kliknuo, ko je odigrao — da vidiš šta zaista konvertuje.
+
+### D. Reduktivni home redesign (mini)
+*Memorija kaže "Do NOT redesign Home — user veto"*, pa **ne diram layout**. Samo:
+- Sklanjam prazne live brojače (gore B).
+- Prvi viewport mora imati **1 jasan CTA**: Play Now.
+- DailyChess_12 sekcija ostaje, ali ide ispod fold-a.
+
+### E. SEO landing strane (programmatic)
+- `/beat/{botId}` — već postoji infrastruktura. Generišem 9 stranica (po botu) sa real meta + JSON-LD.
+- `/openings/{slug}/for-beginners` — 20 najpopularnijih otvaranja, jedna stranica svako.
+- `/play-from/{city}` — 30 gradova (Belgrade, Zagreb, Sarajevo, Skopje, Sofia, Bucharest, Athens...). Long-tail "play chess online from {city}".
+
+Sve ide u sitemap, sve ima unique title/description/og.
+
+---
+
+## DEO 2 — Šta TI radiš (2h/dan)
+
+Sajt sam ne dovodi ljude. Distribucija je tvoj posao. Evo egzaktnog rasporeda:
+
+### Dnevno (60 min)
+- **20 min** — 1 Reels/Short (15-30s): brza pobeda, mat u 4, "kako sam pobedio bota X". Cross-post: Instagram + TikTok + YouTube Shorts. Uvek link u biju `masterchess.live`.
+- **20 min** — 1 Reddit komentar/post u r/chess, r/chessbeginners, r/AnarchyChess. NIKAD goli link — daj vrednost.
+- **20 min** — odgovori na DM-ove, komentare, share `/vs/nikola` link u 3 WhatsApp/Discord grupe.
+
+### Nedeljno (60 min ostatka)
+- **1 duži YouTube video** (5-10 min) na DailyChess_12: "How I built a free chess site" ili "Beating 1800 ELO bot live". Link u opisu + pinned komentar.
+- **1 Reddit "Show & Tell" post** u r/SideProject, r/InternetIsBeautiful: "I built a chess site with zero ads, AMA".
+
+### Šta očekivati realno
+- Nedelja 1: ~50 unique posetilaca, 5-10 signupa.
+- Nedelja 2: ~200 unique, 20-30 signupa.
+- Nedelja 4: ako si dosledan, 500+ unique/nedeljno i Google počinje da rangira SEO landing strane.
+
+**Ako ne odradiš svoj deo — sajt sa najboljim featurima na svetu ostaje prazan.** Ovo je matematika, ne mišljenje.
+
+---
+
+## Tehnički deo (za implementaciju)
+
+```
+src/components/PostGameWinModal.tsx       (NOVO) auto-popup share card
+src/components/Header.tsx                 reduce nav to 5 items + More dropdown
+src/pages/Index.tsx                       hide empty-state widgets when count=0
+src/components/LivePlayerCounter.tsx      return null if value === 0
+src/pages/ChallengeLink.tsx               polish guest landing
+src/pages/PlayFromCity.tsx                (NOVO) programmatic SEO route
+src/lib/seo-cities.ts                     (NOVO) city list + metadata
+src/pages/BeatBotLanding.tsx              ensure all 9 bots have full meta
+scripts/generate-sitemap.ts               add /play-from/* and /beat/* + /openings/*/for-beginners
+supabase migration: challenge_link_clicks (id, code, ip_hash, clicked_at, converted)
+```
+
+Bez novih backend feature-a, bez novih gamification sistema, bez novih stranica izvan SEO landing strana. Disciplina = preživljavanje.
+
+---
+
+## Šta NE radim (svesno)
+
+- Ne diram layout home-a (tvoj veto).
+- Ne brišem Battle Royale/klanove (samo sakrivam).
+- Ne dodajem phantom bot-fill (krši "zero fake engagement").
+- Ne pravim plaćene reklame setup (Google Ads bacanje love dok cold-start nije rešen).
+- Ne pravim još jedan progression sistem.
+
+---
+
+## Sledeći korak
+
+Klikni **Implement plan** i krećem sa DEO 1 (skidanje noise-a + win-flow share card + 1 SEO landing tip kao primer). To je nedelja 1. Posle toga merimo realne brojke pre nego što idemo dalje.
