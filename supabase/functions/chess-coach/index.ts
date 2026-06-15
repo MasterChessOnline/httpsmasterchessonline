@@ -41,6 +41,17 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Cap message volume to prevent AI credit drain
+    if (messages.length > 40) {
+      return new Response(JSON.stringify({ error: "Too many messages (max 40)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    for (const m of messages) {
+      if (typeof m?.content === "string" && m.content.length > 4000) {
+        m.content = m.content.slice(0, 4000);
+      }
+    }
 
     const autoLevel = !rating
       ? "intermediate"
