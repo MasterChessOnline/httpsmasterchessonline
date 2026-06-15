@@ -66,7 +66,7 @@ import WinStreakFlame from "@/components/WinStreakFlame";
 import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
-import HeroDonationCard from "@/components/HeroDonationCard";
+
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
 // and stabilize first paint on mobile.
@@ -274,8 +274,6 @@ const Index = () => {
           >
             <AnimatedLogoHero tagline={t("hero.tagline")} />
 
-            {/* 1 ▸ DONATION — first thing under the title, most prominent */}
-            <HeroDonationCard />
 
             {/* 2 ▸ PRIMARY PLAY CTAs — two clear buttons, breathing room */}
             <motion.div
@@ -569,43 +567,6 @@ const Index = () => {
 
           {/* Daily section moved to top of main content (above) */}
 
-          {/* ─── Training shortcuts (de-emphasized — for between matches) ─── */}
-          <section className="pt-2">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground/70 font-semibold">
-                Between matches
-              </p>
-              <Link
-                to="/guides"
-                className="text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5"
-              >
-                All guides <ChevronRight className="h-3 w-3" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-                { to: "/openings", icon: BookOpen, label: "Openings" },
-                { to: "/training", icon: Brain, label: "Training" },
-                { to: "/analysis", icon: Eye, label: "Analysis" },
-                { to: "/learn", icon: GraduationCap, label: "Lessons" },
-              ].map((item, i) => (
-                <motion.div
-                  key={item.to}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.04, duration: 0.35 }}
-                >
-                  <Link to={item.to}>
-                    <div className="rounded-lg border border-border/15 bg-muted/5 hover:bg-muted/15 hover:border-border/30 p-2.5 flex items-center gap-2 transition-all duration-200">
-                      <item.icon className="h-3.5 w-3.5 text-muted-foreground/80 shrink-0" />
-                      <span className="text-xs text-muted-foreground font-medium truncate">{item.label}</span>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </section>
 
           {/* Recent Games */}
           {user && recentGames.length > 0 && (
@@ -723,7 +684,53 @@ const Index = () => {
             </SectionHeader>
           )}
 
+          {/* ─── Daily Spin Wheel — reward loop ─── */}
+          <React.Suspense fallback={<div className="h-[280px]" />}>
+            <LazyMount minHeight={280}>
+              <HomeSpinWheelSection />
+            </LazyMount>
+          </React.Suspense>
+
+          {/* ─── Training shortcuts (de-emphasized — for between matches) ─── */}
+          <section className="pt-2">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground/70 font-semibold">
+                Between matches
+              </p>
+              <Link
+                to="/guides"
+                className="text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5"
+              >
+                All guides <ChevronRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { to: "/openings", icon: BookOpen, label: "Openings" },
+                { to: "/training", icon: Brain, label: "Training" },
+                { to: "/analysis", icon: Eye, label: "Analysis" },
+                { to: "/learn", icon: GraduationCap, label: "Lessons" },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.to}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.04, duration: 0.35 }}
+                >
+                  <Link to={item.to}>
+                    <div className="rounded-lg border border-border/15 bg-muted/5 hover:bg-muted/15 hover:border-border/30 p-2.5 flex items-center gap-2 transition-all duration-200">
+                      <item.icon className="h-3.5 w-3.5 text-muted-foreground/80 shrink-0" />
+                      <span className="text-xs text-muted-foreground font-medium truncate">{item.label}</span>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+
         </div>
+
 
         {/* Share MasterChess — site-wide share card */}
         <section className="px-4 pb-16">
