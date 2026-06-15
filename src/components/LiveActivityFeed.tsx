@@ -194,12 +194,7 @@ export default function LiveActivityFeed() {
       </div>
 
       <div className="relative max-h-[320px] overflow-hidden">
-        {empty ? (
-          <div className="px-5 py-8 text-center text-sm text-muted-foreground">
-            <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/60" />
-            Waiting for the next game to finish…
-          </div>
-        ) : (
+        {false ? null : (
           <ul className="divide-y divide-border/30">
             <AnimatePresence initial={false}>
               {items.map((it) => (
