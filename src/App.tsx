@@ -287,6 +287,7 @@ function AnimatedRoutes() {
           <Route path="/vs/:code" element={<ChallengeLink />} />
           <Route path="/puzzles" element={<Puzzles />} />
           <Route path="/beat/:botId" element={<BeatBotLanding />} />
+          <Route path="/play-from/:city" element={<PlayFromCity />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
