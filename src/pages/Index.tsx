@@ -259,8 +259,8 @@ const Index = () => {
             />
           </motion.div>
           <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
-          {/* Scan-line futuristic overlay */}
-          <div className="absolute inset-0 scan-line pointer-events-none" />
+          {/* Scan-line futuristic overlay — desktop only (pure decoration). */}
+          {allowHeavy && <div className="absolute inset-0 scan-line pointer-events-none" />}
 
           <motion.div
             className="container mx-auto max-w-4xl text-center relative z-10 pt-8"
