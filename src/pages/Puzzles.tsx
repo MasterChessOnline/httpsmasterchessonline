@@ -160,7 +160,7 @@ export default function Puzzles() {
     <>
       <Helmet>
         <title>Daily Chess Puzzle — Free Tactics Trainer | MasterChess</title>
-        <meta name="description" content="Solve today's chess puzzle. Free, no account needed. New puzzle every day, hand-picked by Lichess and replayed move-by-move on MasterChess." />
+        <meta name="description" content="Solve today's chess puzzle. Free, no account needed. A new tactical puzzle every day on MasterChess." />
         <link rel="canonical" href="https://masterchess.live/puzzles" />
         <meta property="og:title" content="Daily Chess Puzzle — MasterChess" />
         <meta property="og:description" content="Solve today's free chess puzzle. Train tactics every day." />
@@ -291,8 +291,7 @@ export default function Puzzles() {
           )}
 
           <div className="text-center text-[11px] text-muted-foreground pt-6">
-            Puzzle sourced from the public Lichess Daily Puzzle.
-            {" "}
+            New puzzle every day.{" "}
             <a className="underline hover:text-foreground" href="/play">Play a real game →</a>
           </div>
         </div>

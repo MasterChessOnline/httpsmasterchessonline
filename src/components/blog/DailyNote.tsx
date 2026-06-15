@@ -63,7 +63,7 @@ const ENTRIES: DailyEntry[] = [
   },
   {
     title: "I'm 13 and I built this",
-    body: "Sometimes I get nervous that the site has bugs. Then I remember — chess.com was buggy too at the start. Every weekend I fix something. If you find something broken, tell me, I genuinely fix it that night.",
+    body: "Sometimes I get nervous that the site has bugs. Then I remember — every big site was buggy at the start. Every weekend I fix something. If you find something broken, tell me, I genuinely fix it that night.",
     takeaway: "shipping > perfect.",
     fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     illustration: "knight",
