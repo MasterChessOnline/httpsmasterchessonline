@@ -26,6 +26,8 @@ interface Props {
 }
 
 export default function MatchResultModal({ open, data, onClose, onRematch, onReview }: Props) {
+  const { profile } = useAuth() as any;
+  const [copied, setCopied] = useState(false);
   if (!data) return null;
   const titleMap = {
     win: { text: "Victory!", icon: <Trophy className="w-8 h-8" />, color: "from-amber-400 to-yellow-200", glow: "shadow-[0_0_80px_hsl(43,95%,60%,0.5)]" },
