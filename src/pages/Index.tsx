@@ -67,6 +67,7 @@ import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
 import SocialFollowStrip from "@/components/SocialFollowStrip";
 import HomeDonationTopStrip from "@/components/HomeDonationTopStrip";
+import HeroDonationCard from "@/components/HeroDonationCard";
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
 // and stabilize first paint on mobile.
