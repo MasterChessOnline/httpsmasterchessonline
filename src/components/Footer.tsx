@@ -2,6 +2,7 @@ import React from "react";
 import { Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import ShareSiteStrip from "@/components/ShareSiteStrip";
 
 const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
   <footer ref={ref} className="relative border-t border-border/30 bg-card/40 backdrop-blur-sm py-12 overflow-hidden">
@@ -66,7 +67,10 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
           </div>
         ))}
       </div>
-      <div className="border-t border-border/30 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+
+      <ShareSiteStrip />
+
+      <div className="border-t border-border/30 pt-6 mt-8 flex flex-col sm:flex-row justify-between items-center gap-3">
         <p className="text-[10px] text-muted-foreground">© {new Date().getFullYear()} MasterChess. All rights reserved.</p>
         <div className="flex gap-4">
           {[
