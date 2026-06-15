@@ -1,38 +1,34 @@
-# Plan: Fer Spin the Wheel + ručno aktiviran spin
+# Plan: Settings → Appearance cleanup
 
-## Šta je problem
-- Server RPC `claim_daily_spin` daje **25 coina u 35%** slučajeva i **50 coina u 25%** = 60% spin-ova završi na jedno od ta dva polja. Zato deluje "uvek isto".
-- Klijent dodatno preusmerava 35% rezultata sa 25 → Mystery polje, ali distribucija ostaje skewed.
+## 1. Samo Wood Classic + Merida otključani po defaultu
+U `src/lib/chests.ts`:
+- `FREE_BOARD_KEYS` → samo `"classic"` (Dark Wood = wood classic)
+- `FREE_PIECE_KEYS` → samo `"merida"`
 
-## Šta menjam
+Sve ostalo postaje zaključano i mora se otvarati preko **Reward Chests** (`/chests`). Postojeći zaključavajući overlay i toast → navigate("/chests") već rade.
 
-### 1. Server: ravnomernija raspodela
-Migracija — **`claim_daily_spin`** dobija ravniju distribuciju preko 7 nivoa (zbir = 100):
+## 2. Pregledni, isto-veliki tile-ovi
+Trenutno se kartice "razbacuju" jer:
+- preview blokovi nemaju fiksiranu visinu (board je `aspect-square`, ali piece preview je fluidan 2 reda)
+- opis je `line-clamp-2 min-h-[2.2em]` što na mobilnom udvostručuje visinu nekih kartica
 
-```
-25   →  18%   (bilo 35%)
-50   →  18%   (bilo 25%)
-100  →  20%   (bilo 18%)
-250  →  18%   (bilo 12%)
-500  →  14%   (bilo 6%)
-1000 →   8%   (bilo 3%)
-2500 →   4%   (bilo 1%)
-```
-Svako polje sada ima realnu šansu — više nikad ne deluje "uvek 25/50". Najveće nagrade i dalje ostaju retke (4–8%) da bi spin ostao uzbudljiv.
+Rešenje — u `BoardThemeCard.tsx` i `PieceStyleCard.tsx`:
+- Wrap preview-a u **`aspect-square`** kontejner za oba tipa kartica → identična slika i visina
+- Opis: `line-clamp-1` (umesto 2), bez `min-h` → svuda jedan red
+- Naslov: ostaje 1 red sa `line-clamp-1`
+- Padding kartice: `p-3` → `p-2.5` za tighter izgled na mobilnom
 
-Isto rebalansiranje za **`spin_wheel_paid`** (100 → 30% umesto 40%).
-
-`claim_weekly_spin` i `spin_wheel_legendary` ostaju nepromenjeni (već su balansiraniji).
-
-### 2. Klijent: ukloniti hardkodovani re-routing
-- U `HomeSpinWheelSection.tsx` i `SpinWheel.tsx` ukloniti liniju `if (coins === 25 && Math.random() < 0.35) return 4` — pošteno mapiranje: pobednički index = polje sa istim coin iznosom.
-
-### 3. Spin = uvek ručno (potvrda)
-Pregled koda potvrđuje: spin se već pokreće isključivo klikom korisnika na "SPIN THE WHEEL" dugme. Nema auto-spina. Ako želiš još "fizičkiji" feeling (drag-to-spin gest prstom), to mogu dodati kao sledeći korak — javi.
+## 3. Manji board swatch na mobilnom
+- Trenutno board zauzima ceo `w-full aspect-square` (cela širina ćelije). Ostavljam tako jer onda baš sve kartice imaju **identičnu** kvadratnu sliku — i pieces i boards.
 
 ## Fajlovi
-- migracija (DB): `claim_daily_spin` + `spin_wheel_paid`
-- `src/components/HomeSpinWheelSection.tsx` — ukloniti random re-routing
-- `src/pages/SpinWheel.tsx` — ukloniti random re-routing
+- `src/lib/chests.ts` — sužen FREE_*_KEYS set
+- `src/components/settings/BoardThemeCard.tsx` — uniform preview area + jedan red opisa
+- `src/components/settings/PieceStyleCard.tsx` — isto + aspect-square wrap oko PieceSetPreview
+- (PieceSetPreview se ne dira — samo se obmota wrapper-om koji ga centrira)
+
+## Šta korisnik primećuje odmah
+- Otvori Settings → Appearance: sve kartice (i board i pieces) su **iste veličine, isti grid, isti tip slike** (kvadrat).
+- Aktivan ostaje samo "Dark Wood" board i "Merida" figure. Ostali imaju 🔒 katanac sa "Chest" oznakom — klik vodi na `/chests`.
 
 Krećem?

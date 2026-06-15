@@ -114,15 +114,11 @@ export const CHESTS: ChestDef[] = [
   },
 ];
 
-/** Keys that are free for everyone — never gated by chests. */
-export const FREE_BOARD_KEYS = new Set<string>([
-  "classic", "green", "blue", "dark", "contrast", "minimal", "brown", "blue3", "rose",
-  "coral", "olive", "sunset", "mint", "tournament", "glassmorph", "carbon", "ivory",
-  "ruby", "winter", "spring",
-]);
-export const FREE_PIECE_KEYS = new Set<string>([
-  "merida", "cburnett", "neo", "standard", "minimal", "bold", "outline",
-]);
+/** Keys that are free for everyone — never gated by chests.
+ *  Only the canonical Wood Classic board and Merida pieces start unlocked;
+ *  everything else must be earned via Reward Chests. */
+export const FREE_BOARD_KEYS = new Set<string>(["classic"]);
+export const FREE_PIECE_KEYS = new Set<string>(["merida"]);
 
 export function isBoardLocked(key: string): boolean {
   if (FREE_BOARD_KEYS.has(key)) return false;
