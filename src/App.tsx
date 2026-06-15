@@ -239,7 +239,7 @@ function AnimatedRoutes() {
           <Route path="/topics" element={<Topics />} />
           <Route path="/sah-online" element={<SahOnline />} />
           <Route path="/utm" element={<UtmBuilder />} />
-          <Route path="/location" element={<Location />} />
+          <Route path="/location" element={<LocationPage />} />
           <Route path="/resources" element={<Navigate to="/" replace />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
