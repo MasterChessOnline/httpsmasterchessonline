@@ -14,6 +14,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://masterchess.live/sah-online</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://masterchess.live/play/online</loc>
     <lastmod>2026-06-15</lastmod>
     <changefreq>daily</changefreq>
@@ -378,5 +384,33 @@
     <lastmod>2026-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://masterchess.live/location</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <image:image><image:loc>https://masterchess.live/og-image.jpg</image:loc><image:title>MasterChess Location & Contact</image:title><image:caption>MasterChess headquarters and contact information.</image:caption></image:image>
+  </url>
+  <url>
+    <loc>https://masterchess.live/promo</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://masterchess.live/og-image.jpg</image:loc><image:title>Promote MasterChess</image:title><image:caption>Share MasterChess with your friends and community.</image:caption></image:image>
+  </url>
+  <url>
+    <loc>https://masterchess.live/press-kit</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <image:image><image:loc>https://masterchess.live/og-image.jpg</image:loc><image:title>MasterChess Press Kit</image:title><image:caption>Media assets and brand guidelines for MasterChess.</image:caption></image:image>
+  </url>
+  <url>
+    <loc>https://masterchess.live/viral</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://masterchess.live/og-image.jpg</image:loc><image:title>Go Viral with MasterChess</image:title><image:caption>Challenge friends and share MasterChess on social media.</image:caption></image:image>
   </url>
 </urlset>
