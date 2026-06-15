@@ -628,6 +628,33 @@ export type Database = {
           },
         ]
       }
+      confessions: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_public: boolean
+          show_handle: boolean
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          show_handle?: boolean
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          show_handle?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -3347,6 +3374,15 @@ export type Database = {
           p_stake: number
         }
         Returns: Json
+      }
+      public_confessions: {
+        Args: { p_limit?: number }
+        Returns: {
+          body: string
+          created_at: string
+          handle: string
+          id: string
+        }[]
       }
       purchase_shop_item: {
         Args: { p_item_key: string; p_item_type: string; p_price: number }
