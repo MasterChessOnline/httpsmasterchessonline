@@ -59,7 +59,8 @@ const Press = lazy(() => import("./pages/Press"));
 const Streamers = lazy(() => import("./pages/Streamers"));
 const EmbedRating = lazy(() => import("./pages/EmbedRating"));
 const Topics = lazy(() => import("./pages/Topics"));
-
+const SahOnline = lazy(() => import("./pages/SahOnline"));
+const UtmBuilder = lazy(() => import("./pages/UtmBuilder"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
@@ -235,6 +236,8 @@ function AnimatedRoutes() {
           <Route path="/streamers" element={<Streamers />} />
           <Route path="/embed/rating/:username" element={<EmbedRating />} />
           <Route path="/topics" element={<Topics />} />
+          <Route path="/sah-online" element={<SahOnline />} />
+          <Route path="/utm" element={<UtmBuilder />} />
           <Route path="/resources" element={<Navigate to="/" replace />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
