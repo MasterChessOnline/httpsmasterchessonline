@@ -126,7 +126,7 @@ const BeatBotLanding = lazy(() => import("./pages/BeatBotLanding"));
 
 
 // Eager components (used in every page chrome)
-import AntiTiltWatcher from "@/components/AntiTiltWatcher";
+import FloatingShareButton from "@/components/FloatingShareButton";
 import StreakFlexController from "@/components/StreakFlexController";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
