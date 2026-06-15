@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
-import Seo from "@/components/Seo";
   BookOpen, Lock, CheckCircle, Star, ChevronRight, Swords,
   Trophy, ArrowLeft, Loader2, Play, Video
 } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const StoryMode = () => {
   const { user, loading: authLoading } = useAuth();

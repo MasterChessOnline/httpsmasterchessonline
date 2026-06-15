@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import {
-import Seo from "@/components/Seo";
   Calculator, TrendingUp, TrendingDown, Target, Trophy,
   Plus, Trash2, BarChart3, Zap, Shield, Award, Info,
   ArrowRight, Swords, Scale,
 } from "lucide-react";
+import Seo from "@/components/Seo";
 
 /* ── ELO Calculator Logic ── */
 function calcEloChange(myElo: number, oppElo: number, result: number, k = 32) {
