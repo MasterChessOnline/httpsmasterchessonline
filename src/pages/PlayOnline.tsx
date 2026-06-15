@@ -875,6 +875,19 @@ const PlayOnline = () => {
               </span>
             </div>
           )}
+          {/* Draw offer banner — focus mode, directly above board */}
+          {drawOfferedByOpponent && !isGameOver && (
+            <div className="flex items-center justify-between gap-2 rounded-lg border-2 border-primary bg-primary/15 backdrop-blur-sm px-3 py-2 mb-2 shadow-lg shadow-primary/20 animate-in fade-in slide-in-from-top-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <Handshake className="h-4 w-4 text-primary shrink-0 animate-pulse" />
+                <span className="text-sm font-semibold text-primary truncate">Opponent offers a draw</span>
+              </div>
+              <div className="flex gap-1.5 shrink-0">
+                <Button size="sm" variant="default" className="h-7 px-3 text-xs" onClick={acceptDraw}>Accept</Button>
+                <Button size="sm" variant="outline" className="h-7 px-3 text-xs" onClick={declineDraw}>Decline</Button>
+              </div>
+            </div>
+          )}
           <ChessBoard
             game={game}
             flipped={boardFlipped}
@@ -959,6 +972,31 @@ const PlayOnline = () => {
                 <span className="text-[11px] sm:text-xs font-medium text-primary truncate">
                   <span className="font-mono opacity-70 mr-1.5">{detectedOpening.eco}</span>
                   {detectedOpening.name}
+                </span>
+              </div>
+            )}
+
+            {/* Draw offer banner — directly above the board so focus stays on the pieces.
+                Shows when opponent has offered a draw; Accept / Decline keep the page from shifting. */}
+            {drawOfferedByOpponent && !isGameOver && (
+              <div className="flex items-center justify-between gap-2 rounded-lg border-2 border-primary bg-primary/15 backdrop-blur-sm px-3 py-2 shadow-lg shadow-primary/20 animate-in fade-in slide-in-from-top-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Handshake className="h-4 w-4 text-primary shrink-0 animate-pulse" />
+                  <span className="text-sm font-semibold text-primary truncate">
+                    {opponentProfile?.display_name || "Opponent"} offers a draw
+                  </span>
+                </div>
+                <div className="flex gap-1.5 shrink-0">
+                  <Button size="sm" variant="default" className="h-7 px-3 text-xs" onClick={acceptDraw}>Accept</Button>
+                  <Button size="sm" variant="outline" className="h-7 px-3 text-xs" onClick={declineDraw}>Decline</Button>
+                </div>
+              </div>
+            )}
+            {drawOfferedByMe && !isGameOver && (
+              <div className="flex items-center justify-center gap-2 rounded-lg border border-muted-foreground/30 bg-muted/30 px-3 py-1.5">
+                <Handshake className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-[11px] sm:text-xs font-medium text-muted-foreground">
+                  Draw offer sent — waiting for opponent…
                 </span>
               </div>
             )}
@@ -1132,17 +1170,7 @@ const PlayOnline = () => {
               </div>
             </div>
 
-            {/* Draw Offer — fixed floating chip so the page never shifts when offered.
-                Positioned next to the board (top-right of viewport on desktop, top on mobile). */}
-            {drawOfferedByOpponent && !isGameOver && (
-              <div className="fixed top-20 left-1/2 -translate-x-1/2 sm:left-auto sm:right-4 sm:translate-x-0 z-50 rounded-xl border border-primary/40 bg-card/95 backdrop-blur-md shadow-2xl p-3 w-[min(92vw,320px)] space-y-2 animate-in fade-in slide-in-from-top-2">
-                <p className="text-sm font-medium text-primary">Opponent offers a draw</p>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="default" className="flex-1" onClick={acceptDraw}>Accept</Button>
-                  <Button size="sm" variant="outline" className="flex-1" onClick={declineDraw}>Decline</Button>
-                </div>
-              </div>
-            )}
+            {/* Draw-offered-by-me confirmation lives in the sidebar — see button row below. */}
 
             {/* Game Controls */}
             {!isGameOver && onlineStatus === "playing" && (
