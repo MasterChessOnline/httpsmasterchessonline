@@ -127,6 +127,7 @@ const ChallengeLink = lazy(() => import("./pages/ChallengeLink"));
 const Puzzles = lazy(() => import("./pages/Puzzles"));
 const PuzzlePage = lazy(() => import("./pages/PuzzlePage"));
 const Confessions = lazy(() => import("./pages/Confessions"));
+const Rival = lazy(() => import("./pages/Rival"));
 const BeatBotLanding = lazy(() => import("./pages/BeatBotLanding"));
 const PlayFromCity = lazy(() => import("./pages/PlayFromCity"));
 const SeoLandingRoute = lazy(() => import("./pages/SeoLandingRoute"));
@@ -231,6 +232,7 @@ function AnimatedRoutes() {
           <Route path="/daily-puzzle" element={<DailyChallenge />} />
           <Route path="/puzzle/:slug" element={<PuzzlePage />} />
           <Route path="/confessions" element={<Confessions />} />
+          <Route path="/rival/:a/:b" element={<Rival />} />
           <Route path="/bot/:botId" element={<BotProfile />} />
           <Route path="/admin/email-status" element={<AdminEmailStatus />} />
           <Route path="/admin/seo-status" element={<SeoStatus />} />
