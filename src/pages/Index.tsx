@@ -639,7 +639,7 @@ const Index = () => {
           {/* Performance Snapshot */}
           {user && profile && (
             <SectionHeader title="Your Performance" icon={BarChart3}>
-              <ParallaxCard className="rounded-xl" intensity={4} glowColor="hsl(43 90% 55% / 0.08)">
+              <ParallaxCard className="rounded-xl" intensity={allowHeavy ? 4 : 0} glowColor="hsl(43 90% 55% / 0.08)">
                 <div className="rounded-xl border border-border/30 glass-4d p-5 sm:p-6">
                   <div className="flex flex-col sm:flex-row items-center gap-5">
                     <div className="flex items-center gap-4">
