@@ -68,6 +68,7 @@ const GROUPS: Group[] = [
       { label: "ELO tiers", href: "/elo" },
       { label: "Famous games", href: "/famous-games" },
       { label: "Grandmasters", href: "/players" },
+      { label: "❤ Support the project", href: "/supporter" },
     ],
   },
   {

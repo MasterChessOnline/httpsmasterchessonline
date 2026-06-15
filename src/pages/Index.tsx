@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HomeFaqSection from "@/components/HomeFaqSection";
+import SupporterCTA from "@/components/SupporterCTA";
 import DiscoverStrip from "@/components/DiscoverStrip";
 import SiteRating from "@/components/SiteRating";
 import ReviewsCta from "@/components/ReviewsCta";
@@ -914,6 +915,9 @@ const Index = () => {
 
         {/* Social Follow Strip */}
         <SocialFollowStrip />
+
+        {/* Supporter / tip CTA — keeps the project ad-free */}
+        <SupporterCTA />
 
         {/* FAQ — bottom of home, adds FAQPage rich snippet to Google */}
         <HomeFaqSection />
