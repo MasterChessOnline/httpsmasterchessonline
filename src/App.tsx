@@ -64,6 +64,7 @@ const UtmBuilder = lazy(() => import("./pages/UtmBuilder"));
 const LocationPage = lazy(() => import("./pages/Location"));
 const Promo = lazy(() => import("./pages/Promo"));
 const PressKit = lazy(() => import("./pages/PressKit"));
+const Viral = lazy(() => import("./pages/Viral"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
