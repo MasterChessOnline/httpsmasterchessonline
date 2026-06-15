@@ -127,6 +127,7 @@ const Puzzles = lazy(() => import("./pages/Puzzles"));
 const BeatBotLanding = lazy(() => import("./pages/BeatBotLanding"));
 const PlayFromCity = lazy(() => import("./pages/PlayFromCity"));
 const SeoLandingRoute = lazy(() => import("./pages/SeoLandingRoute"));
+const StreamerOverlay = lazy(() => import("./pages/StreamerOverlay"));
 
 
 // Eager components (used in every page chrome)
