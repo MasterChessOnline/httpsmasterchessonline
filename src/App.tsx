@@ -145,6 +145,7 @@ import AppLaunchSplash from "@/components/AppLaunchSplash";
 import EntryQuickDashboard from "@/components/EntryQuickDashboard";
 import ReferralTracker from "@/hooks/useReferralTracker";
 import DonationMilestoneBodyAttr from "@/components/DonationMilestoneBodyAttr";
+import TheDoorButton from "@/components/TheDoorButton";
 
 // Non-critical overlays — lazy-loaded so they don't block first paint.
 const CinematicIntro = lazy(() => import("@/components/CinematicIntro"));
