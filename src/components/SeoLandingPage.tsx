@@ -86,6 +86,7 @@ export default function SeoLandingPage({ config }: { config: SeoLandingConfig })
           <link rel="alternate" hrefLang="x-default" href={`${SITE}${config.hreflang.find((h) => h.lang === "en")?.path ?? config.path}`} />
         )}
         <script type="application/ld+json">{JSON.stringify(webPageJsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
         {faqJsonLd && (
           <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
         )}
