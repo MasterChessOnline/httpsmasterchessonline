@@ -126,6 +126,7 @@ const ChallengeLink = lazy(() => import("./pages/ChallengeLink"));
 const Puzzles = lazy(() => import("./pages/Puzzles"));
 const BeatBotLanding = lazy(() => import("./pages/BeatBotLanding"));
 const PlayFromCity = lazy(() => import("./pages/PlayFromCity"));
+const SeoLandingRoute = lazy(() => import("./pages/SeoLandingRoute"));
 
 
 // Eager components (used in every page chrome)
@@ -288,6 +289,21 @@ function AnimatedRoutes() {
           <Route path="/puzzles" element={<Puzzles />} />
           <Route path="/beat/:botId" element={<BeatBotLanding />} />
           <Route path="/play-from/:city" element={<PlayFromCity />} />
+          {/* SEO long-tail landings (EN + SR), all served by SeoLandingRoute via path lookup */}
+          <Route path="/chess-for-kids" element={<SeoLandingRoute />} />
+          <Route path="/chess-for-beginners" element={<SeoLandingRoute />} />
+          <Route path="/chess-no-signup" element={<SeoLandingRoute />} />
+          <Route path="/chess-no-ads" element={<SeoLandingRoute />} />
+          <Route path="/play-chess-vs-friend" element={<SeoLandingRoute />} />
+          <Route path="/free-online-chess" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-online" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-protiv-prijatelja" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-bez-registracije" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-protiv-kompjutera" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-za-pocetnike" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-pravila" element={<SeoLandingRoute />} />
+          <Route path="/sr/sah-otvaranja" element={<SeoLandingRoute />} />
+          <Route path="/sr/sahovski-rejting" element={<SeoLandingRoute />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>

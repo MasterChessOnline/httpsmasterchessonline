@@ -14,6 +14,8 @@ import { ELO_TIERS } from "../src/data/eloTiers";
 import { FAMOUS_GAMES } from "../src/data/famousGames";
 import { GRANDMASTERS } from "../src/data/grandmasters";
 import { SEO_CITIES } from "../src/lib/seo-cities";
+import { SR_LANDINGS } from "../src/lib/seo-landings-sr";
+import { EN_LANDINGS } from "../src/lib/seo-landings-en";
 
 const BASE_URL = "https://masterchess.live";
 
@@ -133,6 +135,20 @@ const cityEntries: SitemapEntry[] = SEO_CITIES.map((c) => ({
   priority: "0.7",
 }));
 
+// SEO long-tail landing pages (EN + SR)
+const seoLandingEntries: SitemapEntry[] = [
+  ...Object.values(SR_LANDINGS).map((c) => ({
+    path: c.path,
+    changefreq: "monthly" as const,
+    priority: "0.8",
+  })),
+  ...Object.values(EN_LANDINGS).map((c) => ({
+    path: c.path,
+    changefreq: "monthly" as const,
+    priority: "0.8",
+  })),
+];
+
 // Daily puzzle hub
 const puzzleEntries: SitemapEntry[] = [
   { path: "/puzzles", changefreq: "daily", priority: "0.85" },
@@ -249,6 +265,7 @@ writeFileSync(resolve("public/sitemap-elo.xml"), buildUrlset(eloEntries));
 writeFileSync(resolve("public/sitemap-famous-games.xml"), buildUrlset(famousGameEntries));
 writeFileSync(resolve("public/sitemap-players.xml"), buildUrlset(playerEntries));
 writeFileSync(resolve("public/sitemap-cities.xml"), buildUrlset(cityEntries));
+writeFileSync(resolve("public/sitemap-landings.xml"), buildUrlset(seoLandingEntries));
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -266,6 +283,7 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap-famous-games.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-players.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-cities.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-landings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
