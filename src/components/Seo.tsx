@@ -38,16 +38,9 @@ export default function Seo({ title, description, path, image, type = "website",
       <meta name="twitter:image" content={img} />
       <meta name="twitter:image:alt" content={title} />
       <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
-      {/* hreflang alternates — single-language site, but signals regional eligibility to Google,
-          boosting impressions in non-EN markets without duplicate-content penalty. */}
+      {/* Single-language site (English). One hreflang + x-default keeps signal honest;
+          fake regional alternates trip Google's spam filters. */}
       <link rel="alternate" hrefLang="en" href={url} />
-      <link rel="alternate" hrefLang="en-us" href={url} />
-      <link rel="alternate" hrefLang="en-gb" href={url} />
-      <link rel="alternate" hrefLang="sr" href={url} />
-      <link rel="alternate" hrefLang="de" href={url} />
-      <link rel="alternate" hrefLang="es" href={url} />
-      <link rel="alternate" hrefLang="fr" href={url} />
-      <link rel="alternate" hrefLang="ru" href={url} />
       <link rel="alternate" hrefLang="x-default" href={url} />
       {ldArr.map((ld, i) => (
         <script key={i} type="application/ld+json">{JSON.stringify(ld)}</script>
