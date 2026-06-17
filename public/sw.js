@@ -1,5 +1,5 @@
 // MasterChess service worker - lightweight offline shell + cache for static assets
-const CACHE = "mc-shell-v5";
+const CACHE = "mc-shell-v6";
 const SHELL = ["/", "/manifest.json", "/favicon.ico", "/app-icon-192.png", "/app-icon-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
@@ -30,6 +30,16 @@ self.addEventListener("fetch", (e) => {
   // Don't cache API / supabase / dynamic
   if (url.origin !== location.origin) return;
   if (url.pathname.startsWith("/api/") || url.pathname.includes("supabase")) return;
+  // Never cache SEO/crawler files — crawlers must always see the latest.
+  if (
+    url.pathname === "/robots.txt" ||
+    url.pathname.startsWith("/sitemap") ||
+    url.pathname.endsWith(".xml") ||
+    url.pathname.startsWith("/.well-known/") ||
+    url.pathname === "/ai.txt" ||
+    url.pathname === "/llms.txt" ||
+    url.pathname === "/humans.txt"
+  ) return;
 
   // Network-first for HTML, cache-first for static
   if (req.mode === "navigate") {

@@ -31,4 +31,15 @@ Allow: /
 Sitemap: https://masterchess.live/sitemap_index.xml
 Sitemap: https://masterchess.live/sitemap.xml
 Sitemap: https://masterchess.live/sitemap-openings.xml
+Sitemap: https://masterchess.live/sitemap-bots.xml
+Sitemap: https://masterchess.live/sitemap-beat-bots.xml
+Sitemap: https://masterchess.live/sitemap-puzzles.xml
+Sitemap: https://masterchess.live/sitemap-glossary.xml
+Sitemap: https://masterchess.live/sitemap-tools.xml
+Sitemap: https://masterchess.live/sitemap-mates.xml
+Sitemap: https://masterchess.live/sitemap-elo.xml
+Sitemap: https://masterchess.live/sitemap-famous-games.xml
+Sitemap: https://masterchess.live/sitemap-players.xml
+Sitemap: https://masterchess.live/sitemap-cities.xml
+Sitemap: https://masterchess.live/sitemap-landings.xml
 Sitemap: https://masterchess.live/sitemap-images.xml

@@ -1,5 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { Home, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,10 @@ const NotFound = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background relative overflow-hidden">
+      <Helmet>
+        <title>404 — Page not found · MasterChess</title>
+        <meta name="robots" content="noindex, follow" />
+      </Helmet>
       {/* Floating chess piece background */}
       <div className="absolute inset-0 pointer-events-none">
         {["♔", "♕", "♖", "♗", "♘", "♙"].map((piece, i) => (
