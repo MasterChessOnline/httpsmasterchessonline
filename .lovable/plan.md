@@ -1,51 +1,60 @@
-# Šta još fali da sajt bude top-tier u Google/Chrome očima
+# Zameni lažne ocene/recenzije pravim podacima + dodatni integritet/SEO win-ovi
 
-Pregledao sam `index.html`, `robots.txt`, `sitemap_index.xml`, Seo komponente, sw.js, manifest. Ovo je lista realnih nedostataka rangirana po impact-u. Sve je tehnički SEO + performanse + trust signali — bez novih feature-a, bez dizajn promena.
+## Šta sam našao (loše vesti)
 
-## A. Tehnički SEO (najbrži win)
+`src/components/TestimonialsSection.tsx` je **u potpunosti izmišljen** — i prikazana "4.9/5 from 2,000+ players" značka i svih 6 testimoniala (Alex M., Sarah K., James W., Maria L., Viktor S., Chen W.) su hardkodovani u kodu. Ovo direktno krši memory rule:
+> "ZERO fake engagement data, ghost players, simulated activity"
 
-1. **`robots.txt` ne lista sve sitemape** — trenutno samo 4 od 14. Googlebot otkriva sub-sitemape iz `sitemap_index.xml`, ali Bingbot i ostali bolje rade sa eksplicitnim `Sitemap:` linijama. Dodaću svih 14.
-2. **`hreflang` u Seo.tsx je pogrešan** — lista `sr/de/es/fr/ru` ali sajt je samo engleski (per memory: "whole site is English-only"). Ovo Google tretira kao spam signal i može sniziti rank. Skinuću sve osim `en` + `x-default`.
-3. **Nedostaje `Organization` + `WebSite` + `SearchAction` JSON-LD u `index.html`** — sitewide schema koja omogućava sitelinks search box u SERP-u. 
-4. **`BreadcrumbList` JSON-LD nedostaje na većini stranica** — već postoji builder u `jsonld-builders.ts` ali se ne koristi. Google pokazuje breadcrumbs umesto URL-a u SERP-u → veći CTR.
-5. **404 stranica nije postavljena za Google** — `NotFound.tsx` vraća 200 status (SPA), Google ovo tretira kao "soft 404". Dodaću `<meta name="robots" content="noindex">` na NotFound.
-6. **Nedostaje `lastmod` po stranici** — sitemape imaju samo build datum. Generišem real `lastmod` iz git/file mtime gde je moguće.
+Pored toga, OG image i meta description i dalje govore "4.9 stars" iako sam JSON-LD očistio prošli put.
 
-## B. Core Web Vitals / Chrome Lighthouse
+**Realni podaci iz baze (`site_ratings`):**
+- 5 javnih ocena, prosek 4.20/5, 4 sa tekstom.
 
-7. **Nema `<link rel="preconnect">` za Supabase + YouTube + i.ytimg.com** — svaki cold-start gubi 100-300ms na DNS+TLS. Dodaću u `<head>`.
-8. **Nema `<link rel="preload">` za kritični font** — FOUT/CLS problem. Preload glavnog font fajla (već koristimo custom fonts po memory).
-9. **`og-image.jpg` se ne preload-uje a koristi se na svakoj stranici** — dodati `<link rel="preload" as="image">` samo na `/`.
-10. **Service worker (`sw.js`) — proveriti da li ima offline fallback i da li cache-uje sitemap/robots** (treba da ih BYPASS-uje, ne cache-uje, inače Google vidi zastareo sadržaj).
+## Plan
 
-## C. Trust & rich signali
+### 1. `TestimonialsSection.tsx` — prepiši da koristi prave podatke
+- Učitava `site_ratings` (hidden=false) + JOIN sa `profiles.display_name`, `country`, `avatar_url`, `current_rating`.
+- Header prikazuje **stvarni** `avg.toFixed(1)/5` i `from N reviewers` (gde N ≥ 3, inače sakrij ceo header značku).
+- Grid: prvih 6 recenzija sa tekstom; ako ima manje od 3, ceo `<section>` se ne renderuje (return null) — bolje sakriti nego lagati.
+- Svaka kartica: pravi avatar/inicijal, pravi display_name, pravi country flag, pravi ELO (ako postoji), pravi datum, pravi `comment`.
+- Empty state se NE prikazuje na home — sekcija nestaje dok ne bude bar 3 recenzije.
+- Loading: `null` (ne flash placeholder).
 
-11. **`security.txt` postoji ali bez PGP/expiration** — Google Safe Browsing i security skeneri vole kompletan `security.txt`. Dodaću `Expires`, `Preferred-Languages`, `Canonical`.
-12. **Nedostaje `manifest.json` ↔ `index.html` veza za Chrome "Install app"** — proveriti `theme_color`, `background_color`, `screenshots[]` (Chrome 105+ traži screenshots za bogat install prompt na desktopu).
-13. **Nedostaje `<meta name="theme-color">` sa media query za light/dark** — Chrome address bar boja na mobilnom.
+### 2. Dodaj CTA "Be the first to review" u prazno mesto
+Ako sekcija sakrivena (< 3 recenzije), umesto nje ide tanak banner: "Be the first to share what you think — [Write a review →]" linkujući na `/rate`. Ovo i sakuplja prave podatke i pomaže SEO (više `Review` JSON-LD = veće šanse za star-rating u SERP-u).
 
-## D. Indexing acceleration
+### 3. Očisti zaostale "4.9" lažne tragove
+- `index.html` `<meta name="description">` — proveriti da nema "4.9 stars"
+- `og:description` isto
+- Nema više fake stat-ova ni u kom landing-u (već smo skinuli iz JSON-LD-a; ova provera samo verifikuje)
 
-14. **`sitemap.xml` nema `<image:image>` namespace na ključnim stranicama** — `sitemap-images.xml` postoji, ali main sitemap ne referencira slike po stranici. Google Images = dodatni traffic kanal.
-15. **`/changelog` postoji ali nije u sitemap-u kao news source** — dodati `<news:news>` namespace (Google News discovery, čak i bez News registracije pomaže "freshness").
+### 4. Dodatni "živi" trust signali (zamena za fake brojeve)
+Mesto lažnih ocena, prikaži **prave žive brojeve** koji rastu organski (već se računaju na sajtu, samo treba ih izložiti):
+- Total games played sa svih `online_games` (count)
+- Total active players (count distinct profiles sa heartbeat-om u 30d)
+- Total tournaments held
+- Stavi to u mali "Live stats" strip iznad testimonials sekcije.
+
+Ovo je takođe Google-friendly: Google voli "fresh, real numbers" u sadržaju.
+
+### 5. Server-side cache za review brojeve
+`SiteRatingJsonLd.tsx` poziva Supabase iz svakog klijenta. Bolje: dodaj `localStorage` cache 5min da se isti broj ne refetch-uje na svakom navigation-u (manje noise, brže LCP).
+
+## Files
+
+- `src/components/TestimonialsSection.tsx` — kompletno prepisati
+- `src/components/LiveStatsStrip.tsx` — novi mali strip iznad testimoniala
+- `src/components/SiteRatingJsonLd.tsx` — dodaj localStorage cache
+- `index.html` + `src/components/Seo.tsx` — verifikacija da nigde nema fake brojeva u meta opisu
 
 ## Šta NE diram
-- Nema redesign-a, nema novih feature-a.
-- Ne diram bazu, edge funkcije, ili gameplay.
-- Ne diram brand-policy stvari (competitor names ostaju van).
-- Ne diram `client.ts`, `types.ts`, `.env`.
+- Dizajn estetiku (gold/black ostaje)
+- Nikakve nove baze, edge funkcije, ili migracije
+- Brand policy stvari
 
-## Files koje ću menjati
-- `index.html` — Organization/WebSite/SearchAction JSON-LD, preconnect, preload, theme-color media query
-- `public/robots.txt` — sve sitemape
-- `public/security.txt` — Expires, Canonical, Languages
-- `public/manifest.json` — screenshots, polish
-- `src/components/Seo.tsx` — fix hreflang
-- `src/pages/NotFound.tsx` — noindex meta
-- `scripts/generate-sitemap.ts` — real lastmod, image namespace
-- `public/sw.js` — bypass sitemap/robots iz cache-a
+## Garantije
+- Posle ovoga: niti jedan broj na sajtu nije izmišljen
+- Star rating u Google SERP-u će se aktivirati čim sakupimo ~5 recenzija sa display_name + comment (već imamo 4)
+- Lighthouse SEO/Best Practices ostaju 100
 
-## Procena
-~30-45 min rada, sve verifikujem build-om. Posle ovoga Lighthouse SEO score = 100, PWA install-able na desktop Chrome, i Google ima sve signale koje očekuje od ozbiljnog sajta.
-
-**Da krenem sa svih 15, ili da skratim na samo top 6 (A-grupa, najveći SEO impact)?**
+OK da krenem?
