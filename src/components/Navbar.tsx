@@ -1,4 +1,4 @@
-import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Radio, UserPlus, Gift } from "lucide-react";
+import { LogOut, User, Trophy, Swords, GraduationCap, Crown, Brain, Settings, BarChart3, Target, Zap, Clock, Eye, BookOpen, Play, Award, Star, ChevronDown, Menu, X, Bell, Search, Users, Gamepad2, Sparkles, Shield, Crosshair, FileText, History, Lock, Palette, Plus, ListChecks, Medal, Radio, UserPlus, Gift, Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -461,16 +461,26 @@ const Navbar = () => {
                 <Search className="h-4 w-4" />
               </button>
 
-              {/* Rate MasterChess button */}
-              <Link to="/rate-masterchess" className="hidden xl:block">
+              {/* Donate button — ALWAYS visible (mobile + desktop) */}
+              <Link to="/supporter" aria-label="Donate to MasterChess" title="Support MasterChess">
+                <Button
+                  size="sm"
+                  className="h-9 px-2.5 sm:px-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black font-bold shadow-[0_0_18px_rgba(251,191,36,0.4)] hover:shadow-[0_0_26px_rgba(251,191,36,0.6)] transition-all"
+                >
+                  <Heart className="h-4 w-4 fill-current sm:mr-1.5" />
+                  <span className="hidden sm:inline">Donate</span>
+                </Button>
+              </Link>
+
+              {/* Rate MasterChess button — visible from sm up (icon-only on small, with text from md+) */}
+              <Link to="/rate-masterchess" aria-label="Rate MasterChess" title="Rate MasterChess">
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-9 px-3 border-yellow-400/40 text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-300 font-semibold"
-                  title="Rate MasterChess"
+                  className="h-9 px-2.5 md:px-3 border-yellow-400/40 text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-300 font-semibold"
                 >
-                  <Star className="h-4 w-4 mr-1.5 fill-current" />
-                  Rate
+                  <Star className="h-4 w-4 fill-current md:mr-1.5" />
+                  <span className="hidden md:inline">Rate</span>
                 </Button>
               </Link>
 
@@ -485,6 +495,7 @@ const Navbar = () => {
                   <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                 </Button>
               </Link>
+
 
               {/* Language switcher removed — site is English-only */}
 
