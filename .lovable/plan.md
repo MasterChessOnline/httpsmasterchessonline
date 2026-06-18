@@ -1,60 +1,76 @@
-# Zameni lažne ocene/recenzije pravim podacima + dodatni integritet/SEO win-ovi
+## Cilj
+Donate i Rate dugmad da budu UVEK vidljivi (desktop + mobile), plus paket nadogradnji za SEO / GSC / brzinu.
 
-## Šta sam našao (loše vesti)
+## 1. Navbar — Donate + Rate vidljivi svuda
 
-`src/components/TestimonialsSection.tsx` je **u potpunosti izmišljen** — i prikazana "4.9/5 from 2,000+ players" značka i svih 6 testimoniala (Alex M., Sarah K., James W., Maria L., Viktor S., Chen W.) su hardkodovani u kodu. Ovo direktno krši memory rule:
-> "ZERO fake engagement data, ghost players, simulated activity"
+**Desktop (≥lg):**
+- Dodati zlatni **♥ Donate** dugme (link na `/supporter`) u desnu zonu, odmah pre `Play Now`.
+- Dugme: kompaktno (ikona + tekst "Donate"), zlatni gradient kao HeroDonationCard, suptilni pulse glow da privuče oko.
+- Skinuti `hidden xl:block` sa **Rate** dugmeta → `hidden lg:flex` (vidljivo od laptopa naviše). Na užim laptop širinama prikazati samo ikonu da ne razbije layout.
 
-Pored toga, OG image i meta description i dalje govore "4.9 stars" iako sam JSON-LD očistio prošli put.
+**Mobile (<lg):**
+- U `MobileBottomNav.tsx` (uvek prisutan donji bar) ubaciti dva mala ikon-only tastera:
+  - ♥ Donate → `/supporter` (zlatan)
+  - ★ Rate → `/rate-masterchess` (žut)
+- Alternativa za telefon: kompaktna zlatna "♥" pilula u top Navbar-u pored hamburger menija (uvek vidljiva, ne samo u open meniju).
 
-**Realni podaci iz baze (`site_ratings`):**
-- 5 javnih ocena, prosek 4.20/5, 4 sa tekstom.
+**Anti-collision pravila:** na sub-lg ekranima sakriti tekst, držati 44×44 px touch target, ne ići preko Play Now hijerarhije (Play ostaje primarni CTA).
 
-## Plan
+## 2. Homepage čišćenje
+- `HeroDonationCard` ostaje (već lepo izgleda), ali skinuti dupli SupporterCTA niže ako se preklapaju — jedan Donate blok u hero, jedan na dnu (final CTA), bez ponavljanja u sredini.
 
-### 1. `TestimonialsSection.tsx` — prepiši da koristi prave podatke
-- Učitava `site_ratings` (hidden=false) + JOIN sa `profiles.display_name`, `country`, `avatar_url`, `current_rating`.
-- Header prikazuje **stvarni** `avg.toFixed(1)/5` i `from N reviewers` (gde N ≥ 3, inače sakrij ceo header značku).
-- Grid: prvih 6 recenzija sa tekstom; ako ima manje od 3, ceo `<section>` se ne renderuje (return null) — bolje sakriti nego lagati.
-- Svaka kartica: pravi avatar/inicijal, pravi display_name, pravi country flag, pravi ELO (ako postoji), pravi datum, pravi `comment`.
-- Empty state se NE prikazuje na home — sekcija nestaje dok ne bude bar 3 recenzije.
-- Loading: `null` (ne flash placeholder).
+## 3. Google Search Console & SEO nadogradnje
 
-### 2. Dodaj CTA "Be the first to review" u prazno mesto
-Ako sekcija sakrivena (< 3 recenzije), umesto nje ide tanak banner: "Be the first to share what you think — [Write a review →]" linkujući na `/rate`. Ovo i sakuplja prave podatke i pomaže SEO (više `Review` JSON-LD = veće šanse za star-rating u SERP-u).
+**3a. Auto submit sitemap-ova u GSC**
+- Iskoristiti postojeću `submit-sitemaps-gsc` edge funkciju → trigger jednom (svih 15 sitemap-ova) preko GSC konektora koji je već povezan.
 
-### 3. Očisti zaostale "4.9" lažne tragove
-- `index.html` `<meta name="description">` — proveriti da nema "4.9 stars"
-- `og:description` isto
-- Nema više fake stat-ova ni u kom landing-u (već smo skinuli iz JSON-LD-a; ova provera samo verifikuje)
+**3b. IndexNow ping**
+- Već postoji `indexnow-ping` funkcija + `indexnow-key.txt`. Dodati cron (pg_cron) da svaki novi `seo_landings` / blog / puzzle slug auto-pinguje Bing/Yandex.
 
-### 4. Dodatni "živi" trust signali (zamena za fake brojeve)
-Mesto lažnih ocena, prikaži **prave žive brojeve** koji rastu organski (već se računaju na sajtu, samo treba ih izložiti):
-- Total games played sa svih `online_games` (count)
-- Total active players (count distinct profiles sa heartbeat-om u 30d)
-- Total tournaments held
-- Stavi to u mali "Live stats" strip iznad testimonials sekcije.
+**3c. JSON-LD nadogradnje** (pomoću postojećeg `jsonld-builders.ts`)
+- **BreadcrumbList** na svaki detail page (opening, bot, city, glossary, famous game, GM). Trenutno ga nema na većini.
+- **FAQPage** na top landing-e (`/sah-online`, `/beat/:botId`, `/openings/*`) — pull iz `seo-faq.ts`.
+- **WebSite + SearchAction** u `index.html` za sitelinks search box u Google-u.
+- **SoftwareApplication** schema za app (preko aggregateRating iz **realnih** site_ratings).
 
-Ovo je takođe Google-friendly: Google voli "fresh, real numbers" u sadržaju.
+**3d. Core Web Vitals**
+- Preload `og-image.jpg` i prvi hero font (`preload as="font"`).
+- `loading="lazy" decoding="async"` na sve `<img>` ispod fold-a (sweep).
+- Splittovati Stockfish chunk da ne uđe u initial bundle (već je dynamic? proveriti).
 
-### 5. Server-side cache za review brojeve
-`SiteRatingJsonLd.tsx` poziva Supabase iz svakog klijenta. Bolje: dodaj `localStorage` cache 5min da se isti broj ne refetch-uje na svakom navigation-u (manje noise, brže LCP).
+**3e. Internal linking**
+- "Related" footer komponenta na svakom detail page (opening → 5 sličnih, bot → 3 slična ELO bota, city → susedni gradovi). Pomaže crawl depth & PageRank flow.
 
-## Files
+**3f. 404 → soft-redirect**
+- Već `noindex` na 404. Dodati i "did you mean" suggestion-e iz NavSearchPalette-a (kratki link blok).
 
-- `src/components/TestimonialsSection.tsx` — kompletno prepisati
-- `src/components/LiveStatsStrip.tsx` — novi mali strip iznad testimoniala
-- `src/components/SiteRatingJsonLd.tsx` — dodaj localStorage cache
-- `index.html` + `src/components/Seo.tsx` — verifikacija da nigde nema fake brojeva u meta opisu
+**3g. Last-modified headers**
+- Generator sitemap-a već stavlja `<lastmod>` — dodati realne datume iz DB (`updated_at`) umesto build datuma da Google češće re-crawluje samo izmenjene stranice.
 
-## Šta NE diram
-- Dizajn estetiku (gold/black ostaje)
-- Nikakve nove baze, edge funkcije, ili migracije
-- Brand policy stvari
+## 4. Performance / Best Practices (Lighthouse)
+- Dodati `<link rel="preconnect" href="https://i.ytimg.com">` i Supabase host (za brži YouTube + RPC).
+- Inline kritični CSS gold theme tokens u `<head>` da nestane FOUC.
+- Service worker (`sw.js` v6) — dodati stale-while-revalidate za `/data/masterchess/*.json` shard-ove.
 
-## Garantije
-- Posle ovoga: niti jedan broj na sajtu nije izmišljen
-- Star rating u Google SERP-u će se aktivirati čim sakupimo ~5 recenzija sa display_name + comment (već imamo 4)
-- Lighthouse SEO/Best Practices ostaju 100
+## 5. UX / Trust signali
+- "As featured in" / community quotes — samo ako su pravi (preskočiti dok nemamo).
+- **Visitor counter (pravi)**: mali "X playing now" iz Realtime presence — već imamo `use-presence.ts`. Strip ispod hero CTA.
+- **Sticky Donate banner** koji se pojavi tek nakon 60s engagement-a (ne odmah da ne smara).
+
+## Files koje ću taći (u build modu)
+- `src/components/Navbar.tsx` — Donate dugme + Rate vidljiv od lg
+- `src/components/MobileBottomNav.tsx` — Donate + Rate ikone
+- `src/components/HeroDonationCard.tsx` — proveriti spacing
+- `src/pages/Index.tsx` — ukloniti dupli SupporterCTA ako postoji
+- `index.html` — WebSite+SearchAction JSON-LD, preconnect
+- `src/lib/jsonld-builders.ts` — dodati FAQ + WebSite + SoftwareApplication
+- detail page-vi (Opening/Bot/City/Glossary/FamousGame/GM) — Breadcrumb + FAQ JSON-LD
+- `scripts/generate-sitemap.ts` — realni `lastmod` iz DB
+- supabase edge function trigger za GSC submit + IndexNow cron
+
+## Garancije
+- Nikakvi lažni brojevi (sve aggregateRating ide iz `site_ratings`)
+- Nema brand-policy prekršaja
+- Dizajn ostaje Gold & Black, samo +1 dugme u navbar-u
 
 OK da krenem?
