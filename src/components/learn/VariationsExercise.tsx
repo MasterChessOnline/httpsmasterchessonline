@@ -1,33 +1,149 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, GitBranch } from "lucide-react";
+import { Chess } from "chess.js";
+import { ChevronRight, GitBranch, Sparkles, Loader2 } from "lucide-react";
 import InteractiveBoard from "./InteractiveBoard";
+import NikolaCoachAvatar from "./NikolaCoachAvatar";
+import { useNikolaVoice } from "@/hooks/use-nikola-voice";
+import { supabase } from "@/integrations/supabase/client";
 import type { LessonVariation } from "@/lib/lesson-moves";
 
 interface Props {
   variations: LessonVariation[];
   fallbackFen?: string;
   orientation?: "white" | "black";
+  courseId?: string;
+  courseTitle?: string;
 }
 
-export default function VariationsExercise({ variations, fallbackFen, orientation = "white" }: Props) {
-  const [active, setActive] = useState(0);
+interface AIExplanations {
+  summary: string;
+  moves: { san: string; explanation: string }[];
+}
 
-  // Reset selection when the lesson (and therefore the variations array) changes
+export default function VariationsExercise({ variations, fallbackFen, orientation = "white", courseId, courseTitle }: Props) {
+  const [active, setActive] = useState(0);
+  const [ai, setAi] = useState<AIExplanations | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [transcript, setTranscript] = useState<string>("");
+  const lastSpokenRef = useRef<string>("");
+  const voice = useNikolaVoice();
+
+  // Reset active variation when variations array (lesson) changes
   useEffect(() => {
     setActive(0);
   }, [variations]);
 
   if (variations.length === 0) return null;
 
-  const single = variations.length === 1;
   const current = variations[active] ?? variations[0];
+  const variationId = `${active}-${current.name || "var"}`.slice(0, 100);
 
-  // Single variation — render board directly without picker chrome
-  if (single) {
-    return (
-      <div>
-        {current.name && (
+  // Pre-compute FEN per move so the AI gets full context (not strictly needed; we send SAN).
+  const movesPayload = useMemo(() => {
+    try {
+      const chess = new Chess(current.startFen || fallbackFen || undefined);
+      return current.moves.map((m) => {
+        try { chess.move(m.san); } catch { /* ignore */ }
+        return { san: m.san, fen: chess.fen() };
+      });
+    } catch {
+      return current.moves.map((m) => ({ san: m.san }));
+    }
+  }, [current, fallbackFen]);
+
+  // Fetch AI commentary whenever the active variation changes.
+  useEffect(() => {
+    let cancelled = false;
+    setAi(null);
+    setTranscript("");
+    lastSpokenRef.current = "";
+
+    if (!courseId || current.moves.length === 0) return;
+
+    (async () => {
+      setAiLoading(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("explain-variation", {
+          body: {
+            courseId,
+            variationId,
+            courseTitle,
+            variationName: current.name,
+            startFen: current.startFen || fallbackFen,
+            moves: movesPayload,
+          },
+        });
+        if (cancelled) return;
+        if (error || !data) return;
+        const result = data as AIExplanations;
+        setAi(result);
+
+        // Speak the summary intro for the variation
+        if (result.summary && !voice.muted) {
+          const intro = `${current.name ? current.name + ". " : ""}${result.summary}`;
+          setTranscript(intro);
+          lastSpokenRef.current = intro;
+          voice.speak(intro).catch(() => { /* ignore */ });
+        }
+      } catch { /* ignore */ }
+      finally {
+        if (!cancelled) setAiLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, courseId, variationId]);
+
+  // AI explanations array aligned to current.moves
+  const moveExplanations = useMemo(() => {
+    if (!ai?.moves) return undefined;
+    return current.moves.map((m, i) => ai.moves[i]?.san === m.san ? ai.moves[i].explanation : (ai.moves[i]?.explanation || m.explanation));
+  }, [ai, current.moves]);
+
+  const handleMoveIndexChange = useCallback((
+    moveIndex: number,
+    info: { san: string | null; explanation: string | null; totalMoves: number }
+  ) => {
+    if (!info.san || moveIndex === 0) return;
+    const line = `${info.san}. ${info.explanation || ""}`.trim();
+    if (line === lastSpokenRef.current) return;
+    lastSpokenRef.current = line;
+    setTranscript(line);
+    voice.speak(line).catch(() => { /* ignore */ });
+  }, [voice]);
+
+  const replayLast = () => {
+    if (!lastSpokenRef.current) return;
+    voice.speak(lastSpokenRef.current).catch(() => { /* ignore */ });
+  };
+
+  const single = variations.length === 1;
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  const boardBlock = (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={active}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -4 }}
+        transition={{ duration: 0.18 }}
+      >
+        {!single && (
+          <div className="mb-3 text-center">
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              Varijanta {active + 1} od {variations.length}
+            </p>
+            {current.name && (
+              <p className="text-sm font-semibold text-foreground mt-0.5">
+                {current.name}
+              </p>
+            )}
+          </div>
+        )}
+        {single && current.name && (
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 text-center">
             {current.name}
           </p>
@@ -36,7 +152,36 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
           startFen={current.startFen || fallbackFen}
           moves={current.moves}
           orientation={orientation}
+          moveExplanations={moveExplanations}
+          onMoveIndexChange={handleMoveIndexChange}
         />
+      </motion.div>
+    </AnimatePresence>
+  );
+
+  const coachBlock = (
+    <div className="rounded-xl border border-border/50 bg-card/40 p-4 flex flex-col items-center gap-3">
+      <NikolaCoachAvatar voice={voice} transcript={transcript || undefined} onReplay={lastSpokenRef.current ? replayLast : undefined} />
+      {aiLoading && (
+        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+          <Loader2 className="w-3 h-3 animate-spin" /> Nikola priprema objašnjenje…
+        </div>
+      )}
+      {!aiLoading && ai?.summary && (
+        <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground leading-relaxed">
+          <Sparkles className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
+          <span>Klikni „Sledeći potez" — Nikola će objasniti svaki potez naglas.</span>
+        </div>
+      )}
+    </div>
+  );
+
+  // Single variation — board + Nikola side-by-side
+  if (single) {
+    return (
+      <div className="lg:grid lg:grid-cols-[1fr_240px] lg:gap-5">
+        <div className="min-w-0">{boardBlock}</div>
+        <div className="mt-5 lg:mt-0">{coachBlock}</div>
       </div>
     );
   }
@@ -47,7 +192,7 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
       <div className="lg:hidden mb-4">
         <div className="flex items-center gap-1.5 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
           <GitBranch className="w-3.5 h-3.5 text-primary" />
-          Variations ({variations.length})
+          Varijante ({variations.length})
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
           {variations.map((v, i) => (
@@ -61,21 +206,21 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
               }`}
             >
               <span className="opacity-70 mr-1.5">{i + 1}.</span>
-              {v.name || `Variation ${i + 1}`}
+              {v.name || `Varijanta ${i + 1}`}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Desktop: side-by-side */}
-      <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-5">
+      {/* Desktop: list | board | coach */}
+      <div className="lg:grid lg:grid-cols-[200px_1fr_240px] lg:gap-5">
         {/* Sidebar list (lg+) */}
         <aside className="hidden lg:flex lg:flex-col">
           <div className="flex items-center gap-1.5 mb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
             <GitBranch className="w-3.5 h-3.5 text-primary" />
-            Variations
+            Varijante
           </div>
-          <ul className="space-y-1.5">
+          <ul className="space-y-1.5 max-h-[460px] overflow-y-auto pr-1 scrollbar-thin">
             {variations.map((v, i) => {
               const isActive = active === i;
               return (
@@ -99,10 +244,10 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block text-sm font-medium leading-tight">
-                        {v.name || `Variation ${i + 1}`}
+                        {v.name || `Varijanta ${i + 1}`}
                       </span>
                       <span className="block text-[11px] text-muted-foreground mt-0.5">
-                        {v.moves.length} {v.moves.length === 1 ? "move" : "moves"}
+                        {v.moves.length} {v.moves.length === 1 ? "potez" : "poteza"}
                       </span>
                     </span>
                     {isActive && (
@@ -114,40 +259,19 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
             })}
           </ul>
           <p className="text-[11px] text-muted-foreground/70 mt-4 leading-relaxed">
-            Pick a variation to load it on the board.
+            Izaberi varijantu — Nikola objašnjava potez po potez.
           </p>
         </aside>
 
         {/* Active board */}
-        <div className="min-w-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18 }}
-            >
-              {/* Active variation title (visible on all sizes) */}
-              <div className="mb-3 text-center">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                  Variation {active + 1} of {variations.length}
-                </p>
-                {current.name && (
-                  <p className="text-sm font-semibold text-foreground mt-0.5">
-                    {current.name}
-                  </p>
-                )}
-              </div>
-              <InteractiveBoard
-                startFen={current.startFen || fallbackFen}
-                moves={current.moves}
-                orientation={orientation}
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
+        <div className="min-w-0">{boardBlock}</div>
+
+        {/* Coach panel (desktop) */}
+        <div className="hidden lg:block">{coachBlock}</div>
       </div>
+
+      {/* Coach panel on mobile (below board) */}
+      <div className="mt-5 lg:hidden">{coachBlock}</div>
     </div>
   );
 }
