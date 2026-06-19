@@ -43,6 +43,13 @@ interface InteractiveBoardProps {
   orientation?: "white" | "black";
   /** Allow flipping the board with a button (defaults true). */
   allowFlip?: boolean;
+  /** Optional override per-move explanations (e.g. AI-generated). Same index as `moves`. */
+  moveExplanations?: string[];
+  /** Fired whenever the user advances or rewinds in guided mode. moveIndex 0 = start, 1 = after move[0]. */
+  onMoveIndexChange?: (
+    moveIndex: number,
+    info: { san: string | null; explanation: string | null; totalMoves: number }
+  ) => void;
 }
 
 const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
@@ -64,7 +71,7 @@ const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 const DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-export default function InteractiveBoard({ startFen, moves, orientation = "white", allowFlip = true }: InteractiveBoardProps) {
+export default function InteractiveBoard({ startFen, moves, orientation = "white", allowFlip = true, moveExplanations, onMoveIndexChange }: InteractiveBoardProps) {
   const { get: getGlyph } = usePieceGlyphs();
   const baseFen = startFen || DEFAULT_FEN;
   const hasMoves = moves.length > 0;
@@ -249,7 +256,19 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
   }, [engineOn, engine.bestMoveUci]);
 
   const currentExplanation = mode === "guided" && moveIndex > 0 && moveIndex <= effectiveMoves.length
-    ? effectiveMoves[moveIndex - 1].explanation : null;
+    ? (moveExplanations?.[moveIndex - 1] ?? effectiveMoves[moveIndex - 1].explanation) : null;
+
+  // Notify parent on every guided-mode move pointer change (powers Nikola TTS).
+  useEffect(() => {
+    if (!onMoveIndexChange) return;
+    if (mode !== "guided") return;
+    const san = moveIndex > 0 && moveIndex <= effectiveMoves.length ? effectiveMoves[moveIndex - 1].san : null;
+    const exp = moveIndex > 0 && moveIndex <= effectiveMoves.length
+      ? (moveExplanations?.[moveIndex - 1] ?? effectiveMoves[moveIndex - 1].explanation ?? null)
+      : null;
+    onMoveIndexChange(moveIndex, { san, explanation: exp, totalMoves });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moveIndex, mode, effectiveMoves, totalMoves, moveExplanations]);
 
   // Branches available at the CURRENT position (i.e. branches attached to
   // the move that would be played next from the main line). Only show on
@@ -819,13 +838,18 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
             <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-9 w-9">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-xs text-muted-foreground px-2 min-w-[60px] text-center">
+            <Button
+              variant="default"
+              onClick={goForward}
+              disabled={moveIndex === totalMoves}
+              className="h-10 px-4 font-semibold"
+            >
+              Sledeći potez <ChevronRight className="h-4 w-4 ml-1.5" />
+            </Button>
+            <span className="text-xs text-muted-foreground px-1 min-w-[52px] text-center tabular-nums">
               {moveIndex} / {totalMoves}
             </span>
-            <Button variant="outline" size="icon" onClick={goForward} disabled={moveIndex === totalMoves} className="h-9 w-9">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-9 w-9">
+            <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-10 w-10">
               <ChevronsRight className="h-4 w-4" />
             </Button>
             <Button
