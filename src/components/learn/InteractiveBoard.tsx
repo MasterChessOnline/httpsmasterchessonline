@@ -71,7 +71,7 @@ const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 const DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-export default function InteractiveBoard({ startFen, moves, orientation = "white", allowFlip = true }: InteractiveBoardProps) {
+export default function InteractiveBoard({ startFen, moves, orientation = "white", allowFlip = true, moveExplanations, onMoveIndexChange }: InteractiveBoardProps) {
   const { get: getGlyph } = usePieceGlyphs();
   const baseFen = startFen || DEFAULT_FEN;
   const hasMoves = moves.length > 0;
