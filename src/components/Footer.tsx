@@ -58,7 +58,7 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
             title: "Learn",
             links: [
               { label: "Training", href: "/learn" },
-              { label: "Openings", href: "/openings" },
+              { label: "Master Courses", href: "/learn" },
               { label: "Analysis", href: "/analysis" },
             ],
           },
