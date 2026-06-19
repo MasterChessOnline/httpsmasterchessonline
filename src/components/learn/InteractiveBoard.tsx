@@ -838,13 +838,21 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
             <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-9 w-9">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-xs text-muted-foreground px-2 min-w-[60px] text-center">
+            <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-10 w-10">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="default"
+              onClick={goForward}
+              disabled={moveIndex === totalMoves}
+              className="h-10 px-4 font-semibold"
+            >
+              Sledeći potez <ChevronRight className="h-4 w-4 ml-1.5" />
+            </Button>
+            <span className="text-xs text-muted-foreground px-1 min-w-[52px] text-center tabular-nums">
               {moveIndex} / {totalMoves}
             </span>
-            <Button variant="outline" size="icon" onClick={goForward} disabled={moveIndex === totalMoves} className="h-9 w-9">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-9 w-9">
+            <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-10 w-10">
               <ChevronsRight className="h-4 w-4" />
             </Button>
             <Button
