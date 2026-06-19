@@ -256,7 +256,19 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
   }, [engineOn, engine.bestMoveUci]);
 
   const currentExplanation = mode === "guided" && moveIndex > 0 && moveIndex <= effectiveMoves.length
-    ? effectiveMoves[moveIndex - 1].explanation : null;
+    ? (moveExplanations?.[moveIndex - 1] ?? effectiveMoves[moveIndex - 1].explanation) : null;
+
+  // Notify parent on every guided-mode move pointer change (powers Nikola TTS).
+  useEffect(() => {
+    if (!onMoveIndexChange) return;
+    if (mode !== "guided") return;
+    const san = moveIndex > 0 && moveIndex <= effectiveMoves.length ? effectiveMoves[moveIndex - 1].san : null;
+    const exp = moveIndex > 0 && moveIndex <= effectiveMoves.length
+      ? (moveExplanations?.[moveIndex - 1] ?? effectiveMoves[moveIndex - 1].explanation ?? null)
+      : null;
+    onMoveIndexChange(moveIndex, { san, explanation: exp, totalMoves });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moveIndex, mode, effectiveMoves, totalMoves, moveExplanations]);
 
   // Branches available at the CURRENT position (i.e. branches attached to
   // the move that would be played next from the main line). Only show on
