@@ -747,7 +747,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
             <h3 className="font-display text-base font-semibold text-foreground mb-3 flex items-center gap-2">
               <Target className="w-4 h-4 text-primary" /> Interactive Exercise
             </h3>
-            <VariationsExercise variations={variations} fallbackFen={lesson.fen} orientation={orientation} />
+            <VariationsExercise variations={variations} fallbackFen={lesson.fen} orientation={orientation} courseId={course.id} courseTitle={course.title} />
           </div>
         );
       })()}
