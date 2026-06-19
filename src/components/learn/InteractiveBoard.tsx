@@ -838,9 +838,6 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
             <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-9 w-9">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-10 w-10">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
             <Button
               variant="default"
               onClick={goForward}
