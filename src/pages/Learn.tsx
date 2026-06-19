@@ -824,9 +824,7 @@ const Learn = () => {
   }, [getCourseProgress]);
 
   const TABS: { key: LearnTab; label: string; icon: React.ElementType }[] = [
-    { key: "openings", label: "Openings", icon: BookOpen },
     { key: "masters",  label: "Master Courses", icon: Crown },
-    { key: "training", label: "Training", icon: Target },
   ];
 
   return (
