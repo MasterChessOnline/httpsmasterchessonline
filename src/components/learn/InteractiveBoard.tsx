@@ -43,6 +43,13 @@ interface InteractiveBoardProps {
   orientation?: "white" | "black";
   /** Allow flipping the board with a button (defaults true). */
   allowFlip?: boolean;
+  /** Optional override per-move explanations (e.g. AI-generated). Same index as `moves`. */
+  moveExplanations?: string[];
+  /** Fired whenever the user advances or rewinds in guided mode. moveIndex 0 = start, 1 = after move[0]. */
+  onMoveIndexChange?: (
+    moveIndex: number,
+    info: { san: string | null; explanation: string | null; totalMoves: number }
+  ) => void;
 }
 
 const PIECE_DISPLAY: Record<string, { symbol: string; className: string }> = {
