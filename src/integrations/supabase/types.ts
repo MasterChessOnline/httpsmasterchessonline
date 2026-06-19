@@ -3056,6 +3056,33 @@ export type Database = {
         }
         Relationships: []
       }
+      variation_explanations: {
+        Row: {
+          cache_key: string
+          course_id: string
+          created_at: string
+          moves: Json
+          summary: string | null
+          variation_id: string
+        }
+        Insert: {
+          cache_key: string
+          course_id: string
+          created_at?: string
+          moves?: Json
+          summary?: string | null
+          variation_id: string
+        }
+        Update: {
+          cache_key?: string
+          course_id?: string
+          created_at?: string
+          moves?: Json
+          summary?: string | null
+          variation_id?: string
+        }
+        Relationships: []
+      }
       weekly_spin_claims: {
         Row: {
           coins_awarded: number

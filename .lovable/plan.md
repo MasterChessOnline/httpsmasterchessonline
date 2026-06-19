@@ -1,126 +1,150 @@
-## Kratak odgovor na pitanje o Google plaćanju
+## Cilj
 
-**NE moraš da plaćaš Google mesečno.** Chess.com nije popularan jer plaća Google — popularan je jer ima:
-1. 20+ godina starosti domena i milione backlink-ova
-2. Ogroman volumen sadržaja (puzzle, lessons, video)
-3. Viralni krug korisnika koji prirodno dele
-
-Google **organska pretraga = besplatna**. Plaćanje (Google Ads) je opcija samo ako hoćeš da kupuješ klikove — skupo i prestane čim staneš da plaćaš. **Bolja investicija = SEO + share viralnost + backlink-ovi**, što ti sajt već pravi temelj za.
-
-Ako želiš ipak da uložiš par evra: $30–50/mo na Google Ads sa ciljem "play chess online free" je dovoljno za test, ali ne pre nego što popraviš sve dole.
+Site ima samo **Master Courses (Masterkursi)**. Svaka varijacija je bolje objašnjena. Klik na varijaciju odmah je učitava na **istu tablu** sa prev/next dugmićima koja zaista pomeraju figure. Pored table stoji **Nikola avatar** koji **stvarno priča** (AI glas) i komentariše svaki potez dok korak po korak ide kroz varijantu — usne se kreću, oči trepću.
 
 ---
 
-## Plan: bolji share + masivni promo paket
+## 1. Ukloni sve osim Master Courses
 
-### 1. Share button — dodaj sve popularne aplikacije
-Trenutno `FloatingShareButton` ima samo 4 (WhatsApp, Telegram, X, Facebook). Dodaj:
-- **Viber** (`viber://forward?text=...`)
-- **Instagram** (Web Share API native, fallback: copy + "Open Instagram" CTA, jer IG nema direct share URL)
-- **Facebook Messenger** (`fb-messenger://share?link=...`)
-- **Reddit** (`https://reddit.com/submit?url=...&title=...`)
-- **LinkedIn** (`https://linkedin.com/sharing/share-offsite/?url=...`)
-- **Email** (`mailto:?subject=...&body=...`)
-- **SMS** (`sms:?body=...` — radi na telefonu)
-- **Native share** dugme (Web Share API) na vrhu menija na mobilnom — otvara OS share sheet sa SVIM instaliranim aplikacijama (TikTok DM, Snapchat, Discord, itd. — sve odjednom)
+**`src/pages/Learn.tsx`**
+- U `TABS` ostavi samo `{ key: "masters", label: "Master Courses", icon: Crown }`. Skloni Openings i Training tabove.
+- `CourseList` uvek renderuje `masterclassCourses` (sakrij `openings`/`training` grane, obriši `TrainingTab` komponentu).
+- Default `tab` state = `"masters"`.
+- Tip `LearnTab` postaje `"masters"` (zadrži za buduće proširenje).
+- Update SEO `description` da spominje samo master kurseve.
 
-**UX:** kategorizovati u tabove: "Messaging" / "Social" / "Other". Grid 3 kolone umesto 2. Detect mobile → prikaži native share kao prvi CTA.
+**`src/pages/Lessons.tsx`** — preusmeri na `/learn` (`<Navigate to="/learn" replace />`), ukloni rutu iz menija/footera (search `"/lessons"` po `src/components/Navbar.tsx`, `src/components/Footer.tsx`, `CommandPalette.tsx`, sitemape).
 
-### 2. Inteligentni share tekst
-Trenutni tekst je generičan ("Check out MasterChess..."). Dodaj kontekstno-svestan tekst po stranici:
-- Na `/play/online?gameId=X` posle pobede: "Just won my chess game in X moves on MasterChess! 🏆"
-- Na `/puzzles`: "Try this chess puzzle — can you solve it?"
-- Na opening pageu: "Learning the Ruy Lopez on MasterChess"
-- Sa pre-generated OG screenshot pozicije/krunisanog kralja → ljudi dele LEPU sliku, ne URL
+**`src/pages/OpeningTrainer.tsx`** + ruta `/openings` — preusmeri na `/learn`. (`OpeningTrainerView.tsx` ostaje jer ga `MasterGameView` koristi.)
 
-### 3. Referral incentive
-Već imaš referral system (`useReferralTracker`). Dodaj:
-- Posle share: "You'll get 100 coins when your friend signs up"
-- Counter na `/profile`: "X friends invited"
-- Top 10 referrers leaderboard
+**`/guides`, `/learn/glossary`, `/learn/checkmate-patterns`, `/players`, `/learn/:slug`** — ne diramo (to su SEO stranice, ne kursevi). Korisnik je tražio da "kursevi" budu samo masterkursevi.
 
-### 4. Promo IDEJE (zero-budget viralnost)
-
-**A) TikTok/Reels strategy (najjače za chess danas)**
-- DailyChess_12 kanal već imaš → pravi 30–60s shortove: "Beat Magnus in 8 moves" pozicije, blunder reactions, speed runs
-- Svaki video završava sa "Play this on masterchess.live"
-- Cilj: 3 shortova/dan, 30 dana = test viralnosti
-
-**B) Reddit guerilla**
-- Postuj korisne stvari na: r/chess (1M+), r/chessbeginners, r/AnarchyChess (humor!), r/SideProject
-- NE spamuj link — pravi value posts: "I made a free site with no ads/puzzles — here's why and how" + screenshot
-- AMA "13-year-old built chess platform" — to je gold story
-
-**C) Hacker News + Product Hunt launch**
-- Post na "Show HN: I'm 13 and built a chess platform"
-- Launch na ProductHunt — ako uspe top 5, donosi 5–10k posetilaca u 1 dan + ozbiljne backlinks
-- Pre toga: imaj 3 svedočenja iz `site_ratings`
-
-**D) Discord/Twitch chess servere**
-- Pojavi se u chess Discord-ovima (Eric Rosen, Levy Rozman fanovi, BotezLive)
-- Ponudi besplatan custom turnir za njihovu zajednicu na MasterChess
-
-**E) Linkbait sadržaj (besplatni SEO)**
-- Blog post: "I analyzed 1000 chess games — here's what beginners blunder"
-- "Why Stockfish 16 plays the King's Indian like a maniac"
-- "Free chess tools comparison (no brand names)" — privlači backlink-ove
-
-**F) Streameri (mikro-influenseri)**
-- DM 20 chess streamera ispod 5k followers
-- "Hey, here's free Streamer Mode na našem sajtu — try it"
-- 2–3 će prihvatiti
-
-### 5. SEO tehnike koje još fale
-
-**A) Backlink-ovi**
-- Submit na: chess.org/links pages, web directory-je, GitHub awesome lists, free-chess-resources kompilacije
-- Pomenuti na Wikipedia "Chess servers" stranici (ako ispuniš notability)
-
-**B) Schema additions (od prošlog plana, nedovršeno)**
-- BreadcrumbList po detail page-ovima
-- Real `lastmod` iz DB u sitemap-u
-
-**C) Featured snippets**
-- "How to play chess" guide stranica strukturisana sa `<dl>` parovima → Google često uzima u Knowledge Panel
-- "Chess piece values" stranica → ti već imaš `/piece-values`, samo schema + FAQ
-
-**D) Brzina (Core Web Vitals)**
-- Tvoj LCP image (hero) preload-uj sa `fetchpriority="high"` (već imaš za icon)
-- Lazy-load YouTube embed (Facade pattern — placeholder slika dok user ne klikne)
-
-### 6. Email captura / lifecycle
-- Imaš `process-email-queue` edge function → koristi je
-- Weekly "best games of the week" email automation
-- Post-signup: 7-day onboarding sekvencija sa tipovima
-
-### 7. PWA install push
-- Već imaš `InstallAppButton` — promo na home dan posle prve posete
-- Push notifications za turnire (već imaš `push-triggers`) — proveriti da je opt-in CTA vidljiv
-
-### 8. Social proof na home
-- "X games played today" live counter (iz `online_games` table count)
-- "Y players online right now" (iz `use-presence`)
-- Real, ne fake. Brojevi su mali u početku — to je OK, izgleda autentično.
+Sitemap regen nije obavezan — stari URL-ovi će redirect-ovati.
 
 ---
 
-## Konkretno šta da kodiram (build mode)
+## 2. Bolje objašnjenje svake varijante (per-move komentari)
 
-1. **`FloatingShareButton.tsx`** — proširi sa Viber, Messenger, Reddit, LinkedIn, Email, SMS, native Web Share kao primary
-2. **`src/lib/share.ts`** — kontekstno-svesni share tekstovi po path-u
-3. **`src/components/ReferralRewardBanner.tsx`** — novi banner na `/profile` sa referral statusima
-4. **`src/components/LiveStatsStrip.tsx`** — pravi brojevi (games today, players online) iznad testimonials
-5. **`src/pages/Press.tsx` / nova `Promo.tsx`** — public "Press Kit" sa screenshot-ovima, logo download, "submit us to your blog" CTA
-6. **YouTube facade** — lazy load embeds (perf win)
+**`src/lib/lesson-moves.ts`** — `MoveStep` već ima opciono `explanation?: string`. Trenutno mnogi potezi nemaju komentar; pisanje 130+ × 10 ručno je nemoguće. Rešenje:
 
-## Šta NE diram
-- Gold/black dizajn
-- Brand policy (nikakvo "lichess/chess.com" ime)
-- Nikakvi lažni brojevi
+**Nova edge funkcija `supabase/functions/explain-variation/index.ts`** (Lovable AI Gateway, model `google/gemini-3-flash-preview`):
+- Input: `{ courseTitle, variationName, startFen, moves: [{san, fen?}] }`
+- Output: `{ moves: [{san, explanation, idea}] }` — kratko (15–25 reči po potezu) na **srpskom**, plus jedna `summary` rečenica za celu varijantu.
+- Caching: rezultat se piše u novu tabelu `variation_explanations` (PK = hash inputa) da se ne plaća drugi put.
 
-## Garancije
-- Sve organski, bez plaćanja Google-a
-- Share menu radi na svim popularnim aplikacijama (preko Web Share API + direct deep linkovi)
-- SEO + viralnost win bez riskovanja brand policy-a
+Migracija:
+```
+CREATE TABLE public.variation_explanations(
+  cache_key text PRIMARY KEY,
+  course_id text NOT NULL,
+  variation_id text NOT NULL,
+  summary text,
+  moves jsonb NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+GRANT SELECT ON public.variation_explanations TO anon, authenticated;
+GRANT ALL  ON public.variation_explanations TO service_role;
+ALTER TABLE public.variation_explanations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can read cached explanations"
+  ON public.variation_explanations FOR SELECT USING (true);
+```
 
-OK da krenem?
+Klijent (`VariationsExercise.tsx`) na izbor varijante:
+1. Pokušava `select` iz cache-a.
+2. Ako prazno → poziva edge funkciju, prikazuje "Nikola priprema objašnjenje…" sa shimmer placeholder-om.
+3. Smešta rezultat u local state — koristi ga i UI i TTS.
+
+Fallback ako edge padne: koristi postojeći `lesson.content` + `keyPoints`.
+
+---
+
+## 3. Tabla sinhronizovana sa varijantom (prev/next radi)
+
+Trenutno `VariationsExercise` već ubacuje `InteractiveBoard` sa `moves`, ali u **guided** modu se očekuje da korisnik klikne pravu figuru. Korisnik želi da samo gleda — strelica napred = potez se odigra, strelica nazad = potez se vraća.
+
+**Izmene u `src/components/learn/InteractiveBoard.tsx`** — dodaj novi mode `"watch"`:
+- Preskače validaciju "tvoj potez".
+- `→` ili klik **Sledeći potez** → `setMoveIndex(i+1)`, animira figuru, pušta `move`/`capture` zvuk, šalje event `onMoveAdvance(index, san, fen)`.
+- `←` vraća. `⏮ ⏭` start/kraj. `▶` auto-play (postoji).
+- Vidno veliki "‹ Nazad / Sledeći ›" dugmići ispod table (mobile-friendly, min 44px).
+
+**`VariationsExercise.tsx`**:
+- Prosledi `mode="watch"` (osim ako korisnik klikne "Vežbaj ovu varijantu").
+- Dodaj toggle `Watch / Practice`.
+- Kad se promeni `active` (izabrana varijanta) → resetuje `moveIndex` na 0 i emit `onSelectVariation` da TTS krene od početka.
+
+---
+
+## 4. Nikola avatar koji priča (AI glas + animacija usana)
+
+**Avatar slika** — generiši jednu portret-ilustraciju (`src/assets/nikola-avatar-talk.png`, transparent, 512×512) — dečak 13 god., dobroćudan, u stilu gold/black brenda. Koristi se za bazu.
+
+**`src/components/learn/NikolaCoachAvatar.tsx`** (nova):
+- Krug 96–120px, slika unutra.
+- Kad `speaking=true`: 
+  - Soft glow ring (`box-shadow` pulse u primary).
+  - Mali overlay "usta" `<div>` koji se otvara/zatvara po amplitudi (`requestAnimationFrame` čita amplitudu iz `AnalyserNode`).
+  - Treptanje očiju svakih 3–5s (CSS keyframes drugi overlay).
+- Dugmići: ▶ Reci ponovo, ⏸ Pauza, 🔇 Mute (persist u `localStorage` `nikola_voice_muted`).
+
+**`src/hooks/use-nikola-voice.ts`** (nova):
+- `speak(text: string)` → `fetch('/functions/v1/nikola-tts', {body:{text}})`, SSE stream `pcm`, sastavlja AudioBuffer chunks (po pattern-u iz `ai-text-to-speech` knowledge fajla).
+- Vrati `AnalyserNode` da avatar može da čita amplitudu.
+- `stop()` prekida current playback.
+- Queue: ako stigne novi `speak()` dok prethodni traje → prekida prethodni, počinje novi.
+
+**Edge funkcija `supabase/functions/nikola-tts/index.ts`**:
+- `POST {text}` → poziva `https://ai.gateway.lovable.dev/v1/audio/speech` sa `model: openai/gpt-4o-mini-tts`, `voice: "verse"` (mladalački, topao), `stream_format: "sse"`, `response_format: "pcm"`, `instructions: "Speak warmly and clearly, like a friendly 13-year-old chess coach explaining to a friend. Keep energy bright."`
+- Prosleđuje SSE body 1:1 na klijent. CORS headeri uključeni.
+- `verify_jwt = false` (svako može da sluša svoj komentar).
+- Chunking: tekst >400 reči se deli na rečenice (postoji helper u knowledge fajlu).
+
+**Integracija u `VariationsExercise`**:
+- Kad korisnik izabere varijantu → `speak(summary)`.
+- Na svaki `onMoveAdvance(i, san)` → ako postoji `explanation[i]`, `speak("${san}. ${explanation}")`.
+- Auto-play (`▶`) prirodno čita potez-po-potez (sledeći potez čeka da glas završi → koristi `onended` umesto fiksnog 1.1s timera).
+- Cache audio u memoriji po `hash(text)` da se isti komentar ne plaća kad korisnik klikne ←→.
+
+**Jezik glasa**: srpski tekst, model `gpt-4o-mini-tts` ima dobar SR akcenat. Ako zvuči loše, instruction nadograđujemo "Speak Serbian naturally with clear pronunciation".
+
+---
+
+## 5. UI flow (korisnička priča)
+
+1. Otvori `/learn` → vidi samo karticu **Master Courses** (Crown header, 7 kurseva).
+2. Klik na kurs → lista varijanti (kao sada).
+3. Klik na varijantu → otvara se **LessonView** sa:
+   - Levo: tabla sa figurom u startnoj poziciji + **‹ Nazad | Sledeći ›** | **▶ Auto** | **🔁 Reset**.
+   - Desno: avatar Nikole (animirani), ispod njega "Šta govori sada" transkript trenutnog poteza.
+   - Ispod table: lista svih varijanti (može se prebacivati bez napuštanja stranice).
+4. Klik **Sledeći** → figura se pomera, Nikola izgovori `"e4 — Borba za centar od prvog poteza."`. Auto se zaustavlja na kraju varijante.
+5. Toggle **Vežbaj** → prelazi u postojeći guided mode (drag-drop pravog poteza), Nikola pohvali/ispravi.
+
+---
+
+## Tehničke izmene — sažetak
+
+| Fajl | Akcija |
+|---|---|
+| `src/pages/Learn.tsx` | Ukloni Openings/Training tabove i `TrainingTab` |
+| `src/pages/Lessons.tsx` | Zameni sa Navigate→/learn |
+| `src/pages/OpeningTrainer.tsx` | Zameni sa Navigate→/learn |
+| `src/App.tsx` | Sredi rute (`/lessons`, `/openings`) |
+| `src/components/Navbar.tsx`, `Footer.tsx`, `CommandPalette.tsx` | Ukloni linkove ka `/lessons` i `/openings` |
+| `src/components/learn/InteractiveBoard.tsx` | Dodaj `watch` mode + jasniji prev/next + `onMoveAdvance` callback |
+| `src/components/learn/VariationsExercise.tsx` | Watch toggle, fetch explanations, integriši NikolaCoach |
+| **NEW** `src/components/learn/NikolaCoachAvatar.tsx` | Avatar + animacija + mute kontrola |
+| **NEW** `src/hooks/use-nikola-voice.ts` | TTS streaming hook |
+| **NEW** `src/assets/nikola-avatar-talk.png` | Portret (premium imagegen) |
+| **NEW** `supabase/functions/nikola-tts/index.ts` | SSE proxy ka Lovable AI TTS |
+| **NEW** `supabase/functions/explain-variation/index.ts` | Generiše objašnjenja na srpskom |
+| **NEW migracija** | `variation_explanations` tabela + RLS + GRANT |
+
+## Ne diramo
+- `OpeningTrainerView.tsx` (koristi `MasterGameView`).
+- Sve SEO stranice (`/guides`, `/players`, `/glossary`, blog).
+- Postojeće course data (`courses-data.ts`, `lesson-moves.ts`) — sadržaj se dopunjava AI-em, ne menja se ručno.
+
+## Šta ne radi plan
+- TTS troši Lovable AI kredite po pozivu (cache pomaže). Ako padne 402/429 → fallback na browser `speechSynthesis` sa porukom "AI glas trenutno nije dostupan".
+- Nikolin avatar je 2D slika sa CSS overlay-em za usta — nije pravi rigged lip-sync, ali izgleda živo i sinhronizovano sa amplitudom glasa.
