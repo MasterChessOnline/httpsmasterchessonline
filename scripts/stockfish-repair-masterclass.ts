@@ -9,37 +9,50 @@
  *
  * Run:  bunx tsx scripts/stockfish-repair-masterclass.ts
  */
-import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import { Chess } from "chess.js";
 import * as fs from "fs";
 import { MASTERCLASS_VALIDATED_LINES } from "../src/lib/masterclass-validated-lines";
 
 const SF_BIN = process.env.SF_BIN || "/nix/store/givsmnk5rpawndn3dbcb53q5phg9wcz2-stockfish-17.1/bin/stockfish";
+const JS_ENGINE = process.env.SF_JS_ENGINE || "single";
 const DEPTH = Number(process.env.SF_DEPTH || 10);
 const MULTIPV = Number(process.env.SF_MULTIPV || 6);
 const BLUNDER_CP = Number(process.env.SF_BLUNDER_CP || 180); // >1.8 pawns worse than best ⇒ blunder
-const MATE_BLUNDER_CP = 600; // entering a mate-against-you ⇒ always a blunder
+const FIX_NON_TOP = process.env.SF_FIX_NON_TOP === "1";
 
 class SF {
-  private p: ChildProcessWithoutNullStreams;
-  private buf = "";
   private resolvers: ((line: string) => boolean)[] = [];
+  private engine: { sendCommand: (cmd: string) => void; terminate?: () => void } | null = null;
 
-  constructor() {
-    this.p = spawn(SF_BIN);
-    this.p.stdout.on("data", (d: Buffer) => {
-      this.buf += d.toString();
-      let idx;
-      while ((idx = this.buf.indexOf("\n")) >= 0) {
-        const line = this.buf.slice(0, idx).trim();
-        this.buf = this.buf.slice(idx + 1);
-        for (let i = this.resolvers.length - 1; i >= 0; i--) {
-          if (this.resolvers[i](line)) this.resolvers.splice(i, 1);
-        }
-      }
-    });
+  private receive(line: string) {
+    for (let i = this.resolvers.length - 1; i >= 0; i--) {
+      if (this.resolvers[i](line)) this.resolvers.splice(i, 1);
+    }
   }
-  send(cmd: string) { this.p.stdin.write(cmd + "\n"); }
+  async load() {
+    if (fs.existsSync(SF_BIN)) {
+      const { spawn } = await import("child_process");
+      const p = spawn(SF_BIN);
+      let buf = "";
+      p.stdout.on("data", (d: Buffer) => {
+        buf += d.toString();
+        let idx;
+        while ((idx = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, idx).trim();
+          buf = buf.slice(idx + 1);
+          this.receive(line);
+        }
+      });
+      this.engine = { sendCommand: (cmd) => p.stdin.write(cmd + "\n"), terminate: () => p.kill() };
+      return;
+    }
+
+    const stockfish = (await import("stockfish")).default as (enginePath?: string) => Promise<any>;
+    const engine = await stockfish(JS_ENGINE);
+    engine.listener = (line: string) => this.receive(String(line).trim());
+    this.engine = engine;
+  }
+  send(cmd: string) { this.engine?.sendCommand(cmd); }
   waitFor(test: (line: string) => boolean): Promise<string> {
     return new Promise((resolve) => {
       this.resolvers.push((line) => { if (test(line)) { resolve(line); return true; } return false; });
