@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * - Honors a "muted" toggle persisted in localStorage.
  */
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nikola-tts`;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const STORAGE_MUTE = "nikola_voice_muted";
 
 export function useNikolaVoice() {
@@ -22,6 +23,7 @@ export function useNikolaVoice() {
   const abortRef = useRef<AbortController | null>(null);
   const playheadRef = useRef<number>(0);
   const endTimerRef = useRef<number | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const setMuted = useCallback((v: boolean) => {
     setMutedState(v);
@@ -55,11 +57,36 @@ export function useNikolaVoice() {
       clearTimeout(endTimerRef.current);
       endTimerRef.current = null;
     }
+    if (utteranceRef.current && typeof window !== "undefined" && "speechSynthesis" in window) {
+      try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
+      utteranceRef.current = null;
+    }
     playheadRef.current = 0;
     setSpeaking(false);
   };
 
   const stop = useCallback(() => stopInternal(), []);
+
+  const speakFallback = useCallback((text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setSpeaking(false);
+      return;
+    }
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "sr-RS";
+      utterance.rate = 0.95;
+      utterance.pitch = 1.08;
+      utterance.onend = () => { utteranceRef.current = null; setSpeaking(false); };
+      utterance.onerror = () => { utteranceRef.current = null; setSpeaking(false); };
+      utteranceRef.current = utterance;
+      setSpeaking(true);
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      setSpeaking(false);
+    }
+  }, []);
 
   const speak = useCallback(async (text: string, voice = "verse") => {
     if (!text || !text.trim()) return;
@@ -103,12 +130,16 @@ export function useNikolaVoice() {
     try {
       const res = await fetch(FN_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({ text, voice }),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
-        setSpeaking(false);
+        speakFallback(text);
         return;
       }
       const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
@@ -142,10 +173,11 @@ export function useNikolaVoice() {
         endTimerRef.current = null;
         setSpeaking(false);
       }, msLeft);
-    } catch {
-      setSpeaking(false);
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") setSpeaking(false);
+      else speakFallback(text);
     }
-  }, [muted, ensureCtx]);
+  }, [muted, ensureCtx, speakFallback]);
 
   // Cleanup on unmount
   useEffect(() => () => {

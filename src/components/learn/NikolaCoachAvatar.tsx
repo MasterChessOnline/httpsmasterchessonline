@@ -93,15 +93,27 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
           className="w-full h-full object-cover object-top select-none pointer-events-none"
           draggable={false}
         />
+        {/* Privacy-safe stylized face overlay: keeps the uploaded-photo vibe without revealing the blurred face. */}
+        <div
+          aria-hidden
+          className="absolute left-1/2 top-[24%] -translate-x-1/2 rounded-[42%] bg-gradient-to-b from-[#c88f7d] via-[#b87970] to-[#8f5a62] shadow-[inset_0_2px_10px_rgba(255,255,255,0.18),inset_0_-8px_18px_rgba(0,0,0,0.22)]"
+          style={{ width: `${size * 0.38}px`, height: `${size * 0.43}px` }}
+        >
+          <div className="absolute left-[20%] top-[31%] h-[7%] w-[16%] rounded-full bg-card shadow-[0_1px_0_hsl(var(--primary)/0.35)]" />
+          <div className="absolute right-[20%] top-[31%] h-[7%] w-[16%] rounded-full bg-card shadow-[0_1px_0_hsl(var(--primary)/0.35)]" />
+          <div className="absolute left-[47%] top-[42%] h-[21%] w-[7%] rounded-full bg-card/20" />
+          <div className="absolute left-[18%] top-[56%] h-[12%] w-[18%] rounded-full bg-primary/15 blur-[1px]" />
+          <div className="absolute right-[18%] top-[56%] h-[12%] w-[18%] rounded-full bg-primary/15 blur-[1px]" />
+        </div>
         {/* Mouth overlay: small dark oval that scales vertically with amplitude */}
         <div
           aria-hidden
           className="absolute pointer-events-none"
           style={{
             left: "50%",
-            bottom: "26%",
-            width: `${size * 0.22}px`,
-            height: `${size * 0.11}px`,
+            top: "50%",
+            width: `${size * 0.13}px`,
+            height: `${size * 0.065}px`,
             transform: "translateX(-50%)",
           }}
         >
@@ -122,8 +134,8 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
           className="absolute inset-0 pointer-events-none"
           style={{ opacity: blink ? 1 : 0, transition: "opacity 80ms" }}
         >
-          <div className="absolute" style={{ left: "30%", top: "40%", width: "12%", height: "3%", background: "hsl(24 30% 22%)", borderRadius: 2 }} />
-          <div className="absolute" style={{ left: "58%", top: "40%", width: "12%", height: "3%", background: "hsl(24 30% 22%)", borderRadius: 2 }} />
+          <div className="absolute" style={{ left: "39%", top: "40%", width: "6%", height: "2.4%", background: "hsl(var(--card))", borderRadius: 2 }} />
+          <div className="absolute" style={{ left: "55%", top: "40%", width: "6%", height: "2.4%", background: "hsl(var(--card))", borderRadius: 2 }} />
         </div>
         {/* Live dot */}
         {voice.speaking && (

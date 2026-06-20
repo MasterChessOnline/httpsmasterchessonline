@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Chess } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ import {
 import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
 
-import InteractiveBoard from "@/components/learn/InteractiveBoard";
+import type { MoveStep } from "@/components/learn/InteractiveBoard";
 
 import VariationsExercise from "@/components/learn/VariationsExercise";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
@@ -33,6 +34,72 @@ const LEVEL_CONFIG = {
   Intermediate: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", icon: Zap, label: "Intermediate" },
   Advanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Award, label: "Advanced" },
 };
+
+function buildPracticeLineVariation(lesson: Lesson): LessonVariation | null {
+  const practice = lesson.practiceLine;
+  if (!practice?.moves?.length) return null;
+
+  const build = (startFen?: string) => {
+    let chess: Chess;
+    try {
+      chess = new Chess(startFen);
+    } catch {
+      return [];
+    }
+    const out: MoveStep[] = [];
+    const usedPlayer = new Set<number>();
+    const usedResponse = new Set<number>();
+
+    const tryMove = (san: string) => {
+      try {
+        const copy = new Chess(chess.fen());
+        return !!copy.move(san);
+      } catch {
+        return false;
+      }
+    };
+
+    const findNext = () => {
+      for (let i = 0; i < practice.autoResponses.length; i++) {
+        const san = practice.autoResponses[i];
+        if (!usedResponse.has(i) && tryMove(san)) {
+          return { type: "response" as const, idx: i, san, explanation: `${san} — keeps the main line going.` };
+        }
+      }
+      for (let i = 0; i < practice.moves.length; i++) {
+        const move = practice.moves[i];
+        if (!usedPlayer.has(i) && tryMove(move.move)) {
+          return { type: "player" as const, idx: i, san: move.move, explanation: move.explanation || `${move.move} — main course move.` };
+        }
+      }
+      return null;
+    };
+
+    for (let guard = 0; guard < practice.moves.length + practice.autoResponses.length; guard++) {
+      const next = findNext();
+      if (!next) break;
+      chess.move(next.san);
+      if (next.type === "response") usedResponse.add(next.idx);
+      else usedPlayer.add(next.idx);
+      out.push({ san: next.san, explanation: next.explanation });
+    }
+
+    return out;
+  };
+
+  const candidates = [practice.startFen, undefined, lesson.fen].filter((fen, idx, arr) => arr.indexOf(fen) === idx);
+  const best = candidates
+    .map((startFen) => ({ startFen, moves: build(startFen) }))
+    .sort((a, b) => b.moves.length - a.moves.length)[0];
+
+  if (!best?.moves.length) return null;
+
+  return {
+    name: lesson.title,
+    startFen: best.startFen,
+    moves: best.moves,
+  };
+}
 
 
 
@@ -647,12 +714,14 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
 
   const lessonData = LESSON_MOVES[lesson.id];
   const variations: LessonVariation[] = useMemo(() => {
+    const practiceVariation = buildPracticeLineVariation(lesson);
+    if (practiceVariation?.moves.length) return [practiceVariation];
     if (lessonData?.variations && lessonData.variations.length > 0) return lessonData.variations;
     if (lessonData?.moves?.length) return [{ name: "", startFen: lessonData.startFen, moves: lessonData.moves }];
     if (lesson.fen) return [{ name: "Position", startFen: lesson.fen, moves: [] }];
     // Fallback — every chapter must have a board, even if it's just the starting position
     return [{ name: "Starting position", moves: [] }];
-  }, [lesson.id]);
+  }, [lesson, lessonData]);
 
   const hasExercise = variations.length > 0;
 
