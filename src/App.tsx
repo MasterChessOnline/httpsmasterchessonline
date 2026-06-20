@@ -190,6 +190,10 @@ const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
 const WeeklyRecapModal = lazy(() => import("@/components/WeeklyRecapModal"));
 const Shop = lazy(() => import("./pages/Shop"));
 const SpinWheel = lazy(() => import("./pages/SpinWheel"));
+const HallOfFame = lazy(() => import("./pages/HallOfFame"));
+const Beta = lazy(() => import("./pages/Beta"));
+const Ranked = lazy(() => import("./pages/Ranked"));
+const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
