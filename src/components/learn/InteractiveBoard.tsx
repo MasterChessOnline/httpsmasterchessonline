@@ -917,9 +917,18 @@ function MoveListPanel({ moves, activeIdx, branchAt, onJump }: MoveListPanelProp
   const activeRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    if (activeRef.current) {
-      activeRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
+    const el = activeRef.current;
+    if (!el) return;
+    // Scroll ONLY inside the move-list container; never bubble to the page
+    // (clicking "Next move" must keep focus on the board, not jump down).
+    const container = el.closest("[data-movelist]") as HTMLElement | null;
+    if (!container) return;
+    const elTop = el.offsetTop;
+    const elBottom = elTop + el.offsetHeight;
+    const viewTop = container.scrollTop;
+    const viewBottom = viewTop + container.clientHeight;
+    if (elTop < viewTop) container.scrollTo({ top: elTop, behavior: "smooth" });
+    else if (elBottom > viewBottom) container.scrollTo({ top: elBottom - container.clientHeight, behavior: "smooth" });
   }, [activeIdx]);
 
   // Group into pairs: [{ num, white, black }]
