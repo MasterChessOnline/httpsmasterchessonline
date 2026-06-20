@@ -545,9 +545,37 @@ async function handleReportResult(supabase: any, game_id: string, result: string
 
     const { data: tournament } = await supabase
       .from("tournaments")
-      .select("current_round, total_rounds")
+      .select("current_round, total_rounds, tournament_type, format, time_control_seconds, time_control_label, time_control_increment")
       .eq("id", pairing.tournament_id)
       .single();
+
+    // Fast-win bonus: checkmate in <=10 full moves => +1 to winner's fast_win_bonus & score
+    if (tournament && result !== "1/2-1/2" && game && game.status === "finished") {
+      const { data: gameMeta } = await supabase
+        .from("online_games")
+        .select("move_number, end_reason")
+        .eq("id", game_id)
+        .maybeSingle();
+      if (gameMeta && (gameMeta.end_reason === "checkmate" || gameMeta.end_reason === "resignation") && (gameMeta.move_number || 0) <= 20) {
+        const winnerId = result === "1-0" ? pairing.white_player_id : pairing.black_player_id;
+        if (winnerId) {
+          const { data: wr } = await supabase
+            .from("tournament_registrations")
+            .select("score, fast_win_bonus")
+            .eq("tournament_id", pairing.tournament_id)
+            .eq("user_id", winnerId)
+            .single();
+          await supabase
+            .from("tournament_registrations")
+            .update({
+              score: (Number(wr?.score) || 0) + 1,
+              fast_win_bonus: (Number(wr?.fast_win_bonus) || 0) + 1,
+            })
+            .eq("tournament_id", pairing.tournament_id)
+            .eq("user_id", winnerId);
+        }
+      }
+    }
 
     if (tournament) {
       const { data: pendingPairings } = await supabase
@@ -558,7 +586,10 @@ async function handleReportResult(supabase: any, game_id: string, result: string
         .is("result", null);
 
       if (!pendingPairings || pendingPairings.length === 0) {
-        if (tournament.current_round >= tournament.total_rounds) {
+        const isKnockout = tournament.tournament_type === "knockout" || tournament.format === "knockout";
+        if (isKnockout) {
+          await advanceKnockoutRound(supabase, pairing.tournament_id, tournament.current_round);
+        } else if (tournament.current_round >= tournament.total_rounds) {
           await supabase
             .from("tournaments")
             .update({ status: "finished" })
@@ -570,6 +601,7 @@ async function handleReportResult(supabase: any, game_id: string, result: string
       }
     }
   }
+
 
   return jsonRes({ success: true });
 }
