@@ -17,7 +17,7 @@ import {
 import { COURSES, Course, Lesson, CourseCategory, CourseTier } from "@/lib/courses-data";
 import { useAuth } from "@/contexts/AuthContext";
 
-import InteractiveBoard from "@/components/learn/InteractiveBoard";
+import type { MoveStep } from "@/components/learn/InteractiveBoard";
 
 import VariationsExercise from "@/components/learn/VariationsExercise";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
@@ -33,6 +33,44 @@ const LEVEL_CONFIG = {
   Intermediate: { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", icon: Zap, label: "Intermediate" },
   Advanced: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", icon: Award, label: "Advanced" },
 };
+
+function buildPracticeLineVariation(lesson: Lesson): LessonVariation | null {
+  const practice = lesson.practiceLine;
+  if (!practice?.moves?.length) return null;
+
+  const playerTurn = practice.playerColor;
+  let turn: "w" | "b" = (practice.startFen?.split(" ")[1] as "w" | "b" | undefined) || "w";
+  const out: MoveStep[] = [];
+  let playerIdx = 0;
+  let responseIdx = 0;
+
+  const push = (san: string | undefined, explanation: string) => {
+    if (!san) return;
+    out.push({ san, explanation });
+    turn = turn === "w" ? "b" : "w";
+  };
+
+  while (playerIdx < practice.moves.length || responseIdx < practice.autoResponses.length) {
+    if (turn === playerTurn && playerIdx < practice.moves.length) {
+      const move = practice.moves[playerIdx++];
+      push(move.move, move.explanation || `${move.move} — main course move.`);
+    } else if (responseIdx < practice.autoResponses.length) {
+      const response = practice.autoResponses[responseIdx++];
+      push(response, `${response} — keeps the main line going.`);
+    } else if (playerIdx < practice.moves.length) {
+      const move = practice.moves[playerIdx++];
+      push(move.move, move.explanation || `${move.move} — main course move.`);
+    } else {
+      break;
+    }
+  }
+
+  return {
+    name: lesson.title,
+    startFen: practice.startFen,
+    moves: out,
+  };
+}
 
 
 
