@@ -40,7 +40,12 @@ function buildPracticeLineVariation(lesson: Lesson): LessonVariation | null {
   if (!practice?.moves?.length) return null;
 
   const build = (startFen?: string) => {
-    const chess = new Chess(startFen);
+    let chess: Chess;
+    try {
+      chess = new Chess(startFen);
+    } catch {
+      return [];
+    }
     const out: MoveStep[] = [];
     const usedPlayer = new Set<number>();
     const usedResponse = new Set<number>();
