@@ -105,7 +105,7 @@ class SF {
     }
     return out;
   }
-  quit() { this.send("quit"); this.p.kill(); }
+  quit() { this.send("quit"); this.engine?.terminate?.(); }
 }
 
 function uciToSan(fen: string, uci: string): string | null {
