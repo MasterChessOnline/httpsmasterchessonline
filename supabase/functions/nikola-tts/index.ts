@@ -8,9 +8,11 @@ const corsHeaders = {
 };
 
 const INSTRUCTIONS =
-  "Speak in clear, friendly American English like a young, energetic chess coach " +
-  "explaining a move to a friend. Warm, encouraging, never robotic. Pronounce chess " +
-  "notation naturally (e4 as 'e four', Nf3 as 'knight f three', O-O as 'castles kingside').";
+  "Speak in clear American English with the voice of a real 12-13 year old boy — " +
+  "bright, slightly higher pitch, youthful and energetic, like a kid excitedly explaining " +
+  "his favorite chess opening to a friend. Natural cadence, NOT robotic, NOT adult-formal. " +
+  "Pronounce chess notation naturally (e4 as 'e four', Nf3 as 'knight f three', " +
+  "O-O as 'castles kingside'). Keep it warm, fun, and a little playful.";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -47,7 +49,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  const voice = body.voice && /^[a-z]+$/i.test(body.voice) ? body.voice : "verse";
+  const voice = body.voice && /^[a-z]+$/i.test(body.voice) ? body.voice : "coral";
 
   try {
     const upstream = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {

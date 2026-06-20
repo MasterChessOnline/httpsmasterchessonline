@@ -95,7 +95,7 @@ export function useNikolaVoice() {
     }
   }, []);
 
-  const speak = useCallback(async (text: string, voice = "verse") => {
+  const speak = useCallback(async (text: string, voice = "coral") => {
     if (!text || !text.trim()) return;
     if (muted) return;
 
