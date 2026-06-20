@@ -1,5 +1,5 @@
 /**
- * AUTO-GENERATED. Each masterclass variation has been walked through Stockfish 17
+ * AUTO-GENERATED. Each masterclass variation has been walked through Stockfish
  * (depth 6, MultiPV 4); any move scoring more than 220cp worse
  * than the engine's best candidate was replaced with the engine's choice and the
  * rest of the line was replayed from the corrected position. 87 engine
