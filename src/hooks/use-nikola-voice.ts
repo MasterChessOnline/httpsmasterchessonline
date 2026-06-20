@@ -23,6 +23,7 @@ export function useNikolaVoice() {
   const abortRef = useRef<AbortController | null>(null);
   const playheadRef = useRef<number>(0);
   const endTimerRef = useRef<number | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const setMuted = useCallback((v: boolean) => {
     setMutedState(v);
@@ -56,11 +57,36 @@ export function useNikolaVoice() {
       clearTimeout(endTimerRef.current);
       endTimerRef.current = null;
     }
+    if (utteranceRef.current && typeof window !== "undefined" && "speechSynthesis" in window) {
+      try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
+      utteranceRef.current = null;
+    }
     playheadRef.current = 0;
     setSpeaking(false);
   };
 
   const stop = useCallback(() => stopInternal(), []);
+
+  const speakFallback = useCallback((text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setSpeaking(false);
+      return;
+    }
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "sr-RS";
+      utterance.rate = 0.95;
+      utterance.pitch = 1.08;
+      utterance.onend = () => { utteranceRef.current = null; setSpeaking(false); };
+      utterance.onerror = () => { utteranceRef.current = null; setSpeaking(false); };
+      utteranceRef.current = utterance;
+      setSpeaking(true);
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      setSpeaking(false);
+    }
+  }, []);
 
   const speak = useCallback(async (text: string, voice = "verse") => {
     if (!text || !text.trim()) return;
@@ -113,7 +139,7 @@ export function useNikolaVoice() {
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
-        setSpeaking(false);
+        speakFallback(text);
         return;
       }
       const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
@@ -147,10 +173,11 @@ export function useNikolaVoice() {
         endTimerRef.current = null;
         setSpeaking(false);
       }, msLeft);
-    } catch {
-      setSpeaking(false);
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") setSpeaking(false);
+      else speakFallback(text);
     }
-  }, [muted, ensureCtx]);
+  }, [muted, ensureCtx, speakFallback]);
 
   // Cleanup on unmount
   useEffect(() => () => {
