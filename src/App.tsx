@@ -94,6 +94,9 @@ const AlternativeToMajorChessSites = lazy(() =>
   import("./pages/seo-landings").then((m) => ({ default: m.AlternativeToMajorChessSites })),
 );
 const Viral = lazy(() => import("./pages/Viral"));
+const Connections = lazy(() => import("./pages/Connections"));
+const CommunityMap = lazy(() => import("./pages/CommunityMap"));
+const AdminSeoConsole = lazy(() => import("./pages/AdminSeoConsole"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
@@ -380,6 +383,9 @@ function AnimatedRoutes() {
           <Route path="/beta" element={<Beta />} />
           <Route path="/ranked" element={<Ranked />} />
           <Route path="/share/:gameId/:ply" element={<ShareMoment />} />
+          <Route path="/connections" element={<Connections />} />
+          <Route path="/community/map" element={<CommunityMap />} />
+          <Route path="/admin/seo-console" element={<AdminSeoConsole />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>

@@ -52,6 +52,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/ranked", changefreq: "daily", priority: "0.9" },
   { path: "/hall-of-fame", changefreq: "daily", priority: "0.8" },
   { path: "/beta", changefreq: "weekly", priority: "0.6" },
+  { path: "/community/map", changefreq: "weekly", priority: "0.7" },
   { path: "/learn/how-to-play-chess", changefreq: "monthly", priority: "0.9" },
   { path: "/learn/how-to-set-up-chess-board", changefreq: "monthly", priority: "0.9" },
   { path: "/learn/how-to-castle-in-chess", changefreq: "monthly", priority: "0.9" },
