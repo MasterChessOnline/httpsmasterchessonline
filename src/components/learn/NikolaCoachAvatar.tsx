@@ -158,9 +158,9 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
             type="button"
             onClick={onReplay}
             className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-card px-2 py-1 text-[11px] text-foreground hover:bg-muted transition-colors"
-            title="Reci ponovo"
+            title="Replay"
           >
-            <RotateCcw className="w-3 h-3" /> Ponovi
+            <RotateCcw className="w-3 h-3" /> Replay
           </button>
         )}
         {voice.speaking && (
@@ -168,9 +168,9 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
             type="button"
             onClick={voice.stop}
             className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-card px-2 py-1 text-[11px] text-foreground hover:bg-muted transition-colors"
-            title="Pauziraj"
+            title="Pause"
           >
-            <Pause className="w-3 h-3" /> Pauza
+            <Pause className="w-3 h-3" /> Pause
           </button>
         )}
         <button
@@ -181,7 +181,7 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
               ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/15"
               : "border-border/60 bg-card text-foreground hover:bg-muted"
           }`}
-          title={voice.muted ? "Uključi glas" : "Isključi glas"}
+          title={voice.muted ? "Unmute" : "Mute"}
         >
           {voice.muted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
           {voice.muted ? "Muted" : "On"}

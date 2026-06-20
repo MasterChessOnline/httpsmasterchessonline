@@ -1,4 +1,4 @@
-// Generates per-move chess explanations in Serbian via Lovable AI Gateway.
+// Generates per-move chess explanations in English via Lovable AI Gateway.
 // Caches results in `variation_explanations` table.
 //
 // Body: { courseId, variationId, courseTitle, variationName, startFen?, moves: [{san, fen?}] }
@@ -70,19 +70,19 @@ Deno.serve(async (req) => {
 
   // Build prompt
   const movesList = moves.map((m, i) => `${i + 1}. ${m.san}`).join("\n");
-  const prompt = `Ti si Nikola, 13-godišnji šahovski trener iz Srbije. Govoriš toplo i jednostavno.
+  const prompt = `You are Nikola, a young and friendly chess coach. You speak warmly, simply, and in clear English.
 
-Kurs: "${body.courseTitle || courseId}"
-Varijanta: "${body.variationName || variationId}"
-Početna pozicija: ${body.startFen || "standardna početna pozicija"}
+Course: "${body.courseTitle || courseId}"
+Variation: "${body.variationName || variationId}"
+Starting position: ${body.startFen || "standard initial position"}
 
-Potezi:
+Moves:
 ${movesList}
 
-Za SVAKI potez napiši kratko objašnjenje na srpskom (12-22 reči) — šta je ideja, plan, ili pretnja. Ne ponavljaj očigledno. Govori prirodno, kao prijatelju.
-Takođe napiši jednu rečenicu "summary" koja sažima celu varijantu (do 25 reči).
+For EACH move write a short explanation in English (12-22 words) — the idea, the plan, or the threat. Don't restate the obvious. Speak naturally, like to a friend.
+Also write one "summary" sentence that captures the whole variation (max 25 words).
 
-Vrati ISKLJUČIVO validan JSON, bez markdown ograda:
+Return ONLY valid JSON, no markdown fences:
 {"summary":"...", "moves":[{"san":"e4","explanation":"..."}, ...]}`;
 
   const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -94,7 +94,7 @@ Vrati ISKLJUČIVO validan JSON, bez markdown ograda:
     body: JSON.stringify({
       model: "google/gemini-3-flash-preview",
       messages: [
-        { role: "system", content: "Vraćaš samo validan JSON. Nikad markdown ograde." },
+        { role: "system", content: "Return only valid JSON. Never use markdown fences." },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },

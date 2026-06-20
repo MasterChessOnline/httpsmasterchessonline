@@ -75,9 +75,9 @@ export function useNikolaVoice() {
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "sr-RS";
-      utterance.rate = 0.95;
-      utterance.pitch = 1.08;
+      utterance.lang = "en-US";
+      utterance.rate = 1.0;
+      utterance.pitch = 1.05;
       utterance.onend = () => { utteranceRef.current = null; setSpeaking(false); };
       utterance.onerror = () => { utteranceRef.current = null; setSpeaking(false); };
       utteranceRef.current = utterance;

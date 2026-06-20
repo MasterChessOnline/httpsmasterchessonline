@@ -134,7 +134,7 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
         {!single && (
           <div className="mb-3 text-center">
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-              Varijanta {active + 1} od {variations.length}
+              Variation {active + 1} of {variations.length}
             </p>
             {current.name && (
               <p className="text-sm font-semibold text-foreground mt-0.5">
@@ -164,13 +164,13 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
       <NikolaCoachAvatar voice={voice} transcript={transcript || undefined} onReplay={lastSpokenRef.current ? replayLast : undefined} />
       {aiLoading && (
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-          <Loader2 className="w-3 h-3 animate-spin" /> Nikola priprema objašnjenje…
+          <Loader2 className="w-3 h-3 animate-spin" /> Nikola is preparing the analysis…
         </div>
       )}
       {!aiLoading && ai?.summary && (
         <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground leading-relaxed">
           <Sparkles className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
-          <span>Klikni „Sledeći potez" — Nikola će objasniti svaki potez naglas.</span>
+          <span>Click "Next move" — Nikola will explain every move out loud.</span>
         </div>
       )}
     </div>
@@ -192,7 +192,7 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
       <div className="lg:hidden mb-4">
         <div className="flex items-center gap-1.5 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
           <GitBranch className="w-3.5 h-3.5 text-primary" />
-          Varijante ({variations.length})
+          Variations ({variations.length})
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
           {variations.map((v, i) => (
@@ -206,7 +206,7 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
               }`}
             >
               <span className="opacity-70 mr-1.5">{i + 1}.</span>
-              {v.name || `Varijanta ${i + 1}`}
+              {v.name || `Variation ${i + 1}`}
             </button>
           ))}
         </div>
@@ -218,7 +218,7 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
         <aside className="hidden lg:flex lg:flex-col">
           <div className="flex items-center gap-1.5 mb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
             <GitBranch className="w-3.5 h-3.5 text-primary" />
-            Varijante
+            Variations
           </div>
           <ul className="space-y-1.5 max-h-[460px] overflow-y-auto pr-1 scrollbar-thin">
             {variations.map((v, i) => {
@@ -244,10 +244,10 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block text-sm font-medium leading-tight">
-                        {v.name || `Varijanta ${i + 1}`}
+                        {v.name || `Variation ${i + 1}`}
                       </span>
                       <span className="block text-[11px] text-muted-foreground mt-0.5">
-                        {v.moves.length} {v.moves.length === 1 ? "potez" : "poteza"}
+                        {v.moves.length} {v.moves.length === 1 ? "move" : "moves"}
                       </span>
                     </span>
                     {isActive && (
@@ -259,7 +259,7 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
             })}
           </ul>
           <p className="text-[11px] text-muted-foreground/70 mt-4 leading-relaxed">
-            Izaberi varijantu — Nikola objašnjava potez po potez.
+            Pick a variation — Nikola explains it move by move.
           </p>
         </aside>
 
