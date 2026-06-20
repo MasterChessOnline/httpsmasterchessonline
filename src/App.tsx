@@ -100,6 +100,7 @@ const Connections = lazy(() => import("./pages/Connections"));
 const CommunityMap = lazy(() => import("./pages/CommunityMap"));
 const AdminSeoConsole = lazy(() => import("./pages/AdminSeoConsole"));
 const AdminGbpPosts = lazy(() => import("./pages/AdminGbpPosts"));
+const AdminGsc = lazy(() => import("./pages/AdminGsc"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
@@ -392,6 +393,7 @@ function AnimatedRoutes() {
           <Route path="/community/map" element={<CommunityMap />} />
           <Route path="/admin/seo-console" element={<AdminSeoConsole />} />
           <Route path="/admin/gbp-posts" element={<AdminGbpPosts />} />
+          <Route path="/admin/gsc" element={<AdminGsc />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>

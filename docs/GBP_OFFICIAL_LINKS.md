@@ -68,3 +68,36 @@
 
 If a URL is not `https://masterchess.live/...` or one of the four social
 profiles above, it does NOT go into GBP. Period.
+
+---
+
+## Booking slot (NEW)
+
+Paste into GBP dashboard → Bookings → "Add a booking link":
+
+```
+https://masterchess.live/tournaments?utm_source=gbp&utm_medium=booking
+```
+
+Surface in Maps as a **"Reserve"** button — one tap from listing to in-app tournament signup.
+
+## Services (8 entries — paste each as a separate Service)
+
+| Service name      | Description (≤300 chars)                                                | Action link                                                                       |
+|-------------------|-------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| Ranked Online Play| Live ELO-rated chess games with global matchmaking. 100% free.          | `https://masterchess.live/play?utm_source=gbp&utm_medium=service`                 |
+| Tournaments       | Daily Swiss, weekly Battle Royale, monthly Arenas. Free entry.          | `https://masterchess.live/tournaments?utm_source=gbp&utm_medium=service`          |
+| AI Game Review    | Free move-by-move analysis with blunder, mistake, and best-move tags.   | `https://masterchess.live/game-review?utm_source=gbp&utm_medium=service`          |
+| Chess Puzzles     | Daily tactical puzzles for every level — mate in 1 to endgame studies.  | `https://masterchess.live/puzzles?utm_source=gbp&utm_medium=service`              |
+| Bot Practice      | 9 unique AI personalities from 400 to 2000 ELO. Train against any style.| `https://masterchess.live/bots?utm_source=gbp&utm_medium=service`                 |
+| Opening Trainer   | Drill openings with the variation tree explorer. Save your repertoire.  | `https://masterchess.live/openings?utm_source=gbp&utm_medium=service`             |
+| Chess Clubs       | Join or create a club, run private matches, climb the clan leaderboard. | `https://masterchess.live/clubs?utm_source=gbp&utm_medium=service`                |
+| Streamer Mode     | Distraction-free UI for live broadcasters with shareable overlays.      | `https://masterchess.live/streamers?utm_source=gbp&utm_medium=service`            |
+
+## Attributes (set ON in dashboard)
+
+- ✅ **Online service** — always
+- ✅ **Identifies as youth-led business** — unique differentiator (founder is 13)
+- ✅ **Free Wi-Fi** — skip (N/A for online business)
+- ✅ **Online appointments** — ON
+- ✅ **LGBTQ+ friendly** — ON
