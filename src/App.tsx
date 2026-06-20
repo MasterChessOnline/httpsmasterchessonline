@@ -54,6 +54,8 @@ const Reviews = lazy(() => import("./pages/Reviews"));
 const Brag = lazy(() => import("./pages/Brag"));
 const DailyKingPage = lazy(() => import("./pages/DailyKing"));
 const RateMasterChess = lazy(() => import("./pages/RateMasterChess"));
+const MapsRedirect = lazy(() => import("./pages/MapsRedirect"));
+const ReviewRedirect = lazy(() => import("./pages/ReviewRedirect"));
 const BattleRoyale = lazy(() => import("./pages/BattleRoyale"));
 const Press = lazy(() => import("./pages/Press"));
 const Streamers = lazy(() => import("./pages/Streamers"));
