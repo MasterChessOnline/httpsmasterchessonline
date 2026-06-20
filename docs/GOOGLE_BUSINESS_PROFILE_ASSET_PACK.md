@@ -1,101 +1,149 @@
-# 📍 MasterChess — Google Business Profile (100% Complete Asset Pack)
+# MasterChess — Google Business Profile Complete Asset Pack
 
-Everything you need to paste into <https://business.google.com> for the **MasterChess** profile. Copy text verbatim. All images are pre-generated and saved in `/mnt/documents/gbp/`.
-
----
-
-## 1. Basic info (copy verbatim)
-
-| Field          | Value                                                  |
-| -------------- | ------------------------------------------------------ |
-| Name           | `MasterChess`                                          |
-| Category       | `Software company`                                     |
-| Website        | `https://masterchess.live`                             |
-| Service area   | Worldwide, Europe, Serbia                              |
-| Location       | "I don't have a physical location"                     |
-| Email          | `support@masterchess.live` (optional)                  |
-| Phone          | leave blank                                            |
-
-⚠️ Do NOT enter `MasterChess.live` or `MasterChess online chess` — Google often rejects suffixed names.
+> Everything you need to upload to your Google Business Profile in one place.  
+> Files live in `/mnt/documents/gbp/` — download them via the Lovable artifact preview.
 
 ---
 
-## 2. Description (paste verbatim)
+## 1. Basic Info (paste verbatim)
+
+| Field          | Value                                                       |
+|----------------|-------------------------------------------------------------|
+| **Name**       | `MasterChess`                                               |
+| **Category**   | `Software company` (primary) · `Game publisher` (secondary) |
+| **Website**    | `https://masterchess.live`                                  |
+| **Phone**      | (leave blank — online business)                             |
+| **Email**      | `contact@masterchess.live`                                  |
+| **Location**   | **No physical location**                                    |
+| **Service area** | Worldwide / Europe / Serbia                               |
+| **Hours**      | **Open 24 hours, every day**                                |
+
+---
+
+## 2. Description (max 750 chars — paste verbatim)
 
 ```
-MasterChess is a competitive online chess platform where players can play ranked matches, join tournaments, and solve daily chess puzzles. The platform offers global rankings, skill-based progression, and a community-driven chess experience for players of all levels.
+MasterChess is a competitive online chess platform where players can play
+ranked matches, join tournaments, and solve daily chess puzzles. Built for
+real human play — no ads, no bots filling lobbies, no noise. Free to play
+in any browser. Features include 9 AI training bots from beginner to
+grandmaster, daily Arena and Swiss tournaments, Stockfish-powered game
+analysis, an opening trainer with master repertoires, and a global ELO
+leaderboard. Founded in 2025 by Nikola Šakotić.
 ```
 
 ---
 
-## 3. Image pack (pre-generated, ready to upload)
+## 3. Image Pack (14 images total)
 
-All five images live in `/mnt/documents/gbp/` — download and upload as listed:
+All files live in `/mnt/documents/gbp/`.
 
-| Slot in GBP             | File                                            | Use as           |
-| ----------------------- | ----------------------------------------------- | ---------------- |
-| **Logo**                | `gbp/masterchess-logo.png` (1024×1024)          | Profile / logo   |
-| **Cover photo**         | `gbp/masterchess-cover.jpg` (1920×1088)         | Cover image      |
-| **Homepage**            | `gbp/masterchess-homepage.jpg` (1920×1088)      | "By owner" photo |
-| **Gameplay**            | `gbp/masterchess-gameplay.jpg` (1920×1088)      | "By owner" photo |
-| **Tournaments / leaderboard** | `gbp/masterchess-tournaments.jpg` (1920×1088) | "By owner" photo |
+### Logo (1 image — required)
+| File                              | Slot           | Notes                          |
+|-----------------------------------|----------------|--------------------------------|
+| `masterchess-logo-official.png`   | **Logo**       | 1024×1024, white bg, crown M   |
 
-> Need a Discord/community shot? Take a screenshot of your server and upload it as a 6th "By owner" photo — no AI generation needed.
+### Cover (1 image — required)
+| File                          | Slot      | Notes                       |
+|-------------------------------|-----------|-----------------------------|
+| `masterchess-cover.jpg`       | **Cover** | 1920×1080, neon chess board |
 
-**Minimum for verification: 3–5 photos.** Logo + cover + 3 "by owner" already exceeds that.
-
----
-
-## 4. Links to verify on the profile
-
-- ✅ Website opens `https://masterchess.live` and the homepage renders (no "coming soon")
-- ✅ Discord invite link is visible on the site (footer / Community page)
-- ✅ `/play`, `/about`, `/tournaments` all load
-
----
-
-## 5. Pre-verification sanity check
-
-Run before submitting:
-
-- [ ] Site is live on the custom domain
-- [ ] Logo uploaded (1024×1024 PNG, transparent or solid-black bg)
-- [ ] Cover uploaded (1920×1088 JPG)
-- [ ] At least 3 "by owner" photos uploaded
-- [ ] Description pasted verbatim (no edits — Google flags spammy keyword stuffing)
-- [ ] Category set to **Software company**
-- [ ] Service area = Worldwide
-- [ ] No physical address entered
-
-If all checked → request **video verification**: record one continuous clip showing
-1. `https://masterchess.live` in your browser,
-2. logged-in admin panel (`/admin/seo` or `/admin/gbp-posts`),
-3. live tournament / active players list.
-
-Narrate: *"This is MasterChess, an online chess platform with tournaments and ranked games."*
+### "By owner" Gallery (12 images — upload all)
+| File                                | Caption (in GBP)                       |
+|-------------------------------------|----------------------------------------|
+| `masterchess-homepage.jpg`          | Homepage — Play Now                    |
+| `masterchess-gameplay.jpg`          | Live ranked match                      |
+| `masterchess-tournaments.jpg`       | Tournament leaderboard                 |
+| `masterchess-bracket.jpg`           | Battle Royale bracket                  |
+| `masterchess-puzzle.jpg`            | Daily puzzle — Mate in 2               |
+| `masterchess-bots.jpg`              | 9 AI bot personalities                 |
+| `masterchess-live-players.jpg`      | Live online lobby — 247 players        |
+| `masterchess-admin.jpg`             | Admin dashboard (proves real platform) |
+| `masterchess-mobile.jpg`            | MasterChess on mobile browser          |
+| `masterchess-founder.jpg`           | Built by Nikola, 13                    |
 
 ---
 
-## 6. Post-verification
+## 4. Products (5 entries — paste in GBP "Products" tab)
 
-Use `/admin/gbp-posts` (admin-only) to schedule **Google Posts** weekly. Suggested cadence:
-- **Mon** — Tournament announcement
-- **Wed** — Daily puzzle teaser
-- **Fri** — Champion shoutout
-- **Sun** — Stats / community milestone
-
-Each post → Compose → Schedule → cron flips it to `ready_to_post` → Copy → paste into GBP "Add update".
+| Title                | Price | Description                                                |
+|----------------------|-------|------------------------------------------------------------|
+| Free Online Chess    | Free  | Play live vs real players or 9 AI bots, no ads             |
+| Daily Tournaments    | Free  | Arena and Swiss tournaments every day, live ELO            |
+| AI Game Review       | Free  | Stockfish-powered move-by-move analysis of your games      |
+| Chess Puzzles        | Free  | New daily puzzle, build solve streak, all rating levels    |
+| Bot Practice         | Free  | 9 AI personalities from 400 to 2000 ELO                    |
 
 ---
 
-## 7. What "100% complete" looks like
+## 5. Services (4 entries — paste in GBP "Services" tab)
 
-When someone Googles **MasterChess**, the knowledge panel shows:
+- **Ranked Online Play** — Compete with real players worldwide
+- **Tournaments & Events** — Daily Arena, weekly Swiss, monthly Battle Royale
+- **Chess Lessons** — Interactive lessons, opening trainer, gamification
+- **Community & Clubs** — Join clans, follow players, share Chess Moments
 
-- 🟢 Gold-crown logo
-- 🟢 Description (the paragraph above)
-- 🟢 Website button → `masterchess.live`
-- 🟢 5+ photos in the gallery
-- 🟢 Recent Google Posts (after week 1)
+---
 
-That's the trust signal Google needs to rank the domain higher.
+## 6. Q&A Pack (paste each as a Question, then answer it yourself)
+
+**Q1.** Is MasterChess free to play?  
+A: Yes. MasterChess is 100% free to play — no ads, no paywalls. Optional cosmetic perks are available.
+
+**Q2.** Do I need to create an account?  
+A: No. You can play instantly via `/play-guest`. Create a free account to track stats, join tournaments, and earn ELO.
+
+**Q3.** What chess engine does MasterChess use for analysis?  
+A: Stockfish runs directly in your browser via WebAssembly — your moves never leave your device.
+
+**Q4.** Are the players on MasterChess real?  
+A: Yes. MasterChess strictly forbids bot-fill in matchmaking. Every opponent in a ranked game is a real human player.
+
+**Q5.** Does MasterChess have a mobile app?  
+A: MasterChess is a Progressive Web App — install it from your browser's "Add to Home Screen" menu, no app store required.
+
+**Q6.** Who built MasterChess?  
+A: MasterChess was founded in 2025 by Nikola Šakotić, a 13-year-old self-taught programmer from Serbia.
+
+---
+
+## 7. Attributes (toggle on in GBP)
+
+- ✅ Online service
+- ✅ Identifies as women-owned: **NO** (skip)
+- ✅ Active community
+- ✅ Free Wi-Fi: N/A
+- ✅ Wheelchair accessible: N/A (online only)
+
+---
+
+## 8. Verification
+
+See **`docs/GBP_VERIFICATION_VIDEO_SCRIPT.md`** for the exact 30–60s screen-recording shot list.
+
+---
+
+## 9. Post-Verification — Google Posts
+
+The `/admin/gbp-posts` page is pre-seeded with **4 starter posts** (draft status):
+
+1. Weekly Chess Tournament — Sunday  
+2. Daily Chess Puzzle Challenge  
+3. Champion of the Week  
+4. Play Chess Online — Free, No Ads
+
+Schedule them on a Mon/Wed/Fri/Sun cadence after verification. Each post boosts knowledge-panel freshness.
+
+---
+
+## 10. "100% complete" GBP checklist
+
+When all of these are visible on Google Search → "MasterChess", you're done:
+
+- [ ] 🟢 Crown logo (logo slot filled)
+- [ ] 🟢 Description visible in knowledge panel
+- [ ] 🟢 Website link to `masterchess.live`
+- [ ] 🟢 5+ photos in gallery
+- [ ] 🟢 Products & Services sections populated
+- [ ] 🟢 At least one Google Post within last 7 days
+- [ ] 🟢 First Q&A answered by you (owner)
