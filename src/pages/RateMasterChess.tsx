@@ -300,6 +300,26 @@ export default function RateMasterChess() {
             </Link>
           </Button>
         </div>
+
+        {/* Google Business Profile review CTA — drives knowledge-panel stars */}
+        <div className="mt-6 rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-500/10 via-card/70 to-card/70 backdrop-blur p-6 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 text-[11px] font-semibold mb-3">
+            <Star className="w-3.5 h-3.5 fill-amber-300" /> Help us on Google
+          </div>
+          <h2 className="font-display text-xl font-bold mb-1">Rate MasterChess on Google</h2>
+          <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+            One click, one minute. Your Google review puts MasterChess in front of every chess player searching Google — the best way to support a free, ad-free platform.
+          </p>
+          <Button asChild size="lg" className="bg-amber-500 hover:bg-amber-400 text-black">
+            <a
+              href={(import.meta.env.VITE_GOOGLE_REVIEW_URL as string | undefined) || "https://www.google.com/search?q=MasterChess+masterchess.live"}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Star className="w-4 h-4 mr-2 fill-current" /> Leave a Google review
+            </a>
+          </Button>
+        </div>
       </section>
 
       <Footer />

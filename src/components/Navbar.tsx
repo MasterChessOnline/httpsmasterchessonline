@@ -250,17 +250,11 @@ const Navbar = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0 min-w-0" aria-label="MasterChess home">
               <motion.div
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/30 group-hover:border-primary/50 group-hover:shadow-[0_0_28px_rgba(212,175,55,0.28)] transition-all duration-300 shrink-0 overflow-hidden"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/30 group-hover:border-primary/50 group-hover:shadow-[0_0_28px_rgba(212,175,55,0.28)] transition-all duration-300 shrink-0"
                 whileHover={{ rotate: 12, scale: 1.08 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <img
-                  src="/logo-crown-white.png"
-                  alt="MasterChess crown logo"
-                  className="h-7 w-7 sm:h-8 sm:w-8 object-contain drop-shadow-[0_0_8px_rgba(212,175,55,0.55)]"
-                  loading="eager"
-                  decoding="async"
-                />
+                <Crown className="h-6 w-6 sm:h-7 sm:w-7 text-primary drop-shadow-[0_0_8px_rgba(212,175,55,0.55)]" aria-hidden="true" />
               </motion.div>
               <span
                 className="font-display font-bold tracking-wide text-foreground uppercase text-lg sm:text-2xl whitespace-nowrap shrink-0"
