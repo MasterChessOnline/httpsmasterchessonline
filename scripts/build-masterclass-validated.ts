@@ -106,31 +106,24 @@ function buildLesson(lesson: any): Built | null {
   const sourceLen = (pl.moves?.length ?? 0) + (pl.autoResponses?.length ?? 0);
 
   const tryQueue = (q: "p" | "a"): boolean => {
-    if (q === "p" && pi < pl.moves.length) {
-      try { if (game.move(pl.moves[pi].move)) { out.push(pl.moves[pi].move); pi++; return true; } } catch { /* */ }
-    } else if (q === "a" && ai < pl.autoResponses.length) {
-      try { if (game.move(pl.autoResponses[ai])) { out.push(pl.autoResponses[ai]); ai++; return true; } } catch { /* */ }
+    if (q === "p") {
+      while (pi < pl.moves.length) {
+        const move = pl.moves[pi++];
+        try { if (game.move(move.move)) { out.push(move.move); return true; } } catch { /* skip illegal player entry */ }
+      }
+    } else {
+      while (ai < pl.autoResponses.length) {
+        const san = pl.autoResponses[ai++];
+        try { if (game.move(san)) { out.push(san); return true; } } catch { /* skip illegal response entry */ }
+      }
     }
     return false;
   };
 
   let truncatedAt: number | undefined;
   for (let i = 0; i < sourceLen; i++) {
-    const primary = turn ? "p" : "a";
-    const fallback = turn ? "a" : "p";
-    let ok = tryQueue(primary);
-    if (!ok) ok = tryQueue(fallback);
-    if (!ok) {
-      // skip an illegal head; if both queues are stuck, stop.
-      const beforeP = pi, beforeA = ai;
-      if (primary === "p" && pi < pl.moves.length) pi++;
-      else if (primary === "a" && ai < pl.autoResponses.length) ai++;
-      else if (pi < pl.moves.length) pi++;
-      else if (ai < pl.autoResponses.length) ai++;
-      else { truncatedAt = out.length; break; }
-      // If the fallback didn't progress and both queues are now empty heads of illegal moves
-      if (pi === beforeP && ai === beforeA) { truncatedAt = out.length; break; }
-    }
+    const ok = tryQueue(turn ? "p" : "a");
+    if (!ok) { truncatedAt = out.length; break; }
     turn = !turn;
   }
   return { sans: out, startFen: startFromInitial ? undefined : pl.startFen, truncatedAt, sourceLen, source: "practice" };
