@@ -5,13 +5,12 @@ import { motion } from "framer-motion";
 import ShareSiteStrip from "@/components/ShareSiteStrip";
 import DonationProgressBar from "@/components/DonationProgressBar";
 
-import { GOOGLE_REVIEW_URL, trackReviewClick } from "@/lib/google-review";
+import { useGoogleReview, trackReviewClick } from "@/lib/google-review";
 
-const socialLinks = [
+const baseSocialLinks = [
   { icon: Instagram, href: "https://www.instagram.com/masterchess.live", label: "Instagram", color: "hover:text-pink-400" },
   { icon: Youtube, href: "https://www.youtube.com/channel/UC8W92XBMdu20Z0tKBbwsaWA", label: "YouTube", color: "hover:text-red-400" },
   { icon: Share2, href: "https://www.tiktok.com/@masterchess.live", label: "TikTok", color: "hover:text-cyan-400" },
-  { icon: Star, href: GOOGLE_REVIEW_URL, label: "Review us on Google", color: "hover:text-amber-400" },
 ];
 
 const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
