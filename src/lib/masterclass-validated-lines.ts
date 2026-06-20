@@ -10,8 +10,8 @@
  *   - masterkurs-kalashnikov: lessons=50 truncated=0 sourcePlies=1773 validatedPlies=1773
  *   - masterkurs-kid: lessons=50 truncated=0 sourcePlies=1342 validatedPlies=1342
  *   - masterkurs-queens-gambit: lessons=30 truncated=0 sourcePlies=562 validatedPlies=562
- *   - masterkurs-ruy-lopez: lessons=30 truncated=21 sourcePlies=859 validatedPlies=767
- *   - masterkurs-caro-kann: lessons=30 truncated=5 sourcePlies=668 validatedPlies=635
+ *   - masterkurs-ruy-lopez: lessons=30 truncated=0 sourcePlies=530 validatedPlies=530
+ *   - masterkurs-caro-kann: lessons=30 truncated=0 sourcePlies=428 validatedPlies=428
  *   - masterkurs-najdorf: lessons=30 truncated=0 sourcePlies=566 validatedPlies=566
  *
  * Re-generate after editing courses-data.ts or masterclass-practice-extras.ts:
@@ -8814,9 +8814,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "d6",
       "c3",
       "O-O",
-      "h3",
-      "Na5",
-      "d4"
+      "h3"
     ]
   },
   "rl-2": {
@@ -8834,17 +8832,10 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Re1",
       "b5",
       "Bb3",
-      "d6",
-      "c3",
       "O-O",
-      "h3",
-      "Na5",
-      "d4",
-      "c5",
-      "Nbd2",
-      "Qc7",
-      "dxe5",
-      "dxe5"
+      "c3",
+      "d6",
+      "h3"
     ]
   },
   "rl-3": {
@@ -8864,16 +8855,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "dxe5",
       "Nf5",
       "Qxd8+",
-      "Kxd8",
-      "Nc3",
-      "Ke8",
-      "Rd1+",
-      "h6",
-      "Bg5",
-      "Be7",
-      "h3",
-      "Bd7",
-      "Re1"
+      "Kxd8"
     ]
   },
   "rl-4": {
@@ -8895,18 +8877,9 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "O-O",
       "h3",
-      "Na5",
+      "Nb8",
       "d4",
-      "c5",
-      "Nbd2",
-      "Qc7",
-      "Nf1",
-      "Nc6",
-      "Ng3",
-      "Re8",
-      "a4",
-      "Bb7",
-      "axb5"
+      "Nbd7"
     ]
   },
   "rl-5": {
@@ -8928,13 +8901,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "dxe5",
       "Be6",
       "c3",
-      "Be7",
-      "Nbd2",
-      "O-O",
-      "Bc2",
-      "Nc5",
-      "Re1",
-      "d4"
+      "Be7"
     ]
   },
   "rl-6": {
@@ -8956,8 +8923,11 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "d5",
       "exd5",
-      "Bd6",
-      "Nxe5"
+      "Nxd5",
+      "Nxe5",
+      "Nxe5",
+      "Rxe5",
+      "c6"
     ]
   },
   "rl-7": {
@@ -8977,21 +8947,9 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bb3",
       "O-O",
       "a4",
-      "d6",
-      "d3",
       "Bb7",
-      "axb5",
-      "axb5",
-      "Nbd2",
-      "Re8",
-      "Nf1",
-      "Bf8",
-      "Ng3",
-      "g6",
-      "h3",
-      "Bg7",
-      "Nh4",
-      "Nb8"
+      "d3",
+      "d6"
     ]
   },
   "rl-8": {
@@ -9010,13 +8968,9 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "exd4",
       "Nxd4",
       "c5",
-      "Nc3",
-      "Bd6",
-      "Be3",
-      "Be6",
-      "Nd5",
-      "Bd7",
-      "Rfe1"
+      "Nb3",
+      "Qxd1",
+      "Rxd1"
     ]
   },
   "rl-9": {
@@ -9026,25 +8980,15 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nf3",
       "Nc6",
       "Bb5",
-      "a6",
-      "Ba4",
       "d6",
-      "c3",
-      "Bd7",
       "d4",
-      "Nge7",
+      "Bd7",
+      "Nc3",
+      "Nf6",
       "O-O",
-      "g6",
+      "Be7",
       "Re1",
-      "Bg7",
-      "Nbd2",
-      "O-O",
-      "Nf1",
-      "Nb8",
-      "Ng3",
-      "c5",
-      "d5",
-      "Nbc6"
+      "O-O"
     ]
   },
   "rl-10": {
@@ -9062,12 +9006,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nxe5",
       "dxe4",
       "Nxc6",
-      "Qg5",
-      "Qe2",
-      "bxc6",
-      "Qxe4+",
-      "Be7",
-      "d3"
+      "Qg5"
     ]
   },
   "rl-11": {
@@ -9086,20 +9025,8 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bc5",
       "c3",
       "d6",
-      "h3",
-      "O-O",
       "d4",
-      "Bg4",
-      "Re1",
-      "h6",
-      "Nbd2",
-      "Bb6",
-      "Nf1",
-      "Re8",
-      "Bxh6",
-      "exd4",
-      "Ng3",
-      "Nh5"
+      "Bb6"
     ]
   },
   "rl-12": {
@@ -9121,21 +9048,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "O-O",
       "h3",
-      "Nb8",
-      "d4",
-      "Nbd7",
-      "Nbd2",
-      "Bb7",
-      "Bc2",
-      "Re8",
-      "Nf1",
-      "Bf8",
-      "Ng3",
-      "g6",
-      "a4",
-      "Bg7",
-      "d5",
-      "c5"
+      "Nb8"
     ]
   },
   "rl-13": {
@@ -9159,17 +9072,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "h3",
       "Na5",
       "Bc2",
-      "c5",
-      "d4",
-      "Qc7",
-      "Nbd2",
-      "Nc6",
-      "Nf1",
-      "Bd7",
-      "Ng3",
-      "Rfc8",
-      "Nh4",
-      "cxd4"
+      "c5"
     ]
   },
   "rl-14": {
@@ -9191,23 +9094,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "O-O",
       "h3",
-      "Bb7",
-      "d4",
-      "Re8",
-      "Nbd2",
-      "Bf8",
-      "Bc2",
-      "h6",
-      "Nf1",
-      "Nb8",
-      "Ng3",
-      "Nbd7",
-      "a3",
-      "g6",
-      "Bd3",
-      "Bg7",
-      "d5",
-      "c5"
+      "Bb7"
     ]
   },
   "rl-15": {
@@ -9229,21 +9116,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "O-O",
       "h3",
-      "h6",
-      "d4",
-      "Re8",
-      "Nbd2",
-      "Bf8",
-      "a4",
-      "Bb7",
-      "Bc2",
-      "Nb8",
-      "Nf1",
-      "Nbd7",
-      "Ng3",
-      "g6",
-      "Bd3",
-      "Bg7"
+      "h6"
     ]
   },
   "rl-16": {
@@ -9265,16 +9138,8 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "O-O",
       "h3",
-      "Na5",
-      "d4",
-      "exd4",
-      "Nbd2",
       "Re8",
-      "Nf1",
-      "h6",
-      "Ng3",
-      "Bf8",
-      "Bg5"
+      "d4"
     ]
   },
   "rl-17": {
@@ -9295,23 +9160,8 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "d6",
       "c3",
       "O-O",
-      "h3",
-      "Na5",
       "d4",
-      "c5",
-      "d5",
-      "Nc4",
-      "a4",
-      "Qc7",
-      "Nbd2",
-      "Bd7",
-      "Nf1",
-      "Rfc8",
-      "Ng3",
-      "g6",
-      "Nh2",
-      "Bd8",
-      "f4"
+      "Bg4"
     ]
   },
   "rl-18": {
@@ -9323,22 +9173,15 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bb5",
       "a6",
       "Ba4",
-      "d6",
-      "d4",
       "b5",
       "Bb3",
-      "Nxd4",
-      "Nxd4",
-      "exd4",
-      "Qxd4",
-      "c5",
-      "Qd5",
-      "Be6",
-      "Qc6+",
-      "Bd7",
-      "Qd5",
-      "c4",
-      "Be3"
+      "Na5",
+      "Nxe5",
+      "Nxb3",
+      "axb3",
+      "Qg5",
+      "Nf3",
+      "Qxg2"
     ]
   },
   "rl-19": {
@@ -9360,18 +9203,10 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "O-O",
       "h3",
-      "Na5",
+      "Re8",
       "d4",
-      "c5",
-      "Nh4",
-      "h6",
-      "Nf5",
-      "g6",
-      "g4",
-      "Kh8",
-      "Bg5",
-      "Rg8",
-      "h4"
+      "Bf8",
+      "Ng5"
     ]
   },
   "rl-20": {
@@ -9397,53 +9232,52 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bc2",
       "c5",
       "d4",
-      "Qc7",
-      "Nbd2",
-      "Nc6",
-      "d5",
-      "Bd7",
-      "Nb3",
-      "Rfb8",
-      "Be3"
+      "Qc7"
     ]
   },
   "rl-21": {
     "sans": [
-      "f4",
-      "h6",
-      "g4",
-      "g5",
-      "h4",
+      "e4",
+      "e5",
+      "Nf3",
+      "Nc6",
+      "Bb5",
+      "a6",
+      "Bxc6",
+      "dxc6",
+      "O-O",
       "f6",
-      "f5"
+      "d4",
+      "exd4",
+      "Qxd4",
+      "Qxd4",
+      "Nxd4",
+      "Bd6",
+      "Nc3"
     ]
   },
   "rl-22": {
     "sans": [
-      "c4",
-      "Nf6",
-      "Nc3",
-      "e6",
+      "e4",
+      "e5",
       "Nf3",
-      "d5",
-      "d4",
-      "Be7",
-      "cxd5",
-      "exd5",
-      "g3",
-      "O-O",
-      "Bg2",
-      "c5",
-      "O-O",
       "Nc6",
-      "dxc5",
-      "Bxc5",
-      "Bf4",
-      "h6",
-      "Rc1",
-      "Be6",
-      "Nb5",
-      "a6"
+      "Bb5",
+      "a6",
+      "Ba4",
+      "Nf6",
+      "O-O",
+      "Be7",
+      "Re1",
+      "b5",
+      "Bb3",
+      "d6",
+      "c3",
+      "O-O",
+      "h3",
+      "Nb8",
+      "d4",
+      "Nbd7"
     ]
   },
   "rl-23": {
@@ -9465,18 +9299,9 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "O-O",
       "h3",
-      "Bb7",
-      "d4",
-      "Re8",
-      "Nbd2",
-      "Bf8",
-      "d5",
-      "g6",
-      "Nf1",
-      "Bg7",
-      "Ng3",
-      "Qd7",
-      "a4"
+      "Na5",
+      "Bc2",
+      "c5"
     ]
   },
   "rl-24": {
@@ -9496,16 +9321,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bb3",
       "d6",
       "c3",
-      "O-O",
-      "h3",
-      "Na5",
-      "d4",
-      "Bb7",
-      "Nbd2",
-      "c5",
-      "Nf1",
-      "Re8",
-      "Ng3"
+      "O-O"
     ]
   },
   "rl-25": {
@@ -9515,28 +9331,15 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nf3",
       "Nc6",
       "Bb5",
-      "a6",
-      "Ba4",
       "Nf6",
       "d3",
-      "b5",
-      "c3",
       "d6",
+      "c3",
+      "g6",
       "O-O",
-      "Be7",
+      "Bg7",
       "Re1",
-      "O-O",
-      "Nbd2",
-      "Na5",
-      "Nf1",
-      "c5",
-      "Ng3",
-      "Bb7",
-      "h3",
-      "Qc7",
-      "Bb3",
-      "Rfe8",
-      "a4"
+      "O-O"
     ]
   },
   "rl-26": {
@@ -9549,24 +9352,15 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "a6",
       "Ba4",
       "Nf6",
-      "Bb3",
-      "b5",
       "O-O",
+      "b5",
+      "Bb3",
       "Bc5",
       "c3",
       "d6",
       "d4",
-      "O-O",
-      "Re1",
-      "h6",
-      "h3",
       "Bb6",
-      "a4",
-      "Re8",
-      "axb5",
-      "Bg4",
-      "Bxh6",
-      "exd4"
+      "a4"
     ]
   },
   "rl-27": {
@@ -9579,23 +9373,14 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "a6",
       "Ba4",
       "Nf6",
+      "O-O",
+      "Be7",
       "Bxc6",
       "dxc6",
-      "O-O",
-      "Bd6",
-      "d4",
-      "exd4",
-      "Nxd4",
-      "O-O",
-      "Nc3",
-      "Re8",
-      "Be3",
-      "Bd7",
-      "Qd3",
-      "h6",
-      "Rad1",
-      "Bf8",
-      "Nf5"
+      "d3",
+      "Nd7",
+      "Nbd2",
+      "O-O"
     ]
   },
   "rl-28": {
@@ -9604,25 +9389,16 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "e5",
       "Nf3",
       "Nc6",
-      "Bc4",
-      "Nf6",
-      "c3",
+      "Bb5",
       "Bc5",
-      "d3",
-      "d6",
+      "c3",
+      "Nf6",
       "O-O",
       "O-O",
+      "d4",
+      "Bb6",
       "Re1",
-      "a6",
-      "Nbd2",
-      "h6",
-      "Nf1",
-      "Be6",
-      "Ng3",
-      "Ne7",
-      "h3",
-      "Ng6",
-      "Bb3"
+      "d6"
     ]
   },
   "rl-29": {
@@ -9640,12 +9416,11 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Re1",
       "b5",
       "Bb3",
-      "O-O",
+      "d6",
       "c3",
-      "d5",
-      "exd5",
-      "Bd6",
-      "Nxe5"
+      "O-O",
+      "h3",
+      "Re8"
     ]
   },
   "rl-30": {
@@ -9663,24 +9438,12 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Re1",
       "b5",
       "Bb3",
-      "O-O",
-      "a4",
       "d6",
-      "axb5",
-      "Bb7",
-      "d3",
-      "axb5",
-      "Nbd2",
-      "Re8",
       "c3",
-      "Bf8",
-      "Nf1",
-      "h6",
-      "Ng3",
-      "Qe7",
+      "O-O",
       "h3",
-      "g6",
-      "Nh4"
+      "Nb8",
+      "d4"
     ]
   },
   "ck-1": {
@@ -9697,25 +9460,10 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bg6",
       "h4",
       "h6",
-      "h5",
-      "Nf6",
       "Nf3",
-      "Nbd7",
-      "Bd3",
-      "Bxd3",
-      "Qxd3",
-      "e6",
-      "O-O",
-      "Be7",
-      "Rd1",
-      "O-O",
-      "c3",
-      "c5",
-      "dxc5",
-      "Qc7",
-      "Be3",
-      "Rad8",
-      "Bd4"
+      "Nd7",
+      "h5",
+      "Bh7"
     ]
   },
   "ck-2": {
@@ -9732,25 +9480,11 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bg6",
       "h4",
       "h6",
-      "h5",
-      "Nd7",
       "Nf3",
-      "Bh7",
+      "Nd7",
       "Bd3",
       "Bxd3",
-      "Qxd3",
-      "Ngf6",
-      "Bd2",
-      "e6",
-      "O-O-O",
-      "Be7",
-      "c4",
-      "O-O",
-      "Kb1",
-      "c5",
-      "dxc5",
-      "Qc7",
-      "Bc3"
+      "Qxd3"
     ]
   },
   "ck-3": {
@@ -9767,19 +9501,8 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c5",
       "O-O",
       "Nc6",
-      "c3",
-      "cxd4",
       "Be3",
-      "Be7",
-      "Nbd2",
-      "h6",
-      "cxd4",
-      "Rc8",
-      "Qb3",
-      "Qb6",
-      "Rfc1",
-      "Na5",
-      "Rab1"
+      "Qb6"
     ]
   },
   "ck-4": {
@@ -9795,18 +9518,8 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "Nf6",
       "Bf4",
-      "Bf5",
-      "Nf3",
-      "e6",
-      "Nbd2",
-      "Bd6",
-      "Bxd6",
-      "Qc7",
-      "O-O",
-      "Ne4",
-      "Re1",
-      "a6",
-      "Qc2"
+      "Bg4",
+      "Qb3"
     ]
   },
   "ck-5": {
@@ -9823,20 +9536,8 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "e6",
       "Nf3",
       "Be7",
-      "Bd3",
-      "O-O",
       "cxd5",
-      "Nc6",
-      "O-O",
-      "b6",
-      "a3",
-      "Bb7",
-      "Re1",
-      "Rc8",
-      "Bg5",
-      "Na5",
-      "Bb1",
-      "Nc4"
+      "Nxd5"
     ]
   },
   "ck-6": {
@@ -9846,12 +9547,13 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nc3",
       "d5",
       "Nf3",
-      "dxe4",
-      "Nxe4",
       "Bg4",
       "h3",
-      "Nf6",
-      "Nxf6+"
+      "Bxf3",
+      "Qxf3",
+      "e6",
+      "d4",
+      "Nf6"
     ]
   },
   "ck-7": {
@@ -9865,27 +9567,9 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "fxe4",
       "e5",
       "Nf3",
-      "exd4",
+      "Bg4",
       "Bc4",
-      "Bc5",
-      "Nc3",
-      "Nf6",
-      "Bg5",
-      "O-O",
-      "O-O",
-      "Nbd7",
-      "Qd3",
-      "Re8",
-      "Bf4",
-      "Nb6",
-      "Bb3",
-      "Bd6",
-      "h3",
-      "Nbd5",
-      "Rae1",
-      "Qe7",
-      "Bg5",
-      "Nf4"
+      "Nd7"
     ]
   },
   "ck-8": {
@@ -9900,16 +9584,10 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nf6",
       "Nxf6+",
       "exf6",
-      "Bc4",
-      "Bd6",
       "Nf3",
-      "O-O",
-      "O-O",
-      "Re8",
-      "Re1",
-      "Bg4",
-      "h3",
-      "Bh5"
+      "Bd6",
+      "Bd3",
+      "O-O"
     ]
   },
   "ck-9": {
@@ -9929,13 +9607,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nf3",
       "Nd7",
       "h5",
-      "Bh7",
-      "Bd3",
-      "Bxd3",
-      "Qxd3",
-      "Qc7",
-      "Bd2",
-      "Ngf6"
+      "Bh7"
     ]
   },
   "ck-10": {
@@ -9953,9 +9625,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "O-O",
       "Ne7",
       "Nbd2",
-      "Bg6",
-      "Nb3",
-      "h6"
+      "c5"
     ]
   },
   "ck-11": {
@@ -9968,18 +9638,12 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bf5",
       "g4",
       "Bd7",
-      "h4",
-      "c5",
-      "c3",
-      "Nc6",
-      "Nf3",
-      "Qb6",
-      "Bg2",
-      "cxd4",
-      "cxd4",
+      "c4",
       "e6",
       "Nc3",
-      "Nge7"
+      "c5",
+      "cxd5",
+      "exd5"
     ]
   },
   "ck-12": {
@@ -9993,25 +9657,19 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nf3",
       "e6",
       "Be2",
-      "Nd7",
-      "O-O",
-      "Ne7",
-      "c4",
       "c5",
-      "cxd5",
-      "Nxd5",
-      "dxc5",
-      "Bxc5",
-      "Nbd2",
-      "O-O"
+      "O-O",
+      "Nc6",
+      "c4",
+      "dxc4"
     ]
   },
   "ck-13": {
     "sans": [
       "d4",
-      "d5",
-      "c4",
       "c6",
+      "c4",
+      "d5",
       "Nf3",
       "Nf6",
       "Nc3",
@@ -10020,14 +9678,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bf5",
       "e3",
       "e6",
-      "Bxc4",
-      "Bb4",
-      "O-O",
-      "O-O",
-      "Qe2",
-      "Nbd7",
-      "e4",
-      "Bg6"
+      "Bxc4"
     ]
   },
   "ck-14": {
@@ -10043,15 +9694,10 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nc3",
       "e6",
       "Nf3",
-      "Bb4",
-      "Bd3",
-      "dxc4",
-      "Bxc4",
-      "O-O",
-      "O-O",
-      "b6",
-      "Re1",
-      "Bb7"
+      "Be7",
+      "cxd5",
+      "Nxd5",
+      "Bd3"
     ]
   },
   "ck-15": {
@@ -10069,13 +9715,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bf4",
       "Bg4",
       "Qb3",
-      "Qd7",
-      "Nd2",
-      "e6",
-      "Ngf3",
-      "Bd6",
-      "Bxd6",
-      "Qxd6"
+      "Qd7"
     ]
   },
   "ck-16": {
@@ -10094,12 +9734,8 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "h6",
       "Nf3",
       "Nd7",
-      "h5",
-      "Bh7",
       "Bd3",
-      "Bxd3",
-      "Qxd3",
-      "e6"
+      "Bxd3"
     ]
   },
   "ck-17": {
@@ -10109,21 +9745,15 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "d4",
       "d5",
       "Nc3",
-      "g6",
-      "Nf3",
-      "Bg7",
-      "h3",
-      "Nf6",
-      "Bd3",
-      "O-O",
-      "O-O",
-      "Nbd7",
-      "Bf4",
       "dxe4",
       "Nxe4",
-      "Nxe4",
-      "Bxe4",
-      "Nf6"
+      "Nf6",
+      "Nxf6+",
+      "gxf6",
+      "Nf3",
+      "Bf5",
+      "Bd3",
+      "Bxd3"
     ]
   },
   "ck-18": {
@@ -10134,20 +9764,13 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "d5",
       "Nc3",
       "g6",
-      "h3",
-      "Bg7",
       "Nf3",
+      "Bg7",
+      "h3",
       "Nf6",
-      "Bf4",
-      "O-O",
-      "Bd3",
-      "Nh5",
-      "Be3",
-      "dxe4",
-      "Nxe4",
-      "Nd7",
-      "Qd2",
-      "Nhf6"
+      "e5",
+      "Ne4",
+      "Bd3"
     ]
   },
   "ck-19": {
@@ -10165,13 +9788,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "Bd6",
       "Bd3",
-      "O-O",
-      "Qc2",
-      "Re8+",
-      "Ne2",
-      "g6",
-      "Bd2",
-      "Nd7"
+      "O-O"
     ]
   },
   "ck-20": {
@@ -10189,13 +9806,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nge2",
       "c5",
       "h4",
-      "h5",
-      "Nf4",
-      "Bh7",
-      "Nxh5",
-      "cxd4",
-      "Nxd5",
-      "Nc6"
+      "h5"
     ]
   },
   "ck-21": {
@@ -10213,13 +9824,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c3",
       "Bf5",
       "Nf3",
-      "e6",
-      "Be2",
-      "Qc7",
-      "O-O",
-      "Nd7",
-      "Re1",
-      "O-O-O"
+      "e6"
     ]
   },
   "ck-22": {
@@ -10238,12 +9843,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "h6",
       "h5",
       "Bh7",
-      "Nf3",
-      "Nd7",
-      "Bd3",
-      "Bxd3",
-      "Qxd3",
-      "e6"
+      "Nf3"
     ]
   },
   "ck-23": {
@@ -10261,13 +9861,7 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Nf3",
       "Nd7",
       "Bc4",
-      "e6",
-      "O-O",
-      "Ngf6",
-      "Re1",
-      "Be7",
-      "c3",
-      "O-O"
+      "e6"
     ]
   },
   "ck-24": {
@@ -10281,44 +9875,14 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c4",
       "Nf6",
       "Nc3",
-      "Nc6",
-      "Nf3",
-      "Bg4",
-      "cxd5",
-      "Nxd5",
-      "Qb3",
-      "Bxf3",
-      "gxf3",
       "e6",
-      "Qxb7",
-      "Nxd4"
+      "Nf3",
+      "Be7",
+      "cxd5",
+      "Nxd5"
     ]
   },
   "ck-25": {
-    "sans": [
-      "e4",
-      "c6",
-      "d4",
-      "d5",
-      "e5",
-      "Bf5",
-      "Nf3",
-      "e6",
-      "Be2",
-      "Ne7",
-      "O-O",
-      "h6",
-      "Nh4",
-      "Bh7",
-      "Nd2",
-      "c5",
-      "c3",
-      "Nbc6",
-      "f4",
-      "g5"
-    ]
-  },
-  "ck-26": {
     "sans": [
       "e4",
       "c6",
@@ -10330,16 +9894,30 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bf5",
       "Ng3",
       "Bg6",
+      "h4",
+      "h6",
       "Nf3",
       "Nd7",
       "Bd3",
-      "Bxd3",
-      "Qxd3",
+      "Bxd3"
+    ]
+  },
+  "ck-26": {
+    "sans": [
+      "e4",
+      "c6",
+      "d4",
+      "d5",
+      "e5",
+      "Bf5",
+      "Nf3",
       "e6",
-      "Bd2",
-      "Ngf6",
-      "O-O-O",
-      "Qc7"
+      "Be2",
+      "c5",
+      "O-O",
+      "Nc6",
+      "c4",
+      "dxc4"
     ]
   },
   "ck-27": {
@@ -10348,22 +9926,14 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c6",
       "Nc3",
       "d5",
-      "Nf3",
-      "Bg4",
-      "h3",
-      "Bxf3",
-      "Qxf3",
-      "Nf6",
       "d3",
-      "e6",
-      "g3",
-      "Bb4",
-      "Bd2",
-      "Nbd7",
-      "O-O-O",
-      "O-O",
       "e5",
-      "Re8"
+      "Nf3",
+      "Bd6",
+      "g3",
+      "Nf6",
+      "Bg2",
+      "O-O"
     ]
   },
   "ck-28": {
@@ -10378,16 +9948,12 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "Bf5",
       "Ng3",
       "Bg6",
-      "Nh3",
-      "e6",
-      "Nf4",
-      "Bd6",
-      "Nxg6",
-      "hxg6",
-      "c3",
-      "Nf6",
-      "Bd3",
-      "Nbd7"
+      "h4",
+      "h6",
+      "Nf3",
+      "Nd7",
+      "h5",
+      "Bh7"
     ]
   },
   "ck-29": {
@@ -10396,22 +9962,15 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "c6",
       "d4",
       "d5",
-      "exd5",
-      "cxd5",
+      "e5",
+      "Bf5",
       "Nf3",
-      "Nc6",
-      "c3",
-      "Nf6",
-      "Bd3",
-      "Bg4",
-      "O-O",
       "e6",
-      "Re1",
-      "Be7",
-      "Nbd2",
+      "Be2",
+      "c5",
       "O-O",
-      "h3",
-      "Bh5"
+      "Nc6",
+      "c4"
     ]
   },
   "ck-30": {
@@ -10430,12 +9989,9 @@ export const MASTERCLASS_VALIDATED_LINES: Record<string, ValidatedLine> = {
       "h6",
       "Nf3",
       "Nd7",
-      "h5",
-      "Bh7",
       "Bd3",
       "Bxd3",
-      "Qxd3",
-      "Ngf6"
+      "Qxd3"
     ]
   },
   "sd-1": {
