@@ -31,12 +31,14 @@ const TIME_CONTROLS = [
   { label: "30+0 Classical", seconds: 1800, increment: 0, category: "classical" },
 ];
 
-type TFormat = "swiss" | "arena" | "daily_cup" | "blitz_royale";
+type TFormat = "swiss" | "arena" | "daily_cup" | "blitz_royale" | "knockout" | "koth";
 
 const FORMAT_PRESETS: Record<TFormat, {
   label: string; desc: string; icon: any; rounds: number; durationMin?: number; tcIdx: number;
 }> = {
-  swiss:        { label: "Swiss",         desc: "Classic paired rounds",        icon: Trophy,  rounds: 5, tcIdx: 5 },
+  swiss:        { label: "Swiss",         desc: "Classic paired rounds — no eliminations",        icon: Trophy,  rounds: 5, tcIdx: 5 },
+  knockout:     { label: "Knockout",      desc: "Lose once and you're out. Bracket-style drama.", icon: Swords,  rounds: 5, tcIdx: 4 },
+  koth:         { label: "King of the Hill", desc: "One champion. Challenge them to take the crown.", icon: Crown, rounds: 1, tcIdx: 2 },
   arena:        { label: "MasterChess Arena", desc: "Play as many games as you can in a fixed window", icon: Swords, rounds: 99, durationMin: 60, tcIdx: 4 },
   daily_cup:    { label: "Daily Cup",     desc: "Featured short event, rotating daily", icon: Calendar, rounds: 7, durationMin: 45, tcIdx: 3 },
   blitz_royale: { label: "Blitz Royale",  desc: "Fast & furious, every game counts",   icon: Flame,    rounds: 99, durationMin: 30, tcIdx: 2 },
