@@ -943,7 +943,7 @@ function MoveListPanel({ moves, activeIdx, branchAt, onJump }: MoveListPanelProp
   }
 
   return (
-    <div className="rounded-lg border border-border/50 bg-card p-2 mb-3 max-h-[180px] lg:max-h-[340px] xl:max-h-[440px] overflow-y-auto">
+    <div data-movelist className="rounded-lg border border-border/50 bg-card p-2 mb-3 max-h-[180px] lg:max-h-[340px] xl:max-h-[440px] overflow-y-auto">
       <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-0.5 text-xs">
         {rows.map((row) => {
           const isWActive = row.w && row.w.idx + 1 === activeIdx;
