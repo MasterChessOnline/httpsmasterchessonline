@@ -158,7 +158,7 @@ async function repairLine(sf: SF, sans: string[], startFen?: string): Promise<{ 
     const found = candidates.find((c) => c.uci === desiredUci);
     const desiredCp = found ? found.cp : null;
     const blunder = desiredCp === null
-      ? bestCp - (-MATE_BLUNDER_CP) > BLUNDER_CP // not in top-MULTIPV ⇒ likely bad
+      ? FIX_NON_TOP
       : (bestCp - desiredCp) > BLUNDER_CP;
 
     if (blunder) {
@@ -173,8 +173,8 @@ async function repairLine(sf: SF, sans: string[], startFen?: string): Promise<{ 
 }
 
 async function main() {
-  if (!fs.existsSync(SF_BIN)) { console.error("Stockfish binary not found at", SF_BIN); process.exit(1); }
   const sf = new SF();
+  await sf.load();
   await sf.init();
 
   const entries = Object.entries(MASTERCLASS_VALIDATED_LINES);
