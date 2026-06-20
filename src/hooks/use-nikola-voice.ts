@@ -84,6 +84,7 @@ export function useNikolaVoice() {
       utterance.lang = "en-US";
       utterance.rate = 1.0;
       utterance.pitch = 1.05;
+      utterance.volume = 1.0;
       utterance.onend = () => { utteranceRef.current = null; setSpeaking(false); };
       utterance.onerror = () => { utteranceRef.current = null; setSpeaking(false); };
       utteranceRef.current = utterance;
