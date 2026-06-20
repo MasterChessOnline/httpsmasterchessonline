@@ -96,8 +96,8 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
         {/* Privacy-safe stylized face overlay: keeps the uploaded-photo vibe without revealing the blurred face. */}
         <div
           aria-hidden
-          className="absolute left-1/2 top-[28%] -translate-x-1/2 rounded-[42%] bg-gradient-to-b from-[#c88f7d] via-[#b87970] to-[#8f5a62] shadow-[inset_0_2px_10px_rgba(255,255,255,0.18),inset_0_-8px_18px_rgba(0,0,0,0.22)]"
-          style={{ width: `${size * 0.34}px`, height: `${size * 0.38}px` }}
+          className="absolute left-1/2 top-[24%] -translate-x-1/2 rounded-[42%] bg-gradient-to-b from-[#c88f7d] via-[#b87970] to-[#8f5a62] shadow-[inset_0_2px_10px_rgba(255,255,255,0.18),inset_0_-8px_18px_rgba(0,0,0,0.22)]"
+          style={{ width: `${size * 0.38}px`, height: `${size * 0.43}px` }}
         >
           <div className="absolute left-[20%] top-[31%] h-[7%] w-[16%] rounded-full bg-card shadow-[0_1px_0_hsl(var(--primary)/0.35)]" />
           <div className="absolute right-[20%] top-[31%] h-[7%] w-[16%] rounded-full bg-card shadow-[0_1px_0_hsl(var(--primary)/0.35)]" />
