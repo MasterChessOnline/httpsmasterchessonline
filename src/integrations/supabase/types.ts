@@ -1166,6 +1166,54 @@ export type Database = {
           },
         ]
       }
+      gbp_posts: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          cta_label: string | null
+          cta_url: string | null
+          error: string | null
+          id: string
+          image_url: string | null
+          published_at: string | null
+          scheduled_for: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          scheduled_for?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          scheduled_for?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hand_brain_roles: {
         Row: {
           black_brain_id: string
