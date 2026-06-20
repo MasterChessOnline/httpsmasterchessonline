@@ -970,6 +970,33 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_votes: {
+        Row: {
+          comment: string | null
+          created_at: string
+          feature_key: string
+          id: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          feature_key: string
+          id?: string
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          feature_key?: string
+          id?: string
+          user_id?: string
+          weight?: number
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -1705,6 +1732,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_tier: string
           avatar_frame: string | null
           avatar_url: string | null
           bio: string | null
@@ -1715,6 +1743,7 @@ export type Database = {
           bot_peak_rating: number
           bot_rating: number
           city_key: string | null
+          coach_pro_until: string | null
           country: string | null
           country_flag: string | null
           created_at: string
@@ -1743,14 +1772,17 @@ export type Database = {
           rating: number
           skill_level: string | null
           total_xp: number
+          unlocked_courses: Json
           updated_at: string
           user_id: string
           username: string | null
+          username_style: string
           welcome_day: number
           welcome_last_claim: string | null
           win_streak: number
         }
         Insert: {
+          access_tier?: string
           avatar_frame?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -1761,6 +1793,7 @@ export type Database = {
           bot_peak_rating?: number
           bot_rating?: number
           city_key?: string | null
+          coach_pro_until?: string | null
           country?: string | null
           country_flag?: string | null
           created_at?: string
@@ -1789,14 +1822,17 @@ export type Database = {
           rating?: number
           skill_level?: string | null
           total_xp?: number
+          unlocked_courses?: Json
           updated_at?: string
           user_id: string
           username?: string | null
+          username_style?: string
           welcome_day?: number
           welcome_last_claim?: string | null
           win_streak?: number
         }
         Update: {
+          access_tier?: string
           avatar_frame?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -1807,6 +1843,7 @@ export type Database = {
           bot_peak_rating?: number
           bot_rating?: number
           city_key?: string | null
+          coach_pro_until?: string | null
           country?: string | null
           country_flag?: string | null
           created_at?: string
@@ -1835,9 +1872,11 @@ export type Database = {
           rating?: number
           skill_level?: string | null
           total_xp?: number
+          unlocked_courses?: Json
           updated_at?: string
           user_id?: string
           username?: string | null
+          username_style?: string
           welcome_day?: number
           welcome_last_claim?: string | null
           win_streak?: number
@@ -2863,6 +2902,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_titles: {
+        Row: {
+          awarded_at: string
+          created_at: string
+          id: string
+          metadata: Json
+          season: string | null
+          title_key: string
+          title_label: string
+          tournament_id: string | null
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          season?: string | null
+          title_key: string
+          title_label: string
+          tournament_id?: string | null
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          season?: string | null
+          title_key?: string
+          title_label?: string
+          tournament_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       tournaments: {
         Row: {
           anti_cheat_level: string
@@ -2950,6 +3025,42 @@ export type Database = {
           tournament_type?: string
           updated_at?: string
           visibility?: string
+        }
+        Relationships: []
+      }
+      unique_badges: {
+        Row: {
+          asset_url: string | null
+          awarded_at: string | null
+          badge_key: string
+          badge_label: string
+          created_at: string
+          current_owner_id: string | null
+          description: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          asset_url?: string | null
+          awarded_at?: string | null
+          badge_key: string
+          badge_label: string
+          created_at?: string
+          current_owner_id?: string | null
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          asset_url?: string | null
+          awarded_at?: string | null
+          badge_key?: string
+          badge_label?: string
+          created_at?: string
+          current_owner_id?: string | null
+          description?: string | null
+          id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3288,6 +3399,17 @@ export type Database = {
         Args: { p_game_id: string; p_win_streak?: number }
         Returns: Json
       }
+      award_tournament_title: {
+        Args: {
+          _metadata?: Json
+          _season?: string
+          _title_key: string
+          _title_label: string
+          _tournament_id?: string
+          _user_id: string
+        }
+        Returns: string
+      }
       battle_pass_progress: {
         Args: { _user: string }
         Returns: {
@@ -3421,6 +3543,7 @@ export type Database = {
       get_my_profile: {
         Args: never
         Returns: {
+          access_tier: string
           avatar_frame: string | null
           avatar_url: string | null
           bio: string | null
@@ -3431,6 +3554,7 @@ export type Database = {
           bot_peak_rating: number
           bot_rating: number
           city_key: string | null
+          coach_pro_until: string | null
           country: string | null
           country_flag: string | null
           created_at: string
@@ -3459,9 +3583,11 @@ export type Database = {
           rating: number
           skill_level: string | null
           total_xp: number
+          unlocked_courses: Json
           updated_at: string
           user_id: string
           username: string | null
+          username_style: string
           welcome_day: number
           welcome_last_claim: string | null
           win_streak: number
@@ -3646,6 +3772,10 @@ export type Database = {
           p_ref_code: string
           p_user_agent?: string
         }
+        Returns: undefined
+      }
+      transfer_unique_badge: {
+        Args: { _badge_key: string; _new_owner: string }
         Returns: undefined
       }
       update_elo_ratings: {
