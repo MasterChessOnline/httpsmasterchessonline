@@ -109,11 +109,12 @@ Deno.serve(async (req) => {
 
       // Grant cosmetics to inventory
       for (const sku of COSMETICS[a.title.key] ?? []) {
+        const [item_type, item_key] = sku.split(":");
         await supabase
           .from("user_inventory")
           .upsert(
-            { user_id: a.user_id, item_sku: sku, source: "tournament_reward" },
-            { onConflict: "user_id,item_sku" },
+            { user_id: a.user_id, item_key, item_type, price_paid: 0 },
+            { onConflict: "user_id,item_key" },
           );
       }
 
