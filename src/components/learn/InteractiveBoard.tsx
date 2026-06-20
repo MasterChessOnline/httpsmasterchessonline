@@ -696,6 +696,68 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
         </div>
       </div>
 
+      {/* Controls directly under the board */}
+      <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+        {mode === "guided" && totalMoves > 0 && (
+          <>
+            <Button variant="outline" size="icon" onClick={goToStart} disabled={moveIndex === 0} className="h-10 w-10" title="Početak">
+              <ChevronsLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-10 w-10" title="Prethodni potez">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={autoplay ? "default" : "outline"}
+              size="icon"
+              onClick={() => {
+                if (moveIndex >= totalMoves) setMoveIndex(0);
+                setAutoplay((a) => !a);
+              }}
+              className="h-10 w-10"
+              title={autoplay ? "Pauza" : "Pokreni"}
+            >
+              {autoplay ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="default"
+              onClick={goForward}
+              disabled={moveIndex === totalMoves}
+              className="h-10 px-4 font-semibold min-w-[132px]"
+            >
+              Sledeći <ChevronRight className="h-4 w-4 ml-1.5" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-10 w-10" title="Kraj">
+              <ChevronsRight className="h-4 w-4" />
+            </Button>
+            <span className="text-xs text-muted-foreground px-2 min-w-[58px] text-center tabular-nums">
+              {moveIndex} / {totalMoves}
+            </span>
+          </>
+        )}
+
+        {mode === "practice" && !practiceCompleted && (
+          <>
+            <Button variant="outline" size="sm" onClick={showHint}>
+              <Lightbulb className="h-3.5 w-3.5 mr-1.5" /> Hint
+            </Button>
+            <Button variant="outline" size="sm" onClick={resetPractice}>
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Restart
+            </Button>
+          </>
+        )}
+        {mode === "practice" && practiceCompleted && (
+          <Button variant="outline" size="sm" onClick={resetPractice}>
+            <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Try Again
+          </Button>
+        )}
+
+        {mode === "explore" && (
+          <Button variant="outline" size="sm" onClick={resetExplore}>
+            <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Reset Position
+          </Button>
+        )}
+      </div>
+
       {/* Practice feedback */}
       <AnimatePresence>
         {practiceResult && (
@@ -827,68 +889,6 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
           onJump={(idx) => setMoveIndex(idx + 1)}
         />
       )}
-
-      {/* Controls */}
-      <div className="flex items-center justify-center gap-2">
-        {mode === "guided" && totalMoves > 0 && (
-          <>
-            <Button variant="outline" size="icon" onClick={goToStart} disabled={moveIndex === 0} className="h-9 w-9">
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-9 w-9">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="default"
-              onClick={goForward}
-              disabled={moveIndex === totalMoves}
-              className="h-10 px-4 font-semibold"
-            >
-              Sledeći potez <ChevronRight className="h-4 w-4 ml-1.5" />
-            </Button>
-            <span className="text-xs text-muted-foreground px-1 min-w-[52px] text-center tabular-nums">
-              {moveIndex} / {totalMoves}
-            </span>
-            <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-10 w-10">
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={autoplay ? "default" : "outline"}
-              size="icon"
-              onClick={() => {
-                if (moveIndex >= totalMoves) setMoveIndex(0);
-                setAutoplay((a) => !a);
-              }}
-              className="h-9 w-9"
-              title={autoplay ? "Pause" : "Autoplay"}
-            >
-              {autoplay ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
-          </>
-        )}
-
-        {mode === "practice" && !practiceCompleted && (
-          <>
-            <Button variant="outline" size="sm" onClick={showHint}>
-              <Lightbulb className="h-3.5 w-3.5 mr-1.5" /> Hint
-            </Button>
-            <Button variant="outline" size="sm" onClick={resetPractice}>
-              <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Restart
-            </Button>
-          </>
-        )}
-        {mode === "practice" && practiceCompleted && (
-          <Button variant="outline" size="sm" onClick={resetPractice}>
-            <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Try Again
-          </Button>
-        )}
-
-        {mode === "explore" && (
-          <Button variant="outline" size="sm" onClick={resetExplore}>
-            <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Reset Position
-          </Button>
-        )}
-      </div>
 
       {/* Keyboard / swipe hint (guided mode only) */}
       {mode === "guided" && totalMoves > 0 && (
