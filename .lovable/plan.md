@@ -1,102 +1,64 @@
-# Plan — GBP + Search Console maximization
+# Šta je već urađeno (rezime)
 
-Doing the 4 highest-ROI items I recommended, plus 2 quick wins.
+**GSC / Indexing automatizacija:**
+- `gsc-search-analytics` edge funkcija — povlači klikove, impresije, top upite i strane (28 dana)
+- `/admin/gsc` dashboard — live SEO statistika sa week-over-week deltama
+- `indexnow-submit` — automatski šalje sve URL-ove iz sitemap-a Bing/Yandex/Seznam (939 URL-ova već poslato), cron 04:00 UTC
+- `publish-gbp-posts` automatski pinga IndexNow kad se objavi novi post
 
-## 1. Auto-verify masterchess.live in Google Search Console
+**GBP (Google Business Profile):**
+- `image_url` kolona u `gbp_posts` + `gbp-images` storage bucket
+- 8 Services definisano (Ranked Play, Tournaments...)
+- Booking link dodat, atributi „youth-led business"
 
-Use the GSC connector (already available — see `<google_search_console>` knowledge).
+**Google Maps Platform (već povezano):**
+- `resolve-place-id` edge funkcija (server-side, kroz gateway)
 
-- New edge function `gsc-auto-verify`:
-  1. POST `/siteVerification/v1/token` with `{site: {identifier: "https://masterchess.live/", type: "SITE"}, verificationMethod: "META"}`
-  2. Upsert returned token into `site_config` key `gsc_meta_token`
-  3. PUT `/webmasters/v3/sites/https%3A%2F%2Fmasterchess.live%2F` to add property
-  4. POST `/siteVerification/v1/webResource?verificationMethod=META` to finalize
-- New component `<GscVerificationMeta />` mounted in `App.tsx`:
-  - Reads `site_config.gsc_meta_token`
-  - Injects `<meta name="google-site-verification" content="...">` via Helmet
-- First time function runs returns the token → meta tag goes live on next request → admin re-runs function to verify. Or single-shot if token already injected via env override.
-- Also add static `<meta name="google-site-verification" content="">` placeholder in `index.html` head for non-JS crawlers fallback (empty until token resolved — harmless).
+# Da li je korisno?
 
-## 2. GBP Posts: auto-generated images
+Da — GSC + IndexNow donose merljiv SEO efekat (brže indeksiranje, vidljivost koje fraze rade). GBP poboljšanja podižu lokalni ranking. Maps konekcija je trenutno **iskorišćena samo 5%** — odatle dolazi sledeća lista.
 
-Every post in `gbp_posts` gets an image at scheduled time.
+# 10 novih ideja oko Google Maps (od najvrednije ka nice-to-have)
 
-- Extend `gbp_posts` table: add `image_url TEXT` column (migration).
-- New edge function `generate-gbp-post-image`:
-  - Reads post title + theme
-  - Generates an OG-style PNG using existing `/og` rendering pattern OR a simple Canvas in Deno
-  - Uploads to Supabase Storage bucket `gbp-images` (public)
-  - Writes URL back to `gbp_posts.image_url`
-- Hook into `publish-gbp-posts`: if `image_url` is null when flipping to `ready_to_post`, call generator first.
-- Admin UI at `/admin/gbp-posts` shows the image preview + copy-paste action.
+## 1. Geo-targetovane SEO landing strane „Chess in {City}"
+Generisati statičke strane `/chess/{city-slug}` za top 50 gradova (Belgrade, Zagreb, Sofia, Vienna...). Koristi **Places API (New) Nearby Search** da povuče prave šahovske klubove/kafiće u tom gradu + ugrađena mapa. Ogromna long-tail SEO vrednost — „chess club Belgrade", „where to play chess Vienna".
 
-## 3. Auto-submit URLs via IndexNow (Bing/Yandex/Seznam)
+## 2. „Find Chess Near Me" mapa
+Stranica `/near-me` sa Maps JS API mapom, geolokacija korisnika, pinovi za šahovske klubove u radijusu (Places Nearby `textQuery: chess club`). Cluster markeri, filter „open now", deep-link „get directions". Viralni share potencijal.
 
-GSC Indexing API requires special allowlist (jobs/livestream only). IndexNow is open and Bing-backed → covers ~10% of global search instantly.
+## 3. Tournament venue mapa
+Svaki turnir u sistemu već ima lokaciju? Dodati mapu pina + „get directions" dugme. Auto-resolve adrese kroz **Geocoding API** kad organizator otkuca grad.
 
-- New edge function `indexnow-submit`:
-  - Reads `public/sitemap.xml` (or its index)
-  - Parses URLs, POSTs batches of 100 to `https://api.indexnow.org/indexnow`
-  - Uses existing `public/indexnow-key.txt` (already in project)
-- Daily cron at 04:00 UTC.
-- Also hook into `publish-gbp-posts`: when a post goes `ready_to_post`, ping its CTA URL immediately.
+## 4. Player heatmap (anonimizovan)
+World map sa heatmap-om gde su MasterChess igrači aktivni (samo broj po zemlji/regionu, bez tačnih koordinata). Odlično za homepage „social proof" i deluje živo (rešava cold-start ghost-town problem).
 
-## 4. `/admin/gsc` dashboard
+## 5. Time zone-aware matchmaking
+**Time Zone API** + geolokacija → automatski predloži turnire/igrače u sličnom TZ. Smanjuje „niko nije online" osećaj.
 
-Powered by GSC search analytics API.
+## 6. Address autocomplete pri tournament creation
+**Places Autocomplete (New)** umesto plain text inputa za venue adresu. Validna adresa, lat/lng, place_id sačuvan — kasnije se može koristiti za reviews/photos.
 
-- New edge function `gsc-search-analytics`:
-  - POSTs `/webmasters/v3/sites/{site}/searchAnalytics/query` with last 28 days
-  - Groups by `query` and `page`
-  - Returns top 50 by clicks + top 50 losing CTR
-- New admin route `/admin/gsc`:
-  - Stats cards: total clicks, impressions, CTR, avg position (week-over-week deltas)
-  - Top queries table (query, clicks, impressions, CTR, position)
-  - Top losing pages table (clicks dropped >30% WoW)
-  - "Rescan" button → triggers IndexNow submit + GSC analytics refresh
-- Gated by `has_role(auth.uid(), 'admin')`.
+## 7. „Travel to tournament" planner
+Za on-site turnire: **Routes API** prikaže driving/transit vreme + distancu od korisnikove lokacije. CTA „Add to calendar with travel time".
 
-## 5. Quick win — Sitemap auto-resubmit to GSC
+## 8. Air Quality / Weather widget za on-site turnire
+**Weather API** + **Air Quality API** na turnirskoj strani: „Saturday 14°C, AQI good". Mali touch ali izgleda premium i niko od konkurencije nema.
 
-Add to existing `scripts/generate-sitemap.ts` post-write step:
-- POST `/webmasters/v3/sites/{site}/sitemaps/{sitemapUrl}` via GSC connector
-- Only runs in production (skip on `predev`)
+## 9. Static Map Open Graph slika
+Za tournament share linkove generisati **Static Maps API** sliku sa pinom venue-a kao OG image. Lepši Twitter/WhatsApp preview.
 
-## 6. Quick win — GBP "Booking" + "Services" slot data
+## 10. Country leaderboards sa flag mapom
+Iskoristi geokodiranu zemlju igrača → leaderboard po zemlji, country selector na world map (Maps JS sa stylized country fill). Nacionalni ponos = retencija.
 
-Extend `docs/GBP_OFFICIAL_LINKS.md` with:
-- Booking URL → `https://masterchess.live/tournaments?utm_source=gbp&utm_medium=booking`
-- 8 Services entries (Ranked Play, Tournaments, Lessons, Game Review, Puzzles, Bot Practice, Clubs, Streamer Mode) with title, description, deep link
-- 1 "youth-led business" attribute note for the differentiation angle
+# Google Cloud Console — šta još uraditi
 
-## Technical summary
+- **Enable API-je** koje sada ne koristimo: Places API (New), Geocoding, Routes, Time Zone, Static Maps, Weather, Air Quality
+- **API key restrictions** — server key restrict na edge funkcije, browser key restrict na `*.lovable.app` i `masterchess.live`
+- **Quota alerts** — postaviti budget alert na $50/mesec da nas ne iznenadi
+- **GBP API access** — zatražiti pristup (review process ~2 nedelje) da možemo automatski postavljati GBP posts bez ručnog koraka
 
-**New files**
-- `supabase/functions/gsc-auto-verify/index.ts`
-- `supabase/functions/gsc-search-analytics/index.ts`
-- `supabase/functions/generate-gbp-post-image/index.ts`
-- `supabase/functions/indexnow-submit/index.ts`
-- `src/components/GscVerificationMeta.tsx`
-- `src/pages/AdminGsc.tsx`
+# Predlog: šta sledeće da implementiram
 
-**New migration**
-- `ALTER TABLE gbp_posts ADD COLUMN image_url TEXT`
-- Storage bucket `gbp-images` (public read)
+Ne mogu sve odjednom — najveći ROI su **#1 (Geo SEO landing strane)** i **#2 (Find Chess Near Me)**. To su nove strane sa stvarnim SEO/akvizicijskim efektom.
 
-**Edited files**
-- `index.html` — placeholder verification meta tag
-- `src/App.tsx` — mount `<GscVerificationMeta />` + register `/admin/gsc` route
-- `supabase/functions/publish-gbp-posts/index.ts` — call image generator + IndexNow ping
-- `scripts/generate-sitemap.ts` — production sitemap resubmit
-- `docs/GBP_OFFICIAL_LINKS.md` — booking + services
-- `.lovable/plan.md` (auto)
-
-**Cron jobs**
-- `indexnow-daily` — 04:00 UTC daily
-- `gsc-verify-retry` — once daily (idempotent, skips if already verified)
-
-## Out of scope
-- Google Indexing API (allowlist-only)
-- Real Apple Business Connect (no API access from server)
-- Auto-posting to GBP API (allowlist-only)
-- Generating new design assets (uses existing OG renderer)
+**Reci koje od ovih 10 ideja da uradim** (mogu i više, npr. „1, 2, 6, 9") pa pravim detaljan plan implementacije samo za to.
