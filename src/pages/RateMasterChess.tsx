@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { GOOGLE_REVIEW_URL, trackReviewClick } from "@/lib/google-review";
 
 interface RatingRow {
   id: string;
@@ -312,9 +313,10 @@ export default function RateMasterChess() {
           </p>
           <Button asChild size="lg" className="bg-amber-500 hover:bg-amber-400 text-black">
             <a
-              href={(import.meta.env.VITE_GOOGLE_REVIEW_URL as string | undefined) || "https://www.google.com/search?q=MasterChess+masterchess.live"}
+              href={GOOGLE_REVIEW_URL}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackReviewClick("rate-page")}
             >
               <Star className="w-4 h-4 mr-2 fill-current" /> Leave a Google review
             </a>

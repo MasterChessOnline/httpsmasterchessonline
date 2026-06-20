@@ -28,6 +28,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { GOOGLE_REVIEW_URL, trackReviewClick } from "@/lib/google-review";
 
 interface ReviewRow {
   id: string;
@@ -463,6 +464,21 @@ export default function Reviews() {
               </Dialog>
               <Button asChild size="lg" variant="outline">
                 <a href="#all-reviews">Read reviews</a>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-amber-400/40 text-amber-300 hover:bg-amber-400/10"
+              >
+                <a
+                  href={GOOGLE_REVIEW_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackReviewClick("reviews-hero")}
+                >
+                  <Star className="w-4 h-4 mr-2 fill-current" /> Review on Google
+                </a>
               </Button>
             </div>
           </motion.div>
