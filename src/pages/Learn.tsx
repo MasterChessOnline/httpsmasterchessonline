@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Chess } from "chess.js";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -38,37 +39,60 @@ function buildPracticeLineVariation(lesson: Lesson): LessonVariation | null {
   const practice = lesson.practiceLine;
   if (!practice?.moves?.length) return null;
 
-  const playerTurn = practice.playerColor;
-  let turn: "w" | "b" = (practice.startFen?.split(" ")[1] as "w" | "b" | undefined) || "w";
-  const out: MoveStep[] = [];
-  let playerIdx = 0;
-  let responseIdx = 0;
+  const build = (startFen?: string) => {
+    const chess = new Chess(startFen);
+    const out: MoveStep[] = [];
+    const usedPlayer = new Set<number>();
+    const usedResponse = new Set<number>();
 
-  const push = (san: string | undefined, explanation: string) => {
-    if (!san) return;
-    out.push({ san, explanation });
-    turn = turn === "w" ? "b" : "w";
+    const tryMove = (san: string) => {
+      try {
+        const copy = new Chess(chess.fen());
+        return !!copy.move(san);
+      } catch {
+        return false;
+      }
+    };
+
+    const findNext = () => {
+      for (let i = 0; i < practice.autoResponses.length; i++) {
+        const san = practice.autoResponses[i];
+        if (!usedResponse.has(i) && tryMove(san)) {
+          return { type: "response" as const, idx: i, san, explanation: `${san} — keeps the main line going.` };
+        }
+      }
+      for (let i = 0; i < practice.moves.length; i++) {
+        const move = practice.moves[i];
+        if (!usedPlayer.has(i) && tryMove(move.move)) {
+          return { type: "player" as const, idx: i, san: move.move, explanation: move.explanation || `${move.move} — main course move.` };
+        }
+      }
+      return null;
+    };
+
+    for (let guard = 0; guard < practice.moves.length + practice.autoResponses.length; guard++) {
+      const next = findNext();
+      if (!next) break;
+      chess.move(next.san);
+      if (next.type === "response") usedResponse.add(next.idx);
+      else usedPlayer.add(next.idx);
+      out.push({ san: next.san, explanation: next.explanation });
+    }
+
+    return out;
   };
 
-  while (playerIdx < practice.moves.length || responseIdx < practice.autoResponses.length) {
-    if (turn === playerTurn && playerIdx < practice.moves.length) {
-      const move = practice.moves[playerIdx++];
-      push(move.move, move.explanation || `${move.move} — main course move.`);
-    } else if (responseIdx < practice.autoResponses.length) {
-      const response = practice.autoResponses[responseIdx++];
-      push(response, `${response} — keeps the main line going.`);
-    } else if (playerIdx < practice.moves.length) {
-      const move = practice.moves[playerIdx++];
-      push(move.move, move.explanation || `${move.move} — main course move.`);
-    } else {
-      break;
-    }
-  }
+  const candidates = [practice.startFen, undefined, lesson.fen].filter((fen, idx, arr) => arr.indexOf(fen) === idx);
+  const best = candidates
+    .map((startFen) => ({ startFen, moves: build(startFen) }))
+    .sort((a, b) => b.moves.length - a.moves.length)[0];
+
+  if (!best?.moves.length) return null;
 
   return {
     name: lesson.title,
-    startFen: practice.startFen,
-    moves: out,
+    startFen: best.startFen,
+    moves: best.moves,
   };
 }
 
