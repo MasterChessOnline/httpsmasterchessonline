@@ -145,11 +145,21 @@ const beatBotEntries: SitemapEntry[] = BOT_PROFILES.map((b) => ({
 }));
 
 // Programmatic city SEO — "play chess online from {city}" long-tail
-const cityEntries: SitemapEntry[] = SEO_CITIES.map((c) => ({
-  path: `/play-from/${c.slug}`,
-  changefreq: "monthly" as const,
-  priority: "0.7",
-}));
+const cityEntries: SitemapEntry[] = [
+  ...SEO_CITIES.map((c) => ({
+    path: `/play-from/${c.slug}`,
+    changefreq: "monthly" as const,
+    priority: "0.7",
+  })),
+  // "Chess in {city}" — real venues + map via Places API
+  ...SEO_CITIES.map((c) => ({
+    path: `/chess/${c.slug}`,
+    changefreq: "weekly" as const,
+    priority: "0.8",
+  })),
+  { path: "/near-me", changefreq: "weekly" as const, priority: "0.7" },
+  { path: "/players/world", changefreq: "weekly" as const, priority: "0.7" },
+];
 
 // SEO long-tail landing pages (EN + SR)
 const seoLandingEntries: SitemapEntry[] = [
