@@ -90,7 +90,6 @@ async function handleCreate(supabase: any, userId: string, opts: any) {
   const cat = opts.category || "blitz";
   const baseName = opts.name?.trim() || `${cat.charAt(0).toUpperCase() + cat.slice(1)} Arena`;
 
-  const { data: tournament, error } = await supabase
   const fmt = (opts.format || "swiss").toString();
   const tType =
     fmt === "round-robin" ? "round_robin" :
