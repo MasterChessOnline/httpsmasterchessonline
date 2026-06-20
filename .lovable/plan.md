@@ -1,108 +1,108 @@
+# Plan — Auto Place ID + Maximum masterchess.live GBP Saturation
 
-# Make Google Maps show only masterchess.live + audit every review button
+## Part 1 — Place ID: stop hand-pasting, resolve automatically
 
-You asked for two things:
+Right now `VITE_GOOGLE_REVIEW_URL` requires the user to manually find Place ID and set an env var. Replace with auto-resolution.
 
-1. When someone searches **MasterChess on Google Maps**, the panel/web results should point **only to masterchess.live** — no other sites. Also: another Google account couldn't see the listing at all.
-2. **Check every "Review" button** end-to-end so they all work.
+**New edge function `resolve-place-id`** (one-time, cached):
+- Uses Google Maps connector (already documented in context) → `places/v1/places:searchText` with query `"MasterChess masterchess.live"`.
+- Stores result in new `site_config` table (key/value): `place_id`, `place_url`, `maps_url`, `cid`, `resolved_at`.
+- Re-runs weekly via cron (in case Google reassigns).
+- Falls back gracefully to the Maps search URL if not yet verified.
 
----
+**New table `site_config`** (public read, service-role write) — one row per key. Used for any future global config too.
 
-## Why your other Google account sees nothing (read first)
+**New hook `useGoogleReview()`** in `src/lib/google-review.ts`:
+- Fetches `site_config.place_id` from Supabase on mount, caches in localStorage 24h.
+- Returns `{ reviewUrl, mapsUrl, placeId }`.
+- Every existing button (Footer, /rate, /reviews) switches to the hook — no more env var needed.
+- Keeps the env override as highest priority for emergencies.
 
-This is **not a bug we can fix in code**. A Google Business Profile that hasn't passed verification is **only visible to the owner account** that created it. Other Google users see "no results" until Google approves the verification (postcard / video / phone).
+## Part 2 — Flood GBP with masterchess.live deep links
 
-What I'll do in code: make the path to verification as short as possible, plus a doc that spells out the manual steps you must do in business.google.com.
+Currently GBP dashboard has 4 link slots. We expose more URLs via **GBP Posts** (already 52 seeded) and **Products/Services entries**. Add a generator + admin export.
 
----
+**Expand `docs/GBP_OFFICIAL_LINKS.md`** from 4 → 30+ canonical deep links, each with proper UTM:
 
-## Part 1 — Force every GBP surface to point to masterchess.live only
+| Surface | URL |
+|---|---|
+| Website | `/` |
+| Play instant | `/play` |
+| Play guest (no signup) | `/play-guest` |
+| Tournaments hub | `/tournaments` |
+| Today's tournament | `/tournaments/today` |
+| Battle Royale | `/battle-royale` |
+| Daily Puzzle | `/puzzles` |
+| Daily Mate | `/daily-mate` |
+| Openings explorer | `/openings` |
+| Bot practice | `/bots` |
+| Leaderboard | `/leaderboard` |
+| Hall of Fame | `/hall-of-fame` |
+| Community map | `/community/map` |
+| Clubs | `/clubs` |
+| Live stream hub | `/live` |
+| Lessons | `/lessons` |
+| Glossary | `/glossary` |
+| Rating calculator | `/rating-calculator` |
+| Game review | `/game-review` |
+| Rate us | `/rate-masterchess` |
+| Reviews | `/reviews` |
+| Press kit | `/press-kit` |
+| About / founder | `/about` |
+| Contact | `/contact` |
+| Signup | `/signup` |
+| PWA install | `/?install=1` |
+| Beat Nikola | `/beat/nikola` |
+| Beat the bots SEO | `/beat-bots` |
+| City landing template | `/play-chess-from/{city}` |
+| Viral challenge | `/vs/new` |
 
-### A. Audit the 52 seeded weekly posts
-Re-check every row in `gbp_posts` and rewrite any CTA URL so it is **always `https://masterchess.live/...?utm_source=gbp&utm_medium=post`** — no `lovable.app`, no `lovableproject.com`, no bare paths. Migration: `UPDATE gbp_posts SET cta_url = REPLACE(...)` for any stray domain, plus a CHECK constraint so future rows can't use a non-masterchess.live host.
+All wrapped in `?utm_source=gbp&utm_medium={slot}&utm_campaign={theme}`.
 
-### B. Lock the publisher edge function
-`supabase/functions/publish-gbp-posts/index.ts` — before sending a post to GBP, reject any `cta_url` whose host isn't `masterchess.live`. Prevents accidents.
+**New script `scripts/generate-gbp-link-pack.ts`** — outputs `docs/GBP_LINK_PACK.md` with copy-paste blocks per GBP surface (Products, Services, Posts, Q&A answers, Updates). User pastes them into business.google.com one time.
 
-### C. JSON-LD + sitemap audit
-- `index.html` `LocalBusiness` schema: confirm `url`, `logo`, `sameAs` all use `https://masterchess.live`.
-- `public/sitemap.xml` + every sub-sitemap: confirm `<loc>` is `https://masterchess.live/...` only. Add a build-time guard in `scripts/generate-sitemap.ts` that throws if any URL isn't masterchess.live.
+**Lock-down enforcement**: extend the existing forbidden-host guard so every URL in `gbp_posts.cta_url`, `gbp_posts.body`, and the new link pack is validated to be `masterchess.live` only. Add the same check inside `publish-gbp-posts` edge function.
 
-### D. Single "official link list" for GBP dashboard
-New `docs/GBP_OFFICIAL_LINKS.md` — the only URLs you ever paste into the GBP dashboard fields:
+## Part 3 — "Intelligent extras" worth adding to GBP
 
-```text
-Website:          https://masterchess.live/?utm_source=gbp&utm_medium=website
-Appointments:     https://masterchess.live/play?utm_source=gbp&utm_medium=appointment
-Menu (Products):  https://masterchess.live/tournaments?utm_source=gbp
-Reviews link:     https://search.google.com/local/writereview?placeid={PLACE_ID}
-Social profiles:  (only masterchess.live + your real socials — nothing else)
-```
+These are low-effort, high-signal additions:
 
-### E. Verification fast-track doc
-New `docs/GBP_VERIFICATION_FASTTRACK.md`:
-- Why the listing is invisible to other accounts until verified.
-- The exact 60-sec video script (already exists) + reshoot checklist.
-- What to do if Google rejects (re-record showing `masterchess.live` URL bar + admin panel).
-- Expected timeline (3–14 days).
+1. **Auto-generated GBP Product entries** — script reads `src/lib/shop-data.ts` + main features and emits 10 ready-to-paste Product cards (title, description, price=Free, photo URL, action URL).
+2. **Pre-written Q&A pack** — 12 questions in `docs/GBP_QA_PACK.md` covering: free?, signup needed?, mobile?, cheating?, kids-safe?, OTB tournaments?, refunds?, language?, founder?, accessibility?, API?, partnership?. Each answer ends with a deep `masterchess.live` link.
+3. **Review reply templates** (extend existing `GBP_REVIEWS_PLAYBOOK.md`) — add 5-star, 4-star, 3-star, 2-star, 1-star, spam, competitor-mention, language-other-than-EN reply templates, all signed by Nikola and linking back.
+4. **GBP Photo manifest** — `docs/GBP_PHOTO_PACK.md` listing 14 owner-uploaded photos with filenames, alt text, geo-EXIF reminder, and which existing `/public/*.png|jpg` to download. No new assets generated.
+5. **Auto-ping IndexNow** when a new `gbp_posts` row goes `ready_to_post` — pushes the linked deep URL to Bing/Yandex so the page is freshly indexed when GBP visitors click it.
+6. **Schema.org `Review` aggregation** — extend the existing `LocalBusiness` JSON-LD in `index.html` to read `aggregateRating` from `site_ratings` table at build time via `scripts/generate-sitemap.ts` (already runs at build). Once ≥5 reviews exist, stars appear in the knowledge panel.
+7. **`/maps` short redirect page** — new route that 302s to the resolved `place_url` from `site_config`. Lets you put `masterchess.live/maps` on social bios → one click to the Maps listing.
+8. **`/review` short redirect** — same idea, redirects to the resolved review URL. Replaces every hard-coded long review URL with `masterchess.live/review` everywhere on the site.
 
----
+## Technical summary
 
-## Part 2 — Audit every "Review" button in the app
+**New files**
+- `supabase/functions/resolve-place-id/index.ts` (cron weekly)
+- `scripts/generate-gbp-link-pack.ts`
+- `docs/GBP_LINK_PACK.md` (generated)
+- `docs/GBP_QA_PACK.md`
+- `docs/GBP_PHOTO_PACK.md`
+- `src/pages/MapsRedirect.tsx` (route `/maps`)
+- `src/pages/ReviewRedirect.tsx` (route `/review`)
 
-I'll walk every surface and confirm the click → opens the Google review form. Where a button is missing, I add it.
+**New migration**
+- `site_config(key text pk, value jsonb, updated_at timestamptz)` + GRANTs (SELECT to anon, ALL to service_role) + RLS (SELECT public, write service-role only).
 
-| # | Surface | Current state | Fix |
-|---|---|---|---|
-| 1 | Footer "Review us on Google" | ✅ exists in `src/components/Footer.tsx` | verify env-var fallback, add `aria-label`, open in new tab with `rel="noopener"` |
-| 2 | `/rate-masterchess` Google CTA card | ✅ exists in `src/pages/RateMasterChess.tsx` | confirm button works without sign-in, add small "Why?" tooltip |
-| 3 | `/reviews` page hero | ❌ no Google CTA | add the same gold "Leave a Google review" button at the top |
-| 4 | Post-game win toast | ❌ never asks | after ranked win #5, show toast: "Loved it? ⭐ Rate us on Google" — once per user (localStorage flag) |
-| 5 | Tournament winner modal (`TournamentResultsModal.tsx`) | ❌ no CTA | add "Share the love — Google review" button for top-3 finishers |
-| 6 | Profile menu (Navbar) | ❌ no entry | add "⭐ Review on Google" item below "Settings" |
-| 7 | `/about` page | ❌ | add a small footer-style strip "Like MasterChess? Leave a Google review" |
-| 8 | Achievements page | ❌ | when user unlocks "100 games" achievement, add Google-review nudge card |
-| 9 | Settings → Help section | ❌ | add "Support us → Leave Google review" link |
-| 10 | PWA install success | ❌ | after install, toast with Google-review link |
+**Edited files**
+- `src/lib/google-review.ts` — add `useGoogleReview` hook, keep constants.
+- `src/components/Footer.tsx`, `src/pages/RateMasterChess.tsx`, `src/pages/Reviews.tsx` — switch to hook.
+- `src/App.tsx` — register `/maps` and `/review` routes.
+- `docs/GBP_OFFICIAL_LINKS.md` — expand to 30+ URLs.
+- `docs/GBP_REVIEWS_PLAYBOOK.md` — add 8 reply templates.
+- `scripts/generate-sitemap.ts` — inject `aggregateRating` into JSON-LD.
+- `supabase/functions/publish-gbp-posts/index.ts` — IndexNow ping on `ready_to_post`.
 
-All buttons share **one constant** (`src/lib/google-review.ts`) so changing the Place ID later updates everywhere:
+**Connectors**
+- Requires the Google Maps Platform connector (already mentioned in context). If not linked yet, the first run of `resolve-place-id` will fall back to the search URL and the user gets a clear log saying "connect Google Maps Platform".
 
-```ts
-export const GOOGLE_REVIEW_URL =
-  (import.meta.env.VITE_GOOGLE_REVIEW_URL as string | undefined) ??
-  "https://www.google.com/maps/search/?api=1&query=MasterChess+masterchess.live";
-export const GOOGLE_MAPS_URL =
-  "https://www.google.com/maps/search/?api=1&query=MasterChess+masterchess.live";
-```
-
-Fallback now points to **Google Maps search** (not generic Google search) so even pre-verification, users land on Maps and can hit "Suggest an edit" → boosts your listing's signal.
-
-### Tracking
-Each button fires `track('gbp_review_click', { surface })` so you can see in `/admin/full-stats` which surfaces convert.
-
----
-
-## Files touched
-
-**Backend / config:**
-- Migration: rewrite `gbp_posts.cta_url`, add CHECK constraint
-- `supabase/functions/publish-gbp-posts/index.ts` — host guard
-- `scripts/generate-sitemap.ts` — host guard
-
-**Frontend:**
-- `src/lib/google-review.ts` (new constant)
-- `src/components/Footer.tsx` (use constant + a11y)
-- `src/components/Navbar.tsx` (profile menu item)
-- `src/pages/RateMasterChess.tsx` (use constant)
-- `src/pages/Reviews.tsx` (hero CTA)
-- `src/pages/About.tsx`, `src/pages/Achievements.tsx`, `src/pages/Settings.tsx` (small CTAs)
-- `src/components/TournamentResultsModal.tsx` (winner CTA)
-- Post-game toast hook (5th-win nudge)
-- PWA install hook (post-install toast)
-
-**Docs:**
-- `docs/GBP_OFFICIAL_LINKS.md` (new)
-- `docs/GBP_VERIFICATION_FASTTRACK.md` (new)
-- `docs/GBP_MAX_CHECKLIST.md` (update with masterchess.live-only rule + 10-button table)
-
-**Out of scope:** the actual Google verification (manual, your account) and obtaining the Place ID (set as `VITE_GOOGLE_REVIEW_URL` once you have it).
+## Out of scope
+- Actual GBP API auto-posting (needs Google's MyBusiness API allowlist — manual paste workflow stays).
+- Generating new images.
+- Anything that touches Lichess/Chess.com (forbidden per memory).
