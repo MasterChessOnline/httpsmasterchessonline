@@ -372,7 +372,7 @@ async function handleStart(supabase: any, tournament_id: string, callerId: strin
     return jsonRes({ error: "Need at least 2 players" }, 400);
   }
 
-  const pairings = generateSwissPairings(players, 1);
+  const pairings = generateFirstRoundPairings(tournament.format || "swiss", players, 1);
 
   for (const pairing of pairings) {
     const { data: onlineGame } = await supabase
