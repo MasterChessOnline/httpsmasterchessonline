@@ -28,7 +28,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { GOOGLE_REVIEW_URL, trackReviewClick } from "@/lib/google-review";
+import { useGoogleReview, trackReviewClick } from "@/lib/google-review";
 
 interface ReviewRow {
   id: string;
