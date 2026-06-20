@@ -55,19 +55,31 @@ Deno.serve(async (req) => {
       });
     }
 
-    const place = (json.places ?? [])[0];
-    if (!place?.id) {
+    const places = (json.places ?? []) as Array<any>;
+    const match = places.find((p) => {
+      const site = (p?.websiteUri ?? "").toLowerCase();
+      const name = (p?.displayName?.text ?? "").toLowerCase();
+      return site.includes("masterchess.live") || name === "masterchess";
+    });
+
+    if (!match?.id) {
       const value = {
         place_id: null,
         maps_url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(QUERY)}`,
         resolved_at: new Date().toISOString(),
-        status: "no_match_yet_verify_gbp",
+        status: "no_verified_match_yet",
+        candidates: places.slice(0, 3).map((p) => ({
+          name: p?.displayName?.text,
+          website: p?.websiteUri,
+          address: p?.formattedAddress,
+        })),
       };
       await admin.from("site_config").upsert({ key: "google_place", value });
       return new Response(JSON.stringify(value), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const place = match;
 
     const value = {
       place_id: place.id,
