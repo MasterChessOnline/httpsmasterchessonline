@@ -387,6 +387,7 @@ function AnimatedRoutes() {
           <Route path="/connections" element={<Connections />} />
           <Route path="/community/map" element={<CommunityMap />} />
           <Route path="/admin/seo-console" element={<AdminSeoConsole />} />
+          <Route path="/admin/gbp-posts" element={<AdminGbpPosts />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
