@@ -1,8 +1,9 @@
 /**
  * Build a single source of truth of fully-validated SAN sequences for every
- * masterclass lesson. Uses chess.js to walk the practiceLine and recover from
- * desync between `moves` (player) and `autoResponses` (opponent) by trying
- * either queue when the expected one is illegal. Writes the result to
+ * masterclass lesson. Uses chess.js to walk the written `Sequence:` first,
+ * then falls back to practiceLine and recovers from desync between `moves`
+ * (player) and `autoResponses` (opponent) by trying either queue when the
+ * expected one is illegal. Writes the result to
  * src/lib/masterclass-validated-lines.ts as a Record<lessonId, string[]>.
  */
 import { Chess } from "chess.js";
@@ -20,7 +21,46 @@ const MC_COURSES = [
   "masterkurs-najdorf",
 ];
 
-interface Built { sans: string[]; startFen?: string; truncatedAt?: number; sourceLen: number; }
+interface Built { sans: string[]; startFen?: string; truncatedAt?: number; sourceLen: number; source: "sequence" | "practice"; }
+
+function cleanSanToken(token: string): string {
+  return token
+    .trim()
+    .replace(/^\d+\.{1,3}/, "")
+    .replace(/[?!]+$/, "")
+    .replace(/[+#]+$/, "")
+    .replace(/[.,;:]+$/, "")
+    .trim();
+}
+
+function extractSequenceSans(content: string): string[] {
+  const match = content.match(/Sequence:\s*([\s\S]*?)(?:\s+Play through|$)/i);
+  if (!match) return [];
+  return match[1]
+    .split(/\s+/)
+    .map(cleanSanToken)
+    .filter((token) => token.length > 0 && !/^\d+\.{1,3}$/.test(token));
+}
+
+function validateFromInitial(sans: string[]): Built | null {
+  if (!sans.length) return null;
+  const game = new Chess();
+  const out: string[] = [];
+  let truncatedAt: number | undefined;
+  for (const san of sans) {
+    try {
+      if (!game.move(san)) {
+        truncatedAt = out.length;
+        break;
+      }
+      out.push(san);
+    } catch {
+      truncatedAt = out.length;
+      break;
+    }
+  }
+  return { sans: out, truncatedAt, sourceLen: sans.length, source: "sequence" };
+}
 
 // Map of known startFen → SAN prefix played from the initial position.
 // This lets every masterclass variation start from move 1 (like Jobava London)
@@ -32,6 +72,9 @@ const STARTFEN_PREFIX: Record<string, string[]> = {
 };
 
 function buildLesson(lesson: any): Built | null {
+  const sequence = validateFromInitial(extractSequenceSans(lesson.content || ""));
+  if (sequence?.sans.length) return sequence;
+
   const pl = (lesson.practiceLine && (lesson.practiceLine.moves?.length || lesson.practiceLine.autoResponses?.length))
     ? lesson.practiceLine
     : MASTERCLASS_PRACTICE_EXTRAS[lesson.id];
@@ -90,7 +133,7 @@ function buildLesson(lesson: any): Built | null {
     }
     turn = !turn;
   }
-  return { sans: out, startFen: startFromInitial ? undefined : pl.startFen, truncatedAt, sourceLen };
+  return { sans: out, startFen: startFromInitial ? undefined : pl.startFen, truncatedAt, sourceLen, source: "practice" };
 }
 
 const result: Record<string, { sans: string[]; startFen?: string }> = {};
