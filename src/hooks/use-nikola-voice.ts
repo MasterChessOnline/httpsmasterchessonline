@@ -102,10 +102,30 @@ export function useNikolaVoice() {
     if (!text || !text.trim()) return;
     if (muted) return;
 
+    // If audio is not unlocked yet (browser autoplay policy), queue this text
+    // and play it on the first user gesture instead of silently failing.
+    if (typeof window !== "undefined") {
+      // Try to resume — works if we're already inside a user-gesture stack.
+      // If still suspended afterwards, queue and bail.
+      const probe = ctxRef.current;
+      if (probe && probe.state === "suspended") {
+        try { await probe.resume(); } catch { /* ignore */ }
+      }
+    }
+
     // cancel previous
     stopInternal();
 
     const { ctx, analyser } = await ensureCtx();
+
+    if (ctx.state !== "running") {
+      // Still locked → queue and return; gesture listener will replay.
+      pendingTextRef.current = text;
+      pendingVoiceRef.current = voice;
+      setSpeaking(false);
+      return;
+    }
+
     const controller = new AbortController();
     abortRef.current = controller;
     setSpeaking(true);
@@ -177,7 +197,6 @@ export function useNikolaVoice() {
           } catch { /* ignore parse errors */ }
         }
       }
-      // Schedule "stopped speaking" right after playback finishes
       const msLeft = Math.max(0, (lastEndTime - ctx.currentTime) * 1000 + 80);
       endTimerRef.current = window.setTimeout(() => {
         endTimerRef.current = null;
@@ -188,6 +207,30 @@ export function useNikolaVoice() {
       else speakFallback(text);
     }
   }, [muted, ensureCtx, speakFallback]);
+
+  // Manual unlock (call from a button click). Resumes context + replays queued text.
+  const unlock = useCallback(async () => {
+    await ensureCtx();
+    const queued = pendingTextRef.current;
+    pendingTextRef.current = null;
+    if (queued && !muted) {
+      // Slight defer so AudioContext fully transitions to "running".
+      window.setTimeout(() => speak(queued, pendingVoiceRef.current), 50);
+    }
+  }, [ensureCtx, muted, speak]);
+
+  // Global one-shot gesture unlock: first pointerdown/keydown anywhere unlocks audio.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (unlocked) return;
+    const handler = () => { unlock(); };
+    window.addEventListener("pointerdown", handler, { once: true, passive: true });
+    window.addEventListener("keydown", handler, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", handler);
+      window.removeEventListener("keydown", handler);
+    };
+  }, [unlocked, unlock]);
 
   // Cleanup on unmount
   useEffect(() => () => {
@@ -204,6 +247,8 @@ export function useNikolaVoice() {
     speaking,
     muted,
     setMuted,
+    unlock,
+    unlocked,
     analyser: analyserRef,
   };
 }
