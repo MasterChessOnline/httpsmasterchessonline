@@ -90,16 +90,23 @@ async function handleCreate(supabase: any, userId: string, opts: any) {
   const cat = opts.category || "blitz";
   const baseName = opts.name?.trim() || `${cat.charAt(0).toUpperCase() + cat.slice(1)} Arena`;
 
+  const fmt = (opts.format || "swiss").toString();
+  const tType =
+    fmt === "round-robin" ? "round_robin" :
+    fmt === "knockout" ? "knockout" :
+    fmt === "koth" || fmt === "king_of_the_hill" ? "koth" :
+    fmt === "puzzle_rush" || fmt === "puzzle" ? "puzzle" :
+    (fmt === "arena" || fmt === "daily_cup" || fmt === "blitz_royale") ? "arena" :
+    "swiss";
+
   const { data: tournament, error } = await supabase
     .from("tournaments")
     .insert({
       name: baseName,
-      description: `${opts.format || "swiss"} tournament — auto-starts at scheduled time`,
+      description: `${fmt} tournament — auto-starts at scheduled time`,
       category: cat,
-      format: opts.format || "swiss",
-      tournament_type: opts.format === "round-robin" ? "round_robin"
-        : (opts.format === "arena" || opts.format === "daily_cup" || opts.format === "blitz_royale") ? "arena"
-        : "swiss",
+      format: fmt,
+      tournament_type: tType,
       total_rounds: opts.total_rounds || 5,
       max_players: opts.max_players || 32,
       time_control_label: opts.time_control_label || "5+3",
@@ -113,6 +120,7 @@ async function handleCreate(supabase: any, userId: string, opts: any) {
     })
     .select()
     .single();
+
 
   if (error) throw error;
   return jsonRes({ tournament });
@@ -187,7 +195,7 @@ async function handleAutoStartDue(supabase: any) {
     // Adjust round count to fit the number of players
     const adjustedRounds = roundsForPlayers(players.length, t.total_rounds);
 
-    const pairings = generateSwissPairings(players, 1);
+    const pairings = generateFirstRoundPairings(t.format || "swiss", players, 1);
     for (const pairing of pairings) {
       const { data: onlineGame } = await supabase
         .from("online_games")
@@ -364,7 +372,7 @@ async function handleStart(supabase: any, tournament_id: string, callerId: strin
     return jsonRes({ error: "Need at least 2 players" }, 400);
   }
 
-  const pairings = generateSwissPairings(players, 1);
+  const pairings = generateFirstRoundPairings(tournament.format || "swiss", players, 1);
 
   for (const pairing of pairings) {
     const { data: onlineGame } = await supabase
@@ -537,9 +545,37 @@ async function handleReportResult(supabase: any, game_id: string, result: string
 
     const { data: tournament } = await supabase
       .from("tournaments")
-      .select("current_round, total_rounds")
+      .select("current_round, total_rounds, tournament_type, format, time_control_seconds, time_control_label, time_control_increment")
       .eq("id", pairing.tournament_id)
       .single();
+
+    // Fast-win bonus: checkmate in <=10 full moves => +1 to winner's fast_win_bonus & score
+    if (tournament && result !== "1/2-1/2" && game && game.status === "finished") {
+      const { data: gameMeta } = await supabase
+        .from("online_games")
+        .select("move_number, end_reason")
+        .eq("id", game_id)
+        .maybeSingle();
+      if (gameMeta && (gameMeta.end_reason === "checkmate" || gameMeta.end_reason === "resignation") && (gameMeta.move_number || 0) <= 20) {
+        const winnerId = result === "1-0" ? pairing.white_player_id : pairing.black_player_id;
+        if (winnerId) {
+          const { data: wr } = await supabase
+            .from("tournament_registrations")
+            .select("score, fast_win_bonus")
+            .eq("tournament_id", pairing.tournament_id)
+            .eq("user_id", winnerId)
+            .single();
+          await supabase
+            .from("tournament_registrations")
+            .update({
+              score: (Number(wr?.score) || 0) + 1,
+              fast_win_bonus: (Number(wr?.fast_win_bonus) || 0) + 1,
+            })
+            .eq("tournament_id", pairing.tournament_id)
+            .eq("user_id", winnerId);
+        }
+      }
+    }
 
     if (tournament) {
       const { data: pendingPairings } = await supabase
@@ -550,7 +586,10 @@ async function handleReportResult(supabase: any, game_id: string, result: string
         .is("result", null);
 
       if (!pendingPairings || pendingPairings.length === 0) {
-        if (tournament.current_round >= tournament.total_rounds) {
+        const isKnockout = tournament.tournament_type === "knockout" || tournament.format === "knockout";
+        if (isKnockout) {
+          await advanceKnockoutRound(supabase, pairing.tournament_id, tournament.current_round);
+        } else if (tournament.current_round >= tournament.total_rounds) {
           await supabase
             .from("tournaments")
             .update({ status: "finished" })
@@ -562,6 +601,7 @@ async function handleReportResult(supabase: any, game_id: string, result: string
       }
     }
   }
+
 
   return jsonRes({ success: true });
 }
@@ -643,7 +683,127 @@ async function awardStreakBadges(supabase: any, userId: string, streak: number, 
   }
 }
 
+// ===================== FIRST-ROUND PAIRINGS DISPATCH =====================
+function generateFirstRoundPairings(
+  format: string,
+  players: Array<{ user_id: string; rating_at_join: number; score: number | null }>,
+  round: number
+) {
+  if (format === "knockout") return generateKnockoutSeeding(players);
+  return generateSwissPairings(players, round);
+}
+
+// ===================== KNOCKOUT SEEDING =====================
+// Standard bracket seeding: 1v(N), 2v(N-1), ... Highest seeds get byes via odd count.
+function generateKnockoutSeeding(
+  players: Array<{ user_id: string; rating_at_join: number }>
+) {
+  const sorted = [...players].sort((a, b) => b.rating_at_join - a.rating_at_join);
+  const pairings: Array<{ white: string; black: string }> = [];
+  let i = 0;
+  let j = sorted.length - 1;
+  while (i < j) {
+    pairings.push({ white: sorted[i].user_id, black: sorted[j].user_id });
+    i++; j--;
+  }
+  return pairings;
+}
+
+async function advanceKnockoutRound(supabase: any, tournamentId: string, currentRound: number) {
+  // Collect winners of current round (non-bye pairings).
+  const { data: roundPairings } = await supabase
+    .from("tournament_pairings")
+    .select("white_player_id, black_player_id, result")
+    .eq("tournament_id", tournamentId)
+    .eq("round", currentRound);
+
+  if (!roundPairings) return;
+
+  const winners: string[] = [];
+  for (const p of roundPairings) {
+    if (!p.black_player_id) { winners.push(p.white_player_id); continue; } // bye
+    if (p.result === "1-0") winners.push(p.white_player_id);
+    else if (p.result === "0-1") winners.push(p.black_player_id);
+    else if (p.result === "1/2-1/2") {
+      // tie-break by current rating: higher seed advances
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id, rating")
+        .in("user_id", [p.white_player_id, p.black_player_id]);
+      const w = (profs || []).find((x: any) => x.user_id === p.white_player_id)?.rating || 0;
+      const b = (profs || []).find((x: any) => x.user_id === p.black_player_id)?.rating || 0;
+      winners.push(w >= b ? p.white_player_id : p.black_player_id);
+    }
+  }
+
+  // Finished?
+  if (winners.length <= 1) {
+    await supabase
+      .from("tournaments")
+      .update({ status: "finished" })
+      .eq("id", tournamentId);
+    await awardTournamentBadges(supabase, tournamentId);
+    return;
+  }
+
+  // Create next round pairings (adjacent winners face off).
+  const { data: tournament } = await supabase
+    .from("tournaments")
+    .select("time_control_seconds, time_control_label, time_control_increment")
+    .eq("id", tournamentId)
+    .single();
+
+  const next = currentRound + 1;
+  const pairs: Array<{ white: string; black: string | null }> = [];
+  for (let k = 0; k < winners.length; k += 2) {
+    if (k + 1 < winners.length) pairs.push({ white: winners[k], black: winners[k + 1] });
+    else pairs.push({ white: winners[k], black: null }); // bye for odd
+  }
+
+  for (const p of pairs) {
+    if (p.black === null) {
+      await supabase.from("tournament_pairings").insert({
+        tournament_id: tournamentId,
+        round: next,
+        white_player_id: p.white,
+        black_player_id: null,
+        result: "1-0",
+      });
+      continue;
+    }
+    const { data: og } = await supabase
+      .from("online_games")
+      .insert({
+        white_player_id: p.white,
+        black_player_id: p.black,
+        white_time: tournament.time_control_seconds,
+        black_time: tournament.time_control_seconds,
+        time_control_label: tournament.time_control_label,
+        increment: tournament.time_control_increment,
+      })
+      .select()
+      .single();
+    await supabase.from("tournament_pairings").insert({
+      tournament_id: tournamentId,
+      round: next,
+      white_player_id: p.white,
+      black_player_id: p.black,
+      game_id: og?.id || null,
+    });
+  }
+
+  await supabase
+    .from("tournaments")
+    .update({
+      current_round: next,
+      total_rounds: Math.max(next, 1),
+      round_started_at: new Date().toISOString(),
+    })
+    .eq("id", tournamentId);
+}
+
 // ===================== SWISS PAIRING =====================
+
 function generateSwissPairings(
   players: Array<{ user_id: string; rating_at_join: number; score: number | null }>,
   round: number
