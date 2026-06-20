@@ -31,6 +31,7 @@ interface RatingRow {
 export default function RateMasterChess() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { reviewUrl: GOOGLE_REVIEW_URL } = useGoogleReview();
 
   const [ratings, setRatings] = useState<RatingRow[]>([]);
   const [stars, setStars] = useState(0);
