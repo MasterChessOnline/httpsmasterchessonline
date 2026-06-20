@@ -10,7 +10,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Loader2, Trophy, Clock, Zap, Timer, Swords, Calendar, Flame } from "lucide-react";
+import { Plus, Loader2, Trophy, Clock, Zap, Timer, Swords, Calendar, Flame, Crown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Props {
