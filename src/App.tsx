@@ -394,6 +394,9 @@ function AnimatedRoutes() {
           <Route path="/admin/seo-console" element={<AdminSeoConsole />} />
           <Route path="/admin/gbp-posts" element={<AdminGbpPosts />} />
           <Route path="/admin/gsc" element={<AdminGsc />} />
+          <Route path="/chess/:slug" element={<ChessInCity />} />
+          <Route path="/near-me" element={<NearMe />} />
+          <Route path="/players/world" element={<PlayerHeatmap />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
