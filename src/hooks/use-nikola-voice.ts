@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * - Honors a "muted" toggle persisted in localStorage.
  */
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nikola-tts`;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const STORAGE_MUTE = "nikola_voice_muted";
 
 export function useNikolaVoice() {
@@ -103,7 +104,11 @@ export function useNikolaVoice() {
     try {
       const res = await fetch(FN_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({ text, voice }),
         signal: controller.signal,
       });

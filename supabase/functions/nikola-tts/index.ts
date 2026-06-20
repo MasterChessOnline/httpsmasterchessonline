@@ -8,9 +8,9 @@ const corsHeaders = {
 };
 
 const INSTRUCTIONS =
-  "Speak warmly and clearly like a friendly 13-year-old chess coach explaining " +
-  "a move to a friend. Energetic, encouraging, never robotic. Pronounce chess " +
-  "notation (e4, Nf3, O-O) the natural English way.";
+  "Speak warmly and clearly like a friendly 13-year-old Serbian chess coach explaining " +
+  "a move to a friend. Energetic, encouraging, never robotic. Speak Serbian naturally " +
+  "when the input is Serbian, and pronounce chess notation (e4, Nf3, O-O) clearly.";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
