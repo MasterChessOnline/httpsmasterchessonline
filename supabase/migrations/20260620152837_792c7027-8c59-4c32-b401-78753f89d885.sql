@@ -1,0 +1,1 @@
+ALTER TABLE public.gbp_posts ADD COLUMN IF NOT EXISTS image_url TEXT;
