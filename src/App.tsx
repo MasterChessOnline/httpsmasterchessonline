@@ -92,6 +92,9 @@ const LearnChessIn7Days = lazy(() =>
 const Changelog = lazy(() =>
   import("./pages/seo-landings").then((m) => ({ default: m.Changelog })),
 );
+const ChessInCity = lazy(() => import("./pages/ChessInCity"));
+const NearMe = lazy(() => import("./pages/NearMe"));
+const PlayerHeatmap = lazy(() => import("./pages/PlayerHeatmap"));
 const AlternativeToMajorChessSites = lazy(() =>
   import("./pages/seo-landings").then((m) => ({ default: m.AlternativeToMajorChessSites })),
 );
@@ -394,6 +397,9 @@ function AnimatedRoutes() {
           <Route path="/admin/seo-console" element={<AdminSeoConsole />} />
           <Route path="/admin/gbp-posts" element={<AdminGbpPosts />} />
           <Route path="/admin/gsc" element={<AdminGsc />} />
+          <Route path="/chess/:slug" element={<ChessInCity />} />
+          <Route path="/near-me" element={<NearMe />} />
+          <Route path="/players/world" element={<PlayerHeatmap />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
