@@ -134,6 +134,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://masterchess.live/community/map</loc>
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://masterchess.live/learn/how-to-play-chess</loc>
     <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
