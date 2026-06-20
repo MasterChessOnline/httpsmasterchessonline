@@ -1,108 +1,102 @@
-# Plan — Auto Place ID + Maximum masterchess.live GBP Saturation
+# Plan — GBP + Search Console maximization
 
-## Part 1 — Place ID: stop hand-pasting, resolve automatically
+Doing the 4 highest-ROI items I recommended, plus 2 quick wins.
 
-Right now `VITE_GOOGLE_REVIEW_URL` requires the user to manually find Place ID and set an env var. Replace with auto-resolution.
+## 1. Auto-verify masterchess.live in Google Search Console
 
-**New edge function `resolve-place-id`** (one-time, cached):
-- Uses Google Maps connector (already documented in context) → `places/v1/places:searchText` with query `"MasterChess masterchess.live"`.
-- Stores result in new `site_config` table (key/value): `place_id`, `place_url`, `maps_url`, `cid`, `resolved_at`.
-- Re-runs weekly via cron (in case Google reassigns).
-- Falls back gracefully to the Maps search URL if not yet verified.
+Use the GSC connector (already available — see `<google_search_console>` knowledge).
 
-**New table `site_config`** (public read, service-role write) — one row per key. Used for any future global config too.
+- New edge function `gsc-auto-verify`:
+  1. POST `/siteVerification/v1/token` with `{site: {identifier: "https://masterchess.live/", type: "SITE"}, verificationMethod: "META"}`
+  2. Upsert returned token into `site_config` key `gsc_meta_token`
+  3. PUT `/webmasters/v3/sites/https%3A%2F%2Fmasterchess.live%2F` to add property
+  4. POST `/siteVerification/v1/webResource?verificationMethod=META` to finalize
+- New component `<GscVerificationMeta />` mounted in `App.tsx`:
+  - Reads `site_config.gsc_meta_token`
+  - Injects `<meta name="google-site-verification" content="...">` via Helmet
+- First time function runs returns the token → meta tag goes live on next request → admin re-runs function to verify. Or single-shot if token already injected via env override.
+- Also add static `<meta name="google-site-verification" content="">` placeholder in `index.html` head for non-JS crawlers fallback (empty until token resolved — harmless).
 
-**New hook `useGoogleReview()`** in `src/lib/google-review.ts`:
-- Fetches `site_config.place_id` from Supabase on mount, caches in localStorage 24h.
-- Returns `{ reviewUrl, mapsUrl, placeId }`.
-- Every existing button (Footer, /rate, /reviews) switches to the hook — no more env var needed.
-- Keeps the env override as highest priority for emergencies.
+## 2. GBP Posts: auto-generated images
 
-## Part 2 — Flood GBP with masterchess.live deep links
+Every post in `gbp_posts` gets an image at scheduled time.
 
-Currently GBP dashboard has 4 link slots. We expose more URLs via **GBP Posts** (already 52 seeded) and **Products/Services entries**. Add a generator + admin export.
+- Extend `gbp_posts` table: add `image_url TEXT` column (migration).
+- New edge function `generate-gbp-post-image`:
+  - Reads post title + theme
+  - Generates an OG-style PNG using existing `/og` rendering pattern OR a simple Canvas in Deno
+  - Uploads to Supabase Storage bucket `gbp-images` (public)
+  - Writes URL back to `gbp_posts.image_url`
+- Hook into `publish-gbp-posts`: if `image_url` is null when flipping to `ready_to_post`, call generator first.
+- Admin UI at `/admin/gbp-posts` shows the image preview + copy-paste action.
 
-**Expand `docs/GBP_OFFICIAL_LINKS.md`** from 4 → 30+ canonical deep links, each with proper UTM:
+## 3. Auto-submit URLs via IndexNow (Bing/Yandex/Seznam)
 
-| Surface | URL |
-|---|---|
-| Website | `/` |
-| Play instant | `/play` |
-| Play guest (no signup) | `/play-guest` |
-| Tournaments hub | `/tournaments` |
-| Today's tournament | `/tournaments/today` |
-| Battle Royale | `/battle-royale` |
-| Daily Puzzle | `/puzzles` |
-| Daily Mate | `/daily-mate` |
-| Openings explorer | `/openings` |
-| Bot practice | `/bots` |
-| Leaderboard | `/leaderboard` |
-| Hall of Fame | `/hall-of-fame` |
-| Community map | `/community/map` |
-| Clubs | `/clubs` |
-| Live stream hub | `/live` |
-| Lessons | `/lessons` |
-| Glossary | `/glossary` |
-| Rating calculator | `/rating-calculator` |
-| Game review | `/game-review` |
-| Rate us | `/rate-masterchess` |
-| Reviews | `/reviews` |
-| Press kit | `/press-kit` |
-| About / founder | `/about` |
-| Contact | `/contact` |
-| Signup | `/signup` |
-| PWA install | `/?install=1` |
-| Beat Nikola | `/beat/nikola` |
-| Beat the bots SEO | `/beat-bots` |
-| City landing template | `/play-chess-from/{city}` |
-| Viral challenge | `/vs/new` |
+GSC Indexing API requires special allowlist (jobs/livestream only). IndexNow is open and Bing-backed → covers ~10% of global search instantly.
 
-All wrapped in `?utm_source=gbp&utm_medium={slot}&utm_campaign={theme}`.
+- New edge function `indexnow-submit`:
+  - Reads `public/sitemap.xml` (or its index)
+  - Parses URLs, POSTs batches of 100 to `https://api.indexnow.org/indexnow`
+  - Uses existing `public/indexnow-key.txt` (already in project)
+- Daily cron at 04:00 UTC.
+- Also hook into `publish-gbp-posts`: when a post goes `ready_to_post`, ping its CTA URL immediately.
 
-**New script `scripts/generate-gbp-link-pack.ts`** — outputs `docs/GBP_LINK_PACK.md` with copy-paste blocks per GBP surface (Products, Services, Posts, Q&A answers, Updates). User pastes them into business.google.com one time.
+## 4. `/admin/gsc` dashboard
 
-**Lock-down enforcement**: extend the existing forbidden-host guard so every URL in `gbp_posts.cta_url`, `gbp_posts.body`, and the new link pack is validated to be `masterchess.live` only. Add the same check inside `publish-gbp-posts` edge function.
+Powered by GSC search analytics API.
 
-## Part 3 — "Intelligent extras" worth adding to GBP
+- New edge function `gsc-search-analytics`:
+  - POSTs `/webmasters/v3/sites/{site}/searchAnalytics/query` with last 28 days
+  - Groups by `query` and `page`
+  - Returns top 50 by clicks + top 50 losing CTR
+- New admin route `/admin/gsc`:
+  - Stats cards: total clicks, impressions, CTR, avg position (week-over-week deltas)
+  - Top queries table (query, clicks, impressions, CTR, position)
+  - Top losing pages table (clicks dropped >30% WoW)
+  - "Rescan" button → triggers IndexNow submit + GSC analytics refresh
+- Gated by `has_role(auth.uid(), 'admin')`.
 
-These are low-effort, high-signal additions:
+## 5. Quick win — Sitemap auto-resubmit to GSC
 
-1. **Auto-generated GBP Product entries** — script reads `src/lib/shop-data.ts` + main features and emits 10 ready-to-paste Product cards (title, description, price=Free, photo URL, action URL).
-2. **Pre-written Q&A pack** — 12 questions in `docs/GBP_QA_PACK.md` covering: free?, signup needed?, mobile?, cheating?, kids-safe?, OTB tournaments?, refunds?, language?, founder?, accessibility?, API?, partnership?. Each answer ends with a deep `masterchess.live` link.
-3. **Review reply templates** (extend existing `GBP_REVIEWS_PLAYBOOK.md`) — add 5-star, 4-star, 3-star, 2-star, 1-star, spam, competitor-mention, language-other-than-EN reply templates, all signed by Nikola and linking back.
-4. **GBP Photo manifest** — `docs/GBP_PHOTO_PACK.md` listing 14 owner-uploaded photos with filenames, alt text, geo-EXIF reminder, and which existing `/public/*.png|jpg` to download. No new assets generated.
-5. **Auto-ping IndexNow** when a new `gbp_posts` row goes `ready_to_post` — pushes the linked deep URL to Bing/Yandex so the page is freshly indexed when GBP visitors click it.
-6. **Schema.org `Review` aggregation** — extend the existing `LocalBusiness` JSON-LD in `index.html` to read `aggregateRating` from `site_ratings` table at build time via `scripts/generate-sitemap.ts` (already runs at build). Once ≥5 reviews exist, stars appear in the knowledge panel.
-7. **`/maps` short redirect page** — new route that 302s to the resolved `place_url` from `site_config`. Lets you put `masterchess.live/maps` on social bios → one click to the Maps listing.
-8. **`/review` short redirect** — same idea, redirects to the resolved review URL. Replaces every hard-coded long review URL with `masterchess.live/review` everywhere on the site.
+Add to existing `scripts/generate-sitemap.ts` post-write step:
+- POST `/webmasters/v3/sites/{site}/sitemaps/{sitemapUrl}` via GSC connector
+- Only runs in production (skip on `predev`)
+
+## 6. Quick win — GBP "Booking" + "Services" slot data
+
+Extend `docs/GBP_OFFICIAL_LINKS.md` with:
+- Booking URL → `https://masterchess.live/tournaments?utm_source=gbp&utm_medium=booking`
+- 8 Services entries (Ranked Play, Tournaments, Lessons, Game Review, Puzzles, Bot Practice, Clubs, Streamer Mode) with title, description, deep link
+- 1 "youth-led business" attribute note for the differentiation angle
 
 ## Technical summary
 
 **New files**
-- `supabase/functions/resolve-place-id/index.ts` (cron weekly)
-- `scripts/generate-gbp-link-pack.ts`
-- `docs/GBP_LINK_PACK.md` (generated)
-- `docs/GBP_QA_PACK.md`
-- `docs/GBP_PHOTO_PACK.md`
-- `src/pages/MapsRedirect.tsx` (route `/maps`)
-- `src/pages/ReviewRedirect.tsx` (route `/review`)
+- `supabase/functions/gsc-auto-verify/index.ts`
+- `supabase/functions/gsc-search-analytics/index.ts`
+- `supabase/functions/generate-gbp-post-image/index.ts`
+- `supabase/functions/indexnow-submit/index.ts`
+- `src/components/GscVerificationMeta.tsx`
+- `src/pages/AdminGsc.tsx`
 
 **New migration**
-- `site_config(key text pk, value jsonb, updated_at timestamptz)` + GRANTs (SELECT to anon, ALL to service_role) + RLS (SELECT public, write service-role only).
+- `ALTER TABLE gbp_posts ADD COLUMN image_url TEXT`
+- Storage bucket `gbp-images` (public read)
 
 **Edited files**
-- `src/lib/google-review.ts` — add `useGoogleReview` hook, keep constants.
-- `src/components/Footer.tsx`, `src/pages/RateMasterChess.tsx`, `src/pages/Reviews.tsx` — switch to hook.
-- `src/App.tsx` — register `/maps` and `/review` routes.
-- `docs/GBP_OFFICIAL_LINKS.md` — expand to 30+ URLs.
-- `docs/GBP_REVIEWS_PLAYBOOK.md` — add 8 reply templates.
-- `scripts/generate-sitemap.ts` — inject `aggregateRating` into JSON-LD.
-- `supabase/functions/publish-gbp-posts/index.ts` — IndexNow ping on `ready_to_post`.
+- `index.html` — placeholder verification meta tag
+- `src/App.tsx` — mount `<GscVerificationMeta />` + register `/admin/gsc` route
+- `supabase/functions/publish-gbp-posts/index.ts` — call image generator + IndexNow ping
+- `scripts/generate-sitemap.ts` — production sitemap resubmit
+- `docs/GBP_OFFICIAL_LINKS.md` — booking + services
+- `.lovable/plan.md` (auto)
 
-**Connectors**
-- Requires the Google Maps Platform connector (already mentioned in context). If not linked yet, the first run of `resolve-place-id` will fall back to the search URL and the user gets a clear log saying "connect Google Maps Platform".
+**Cron jobs**
+- `indexnow-daily` — 04:00 UTC daily
+- `gsc-verify-retry` — once daily (idempotent, skips if already verified)
 
 ## Out of scope
-- Actual GBP API auto-posting (needs Google's MyBusiness API allowlist — manual paste workflow stays).
-- Generating new images.
-- Anything that touches Lichess/Chess.com (forbidden per memory).
+- Google Indexing API (allowlist-only)
+- Real Apple Business Connect (no API access from server)
+- Auto-posting to GBP API (allowlist-only)
+- Generating new design assets (uses existing OG renderer)
