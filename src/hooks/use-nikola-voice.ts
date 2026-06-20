@@ -9,7 +9,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
  */
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nikola-tts`;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const STORAGE_MUTE = "nikola_voice_muted";
+const STORAGE_MUTE = "nikola_voice_muted_v2";
+const DEFAULT_VOICE = "ash";
+const SPEAK_DEBOUNCE_MS = 220;
 
 export function useNikolaVoice() {
   const [speaking, setSpeaking] = useState(false);
@@ -27,7 +29,9 @@ export function useNikolaVoice() {
   const endTimerRef = useRef<number | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const pendingTextRef = useRef<string | null>(null);
-  const pendingVoiceRef = useRef<string>("coral");
+  const pendingVoiceRef = useRef<string>(DEFAULT_VOICE);
+  const speakTimerRef = useRef<number | null>(null);
+  const activeRequestIdRef = useRef(0);
 
   const setMuted = useCallback((v: boolean) => {
     setMutedState(v);
@@ -58,6 +62,11 @@ export function useNikolaVoice() {
   }, []);
 
   const stopInternal = () => {
+    activeRequestIdRef.current += 1;
+    if (speakTimerRef.current !== null) {
+      clearTimeout(speakTimerRef.current);
+      speakTimerRef.current = null;
+    }
     if (abortRef.current) {
       try { abortRef.current.abort(); } catch { /* ignore */ }
       abortRef.current = null;
@@ -85,8 +94,8 @@ export function useNikolaVoice() {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
-      utterance.rate = 1.0;
-      utterance.pitch = 1.05;
+      utterance.rate = 1.03;
+      utterance.pitch = 1.25;
       utterance.volume = 1.0;
       utterance.onend = () => { utteranceRef.current = null; setSpeaking(false); };
       utterance.onerror = () => { utteranceRef.current = null; setSpeaking(false); };
@@ -98,7 +107,7 @@ export function useNikolaVoice() {
     }
   }, []);
 
-  const speak = useCallback(async (text: string, voice = "coral") => {
+  const speakNow = useCallback(async (text: string, voice = DEFAULT_VOICE) => {
     if (!text || !text.trim()) return;
     if (muted) return;
 
@@ -128,6 +137,7 @@ export function useNikolaVoice() {
 
     const controller = new AbortController();
     abortRef.current = controller;
+    const requestId = activeRequestIdRef.current;
     setSpeaking(true);
     playheadRef.current = 0;
     let pending = new Uint8Array(0);
@@ -182,6 +192,7 @@ export function useNikolaVoice() {
         while ((idx = buf.indexOf("\n\n")) >= 0) {
           const event = buf.slice(0, idx);
           buf = buf.slice(idx + 2);
+          if (requestId !== activeRequestIdRef.current) return;
           const dataLine = event.split("\n").find((l) => l.startsWith("data:"));
           if (!dataLine) continue;
           const data = dataLine.slice(5).trim();
@@ -199,6 +210,7 @@ export function useNikolaVoice() {
       }
       const msLeft = Math.max(0, (lastEndTime - ctx.currentTime) * 1000 + 80);
       endTimerRef.current = window.setTimeout(() => {
+        if (requestId !== activeRequestIdRef.current) return;
         endTimerRef.current = null;
         setSpeaking(false);
       }, msLeft);
@@ -207,6 +219,25 @@ export function useNikolaVoice() {
       else speakFallback(text);
     }
   }, [muted, ensureCtx, speakFallback]);
+
+  const speak = useCallback(async (text: string, voice = DEFAULT_VOICE) => {
+    if (!text || !text.trim() || muted) return;
+
+    pendingTextRef.current = text;
+    pendingVoiceRef.current = voice;
+
+    if (speakTimerRef.current !== null) clearTimeout(speakTimerRef.current);
+
+    speakTimerRef.current = window.setTimeout(() => {
+      speakTimerRef.current = null;
+      const queued = pendingTextRef.current;
+      const queuedVoice = pendingVoiceRef.current;
+      pendingTextRef.current = null;
+      if (queued && !muted) {
+        speakNow(queued, queuedVoice).catch(() => { /* ignore */ });
+      }
+    }, SPEAK_DEBOUNCE_MS);
+  }, [muted, speakNow]);
 
   // Manual unlock (call from a button click). Resumes context + replays queued text.
   const unlock = useCallback(async () => {
