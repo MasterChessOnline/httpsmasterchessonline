@@ -9,6 +9,7 @@
 import { Chess } from "chess.js";
 import { COURSES } from "../src/lib/courses-data";
 import { MASTERCLASS_PRACTICE_EXTRAS } from "../src/lib/masterclass-practice-extras";
+import { MASTERCLASS_CURATED_LINES } from "../src/lib/masterclass-curated-lines";
 import * as fs from "fs";
 
 const MC_COURSES = [
@@ -74,6 +75,9 @@ const STARTFEN_PREFIX: Record<string, string[]> = {
 function buildLesson(lesson: any): Built | null {
   const sequence = validateFromInitial(extractSequenceSans(lesson.content || ""));
   if (sequence?.sans.length) return sequence;
+
+  const curated = validateFromInitial(MASTERCLASS_CURATED_LINES[lesson.id] || []);
+  if (curated?.sans.length) return curated;
 
   const pl = (lesson.practiceLine && (lesson.practiceLine.moves?.length || lesson.practiceLine.autoResponses?.length))
     ? lesson.practiceLine
