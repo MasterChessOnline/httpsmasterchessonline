@@ -714,15 +714,17 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
   const videoUrl = null;
 
   const lessonData = LESSON_MOVES[lesson.id];
+  const isMasterclass = course.tier === "masterclass";
   const variations: LessonVariation[] = useMemo(() => {
-    // 1. Validated MasterKurs lines (always start from real beginning)
+    // 1. Validated MasterKurs lines — ALWAYS start from the initial chess position.
     const validated = MASTERCLASS_VALIDATED_LINES[lesson.id];
     if (validated?.sans?.length) {
       const moves: MoveStep[] = validated.sans.map((san) => ({
         san,
         explanation: `${san} — main course move.`,
       }));
-      return [{ name: lesson.title, startFen: validated.startFen, moves }];
+      // startFen undefined → board opens from move 0 every time.
+      return [{ name: lesson.title, startFen: undefined, moves }];
     }
     // 2. PracticeLine reconstructed
     const practiceVariation = buildPracticeLineVariation(lesson);
@@ -730,10 +732,10 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
     // 3. Explicit lesson variations
     if (lessonData?.variations && lessonData.variations.length > 0) return lessonData.variations;
     if (lessonData?.moves?.length) return [{ name: "", startFen: lessonData.startFen, moves: lessonData.moves }];
-    // 4. Static FEN fallback
-    if (lesson.fen) return [{ name: "Position", startFen: lesson.fen, moves: [] }];
+    // 4. Static FEN fallback (non-MasterKurs only)
+    if (!isMasterclass && lesson.fen) return [{ name: "Position", startFen: lesson.fen, moves: [] }];
     return [{ name: "Starting position", moves: [] }];
-  }, [lesson, lessonData]);
+  }, [lesson, lessonData, isMasterclass]);
 
   const hasExercise = variations.length > 0;
 
@@ -828,7 +830,7 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
             <h3 className="font-display text-base font-semibold text-foreground mb-3 flex items-center gap-2">
               <Target className="w-4 h-4 text-primary" /> Interactive Exercise
             </h3>
-            <VariationsExercise variations={variations} fallbackFen={lesson.fen} orientation={orientation} courseId={course.id} courseTitle={course.title} />
+            <VariationsExercise variations={variations} fallbackFen={isMasterclass ? undefined : lesson.fen} orientation={orientation} courseId={course.id} courseTitle={course.title} />
           </div>
         );
       })()}
