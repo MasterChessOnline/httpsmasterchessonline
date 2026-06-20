@@ -287,6 +287,8 @@ function AnimatedRoutes() {
           <Route path="/brag/:username" element={<Brag />} />
           <Route path="/daily-king" element={<DailyKingPage />} />
           <Route path="/rate-masterchess" element={<RateMasterChess />} />
+          <Route path="/maps" element={<MapsRedirect />} />
+          <Route path="/review" element={<ReviewRedirect />} />
           <Route path="/battle-royale" element={<BattleRoyale />} />
           <Route path="/press" element={<Press />} />
           <Route path="/streamers" element={<Streamers />} />
