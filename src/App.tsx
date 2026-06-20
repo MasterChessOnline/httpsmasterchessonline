@@ -92,6 +92,9 @@ const LearnChessIn7Days = lazy(() =>
 const Changelog = lazy(() =>
   import("./pages/seo-landings").then((m) => ({ default: m.Changelog })),
 );
+const ChessInCity = lazy(() => import("./pages/ChessInCity"));
+const NearMe = lazy(() => import("./pages/NearMe"));
+const PlayerHeatmap = lazy(() => import("./pages/PlayerHeatmap"));
 const AlternativeToMajorChessSites = lazy(() =>
   import("./pages/seo-landings").then((m) => ({ default: m.AlternativeToMajorChessSites })),
 );
