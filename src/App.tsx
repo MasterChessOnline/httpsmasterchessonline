@@ -190,6 +190,10 @@ const OnboardingWizard = lazy(() => import("@/components/OnboardingWizard"));
 const WeeklyRecapModal = lazy(() => import("@/components/WeeklyRecapModal"));
 const Shop = lazy(() => import("./pages/Shop"));
 const SpinWheel = lazy(() => import("./pages/SpinWheel"));
+const HallOfFame = lazy(() => import("./pages/HallOfFame"));
+const Beta = lazy(() => import("./pages/Beta"));
+const Ranked = lazy(() => import("./pages/Ranked"));
+const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
 
 function AnimatedRoutes() {
@@ -372,6 +376,10 @@ function AnimatedRoutes() {
           <Route path="/sr/sicilijanska-odbrana" element={<SeoLandingRoute />} />
           <Route path="/sr/sahovska-strategija" element={<SeoLandingRoute />} />
           <Route path="/sr/sah-mat-u-3-poteza" element={<SeoLandingRoute />} />
+          <Route path="/hall-of-fame" element={<HallOfFame />} />
+          <Route path="/beta" element={<Beta />} />
+          <Route path="/ranked" element={<Ranked />} />
+          <Route path="/share/:gameId/:ply" element={<ShareMoment />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>

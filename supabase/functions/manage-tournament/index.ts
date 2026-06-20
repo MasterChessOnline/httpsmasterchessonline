@@ -595,6 +595,17 @@ async function handleReportResult(supabase: any, game_id: string, result: string
             .update({ status: "finished" })
             .eq("id", pairing.tournament_id);
           await awardTournamentBadges(supabase, pairing.tournament_id);
+          // Phase 2: distribute titles + cosmetics, post to Discord
+          try {
+            await supabase.functions.invoke("award-tournament-titles", {
+              body: { tournament_id: pairing.tournament_id },
+            });
+          } catch (e) { console.error("award-tournament-titles failed", e); }
+          try {
+            await supabase.functions.invoke("discord-webhook-publish", {
+              body: { event: "tournament_finished", channel: "tournaments", tournament_id: pairing.tournament_id },
+            });
+          } catch (e) { console.error("discord publish failed", e); }
         } else {
           await generateNextRound(supabase, pairing.tournament_id, tournament.current_round + 1);
         }
@@ -743,6 +754,14 @@ async function advanceKnockoutRound(supabase: any, tournamentId: string, current
       .update({ status: "finished" })
       .eq("id", tournamentId);
     await awardTournamentBadges(supabase, tournamentId);
+    try {
+      await supabase.functions.invoke("award-tournament-titles", { body: { tournament_id: tournamentId } });
+    } catch (e) { console.error("award-tournament-titles failed", e); }
+    try {
+      await supabase.functions.invoke("discord-webhook-publish", {
+        body: { event: "tournament_finished", channel: "tournaments", tournament_id: tournamentId },
+      });
+    } catch (e) { console.error("discord publish failed", e); }
     return;
   }
 
