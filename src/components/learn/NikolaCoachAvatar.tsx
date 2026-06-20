@@ -23,10 +23,10 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
   const rafRef = useRef<number | null>(null);
   const [blink, setBlink] = useState(false);
 
-  // Lip-sync loop
+  // Speaking pulse (scales the overlay slightly with audio amplitude)
   useEffect(() => {
     if (!voice.speaking) {
-      if (mouthRef.current) mouthRef.current.style.transform = "scaleY(0.15)";
+      if (mouthRef.current) mouthRef.current.style.transform = "scale(1)";
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
       return;
@@ -36,13 +36,12 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
       const analyser = voice.analyser.current;
       if (analyser) {
         analyser.getByteFrequencyData(data);
-        // average low/mid band
         let sum = 0;
         const end = Math.min(data.length, 40);
         for (let i = 0; i < end; i++) sum += data[i];
-        const avg = sum / end / 255; // 0..1
-        const scale = 0.15 + Math.min(1, avg * 2.2) * 0.95;
-        if (mouthRef.current) mouthRef.current.style.transform = `scaleY(${scale})`;
+        const avg = sum / end / 255;
+        const scale = 1 + Math.min(1, avg * 2.2) * 0.04;
+        if (mouthRef.current) mouthRef.current.style.transform = `scale(${scale})`;
       }
       rafRef.current = requestAnimationFrame(tick);
     };
