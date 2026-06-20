@@ -91,15 +91,23 @@ async function handleCreate(supabase: any, userId: string, opts: any) {
   const baseName = opts.name?.trim() || `${cat.charAt(0).toUpperCase() + cat.slice(1)} Arena`;
 
   const { data: tournament, error } = await supabase
+  const fmt = (opts.format || "swiss").toString();
+  const tType =
+    fmt === "round-robin" ? "round_robin" :
+    fmt === "knockout" ? "knockout" :
+    fmt === "koth" || fmt === "king_of_the_hill" ? "koth" :
+    fmt === "puzzle_rush" || fmt === "puzzle" ? "puzzle" :
+    (fmt === "arena" || fmt === "daily_cup" || fmt === "blitz_royale") ? "arena" :
+    "swiss";
+
+  const { data: tournament, error } = await supabase
     .from("tournaments")
     .insert({
       name: baseName,
-      description: `${opts.format || "swiss"} tournament — auto-starts at scheduled time`,
+      description: `${fmt} tournament — auto-starts at scheduled time`,
       category: cat,
-      format: opts.format || "swiss",
-      tournament_type: opts.format === "round-robin" ? "round_robin"
-        : (opts.format === "arena" || opts.format === "daily_cup" || opts.format === "blitz_royale") ? "arena"
-        : "swiss",
+      format: fmt,
+      tournament_type: tType,
       total_rounds: opts.total_rounds || 5,
       max_players: opts.max_players || 32,
       time_control_label: opts.time_control_label || "5+3",
@@ -113,6 +121,7 @@ async function handleCreate(supabase: any, userId: string, opts: any) {
     })
     .select()
     .single();
+
 
   if (error) throw error;
   return jsonRes({ tournament });
