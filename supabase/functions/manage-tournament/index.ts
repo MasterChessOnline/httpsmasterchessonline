@@ -754,6 +754,14 @@ async function advanceKnockoutRound(supabase: any, tournamentId: string, current
       .update({ status: "finished" })
       .eq("id", tournamentId);
     await awardTournamentBadges(supabase, tournamentId);
+    try {
+      await supabase.functions.invoke("award-tournament-titles", { body: { tournament_id: tournamentId } });
+    } catch (e) { console.error("award-tournament-titles failed", e); }
+    try {
+      await supabase.functions.invoke("discord-webhook-publish", {
+        body: { event: "tournament_finished", channel: "tournaments", tournament_id: tournamentId },
+      });
+    } catch (e) { console.error("discord publish failed", e); }
     return;
   }
 
