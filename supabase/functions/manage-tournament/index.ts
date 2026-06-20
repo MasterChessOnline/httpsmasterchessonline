@@ -195,7 +195,7 @@ async function handleAutoStartDue(supabase: any) {
     // Adjust round count to fit the number of players
     const adjustedRounds = roundsForPlayers(players.length, t.total_rounds);
 
-    const pairings = generateSwissPairings(players, 1);
+    const pairings = generateFirstRoundPairings(t.format || "swiss", players, 1);
     for (const pairing of pairings) {
       const { data: onlineGame } = await supabase
         .from("online_games")
