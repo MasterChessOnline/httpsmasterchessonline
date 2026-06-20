@@ -683,7 +683,127 @@ async function awardStreakBadges(supabase: any, userId: string, streak: number, 
   }
 }
 
+// ===================== FIRST-ROUND PAIRINGS DISPATCH =====================
+function generateFirstRoundPairings(
+  format: string,
+  players: Array<{ user_id: string; rating_at_join: number; score: number | null }>,
+  round: number
+) {
+  if (format === "knockout") return generateKnockoutSeeding(players);
+  return generateSwissPairings(players, round);
+}
+
+// ===================== KNOCKOUT SEEDING =====================
+// Standard bracket seeding: 1v(N), 2v(N-1), ... Highest seeds get byes via odd count.
+function generateKnockoutSeeding(
+  players: Array<{ user_id: string; rating_at_join: number }>
+) {
+  const sorted = [...players].sort((a, b) => b.rating_at_join - a.rating_at_join);
+  const pairings: Array<{ white: string; black: string }> = [];
+  let i = 0;
+  let j = sorted.length - 1;
+  while (i < j) {
+    pairings.push({ white: sorted[i].user_id, black: sorted[j].user_id });
+    i++; j--;
+  }
+  return pairings;
+}
+
+async function advanceKnockoutRound(supabase: any, tournamentId: string, currentRound: number) {
+  // Collect winners of current round (non-bye pairings).
+  const { data: roundPairings } = await supabase
+    .from("tournament_pairings")
+    .select("white_player_id, black_player_id, result")
+    .eq("tournament_id", tournamentId)
+    .eq("round", currentRound);
+
+  if (!roundPairings) return;
+
+  const winners: string[] = [];
+  for (const p of roundPairings) {
+    if (!p.black_player_id) { winners.push(p.white_player_id); continue; } // bye
+    if (p.result === "1-0") winners.push(p.white_player_id);
+    else if (p.result === "0-1") winners.push(p.black_player_id);
+    else if (p.result === "1/2-1/2") {
+      // tie-break by current rating: higher seed advances
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id, rating")
+        .in("user_id", [p.white_player_id, p.black_player_id]);
+      const w = (profs || []).find((x: any) => x.user_id === p.white_player_id)?.rating || 0;
+      const b = (profs || []).find((x: any) => x.user_id === p.black_player_id)?.rating || 0;
+      winners.push(w >= b ? p.white_player_id : p.black_player_id);
+    }
+  }
+
+  // Finished?
+  if (winners.length <= 1) {
+    await supabase
+      .from("tournaments")
+      .update({ status: "finished" })
+      .eq("id", tournamentId);
+    await awardTournamentBadges(supabase, tournamentId);
+    return;
+  }
+
+  // Create next round pairings (adjacent winners face off).
+  const { data: tournament } = await supabase
+    .from("tournaments")
+    .select("time_control_seconds, time_control_label, time_control_increment")
+    .eq("id", tournamentId)
+    .single();
+
+  const next = currentRound + 1;
+  const pairs: Array<{ white: string; black: string | null }> = [];
+  for (let k = 0; k < winners.length; k += 2) {
+    if (k + 1 < winners.length) pairs.push({ white: winners[k], black: winners[k + 1] });
+    else pairs.push({ white: winners[k], black: null }); // bye for odd
+  }
+
+  for (const p of pairs) {
+    if (p.black === null) {
+      await supabase.from("tournament_pairings").insert({
+        tournament_id: tournamentId,
+        round: next,
+        white_player_id: p.white,
+        black_player_id: null,
+        result: "1-0",
+      });
+      continue;
+    }
+    const { data: og } = await supabase
+      .from("online_games")
+      .insert({
+        white_player_id: p.white,
+        black_player_id: p.black,
+        white_time: tournament.time_control_seconds,
+        black_time: tournament.time_control_seconds,
+        time_control_label: tournament.time_control_label,
+        increment: tournament.time_control_increment,
+      })
+      .select()
+      .single();
+    await supabase.from("tournament_pairings").insert({
+      tournament_id: tournamentId,
+      round: next,
+      white_player_id: p.white,
+      black_player_id: p.black,
+      game_id: og?.id || null,
+    });
+  }
+
+  await supabase
+    .from("tournaments")
+    .update({
+      current_round: next,
+      total_rounds: Math.max(next, 1),
+      round_started_at: new Date().toISOString(),
+    })
+    .eq("id", tournamentId);
+}
+
 // ===================== SWISS PAIRING =====================
+
 function generateSwissPairings(
   players: Array<{ user_id: string; rating_at_join: number; score: number | null }>,
   round: number
