@@ -13,6 +13,7 @@ const STORAGE_MUTE = "nikola_voice_muted";
 
 export function useNikolaVoice() {
   const [speaking, setSpeaking] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
   const [muted, setMutedState] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_MUTE) === "1";
@@ -25,6 +26,8 @@ export function useNikolaVoice() {
   const playheadRef = useRef<number>(0);
   const endTimerRef = useRef<number | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const pendingTextRef = useRef<string | null>(null);
+  const pendingVoiceRef = useRef<string>("coral");
 
   const setMuted = useCallback((v: boolean) => {
     setMutedState(v);
@@ -39,7 +42,6 @@ export function useNikolaVoice() {
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
       analyser.smoothingTimeConstant = 0.6;
-      // Gain node = loudness boost. 2.2x is loud but stays clean for speech PCM.
       const gain = ctx.createGain();
       gain.gain.value = 2.2;
       analyser.connect(gain);
@@ -51,6 +53,7 @@ export function useNikolaVoice() {
     if (ctxRef.current.state === "suspended") {
       try { await ctxRef.current.resume(); } catch { /* ignore */ }
     }
+    if (ctxRef.current.state === "running") setUnlocked(true);
     return { ctx: ctxRef.current!, analyser: analyserRef.current! };
   }, []);
 
