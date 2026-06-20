@@ -97,6 +97,7 @@ const Viral = lazy(() => import("./pages/Viral"));
 const Connections = lazy(() => import("./pages/Connections"));
 const CommunityMap = lazy(() => import("./pages/CommunityMap"));
 const AdminSeoConsole = lazy(() => import("./pages/AdminSeoConsole"));
+const AdminGbpPosts = lazy(() => import("./pages/AdminGbpPosts"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
