@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  */
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nikola-tts`;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const STORAGE_MUTE = "nikola_voice_muted";
+const STORAGE_MUTE = "nikola_voice_muted_v2";
 const DEFAULT_VOICE = "ash";
 const SPEAK_DEBOUNCE_MS = 220;
 
