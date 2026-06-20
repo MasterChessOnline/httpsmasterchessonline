@@ -28,7 +28,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { GOOGLE_REVIEW_URL, trackReviewClick } from "@/lib/google-review";
+import { useGoogleReview, trackReviewClick } from "@/lib/google-review";
 
 interface ReviewRow {
   id: string;
@@ -74,6 +74,7 @@ function isVerified(p?: ProfileLite | null) {
 
 export default function Reviews() {
   const { user } = useAuth();
+  const { reviewUrl: GOOGLE_REVIEW_URL } = useGoogleReview();
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [myReactions, setMyReactions] = useState<Set<string>>(new Set()); // key = `${review_id}:${reaction}`

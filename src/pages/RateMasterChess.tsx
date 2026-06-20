@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { GOOGLE_REVIEW_URL, trackReviewClick } from "@/lib/google-review";
+import { useGoogleReview, trackReviewClick } from "@/lib/google-review";
 
 interface RatingRow {
   id: string;
@@ -31,6 +31,7 @@ interface RatingRow {
 export default function RateMasterChess() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { reviewUrl: GOOGLE_REVIEW_URL } = useGoogleReview();
 
   const [ratings, setRatings] = useState<RatingRow[]>([]);
   const [stars, setStars] = useState(0);

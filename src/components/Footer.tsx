@@ -5,16 +5,21 @@ import { motion } from "framer-motion";
 import ShareSiteStrip from "@/components/ShareSiteStrip";
 import DonationProgressBar from "@/components/DonationProgressBar";
 
-import { GOOGLE_REVIEW_URL, trackReviewClick } from "@/lib/google-review";
+import { useGoogleReview, trackReviewClick } from "@/lib/google-review";
 
-const socialLinks = [
+const baseSocialLinks = [
   { icon: Instagram, href: "https://www.instagram.com/masterchess.live", label: "Instagram", color: "hover:text-pink-400" },
   { icon: Youtube, href: "https://www.youtube.com/channel/UC8W92XBMdu20Z0tKBbwsaWA", label: "YouTube", color: "hover:text-red-400" },
   { icon: Share2, href: "https://www.tiktok.com/@masterchess.live", label: "TikTok", color: "hover:text-cyan-400" },
-  { icon: Star, href: GOOGLE_REVIEW_URL, label: "Review us on Google", color: "hover:text-amber-400" },
 ];
 
-const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
+const Footer = React.forwardRef<HTMLElement>((_props, ref) => {
+  const { reviewUrl } = useGoogleReview();
+  const socialLinks = [
+    ...baseSocialLinks,
+    { icon: Star, href: reviewUrl, label: "Review us on Google", color: "hover:text-amber-400" },
+  ];
+  return (
   <footer ref={ref} className="relative border-t border-border/30 bg-card/40 backdrop-blur-sm py-12 overflow-hidden">
     {/* Subtle ambient glow */}
     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, hsl(43 90% 55% / 0.02), transparent 70%)" }} />
@@ -139,7 +144,8 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
       </Link>
     </div>
   </footer>
-));
+  );
+});
 Footer.displayName = "Footer";
 
 export default Footer;

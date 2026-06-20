@@ -54,6 +54,8 @@ const Reviews = lazy(() => import("./pages/Reviews"));
 const Brag = lazy(() => import("./pages/Brag"));
 const DailyKingPage = lazy(() => import("./pages/DailyKing"));
 const RateMasterChess = lazy(() => import("./pages/RateMasterChess"));
+const MapsRedirect = lazy(() => import("./pages/MapsRedirect"));
+const ReviewRedirect = lazy(() => import("./pages/ReviewRedirect"));
 const BattleRoyale = lazy(() => import("./pages/BattleRoyale"));
 const Press = lazy(() => import("./pages/Press"));
 const Streamers = lazy(() => import("./pages/Streamers"));
@@ -285,6 +287,8 @@ function AnimatedRoutes() {
           <Route path="/brag/:username" element={<Brag />} />
           <Route path="/daily-king" element={<DailyKingPage />} />
           <Route path="/rate-masterchess" element={<RateMasterChess />} />
+          <Route path="/maps" element={<MapsRedirect />} />
+          <Route path="/review" element={<ReviewRedirect />} />
           <Route path="/battle-royale" element={<BattleRoyale />} />
           <Route path="/press" element={<Press />} />
           <Route path="/streamers" element={<Streamers />} />
