@@ -1,14 +1,19 @@
 import React from "react";
-import { Crown, Instagram, Youtube, Share2 } from "lucide-react";
+import { Crown, Instagram, Youtube, Share2, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import ShareSiteStrip from "@/components/ShareSiteStrip";
 import DonationProgressBar from "@/components/DonationProgressBar";
 
+const GOOGLE_REVIEW_URL =
+  (import.meta.env.VITE_GOOGLE_REVIEW_URL as string | undefined) ||
+  "https://www.google.com/search?q=MasterChess+masterchess.live";
+
 const socialLinks = [
   { icon: Instagram, href: "https://www.instagram.com/masterchess.live", label: "Instagram", color: "hover:text-pink-400" },
   { icon: Youtube, href: "https://www.youtube.com/channel/UC8W92XBMdu20Z0tKBbwsaWA", label: "YouTube", color: "hover:text-red-400" },
   { icon: Share2, href: "https://www.tiktok.com/@masterchess.live", label: "TikTok", color: "hover:text-cyan-400" },
+  { icon: Star, href: GOOGLE_REVIEW_URL, label: "Review us on Google", color: "hover:text-amber-400" },
 ];
 
 const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
