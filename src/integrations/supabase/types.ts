@@ -1195,6 +1195,44 @@ export type Database = {
           },
         ]
       }
+      koth_throne: {
+        Row: {
+          crowned_at: string
+          current_king_id: string | null
+          defended_count: number
+          id: string
+          last_challenge_at: string | null
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          crowned_at?: string
+          current_king_id?: string | null
+          defended_count?: number
+          id?: string
+          last_challenge_at?: string | null
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          crowned_at?: string
+          current_king_id?: string | null
+          defended_count?: number
+          id?: string
+          last_challenge_at?: string | null
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "koth_throne_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: true
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_streaks: {
         Row: {
           current_streak: number
@@ -1925,6 +1963,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      puzzle_tournament_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          puzzle_id: string
+          solve_time_ms: number | null
+          solved: boolean
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          puzzle_id: string
+          solve_time_ms?: number | null
+          solved?: boolean
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          puzzle_id?: string
+          solve_time_ms?: number | null
+          solved?: boolean
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puzzle_tournament_attempts_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rating_history: {
         Row: {
@@ -2708,7 +2784,9 @@ export type Database = {
         Row: {
           buchholz: number
           created_at: string
+          fast_win_bonus: number
           id: string
+          no_mistake_bonus: number
           rating_at_join: number
           score: number
           sonneborn: number
@@ -2720,7 +2798,9 @@ export type Database = {
         Insert: {
           buchholz?: number
           created_at?: string
+          fast_win_bonus?: number
           id?: string
+          no_mistake_bonus?: number
           rating_at_join?: number
           score?: number
           sonneborn?: number
@@ -2732,7 +2812,9 @@ export type Database = {
         Update: {
           buchholz?: number
           created_at?: string
+          fast_win_bonus?: number
           id?: string
+          no_mistake_bonus?: number
           rating_at_join?: number
           score?: number
           sonneborn?: number
