@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  const voice = body.voice && /^[a-z]+$/i.test(body.voice) ? body.voice : "verse";
+  const voice = body.voice && /^[a-z]+$/i.test(body.voice) ? body.voice : "coral";
 
   try {
     const upstream = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
