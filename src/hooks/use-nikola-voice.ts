@@ -20,6 +20,7 @@ export function useNikolaVoice() {
 
   const ctxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const playheadRef = useRef<number>(0);
   const endTimerRef = useRef<number | null>(null);
@@ -38,9 +39,14 @@ export function useNikolaVoice() {
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
       analyser.smoothingTimeConstant = 0.6;
-      analyser.connect(ctx.destination);
+      // Gain node = loudness boost. 2.2x is loud but stays clean for speech PCM.
+      const gain = ctx.createGain();
+      gain.gain.value = 2.2;
+      analyser.connect(gain);
+      gain.connect(ctx.destination);
       ctxRef.current = ctx;
       analyserRef.current = analyser;
+      gainRef.current = gain;
     }
     if (ctxRef.current.state === "suspended") {
       try { await ctxRef.current.resume(); } catch { /* ignore */ }
