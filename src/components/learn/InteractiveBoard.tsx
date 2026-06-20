@@ -700,10 +700,10 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
       <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
         {mode === "guided" && totalMoves > 0 && (
           <>
-            <Button variant="outline" size="icon" onClick={goToStart} disabled={moveIndex === 0} className="h-10 w-10" title="Početak">
+            <Button variant="outline" size="icon" onClick={goToStart} disabled={moveIndex === 0} className="h-10 w-10" title="Start">
               <ChevronsLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-10 w-10" title="Prethodni potez">
+            <Button variant="outline" size="icon" onClick={goBack} disabled={moveIndex === 0} className="h-10 w-10" title="Previous move">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
@@ -714,7 +714,7 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
                 setAutoplay((a) => !a);
               }}
               className="h-10 w-10"
-              title={autoplay ? "Pauza" : "Pokreni"}
+              title={autoplay ? "Pause" : "Play"}
             >
               {autoplay ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
@@ -722,11 +722,11 @@ export default function InteractiveBoard({ startFen, moves, orientation = "white
               variant="default"
               onClick={goForward}
               disabled={moveIndex === totalMoves}
-              className="h-10 px-4 font-semibold min-w-[132px]"
+              className="h-10 px-4 font-semibold min-w-[140px]"
             >
-              Sledeći <ChevronRight className="h-4 w-4 ml-1.5" />
+              Next move <ChevronRight className="h-4 w-4 ml-1.5" />
             </Button>
-            <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-10 w-10" title="Kraj">
+            <Button variant="outline" size="icon" onClick={goToEnd} disabled={moveIndex === totalMoves} className="h-10 w-10" title="End">
               <ChevronsRight className="h-4 w-4" />
             </Button>
             <span className="text-xs text-muted-foreground px-2 min-w-[58px] text-center tabular-nums">

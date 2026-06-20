@@ -23,10 +23,10 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
   const rafRef = useRef<number | null>(null);
   const [blink, setBlink] = useState(false);
 
-  // Lip-sync loop
+  // Speaking pulse (scales the overlay slightly with audio amplitude)
   useEffect(() => {
     if (!voice.speaking) {
-      if (mouthRef.current) mouthRef.current.style.transform = "scaleY(0.15)";
+      if (mouthRef.current) mouthRef.current.style.transform = "scale(1)";
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
       return;
@@ -36,13 +36,12 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
       const analyser = voice.analyser.current;
       if (analyser) {
         analyser.getByteFrequencyData(data);
-        // average low/mid band
         let sum = 0;
         const end = Math.min(data.length, 40);
         for (let i = 0; i < end; i++) sum += data[i];
-        const avg = sum / end / 255; // 0..1
-        const scale = 0.15 + Math.min(1, avg * 2.2) * 0.95;
-        if (mouthRef.current) mouthRef.current.style.transform = `scaleY(${scale})`;
+        const avg = sum / end / 255;
+        const scale = 1 + Math.min(1, avg * 2.2) * 0.04;
+        if (mouthRef.current) mouthRef.current.style.transform = `scale(${scale})`;
       }
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -90,53 +89,29 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
           width={size}
           height={size}
           loading="lazy"
-          className="w-full h-full object-cover object-top select-none pointer-events-none"
+          className="w-full h-full object-cover object-center select-none pointer-events-none"
           draggable={false}
         />
-        {/* Privacy-safe stylized face overlay: keeps the uploaded-photo vibe without revealing the blurred face. */}
-        <div
-          aria-hidden
-          className="absolute left-1/2 top-[24%] -translate-x-1/2 rounded-[42%] bg-gradient-to-b from-[#c88f7d] via-[#b87970] to-[#8f5a62] shadow-[inset_0_2px_10px_rgba(255,255,255,0.18),inset_0_-8px_18px_rgba(0,0,0,0.22)]"
-          style={{ width: `${size * 0.38}px`, height: `${size * 0.43}px` }}
-        >
-          <div className="absolute left-[20%] top-[31%] h-[7%] w-[16%] rounded-full bg-card shadow-[0_1px_0_hsl(var(--primary)/0.35)]" />
-          <div className="absolute right-[20%] top-[31%] h-[7%] w-[16%] rounded-full bg-card shadow-[0_1px_0_hsl(var(--primary)/0.35)]" />
-          <div className="absolute left-[47%] top-[42%] h-[21%] w-[7%] rounded-full bg-card/20" />
-          <div className="absolute left-[18%] top-[56%] h-[12%] w-[18%] rounded-full bg-primary/15 blur-[1px]" />
-          <div className="absolute right-[18%] top-[56%] h-[12%] w-[18%] rounded-full bg-primary/15 blur-[1px]" />
-        </div>
-        {/* Mouth overlay: small dark oval that scales vertically with amplitude */}
-        <div
-          aria-hidden
-          className="absolute pointer-events-none"
-          style={{
-            left: "50%",
-            top: "50%",
-            width: `${size * 0.13}px`,
-            height: `${size * 0.065}px`,
-            transform: "translateX(-50%)",
-          }}
-        >
+        {/* Subtle speaking pulse overlay */}
+        {voice.speaking && (
           <div
+            aria-hidden
             ref={mouthRef}
-            className="w-full h-full rounded-full bg-[#2a1410]/85"
+            className="absolute inset-0 pointer-events-none rounded-full"
             style={{
+              boxShadow: "inset 0 0 24px hsl(var(--primary) / 0.35)",
               transformOrigin: "center",
-              transform: "scaleY(0.15)",
+              transform: "scale(1)",
               transition: "transform 60ms linear",
-              boxShadow: "inset 0 -2px 4px rgba(0,0,0,0.5)",
             }}
           />
-        </div>
-        {/* Blink overlay — two thin dark bars where eyes are */}
+        )}
+        {/* Blink overlay — soft dim flash */}
         <div
           aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{ opacity: blink ? 1 : 0, transition: "opacity 80ms" }}
-        >
-          <div className="absolute" style={{ left: "39%", top: "40%", width: "6%", height: "2.4%", background: "hsl(var(--card))", borderRadius: 2 }} />
-          <div className="absolute" style={{ left: "55%", top: "40%", width: "6%", height: "2.4%", background: "hsl(var(--card))", borderRadius: 2 }} />
-        </div>
+          className="absolute inset-0 pointer-events-none bg-black"
+          style={{ opacity: blink ? 0.18 : 0, transition: "opacity 80ms" }}
+        />
         {/* Live dot */}
         {voice.speaking && (
           <div className="absolute top-1 right-1 flex items-center gap-1 rounded-full bg-primary/90 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground shadow">
@@ -158,9 +133,9 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
             type="button"
             onClick={onReplay}
             className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-card px-2 py-1 text-[11px] text-foreground hover:bg-muted transition-colors"
-            title="Reci ponovo"
+            title="Replay"
           >
-            <RotateCcw className="w-3 h-3" /> Ponovi
+            <RotateCcw className="w-3 h-3" /> Replay
           </button>
         )}
         {voice.speaking && (
@@ -168,9 +143,9 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
             type="button"
             onClick={voice.stop}
             className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-card px-2 py-1 text-[11px] text-foreground hover:bg-muted transition-colors"
-            title="Pauziraj"
+            title="Pause"
           >
-            <Pause className="w-3 h-3" /> Pauza
+            <Pause className="w-3 h-3" /> Pause
           </button>
         )}
         <button
@@ -181,7 +156,7 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
               ? "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/15"
               : "border-border/60 bg-card text-foreground hover:bg-muted"
           }`}
-          title={voice.muted ? "Uključi glas" : "Isključi glas"}
+          title={voice.muted ? "Unmute" : "Mute"}
         >
           {voice.muted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
           {voice.muted ? "Muted" : "On"}

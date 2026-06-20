@@ -22,6 +22,7 @@ import type { MoveStep } from "@/components/learn/InteractiveBoard";
 
 import VariationsExercise from "@/components/learn/VariationsExercise";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
+import { MASTERCLASS_VALIDATED_LINES } from "@/lib/masterclass-validated-lines";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
 import { toast } from "@/hooks/use-toast";
 
@@ -714,12 +715,23 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
 
   const lessonData = LESSON_MOVES[lesson.id];
   const variations: LessonVariation[] = useMemo(() => {
+    // 1. Validated MasterKurs lines (always start from real beginning)
+    const validated = MASTERCLASS_VALIDATED_LINES[lesson.id];
+    if (validated?.sans?.length) {
+      const moves: MoveStep[] = validated.sans.map((san) => ({
+        san,
+        explanation: `${san} — main course move.`,
+      }));
+      return [{ name: lesson.title, startFen: validated.startFen, moves }];
+    }
+    // 2. PracticeLine reconstructed
     const practiceVariation = buildPracticeLineVariation(lesson);
     if (practiceVariation?.moves.length) return [practiceVariation];
+    // 3. Explicit lesson variations
     if (lessonData?.variations && lessonData.variations.length > 0) return lessonData.variations;
     if (lessonData?.moves?.length) return [{ name: "", startFen: lessonData.startFen, moves: lessonData.moves }];
+    // 4. Static FEN fallback
     if (lesson.fen) return [{ name: "Position", startFen: lesson.fen, moves: [] }];
-    // Fallback — every chapter must have a board, even if it's just the starting position
     return [{ name: "Starting position", moves: [] }];
   }, [lesson, lessonData]);
 
