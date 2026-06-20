@@ -195,7 +195,7 @@ async function main() {
   sf.quit();
 
   const banner = `/**
- * AUTO-GENERATED. Each masterclass variation has been walked through Stockfish 17
+ * AUTO-GENERATED. Each masterclass variation has been walked through Stockfish
  * (depth ${DEPTH}, MultiPV ${MULTIPV}); any move scoring more than ${BLUNDER_CP}cp worse
  * than the engine's best candidate was replaced with the engine's choice and the
  * rest of the line was replayed from the corrected position. ${totalFixes} engine
