@@ -528,11 +528,14 @@ export type Database = {
         Row: {
           avg_rating: number
           banner_color: string
+          city: string | null
           created_at: string
           description: string
           icon: string
           id: string
           is_public: boolean
+          lat: number | null
+          lng: number | null
           member_count: number
           name: string
           owner_id: string
@@ -545,11 +548,14 @@ export type Database = {
         Insert: {
           avg_rating?: number
           banner_color?: string
+          city?: string | null
           created_at?: string
           description?: string
           icon?: string
           id?: string
           is_public?: boolean
+          lat?: number | null
+          lng?: number | null
           member_count?: number
           name: string
           owner_id: string
@@ -562,11 +568,14 @@ export type Database = {
         Update: {
           avg_rating?: number
           banner_color?: string
+          city?: string | null
           created_at?: string
           description?: string
           icon?: string
           id?: string
           is_public?: boolean
+          lat?: number | null
+          lng?: number | null
           member_count?: number
           name?: string
           owner_id?: string
@@ -1742,12 +1751,17 @@ export type Database = {
           bot_games_won: number
           bot_peak_rating: number
           bot_rating: number
+          city: string | null
           city_key: string | null
           coach_pro_until: string | null
           country: string | null
           country_flag: string | null
           created_at: string
           current_game_id: string | null
+          discord_avatar: string | null
+          discord_linked_at: string | null
+          discord_user_id: string | null
+          discord_username: string | null
           display_name: string | null
           favorite_opening: string | null
           favorite_openings: string[] | null
@@ -1764,12 +1778,15 @@ export type Database = {
           login_streak: number
           login_streak_best: number
           loss_streak: number
+          map_lat: number | null
+          map_lng: number | null
           master_coins: number
           onboarding_completed: boolean
           peak_rating: number
           profile_banner: string | null
           push_notifications_enabled: boolean
           rating: number
+          show_on_map: boolean
           skill_level: string | null
           total_xp: number
           unlocked_courses: Json
@@ -1792,12 +1809,17 @@ export type Database = {
           bot_games_won?: number
           bot_peak_rating?: number
           bot_rating?: number
+          city?: string | null
           city_key?: string | null
           coach_pro_until?: string | null
           country?: string | null
           country_flag?: string | null
           created_at?: string
           current_game_id?: string | null
+          discord_avatar?: string | null
+          discord_linked_at?: string | null
+          discord_user_id?: string | null
+          discord_username?: string | null
           display_name?: string | null
           favorite_opening?: string | null
           favorite_openings?: string[] | null
@@ -1814,12 +1836,15 @@ export type Database = {
           login_streak?: number
           login_streak_best?: number
           loss_streak?: number
+          map_lat?: number | null
+          map_lng?: number | null
           master_coins?: number
           onboarding_completed?: boolean
           peak_rating?: number
           profile_banner?: string | null
           push_notifications_enabled?: boolean
           rating?: number
+          show_on_map?: boolean
           skill_level?: string | null
           total_xp?: number
           unlocked_courses?: Json
@@ -1842,12 +1867,17 @@ export type Database = {
           bot_games_won?: number
           bot_peak_rating?: number
           bot_rating?: number
+          city?: string | null
           city_key?: string | null
           coach_pro_until?: string | null
           country?: string | null
           country_flag?: string | null
           created_at?: string
           current_game_id?: string | null
+          discord_avatar?: string | null
+          discord_linked_at?: string | null
+          discord_user_id?: string | null
+          discord_username?: string | null
           display_name?: string | null
           favorite_opening?: string | null
           favorite_openings?: string[] | null
@@ -1864,12 +1894,15 @@ export type Database = {
           login_streak?: number
           login_streak_best?: number
           loss_streak?: number
+          map_lat?: number | null
+          map_lng?: number | null
           master_coins?: number
           onboarding_completed?: boolean
           peak_rating?: number
           profile_banner?: string | null
           push_notifications_enabled?: boolean
           rating?: number
+          show_on_map?: boolean
           skill_level?: string | null
           total_xp?: number
           unlocked_courses?: Json
@@ -2199,6 +2232,42 @@ export type Database = {
           season_number?: number
           starts_at?: string
           status?: string
+        }
+        Relationships: []
+      }
+      seo_query_opportunities: {
+        Row: {
+          acted_on: boolean
+          avg_position: number | null
+          clicks: number
+          ctr: number
+          id: string
+          impressions: number
+          picked_up_at: string
+          query: string
+          suggested_page: string | null
+        }
+        Insert: {
+          acted_on?: boolean
+          avg_position?: number | null
+          clicks?: number
+          ctr?: number
+          id?: string
+          impressions?: number
+          picked_up_at?: string
+          query: string
+          suggested_page?: string | null
+        }
+        Update: {
+          acted_on?: boolean
+          avg_position?: number | null
+          clicks?: number
+          ctr?: number
+          id?: string
+          impressions?: number
+          picked_up_at?: string
+          query?: string
+          suggested_page?: string | null
         }
         Relationships: []
       }
@@ -3353,6 +3422,39 @@ export type Database = {
         }
         Relationships: []
       }
+      community_map_pins: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          country: string | null
+          id: string | null
+          lat: number | null
+          lng: number | null
+          rating: number | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          id?: string | null
+          lat?: number | null
+          lng?: number | null
+          rating?: number | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          id?: string | null
+          lat?: number | null
+          lng?: number | null
+          rating?: number | null
+          username?: string | null
+        }
+        Relationships: []
+      }
       tournament_played_pairs: {
         Row: {
           player_a: string | null
@@ -3553,12 +3655,17 @@ export type Database = {
           bot_games_won: number
           bot_peak_rating: number
           bot_rating: number
+          city: string | null
           city_key: string | null
           coach_pro_until: string | null
           country: string | null
           country_flag: string | null
           created_at: string
           current_game_id: string | null
+          discord_avatar: string | null
+          discord_linked_at: string | null
+          discord_user_id: string | null
+          discord_username: string | null
           display_name: string | null
           favorite_opening: string | null
           favorite_openings: string[] | null
@@ -3575,12 +3682,15 @@ export type Database = {
           login_streak: number
           login_streak_best: number
           loss_streak: number
+          map_lat: number | null
+          map_lng: number | null
           master_coins: number
           onboarding_completed: boolean
           peak_rating: number
           profile_banner: string | null
           push_notifications_enabled: boolean
           rating: number
+          show_on_map: boolean
           skill_level: string | null
           total_xp: number
           unlocked_courses: Json
