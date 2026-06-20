@@ -5,9 +5,7 @@ import { motion } from "framer-motion";
 import ShareSiteStrip from "@/components/ShareSiteStrip";
 import DonationProgressBar from "@/components/DonationProgressBar";
 
-const GOOGLE_REVIEW_URL =
-  (import.meta.env.VITE_GOOGLE_REVIEW_URL as string | undefined) ||
-  "https://www.google.com/search?q=MasterChess+masterchess.live";
+import { GOOGLE_REVIEW_URL, trackReviewClick } from "@/lib/google-review";
 
 const socialLinks = [
   { icon: Instagram, href: "https://www.instagram.com/masterchess.live", label: "Instagram", color: "hover:text-pink-400" },
