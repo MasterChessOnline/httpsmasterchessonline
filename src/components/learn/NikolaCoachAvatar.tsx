@@ -127,7 +127,17 @@ export default function NikolaCoachAvatar({ voice, transcript, onReplay, size = 
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 flex-wrap justify-center">
+        {!voice.unlocked && !voice.muted && (
+          <button
+            type="button"
+            onClick={() => voice.unlock()}
+            className="inline-flex items-center gap-1 rounded-md border border-primary/60 bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors animate-pulse"
+            title="Enable Nikola's voice"
+          >
+            <Volume2 className="w-3 h-3" /> Enable voice
+          </button>
+        )}
         {onReplay && (
           <button
             type="button"
