@@ -41,6 +41,7 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => (
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.label}
+                onClick={() => s.label === "Review us on Google" && trackReviewClick("footer")}
                 className={`w-8 h-8 rounded-lg bg-zinc-800/60 flex items-center justify-center text-muted-foreground ${s.color} hover:scale-110 transition-all`}
               >
                 <s.icon className="w-4 h-4" />
