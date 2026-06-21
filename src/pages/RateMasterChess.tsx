@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useGoogleReview, trackReviewClick } from "@/lib/google-review";
+import GoogleReviewsBlock from "@/components/GoogleReviewsBlock";
 
 interface RatingRow {
   id: string;
