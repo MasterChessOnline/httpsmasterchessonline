@@ -1,64 +1,72 @@
-# Šta je već urađeno (rezime)
 
-**GSC / Indexing automatizacija:**
-- `gsc-search-analytics` edge funkcija — povlači klikove, impresije, top upite i strane (28 dana)
-- `/admin/gsc` dashboard — live SEO statistika sa week-over-week deltama
-- `indexnow-submit` — automatski šalje sve URL-ove iz sitemap-a Bing/Yandex/Seznam (939 URL-ova već poslato), cron 04:00 UTC
-- `publish-gbp-posts` automatski pinga IndexNow kad se objavi novi post
+# Google audit + sledeći koraci za Maps
 
-**GBP (Google Business Profile):**
-- `image_url` kolona u `gbp_posts` + `gbp-images` storage bucket
-- 8 Services definisano (Ranked Play, Tournaments...)
-- Booking link dodat, atributi „youth-led business"
+## 1. Šta već postoji (radi)
+- `/rate-masterchess` upisuje u `site_ratings` → AggregateRating JSON-LD se generiše automatski.
+- `useGoogleReview()` hook povlači `place_id` iz `site_config` → CTA dugme "Leave a Google review" vodi direktno na `search.google.com/local/writereview?placeid=...`.
+- `resolve-place-id` edge funkcija auto-pronalazi MasterChess GBP listing.
+- Maps stranice: `/community/map`, `/near-me`, `/chess/:city`, `/players/world`.
 
-**Google Maps Platform (već povezano):**
-- `resolve-place-id` edge funkcija (server-side, kroz gateway)
+## 2. Šta NE radi kako treba (popravlja se sad)
 
-# Da li je korisno?
+**Problem A — Google review CTA je sakriven.**  
+Trenutno se "Rate on Google" sekcija pojavi tek POŠTO korisnik već submituje na sajtu. Većina ljudi tu zatvara tab. Treba ih provući kroz Google **pre** nego što odu.
 
-Da — GSC + IndexNow donose merljiv SEO efekat (brže indeksiranje, vidljivost koje fraze rade). GBP poboljšanja podižu lokalni ranking. Maps konekcija je trenutno **iskorišćena samo 5%** — odatle dolazi sledeća lista.
+**Problem B — nema "smart routing" (a da ne krši Google TOS).**  
+Trenutno svako ko ide na Google dobija isti link. Bolje: posle submita pokazujemo Google CTA SVIMA (5⭐ i 1⭐), ali jasno označimo "Loved it? Tell Google" + zaseban "Not great? Tell us why" mailto:feedback link. To je u skladu s Google TOS (ne smemo da gejtujemo samo pozitivne).
 
-# 10 novih ideja oko Google Maps (od najvrednije ka nice-to-have)
+**Problem C — nema dokaza/trust signala iza CTA dugmeta.**  
+Ne pokazuje "184 ljudi je već dalo recenziju na Googleu". Treba mali brojač + lista poslednjih Google review-a (preko Place Details API, `reviews` field).
 
-## 1. Geo-targetovane SEO landing strane „Chess in {City}"
-Generisati statičke strane `/chess/{city-slug}` za top 50 gradova (Belgrade, Zagreb, Sofia, Vienna...). Koristi **Places API (New) Nearby Search** da povuče prave šahovske klubove/kafiće u tom gradu + ugrađena mapa. Ogromna long-tail SEO vrednost — „chess club Belgrade", „where to play chess Vienna".
+**Problem D — `/reviews` strana ne prikazuje Google reviews uopšte.**  
+Trebalo bi povući top 5 Google review-a (Place Details API) i ubaciti ih iznad in-site review-a, sa "View all on Google Maps" linkom.
 
-## 2. „Find Chess Near Me" mapa
-Stranica `/near-me` sa Maps JS API mapom, geolokacija korisnika, pinovi za šahovske klubove u radijusu (Places Nearby `textQuery: chess club`). Cluster markeri, filter „open now", deep-link „get directions". Viralni share potencijal.
+## 3. Implementacija — "Google Review Funnel"
 
-## 3. Tournament venue mapa
-Svaki turnir u sistemu već ima lokaciju? Dodati mapu pina + „get directions" dugme. Auto-resolve adrese kroz **Geocoding API** kad organizator otkuca grad.
+1. **Edit `RateMasterChess.tsx`**:
+   - Posle uspešnog submita, NE redirektuj odmah na `/reviews`. Pokaži full-screen "Thank you" sa 2 dugmeta:
+     - Primary (zlatno): "⭐ Now post it on Google (15 sec)" → otvara Google review URL u novom tabu
+     - Secondary: "Skip → see all reviews"
+   - Track oba klika (`gbp_review_click` / `gbp_review_skip`) preko `track()`.
+2. **Novi component `GoogleReviewsBlock.tsx`**:
+   - Povlači top 5 Google review-a iz nove edge funkcije `fetch-google-reviews` (Place Details API, field `reviews`).
+   - Cache 6h u `site_config` da ne troši kvotu.
+   - Render kao karusel sa Google logoom + "View all on Google →".
+3. **Ubaciti `GoogleReviewsBlock`** na: `/reviews` (vrh strane), `/rate-masterchess` (iznad forme — social proof), homepage testimonials sekcija.
+4. **Nova edge fn `fetch-google-reviews/index.ts`**: gateway poziv na `places/v1/places/{placeId}?fields=reviews,rating,userRatingCount`.
 
-## 4. Player heatmap (anonimizovan)
-World map sa heatmap-om gde su MasterChess igrači aktivni (samo broj po zemlji/regionu, bez tačnih koordinata). Odlično za homepage „social proof" i deluje živo (rešava cold-start ghost-town problem).
+## 4. Nove Google Maps ideje (rangirano po ROI)
 
-## 5. Time zone-aware matchmaking
-**Time Zone API** + geolokacija → automatski predloži turnire/igrače u sličnom TZ. Smanjuje „niko nije online" osećaj.
+| # | Ideja | Zašto se isplati |
+|---|------|-----------------|
+| **A** | **Google Reviews na sajtu** (gore opisano) | Direktan trust signal, ↑ konverzija |
+| **B** | **"Players in your city" widget** na profilu | Koristi geocoded `profiles.city` → "12 igrača iz Beograda" + mini mapa |
+| **C** | **Static Map OG slike za tournamentse** | `/tournaments/:id` share link dobija mapu venue-a kao OG image (Static Maps API) |
+| **D** | **Places Autocomplete za turnir venue** | Organizatori biraju lokaciju iz Google sugestija → tačni adress/lat/lng/place_id |
+| **E** | **"Get directions" dugme** na svakom venue/turnir | Otvara Google Maps app sa rute od korisnika → ↑ mobile UX |
+| **F** | **Pollen + Weather widget** na outdoor turnir stranicama (park chess) | Pollen API + Weather API kroz gateway |
+| **G** | **Country leaderboard sa pravim zastavama na 3D globusu** | Već imamo `/players/world`, dodati WebGL globus (react-globe.gl) |
+| **H** | **GBP weekly post auto-publish** sa najboljim review-om nedelje | Već postoji `publish-gbp-posts` fn — dodati "Review of the week" template |
 
-## 6. Address autocomplete pri tournament creation
-**Places Autocomplete (New)** umesto plain text inputa za venue adresu. Validna adresa, lat/lng, place_id sačuvan — kasnije se može koristiti za reviews/photos.
+## 5. Tehnički detalji
 
-## 7. „Travel to tournament" planner
-Za on-site turnire: **Routes API** prikaže driving/transit vreme + distancu od korisnikove lokacije. CTA „Add to calendar with travel time".
+```text
+Files to create:
+  supabase/functions/fetch-google-reviews/index.ts
+  src/components/GoogleReviewsBlock.tsx
 
-## 8. Air Quality / Weather widget za on-site turnire
-**Weather API** + **Air Quality API** na turnirskoj strani: „Saturday 14°C, AQI good". Mali touch ali izgleda premium i niko od konkurencije nema.
+Files to edit:
+  src/pages/RateMasterChess.tsx        (funnel posle submita)
+  src/pages/Reviews.tsx                (ubaci GoogleReviewsBlock na vrhu)
+  src/components/TestimonialsSection.tsx (ubaci 1 Google review)
+```
 
-## 9. Static Map Open Graph slika
-Za tournament share linkove generisati **Static Maps API** sliku sa pinom venue-a kao OG image. Lepši Twitter/WhatsApp preview.
+Edge funkcija koristi postojeći Google Maps connector (gateway URL + `LOVABLE_API_KEY` + `GOOGLE_MAPS_API_KEY`). Cache rezultata: 6h u `site_config` key `google_reviews_cache`.
 
-## 10. Country leaderboards sa flag mapom
-Iskoristi geokodiranu zemlju igrača → leaderboard po zemlji, country selector na world map (Maps JS sa stylized country fill). Nacionalni ponos = retencija.
+## 6. Šta gradimo prvo?
 
-# Google Cloud Console — šta još uraditi
+Predlažem **Fazu 1 = Sekcija 3 (Google Review Funnel + GoogleReviewsBlock)** jer to direktno povećava broj Google review-a (= bolji ranking u Google Maps + AggregateRating zvezdice u Google Search).
 
-- **Enable API-je** koje sada ne koristimo: Places API (New), Geocoding, Routes, Time Zone, Static Maps, Weather, Air Quality
-- **API key restrictions** — server key restrict na edge funkcije, browser key restrict na `*.lovable.app` i `masterchess.live`
-- **Quota alerts** — postaviti budget alert na $50/mesec da nas ne iznenadi
-- **GBP API access** — zatražiti pristup (review process ~2 nedelje) da možemo automatski postavljati GBP posts bez ručnog koraka
+Faza 2 = bilo koje 2-3 ideje iz tabele (A je već uračunato u Fazu 1).
 
-# Predlog: šta sledeće da implementiram
-
-Ne mogu sve odjednom — najveći ROI su **#1 (Geo SEO landing strane)** i **#2 (Find Chess Near Me)**. To su nove strane sa stvarnim SEO/akvizicijskim efektom.
-
-**Reci koje od ovih 10 ideja da uradim** (mogu i više, npr. „1, 2, 6, 9") pa pravim detaljan plan implementacije samo za to.
+**Reci mi: "Faza 1" da krenem odmah, ili izaberi i ideje iz tabele (npr. "Faza 1 + C + E").**
