@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useGoogleReview, trackReviewClick } from "@/lib/google-review";
+import GoogleReviewsBlock from "@/components/GoogleReviewsBlock";
 
 interface ReviewRow {
   id: string;
@@ -484,6 +485,11 @@ export default function Reviews() {
             </div>
           </motion.div>
         </div>
+      </section>
+
+      {/* GOOGLE REVIEWS — pulled live from Google Maps */}
+      <section className="container mx-auto px-4 pt-8 max-w-5xl">
+        <GoogleReviewsBlock />
       </section>
 
       {/* STATS */}

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useGoogleReview, trackReviewClick } from "@/lib/google-review";
+import GoogleReviewsBlock from "@/components/GoogleReviewsBlock";
 
 interface RatingRow {
   id: string;
@@ -109,7 +110,8 @@ export default function RateMasterChess() {
         body: { url: "https://masterchess.live/reviews" },
       });
     } catch {}
-    setTimeout(() => navigate("/reviews"), 1600);
+    // Do NOT auto-redirect — the post-submit "Post on Google" CTA is the
+    // funnel and it needs the user's attention. They click Skip to leave.
   }
 
   // Only emit schema when we have real ratings.
@@ -212,6 +214,10 @@ export default function RateMasterChess() {
         </div>
       </section>
 
+      <section className="container mx-auto px-4 pt-6 max-w-3xl">
+        <GoogleReviewsBlock title="Real Google reviews" />
+      </section>
+
       <section className="container mx-auto px-4 py-10 max-w-2xl">
         <div className="relative rounded-2xl border border-border bg-card/70 backdrop-blur p-6 sm:p-8 shadow-xl overflow-hidden">
           <AnimatePresence>
@@ -220,17 +226,45 @@ export default function RateMasterChess() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-10 flex items-center justify-center bg-card/95 backdrop-blur"
+                className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card/95 backdrop-blur p-6"
               >
-                <div className="text-center">
-                  <CheckCircle2 className="w-14 h-14 text-green-400 mx-auto mb-2" />
-                  <p className="font-display text-xl font-semibold">
-                    Thank you for rating MasterChess!
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Taking you to the reviews hub…
-                  </p>
+                <CheckCircle2 className="w-14 h-14 text-green-400 mb-3" />
+                <p className="font-display text-2xl font-semibold text-center">
+                  Thanks! One last favor —
+                </p>
+                <p className="text-sm text-muted-foreground mt-2 mb-5 text-center max-w-sm">
+                  Post the same review on Google so other chess players can find MasterChess. Takes 15 seconds.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2 w-full max-w-sm">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-semibold"
+                  >
+                    <a
+                      href={GOOGLE_REVIEW_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        trackReviewClick("post-submit-funnel");
+                        setTimeout(() => navigate("/reviews"), 800);
+                      }}
+                    >
+                      <Star className="w-4 h-4 mr-2 fill-current" /> Post on Google
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => navigate("/reviews")}
+                    className="flex-1"
+                  >
+                    Skip
+                  </Button>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-4">
+                  Google reviews boost MasterChess's ranking in Google Maps & Search.
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
