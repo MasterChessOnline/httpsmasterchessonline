@@ -211,6 +211,7 @@ export default function RateMasterChess() {
               </div>
             )}
           </motion.div>
+        </div>
       </section>
 
       <section className="container mx-auto px-4 pt-6 max-w-3xl">
