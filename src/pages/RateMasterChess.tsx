@@ -211,7 +211,10 @@ export default function RateMasterChess() {
               </div>
             )}
           </motion.div>
-        </div>
+      </section>
+
+      <section className="container mx-auto px-4 pt-6 max-w-3xl">
+        <GoogleReviewsBlock title="Real Google reviews" />
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-2xl">
