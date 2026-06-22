@@ -1,72 +1,72 @@
+# MasterChess — "Sve odjednom" plan (PWA fokus)
 
-# Google audit + sledeći koraci za Maps
+Spec ti je ogroman (5 sekcija + GSC + Maps + voice chat + nove ideje). Da ne bih sve gurnuo u jedan loš commit, ovo je **realistični plan po fazama**. Krećem od Faze A odmah po odobrenju, ostalo sukcesivno.
 
-## 1. Šta već postoji (radi)
-- `/rate-masterchess` upisuje u `site_ratings` → AggregateRating JSON-LD se generiše automatski.
-- `useGoogleReview()` hook povlači `place_id` iz `site_config` → CTA dugme "Leave a Google review" vodi direktno na `search.google.com/local/writereview?placeid=...`.
-- `resolve-place-id` edge funkcija auto-pronalazi MasterChess GBP listing.
-- Maps stranice: `/community/map`, `/near-me`, `/chess/:city`, `/players/world`.
+---
 
-## 2. Šta NE radi kako treba (popravlja se sad)
+## FAZA A — Odmah (1 iteracija, sada)
 
-**Problem A — Google review CTA je sakriven.**  
-Trenutno se "Rate on Google" sekcija pojavi tek POŠTO korisnik već submituje na sajtu. Većina ljudi tu zatvara tab. Treba ih provući kroz Google **pre** nego što odu.
+### A1. Google Search Console — auto verify za masterchess.live
+- Edge fn `gsc-verify-domain`: poziva `siteVerification/v1/token` (META metoda) preko GSC connector gateway-a
+- Snimam token u `site_config` (`gsc_meta_token`)
+- Ubacujem `<meta name="google-site-verification" content="...">` u `index.html` (već postoji prazan slot? ako ne, dodajem)
+- Admin dugme na `/admin/seo-console` → "Verify domain in Google Search Console" → poziva fn → automatski poziva verify + dodaje sajt u GSC properties
 
-**Problem B — nema "smart routing" (a da ne krši Google TOS).**  
-Trenutno svako ko ide na Google dobija isti link. Bolje: posle submita pokazujemo Google CTA SVIMA (5⭐ i 1⭐), ali jasno označimo "Loved it? Tell Google" + zaseban "Not great? Tell us why" mailto:feedback link. To je u skladu s Google TOS (ne smemo da gejtujemo samo pozitivne).
+### A2. Google Maps — Custom Domain Setup Wizard
+- Nova stranica `/admin/maps-setup` sa step-by-step checklistom (4 koraka iz docs/GOOGLE_MAPS_INTEGRATION.md)
+- Live test dugme: "Test API key on masterchess.live" → poziva edge fn koja proverava da li `places/v1/places:searchText` radi sa custom ključem
+- Status badge u admin SEO console: 🟢 Working / 🔴 Referrer denied
 
-**Problem C — nema dokaza/trust signala iza CTA dugmeta.**  
-Ne pokazuje "184 ljudi je već dalo recenziju na Googleu". Treba mali brojač + lista poslednjih Google review-a (preko Place Details API, `reviews` field).
+### A3. Voice Chat — Quick polish
+- "Push-to-talk" mode (drži razmaknicu = mikrofon živ, otpusti = mute) — manje awkward nego stalno otvoren mic
+- Voice activity indicator (zlatni ring oko avatara protivnika dok priča)
+- Auto-mute kad protivnik napravi potez (da se ne čuje šum dok razmišljaš)
 
-**Problem D — `/reviews` strana ne prikazuje Google reviews uopšte.**  
-Trebalo bi povući top 5 Google review-a (Place Details API) i ubaciti ih iznad in-site review-a, sa "View all on Google Maps" linkom.
+### A4. PWA install prompt (manifest-only, već imamo manifest)
+- Smart install banner: prikazuje se posle 3. partije, ne odmah (manje annoying)
+- Tracking event `pwa_install_prompt_shown` / `pwa_installed`
 
-## 3. Implementacija — "Google Review Funnel"
+---
 
-1. **Edit `RateMasterChess.tsx`**:
-   - Posle uspešnog submita, NE redirektuj odmah na `/reviews`. Pokaži full-screen "Thank you" sa 2 dugmeta:
-     - Primary (zlatno): "⭐ Now post it on Google (15 sec)" → otvara Google review URL u novom tabu
-     - Secondary: "Skip → see all reviews"
-   - Track oba klika (`gbp_review_click` / `gbp_review_skip`) preko `track()`.
-2. **Novi component `GoogleReviewsBlock.tsx`**:
-   - Povlači top 5 Google review-a iz nove edge funkcije `fetch-google-reviews` (Place Details API, field `reviews`).
-   - Cache 6h u `site_config` da ne troši kvotu.
-   - Render kao karusel sa Google logoom + "View all on Google →".
-3. **Ubaciti `GoogleReviewsBlock`** na: `/reviews` (vrh strane), `/rate-masterchess` (iznad forme — social proof), homepage testimonials sekcija.
-4. **Nova edge fn `fetch-google-reviews/index.ts`**: gateway poziv na `places/v1/places/{placeId}?fields=reviews,rating,userRatingCount`.
+## FAZA B — Sledeća iteracija (kad mi javiš GO)
 
-## 4. Nove Google Maps ideje (rangirano po ROI)
+### B1. AI Voice Coach u MasterCourse (iz tvog Android spec-a)
+- Tap-na-potez u `/learn/:lessonId` → poziva `nikola-tts` sa generisanim engleskim objašnjenjem (template + Stockfish kontekst)
+- Template: "White moves the {piece} to {square}. This is a {classification} move because {reason}."
+- Cache izgovorenih objašnjenja po (FEN + move) ključu u `audio_cache` storage bucket-u (jeftinije, brže)
+- Toggle dugme "🔊 Coach voice ON/OFF" u lesson header-u
 
-| # | Ideja | Zašto se isplati |
-|---|------|-----------------|
-| **A** | **Google Reviews na sajtu** (gore opisano) | Direktan trust signal, ↑ konverzija |
-| **B** | **"Players in your city" widget** na profilu | Koristi geocoded `profiles.city` → "12 igrača iz Beograda" + mini mapa |
-| **C** | **Static Map OG slike za tournamentse** | `/tournaments/:id` share link dobija mapu venue-a kao OG image (Static Maps API) |
-| **D** | **Places Autocomplete za turnir venue** | Organizatori biraju lokaciju iz Google sugestija → tačni adress/lat/lng/place_id |
-| **E** | **"Get directions" dugme** na svakom venue/turnir | Otvara Google Maps app sa rute od korisnika → ↑ mobile UX |
-| **F** | **Pollen + Weather widget** na outdoor turnir stranicama (park chess) | Pollen API + Weather API kroz gateway |
-| **G** | **Country leaderboard sa pravim zastavama na 3D globusu** | Već imamo `/players/world`, dodati WebGL globus (react-globe.gl) |
-| **H** | **GBP weekly post auto-publish** sa najboljim review-om nedelje | Već postoji `publish-gbp-posts` fn — dodati "Review of the week" template |
+### B2. Share Analysis Card (proširenje SharePositionCard)
+- Posle finished game: 1080×1080 PNG sa Accuracy %, Best move, # mistakes/blunders, final position thumbnail
+- "Challenge my score" deep link → `/vs/{shareCode}` (postoji)
+- Native Web Share API (već radi) + per-platform pretext: IG, X, WA, Telegram, Discord
 
-## 5. Tehnički detalji
+### B3. Daily Challenges hub konsolidacija
+- Unified `/daily` route koji u tabovima zove postojeće: DailyPuzzle, DailyMate, DailyKing, DailyChallenge
+- Single XP/coin/streak source of truth
+- Push notification scheduler (1× dnevno, 18:00 lokalno) ako je streak > 2 dana
 
-```text
-Files to create:
-  supabase/functions/fetch-google-reviews/index.ts
-  src/components/GoogleReviewsBlock.tsx
+---
 
-Files to edit:
-  src/pages/RateMasterChess.tsx        (funnel posle submita)
-  src/pages/Reviews.tsx                (ubaci GoogleReviewsBlock na vrhu)
-  src/components/TestimonialsSection.tsx (ubaci 1 Google review)
-```
+## FAZA C — Ideje na backlog-u (ne radim sad, samo lista za diskusiju)
 
-Edge funkcija koristi postojeći Google Maps connector (gateway URL + `LOVABLE_API_KEY` + `GOOGLE_MAPS_API_KEY`). Cache rezultata: 6h u `site_config` key `google_reviews_cache`.
+| # | Ideja | ROI | Vreme |
+|---|-------|-----|-------|
+| 1 | **Google Static Maps OG za /chess/:city** stranice (slika grada + pin) → bogatije social share preview | High SEO | 2h |
+| 2 | **GBP auto-publish "Player of the week"** post (već imamo `publish-gbp-posts` cron) | Med | 1h |
+| 3 | **Places Autocomplete** za turnirske venue lokacije u Tournament create formi | Med | 2h |
+| 4 | **"Get directions" CTA** na svakom venue na /near-me i /chess/:city | Med | 30min |
+| 5 | **Weather/Pollen widget** za outdoor turnire (Google Weather API kroz connector) | Low | 2h |
+| 6 | **Country leaderboard 3D globe** (react-globe.gl) sa pin-ovima top igrača | High wow | 4h |
+| 7 | **Voice messages u chat-u** (record 5s, šalji kao Opus blob u Supabase storage) | Med-high | 3h |
+| 8 | **AI Coach summary posle partije** (text + TTS): "Tvoja partija u 30 reči" + audio play | High retention | 3h |
+| 9 | **Auto-generated YouTube Shorts** od top game snippet-a (h2h ko može + ffmpeg) — eksperiment | Low | 1d+ |
+| 10 | **"Replay my game" QR code** na štampanom certifikatu | Low | 1h |
 
-## 6. Šta gradimo prvo?
+---
 
-Predlažem **Fazu 1 = Sekcija 3 (Google Review Funnel + GoogleReviewsBlock)** jer to direktno povećava broj Google review-a (= bolji ranking u Google Maps + AggregateRating zvezdice u Google Search).
+## Šta odobravaš?
 
-Faza 2 = bilo koje 2-3 ideje iz tabele (A je već uračunato u Fazu 1).
-
-**Reci mi: "Faza 1" da krenem odmah, ili izaberi i ideje iz tabele (npr. "Faza 1 + C + E").**
+- **(A)** Faza A sva 4 podzadatka — krećem odmah
+- **(A + B1)** Faza A + AI Voice Coach (najveći item iz tvog spec-a)
+- **(custom)** napiši šta tačno hoćeš prvo, npr. "Faza A bez voice chat-a + B2 share card"
