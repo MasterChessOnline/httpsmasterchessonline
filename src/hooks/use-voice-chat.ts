@@ -150,7 +150,88 @@ export function useVoiceChat(roomId: string | null, userId: string | null) {
     localStreamRef.current?.getAudioTracks().forEach((t) => (t.enabled = enabled));
   }, [micOn]);
 
+  /** Programmatically set the mic on/off (used by push-to-talk and auto-mute). */
+  const setMic = useCallback((enabled: boolean) => {
+    setMicOn(enabled);
+    localStreamRef.current?.getAudioTracks().forEach((t) => (t.enabled = enabled));
+  }, []);
+
+  // --- Push-to-talk: hold space to talk, release to mute. Opt-in.
+  const pttRef = useRef(false);
+  const enablePushToTalk = useCallback(
+    (enabled: boolean, key: string = " ") => {
+      pttRef.current = enabled;
+      if (enabled) setMic(false);
+      if (!enabled) return;
+      const onDown = (e: KeyboardEvent) => {
+        if (e.repeat || e.key !== key) return;
+        const t = e.target as HTMLElement | null;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+        e.preventDefault();
+        setMic(true);
+      };
+      const onUp = (e: KeyboardEvent) => {
+        if (e.key !== key) return;
+        setMic(false);
+      };
+      window.addEventListener("keydown", onDown);
+      window.addEventListener("keyup", onUp);
+      return () => {
+        window.removeEventListener("keydown", onDown);
+        window.removeEventListener("keyup", onUp);
+      };
+    },
+    [setMic],
+  );
+
+  // --- Remote voice-activity detection (drives gold ring around opponent avatar).
+  useEffect(() => {
+    if (!connected || !remoteAudioRef.current) return;
+    const stream = remoteAudioRef.current.srcObject as MediaStream | null;
+    if (!stream) return;
+    let ctx: AudioContext | null = null;
+    let raf = 0;
+    try {
+      ctx = new AudioContext();
+      const src = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      src.connect(analyser);
+      const buf = new Uint8Array(analyser.frequencyBinCount);
+      const tick = () => {
+        analyser.getByteTimeDomainData(buf);
+        let sum = 0;
+        for (let i = 0; i < buf.length; i++) {
+          const v = (buf[i] - 128) / 128;
+          sum += v * v;
+        }
+        const rms = Math.sqrt(sum / buf.length);
+        setRemoteSpeaking(rms > 0.04);
+        raf = requestAnimationFrame(tick);
+      };
+      tick();
+    } catch (err) {
+      console.warn("[voice] analyser failed", err);
+    }
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      try { ctx?.close(); } catch {}
+    };
+  }, [connected]);
+
+  /** Auto-mute briefly while the opponent is moving so room noise stays out. */
+  const duckOnOpponentMove = useCallback((ms = 1500) => {
+    if (pttRef.current) return;
+    if (!micOn) return;
+    setMic(false);
+    window.setTimeout(() => setMic(true), ms);
+  }, [micOn, setMic]);
+
   useEffect(() => () => cleanup(), [cleanup]);
 
-  return { active, connected, micOn, remoteSpeaking, start, stop, toggleMic, remoteAudioRef };
+  return {
+    active, connected, micOn, remoteSpeaking,
+    start, stop, toggleMic, setMic, enablePushToTalk, duckOnOpponentMove,
+    remoteAudioRef,
+  };
 }

@@ -104,6 +104,8 @@ const CommunityMap = lazy(() => import("./pages/CommunityMap"));
 const AdminSeoConsole = lazy(() => import("./pages/AdminSeoConsole"));
 const AdminGbpPosts = lazy(() => import("./pages/AdminGbpPosts"));
 const AdminGsc = lazy(() => import("./pages/AdminGsc"));
+const AdminMapsSetup = lazy(() => import("./pages/AdminMapsSetup"));
+const PwaInstallBanner = lazy(() => import("./components/PwaInstallBanner"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
@@ -397,6 +399,7 @@ function AnimatedRoutes() {
           <Route path="/admin/seo-console" element={<AdminSeoConsole />} />
           <Route path="/admin/gbp-posts" element={<AdminGbpPosts />} />
           <Route path="/admin/gsc" element={<AdminGsc />} />
+          <Route path="/admin/maps-setup" element={<AdminMapsSetup />} />
           <Route path="/chess/:slug" element={<ChessInCity />} />
           <Route path="/near-me" element={<NearMe />} />
           <Route path="/players/world" element={<PlayerHeatmap />} />
@@ -464,6 +467,7 @@ const App = () => (
             <WeeklyRecapModal />
             <StreakFlexController />
             <FloatingShareButton />
+            <PwaInstallBanner />
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
