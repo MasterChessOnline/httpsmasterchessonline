@@ -147,10 +147,8 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
     voice.speak(lastSpokenRef.current).catch(() => { /* ignore */ });
   };
 
-  const replayLast = () => {
-    if (!lastSpokenRef.current) return;
-    voice.speak(lastSpokenRef.current).catch(() => { /* ignore */ });
-  };
+
+
 
   const single = variations.length === 1;
 
