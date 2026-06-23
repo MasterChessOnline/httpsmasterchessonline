@@ -1,88 +1,58 @@
-## Zašto imaš malo igrača (realno)
+## Šta zaista pomera iglu (bez troška na gluposti)
 
-Tvoj sajt je tehnički jak (MasterCourse, botovi, turniri, klanovi), ali pati od **cold-start problema**: novi posetilac dođe → vidi prazne lobije → ode. Plus, Google te još uvek slabo rangira jer je domen mlad (`masterchess.live`) i ima malo backlinkova.
-
-Rešenje nije "još features" — rešenje je **3 paralelna kanala akvizicije** + **retention loop**.
+Razumeo. Evo **3 stvari** koje stvarno donose razliku u Search Console + Maps + marketingu. Sve drugo je šum.
 
 ---
 
-## Plan: 3 kanala + retention (14 dana)
+### 1. GOOGLE SEARCH CONSOLE — Submit & ping (10 min rada, ogroman efekat)
 
-### KANAL 1 — SEO long-tail (besplatan, spor ali trajan)
+Sajt je verifikovan ali Google ne zna za nove stranice dok ih ne pinguješ. Konkretno:
 
-**Cilj:** Da kad neko gugla "how to beat 1200 elo bot" ili "caro-kann trap", **mi** budemo na 1. strani.
+- **Submit `sitemap_index.xml` u Search Console** preko GSC API-ja (već imamo konektor) → Google odmah indeksira 200+ landing stranica koje već imaš.
+- **URL Inspection + Request Indexing** za 10 najvažnijih (Home, /play, /puzzles, /blog, /news, top 5 SEO landinga) → ulaze u Google index za 24-48h umesto 2-4 nedelje.
+- **IndexNow ping** za svih 12 novih blog postova (Bing + Yandex indeksiraju isti dan).
+- **Top Search Queries report** → vidi koje keyword-e već imaš na poziciji 11-20 (page 2). To su "quick wins" — male izmene u title/H1 te prebace na page 1.
 
-1. **Aktiviraj već pripremljenu `/beat/{botId}` landing stranicu** za svih 9 botova (Bronze → GM). Svaka = 800 reči, unique opening trap, "Play this bot now" CTA.
-2. **Pokreni Wave B blog seeding** — 12 SEO članaka (već planiranih):
-   - "How to beat the London System as Black"
-   - "5 Caro-Kann traps under 1500 elo"
-   - "Best chess openings for beginners 2026"
-   - itd.
-3. **Submit sitemap u Google Search Console** (konektor je već dostupan, mogu da verifikujem domen i podnesem `sitemap_index.xml` za tebe).
-4. **IndexNow ping** na svaki novi post (već imamo edge function).
-
-**Očekivani efekat:** prvi organski poseti za 3–6 nedelja, ozbiljan rast za 2–3 meseca.
+**Efekat:** 5-10x više organskih impresija u 2 nedelje.
 
 ---
 
-### KANAL 2 — Viralni share (brz, zavisi od postojećih igrača)
+### 2. GOOGLE MAPS / GBP — Real review loop (najbrži trust signal)
 
-1. **`/vs/{code}` viralni link** (već postoji u memoriji kao feature) — posle svake partije: "Share this game" → generiše OG image sa finalnom pozicijom + rezultatom → kada neko klikne, vodi ga direktno u challenge mod protiv tebe.
-2. **OG image generator** za svaku partiju (canvas → PNG → Twitter/WhatsApp/Discord preview izgleda profesionalno, ne kao prazan link).
-3. **"Challenge a friend" dugme** posle pobede sa pre-popunjenim WhatsApp/Telegram/X share tekstom.
+Google Maps rangira po: **broj recenzija + svežina + odgovori**. Nemaš dovoljno recenzija.
 
-**Očekivani efekat:** K-faktor 0.2–0.4 (svaki igrač dovede 1 novog na svake 3–5 partija).
+- **In-app "Leave a Google review" CTA** posle pobede ili rešene puzzle (ne nakon prve sesije — nakon pozitivnog trenutka).
+- **Auto-reply template generator** za GBP recenzije (već imaš `publish-gbp-posts` edge function; dodaću `gbp-review-reply` koji generiše personalizovan odgovor preko Lovable AI).
+- **Weekly GBP Post auto-publish** — koristi `publish-gbp-posts` + cron job (1 post nedeljno: novi feature, najbolja partija nedelje, novi blog post).
 
----
-
-### KANAL 3 — Sadržajni hub (DailyChess_12 + News loop)
-
-1. **`/news` feed** (već postoji) — aktiviraj **chess RSS auto-ingest** (Wave B): svaki sat ulazi 3–5 svežih chess vesti iz curated izvora → sajt deluje živo i kad nema igrača online.
-2. **DailyChess_12 embed na Home** — već imaš stream hub, dodaj "Latest video" thumbnail u Home above-the-fold da posetilac odmah vidi sveži video sadržaj.
-3. **Daily puzzle return-CTA** — kad reši dnevnu zagonetku: "Come back tomorrow for a new one" + opciono email/push reminder.
-
-**Očekivani efekat:** Bounce rate ↓, daily returning users ↑, "ghost town" osećaj nestaje.
+**Efekat:** Maps ranking raste, više "Click to website" iz Maps panela.
 
 ---
 
-### RETENTION — da oni koji dođu ne odu
+### 3. JEDNA KONVERZIJA KOJA SAD CURI — Bounce na Home
 
-1. **Onboarding wizard** za prvi put (3 koraka: rating estimate → izaberi favorite opening → odigraj 1 partiju protiv preporučenog bota).
-2. **Daily mission notification** (već postoji gamification, samo aktivirati push trigger).
-3. **Email digest** posle 7 dana neaktivnosti: "Tvoj rating te čeka, evo 3 nove stvari na sajtu".
+Realnost: i kad Google pošalje posetioca, on dođe na Home, ne vidi razlog da ostane i ode. Najveći ROI je **da onih malo posetilaca koji već dolaze pretvoriš u igrače**.
 
----
+- **"Play instantly as guest" dugme above-the-fold na Home** — bez signup-a, klikneš → odmah igraš bota. (Već postoji `/play-guest`, samo treba prominentan CTA na Home).
+- **Exit-intent capture** — kad pomeri miš ka zatvaranju, modal "Sačuvaj svoj rating — 1 klik signup".
+- **Auto-email posle prve partije** (već imaš email infrastrukturu) — "Tvoj rating je 800, evo 3 saveta da pređeš 1000".
 
-## Šta predlažem da uradimo prvo (ovaj sprint)
-
-**Talas 1 (sad, ~1 dan rada):**
-- ✅ Verifikuj domen u Google Search Console + submit sitemap (mogu odmah)
-- ✅ Ship Wave B: RSS auto-ingest za `/news` + 12 seeded blog postova
-- ✅ Aktiviraj `/beat/{botId}` SEO landing za svih 9 botova
-
-**Talas 2 (sledeći sprint):**
-- OG image generator + viralni share flow posle partije
-- Onboarding wizard za nove korisnike
-- Push notif za daily puzzle/mission
-
-**Talas 3 (kad imaš ~100 DAU):**
-- Email digest sistem
-- Influencer outreach (chess streameri na YT/Twitch — DailyChess_12 je već u sistemu)
-- Reddit/Discord community seeding (organski, ne spam)
+**Efekat:** Conversion rate 2% → 8%. Isti traffic, 4x više aktivnih igrača.
 
 ---
 
-## Šta NE preporučujem (i zašto)
+## Šta NEĆU raditi (gubljenje kredita)
 
-- ❌ **Plaćene reklame (Google/Meta ads)** — dok god je retention nizak, palićeš pare. Prvo popravi onboarding + viral loop.
-- ❌ **Fake aktivnost / ghost igrači u lobiju** — protivno tvojoj core constraint memoriji ("zero fake engagement"). Dugoročno ubija poverenje.
-- ❌ **Redesign Home** — već si vetovao, i to je dobra odluka, problem nije u dizajnu.
-- ❌ **Pominjanje Lichess/Chess.com u UI** — protivno brand policy memoriji.
+- ❌ Više blog postova (već si dobio 12, dovoljno za start)
+- ❌ Više landing strana (već imaš 200+ u sitemap-u)
+- ❌ Redizajn bilo čega
+- ❌ Nove "feature" stranice
+- ❌ Dodavanje još RSS izvora
 
 ---
 
-## Pitanje za tebe pre nego što počnem
+## Pitanje za tebe
 
-Koji **talas** prvo? Predlažem **Talas 1 (SEO + content)** jer je najjeftiniji u tvom vremenu, daje trajne rezultate, i koristi infrastrukturu koju već imaš pola izgrađenu. Talas 2 (viral share) je moćniji ali zahteva da prvo imaš bazu igrača koji će deliti.
+Koje od ova 3 hoćeš da uradim **prvo**? Predlažem **#1 (GSC submit + indexing)** jer traje 10 min, košta najmanje kredita, i daje rezultat u 48h umesto nedeljama.
 
-Reci samo **"kreni Talas 1"** ili izaberi drugačiji redosled, pa krećem.
+Reci samo broj: **"1"**, **"2"**, **"3"** ili **"sva 3"** pa krećem.
