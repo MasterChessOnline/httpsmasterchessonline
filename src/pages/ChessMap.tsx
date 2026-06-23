@@ -28,7 +28,7 @@ const TRACKING_ID = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_
 
 function loadMapsScript(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (window.google?.maps) return resolve();
+    if ((window as any).google?.maps) return resolve();
     if (!BROWSER_KEY) return reject(new Error("Missing Google Maps browser key"));
     const existing = document.getElementById("gmaps-script") as HTMLScriptElement | null;
     window.__initChessMap = () => resolve();
@@ -113,7 +113,7 @@ export default function ChessMap() {
       try {
         await loadMapsScript();
         if (cancelled) return;
-        const map = new window.google.maps.Map(mapRef.current!, {
+        const map = new (window as any).google.maps.Map(mapRef.current!, {
           center: { lat: 30, lng: 15 },
           zoom: 2,
           minZoom: 2,
@@ -123,16 +123,16 @@ export default function ChessMap() {
           backgroundColor: "#0b0b0d",
           styles: NIGHT_STYLES,
         });
-        const InfoWindow = new window.google.maps.InfoWindow();
+        const InfoWindow = new (window as any).google.maps.InfoWindow();
         cities.forEach((c) => {
           const hasPlayers = c.players > 0;
           const radius = Math.max(6, Math.min(22, 6 + Math.sqrt(c.players) * 4));
-          const marker = new window.google.maps.Marker({
+          const marker = new (window as any).google.maps.Marker({
             position: { lat: c.lat, lng: c.lng },
             map,
             title: `${c.name} — ${c.players} player${c.players === 1 ? "" : "s"}`,
             icon: {
-              path: window.google.maps.SymbolPath.CIRCLE,
+              path: (window as any).google.maps.SymbolPath.CIRCLE,
               scale: hasPlayers ? radius : 4,
               fillColor: hasPlayers ? "#f5c518" : "#6b7280",
               fillOpacity: hasPlayers ? 0.9 : 0.55,
