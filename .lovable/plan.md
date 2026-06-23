@@ -1,58 +1,60 @@
-## Šta zaista pomera iglu (bez troška na gluposti)
+## Iskreno — zašto nemaš igrače
 
-Razumeo. Evo **3 stvari** koje stvarno donose razliku u Search Console + Maps + marketingu. Sve drugo je šum.
+Reći ću ti tačno, bez sranja:
 
----
+1. **SEO ne radi za 2 nedelje.** Sve što sam uradio (sitemap, blog, news) **počinje da donosi traffic za 2-6 meseci**. To je realnost mladog domena.
+2. **Nikoga nije briga za "MasterChess" kao brand.** Niko ga ne traži na Google-u.
+3. **Ali ljude zanima ZA TEBE.** "13-godišnji klinac napravio chess sajt" je priča koja se sama deli.
 
-### 1. GOOGLE SEARCH CONSOLE — Submit & ping (10 min rada, ogroman efekat)
-
-Sajt je verifikovan ali Google ne zna za nove stranice dok ih ne pinguješ. Konkretno:
-
-- **Submit `sitemap_index.xml` u Search Console** preko GSC API-ja (već imamo konektor) → Google odmah indeksira 200+ landing stranica koje već imaš.
-- **URL Inspection + Request Indexing** za 10 najvažnijih (Home, /play, /puzzles, /blog, /news, top 5 SEO landinga) → ulaze u Google index za 24-48h umesto 2-4 nedelje.
-- **IndexNow ping** za svih 12 novih blog postova (Bing + Yandex indeksiraju isti dan).
-- **Top Search Queries report** → vidi koje keyword-e već imaš na poziciji 11-20 (page 2). To su "quick wins" — male izmene u title/H1 te prebace na page 1.
-
-**Efekat:** 5-10x više organskih impresija u 2 nedelje.
+Tvoj **stvarni** marketing kanal nije SEO. Nije Maps. Nije ads. **TI si marketing.** Lični brand → sajt. Ne obrnuto.
 
 ---
 
-### 2. GOOGLE MAPS / GBP — Real review loop (najbrži trust signal)
+## Plan: 1 stvar koja zaista može doneti igrače u 7 dana
 
-Google Maps rangira po: **broj recenzija + svežina + odgovori**. Nemaš dovoljno recenzija.
+### A. Stranica `/nikola-sakotic` — "Founder of MasterChess"
 
-- **In-app "Leave a Google review" CTA** posle pobede ili rešene puzzle (ne nakon prve sesije — nakon pozitivnog trenutka).
-- **Auto-reply template generator** za GBP recenzije (već imaš `publish-gbp-posts` edge function; dodaću `gbp-review-reply` koji generiše personalizovan odgovor preko Lovable AI).
-- **Weekly GBP Post auto-publish** — koristi `publish-gbp-posts` + cron job (1 post nedeljno: novi feature, najbolja partija nedelje, novi blog post).
+Posebna SEO-optimizovana stranica o tebi sa:
 
-**Efekat:** Maps ranking raste, više "Click to website" iz Maps panela.
+- **Person JSON-LD schema** (`@type: Person`, `name: Nikola Šakotić`, `jobTitle: Founder & Developer`, `worksFor: MasterChess`, `birthDate: 2013`, `url`, `image`, `sameAs` na tvoje social profile)
+- **Organization schema** na Home koja pokazuje na tebe kao founder-a → ovo Google koristi za **Knowledge Panel**
+- Tvoja priča (300-500 reči, engleski): kako si počeo programirati, zašto si napravio MasterChess, šta je sledeće
+- Link na sajt iz svake sekcije (interna povezanost = SEO juice za tvoje ime)
+- **Submit u GSC** za prioritetno indeksiranje
+
+**Cilj:** Kad neko za 2-3 nedelje gugla "Nikola Sakotic" ili "Nikola Šakotić chess", izlazi tvoja stranica + MasterChess.
+
+### B. Copy-paste Reddit/HN post koji TI treba da postaviš
+
+Napisaću ti spreman tekst za:
+
+- **r/chess** (200k članova) — "I'm 13 and built a chess site from scratch — would love your feedback"
+- **r/SideProject** (200k) — "I built MasterChess at 13 — chess platform with bots, tournaments, no ads"
+- **Hacker News Show HN** — "Show HN: MasterChess — Chess platform I built at 13"
+- **Twitter/X thread** — 5-tweet story sa screenshot-ima
+
+**Jedan viralni post na r/chess = 1000-10000 posetilaca za 24h.** To je 100x više nego ceo SEO trud zajedno za isti period.
+
+**Ali postoji 1 uslov:** Postove **TI sam moraš da postaviš** sa svog naloga. Reddit ban-uje botove i nove naloge bez karme. Daću ti tekst, ti samo paste-uješ.
+
+### C. Što NEĆU raditi (i pravac zašto)
+
+- ❌ Više blog postova — već imaš 12, niko ih neće videti pre nego što dobijes traffic odnekud drugde
+- ❌ Više landing strana — već imaš 1087 u sitemap-u
+- ❌ Email kampanju — nemaš email listu
+- ❌ Plaćene reklame — palićeš pare bez retention sistema
 
 ---
 
-### 3. JEDNA KONVERZIJA KOJA SAD CURI — Bounce na Home
+## Šta tačno dobijaš za ovu sesiju
 
-Realnost: i kad Google pošalje posetioca, on dođe na Home, ne vidi razlog da ostane i ode. Najveći ROI je **da onih malo posetilaca koji već dolaze pretvoriš u igrače**.
+1. **`/nikola-sakotic` stranica** sa Person schema + Organization founder link na Home
+2. **`docs/MARKETING_POSTS.md`** — 4 spremne objave (Reddit ×2, HN, Twitter thread) na engleskom, copy-paste ready
+3. **GSC submit + indexing request** za novu stranicu
+4. **Linkove na novu stranicu iz Navbar-a i Home-a** (interna povezanost)
 
-- **"Play instantly as guest" dugme above-the-fold na Home** — bez signup-a, klikneš → odmah igraš bota. (Već postoji `/play-guest`, samo treba prominentan CTA na Home).
-- **Exit-intent capture** — kad pomeri miš ka zatvaranju, modal "Sačuvaj svoj rating — 1 klik signup".
-- **Auto-email posle prve partije** (već imaš email infrastrukturu) — "Tvoj rating je 800, evo 3 saveta da pređeš 1000".
-
-**Efekat:** Conversion rate 2% → 8%. Isti traffic, 4x više aktivnih igrača.
-
----
-
-## Šta NEĆU raditi (gubljenje kredita)
-
-- ❌ Više blog postova (već si dobio 12, dovoljno za start)
-- ❌ Više landing strana (već imaš 200+ u sitemap-u)
-- ❌ Redizajn bilo čega
-- ❌ Nove "feature" stranice
-- ❌ Dodavanje još RSS izvora
+To je sve. Jedan fokusiran sprint. Bez gluposti.
 
 ---
 
-## Pitanje za tebe
-
-Koje od ova 3 hoćeš da uradim **prvo**? Predlažem **#1 (GSC submit + indexing)** jer traje 10 min, košta najmanje kredita, i daje rezultat u 48h umesto nedeljama.
-
-Reci samo broj: **"1"**, **"2"**, **"3"** ili **"sva 3"** pa krećem.
+**Reci "kreni" pa radim. Ili reci šta dodaješ/menjaš.**
