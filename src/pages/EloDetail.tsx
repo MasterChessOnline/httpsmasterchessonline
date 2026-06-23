@@ -18,8 +18,8 @@ export default function EloDetail() {
   return (
     <div className="min-h-screen bg-background">
       <Seo
-        title={`${tier.rating} ELO Chess Rating — What Does It Mean? | MasterChess`}
-        description={`What is a ${tier.rating} ELO chess rating? ${tier.description.slice(0, 100)}... Percentile, benchmarks, and how to reach ${nextTier?.rating || "the next level"}.`}
+        title={`What is ${tier.rating} ELO in Chess? ${tier.category} Skill Level & How to Reach ${nextTier?.rating || "GM"}`}
+        description={`A ${tier.rating} ELO chess rating means you're in the ${tier.percentile} — ${tier.category.toLowerCase()}. ${tier.benchmark} Full breakdown, percentile, and a step-by-step path to ${nextTier?.rating || "Grandmaster"}.`}
         path={`/elo/${tier.rating}`}
         type="article"
         jsonLd={[
@@ -37,6 +37,32 @@ export default function EloDetail() {
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "ELO Ratings", item: "https://masterchess.live/elo" },
               { "@type": "ListItem", position: 2, name: `${tier.rating} ELO` },
+            ],
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: `What does a ${tier.rating} ELO chess rating mean?`,
+                acceptedAnswer: { "@type": "Answer", text: `A ${tier.rating} ELO rating places you in the ${tier.percentile} of all rated chess players. ${tier.description}` },
+              },
+              {
+                "@type": "Question",
+                name: `What can a ${tier.rating} ELO chess player do?`,
+                acceptedAnswer: { "@type": "Answer", text: tier.benchmark },
+              },
+              {
+                "@type": "Question",
+                name: `How do I improve from ${tier.rating} to ${nextTier?.rating || "the next level"} ELO?`,
+                acceptedAnswer: { "@type": "Answer", text: tier.goal },
+              },
+              {
+                "@type": "Question",
+                name: `Is ${tier.rating} ELO good in chess?`,
+                acceptedAnswer: { "@type": "Answer", text: `${tier.rating} ELO is categorized as ${tier.category} — ${tier.percentile} of rated players. ${nextTier ? `The next milestone is ${nextTier.rating} ELO.` : "This is the top tier of chess."}` },
+              },
             ],
           },
         ]}

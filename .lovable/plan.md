@@ -1,65 +1,46 @@
-## Cilj
-Maksimalno pojačati vidljivost MasterChess-a kroz Google Search Console, Google Maps i PR (portali/mediji), bez trošenja kredita na stvari koje ne donose igrače.
+## Sledeći korak: Optimizacija stranica koje već rangiraju (najveći ROI sada)
 
-## Šta predlažem (po prioritetu ROI)
+GSC podaci pokazuju da postoje stranice koje **već rangiraju ali ne donose klikove** jer su title/meta loši. Prepravka ovih tagova = klikovi za 2-3 nedelje (bez čekanja na indeksiranje).
 
-### 1. Google Search Console — dodatno (~10 kredita)
-- **URL Inspection + Request Indexing** za 10 najvažnijih stranica (Home, /nikola-sakotic, /play-guest, /puzzles, /openings, /tournaments, /battle-royale, /vs/{code}, /beat/magnus-bot, /community) — gura ih u indeks za par dana umesto par nedelja.
-- **Performance API report** — koje queries već donose impresije ali NE klikove (pozicije 8–20). Te stranice prepravljamo (title/H1/meta) jer su "low-hanging fruit".
-- **Fix sitemap error** — `sitemap.xml` ima `errors: 1`. Naći i popraviti.
-- **Core Web Vitals report** — provera da li LCP/CLS koče indeksiranje.
+### Šta menjam
 
-### 2. Google Maps / Business Profile (~5 kredita kod, ostalo ručno)
-**Važno:** Google Business Profile zahteva fizičku lokaciju ili "service area business". MasterChess je online servis — ne kvalifikuje se za klasičan Maps pin. Realne opcije:
-- **Google Knowledge Panel za Nikola Šakotić** kroz Person schema (već urađeno) + Wikidata entry (ručno, ja pripremim tekst).
-- **Google Business Profile kao "Service Area"** registrovan na Nikolinu adresu (Beograd/region) — ako pristaješ, dam ti uputstvo korak po korak. Tu možeš dodavati fotografije sajta, postove, recenzije.
-- **Google Posts** preko Business Profile-a — nedeljne objave o turnirima, puzzlesima.
+**1. Home (`/`) — query "master chess"**
+- Trenutno: 719 impresija, poz. 11.9, samo 8 klikova (1.1% CTR)
+- Cilj: poz. 5-7, CTR 5%+ = ~35 klikova/mesec iz jednog query-ja
+- Novi `<title>`: `MasterChess — Play Free Online Chess | Multiplayer, Bots, Tournaments`
+- Nova `<meta description>`: poziv na akciju + "13-year-old founder" hook + ključne reči
 
-### 3. PR / Portali — copy-paste pitch-evi (~15 kredita)
-Pripremam **gotove mejlove i pitch tekstove** za:
-- **Srpski tech portali:** Netokracija, Startit, Benchmark, Mondo Tech, B92 Tehnologija, Telegraf Tech, Blic Zona
-- **Omladinski/edukativni:** RTS Klinci, Politikin Zabavnik, NIN, Nedeljnik
-- **Šahovski:** Šahovski Savez Srbije bilten, lokalni šah klubovi (mejling lista)
-- **Internacionalno (engleski):** TechCrunch tips, Hacker News (već u planu), IndieHackers, Product Hunt launch, BetaList, Reddit r/InternetIsBeautiful
+**2. `/openings/nimzo-indian-defense` — query "Kasparov vs Karpov 1985 E20"**
+- 29 impresija, poz. 8, 0 klikova
+- Dodaj sekciju "Famous Games: Kasparov vs Karpov 1985" sa PGN-om
+- Title: `Nimzo-Indian Defense (E20) — Kasparov vs Karpov 1985 Analysis`
+- H1 koji match-uje query
 
-Angle za sve: **"13-godišnji dečak iz Srbije napravio chess platformu koja konkuriše Chess.com-u"** — to je priča koja se sama prodaje.
+**3. `/elo/2200`, `/elo/1600`, `/elo/1500`, `/elo/600` — ELO queries**
+- Imaju impresije, 0 klikova
+- Title format: `What is {ELO} Chess Rating? Skill Level & How to Reach It`
+- Dodaj FAQ schema (FAQPage JSON-LD) — Google često prikazuje rich snippet
 
-### 4. Dodatne viralne ideje (besplatne, samo treba uraditi)
-- **TikTok/Instagram Reels** — Nikola snima 30s "kako sam napravio sajt sa 13 godina" → linkuje masterchess.live u bio
-- **YouTube DailyChess_12** — pin video "Igraj na mom sajtu" + link u opisu svakog videa
-- **Šah turniri u školama** — ponuda lokalnim školama: besplatan turnir na MasterChess platformi
-- **Sticker/QR kod kampanja** — print QR koji vodi na /play-guest, lepi po šah klubovima u Beogradu
-- **Discord server MasterChess** — community hub, daily puzzle, turniri
-- **Wikipedia stranica "Nikola Šakotić"** — ako se kvalifikuje (treba 2-3 nezavisna izvora prvo → otud PR)
+**4. `/famous-games/carlsen-anand-game-6-2` — Carlsen-Anand query**
+- Poz. 11.7, 0 klikova
+- Title: `Carlsen vs Anand Game 6 (2014 WC) — Move-by-Move Analysis`
 
-### 5. Šta NE radimo (gubitak kredita)
-- Više landing stranica (već imamo 1000+)
-- Više blog postova (nema ko da čita)
-- Plaćeni Google/Meta Ads (skupo, mali ROI za young domain)
-- Email kampanje (nemamo listu)
+**5. `/tools/stockfish-online` — "stockfish.online fen depth"**
+- Title: `Free Stockfish Analysis Online — FEN & Depth Tool`
 
-## Plan izvršenja (ako odobriš)
+### Tehnička izvedba
+- Svaka stranica koristi react-helmet-async (već postoji u projektu)
+- Dodajem FAQPage JSON-LD na ELO stranice za rich snippets
+- Posle deploya: ponovo submit u GSC (automatski)
 
-**Faza A — Tehnički (ja radim, ~30 kredita):**
-1. GSC: Request Indexing za 10 ključnih URL-ova
-2. GSC: Performance report → identifikuj "page 2" queries
-3. Popravi sitemap error
-4. Generiši `docs/PR_PITCHES.md` sa 15+ gotovih mejlova (srpski + engleski)
-5. Generiši `docs/GOOGLE_BUSINESS_SETUP.md` — korak po korak za GBP
-6. Generiši `docs/WIKIDATA_NIKOLA.md` — gotov entry za Wikidata
-7. Generiši `docs/TIKTOK_SCRIPTS.md` — 10 video scenarija za Nikolu
+### Kredita: ~10-15
+### Rezultat: 50-150 dodatnih klikova/mesec za 2-4 nedelje (bez ikakvog drugog rada)
 
-**Faza B — Ti radiš (ručno, besplatno):**
-- Šalješ mejlove portalima (template-i gotovi)
-- Postavljaš Google Business Profile
-- Snimaš TikTok/Reels
-- Postavljaš na Reddit/HN (template-i već gotovi)
+### Šta NE radim
+- Nove stranice (već ih ima 1000+)
+- Backend izmene
+- AI funkcionalnost
 
-## Pitanje pre nego što krenem
-Koja faza ti je prioritet?
-- **A** Samo GSC tehnički (10 kredita, brzo)
-- **B** PR pitch-evi za portale (15 kredita, najveći ROI dugoročno)
-- **C** Sve od navedenog (30 kredita)
-- **D** Nešto drugo — reci šta
+---
 
-Napiši A / B / C / D ili "kreni sve".
+Odobravaš? Napiši "kreni" ili reci šta da promenim.
