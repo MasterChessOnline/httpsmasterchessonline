@@ -82,6 +82,11 @@ ${movesList}
 For EACH move write a short explanation in English (12-22 words) — the idea, the plan, or the threat. Don't restate the obvious. Speak naturally, like to a friend.
 Also write one "summary" sentence that captures the whole variation (max 25 words).
 
+CRITICAL FORMATTING RULES (must follow):
+- Do NOT start the "explanation" with the move number (no "13.", "13...", "1.").
+- Do NOT repeat the SAN inside the explanation (no "b5 — break", just "break...").
+- Start directly with the chess idea. The UI prepends the move notation itself.
+
 Return ONLY valid JSON, no markdown fences:
 {"summary":"...", "moves":[{"san":"e4","explanation":"..."}, ...]}`;
 
