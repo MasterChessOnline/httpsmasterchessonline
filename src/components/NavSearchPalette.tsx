@@ -44,7 +44,7 @@ const ENTRIES: SearchEntry[] = [
 
   // LEARN
   { label: "Daily Training Plan", href: "/daily-plan",  icon: Sparkles,  desc: "Personalized daily tasks",   category: "learn",   keywords: "daily plan" },
-  { label: "Coach",               href: "/coach",       icon: Brain,     desc: "Ask the chess coach",        category: "learn" },
+  { label: "AI Coach",            href: "/coach",       icon: Brain,     desc: "Chat with your AI chess coach", category: "learn", keywords: "ai coach mentor tutor" },
   { label: "Opening Repertoire",  href: "/repertoire",  icon: BookOpen,  desc: "Build your repertoire",      category: "learn" },
   { label: "Training",            href: "/learn",       icon: Target,    desc: "Structured learning path",   category: "learn" },
   { label: "Openings",            href: "/openings",    icon: BookOpen,  desc: "Master opening systems",     category: "learn" },

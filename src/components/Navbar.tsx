@@ -60,7 +60,7 @@ const NAV_SECTIONS: NavSection[] = [
     accentRgb: "168,85,247",
     items: [
       { label: "Daily Training Plan", href: "/daily-plan", icon: Sparkles, desc: "Your personalized daily tasks", highlight: true, subheading: "Improve" },
-      { label: "Coach", href: "/coach", icon: Brain, desc: "Ask the chess coach anything" },
+      { label: "AI Coach", href: "/coach", icon: Brain, desc: "Chat with your AI coach — ask anything, review games, get a plan" },
       { label: "Opening Repertoire", href: "/repertoire", icon: BookOpen, desc: "Build your personal repertoire" },
       { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path", separator: true, subheading: "Fundamentals" },
       

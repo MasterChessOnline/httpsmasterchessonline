@@ -194,7 +194,22 @@ export default function Coach() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.length === 0 && (
               <div className="space-y-6">
-                <div className="text-center py-6">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold mb-1">What your AI Coach can do</h3>
+                      <ul className="text-xs text-muted-foreground space-y-1 leading-relaxed">
+                        <li>• <span className="text-foreground font-medium">Answer chess questions</span> — openings, tactics, endgames, strategy.</li>
+                        <li>• <span className="text-foreground font-medium">Review your games</span> — paste a PGN or FEN and get a structured breakdown.</li>
+                        <li>• <span className="text-foreground font-medium">Build a training plan</span> — tell it your rating + goals, get a weekly plan.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center py-2">
                   <Sparkles className="w-10 h-10 text-primary mx-auto mb-3" />
                   <h2 className="text-xl font-semibold mb-1">Ask anything about chess</h2>
                   <p className="text-sm text-muted-foreground">Paste a FEN or PGN, ask about plans, or pick a starter below. You'll get GM-style structured coaching, not engine dumps.</p>

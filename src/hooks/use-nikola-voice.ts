@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { resolveVoiceClip, isRealVoiceEnabled, type VoiceClipKey } from "@/lib/nikola-voice-clips";
+
 
 /**
  * Streams Nikola coach voice via /functions/v1/nikola-tts (SSE PCM).
@@ -239,6 +241,34 @@ export function useNikolaVoice() {
     }, SPEAK_DEBOUNCE_MS);
   }, [muted, speakNow]);
 
+  /**
+   * Play a real-voice clip if one is registered for `key`; otherwise fall back
+   * to TTS with `text`. Routes through the same AnalyserNode so lip-sync /
+   * VU meter visuals keep working.
+   */
+  const speakClipOrText = useCallback(async (text: string, key: VoiceClipKey, voice = DEFAULT_VOICE) => {
+    if (!text || muted) return;
+    const clipUrl = isRealVoiceEnabled() ? resolveVoiceClip(key) : null;
+    if (!clipUrl) { return speak(text, voice); }
+
+    stopInternal();
+    try {
+      const { ctx, analyser } = await ensureCtx();
+      const res = await fetch(clipUrl);
+      if (!res.ok) { return speak(text, voice); }
+      const arr = await res.arrayBuffer();
+      const buffer = await ctx.decodeAudioData(arr.slice(0));
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(analyser);
+      setSpeaking(true);
+      source.onended = () => setSpeaking(false);
+      source.start(ctx.currentTime + 0.02);
+    } catch {
+      return speak(text, voice);
+    }
+  }, [muted, ensureCtx, speak]);
+
   // Manual unlock (call from a button click). Resumes context + replays queued text.
   const unlock = useCallback(async () => {
     await ensureCtx();
@@ -274,6 +304,7 @@ export function useNikolaVoice() {
 
   return {
     speak,
+    speakClipOrText,
     stop,
     speaking,
     muted,

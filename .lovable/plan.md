@@ -1,72 +1,76 @@
-# MasterChess — "Sve odjednom" plan (PWA fokus)
+# MasterCourse + Navigation Upgrades
 
-Spec ti je ogroman (5 sekcija + GSC + Maps + voice chat + nove ideje). Da ne bih sve gurnuo u jedan loš commit, ovo je **realistični plan po fazama**. Krećem od Faze A odmah po odobrenju, ostalo sukcesivno.
+## 1. Fix coach text duplication
 
----
+**File:** `src/components/learn/VariationsExercise.tsx` (`handleMoveIndexChange`)
 
-## FAZA A — Odmah (1 iteracija, sada)
+Currently: `` `${info.san}. ${info.explanation}` `` → AI sometimes returns explanations that already include `"13.b5 — break!"`, producing `"b5. 13.b5 — break!"`.
 
-### A1. Google Search Console — auto verify za masterchess.live
-- Edge fn `gsc-verify-domain`: poziva `siteVerification/v1/token` (META metoda) preko GSC connector gateway-a
-- Snimam token u `site_config` (`gsc_meta_token`)
-- Ubacujem `<meta name="google-site-verification" content="...">` u `index.html` (već postoji prazan slot? ako ne, dodajem)
-- Admin dugme na `/admin/seo-console` → "Verify domain in Google Search Console" → poziva fn → automatski poziva verify + dodaje sajt u GSC properties
+Changes:
+- Add a `stripMovePrefix(san, text)` helper that removes any leading:
+  - turn number + dot (`13.`, `13...`, `13. `)
+  - bare SAN echo (`b5`, `Nf3`)
+  - common separators (`—`, `-`, `:`, `,`)
+- Apply it to both the per-move `info.explanation` and to `ai.summary` before speaking.
+- Final spoken line becomes: `` `${san} — ${cleanedExplanation}` ``, with no separator when explanation is empty.
+- Also tighten the prompt in `supabase/functions/explain-variation/index.ts` to instruct the model: *"Do NOT repeat the SAN or include move numbers — start directly with the idea."*
 
-### A2. Google Maps — Custom Domain Setup Wizard
-- Nova stranica `/admin/maps-setup` sa step-by-step checklistom (4 koraka iz docs/GOOGLE_MAPS_INTEGRATION.md)
-- Live test dugme: "Test API key on masterchess.live" → poziva edge fn koja proverava da li `places/v1/places:searchText` radi sa custom ključem
-- Status badge u admin SEO console: 🟢 Working / 🔴 Referrer denied
+## 2. Real-voice audio architecture (ready for your recordings)
 
-### A3. Voice Chat — Quick polish
-- "Push-to-talk" mode (drži razmaknicu = mikrofon živ, otpusti = mute) — manje awkward nego stalno otvoren mic
-- Voice activity indicator (zlatni ring oko avatara protivnika dok priča)
-- Auto-mute kad protivnik napravi potez (da se ne čuje šum dok razmišljaš)
+Goal: drop-in `.mp3`/`.wav` overrides per lesson/variation/move; fall back to TTS when missing.
 
-### A4. PWA install prompt (manifest-only, već imamo manifest)
-- Smart install banner: prikazuje se posle 3. partije, ne odmah (manje annoying)
-- Tracking event `pwa_install_prompt_shown` / `pwa_installed`
+- **New module:** `src/lib/nikola-voice-clips.ts`
+  - `type VoiceClipKey = { courseId: string; variationId?: string; moveIndex?: number; san?: string }`
+  - `voiceClipManifest`: a typed mapping `Record<string, string>` (key → asset URL).
+  - `resolveVoiceClip(key)`: tries most-specific match first (`course/var/move`), then `course/var`, then `course`. Returns `null` if none.
+  - `buildClipKey(...)` and `registerClip(...)` helpers so uploads are 1-line additions.
+- **New folder:** `src/assets/voice/` with a `README.md` describing the naming convention (`{courseId}__{variationId}__{moveIndex}-{san}.mp3`) and `lovable-assets create` workflow → `.asset.json` pointers auto-registered in the manifest.
+- **Hook upgrade:** `src/hooks/use-nikola-voice.ts` gets a new `speakClipOrText(text, key)` method:
+  1. If `resolveVoiceClip(key)` returns a URL → play via `HTMLAudioElement` (still feeds the existing `AnalyserNode` for lip-sync).
+  2. Else → existing TTS path.
+  Existing `speak()` API stays unchanged for backward compat.
+- **Wire it in:** `VariationsExercise` passes `{ courseId, variationId, moveIndex, san }` to `speakClipOrText` for both intro summary and per-move lines.
+- **Settings toggle:** add `"Use Nikola's real voice when available"` (default ON) in `src/pages/Settings.tsx`, persisted to localStorage and read by the hook.
 
----
+When you upload `.m4a`/`.mp3` files later, the only action is: run `lovable-assets create`, drop the resulting `.asset.json` into `src/assets/voice/`, add one line to the manifest. No code changes elsewhere.
 
-## FAZA B — Sledeća iteracija (kad mi javiš GO)
+> Note: the attached `.m4a` is a *spoken instruction* from you, not a lesson clip — I will not register it as a MasterCourse voiceover. Send the actual move-explanation recordings (or a ZIP) when ready.
 
-### B1. AI Voice Coach u MasterCourse (iz tvog Android spec-a)
-- Tap-na-potez u `/learn/:lessonId` → poziva `nikola-tts` sa generisanim engleskim objašnjenjem (template + Stockfish kontekst)
-- Template: "White moves the {piece} to {square}. This is a {classification} move because {reason}."
-- Cache izgovorenih objašnjenja po (FEN + move) ključu u `audio_cache` storage bucket-u (jeftinije, brže)
-- Toggle dugme "🔊 Coach voice ON/OFF" u lesson header-u
+## 3. Learn navbar → AI Coach fully functional
 
-### B2. Share Analysis Card (proširenje SharePositionCard)
-- Posle finished game: 1080×1080 PNG sa Accuracy %, Best move, # mistakes/blunders, final position thumbnail
-- "Challenge my score" deep link → `/vs/{shareCode}` (postoji)
-- Native Web Share API (već radi) + per-platform pretext: IG, X, WA, Telegram, Discord
+- `Navbar.tsx` Learn dropdown: rename `"Coach"` → `"AI Coach"`, update `desc` to: *"Chat with your personal AI chess coach — ask anything, review games, get a plan."*
+- Same rename in `NavSearchPalette.tsx` and `Topics.tsx` for consistency.
+- Verify `/coach` route renders `src/pages/Coach.tsx` (already wired in `App.tsx:272`).
+- Add an `AICoachIntroCard` at the top of `Coach.tsx` (collapsible, dismissible via localStorage) explaining the 3 things the coach does: **Answer questions**, **Review your games**, **Suggest training plans** — with example prompts as clickable chips.
 
-### B3. Daily Challenges hub konsolidacija
-- Unified `/daily` route koji u tabovima zove postojeće: DailyPuzzle, DailyMate, DailyKing, DailyChallenge
-- Single XP/coin/streak source of truth
-- Push notification scheduler (1× dnevno, 18:00 lokalno) ako je streak > 2 dana
+## 4. MasterCourse variations = engine/theory truth
 
----
+Goal: every line shown must be either (a) Stockfish top choice or (b) ECO/GM opening theory.
 
-## FAZA C — Ideje na backlog-u (ne radim sad, samo lista za diskusiju)
+- **Validator script (already exists):** `scripts-validate-tree.ts` — extend it:
+  - For each move, query a Lichess Masters opening DB snapshot (already bundled in `src/lib/lichess-explorer.ts` patterns) OR run `stockfish-repair-masterclass.ts` style Stockfish check (already in repo) at depth 18.
+  - Mark each move with `source: "theory" | "engine" | "unknown"`; fail the build on `unknown` unless explicitly whitelisted.
+- **Runtime guard:** in `src/lib/lesson-moves.ts` types, add optional `source` field on each move. `VariationsExercise` renders a small badge next to suspicious moves (only shown when `source === "unknown"`).
+- **Data sweep:** run the extended validator over `src/lib/masterclass-validated-lines.ts`, `masterclass-curated-lines.ts`, `masterclass-practice-extras.ts`. Auto-replace any move whose evaluation drops > 80cp vs Stockfish top with the engine's best move (using the existing `stockfish-repair-masterclass.ts` repair loop). Output a diff report to the chat for your review.
+- **Docs:** add `docs/MASTERCOURSE_THEORY_POLICY.md` describing the validation rule, threshold, and how to add new lines safely.
 
-| # | Ideja | ROI | Vreme |
-|---|-------|-----|-------|
-| 1 | **Google Static Maps OG za /chess/:city** stranice (slika grada + pin) → bogatije social share preview | High SEO | 2h |
-| 2 | **GBP auto-publish "Player of the week"** post (već imamo `publish-gbp-posts` cron) | Med | 1h |
-| 3 | **Places Autocomplete** za turnirske venue lokacije u Tournament create formi | Med | 2h |
-| 4 | **"Get directions" CTA** na svakom venue na /near-me i /chess/:city | Med | 30min |
-| 5 | **Weather/Pollen widget** za outdoor turnire (Google Weather API kroz connector) | Low | 2h |
-| 6 | **Country leaderboard 3D globe** (react-globe.gl) sa pin-ovima top igrača | High wow | 4h |
-| 7 | **Voice messages u chat-u** (record 5s, šalji kao Opus blob u Supabase storage) | Med-high | 3h |
-| 8 | **AI Coach summary posle partije** (text + TTS): "Tvoja partija u 30 reči" + audio play | High retention | 3h |
-| 9 | **Auto-generated YouTube Shorts** od top game snippet-a (h2h ko može + ffmpeg) — eksperiment | Low | 1d+ |
-| 10 | **"Replay my game" QR code** na štampanom certifikatu | Low | 1h |
+## Technical details
 
----
+- Strip regex: `/^\s*(?:\d+\s*\.{1,3}\s*)?(?:SAN\s*[—\-:,]?\s*)?/i` with SAN escaped.
+- Voice clip storage uses the existing Lovable Assets CDN (no Supabase Storage bucket needed).
+- No new DB migrations.
+- No breaking API changes — `speak()` continues to work; `speakClipOrText()` is additive.
 
-## Šta odobravaš?
+## Files touched
 
-- **(A)** Faza A sva 4 podzadatka — krećem odmah
-- **(A + B1)** Faza A + AI Voice Coach (najveći item iz tvog spec-a)
-- **(custom)** napiši šta tačno hoćeš prvo, npr. "Faza A bez voice chat-a + B2 share card"
+- `src/components/learn/VariationsExercise.tsx` (dedup + clip wiring)
+- `src/hooks/use-nikola-voice.ts` (clip playback path)
+- `src/lib/nikola-voice-clips.ts` *(new)*
+- `src/assets/voice/README.md` *(new)*
+- `src/components/Navbar.tsx`, `src/components/NavSearchPalette.tsx`, `src/pages/Topics.tsx` (label + desc)
+- `src/pages/Coach.tsx` (intro card)
+- `src/pages/Settings.tsx` (real-voice toggle)
+- `supabase/functions/explain-variation/index.ts` (tighter prompt)
+- `scripts-validate-tree.ts` (theory/engine validation)
+- `src/lib/lesson-moves.ts` (`source` field)
+- `docs/MASTERCOURSE_THEORY_POLICY.md` *(new)*
