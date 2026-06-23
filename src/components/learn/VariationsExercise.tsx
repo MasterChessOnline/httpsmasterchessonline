@@ -99,10 +99,11 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
 
         // Speak the summary intro for the variation
         if (result.summary && !voice.muted) {
-          const intro = `${current.name ? current.name + ". " : ""}${result.summary}`;
+          const cleanSummary = stripMovePrefix("", result.summary);
+          const intro = `${current.name ? current.name + ". " : ""}${cleanSummary}`.trim();
           setTranscript(intro);
           lastSpokenRef.current = intro;
-          voice.speak(intro).catch(() => { /* ignore */ });
+          voice.speakClipOrText(intro, { courseId: courseId!, variationId }).catch(() => { /* ignore */ });
         }
       } catch { /* ignore */ }
       finally {
@@ -114,10 +115,13 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, courseId, variationId]);
 
-  // AI explanations array aligned to current.moves
+  // AI explanations array aligned to current.moves (cleaned of duplicate SAN/turn-number prefixes).
   const moveExplanations = useMemo(() => {
     if (!ai?.moves) return undefined;
-    return current.moves.map((m, i) => ai.moves[i]?.san === m.san ? ai.moves[i].explanation : (ai.moves[i]?.explanation || m.explanation));
+    return current.moves.map((m, i) => {
+      const raw = ai.moves[i]?.san === m.san ? ai.moves[i].explanation : (ai.moves[i]?.explanation || m.explanation);
+      return stripMovePrefix(m.san, raw || "");
+    });
   }, [ai, current.moves]);
 
   const handleMoveIndexChange = useCallback((
@@ -125,12 +129,23 @@ export default function VariationsExercise({ variations, fallbackFen, orientatio
     info: { san: string | null; explanation: string | null; totalMoves: number }
   ) => {
     if (!info.san || moveIndex === 0) return;
-    const line = `${info.san}. ${info.explanation || ""}`.trim();
+    const cleaned = stripMovePrefix(info.san, info.explanation || "");
+    const line = cleaned ? `${info.san} — ${cleaned}` : info.san;
     if (line === lastSpokenRef.current) return;
     lastSpokenRef.current = line;
     setTranscript(line);
-    voice.speak(line).catch(() => { /* ignore */ });
-  }, [voice]);
+    voice.speakClipOrText(line, {
+      courseId: courseId || "unknown",
+      variationId,
+      moveIndex: moveIndex - 1,
+      san: info.san,
+    }).catch(() => { /* ignore */ });
+  }, [voice, courseId, variationId]);
+
+  const replayLast = () => {
+    if (!lastSpokenRef.current) return;
+    voice.speak(lastSpokenRef.current).catch(() => { /* ignore */ });
+  };
 
   const replayLast = () => {
     if (!lastSpokenRef.current) return;
