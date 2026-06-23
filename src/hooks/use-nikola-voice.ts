@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { resolveVoiceClip, isRealVoiceEnabled, type VoiceClipKey } from "@/lib/nikola-voice-clips";
+
 
 /**
  * Streams Nikola coach voice via /functions/v1/nikola-tts (SSE PCM).
