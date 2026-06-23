@@ -62,6 +62,7 @@ import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import LazyMount from "@/components/LazyMount";
+import TonightArenaBanner from "@/components/TonightArenaBanner";
 import WinStreakFlame from "@/components/WinStreakFlame";
 import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
@@ -380,7 +381,10 @@ const Index = () => {
 
         {/* ── MAIN CONTENT ── */}
         <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
-          {/* ─── Daily Spin Wheel — reward hook, FIRST below hero ─── */}
+          {/* ─── Tonight Arena — daily ritual at 20:00, fights cold-start ─── */}
+          <TonightArenaBanner />
+
+          {/* ─── Daily Spin Wheel — reward hook ─── */}
           <React.Suspense fallback={<div className="h-[280px]" />}>
             <LazyMount minHeight={280}>
               <HomeSpinWheelSection />
