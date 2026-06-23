@@ -160,9 +160,27 @@ export default function ChessInCity() {
           </div>
         </section>
 
-        <section className="mt-12 rounded-2xl border border-yellow-500/10 bg-gradient-to-br from-yellow-500/5 to-transparent p-6">
+        <section className="mt-12 rounded-2xl border border-yellow-500/10 bg-[#121216] p-6">
+          <h3 className="text-lg font-semibold mb-4">Common questions about chess in {city.city}</h3>
+          <div className="space-y-4 text-sm">
+            <div>
+              <div className="font-medium text-yellow-300 mb-1">Where can I play chess in {city.city}?</div>
+              <p className="text-zinc-400">Online for free on MasterChess, or over the board at the clubs and cafés listed above.</p>
+            </div>
+            <div>
+              <div className="font-medium text-yellow-300 mb-1">Is online chess free in {city.country}?</div>
+              <p className="text-zinc-400">Yes — MasterChess is 100% free, no ads, no paywalls.</p>
+            </div>
+            <div>
+              <div className="font-medium text-yellow-300 mb-1">How do I find clubs near me?</div>
+              <p className="text-zinc-400">The map above shows verified spots in {city.city}. Click any pin for directions.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-8 rounded-2xl border border-yellow-500/10 bg-gradient-to-br from-yellow-500/5 to-transparent p-6">
           <h3 className="text-lg font-semibold mb-2">More chess cities</h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mb-4">
             {SEO_CITIES.slice(0, 20).filter((c) => c.slug !== city.slug).map((c) => (
               <Link
                 key={c.slug}
@@ -173,6 +191,9 @@ export default function ChessInCity() {
               </Link>
             ))}
           </div>
+          <Link to="/chess-map" className="inline-flex items-center gap-1 text-xs text-yellow-300 hover:text-yellow-200">
+            <MapPin className="w-3 h-3" /> See the full Chess World Map →
+          </Link>
         </section>
       </div>
     </div>
