@@ -21,6 +21,24 @@ interface AIExplanations {
   moves: { san: string; explanation: string }[];
 }
 
+/**
+ * Strip leading move-number prefixes (e.g. "13.", "13...") and an echoed SAN
+ * from the start of an explanation, plus any leading separators. Prevents
+ * the coach from saying "b5. 13.b5 — break!" instead of just "break!".
+ */
+function stripMovePrefix(san: string, text: string): string {
+  if (!text) return "";
+  const sanEsc = san.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  let out = text.trim();
+  // Drop a leading "13." / "13..." / "13. " optionally followed by the SAN.
+  out = out.replace(new RegExp(`^\\s*\\d+\\s*\\.{1,3}\\s*(?:${sanEsc})?\\s*`, "i"), "");
+  // Drop a bare leading SAN echo: "b5", "Nf3", "O-O".
+  out = out.replace(new RegExp(`^\\s*${sanEsc}\\b\\s*`, "i"), "");
+  // Drop common leading separators left behind.
+  out = out.replace(/^[\s\-—–:,.]+/, "");
+  return out.trim();
+}
+
 export default function VariationsExercise({ variations, fallbackFen, orientation = "white", courseId, courseTitle }: Props) {
   const [active, setActive] = useState(0);
   const [ai, setAi] = useState<AIExplanations | null>(null);
