@@ -278,6 +278,54 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_id: string | null
+          body_md: string
+          cover_url: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          published_at: string | null
+          reading_minutes: number | null
+          slug: string
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          body_md: string
+          cover_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          reading_minutes?: number | null
+          slug: string
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          body_md?: string
+          cover_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          reading_minutes?: number | null
+          slug?: string
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bot_games: {
         Row: {
           bot_key: string | null
@@ -1448,6 +1496,122 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      news_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "news_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "news_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "news_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news_posts: {
+        Row: {
+          author_id: string | null
+          body_md: string | null
+          comment_count: number
+          created_at: string
+          id: string
+          kind: string
+          score: number
+          slug: string
+          source: string | null
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          body_md?: string | null
+          comment_count?: number
+          created_at?: string
+          id?: string
+          kind: string
+          score?: number
+          slug: string
+          source?: string | null
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          body_md?: string | null
+          comment_count?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          score?: number
+          slug?: string
+          source?: string | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      news_votes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "news_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_preferences: {
         Row: {
