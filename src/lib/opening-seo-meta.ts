@@ -321,8 +321,8 @@ export const OPENING_SEO: Record<string, OpeningSeoMeta> = {
     id: "nimzo-indian-defense",
     slug: "nimzo-indian-defense",
     searchVolume: 7400,
-    longTitle: "Nimzo-Indian Defense — Strategy & Best Lines",
-    longDescription: "Nimzo-Indian (1.d4 Nf6 2.c4 e6 3.Nc3 Bb4) — pin the knight, double White's c-pawns, dominate dark squares.",
+    longTitle: "Nimzo-Indian Defense (E20) — Kasparov vs Karpov 1985 & Best Lines",
+    longDescription: "Nimzo-Indian Defense (ECO E20): 1.d4 Nf6 2.c4 e6 3.Nc3 Bb4. Pin the knight, double White's c-pawns, dominate dark squares. Includes the legendary Kasparov vs Karpov 1985 World Championship games, main variations, and how to play both sides.",
     keyIdeas: [
       "Pin Nc3 with Bb4 and threaten to trade for doubled c-pawns",
       "Place the bishop on b7 for a powerful long diagonal",
