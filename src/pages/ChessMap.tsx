@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
-    google?: any;
     __initChessMap?: () => void;
   }
 }
