@@ -1084,14 +1084,18 @@ const PlayOnline = () => {
             </div>
 
 
-            {/* Clock ticker (hidden) */}
-            <ChessClock
-              whiteTime={whiteTime} blackTime={blackTime}
-              activeColor={activeClockColor} isGameOver={isGameOver}
-              onTimeOut={handleTimeOut}
-              setWhiteTime={setWhiteTime} setBlackTime={setBlackTime}
-              unlimited={unlimited}
-            />
+            {/* Clock ticker — logic only, hidden from view.
+                The visible clocks are rendered inline next to each player's name
+                above and below the board for a cleaner, more professional layout. */}
+            <div className="sr-only" aria-hidden="true">
+              <ChessClock
+                whiteTime={whiteTime} blackTime={blackTime}
+                activeColor={activeClockColor} isGameOver={isGameOver}
+                onTimeOut={handleTimeOut}
+                setWhiteTime={setWhiteTime} setBlackTime={setBlackTime}
+                unlimited={unlimited}
+              />
+            </div>
             </div>
           </div>
 

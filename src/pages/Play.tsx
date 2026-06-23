@@ -1180,7 +1180,7 @@ const Play = () => {
           {/* Board column */}
           <div className="w-full max-w-[min(96vw,560px)] lg:max-w-[min(calc(100svh-4rem),82vw,1400px)] xl:max-w-[min(calc(100svh-4rem),80vw,1600px)] 2xl:max-w-[min(calc(100svh-4rem),1800px)] space-y-1.5 relative">
 
-            {/* Opponent bar (top) */}
+            {/* Opponent bar (top) — clock sits inline next to the name */}
             <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all ${
               game.turn() === aiColor && !isGameOver
                 ? "bg-primary/5 border-primary/30"
@@ -1206,9 +1206,25 @@ const Play = () => {
                   )}
                 </div>
               )}
+              {!unlimited && (
+                <span className={`font-mono text-base font-bold tabular-nums px-2 py-1 rounded-md border ${
+                  game.turn() === aiColor && !isGameOver
+                    ? ((aiColor === "w" ? whiteTime : blackTime) <= 10
+                        ? "text-destructive border-destructive/60 bg-destructive/10"
+                        : (aiColor === "w" ? whiteTime : blackTime) <= 30
+                          ? "text-orange-400 border-orange-400/50 bg-orange-400/10"
+                          : "text-foreground border-primary/40 bg-primary/10")
+                    : "text-muted-foreground border-border/40 bg-card/60"
+                }`}>
+                  {`${Math.floor((aiColor === "w" ? whiteTime : blackTime) / 60)}:${String((aiColor === "w" ? whiteTime : blackTime) % 60).padStart(2, "0")}`}
+                </span>
+              )}
             </div>
 
-            <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor} isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
+            {/* Clock ticker — logic only, hidden. Visible clocks live in the player bars. */}
+            <div className="sr-only" aria-hidden="true">
+              <ChessClock whiteTime={whiteTime} blackTime={blackTime} activeColor={activeClockColor} isGameOver={isGameOver} onTimeOut={handleTimeOut} setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} unlimited={unlimited} />
+            </div>
             <CapturedPieces game={game} color={boardFlipped ? "w" : "b"} />
 
             <ChessBoard4D enabled={mode4D}>
@@ -1264,6 +1280,19 @@ const Play = () => {
               </div>
               {game.turn() === playerColor && !isGameOver && (
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              )}
+              {!unlimited && (
+                <span className={`font-mono text-base font-bold tabular-nums px-2 py-1 rounded-md border ${
+                  game.turn() === playerColor && !isGameOver
+                    ? ((playerColor === "w" ? whiteTime : blackTime) <= 10
+                        ? "text-destructive border-destructive/60 bg-destructive/10"
+                        : (playerColor === "w" ? whiteTime : blackTime) <= 30
+                          ? "text-orange-400 border-orange-400/50 bg-orange-400/10"
+                          : "text-foreground border-primary/40 bg-primary/10")
+                    : "text-muted-foreground border-border/40 bg-card/60"
+                }`}>
+                  {`${Math.floor((playerColor === "w" ? whiteTime : blackTime) / 60)}:${String((playerColor === "w" ? whiteTime : blackTime) % 60).padStart(2, "0")}`}
+                </span>
               )}
             </div>
 
