@@ -16,6 +16,7 @@ import { GRANDMASTERS } from "../src/data/grandmasters";
 import { SEO_CITIES } from "../src/lib/seo-cities";
 import { SR_LANDINGS } from "../src/lib/seo-landings-sr";
 import { EN_LANDINGS } from "../src/lib/seo-landings-en";
+import { AGE_GUIDES } from "../src/data/ageGuides";
 
 const BASE_URL = "https://masterchess.live";
 
@@ -232,6 +233,11 @@ const eloEntries: SitemapEntry[] = [
   { path: "/elo", changefreq: "weekly", priority: "0.8" },
   ...ELO_TIERS.map((t) => ({ path: `/elo/${t.rating}`, changefreq: "monthly" as const, priority: "0.7" })),
 ];
+
+const ageGuideEntries: SitemapEntry[] = [
+  { path: "/chess-for", changefreq: "monthly", priority: "0.8" },
+  ...AGE_GUIDES.map((g) => ({ path: `/chess-for/${g.slug}`, changefreq: "monthly" as const, priority: "0.7" })),
+];
 const famousGameEntries: SitemapEntry[] = [
   { path: "/famous-games", changefreq: "weekly", priority: "0.85" },
   ...FAMOUS_GAMES.map((g) => ({ path: `/famous-games/${g.slug}`, changefreq: "monthly" as const, priority: "0.8" })),
@@ -321,6 +327,7 @@ writeFileSync(resolve("public/sitemap-famous-games.xml"), buildUrlset(famousGame
 writeFileSync(resolve("public/sitemap-players.xml"), buildUrlset(playerEntries));
 writeFileSync(resolve("public/sitemap-cities.xml"), buildUrlset(cityEntries));
 writeFileSync(resolve("public/sitemap-landings.xml"), buildUrlset(seoLandingEntries));
+writeFileSync(resolve("public/sitemap-chess-for.xml"), buildUrlset(ageGuideEntries));
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -339,6 +346,7 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap-players.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-cities.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-landings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-chess-for.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
