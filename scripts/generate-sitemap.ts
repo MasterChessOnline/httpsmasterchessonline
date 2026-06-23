@@ -32,6 +32,8 @@ const today = new Date().toISOString().slice(0, 10);
 const staticEntries: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess — Play Chess Online Free", caption: "Free online chess platform with AI coach, tournaments, and lessons." } },
   { path: "/built-by-a-kid", changefreq: "monthly", priority: "0.8" },
+  { path: "/nikola-sakotic", changefreq: "monthly", priority: "0.9" },
+  { path: "/founder", changefreq: "monthly", priority: "0.7" },
   { path: "/no-ads-chess", changefreq: "monthly", priority: "0.8" },
   { path: "/play-chess-with-friends-free", changefreq: "monthly", priority: "0.9" },
   { path: "/best-free-chess-site-2026", changefreq: "monthly", priority: "0.9" },
