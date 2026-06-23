@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Eye, Users, Clock, ChevronRight } from "lucide-react";
+import { Eye, Clock, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import DynamicBackground from "@/components/DynamicBackground";
+import EmptyLobbyActions from "@/components/EmptyLobbyActions";
 
 interface LiveGame {
   id: string;
@@ -92,18 +92,10 @@ const Spectate = () => {
             <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
           </div>
         ) : liveGames.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
-          >
-            <Eye className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground mb-2">No live games right now</p>
-            <p className="text-xs text-muted-foreground mb-6">Games will appear here when players are competing</p>
-            <Link to="/play/online">
-              <Button>Start a Game</Button>
-            </Link>
-          </motion.div>
+          <EmptyLobbyActions
+            title="No live games right now"
+            subtitle="Start one and you'll be the first match other players join."
+          />
         ) : (
           <div className="max-w-2xl mx-auto space-y-3">
             {liveGames.map((game, i) => {
