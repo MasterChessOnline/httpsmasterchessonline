@@ -420,6 +420,7 @@ function AnimatedRoutes() {
           <Route path="/chess/:slug" element={<ChessInCity />} />
           <Route path="/near-me" element={<NearMe />} />
           <Route path="/players/world" element={<PlayerHeatmap />} />
+          <Route path="/chess-map" element={<ChessMap />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>
