@@ -95,6 +95,7 @@ const Changelog = lazy(() =>
 const ChessInCity = lazy(() => import("./pages/ChessInCity"));
 const NearMe = lazy(() => import("./pages/NearMe"));
 const PlayerHeatmap = lazy(() => import("./pages/PlayerHeatmap"));
+const ChessMap = lazy(() => import("./pages/ChessMap"));
 const AlternativeToMajorChessSites = lazy(() =>
   import("./pages/seo-landings").then((m) => ({ default: m.AlternativeToMajorChessSites })),
 );
