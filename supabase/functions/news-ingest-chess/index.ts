@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
             {
               slug,
               title: item.title.slice(0, 200),
-              kind: "link",
+              kind: "world",
               url: item.link,
               source: feed.source,
               body_md: item.desc || null,
