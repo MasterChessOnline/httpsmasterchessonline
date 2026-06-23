@@ -1,97 +1,88 @@
+## Zašto imaš malo igrača (realno)
 
-# MasterChess Growth Loop — Implementation Plan
+Tvoj sajt je tehnički jak (MasterCourse, botovi, turniri, klanovi), ali pati od **cold-start problema**: novi posetilac dođe → vidi prazne lobije → ode. Plus, Google te još uvek slabo rangira jer je domen mlad (`masterchess.live`) i ima malo backlinkova.
 
-Goal: ship the 4 highest-leverage pieces from your brief (News, Puzzles loop, Blog, Maps/Reviews) plus the SEO plumbing that ties them together. Everything stays English, matches the existing Gold & Black design, and respects the "no fake engagement" rule.
-
----
-
-## 1. `/news` — Hacker News–style feed (NEW)
-
-A real, voteable feed that mixes platform updates, chess world news, and community posts. Gives Google fresh content + engagement signals daily.
-
-- **New table `news_posts`** (title, url, slug, body_md, kind: `update`|`world`|`community`, source, author_id, created_at, score cache).
-- **New table `news_votes`** (post_id, user_id, value ±1, unique). Score = sum; trending = HN formula `(score-1)/(age_hours+2)^1.8`.
-- **New table `news_comments`** (post_id, user_id, body, parent_id) — threaded, optional v1.
-- RLS + GRANTs per project rules. `service_role` for edge-function inserts.
-- **Edge function `news-ingest-chess`** — pulls a curated chess RSS list (FIDE, Chess.com news RSS is OK as a backend source per the brand-policy memory: backend ingestion fine, never credit competitors in UI; we'll strip source branding and show "World Chess News" tag). Runs hourly via `pg_cron`.
-- **Edge function `news-autopost-updates`** — when a release marker is dropped in `site_config.release_notes`, it auto-creates an `update` post.
-- **Page `src/pages/News.tsx`** — HN-style list: rank, ▲/▼, title, kind chip, score, age, comments link. Routes: `/news`, `/news/:slug`, `/news/submit` (auth required).
-- Full SEO: `<Seo>` per item, JSON-LD `NewsArticle` + `ItemList` on index, added to `sitemap.xml` generator.
-- Navbar entry under "Community".
-
-Anti-fake-engagement: no seeded votes, no ghost authors. World-news items show `source: world` with no fake score; only real user votes move them.
-
-## 2. `/blog` — SEO content engine (NEW)
-
-3 posts/week, MDX-style stored in DB so non-devs can publish.
-
-- **New table `blog_posts`** (slug, title, excerpt, body_md, cover_url, tags[], status, published_at, author_id, reading_minutes).
-- **Page `src/pages/Blog.tsx`** + `src/pages/BlogPost.tsx`. Markdown renderer via `react-markdown` (already in deps if not, add).
-- **Admin page `src/pages/AdminBlog.tsx`** — gated by `has_role(uid,'admin')`. Markdown editor, preview, schedule.
-- **Seed 12 posts** matching your brief: "How to Improve Chess Fast", "Chess Basics Explained", "Best Chess Openings", "How to Stop Blunders", "Chess Tactics Guide", "Thinking Like a Chess Player", "Play Chess Online — Complete Guide", "Best Chess Training Methods", "Daily Puzzles: Why They Work", "Endgame Fundamentals", "Calculation Drills", "Reading Your Opponent".
-- JSON-LD `Article` + `BreadcrumbList`. New `sitemap-blog.xml` shard added to `sitemap_index.xml`.
-- RSS feed at `/blog/rss.xml` for IndexNow + future ingestion.
-
-## 3. Home + funnel SEO tightening
-
-- Update `<title>` / meta on `/`, `/puzzles`, `/news`, `/blog` to the exact strings from your brief.
-- Home keyword block (natural prose, not stuffing) under the hero, hidden from logged-in users to keep the play-first UX.
-- Add `/news` and `/blog` to `Navbar.tsx` and `NavSearchPalette.tsx`.
-- Add a "Daily puzzle → come back tomorrow" return CTA on puzzle complete (uses existing `use-daily-streak`).
-
-## 4. Google Search Console automation
-
-- New edge function `news-indexnow-ping` — fires IndexNow + GSC submit for every new news/blog URL on insert (uses existing `INDEXNOW_KEY`).
-- Extend `scripts/generate-sitemap.ts` to pull `news_posts` and `blog_posts` from DB at build time → `sitemap-news.xml`, `sitemap-blog.xml`. Add both to `sitemap_index.xml`.
-
-## 5. Google Maps / GBP polish (docs + admin only — no UI churn)
-
-Maps/GBP setup is already shipped. We add:
-
-- `docs/GBP_COPY_PACK.md` — the exact Name, Description, Categories, Posts, Review-request templates from your brief, copy-pasteable.
-- `src/pages/AdminGbpPosts.tsx` already exists — extend with the 3 post templates from your brief preloaded as drafts.
-- `GoogleReviewsBlock` is already on the site; add it to `/about` and Home footer band so trust signal shows up sitewide.
-
-No fake reviews seeded — playbook only.
-
-## 6. What we are NOT changing
-
-- No redesign of Home (per Core memory veto).
-- No competitor brand names in any UI copy.
-- No fake votes/comments/reviews — every engagement primitive is real-user-only.
-- AI Voice Coach, game-board layout, MasterCourse work from prior turns: untouched.
+Rešenje nije "još features" — rešenje je **3 paralelna kanala akvizicije** + **retention loop**.
 
 ---
 
-## Technical notes (for the dev side)
+## Plan: 3 kanala + retention (14 dana)
 
-```text
-migrations/
-  news_posts, news_votes, news_comments  (+ GRANTs, RLS, has_role policies for admin moderation)
-  blog_posts                              (+ GRANTs, RLS)
-supabase/functions/
-  news-ingest-chess/index.ts              (RSS → news_posts, kind='world')
-  news-autopost-updates/index.ts          (release marker → kind='update')
-  news-indexnow-ping/index.ts             (on new slug → IndexNow + GSC)
-src/pages/
-  News.tsx, NewsItem.tsx, NewsSubmit.tsx
-  Blog.tsx, BlogPost.tsx, AdminBlog.tsx
-src/components/
-  NewsRow.tsx, VoteArrows.tsx, BlogCard.tsx
-scripts/generate-sitemap.ts                (+ news/blog shards)
-public/sitemap_index.xml                   (+ 2 new shard rows)
-docs/GBP_COPY_PACK.md                      (new — copy/paste pack)
-```
+### KANAL 1 — SEO long-tail (besplatan, spor ali trajan)
 
-Cron:
-```sql
-select cron.schedule('news-ingest-hourly','0 * * * *', $$select net.http_post(...) /* news-ingest-chess */ $$);
-```
+**Cilj:** Da kad neko gugla "how to beat 1200 elo bot" ili "caro-kann trap", **mi** budemo na 1. strani.
+
+1. **Aktiviraj već pripremljenu `/beat/{botId}` landing stranicu** za svih 9 botova (Bronze → GM). Svaka = 800 reči, unique opening trap, "Play this bot now" CTA.
+2. **Pokreni Wave B blog seeding** — 12 SEO članaka (već planiranih):
+   - "How to beat the London System as Black"
+   - "5 Caro-Kann traps under 1500 elo"
+   - "Best chess openings for beginners 2026"
+   - itd.
+3. **Submit sitemap u Google Search Console** (konektor je već dostupan, mogu da verifikujem domen i podnesem `sitemap_index.xml` za tebe).
+4. **IndexNow ping** na svaki novi post (već imamo edge function).
+
+**Očekivani efekat:** prvi organski poseti za 3–6 nedelja, ozbiljan rast za 2–3 meseca.
 
 ---
 
-## Open questions before I build
+### KANAL 2 — Viralni share (brz, zavisi od postojećih igrača)
 
-1. **Scope of v1**: do you want all 6 sections in one go, or ship in 2 waves (Wave A = News + sitemap/SEO, Wave B = Blog + GBP pack)?
-2. **Comments on `/news`**: ship v1 with comments, or links-only first and comments later?
-3. **Blog seeding**: do you want me to write the full body for all 12 posts (~600-900 words each), or stubs + outline that you/Coach AI finish?
+1. **`/vs/{code}` viralni link** (već postoji u memoriji kao feature) — posle svake partije: "Share this game" → generiše OG image sa finalnom pozicijom + rezultatom → kada neko klikne, vodi ga direktno u challenge mod protiv tebe.
+2. **OG image generator** za svaku partiju (canvas → PNG → Twitter/WhatsApp/Discord preview izgleda profesionalno, ne kao prazan link).
+3. **"Challenge a friend" dugme** posle pobede sa pre-popunjenim WhatsApp/Telegram/X share tekstom.
+
+**Očekivani efekat:** K-faktor 0.2–0.4 (svaki igrač dovede 1 novog na svake 3–5 partija).
+
+---
+
+### KANAL 3 — Sadržajni hub (DailyChess_12 + News loop)
+
+1. **`/news` feed** (već postoji) — aktiviraj **chess RSS auto-ingest** (Wave B): svaki sat ulazi 3–5 svežih chess vesti iz curated izvora → sajt deluje živo i kad nema igrača online.
+2. **DailyChess_12 embed na Home** — već imaš stream hub, dodaj "Latest video" thumbnail u Home above-the-fold da posetilac odmah vidi sveži video sadržaj.
+3. **Daily puzzle return-CTA** — kad reši dnevnu zagonetku: "Come back tomorrow for a new one" + opciono email/push reminder.
+
+**Očekivani efekat:** Bounce rate ↓, daily returning users ↑, "ghost town" osećaj nestaje.
+
+---
+
+### RETENTION — da oni koji dođu ne odu
+
+1. **Onboarding wizard** za prvi put (3 koraka: rating estimate → izaberi favorite opening → odigraj 1 partiju protiv preporučenog bota).
+2. **Daily mission notification** (već postoji gamification, samo aktivirati push trigger).
+3. **Email digest** posle 7 dana neaktivnosti: "Tvoj rating te čeka, evo 3 nove stvari na sajtu".
+
+---
+
+## Šta predlažem da uradimo prvo (ovaj sprint)
+
+**Talas 1 (sad, ~1 dan rada):**
+- ✅ Verifikuj domen u Google Search Console + submit sitemap (mogu odmah)
+- ✅ Ship Wave B: RSS auto-ingest za `/news` + 12 seeded blog postova
+- ✅ Aktiviraj `/beat/{botId}` SEO landing za svih 9 botova
+
+**Talas 2 (sledeći sprint):**
+- OG image generator + viralni share flow posle partije
+- Onboarding wizard za nove korisnike
+- Push notif za daily puzzle/mission
+
+**Talas 3 (kad imaš ~100 DAU):**
+- Email digest sistem
+- Influencer outreach (chess streameri na YT/Twitch — DailyChess_12 je već u sistemu)
+- Reddit/Discord community seeding (organski, ne spam)
+
+---
+
+## Šta NE preporučujem (i zašto)
+
+- ❌ **Plaćene reklame (Google/Meta ads)** — dok god je retention nizak, palićeš pare. Prvo popravi onboarding + viral loop.
+- ❌ **Fake aktivnost / ghost igrači u lobiju** — protivno tvojoj core constraint memoriji ("zero fake engagement"). Dugoročno ubija poverenje.
+- ❌ **Redesign Home** — već si vetovao, i to je dobra odluka, problem nije u dizajnu.
+- ❌ **Pominjanje Lichess/Chess.com u UI** — protivno brand policy memoriji.
+
+---
+
+## Pitanje za tebe pre nego što počnem
+
+Koji **talas** prvo? Predlažem **Talas 1 (SEO + content)** jer je najjeftiniji u tvom vremenu, daje trajne rezultate, i koristi infrastrukturu koju već imaš pola izgrađenu. Talas 2 (viral share) je moćniji ali zahteva da prvo imaš bazu igrača koji će deliti.
+
+Reci samo **"kreni Talas 1"** ili izaberi drugačiji redosled, pa krećem.
