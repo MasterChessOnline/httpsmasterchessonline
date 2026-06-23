@@ -1,60 +1,65 @@
-## Iskreno — zašto nemaš igrače
+## Cilj
+Maksimalno pojačati vidljivost MasterChess-a kroz Google Search Console, Google Maps i PR (portali/mediji), bez trošenja kredita na stvari koje ne donose igrače.
 
-Reći ću ti tačno, bez sranja:
+## Šta predlažem (po prioritetu ROI)
 
-1. **SEO ne radi za 2 nedelje.** Sve što sam uradio (sitemap, blog, news) **počinje da donosi traffic za 2-6 meseci**. To je realnost mladog domena.
-2. **Nikoga nije briga za "MasterChess" kao brand.** Niko ga ne traži na Google-u.
-3. **Ali ljude zanima ZA TEBE.** "13-godišnji klinac napravio chess sajt" je priča koja se sama deli.
+### 1. Google Search Console — dodatno (~10 kredita)
+- **URL Inspection + Request Indexing** za 10 najvažnijih stranica (Home, /nikola-sakotic, /play-guest, /puzzles, /openings, /tournaments, /battle-royale, /vs/{code}, /beat/magnus-bot, /community) — gura ih u indeks za par dana umesto par nedelja.
+- **Performance API report** — koje queries već donose impresije ali NE klikove (pozicije 8–20). Te stranice prepravljamo (title/H1/meta) jer su "low-hanging fruit".
+- **Fix sitemap error** — `sitemap.xml` ima `errors: 1`. Naći i popraviti.
+- **Core Web Vitals report** — provera da li LCP/CLS koče indeksiranje.
 
-Tvoj **stvarni** marketing kanal nije SEO. Nije Maps. Nije ads. **TI si marketing.** Lični brand → sajt. Ne obrnuto.
+### 2. Google Maps / Business Profile (~5 kredita kod, ostalo ručno)
+**Važno:** Google Business Profile zahteva fizičku lokaciju ili "service area business". MasterChess je online servis — ne kvalifikuje se za klasičan Maps pin. Realne opcije:
+- **Google Knowledge Panel za Nikola Šakotić** kroz Person schema (već urađeno) + Wikidata entry (ručno, ja pripremim tekst).
+- **Google Business Profile kao "Service Area"** registrovan na Nikolinu adresu (Beograd/region) — ako pristaješ, dam ti uputstvo korak po korak. Tu možeš dodavati fotografije sajta, postove, recenzije.
+- **Google Posts** preko Business Profile-a — nedeljne objave o turnirima, puzzlesima.
 
----
+### 3. PR / Portali — copy-paste pitch-evi (~15 kredita)
+Pripremam **gotove mejlove i pitch tekstove** za:
+- **Srpski tech portali:** Netokracija, Startit, Benchmark, Mondo Tech, B92 Tehnologija, Telegraf Tech, Blic Zona
+- **Omladinski/edukativni:** RTS Klinci, Politikin Zabavnik, NIN, Nedeljnik
+- **Šahovski:** Šahovski Savez Srbije bilten, lokalni šah klubovi (mejling lista)
+- **Internacionalno (engleski):** TechCrunch tips, Hacker News (već u planu), IndieHackers, Product Hunt launch, BetaList, Reddit r/InternetIsBeautiful
 
-## Plan: 1 stvar koja zaista može doneti igrače u 7 dana
+Angle za sve: **"13-godišnji dečak iz Srbije napravio chess platformu koja konkuriše Chess.com-u"** — to je priča koja se sama prodaje.
 
-### A. Stranica `/nikola-sakotic` — "Founder of MasterChess"
+### 4. Dodatne viralne ideje (besplatne, samo treba uraditi)
+- **TikTok/Instagram Reels** — Nikola snima 30s "kako sam napravio sajt sa 13 godina" → linkuje masterchess.live u bio
+- **YouTube DailyChess_12** — pin video "Igraj na mom sajtu" + link u opisu svakog videa
+- **Šah turniri u školama** — ponuda lokalnim školama: besplatan turnir na MasterChess platformi
+- **Sticker/QR kod kampanja** — print QR koji vodi na /play-guest, lepi po šah klubovima u Beogradu
+- **Discord server MasterChess** — community hub, daily puzzle, turniri
+- **Wikipedia stranica "Nikola Šakotić"** — ako se kvalifikuje (treba 2-3 nezavisna izvora prvo → otud PR)
 
-Posebna SEO-optimizovana stranica o tebi sa:
+### 5. Šta NE radimo (gubitak kredita)
+- Više landing stranica (već imamo 1000+)
+- Više blog postova (nema ko da čita)
+- Plaćeni Google/Meta Ads (skupo, mali ROI za young domain)
+- Email kampanje (nemamo listu)
 
-- **Person JSON-LD schema** (`@type: Person`, `name: Nikola Šakotić`, `jobTitle: Founder & Developer`, `worksFor: MasterChess`, `birthDate: 2013`, `url`, `image`, `sameAs` na tvoje social profile)
-- **Organization schema** na Home koja pokazuje na tebe kao founder-a → ovo Google koristi za **Knowledge Panel**
-- Tvoja priča (300-500 reči, engleski): kako si počeo programirati, zašto si napravio MasterChess, šta je sledeće
-- Link na sajt iz svake sekcije (interna povezanost = SEO juice za tvoje ime)
-- **Submit u GSC** za prioritetno indeksiranje
+## Plan izvršenja (ako odobriš)
 
-**Cilj:** Kad neko za 2-3 nedelje gugla "Nikola Sakotic" ili "Nikola Šakotić chess", izlazi tvoja stranica + MasterChess.
+**Faza A — Tehnički (ja radim, ~30 kredita):**
+1. GSC: Request Indexing za 10 ključnih URL-ova
+2. GSC: Performance report → identifikuj "page 2" queries
+3. Popravi sitemap error
+4. Generiši `docs/PR_PITCHES.md` sa 15+ gotovih mejlova (srpski + engleski)
+5. Generiši `docs/GOOGLE_BUSINESS_SETUP.md` — korak po korak za GBP
+6. Generiši `docs/WIKIDATA_NIKOLA.md` — gotov entry za Wikidata
+7. Generiši `docs/TIKTOK_SCRIPTS.md` — 10 video scenarija za Nikolu
 
-### B. Copy-paste Reddit/HN post koji TI treba da postaviš
+**Faza B — Ti radiš (ručno, besplatno):**
+- Šalješ mejlove portalima (template-i gotovi)
+- Postavljaš Google Business Profile
+- Snimaš TikTok/Reels
+- Postavljaš na Reddit/HN (template-i već gotovi)
 
-Napisaću ti spreman tekst za:
+## Pitanje pre nego što krenem
+Koja faza ti je prioritet?
+- **A** Samo GSC tehnički (10 kredita, brzo)
+- **B** PR pitch-evi za portale (15 kredita, najveći ROI dugoročno)
+- **C** Sve od navedenog (30 kredita)
+- **D** Nešto drugo — reci šta
 
-- **r/chess** (200k članova) — "I'm 13 and built a chess site from scratch — would love your feedback"
-- **r/SideProject** (200k) — "I built MasterChess at 13 — chess platform with bots, tournaments, no ads"
-- **Hacker News Show HN** — "Show HN: MasterChess — Chess platform I built at 13"
-- **Twitter/X thread** — 5-tweet story sa screenshot-ima
-
-**Jedan viralni post na r/chess = 1000-10000 posetilaca za 24h.** To je 100x više nego ceo SEO trud zajedno za isti period.
-
-**Ali postoji 1 uslov:** Postove **TI sam moraš da postaviš** sa svog naloga. Reddit ban-uje botove i nove naloge bez karme. Daću ti tekst, ti samo paste-uješ.
-
-### C. Što NEĆU raditi (i pravac zašto)
-
-- ❌ Više blog postova — već imaš 12, niko ih neće videti pre nego što dobijes traffic odnekud drugde
-- ❌ Više landing strana — već imaš 1087 u sitemap-u
-- ❌ Email kampanju — nemaš email listu
-- ❌ Plaćene reklame — palićeš pare bez retention sistema
-
----
-
-## Šta tačno dobijaš za ovu sesiju
-
-1. **`/nikola-sakotic` stranica** sa Person schema + Organization founder link na Home
-2. **`docs/MARKETING_POSTS.md`** — 4 spremne objave (Reddit ×2, HN, Twitter thread) na engleskom, copy-paste ready
-3. **GSC submit + indexing request** za novu stranicu
-4. **Linkove na novu stranicu iz Navbar-a i Home-a** (interna povezanost)
-
-To je sve. Jedan fokusiran sprint. Bez gluposti.
-
----
-
-**Reci "kreni" pa radim. Ili reci šta dodaješ/menjaš.**
+Napiši A / B / C / D ili "kreni sve".
