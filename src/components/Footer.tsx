@@ -78,6 +78,7 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => {
               { label: "Achievements", href: "/achievements" },
               { label: "Friends", href: "/friends" },
               { label: "Community", href: "/community" },
+              { label: "Chess World Map", href: "/chess-map" },
               { label: "Live · DailyChess_12", href: "/live" },
               { label: "About", href: "/about" },
               { label: "Fair Play", href: "/fair-play" },

@@ -95,6 +95,7 @@ const Changelog = lazy(() =>
 const ChessInCity = lazy(() => import("./pages/ChessInCity"));
 const NearMe = lazy(() => import("./pages/NearMe"));
 const PlayerHeatmap = lazy(() => import("./pages/PlayerHeatmap"));
+const ChessMap = lazy(() => import("./pages/ChessMap"));
 const AlternativeToMajorChessSites = lazy(() =>
   import("./pages/seo-landings").then((m) => ({ default: m.AlternativeToMajorChessSites })),
 );
@@ -419,6 +420,7 @@ function AnimatedRoutes() {
           <Route path="/chess/:slug" element={<ChessInCity />} />
           <Route path="/near-me" element={<NearMe />} />
           <Route path="/players/world" element={<PlayerHeatmap />} />
+          <Route path="/chess-map" element={<ChessMap />} />
           <Route path="*" element={<NotFound />} />
 
         </Routes>

@@ -163,6 +163,7 @@ const cityEntries: SitemapEntry[] = [
   })),
   { path: "/near-me", changefreq: "weekly" as const, priority: "0.7" },
   { path: "/players/world", changefreq: "weekly" as const, priority: "0.7" },
+  { path: "/chess-map", changefreq: "daily" as const, priority: "0.9" },
 ];
 
 // SEO long-tail landing pages (EN + SR)
