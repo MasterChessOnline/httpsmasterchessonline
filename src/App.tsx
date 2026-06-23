@@ -172,6 +172,10 @@ const BeatBotLanding = lazy(() => import("./pages/BeatBotLanding"));
 const PlayFromCity = lazy(() => import("./pages/PlayFromCity"));
 const SeoLandingRoute = lazy(() => import("./pages/SeoLandingRoute"));
 const StreamerOverlay = lazy(() => import("./pages/StreamerOverlay"));
+const News = lazy(() => import("./pages/News"));
+const NewsItem = lazy(() => import("./pages/NewsItem"));
+const NewsSubmit = lazy(() => import("./pages/NewsSubmit"));
+const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 
 
 // Eager components (used in every page chrome)
@@ -233,6 +237,10 @@ function AnimatedRoutes() {
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<LearnArticle />} />
+          <Route path="/news" element={<News />} />
+          <Route path="/news/submit" element={<NewsSubmit />} />
+          <Route path="/news/:slug" element={<NewsItem />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
           <Route path="/world-tournaments" element={<WorldTournaments />} />

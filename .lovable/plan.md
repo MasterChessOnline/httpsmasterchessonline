@@ -1,76 +1,97 @@
-# MasterCourse + Navigation Upgrades
 
-## 1. Fix coach text duplication
+# MasterChess Growth Loop — Implementation Plan
 
-**File:** `src/components/learn/VariationsExercise.tsx` (`handleMoveIndexChange`)
+Goal: ship the 4 highest-leverage pieces from your brief (News, Puzzles loop, Blog, Maps/Reviews) plus the SEO plumbing that ties them together. Everything stays English, matches the existing Gold & Black design, and respects the "no fake engagement" rule.
 
-Currently: `` `${info.san}. ${info.explanation}` `` → AI sometimes returns explanations that already include `"13.b5 — break!"`, producing `"b5. 13.b5 — break!"`.
+---
 
-Changes:
-- Add a `stripMovePrefix(san, text)` helper that removes any leading:
-  - turn number + dot (`13.`, `13...`, `13. `)
-  - bare SAN echo (`b5`, `Nf3`)
-  - common separators (`—`, `-`, `:`, `,`)
-- Apply it to both the per-move `info.explanation` and to `ai.summary` before speaking.
-- Final spoken line becomes: `` `${san} — ${cleanedExplanation}` ``, with no separator when explanation is empty.
-- Also tighten the prompt in `supabase/functions/explain-variation/index.ts` to instruct the model: *"Do NOT repeat the SAN or include move numbers — start directly with the idea."*
+## 1. `/news` — Hacker News–style feed (NEW)
 
-## 2. Real-voice audio architecture (ready for your recordings)
+A real, voteable feed that mixes platform updates, chess world news, and community posts. Gives Google fresh content + engagement signals daily.
 
-Goal: drop-in `.mp3`/`.wav` overrides per lesson/variation/move; fall back to TTS when missing.
+- **New table `news_posts`** (title, url, slug, body_md, kind: `update`|`world`|`community`, source, author_id, created_at, score cache).
+- **New table `news_votes`** (post_id, user_id, value ±1, unique). Score = sum; trending = HN formula `(score-1)/(age_hours+2)^1.8`.
+- **New table `news_comments`** (post_id, user_id, body, parent_id) — threaded, optional v1.
+- RLS + GRANTs per project rules. `service_role` for edge-function inserts.
+- **Edge function `news-ingest-chess`** — pulls a curated chess RSS list (FIDE, Chess.com news RSS is OK as a backend source per the brand-policy memory: backend ingestion fine, never credit competitors in UI; we'll strip source branding and show "World Chess News" tag). Runs hourly via `pg_cron`.
+- **Edge function `news-autopost-updates`** — when a release marker is dropped in `site_config.release_notes`, it auto-creates an `update` post.
+- **Page `src/pages/News.tsx`** — HN-style list: rank, ▲/▼, title, kind chip, score, age, comments link. Routes: `/news`, `/news/:slug`, `/news/submit` (auth required).
+- Full SEO: `<Seo>` per item, JSON-LD `NewsArticle` + `ItemList` on index, added to `sitemap.xml` generator.
+- Navbar entry under "Community".
 
-- **New module:** `src/lib/nikola-voice-clips.ts`
-  - `type VoiceClipKey = { courseId: string; variationId?: string; moveIndex?: number; san?: string }`
-  - `voiceClipManifest`: a typed mapping `Record<string, string>` (key → asset URL).
-  - `resolveVoiceClip(key)`: tries most-specific match first (`course/var/move`), then `course/var`, then `course`. Returns `null` if none.
-  - `buildClipKey(...)` and `registerClip(...)` helpers so uploads are 1-line additions.
-- **New folder:** `src/assets/voice/` with a `README.md` describing the naming convention (`{courseId}__{variationId}__{moveIndex}-{san}.mp3`) and `lovable-assets create` workflow → `.asset.json` pointers auto-registered in the manifest.
-- **Hook upgrade:** `src/hooks/use-nikola-voice.ts` gets a new `speakClipOrText(text, key)` method:
-  1. If `resolveVoiceClip(key)` returns a URL → play via `HTMLAudioElement` (still feeds the existing `AnalyserNode` for lip-sync).
-  2. Else → existing TTS path.
-  Existing `speak()` API stays unchanged for backward compat.
-- **Wire it in:** `VariationsExercise` passes `{ courseId, variationId, moveIndex, san }` to `speakClipOrText` for both intro summary and per-move lines.
-- **Settings toggle:** add `"Use Nikola's real voice when available"` (default ON) in `src/pages/Settings.tsx`, persisted to localStorage and read by the hook.
+Anti-fake-engagement: no seeded votes, no ghost authors. World-news items show `source: world` with no fake score; only real user votes move them.
 
-When you upload `.m4a`/`.mp3` files later, the only action is: run `lovable-assets create`, drop the resulting `.asset.json` into `src/assets/voice/`, add one line to the manifest. No code changes elsewhere.
+## 2. `/blog` — SEO content engine (NEW)
 
-> Note: the attached `.m4a` is a *spoken instruction* from you, not a lesson clip — I will not register it as a MasterCourse voiceover. Send the actual move-explanation recordings (or a ZIP) when ready.
+3 posts/week, MDX-style stored in DB so non-devs can publish.
 
-## 3. Learn navbar → AI Coach fully functional
+- **New table `blog_posts`** (slug, title, excerpt, body_md, cover_url, tags[], status, published_at, author_id, reading_minutes).
+- **Page `src/pages/Blog.tsx`** + `src/pages/BlogPost.tsx`. Markdown renderer via `react-markdown` (already in deps if not, add).
+- **Admin page `src/pages/AdminBlog.tsx`** — gated by `has_role(uid,'admin')`. Markdown editor, preview, schedule.
+- **Seed 12 posts** matching your brief: "How to Improve Chess Fast", "Chess Basics Explained", "Best Chess Openings", "How to Stop Blunders", "Chess Tactics Guide", "Thinking Like a Chess Player", "Play Chess Online — Complete Guide", "Best Chess Training Methods", "Daily Puzzles: Why They Work", "Endgame Fundamentals", "Calculation Drills", "Reading Your Opponent".
+- JSON-LD `Article` + `BreadcrumbList`. New `sitemap-blog.xml` shard added to `sitemap_index.xml`.
+- RSS feed at `/blog/rss.xml` for IndexNow + future ingestion.
 
-- `Navbar.tsx` Learn dropdown: rename `"Coach"` → `"AI Coach"`, update `desc` to: *"Chat with your personal AI chess coach — ask anything, review games, get a plan."*
-- Same rename in `NavSearchPalette.tsx` and `Topics.tsx` for consistency.
-- Verify `/coach` route renders `src/pages/Coach.tsx` (already wired in `App.tsx:272`).
-- Add an `AICoachIntroCard` at the top of `Coach.tsx` (collapsible, dismissible via localStorage) explaining the 3 things the coach does: **Answer questions**, **Review your games**, **Suggest training plans** — with example prompts as clickable chips.
+## 3. Home + funnel SEO tightening
 
-## 4. MasterCourse variations = engine/theory truth
+- Update `<title>` / meta on `/`, `/puzzles`, `/news`, `/blog` to the exact strings from your brief.
+- Home keyword block (natural prose, not stuffing) under the hero, hidden from logged-in users to keep the play-first UX.
+- Add `/news` and `/blog` to `Navbar.tsx` and `NavSearchPalette.tsx`.
+- Add a "Daily puzzle → come back tomorrow" return CTA on puzzle complete (uses existing `use-daily-streak`).
 
-Goal: every line shown must be either (a) Stockfish top choice or (b) ECO/GM opening theory.
+## 4. Google Search Console automation
 
-- **Validator script (already exists):** `scripts-validate-tree.ts` — extend it:
-  - For each move, query a Lichess Masters opening DB snapshot (already bundled in `src/lib/lichess-explorer.ts` patterns) OR run `stockfish-repair-masterclass.ts` style Stockfish check (already in repo) at depth 18.
-  - Mark each move with `source: "theory" | "engine" | "unknown"`; fail the build on `unknown` unless explicitly whitelisted.
-- **Runtime guard:** in `src/lib/lesson-moves.ts` types, add optional `source` field on each move. `VariationsExercise` renders a small badge next to suspicious moves (only shown when `source === "unknown"`).
-- **Data sweep:** run the extended validator over `src/lib/masterclass-validated-lines.ts`, `masterclass-curated-lines.ts`, `masterclass-practice-extras.ts`. Auto-replace any move whose evaluation drops > 80cp vs Stockfish top with the engine's best move (using the existing `stockfish-repair-masterclass.ts` repair loop). Output a diff report to the chat for your review.
-- **Docs:** add `docs/MASTERCOURSE_THEORY_POLICY.md` describing the validation rule, threshold, and how to add new lines safely.
+- New edge function `news-indexnow-ping` — fires IndexNow + GSC submit for every new news/blog URL on insert (uses existing `INDEXNOW_KEY`).
+- Extend `scripts/generate-sitemap.ts` to pull `news_posts` and `blog_posts` from DB at build time → `sitemap-news.xml`, `sitemap-blog.xml`. Add both to `sitemap_index.xml`.
 
-## Technical details
+## 5. Google Maps / GBP polish (docs + admin only — no UI churn)
 
-- Strip regex: `/^\s*(?:\d+\s*\.{1,3}\s*)?(?:SAN\s*[—\-:,]?\s*)?/i` with SAN escaped.
-- Voice clip storage uses the existing Lovable Assets CDN (no Supabase Storage bucket needed).
-- No new DB migrations.
-- No breaking API changes — `speak()` continues to work; `speakClipOrText()` is additive.
+Maps/GBP setup is already shipped. We add:
 
-## Files touched
+- `docs/GBP_COPY_PACK.md` — the exact Name, Description, Categories, Posts, Review-request templates from your brief, copy-pasteable.
+- `src/pages/AdminGbpPosts.tsx` already exists — extend with the 3 post templates from your brief preloaded as drafts.
+- `GoogleReviewsBlock` is already on the site; add it to `/about` and Home footer band so trust signal shows up sitewide.
 
-- `src/components/learn/VariationsExercise.tsx` (dedup + clip wiring)
-- `src/hooks/use-nikola-voice.ts` (clip playback path)
-- `src/lib/nikola-voice-clips.ts` *(new)*
-- `src/assets/voice/README.md` *(new)*
-- `src/components/Navbar.tsx`, `src/components/NavSearchPalette.tsx`, `src/pages/Topics.tsx` (label + desc)
-- `src/pages/Coach.tsx` (intro card)
-- `src/pages/Settings.tsx` (real-voice toggle)
-- `supabase/functions/explain-variation/index.ts` (tighter prompt)
-- `scripts-validate-tree.ts` (theory/engine validation)
-- `src/lib/lesson-moves.ts` (`source` field)
-- `docs/MASTERCOURSE_THEORY_POLICY.md` *(new)*
+No fake reviews seeded — playbook only.
+
+## 6. What we are NOT changing
+
+- No redesign of Home (per Core memory veto).
+- No competitor brand names in any UI copy.
+- No fake votes/comments/reviews — every engagement primitive is real-user-only.
+- AI Voice Coach, game-board layout, MasterCourse work from prior turns: untouched.
+
+---
+
+## Technical notes (for the dev side)
+
+```text
+migrations/
+  news_posts, news_votes, news_comments  (+ GRANTs, RLS, has_role policies for admin moderation)
+  blog_posts                              (+ GRANTs, RLS)
+supabase/functions/
+  news-ingest-chess/index.ts              (RSS → news_posts, kind='world')
+  news-autopost-updates/index.ts          (release marker → kind='update')
+  news-indexnow-ping/index.ts             (on new slug → IndexNow + GSC)
+src/pages/
+  News.tsx, NewsItem.tsx, NewsSubmit.tsx
+  Blog.tsx, BlogPost.tsx, AdminBlog.tsx
+src/components/
+  NewsRow.tsx, VoteArrows.tsx, BlogCard.tsx
+scripts/generate-sitemap.ts                (+ news/blog shards)
+public/sitemap_index.xml                   (+ 2 new shard rows)
+docs/GBP_COPY_PACK.md                      (new — copy/paste pack)
+```
+
+Cron:
+```sql
+select cron.schedule('news-ingest-hourly','0 * * * *', $$select net.http_post(...) /* news-ingest-chess */ $$);
+```
+
+---
+
+## Open questions before I build
+
+1. **Scope of v1**: do you want all 6 sections in one go, or ship in 2 waves (Wave A = News + sitemap/SEO, Wave B = Blog + GBP pack)?
+2. **Comments on `/news`**: ship v1 with comments, or links-only first and comments later?
+3. **Blog seeding**: do you want me to write the full body for all 12 posts (~600-900 words each), or stubs + outline that you/Coach AI finish?
