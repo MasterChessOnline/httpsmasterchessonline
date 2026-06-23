@@ -89,6 +89,8 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "My Tournaments", href: "/tournaments?filter=mine", icon: ListChecks, desc: "Your active tournaments" },
       { label: "Team Battles", href: "/team-battles", icon: Swords, desc: "Battle team vs team in real time" },
       { label: "Community", href: "/community", icon: Users, desc: "Posts & chess moments", separator: true, subheading: "Connect" },
+      { label: "Chess World Map", href: "/chess-map", icon: Crosshair, desc: "Live players across 130+ cities" },
+      { label: "Beat the Founder", href: "/beat-nikola", icon: Crown, desc: "Pobedi Nikolu (13) i osvoji sertifikat" },
       { label: "News Feed", href: "/news", icon: Radio, desc: "Vote on chess news & updates" },
     ],
   },
