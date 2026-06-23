@@ -1281,6 +1281,19 @@ const Play = () => {
               {game.turn() === playerColor && !isGameOver && (
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               )}
+              {!unlimited && (
+                <span className={`font-mono text-base font-bold tabular-nums px-2 py-1 rounded-md border ${
+                  game.turn() === playerColor && !isGameOver
+                    ? ((playerColor === "w" ? whiteTime : blackTime) <= 10
+                        ? "text-destructive border-destructive/60 bg-destructive/10"
+                        : (playerColor === "w" ? whiteTime : blackTime) <= 30
+                          ? "text-orange-400 border-orange-400/50 bg-orange-400/10"
+                          : "text-foreground border-primary/40 bg-primary/10")
+                    : "text-muted-foreground border-border/40 bg-card/60"
+                }`}>
+                  {`${Math.floor((playerColor === "w" ? whiteTime : blackTime) / 60)}:${String((playerColor === "w" ? whiteTime : blackTime) % 60).padStart(2, "0")}`}
+                </span>
+              )}
             </div>
 
             {/* Mobile-only Resign / Draw row — directly under the board for one-tap access. */}
