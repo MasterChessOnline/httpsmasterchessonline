@@ -154,6 +154,8 @@ const CheckmatePatterns = lazy(() => import("./pages/CheckmatePatterns"));
 const CheckmatePatternDetail = lazy(() => import("./pages/CheckmatePatternDetail"));
 const EloLanding = lazy(() => import("./pages/EloLanding"));
 const EloDetail = lazy(() => import("./pages/EloDetail"));
+const ChessForIndex = lazy(() => import("./pages/ChessForIndex"));
+const ChessForAge = lazy(() => import("./pages/ChessForAge"));
 const FamousGames = lazy(() => import("./pages/FamousGames"));
 const FamousGameDetail = lazy(() => import("./pages/FamousGameDetail"));
 const Grandmasters = lazy(() => import("./pages/Grandmasters"));
@@ -358,6 +360,8 @@ function AnimatedRoutes() {
           <Route path="/learn/checkmate-patterns/:slug" element={<CheckmatePatternDetail />} />
           <Route path="/elo" element={<EloLanding />} />
           <Route path="/elo/:rating" element={<EloDetail />} />
+          <Route path="/chess-for" element={<ChessForIndex />} />
+          <Route path="/chess-for/:slug" element={<ChessForAge />} />
           <Route path="/famous-games" element={<FamousGames />} />
           <Route path="/famous-games/:slug" element={<FamousGameDetail />} />
           <Route path="/players" element={<Grandmasters />} />
