@@ -59,8 +59,30 @@ export default function ChessInCity() {
           "@type": "BreadcrumbList",
           itemListElement: [
             { "@type": "ListItem", position: 1, name: "Home", item: "https://masterchess.live/" },
-            { "@type": "ListItem", position: 2, name: "Chess in cities", item: "https://masterchess.live/chess" },
+            { "@type": "ListItem", position: 2, name: "Chess World Map", item: "https://masterchess.live/chess-map" },
             { "@type": "ListItem", position: 3, name: `Chess in ${city.city}`, item: url },
+          ],
+        })}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: `MasterChess — Chess in ${city.city}`,
+          description: desc,
+          url,
+          areaServed: { "@type": "City", name: city.city, address: { "@type": "PostalAddress", addressCountry: city.countryCode } },
+          knowsAbout: ["chess", "online chess", "chess clubs", `chess ${city.city}`],
+          priceRange: "Free",
+        })}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: `Where can I play chess in ${city.city}?`,
+              acceptedAnswer: { "@type": "Answer", text: `You can play chess online for free from ${city.city} on MasterChess, and meet over the board at local clubs and cafés listed on this page.` } },
+            { "@type": "Question", name: `Is online chess free in ${city.country}?`,
+              acceptedAnswer: { "@type": "Answer", text: `Yes — MasterChess is completely free to play, with no ads or paywalls, for players in ${city.country} and worldwide.` } },
+            { "@type": "Question", name: `How do I find chess clubs near me in ${city.city}?`,
+              acceptedAnswer: { "@type": "Answer", text: `This page lists verified chess clubs, cafés and meet-up spots in ${city.city}, pulled from Google Maps. Click any venue for directions.` } },
           ],
         })}</script>
       </Helmet>
