@@ -1,98 +1,61 @@
-# OPERACIJA "1000 IGRAČA ZA 30 DANA"
+# Plan: Centered Board + Signature Weekly Tournament
 
-Cilj: svaki dan merljiv rast aktivnih igrača. Plan kombinuje **(A) tehničke fiče koje same po sebi dovode igrače sa Google-a i društvenih mreža**, i **(B) operativne korake (Search Console, Maps, reklame)** koje radimo paralelno.
+## 1. Fix board centering (Play vs Bot + Online)
 
----
+**Problem (from your screenshot):** board sits left, right-side panel (Strength / Time Control / Start) overflows, options get cut off on laptop screens (~1366px / 878px CSS width).
 
-## 1. KILLER IDEJA — "Chess Heatmap of the World" + Live City Battle
+**Fix:**
+- Update `src/pages/Play.tsx` and `src/pages/OnlineGame.tsx` (or whichever wraps the board + side panel) to use a centered CSS grid: `grid-cols-[1fr_minmax(280px,360px)]` on `lg+`, single column stacked on mobile, with `place-items-center` and `max-w-7xl mx-auto`.
+- Tighten `BOARD_CONTAINER_CLASS` in `src/lib/board-sizing.ts` for the laptop range so board + side panel both fit without horizontal scroll: cap board to `min(calc(100svh - 8rem), 62vw, 720px)` on `lg`, leaving ~360px for the side rail.
+- Make the right-side panel `sticky top-20` so Start / Time / Strength stay visible while scrolling.
+- Verify with Playwright at 1366×768 and 1280×800 — screenshot Play vs Bot and Online to confirm nothing clips.
 
-Jedna velika, viralna stvar koja istovremeno rešava SEO, Google Maps i FOMO:
+## 2. Signature weekly tournament: "MasterChess Monday"
 
-```text
-┌──────────────────────────────────────────────────────┐
-│  /chess-map  →  Interaktivna Google mapa sveta       │
-│  • Svaka tačka = grad sa registrovanim igračem        │
-│  • Klik na grad → leaderboard tog grada               │
-│  • "City vs City" nedeljni duel (Beograd vs Zagreb)   │
-│  • Auto-generisan /chess/{grad} SEO landing za 200+   │
-│    gradova (LocalBusiness JSON-LD → Maps pack)        │
-└──────────────────────────────────────────────────────┘
-```
+Inspired by Titled Tuesday, but our own brand.
 
-Zašto radi: Google indeksira 200+ gradskih stranica → Maps pack rezultati → lokalni igrači klikću → vide "5 igrača iz tvog grada online" → registracija iz FOMO-a.
+**Concept:**
+- **MasterChess Monday** — every Monday 19:00 CET, 3+0 blitz arena, 90 minutes, open to all.
+- **Friday Night Fire** — every Friday 21:00 CET, 1+0 bullet arena, 60 minutes.
+- **Sunday Classic** — every Sunday 17:00 CET, 10+0 rapid swiss, 7 rounds.
+- Auto-created by a cron edge function (`schedule-weekly-tournaments`) every Sunday 00:00 — inserts next 4 weeks into `tournaments` table so the lobby always shows upcoming events.
+- Winner gets: title badge ("Monday Champion · {date}"), 500 coins, profile flair for 7 days, auto-tweet/share card.
 
----
+**Homepage wiring:**
+- `TonightArenaBanner` becomes `WeeklySignatureBanner` — reads next upcoming "signature" tournament from DB (new column `tournaments.is_signature boolean` + `signature_series text`).
+- Whole card is a `<Link to={"/tournaments/" + id}>` — one click takes user straight into the lobby with live countdown + Join button.
+- Shows: series name, countdown, current registrants, prize pool, "Join Now" CTA.
 
-## 2. ŠTA GRADIMO (tehnički, ovog ciklusa)
+## 3. Bonus creative ideas (pick which to build)
 
-### A. Growth-engine fiče
-1. **`/chess-map`** — Google Maps JS API, markeri po gradovima, klik → city leaderboard.
-2. **`/chess/{city}` programatske stranice** — 50 najvećih gradova Balkana + EU; `LocalBusiness` + `BreadcrumbList` JSON-LD; "X igrača iz {grad}a online".
-3. **City vs City duel** — nedeljni event, auto-pairing igrača iz dva grada, share kartice za pobedu.
-4. **Auto Share Cards** — posle pobede generiše PNG ("Pobedio sam u 18 poteza na masterchess.live"), native share + download → Instagram/WhatsApp viralnost.
-5. **`/vs/{username}` lični challenge link** — svaki igrač dobija ličnu URL koju deli; klik → instant partija → registracija.
-6. **"Beat Nikola" certifikat** — ko pobedi 13-godišnjeg osnivača, dobija PNG sertifikat sa potpisom → emocija → share.
+1. **"Beat the Champion"** — winner of last MasterChess Monday becomes "Champion of the Week"; anyone who beats them in a ranked game gets a special badge + bounty coins. Creates a target for the community.
+2. **Tournament Pass** — €2.99/month: priority queue, exclusive Wednesday titled-only events, custom flair. Recurring revenue.
+3. **Live tournament ticker** on homepage — thin bar above the fold: "🔴 LIVE: MasterChess Monday · Round 4 · Leader: @nikola (12/12)" — clickable, drives traffic into spectating.
+4. **Auto share-cards after tournament** — top 3 get an auto-generated PNG with their result + standing, one-tap share to X/IG/WhatsApp.
+5. **Country leaderboard inside each tournament** — "Best Serbian player: @x · Best from Croatia: @y" — taps national pride, drives regional shares.
+6. **Tournament Replay Hub** — `/tournaments/{id}/replays` auto-curates top 5 games from each event with one-click "Analyze" — extends engagement past the event.
+7. **Tournament-only chat room** — opens 15min before start, closes 15min after — creates a "live event" feeling.
 
-### B. SEO i indeksiranje
-7. **IndexNow ping** — automatski na svaku novu stranicu (puzzles, city pages, blog) → Bing/Yandex indeksiraju u 24h.
-8. **Daily Puzzle blog post** — automatski svaki dan nova stranica `/puzzle/{datum}` sa rešenjem → dugorepi keywords → Discover trafik.
-9. **FAQ JSON-LD svuda** — već postoji na age guides, raširiti na sve glavne stranice → rich snippets u Google rezultatima.
-10. **hreflang sr/en** — duple verzije ključnih stranica za srpski + engleski trafik.
+## Technical details
 
-### C. Konverzija & retencija
-11. **TonightArenaBanner refresh** — sa live brojem prijavljenih ("47 igrača već unutra") → social proof.
-12. **Push notif "5 igrača iz tvog grada upravo igra"** — geo-lokalizovan trigger.
-13. **Email "We miss you" sekvenca** — 3, 7, 14 dana neaktivnosti → "Tvoj rival {ime} te izazvao".
-14. **Discord widget na home-u** — live broj online članova → "živ" osećaj.
+**Files to edit:**
+- `src/pages/Play.tsx`, `src/pages/OnlineGame.tsx` — grid layout fix
+- `src/lib/board-sizing.ts` — tighter laptop cap
+- `src/components/TonightArenaBanner.tsx` → rename / refactor to `WeeklySignatureBanner.tsx`, read from DB
+- `src/pages/Index.tsx` — swap component
 
-### D. Cleanup (manje je više)
-15. Sakriti iz Navbar/Footer prazne fiče (Battle Royale, Clans, Stream Hub) dok ne imaju kritičnu masu igrača — fokus na Play / Puzzles / Tournaments / Map.
+**DB migration:**
+- `ALTER TABLE tournaments ADD COLUMN is_signature boolean DEFAULT false, ADD COLUMN signature_series text;`
+- Seed first 4 weeks of each series.
 
----
+**New edge function:**
+- `supabase/functions/schedule-weekly-tournaments/index.ts` — cron weekly, idempotent insert.
 
-## 3. ŠTA TI (USER) RADIŠ PARALELNO (operativno, van koda)
+## What I need from you
 
-Ovo ja **ne mogu** da uradim umesto tebe, ali bez ovoga rast je spor:
+Confirm which of these to build now. Suggested order:
+1. Board centering fix (quick, high impact) ✅
+2. MasterChess Monday + Friday Night Fire + Sunday Classic + homepage banner ✅
+3. Pick 2-3 from the bonus list (my recommendation: #1 Beat the Champion, #3 Live ticker, #5 Country leaderboard)
 
-| # | Akcija | Vreme | Efekat |
-|---|--------|-------|--------|
-| 1 | **Google Search Console** — verifikuj domen, submit sitemap_index.xml, request indexing za top 20 stranica | 30 min | Indeksiranje za 3-7 dana umesto 30 |
-| 2 | **Google Business Profile** — kreiraj "MasterChess" kao online business, kategorija "Chess club", region Srbija | 20 min | Pojavljivanje u Maps pretrazi "chess near me" |
-| 3 | **Google Ads — €5/dan kampanja** na keywords: "chess online", "šah online besplatno", "play chess Serbia" | 15 min setup | 30-80 klikova/dan, ~10 registracija/dan |
-| 4 | **Meta Ads — €5/dan** sa "13-godišnji osnivač" videom → Lookalike audience šahisti SR/HR/BA/SI | 30 min | Viralni potencijal, jeftina cena po klik na Balkanu |
-| 5 | **TikTok** — 1 video dnevno: Nikola igra, "beat me", "puzzle dana" → link u biou | 15 min/dan | Najjeftiniji organski trafik 2026 |
-| 6 | **PR pitch** — Netokracija, Startit, Telegraf "13-godišnjak iz SR napravio šah platformu" | 1h jednom | 1 članak = 500-2000 poseta + backlink |
-| 7 | **Reddit** — r/chess, r/serbia, r/beginnerchess: "I built this, feedback?" | 30 min | 200-1000 poseta po post-u |
-| 8 | **Product Hunt launch** — utorkom, pripremi assets nedelju ranije | 4h priprema | 1000-3000 poseta na dan launch-a |
-
----
-
-## 4. TEHNIČKI DETALJI (za AI/dev čitaoca)
-
-- **Mapa**: `@vis.gl/react-google-maps` + `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` (već dostupan). City data iz `src/data/cities.ts` (nadograditi postojeći). Markeri grupisani po regiji.
-- **City pages**: dinamički route `/chess/:city`, content iz tabele `cities` + live count iz `profiles` po `city_slug` koloni (dodati migraciju).
-- **Share cards**: server-side render preko nove edge funkcije `generate-share-card` koja koristi `@vercel/og` ili Satori → vraća PNG.
-- **IndexNow**: `public/indexnow-{key}.txt` + edge funkcija `ping-indexnow` koja se okida na nove redove u `daily_puzzles` i `cities`.
-- **City vs City**: nova tabela `city_battles` (week_start, city_a, city_b, score_a, score_b) + cron edge fn nedeljom.
-- **`/vs/{username}`**: route koji čita `profiles.username` → "Izazvao te je {ime}, prihvati za 3...2...1".
-
----
-
-## 5. REDOSLED IMPLEMENTACIJE (predlog)
-
-Ako odobriš plan, gradimo ovim redom (svaki korak je samostalno koristan, mogu da stanem između):
-
-1. **Cleanup nav/footer** (15 min) — odmah čistiji utisak
-2. **`/vs/{username}` challenge link** (1h) — najlakše viralno
-3. **Auto Share Card posle pobede** (2h) — viralni motor
-4. **`/chess-map` sa Google Maps** (3h) — glavna atrakcija
-5. **`/chess/{city}` programatske stranice** (2h) — SEO masa
-6. **IndexNow + GSC sitemap submit pomoć** (1h)
-7. **City vs City duel sistem** (3h) — retencija
-8. **"Beat Nikola" certifikat** (1h) — emocija
-
----
-
-## PITANJE ZA TEBE
-
-Reci samo **"kreni"** pa idem redom 1→8, ili napiši broj/brojeve koje hoćeš odmah (npr. "1, 2, 4"). Takođe potvrdi: hoćeš li ti odraditi listu iz sekcije 3 (Search Console, Ads, TikTok), ili ti treba detaljan vodič korak-po-korak za neki od njih?
+Reply **"kreni"** for all of the above, or list the numbers you want.
