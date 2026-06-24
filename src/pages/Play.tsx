@@ -1351,7 +1351,7 @@ const Play = () => {
           </div>
 
           {/* Controls column */}
-          <div className="w-full lg:max-w-xs space-y-3">
+          <div className="w-full lg:w-[320px] lg:sticky lg:top-20 lg:max-h-[calc(100svh-6rem)] lg:overflow-y-auto space-y-3 pr-1">
             {/* Continue course (when game was launched from Opening Trainer) */}
             {returnToOpening && (
               <Link
