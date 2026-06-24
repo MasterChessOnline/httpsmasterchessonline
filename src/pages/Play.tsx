@@ -1176,9 +1176,10 @@ const Play = () => {
           )}
         </AnimatePresence>
 
-        <div className="flex flex-col items-center gap-4 lg:gap-6 lg:flex-row lg:items-start lg:justify-center">
-          {/* Board column */}
-          <div className="w-full max-w-[min(96vw,560px)] lg:max-w-[min(calc(100svh-4rem),82vw,1400px)] xl:max-w-[min(calc(100svh-4rem),80vw,1600px)] 2xl:max-w-[min(calc(100svh-4rem),1800px)] space-y-1.5 relative">
+        <div className="mx-auto w-full max-w-[1280px] flex flex-col items-center gap-4 lg:gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:justify-items-center">
+          {/* Board column — capped so the controls panel always fits beside it on laptop screens */}
+          <div className="w-full max-w-[min(96vw,560px)] lg:max-w-[min(calc(100svh-10rem),58vw,720px)] xl:max-w-[min(calc(100svh-6rem),60vw,860px)] 2xl:max-w-[min(calc(100svh-6rem),960px)] space-y-1.5 relative">
+
 
             {/* Opponent bar (top) — clock sits inline next to the name */}
             <div className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border transition-all ${
