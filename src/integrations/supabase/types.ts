@@ -3252,10 +3252,12 @@ export type Database = {
           format: string
           id: string
           is_rated: boolean
+          is_signature: boolean
           max_players: number
           name: string
           registration_deadline: string | null
           round_started_at: string | null
+          signature_series: string | null
           start_time_locked: boolean
           starts_at: string
           status: string
@@ -3281,10 +3283,12 @@ export type Database = {
           format?: string
           id?: string
           is_rated?: boolean
+          is_signature?: boolean
           max_players?: number
           name: string
           registration_deadline?: string | null
           round_started_at?: string | null
+          signature_series?: string | null
           start_time_locked?: boolean
           starts_at?: string
           status?: string
@@ -3310,10 +3314,12 @@ export type Database = {
           format?: string
           id?: string
           is_rated?: boolean
+          is_signature?: boolean
           max_players?: number
           name?: string
           registration_deadline?: string | null
           round_started_at?: string | null
+          signature_series?: string | null
           start_time_locked?: boolean
           starts_at?: string
           status?: string
