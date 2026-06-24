@@ -15,9 +15,12 @@
 export const BOARD_CONTAINER_CLASS =
   "w-full mx-auto " +
   "max-w-[min(100vw-1rem,calc(100svh-12rem),660px)] " +
-  "lg:max-w-[min(calc(100svh-5rem),82vw,1400px)] " +
-  "xl:max-w-[min(calc(100svh-5rem),80vw,1600px)] " +
-  "2xl:max-w-[min(calc(100svh-5rem),1800px)]";
+  // Leave ~22rem horizontal room for a side controls panel on laptop screens
+  // so the board never pushes the panel off-screen.
+  "lg:max-w-[min(calc(100svh-7rem),calc(100vw-23rem),820px)] " +
+  "xl:max-w-[min(calc(100svh-6rem),calc(100vw-22rem),960px)] " +
+  "2xl:max-w-[min(calc(100svh-6rem),1100px)]";
+
 
 /** Tighter variant for streamer / focus-mode (no surrounding chrome). */
 export const BOARD_CONTAINER_FOCUS_CLASS =
