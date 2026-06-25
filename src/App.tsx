@@ -377,6 +377,8 @@ function AnimatedRoutes() {
           <Route path="/beat/:botId" element={<BeatBotLanding />} />
           <Route path="/nikola-sakotic" element={<NikolaSakotic />} />
           <Route path="/nikola-sakotić" element={<NikolaSakotic />} />
+          <Route path="/nikola" element={<NikolaSakotic />} />
+          <Route path="/authors/nikola-sakotic" element={<NikolaSakotic />} />
           <Route path="/founder" element={<NikolaSakotic />} />
           <Route path="/play-from/:city" element={<PlayFromCity />} />
           <Route path="/overlay/:username" element={<StreamerOverlay />} />

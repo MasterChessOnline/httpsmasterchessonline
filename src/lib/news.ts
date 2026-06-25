@@ -1,7 +1,16 @@
 // News helpers — HN-style ranking + slugification.
 import { supabase } from "@/integrations/supabase/client";
 
-export type NewsKind = "update" | "world" | "community";
+export type NewsKind =
+  | "update"
+  | "world"
+  | "community"
+  | "founder"
+  | "releases"
+  | "tournaments"
+  | "milestones"
+  | "roadmap"
+  | "ai";
 
 export interface NewsPost {
   id: string;
@@ -12,6 +21,9 @@ export interface NewsPost {
   kind: NewsKind;
   source: string | null;
   author_id: string | null;
+  author_name?: string | null;
+  cover_image?: string | null;
+  featured?: boolean;
   score: number;
   comment_count: number;
   created_at: string;
@@ -55,12 +67,24 @@ export const KIND_LABEL: Record<NewsKind, string> = {
   update: "MasterChess",
   world: "World Chess",
   community: "Community",
+  founder: "Founder",
+  releases: "Releases",
+  tournaments: "Tournaments",
+  milestones: "Milestones",
+  roadmap: "Roadmap",
+  ai: "AI",
 };
 
 export const KIND_COLOR: Record<NewsKind, string> = {
   update: "text-amber-300 border-amber-400/30 bg-amber-500/10",
   world: "text-sky-300 border-sky-400/30 bg-sky-500/10",
   community: "text-emerald-300 border-emerald-400/30 bg-emerald-500/10",
+  founder: "text-fuchsia-300 border-fuchsia-400/30 bg-fuchsia-500/10",
+  releases: "text-lime-300 border-lime-400/30 bg-lime-500/10",
+  tournaments: "text-orange-300 border-orange-400/30 bg-orange-500/10",
+  milestones: "text-yellow-300 border-yellow-400/30 bg-yellow-500/10",
+  roadmap: "text-cyan-300 border-cyan-400/30 bg-cyan-500/10",
+  ai: "text-violet-300 border-violet-400/30 bg-violet-500/10",
 };
 
 export async function listNewsPosts(opts: { kind?: NewsKind; sort?: "top" | "new"; limit?: number } = {}) {
