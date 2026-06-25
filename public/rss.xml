@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>MasterChess News</title>
+    <link>https://masterchess.live/news</link>
+    <atom:link href="https://masterchess.live/rss.xml" rel="self" type="application/rss+xml" />
+    <description>Official news of MasterChess.live — platform updates, founder story, tournaments and community.</description>
+    <language>en</language>
+    <lastBuildDate>Thu, 25 Jun 2026 00:12:31 GMT</lastBuildDate>
+    <item>
+      <title>A 13-Year-Old Who Built His Own Chess App</title>
+      <link>https://masterchess.live/news/a-13-year-old-who-built-his-own-chess-app</link>
+      <guid isPermaLink="true">https://masterchess.live/news/a-13-year-old-who-built-his-own-chess-app</guid>
+      <pubDate>Wed, 24 Jun 2026 00:12:31 GMT</pubDate>
+      <description>Meet Nikola Šakotić, the Serbian U14 Chess Champion who built MasterChess.live — a free chess platform for competitive players.</description>
+    </item>
+    <item>
+      <title>MasterChess Wears the Brand at Top Serbian Chess Events</title>
+      <link>https://masterchess.live/news/masterchess-brand-serbian-chess-events</link>
+      <guid isPermaLink="true">https://masterchess.live/news/masterchess-brand-serbian-chess-events</guid>
+      <pubDate>Wed, 24 Jun 2026 18:12:31 GMT</pubDate>
+      <description>MasterChess shows up at top-tier chess events in Serbia, building the brand in person and online.</description>
+    </item>
+    <item>
+      <title>New Analysis System Released on MasterChess</title>
+      <link>https://masterchess.live/news/new-analysis-system-released</link>
+      <guid isPermaLink="true">https://masterchess.live/news/new-analysis-system-released</guid>
+      <pubDate>Wed, 24 Jun 2026 12:12:31 GMT</pubDate>
+      <description>Move-by-move classification, key-moment highlighting and one-click opening detection — free on MasterChess.</description>
+    </item>
+    <item>
+      <title>Weekly Signature Tournaments Now Live</title>
+      <link>https://masterchess.live/news/weekly-signature-tournaments-live</link>
+      <guid isPermaLink="true">https://masterchess.live/news/weekly-signature-tournaments-live</guid>
+      <pubDate>Wed, 24 Jun 2026 00:12:31 GMT</pubDate>
+      <description>MasterChess Monday, Friday Night Fire and Sunday Classic — three signature events every week.</description>
+    </item>
+    <item>
+      <title>MasterChess Community Update — June</title>
+      <link>https://masterchess.live/news/masterchess-community-update-june</link>
+      <guid isPermaLink="true">https://masterchess.live/news/masterchess-community-update-june</guid>
+      <pubDate>Tue, 23 Jun 2026 00:12:31 GMT</pubDate>
+      <description>Clan banners, voice chat, daily missions and Battle Pass — fresh updates from the MasterChess community.</description>
+    </item>
+  </channel>
+</rss>
