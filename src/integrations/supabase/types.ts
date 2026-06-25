@@ -1542,9 +1542,12 @@ export type Database = {
       news_posts: {
         Row: {
           author_id: string | null
+          author_name: string | null
           body_md: string | null
           comment_count: number
+          cover_image: string | null
           created_at: string
+          featured: boolean
           id: string
           kind: string
           score: number
@@ -1556,9 +1559,12 @@ export type Database = {
         }
         Insert: {
           author_id?: string | null
+          author_name?: string | null
           body_md?: string | null
           comment_count?: number
+          cover_image?: string | null
           created_at?: string
+          featured?: boolean
           id?: string
           kind: string
           score?: number
@@ -1570,9 +1576,12 @@ export type Database = {
         }
         Update: {
           author_id?: string | null
+          author_name?: string | null
           body_md?: string | null
           comment_count?: number
+          cover_image?: string | null
           created_at?: string
+          featured?: boolean
           id?: string
           kind?: string
           score?: number

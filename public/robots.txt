@@ -43,3 +43,5 @@ Sitemap: https://masterchess.live/sitemap-players.xml
 Sitemap: https://masterchess.live/sitemap-cities.xml
 Sitemap: https://masterchess.live/sitemap-landings.xml
 Sitemap: https://masterchess.live/sitemap-images.xml
+Sitemap: https://masterchess.live/sitemap-news.xml
+Sitemap: https://masterchess.live/news-sitemap.xml

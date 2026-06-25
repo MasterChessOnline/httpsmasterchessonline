@@ -33,7 +33,9 @@ const today = new Date().toISOString().slice(0, 10);
 const staticEntries: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0", image: { loc: `${BASE_URL}/og-image.jpg`, title: "MasterChess — Play Chess Online Free", caption: "Free online chess platform with AI coach, tournaments, and lessons." } },
   { path: "/built-by-a-kid", changefreq: "monthly", priority: "0.8" },
+  { path: "/nikola", changefreq: "monthly", priority: "0.9" },
   { path: "/nikola-sakotic", changefreq: "monthly", priority: "0.9" },
+  { path: "/authors/nikola-sakotic", changefreq: "monthly", priority: "0.7" },
   { path: "/founder", changefreq: "monthly", priority: "0.7" },
   { path: "/no-ads-chess", changefreq: "monthly", priority: "0.8" },
   { path: "/play-chess-with-friends-free", changefreq: "monthly", priority: "0.9" },
@@ -316,6 +318,106 @@ const imageEntries: SitemapEntry[] = [
   })),
 ];
 
+// ── News & RSS ────────────────────────────────────────────────────────────
+// Seed list of published articles. Keep in sync with seeded rows in
+// supabase/migrations/*_news_featured_seed.sql. Dynamic posts added later
+// are pinged to IndexNow via supabase/functions/news-indexnow-ping.
+interface NewsArticle {
+  slug: string;
+  title: string;
+  description: string;
+  publishedAt: string; // ISO
+  image?: string;
+}
+const NEWS_ARTICLES: NewsArticle[] = [
+  {
+    slug: "a-13-year-old-who-built-his-own-chess-app",
+    title: "A 13-Year-Old Who Built His Own Chess App",
+    description: "Meet Nikola Šakotić, the Serbian U14 Chess Champion who built MasterChess.live — a free chess platform for competitive players.",
+    publishedAt: new Date(Date.now() - 86_400_000).toISOString(),
+    image: `${BASE_URL}/__l5e/assets-v1/14dae1b4-8366-483a-85ee-cdfb7e456207/nikola-vs-niemann.jpg`,
+  },
+  {
+    slug: "masterchess-brand-serbian-chess-events",
+    title: "MasterChess Wears the Brand at Top Serbian Chess Events",
+    description: "MasterChess shows up at top-tier chess events in Serbia, building the brand in person and online.",
+    publishedAt: new Date(Date.now() - 21_600_000).toISOString(),
+    image: `${BASE_URL}/__l5e/assets-v1/f35f47e4-9616-48fc-b29e-95e8a18ef06e/nikola-with-streamer.jpg`,
+  },
+  {
+    slug: "new-analysis-system-released",
+    title: "New Analysis System Released on MasterChess",
+    description: "Move-by-move classification, key-moment highlighting and one-click opening detection — free on MasterChess.",
+    publishedAt: new Date(Date.now() - 43_200_000).toISOString(),
+  },
+  {
+    slug: "weekly-signature-tournaments-live",
+    title: "Weekly Signature Tournaments Now Live",
+    description: "MasterChess Monday, Friday Night Fire and Sunday Classic — three signature events every week.",
+    publishedAt: new Date(Date.now() - 86_400_000).toISOString(),
+  },
+  {
+    slug: "masterchess-community-update-june",
+    title: "MasterChess Community Update — June",
+    description: "Clan banners, voice chat, daily missions and Battle Pass — fresh updates from the MasterChess community.",
+    publishedAt: new Date(Date.now() - 172_800_000).toISOString(),
+  },
+];
+
+const newsEntries: SitemapEntry[] = NEWS_ARTICLES.map((a) => ({
+  path: `/news/${a.slug}`,
+  changefreq: "weekly",
+  priority: "0.9",
+  ...(a.image ? { image: { loc: a.image, title: a.title, caption: a.description } } : {}),
+}));
+
+const newsSitemapXml = [
+  `<?xml version="1.0" encoding="UTF-8"?>`,
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">`,
+  ...NEWS_ARTICLES.map((a) =>
+    [
+      `  <url>`,
+      `    <loc>${BASE_URL}/news/${a.slug}</loc>`,
+      `    <news:news>`,
+      `      <news:publication><news:name>MasterChess</news:name><news:language>en</news:language></news:publication>`,
+      `      <news:publication_date>${a.publishedAt}</news:publication_date>`,
+      `      <news:title>${escapeXml(a.title)}</news:title>`,
+      `    </news:news>`,
+      `  </url>`,
+    ].join("\n"),
+  ),
+  `</urlset>`,
+].join("\n");
+
+function escapeXml(s: string) {
+  return s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]!));
+}
+
+const rssXml = [
+  `<?xml version="1.0" encoding="UTF-8"?>`,
+  `<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">`,
+  `  <channel>`,
+  `    <title>MasterChess News</title>`,
+  `    <link>${BASE_URL}/news</link>`,
+  `    <atom:link href="${BASE_URL}/rss.xml" rel="self" type="application/rss+xml" />`,
+  `    <description>Official news of MasterChess.live — platform updates, founder story, tournaments and community.</description>`,
+  `    <language>en</language>`,
+  `    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>`,
+  ...NEWS_ARTICLES.map((a) =>
+    [
+      `    <item>`,
+      `      <title>${escapeXml(a.title)}</title>`,
+      `      <link>${BASE_URL}/news/${a.slug}</link>`,
+      `      <guid isPermaLink="true">${BASE_URL}/news/${a.slug}</guid>`,
+      `      <pubDate>${new Date(a.publishedAt).toUTCString()}</pubDate>`,
+      `      <description>${escapeXml(a.description)}</description>`,
+      `    </item>`,
+    ].join("\n"),
+  ),
+  `  </channel>`,
+  `</rss>`,
+].join("\n");
+
 writeFileSync(resolve("public/sitemap.xml"), buildUrlset(staticEntries, true));
 writeFileSync(resolve("public/sitemap-openings.xml"), buildUrlset(openingEntries));
 writeFileSync(resolve("public/sitemap-bots.xml"), buildUrlset(botEntries));
@@ -330,6 +432,9 @@ writeFileSync(resolve("public/sitemap-players.xml"), buildUrlset(playerEntries))
 writeFileSync(resolve("public/sitemap-cities.xml"), buildUrlset(cityEntries));
 writeFileSync(resolve("public/sitemap-landings.xml"), buildUrlset(seoLandingEntries));
 writeFileSync(resolve("public/sitemap-chess-for.xml"), buildUrlset(ageGuideEntries));
+writeFileSync(resolve("public/sitemap-news.xml"), buildUrlset(newsEntries));
+writeFileSync(resolve("public/news-sitemap.xml"), newsSitemapXml);
+writeFileSync(resolve("public/rss.xml"), rssXml);
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -349,9 +454,12 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap-cities.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-landings.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-chess-for.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-news.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/news-sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
 writeFileSync(resolve("public/sitemap_index.xml"), indexXml);
 
-console.log(`✓ static (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + tools (${toolsEntries.length}) + mates (${mateEntries.length}) + elo (${eloEntries.length}) + games (${famousGameEntries.length}) + players (${playerEntries.length}) + images (${imageEntries.length})`);
+console.log(`✓ static (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + tools (${toolsEntries.length}) + mates (${mateEntries.length}) + elo (${eloEntries.length}) + games (${famousGameEntries.length}) + players (${playerEntries.length}) + news (${NEWS_ARTICLES.length}) + images (${imageEntries.length})`);
+
