@@ -331,6 +331,47 @@ interface NewsArticle {
 }
 const NEWS_ARTICLES: NewsArticle[] = [
   {
+    slug: "how-13-year-old-built-masterchess-live",
+    title: "How a 13-Year-Old Built MasterChess.live — The Full Story",
+    description: "Nikola Šakotić, 13, from Serbia, built MasterChess.live by himself — every line of code, every bot, every pixel. This is the full story.",
+    publishedAt: new Date(Date.now() - 3_600_000).toISOString(),
+    image: `${BASE_URL}/__l5e/assets-v1/f35f47e4-9616-48fc-b29e-95e8a18ef06e/nikola-with-streamer.jpg`,
+  },
+  {
+    slug: "meeting-hans-niemann-at-the-board-belgrade",
+    title: "Meeting Hans Niemann at the Board in Belgrade",
+    description: "MasterChess.live founder Nikola Šakotić at the Serbian Chess Federation board where Hans Niemann faced Ian Nepomniachtchi.",
+    publishedAt: new Date(Date.now() - 7_200_000).toISOString(),
+    image: `${BASE_URL}/__l5e/assets-v1/14dae1b4-8366-483a-85ee-cdfb7e456207/nikola-vs-niemann.jpg`,
+  },
+  {
+    slug: "backstage-with-a-grandmaster-lessons-from-the-top",
+    title: "Backstage with a Grandmaster: Lessons from the Top",
+    description: "Four lessons from a grandmaster — and how they shape the next training tools on MasterChess.live.",
+    publishedAt: new Date(Date.now() - 10_800_000).toISOString(),
+    image: `${BASE_URL}/__l5e/assets-v1/2a6e1880-e177-4cbe-b12c-834b642345c7/nikola-with-gm.jpg`,
+  },
+  {
+    slug: "founders-letter-why-masterchess-live-exists",
+    title: "Founder's Letter: Why MasterChess.live Exists",
+    description: "An open letter from MasterChess.live founder Nikola Šakotić about why he built a free, ad-free chess platform at 13.",
+    publishedAt: new Date(Date.now() - 18_000_000).toISOString(),
+    image: `${BASE_URL}/__l5e/assets-v1/f35f47e4-9616-48fc-b29e-95e8a18ef06e/nikola-with-streamer.jpg`,
+  },
+  {
+    slug: "masterchess-live-launch-notes-2026",
+    title: "MasterChess.live Launch Notes — Everything That's Live Today",
+    description: "A full map of every feature live on MasterChess.live today — play, compete, learn, identity.",
+    publishedAt: new Date(Date.now() - 14_400_000).toISOString(),
+    image: `${BASE_URL}/__l5e/assets-v1/f35f47e4-9616-48fc-b29e-95e8a18ef06e/nikola-with-streamer.jpg`,
+  },
+  {
+    slug: "roadmap-2026-tournaments-clans-battle-royale",
+    title: "Roadmap 2026: Tournaments, Clans, and Battle Royale",
+    description: "What ships next on MasterChess.live — arena tournaments, clan quests, battle royale and native mobile apps.",
+    publishedAt: new Date(Date.now() - 21_600_000).toISOString(),
+  },
+  {
     slug: "a-13-year-old-who-built-his-own-chess-app",
     title: "A 13-Year-Old Who Built His Own Chess App",
     description: "Meet Nikola Šakotić, the Serbian U14 Chess Champion who built MasterChess.live — a free chess platform for competitive players.",
@@ -346,21 +387,15 @@ const NEWS_ARTICLES: NewsArticle[] = [
   },
   {
     slug: "new-analysis-system-released",
-    title: "New Analysis System Released on MasterChess",
-    description: "Move-by-move classification, key-moment highlighting and one-click opening detection — free on MasterChess.",
+    title: "New Analysis System Released on MasterChess.live",
+    description: "Move-by-move classification, key-moment highlighting and one-click opening detection — free on MasterChess.live.",
     publishedAt: new Date(Date.now() - 43_200_000).toISOString(),
   },
   {
     slug: "weekly-signature-tournaments-live",
-    title: "Weekly Signature Tournaments Now Live",
+    title: "Weekly Signature Tournaments Now Live on MasterChess.live",
     description: "MasterChess Monday, Friday Night Fire and Sunday Classic — three signature events every week.",
     publishedAt: new Date(Date.now() - 86_400_000).toISOString(),
-  },
-  {
-    slug: "masterchess-community-update-june",
-    title: "MasterChess Community Update — June",
-    description: "Clan banners, voice chat, daily missions and Battle Pass — fresh updates from the MasterChess community.",
-    publishedAt: new Date(Date.now() - 172_800_000).toISOString(),
   },
 ];
 
