@@ -414,7 +414,7 @@ const newsSitemapXml = [
       `  <url>`,
       `    <loc>${BASE_URL}/news/${a.slug}</loc>`,
       `    <news:news>`,
-      `      <news:publication><news:name>MasterChess</news:name><news:language>en</news:language></news:publication>`,
+      `      <news:publication><news:name>MasterChess.live</news:name><news:language>en</news:language></news:publication>`,
       `      <news:publication_date>${a.publishedAt}</news:publication_date>`,
       `      <news:title>${escapeXml(a.title)}</news:title>`,
       `    </news:news>`,
