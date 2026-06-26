@@ -1,61 +1,82 @@
-# Plan: Centered Board + Signature Weekly Tournament
+## Why MasterChess.live isn't in Google News yet
 
-## 1. Fix board centering (Play vs Bot + Online)
+Google News indexes brand-new domains slowly (usually weeks to months). What we can control:
+1. **Publisher signals** — proper `NewsArticle` JSON-LD, author = "MasterChess.live Newsroom", real cover images, dated articles. ✅ Mostly done, but author label needs to read **"MasterChess.live"** everywhere.
+2. **news-sitemap.xml** must list articles published in the last 48h with valid `<news:publication><news:name>MasterChess.live</news:name>`. Needs verification.
+3. **Submit to Google Publisher Center** + verify in Search Console — manual step you (Nikola) must do; I'll add a one-page checklist.
+4. **Fresh, original, frequent** content — at least 2-3 new articles/week. We'll seed the founder series now.
 
-**Problem (from your screenshot):** board sits left, right-side panel (Strength / Time Control / Start) overflows, options get cut off on laptop screens (~1366px / 878px CSS width).
+---
 
-**Fix:**
-- Update `src/pages/Play.tsx` and `src/pages/OnlineGame.tsx` (or whichever wraps the board + side panel) to use a centered CSS grid: `grid-cols-[1fr_minmax(280px,360px)]` on `lg+`, single column stacked on mobile, with `place-items-center` and `max-w-7xl mx-auto`.
-- Tighten `BOARD_CONTAINER_CLASS` in `src/lib/board-sizing.ts` for the laptop range so board + side panel both fit without horizontal scroll: cap board to `min(calc(100svh - 8rem), 62vw, 720px)` on `lg`, leaving ~360px for the side rail.
-- Make the right-side panel `sticky top-20` so Start / Time / Strength stay visible while scrolling.
-- Verify with Playwright at 1366×768 and 1280×800 — screenshot Play vs Bot and Online to confirm nothing clips.
+## Plan
 
-## 2. Signature weekly tournament: "MasterChess Monday"
+### 1. Upload the 3 founder photos as Lovable assets
+- `nikola-with-streamer.jpg` (with white-shirt streamer)
+- `nikola-vs-niemann-board.jpg` (at the board, Niemann vs Nepo nameplates)
+- `nikola-with-gm.jpg` (with the curly-haired GM in suit)
 
-Inspired by Titled Tuesday, but our own brand.
+Use these as cover images for the new featured articles.
 
-**Concept:**
-- **MasterChess Monday** — every Monday 19:00 CET, 3+0 blitz arena, 90 minutes, open to all.
-- **Friday Night Fire** — every Friday 21:00 CET, 1+0 bullet arena, 60 minutes.
-- **Sunday Classic** — every Sunday 17:00 CET, 10+0 rapid swiss, 7 rounds.
-- Auto-created by a cron edge function (`schedule-weekly-tournaments`) every Sunday 00:00 — inserts next 4 weeks into `tournaments` table so the lobby always shows upcoming events.
-- Winner gets: title badge ("Monday Champion · {date}"), 500 coins, profile flair for 7 days, auto-tweet/share card.
+### 2. Seed 6 new founder-first news articles (English, author = "MasterChess.live Newsroom")
+Migration inserts into `news_posts` with `featured=true` for the first one, kind=`founder`/`milestones`/`releases`:
 
-**Homepage wiring:**
-- `TonightArenaBanner` becomes `WeeklySignatureBanner` — reads next upcoming "signature" tournament from DB (new column `tournaments.is_signature boolean` + `signature_series text`).
-- Whole card is a `<Link to={"/tournaments/" + id}>` — one click takes user straight into the lobby with live countdown + Join button.
-- Shows: series name, countdown, current registrants, prize pool, "Join Now" CTA.
+1. **"How a 13-Year-Old Built MasterChess.live — The Full Story"** (FEATURED, cover = streamer photo) — origin story, why he built it, vision.
+2. **"Meeting Hans Niemann at the Board in Belgrade"** (cover = Niemann/Nepo board photo) — event report.
+3. **"Backstage with a Grandmaster: Lessons from the Top"** (cover = GM photo).
+4. **"MasterChess.live Launch Notes — What's Live Today"** (kind=releases) — features list, links to /play, /bots, /tournaments, /puzzles.
+5. **"Roadmap 2026: Tournaments, Clans, Battle Royale"** (kind=roadmap).
+6. **"Why MasterChess.live Exists — A Founder's Letter"** (kind=founder).
 
-## 3. Bonus creative ideas (pick which to build)
+All `author_name = "MasterChess.live Newsroom"`, all bodies original, all in English, all with proper `cover_image` and SEO-friendly slugs.
 
-1. **"Beat the Champion"** — winner of last MasterChess Monday becomes "Champion of the Week"; anyone who beats them in a ranked game gets a special badge + bounty coins. Creates a target for the community.
-2. **Tournament Pass** — €2.99/month: priority queue, exclusive Wednesday titled-only events, custom flair. Recurring revenue.
-3. **Live tournament ticker** on homepage — thin bar above the fold: "🔴 LIVE: MasterChess Monday · Round 4 · Leader: @nikola (12/12)" — clickable, drives traffic into spectating.
-4. **Auto share-cards after tournament** — top 3 get an auto-generated PNG with their result + standing, one-tap share to X/IG/WhatsApp.
-5. **Country leaderboard inside each tournament** — "Best Serbian player: @x · Best from Croatia: @y" — taps national pride, drives regional shares.
-6. **Tournament Replay Hub** — `/tournaments/{id}/replays` auto-curates top 5 games from each event with one-click "Analyze" — extends engagement past the event.
-7. **Tournament-only chat room** — opens 15min before start, closes 15min after — creates a "live event" feeling.
+### 3. Fix author labelling site-wide
+- `NewsItem.tsx` default fallback → `"MasterChess.live Newsroom"` (already partial).
+- News header chip already shows "Masterchess News" — change to **"MasterChess.live News"** for brand consistency.
+- Founder page `/nikola` byline link.
 
-## Technical details
+### 4. Make sure every section of `/nikola` and `/authors/nikola-sakotic` is populated
+Verify and fill: Founder Photo, Biography, Achievements, Tournament Results, Articles list (pulls from news), Interviews, Updates, Project Timeline, Future Plans. Wire articles list to query `news_posts where kind in ('founder','milestones','releases')`.
 
-**Files to edit:**
-- `src/pages/Play.tsx`, `src/pages/OnlineGame.tsx` — grid layout fix
-- `src/lib/board-sizing.ts` — tighter laptop cap
-- `src/components/TonightArenaBanner.tsx` → rename / refactor to `WeeklySignatureBanner.tsx`, read from DB
-- `src/pages/Index.tsx` — swap component
+### 5. Regenerate news-sitemap.xml & ping
+- Update `scripts/generate-sitemap.ts` so `news-sitemap.xml` uses `<news:publication_name>MasterChess.live</news:publication_name>` and only lists articles <48h old (Google News requirement).
+- Trigger the existing `news-indexnow-ping` edge function after the new posts are inserted (one-shot SQL `select net.http_post(...)` in the migration, or a manual ping doc).
 
-**DB migration:**
-- `ALTER TABLE tournaments ADD COLUMN is_signature boolean DEFAULT false, ADD COLUMN signature_series text;`
-- Seed first 4 weeks of each series.
+### 6. "Brutal" growth ideas (added as a docs file + implement the cheap ones now)
+Create `docs/GROWTH_PLAYBOOK.md` with 25+ tactics, and implement these immediately:
 
-**New edge function:**
-- `supabase/functions/schedule-weekly-tournaments/index.ts` — cron weekly, idempotent insert.
+| # | Tactic | Implementation |
+|---|---|---|
+| A | **Google Publisher Center submission checklist** | New `docs/GOOGLE_NEWS_SUBMISSION.md` step-by-step |
+| B | **RSS auto-discovery** `<link rel="alternate" type="application/rss+xml">` in `index.html` | 1-line edit |
+| C | **Twitter/X Card + LinkedIn OG** verified on every news article | Already in `NewsItem.tsx`, audit |
+| D | **"As seen with" trust strip on homepage** — small photo row of Nikola with Niemann + GM (links to article) | New component on `/` |
+| E | **Auto-generated OG image per article** using existing `og-board-image.ts` pattern | Reuse, add fallback to cover_image |
+| F | **`/press` page** — press kit, founder bio, downloadable logos, contact email | New page |
+| G | **Founder Story pinned to top of `/news`** forever via `featured` flag | Migration sets it |
+| H | **`<link rel="me">` to Nikola's socials** for Google author entity | index.html |
+| I | **Sitemap `<lastmod>` set to NOW** on every news rebuild so Google recrawls | scripts/generate-sitemap.ts tweak |
+| J | **Daily auto-ping IndexNow + Bing** when a news_post is inserted | DB trigger calling existing edge function |
 
-## What I need from you
+Documented (not auto-built): GMB posts schedule, Reddit r/chess seeding rules, YouTube Shorts hooks, TikTok scripts (already exist), Quora answer farming, Wikipedia draft, HackerNews Show HN, Product Hunt launch checklist, Discord cross-post, podcast pitch list, school-club outreach template, chess clubs in Serbia outreach, Twitch raid coordination, IG Reels content calendar (15 prompts), influencer DM templates, viral share-card OG variants.
 
-Confirm which of these to build now. Suggested order:
-1. Board centering fix (quick, high impact) ✅
-2. MasterChess Monday + Friday Night Fire + Sunday Classic + homepage banner ✅
-3. Pick 2-3 from the bonus list (my recommendation: #1 Beat the Champion, #3 Live ticker, #5 Country leaderboard)
+### 7. SEO scan
+After everything is in, trigger a fresh SEO scan and tell user to open the SEO tab.
 
-Reply **"kreni"** for all of the above, or list the numbers you want.
+---
+
+### Technical files to touch
+- **New migration**: `supabase/migrations/<ts>_founder_news_seed.sql` — insert 6 articles, ensure featured story, set author_name.
+- **Edit**: `src/pages/NewsItem.tsx` (author default), `src/pages/News.tsx` (header label), `src/pages/Nikola.tsx` (verify all sections + article list), `src/pages/AuthorNikola.tsx`.
+- **Edit**: `scripts/generate-sitemap.ts` (news-sitemap publication_name + 48h filter + lastmod).
+- **Edit**: `index.html` (RSS auto-discovery, `<link rel="me">`).
+- **New**: `src/pages/Press.tsx`, route in `App.tsx`.
+- **New**: `src/components/FounderTrustStrip.tsx` mounted on `/`.
+- **New docs**: `docs/GOOGLE_NEWS_SUBMISSION.md`, `docs/GROWTH_PLAYBOOK.md`.
+- **Asset uploads**: 3 photos via `lovable-assets`.
+
+### What I need from you (Nikola) — can't be automated
+1. Go to **Google Publisher Center** and submit MasterChess.live (I'll give you the exact steps in the doc).
+2. In Google Search Console, submit `news-sitemap.xml`.
+3. Verify domain ownership if not done.
+
+Ready to build?
