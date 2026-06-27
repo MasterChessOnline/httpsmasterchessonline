@@ -192,15 +192,29 @@ const TournamentLobby = () => {
             </div>
             <div className="flex gap-2">
               {isRegistering && !isRegistered && (
-                <Button onClick={handleJoin} disabled={joining}>
-                  {joining ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <UserCheck className="h-4 w-4 mr-1" />}
-                  Join Tournament
-                </Button>
+                tournament.is_humanitarian || tournament.checkin_opens_at ? (
+                  <Button onClick={() => navigate(`/tournaments/${tournament.id}/register`)}>
+                    <UserCheck className="h-4 w-4 mr-1" /> Register
+                  </Button>
+                ) : (
+                  <Button onClick={handleJoin} disabled={joining}>
+                    {joining ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <UserCheck className="h-4 w-4 mr-1" />}
+                    Join Tournament
+                  </Button>
+                )
               )}
               {isRegistering && isRegistered && (
                 <Button variant="outline" onClick={handleLeave}>
                   <LogOut className="h-4 w-4 mr-1" /> Leave
                 </Button>
+              )}
+              {isFinished && (
+                <a
+                  href={`https://kicabdwgdyabibioycbq.supabase.co/functions/v1/tournament-export?tournament_id=${tournament.id}&format=trf`}
+                  target="_blank" rel="noreferrer"
+                >
+                  <Button variant="outline"><Trophy className="h-4 w-4 mr-1" /> Export TRF</Button>
+                </a>
               )}
               {isActive && myPairing?.game_id && (
                 <Button onClick={() => navigate(`/play/online?game=${myPairing.game_id}`)}>
@@ -210,6 +224,22 @@ const TournamentLobby = () => {
             </div>
           </div>
         </div>
+
+        {/* Check-in window (humanitarian / official events) */}
+        {(tournament.checkin_opens_at || tournament.checkin_closes_at) && (
+          (() => {
+            const myReg = user ? registrations.find(r => r.user_id === user.id) : undefined;
+            return (
+              <CheckInPanel
+                tournamentId={tournament.id}
+                checkinOpensAt={tournament.checkin_opens_at}
+                checkinClosesAt={tournament.checkin_closes_at}
+                isRegistered={isRegistered}
+                checkedIn={Boolean((myReg as any)?.checked_in)}
+              />
+            );
+          })()
+        )}
 
         {/* Auto-start countdown */}
         {isRegistering && tournament.starts_at && (() => {
