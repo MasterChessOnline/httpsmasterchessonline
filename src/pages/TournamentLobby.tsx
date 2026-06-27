@@ -7,6 +7,7 @@ import { useStreak } from "@/hooks/use-streak";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TournamentChat from "@/components/tournaments/TournamentChat";
+import CheckInPanel from "@/components/tournaments/CheckInPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
