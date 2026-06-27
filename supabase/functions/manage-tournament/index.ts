@@ -70,6 +70,19 @@ Deno.serve(async (req) => {
     if (action === "report_result") {
       return await handleReportResult(supabase, game_id, result, user.id);
     }
+    if (action === "check_in") {
+      return await handleCheckIn(supabase, user.id, tournament_id);
+    }
+    if (action === "update_player_details") {
+      return await handleUpdatePlayerDetails(supabase, user.id, tournament_id, player_details || {});
+    }
+    if (action === "remove_unchecked") {
+      return await handleRemoveUnchecked(supabase, user.id, tournament_id);
+    }
+    if (action === "recalc_tiebreaks") {
+      await supabase.rpc("recalc_tournament_tiebreaks", { _tid: tournament_id });
+      return jsonRes({ ok: true });
+    }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400,
