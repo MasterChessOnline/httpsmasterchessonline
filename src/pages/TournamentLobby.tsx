@@ -7,6 +7,7 @@ import { useStreak } from "@/hooks/use-streak";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TournamentChat from "@/components/tournaments/TournamentChat";
+import CheckInPanel from "@/components/tournaments/CheckInPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -192,15 +193,29 @@ const TournamentLobby = () => {
             </div>
             <div className="flex gap-2">
               {isRegistering && !isRegistered && (
-                <Button onClick={handleJoin} disabled={joining}>
-                  {joining ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <UserCheck className="h-4 w-4 mr-1" />}
-                  Join Tournament
-                </Button>
+                tournament.is_humanitarian || tournament.checkin_opens_at ? (
+                  <Button onClick={() => navigate(`/tournaments/${tournament.id}/register`)}>
+                    <UserCheck className="h-4 w-4 mr-1" /> Register
+                  </Button>
+                ) : (
+                  <Button onClick={handleJoin} disabled={joining}>
+                    {joining ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <UserCheck className="h-4 w-4 mr-1" />}
+                    Join Tournament
+                  </Button>
+                )
               )}
               {isRegistering && isRegistered && (
                 <Button variant="outline" onClick={handleLeave}>
                   <LogOut className="h-4 w-4 mr-1" /> Leave
                 </Button>
+              )}
+              {isFinished && (
+                <a
+                  href={`https://kicabdwgdyabibioycbq.supabase.co/functions/v1/tournament-export?tournament_id=${tournament.id}&format=trf`}
+                  target="_blank" rel="noreferrer"
+                >
+                  <Button variant="outline"><Trophy className="h-4 w-4 mr-1" /> Export TRF</Button>
+                </a>
               )}
               {isActive && myPairing?.game_id && (
                 <Button onClick={() => navigate(`/play/online?game=${myPairing.game_id}`)}>
@@ -210,6 +225,22 @@ const TournamentLobby = () => {
             </div>
           </div>
         </div>
+
+        {/* Check-in window (humanitarian / official events) */}
+        {(tournament.checkin_opens_at || tournament.checkin_closes_at) && (
+          (() => {
+            const myReg = user ? registrations.find(r => r.user_id === user.id) : undefined;
+            return (
+              <CheckInPanel
+                tournamentId={tournament.id}
+                checkinOpensAt={tournament.checkin_opens_at}
+                checkinClosesAt={tournament.checkin_closes_at}
+                isRegistered={isRegistered}
+                checkedIn={Boolean((myReg as any)?.checked_in)}
+              />
+            );
+          })()
+        )}
 
         {/* Auto-start countdown */}
         {isRegistering && tournament.starts_at && (() => {
@@ -324,32 +355,53 @@ const TournamentLobby = () => {
 
         {/* ============ STANDINGS ============ */}
         {activeTab === "standings" && (
-          <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
-            <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 px-4 py-2 text-xs font-medium text-muted-foreground bg-muted/30 border-b border-border/30">
-              <span>#</span><span>Player</span><span>Rating</span><span>Skill</span><span>Score</span>
+          <div className="rounded-xl border border-border/50 bg-card overflow-x-auto">
+            <div className="min-w-[760px]">
+              <div className="grid grid-cols-[2.5rem_minmax(160px,1fr)_4rem_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem] gap-2 px-4 py-2 text-[11px] font-medium text-muted-foreground bg-muted/30 border-b border-border/30">
+                <span>#</span><span>Player</span><span>Rtg</span><span title="Score">Pts</span>
+                <span title="Buchholz">Bh</span>
+                <span title="Buchholz Cut 1">Bh-1</span>
+                <span title="Sonneborn-Berger">SB</span>
+                <span title="Progressive Score">Prog</span>
+                <span title="Performance Rating">Perf</span>
+              </div>
+              {registrations.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">No players registered yet.</p>
+              ) : (
+                [...registrations]
+                  .sort((a, b) =>
+                    Number(b.score) - Number(a.score) ||
+                    Number(b.buchholz || 0) - Number(a.buchholz || 0) ||
+                    Number(b.buchholz_cut1 || 0) - Number(a.buchholz_cut1 || 0) ||
+                    Number(b.sonneborn || 0) - Number(a.sonneborn || 0) ||
+                    Number(b.progressive_score || 0) - Number(a.progressive_score || 0) ||
+                    Number(b.wins || 0) - Number(a.wins || 0) ||
+                    b.rating_at_join - a.rating_at_join
+                  )
+                  .map((reg, i) => (
+                  <div key={reg.id}
+                    className={`grid grid-cols-[2.5rem_minmax(160px,1fr)_4rem_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem_3.5rem] gap-2 px-4 py-2.5 text-sm items-center border-b border-border/20 last:border-0 ${
+                      user && reg.user_id === user.id ? "bg-primary/5" : ""
+                    }`}>
+                    <span className="w-6 text-center">
+                      {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : <span className="text-xs text-muted-foreground">{i + 1}</span>}
+                    </span>
+                    <span className="font-medium text-foreground truncate flex items-center">
+                      <CountryFlag country={reg.country} country_flag={reg.country_flag} />
+                      {getPlayerName(reg)}
+                      {user && reg.user_id === user.id && <span className="text-primary text-xs ml-1">(you)</span>}
+                    </span>
+                    <span className="text-muted-foreground tabular-nums">{reg.rating_at_join}</span>
+                    <span className="font-bold text-primary tabular-nums">{Number(reg.score)}</span>
+                    <span className="text-xs tabular-nums">{Number(reg.buchholz || 0).toFixed(1)}</span>
+                    <span className="text-xs tabular-nums">{Number(reg.buchholz_cut1 || 0).toFixed(1)}</span>
+                    <span className="text-xs tabular-nums">{Number(reg.sonneborn || 0).toFixed(1)}</span>
+                    <span className="text-xs tabular-nums">{Number(reg.progressive_score || 0).toFixed(1)}</span>
+                    <span className="text-xs tabular-nums">{reg.performance_rating ?? "—"}</span>
+                  </div>
+                ))
+              )}
             </div>
-            {registrations.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8 text-sm">No players registered yet.</p>
-            ) : (
-              registrations.sort((a, b) => Number(b.score) - Number(a.score) || b.rating_at_join - a.rating_at_join).map((reg, i) => (
-                <div key={reg.id}
-                  className={`grid grid-cols-[auto_1fr_auto_auto_auto] gap-2 px-4 py-2.5 text-sm items-center border-b border-border/20 last:border-0 ${
-                    user && reg.user_id === user.id ? "bg-primary/5" : ""
-                  }`}>
-                  <span className="w-6 text-center">
-                    {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : <span className="text-xs text-muted-foreground">{i + 1}</span>}
-                  </span>
-                  <span className="font-medium text-foreground truncate flex items-center">
-                    <CountryFlag country={reg.country} country_flag={reg.country_flag} />
-                    {getPlayerName(reg)}
-                    {user && reg.user_id === user.id && <span className="text-primary text-xs ml-1">(you)</span>}
-                  </span>
-                  <span className="text-muted-foreground">{reg.rating_at_join}</span>
-                  <Badge variant="outline" className="text-[10px]">{getSkillLabel(reg.rating_at_join)}</Badge>
-                  <span className="font-bold text-primary">{Number(reg.score)}</span>
-                </div>
-              ))
-            )}
           </div>
         )}
 

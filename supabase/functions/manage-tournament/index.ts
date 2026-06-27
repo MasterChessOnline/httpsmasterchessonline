@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
 
   let body: any = {};
   try { body = await req.json(); } catch { body = {}; }
-  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes, arena_duration_minutes } = body;
+  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes, arena_duration_minutes, player_details } = body;
 
   // Public action: auto-start due tournaments (called by cron). Requires shared-secret / service-role auth.
   if (action === "auto_start_due") {
@@ -69,6 +69,19 @@ Deno.serve(async (req) => {
     }
     if (action === "report_result") {
       return await handleReportResult(supabase, game_id, result, user.id);
+    }
+    if (action === "check_in") {
+      return await handleCheckIn(supabase, user.id, tournament_id);
+    }
+    if (action === "update_player_details") {
+      return await handleUpdatePlayerDetails(supabase, user.id, tournament_id, player_details || {});
+    }
+    if (action === "remove_unchecked") {
+      return await handleRemoveUnchecked(supabase, user.id, tournament_id);
+    }
+    if (action === "recalc_tiebreaks") {
+      await supabase.rpc("recalc_tournament_tiebreaks", { _tid: tournament_id });
+      return jsonRes({ ok: true });
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {
@@ -613,8 +626,81 @@ async function handleReportResult(supabase: any, game_id: string, result: string
     }
   }
 
+  // Recalculate Buchholz / Buchholz Cut 1 / Sonneborn-Berger / Progressive / Performance.
+  if (pairing?.tournament_id) {
+    try { await supabase.rpc("recalc_tournament_tiebreaks", { _tid: pairing.tournament_id }); } catch (e) { console.error("recalc failed", e); }
+  }
 
   return jsonRes({ success: true });
+}
+
+// ===================== CHECK-IN =====================
+async function handleCheckIn(supabase: any, userId: string, tournament_id: string) {
+  const { data: t } = await supabase
+    .from("tournaments")
+    .select("checkin_opens_at, checkin_closes_at, status")
+    .eq("id", tournament_id)
+    .single();
+  if (!t) return jsonRes({ error: "Tournament not found" }, 404);
+  if (t.status !== "registering") return jsonRes({ error: "Check-in unavailable" }, 400);
+  const now = Date.now();
+  if (t.checkin_opens_at && now < new Date(t.checkin_opens_at).getTime()) {
+    return jsonRes({ error: "Check-in not open yet" }, 400);
+  }
+  if (t.checkin_closes_at && now > new Date(t.checkin_closes_at).getTime()) {
+    return jsonRes({ error: "Check-in window closed" }, 400);
+  }
+  const { data: reg, error } = await supabase
+    .from("tournament_registrations")
+    .update({ checked_in: true, checked_in_at: new Date().toISOString() })
+    .eq("tournament_id", tournament_id)
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
+  if (error) return jsonRes({ error: error.message }, 500);
+  if (!reg) return jsonRes({ error: "You are not registered" }, 400);
+  return jsonRes({ ok: true });
+}
+
+async function handleUpdatePlayerDetails(supabase: any, userId: string, tournament_id: string, details: any) {
+  const allow = ["first_name", "last_name", "fide_id", "fide_title", "federation", "birth_year", "city", "club", "fide_blitz_rating"];
+  const patch: Record<string, any> = {};
+  for (const k of allow) if (details[k] !== undefined) patch[k] = details[k];
+  if (Object.keys(patch).length === 0) return jsonRes({ ok: true });
+  const { error } = await supabase
+    .from("tournament_registrations")
+    .update(patch)
+    .eq("tournament_id", tournament_id)
+    .eq("user_id", userId);
+  if (error) return jsonRes({ error: error.message }, 500);
+  // Mirror common identity fields to profile so future events auto-fill.
+  const profilePatch: Record<string, any> = {};
+  for (const k of ["first_name", "last_name", "fide_id", "fide_title", "federation", "birth_year", "club"]) {
+    if (patch[k] !== undefined) profilePatch[k] = patch[k];
+  }
+  if (Object.keys(profilePatch).length > 0) {
+    await supabase.from("profiles").update(profilePatch).eq("user_id", userId);
+  }
+  return jsonRes({ ok: true });
+}
+
+async function handleRemoveUnchecked(supabase: any, userId: string, tournament_id: string) {
+  // Admin/organizer only.
+  const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const allowed = (roleRows || []).some((r: any) => r.role === "admin" || r.role === "organizer");
+  if (!allowed) return jsonRes({ error: "Forbidden" }, 403);
+  const { data: removed, error } = await supabase
+    .from("tournament_registrations")
+    .delete()
+    .eq("tournament_id", tournament_id)
+    .eq("checked_in", false)
+    .select("id");
+  if (error) return jsonRes({ error: error.message }, 500);
+  await supabase
+    .from("tournaments")
+    .update({ roster_locked_at: new Date().toISOString() })
+    .eq("id", tournament_id);
+  return jsonRes({ ok: true, removed_count: removed?.length || 0 });
 }
 
 // ===================== STREAK TRACKING =====================

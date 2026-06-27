@@ -1966,6 +1966,7 @@ export type Database = {
           avatar_frame: string | null
           avatar_url: string | null
           bio: string | null
+          birth_year: number | null
           bot_games_drawn: number
           bot_games_lost: number
           bot_games_played: number
@@ -1974,6 +1975,7 @@ export type Database = {
           bot_rating: number
           city: string | null
           city_key: string | null
+          club: string | null
           coach_pro_until: string | null
           country: string | null
           country_flag: string | null
@@ -1986,6 +1988,10 @@ export type Database = {
           display_name: string | null
           favorite_opening: string | null
           favorite_openings: string[] | null
+          federation: string | null
+          fide_id: string | null
+          fide_title: string | null
+          first_name: string | null
           followers_count: number
           following_count: number
           games_drawn: number
@@ -1996,6 +2002,7 @@ export type Database = {
           id: string
           is_streamer: boolean
           last_login_reward_date: string | null
+          last_name: string | null
           login_streak: number
           login_streak_best: number
           loss_streak: number
@@ -2024,6 +2031,7 @@ export type Database = {
           avatar_frame?: string | null
           avatar_url?: string | null
           bio?: string | null
+          birth_year?: number | null
           bot_games_drawn?: number
           bot_games_lost?: number
           bot_games_played?: number
@@ -2032,6 +2040,7 @@ export type Database = {
           bot_rating?: number
           city?: string | null
           city_key?: string | null
+          club?: string | null
           coach_pro_until?: string | null
           country?: string | null
           country_flag?: string | null
@@ -2044,6 +2053,10 @@ export type Database = {
           display_name?: string | null
           favorite_opening?: string | null
           favorite_openings?: string[] | null
+          federation?: string | null
+          fide_id?: string | null
+          fide_title?: string | null
+          first_name?: string | null
           followers_count?: number
           following_count?: number
           games_drawn?: number
@@ -2054,6 +2067,7 @@ export type Database = {
           id?: string
           is_streamer?: boolean
           last_login_reward_date?: string | null
+          last_name?: string | null
           login_streak?: number
           login_streak_best?: number
           loss_streak?: number
@@ -2082,6 +2096,7 @@ export type Database = {
           avatar_frame?: string | null
           avatar_url?: string | null
           bio?: string | null
+          birth_year?: number | null
           bot_games_drawn?: number
           bot_games_lost?: number
           bot_games_played?: number
@@ -2090,6 +2105,7 @@ export type Database = {
           bot_rating?: number
           city?: string | null
           city_key?: string | null
+          club?: string | null
           coach_pro_until?: string | null
           country?: string | null
           country_flag?: string | null
@@ -2102,6 +2118,10 @@ export type Database = {
           display_name?: string | null
           favorite_opening?: string | null
           favorite_openings?: string[] | null
+          federation?: string | null
+          fide_id?: string | null
+          fide_title?: string | null
+          first_name?: string | null
           followers_count?: number
           following_count?: number
           games_drawn?: number
@@ -2112,6 +2132,7 @@ export type Database = {
           id?: string
           is_streamer?: boolean
           last_login_reward_date?: string | null
+          last_name?: string | null
           login_streak?: number
           login_streak_best?: number
           loss_streak?: number
@@ -3129,11 +3150,25 @@ export type Database = {
       }
       tournament_registrations: {
         Row: {
+          birth_year: number | null
           buchholz: number
+          buchholz_cut1: number
+          checked_in: boolean
+          checked_in_at: string | null
+          city: string | null
+          club: string | null
           created_at: string
           fast_win_bonus: number
+          federation: string | null
+          fide_blitz_rating: number | null
+          fide_id: string | null
+          fide_title: string | null
+          first_name: string | null
           id: string
+          last_name: string | null
           no_mistake_bonus: number
+          performance_rating: number | null
+          progressive_score: number
           rating_at_join: number
           score: number
           sonneborn: number
@@ -3143,11 +3178,25 @@ export type Database = {
           wins: number
         }
         Insert: {
+          birth_year?: number | null
           buchholz?: number
+          buchholz_cut1?: number
+          checked_in?: boolean
+          checked_in_at?: string | null
+          city?: string | null
+          club?: string | null
           created_at?: string
           fast_win_bonus?: number
+          federation?: string | null
+          fide_blitz_rating?: number | null
+          fide_id?: string | null
+          fide_title?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           no_mistake_bonus?: number
+          performance_rating?: number | null
+          progressive_score?: number
           rating_at_join?: number
           score?: number
           sonneborn?: number
@@ -3157,11 +3206,25 @@ export type Database = {
           wins?: number
         }
         Update: {
+          birth_year?: number | null
           buchholz?: number
+          buchholz_cut1?: number
+          checked_in?: boolean
+          checked_in_at?: string | null
+          city?: string | null
+          club?: string | null
           created_at?: string
           fast_win_bonus?: number
+          federation?: string | null
+          fide_blitz_rating?: number | null
+          fide_id?: string | null
+          fide_title?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           no_mistake_bonus?: number
+          performance_rating?: number | null
+          progressive_score?: number
           rating_at_join?: number
           score?: number
           sonneborn?: number
@@ -3253,6 +3316,8 @@ export type Database = {
           auto_started: boolean
           berserk_allowed: boolean
           category: string
+          checkin_closes_at: string | null
+          checkin_opens_at: string | null
           created_at: string
           created_by: string | null
           current_round: number
@@ -3260,11 +3325,14 @@ export type Database = {
           entry_fee: number
           format: string
           id: string
+          is_humanitarian: boolean
           is_rated: boolean
           is_signature: boolean
           max_players: number
           name: string
+          organizer_label: string | null
           registration_deadline: string | null
+          roster_locked_at: string | null
           round_started_at: string | null
           signature_series: string | null
           start_time_locked: boolean
@@ -3284,6 +3352,8 @@ export type Database = {
           auto_started?: boolean
           berserk_allowed?: boolean
           category?: string
+          checkin_closes_at?: string | null
+          checkin_opens_at?: string | null
           created_at?: string
           created_by?: string | null
           current_round?: number
@@ -3291,11 +3361,14 @@ export type Database = {
           entry_fee?: number
           format?: string
           id?: string
+          is_humanitarian?: boolean
           is_rated?: boolean
           is_signature?: boolean
           max_players?: number
           name: string
+          organizer_label?: string | null
           registration_deadline?: string | null
+          roster_locked_at?: string | null
           round_started_at?: string | null
           signature_series?: string | null
           start_time_locked?: boolean
@@ -3315,6 +3388,8 @@ export type Database = {
           auto_started?: boolean
           berserk_allowed?: boolean
           category?: string
+          checkin_closes_at?: string | null
+          checkin_opens_at?: string | null
           created_at?: string
           created_by?: string | null
           current_round?: number
@@ -3322,11 +3397,14 @@ export type Database = {
           entry_fee?: number
           format?: string
           id?: string
+          is_humanitarian?: boolean
           is_rated?: boolean
           is_signature?: boolean
           max_players?: number
           name?: string
+          organizer_label?: string | null
           registration_deadline?: string | null
+          roster_locked_at?: string | null
           round_started_at?: string | null
           signature_series?: string | null
           start_time_locked?: boolean
@@ -3894,6 +3972,7 @@ export type Database = {
           avatar_frame: string | null
           avatar_url: string | null
           bio: string | null
+          birth_year: number | null
           bot_games_drawn: number
           bot_games_lost: number
           bot_games_played: number
@@ -3902,6 +3981,7 @@ export type Database = {
           bot_rating: number
           city: string | null
           city_key: string | null
+          club: string | null
           coach_pro_until: string | null
           country: string | null
           country_flag: string | null
@@ -3914,6 +3994,10 @@ export type Database = {
           display_name: string | null
           favorite_opening: string | null
           favorite_openings: string[] | null
+          federation: string | null
+          fide_id: string | null
+          fide_title: string | null
+          first_name: string | null
           followers_count: number
           following_count: number
           games_drawn: number
@@ -3924,6 +4008,7 @@ export type Database = {
           id: string
           is_streamer: boolean
           last_login_reward_date: string | null
+          last_name: string | null
           login_streak: number
           login_streak_best: number
           loss_streak: number

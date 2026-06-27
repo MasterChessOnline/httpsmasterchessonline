@@ -7,3 +7,5 @@ project_id = "kicabdwgdyabibioycbq"
     verify_jwt = true
   [functions.push-daily-reminder]
     verify_jwt = false
+  [functions.tournament-export]
+    verify_jwt = false

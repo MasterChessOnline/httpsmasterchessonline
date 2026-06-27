@@ -110,6 +110,8 @@ const PwaInstallBanner = lazy(() => import("./components/PwaInstallBanner"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
+const TournamentRegister = lazy(() => import("./pages/TournamentRegister"));
+const DraganBrakusRedirect = lazy(() => import("./pages/DraganBrakusRedirect"));
 const StoryMode = lazy(() => import("./pages/StoryMode"));
 const OpeningTrainer = lazy(() => import("./pages/OpeningTrainer"));
 const OpeningExplorer = lazy(() => import("./pages/OpeningExplorer"));
@@ -247,6 +249,8 @@ function AnimatedRoutes() {
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
+          <Route path="/tournaments/:id/register" element={<TournamentRegister />} />
+          <Route path="/dragan-brakus" element={<DraganBrakusRedirect />} />
           <Route path="/world-tournaments" element={<WorldTournaments />} />
           
           <Route path="/leaderboard" element={<Leaderboard />} />

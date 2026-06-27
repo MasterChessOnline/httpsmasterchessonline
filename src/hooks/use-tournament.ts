@@ -17,6 +17,11 @@ export interface TournamentData {
   time_control_seconds: number;
   time_control_increment: number;
   round_started_at: string | null;
+  checkin_opens_at?: string | null;
+  checkin_closes_at?: string | null;
+  roster_locked_at?: string | null;
+  is_humanitarian?: boolean;
+  organizer_label?: string | null;
 }
 
 export interface Registration {
@@ -29,6 +34,13 @@ export interface Registration {
   username?: string;
   country?: string | null;
   country_flag?: string | null;
+  checked_in?: boolean;
+  buchholz?: number;
+  buchholz_cut1?: number;
+  sonneborn?: number;
+  progressive_score?: number;
+  performance_rating?: number | null;
+  wins?: number;
 }
 
 export interface Pairing {
