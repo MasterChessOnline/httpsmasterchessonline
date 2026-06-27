@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
 
   let body: any = {};
   try { body = await req.json(); } catch { body = {}; }
-  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes, arena_duration_minutes } = body;
+  const { action, tournament_id, game_id, result, time_control_label, time_control_seconds, time_control_increment, category, format, total_rounds, max_players, name, starts_in_minutes, arena_duration_minutes, player_details } = body;
 
   // Public action: auto-start due tournaments (called by cron). Requires shared-secret / service-role auth.
   if (action === "auto_start_due") {
