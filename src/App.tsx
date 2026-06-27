@@ -249,6 +249,8 @@ function AnimatedRoutes() {
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
+          <Route path="/tournaments/:id/register" element={<TournamentRegister />} />
+          <Route path="/dragan-brakus" element={<DraganBrakusRedirect />} />
           <Route path="/world-tournaments" element={<WorldTournaments />} />
           
           <Route path="/leaderboard" element={<Leaderboard />} />
