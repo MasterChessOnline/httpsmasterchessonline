@@ -36,10 +36,13 @@
 
     --radius: 0.75rem;
 
+    /* 5-color theme: bg / surface / text / muted / accent.
+       Legacy "neon" tokens are aliased to the single gold accent so old
+       components automatically inherit the tightened palette. */
     --neon-blue: 43 90% 55%;
-    --neon-purple: 30 60% 40%;
+    --neon-purple: 43 80% 48%;
     --neon-cyan: 43 70% 65%;
-    --neon-pink: 15 80% 55%;
+    --neon-pink: 43 90% 55%;
 
     --board-light: 40 35% 65%;
     --board-dark: 30 30% 25%;
@@ -48,13 +51,23 @@
     --font-body: 'Inter', sans-serif;
 
     --gradient-hero: linear-gradient(180deg, hsl(30 8% 4% / 0.2) 0%, hsl(30 8% 4% / 0.98) 100%);
-    --gradient-neon: linear-gradient(135deg, hsl(43 90% 55%), hsl(30 60% 40%));
+    --gradient-neon: linear-gradient(135deg, hsl(43 90% 55%), hsl(43 80% 48%));
     --gradient-cyan: linear-gradient(135deg, hsl(43 70% 65%), hsl(43 90% 55%));
     --gradient-card: linear-gradient(145deg, hsl(30 10% 10%), hsl(30 10% 6%));
-    --shadow-neon: 0 0 30px hsl(43 90% 55% / 0.15);
-    --shadow-neon-lg: 0 0 60px hsl(43 90% 55% / 0.2);
+    --shadow-neon: 0 0 18px hsl(43 90% 55% / 0.08);
+    --shadow-neon-lg: 0 0 32px hsl(43 90% 55% / 0.10);
     --shadow-card: 0 4px 24px hsl(30 8% 2% / 0.5);
-    --shadow-glow-purple: 0 0 40px hsl(30 60% 40% / 0.15);
+    --shadow-glow-purple: 0 0 24px hsl(43 80% 48% / 0.08);
+  }
+}
+
+@layer base {
+  /* === Game mode: hide site chrome when inside a live game === */
+  body[data-game-active="true"] .app-navbar,
+  body[data-game-active="true"] .app-navbar-spacer,
+  body[data-game-active="true"] [data-mobile-bottom-nav],
+  body[data-game-active="true"] footer.site-footer {
+    display: none !important;
   }
 }
 

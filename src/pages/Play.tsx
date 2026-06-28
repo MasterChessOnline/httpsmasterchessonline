@@ -1,4 +1,5 @@
 import Seo from "@/components/Seo";
+import { useGameMode } from "@/hooks/use-game-mode";
 import BotAvatar from "@/components/BotAvatar";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Chess, Square } from "chess.js";
@@ -53,6 +54,7 @@ const PHASE_RECOMMENDATIONS = [
 
 const Play = () => {
   const { user, profile, refreshProfile } = useAuth();
+  useGameMode(true);
   const [fen, setFen] = useState("start");
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
