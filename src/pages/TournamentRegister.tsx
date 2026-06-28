@@ -213,9 +213,35 @@ export default function TournamentRegister() {
             <Trophy className="h-5 w-5 text-primary" />
             <h1 className="text-2xl font-bold">Register · {tournament.name}</h1>
           </div>
-          <p className="text-sm text-muted-foreground mb-6">
+          <p className="text-sm text-muted-foreground mb-4">
             {tournament.time_control_label} · {tournament.total_rounds} rounds · {tournament.format}
           </p>
+
+          {/* FIDE Quick Lookup */}
+          <div className="mb-5 rounded-lg border border-primary/30 bg-primary/5 p-3">
+            <Label className="text-xs font-bold uppercase tracking-wide text-primary">FIDE Quick Lookup</Label>
+            <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+              Enter your FIDE ID and we'll fetch your name, federation & title automatically.
+            </p>
+            <div className="flex gap-2">
+              <Input value={form.fide_id} onChange={handle("fide_id")} placeholder="e.g. 14600340" maxLength={10} />
+              <Button type="button" onClick={lookupFide} disabled={fideBusy} variant="secondary">
+                {fideBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Search className="h-4 w-4 mr-1" /> Find me</>}
+              </Button>
+            </div>
+          </div>
+
+          {(form.first_name && form.last_name) && (
+            <Button
+              type="button"
+              className="w-full mb-4 bg-gradient-to-r from-yellow-500 to-amber-400 text-black hover:from-yellow-400 hover:to-amber-300"
+              onClick={(e) => submit(e as any)}
+              disabled={busy}
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Zap className="h-4 w-4 mr-1" /> Register as {form.first_name} {form.last_name}</>}
+            </Button>
+          )}
+
           <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="First name *" value={form.first_name} onChange={handle("first_name")} />
             <Field label="Last name *" value={form.last_name} onChange={handle("last_name")} />
@@ -233,10 +259,10 @@ export default function TournamentRegister() {
             </div>
           </form>
           <p className="text-xs text-muted-foreground mt-4">
-            FIDE data is used only for official Chess-Results publication. We do not auto-query the FIDE database; please copy your details from{" "}
-            <a className="underline" href="https://ratings.fide.com/" target="_blank" rel="noreferrer">ratings.fide.com</a>.
+            FIDE Quick Lookup reads your public profile from{" "}
+            <a className="underline" href="https://ratings.fide.com/" target="_blank" rel="noreferrer">ratings.fide.com</a>{" "}
+            so you don't have to type anything. Used only for official Chess-Results publication.
           </p>
-        </Card>
       </main>
       <Footer />
     </div>
