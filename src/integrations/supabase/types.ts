@@ -3393,6 +3393,7 @@ export type Database = {
           performance_rating: number | null
           progressive_score: number
           rating_at_join: number
+          reminded_2h_at: string | null
           score: number
           sonneborn: number
           tiebreak: number
@@ -3423,6 +3424,7 @@ export type Database = {
           performance_rating?: number | null
           progressive_score?: number
           rating_at_join?: number
+          reminded_2h_at?: string | null
           score?: number
           sonneborn?: number
           tiebreak?: number
@@ -3453,6 +3455,7 @@ export type Database = {
           performance_rating?: number | null
           progressive_score?: number
           rating_at_join?: number
+          reminded_2h_at?: string | null
           score?: number
           sonneborn?: number
           tiebreak?: number
