@@ -115,7 +115,7 @@ export default function DraganBrakusCup() {
     setRegistering(true);
     try {
       // Pull invite code from URL ?invite= or sessionStorage (set by /i/:code)
-      const url = new URL(window.location.href);
+      const url = new window.URL(window.location.href);
       const inviteFromUrl = url.searchParams.get("invite") || "";
       const inviteFromStore = (() => { try { return sessionStorage.getItem("db_cup_invite_code") || ""; } catch { return ""; } })();
       const invite_code = (inviteFromUrl || inviteFromStore || "").trim().toUpperCase() || null;
