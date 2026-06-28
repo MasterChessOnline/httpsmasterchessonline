@@ -17,7 +17,7 @@ interface ActivePair {
   white_player_id: string;
   black_player_id: string | null;
   result: string | null;
-  online_game_id: string | null;
+  game_id: string | null;
   tournament_name: string;
   tournament_category: string;
   white_username: string | null;
@@ -43,7 +43,7 @@ export default function TournamentsWall() {
 
       const { data: pairings } = await supabase
         .from("tournament_pairings")
-        .select("id, tournament_id, round, white_player_id, black_player_id, result, online_game_id")
+        .select("id, tournament_id, round, white_player_id, black_player_id, result, game_id")
         .in("tournament_id", ids)
         .is("result", null);
 
@@ -129,7 +129,7 @@ export default function TournamentsWall() {
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {list.map((p) => {
-                const href = p.online_game_id ? `/online/${p.online_game_id}` : `/tournaments/${p.tournament_id}`;
+                const href = p.game_id ? `/online/${p.game_id}` : `/tournaments/${p.tournament_id}`;
                 return (
                   <Link key={p.id} to={href} className="group">
                     <Card className="p-3 hover:border-primary/60 transition-colors bg-card/60 backdrop-blur">
