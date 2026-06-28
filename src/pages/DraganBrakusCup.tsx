@@ -23,19 +23,44 @@ const URL = `${SITE}/dragan-brakus`;
 
 export default function DraganBrakusCup() {
   const [lobbyId, setLobbyId] = useState<string | null>(null);
+  const [playerCount, setPlayerCount] = useState<number>(0);
+  const [maxPlayers, setMaxPlayers] = useState<number>(500);
+  const [prizePool, setPrizePool] = useState<number>(100);
+  const [escalatorStep, setEscalatorStep] = useState<number>(25);
 
   useEffect(() => {
-    (async () => {
+    let cancelled = false;
+    async function load() {
       const { data } = await supabase
         .from("tournaments")
-        .select("id")
+        .select("id, max_players, prize_pool_eur, prize_escalator_step")
         .ilike("name", "%Dragan Brakus%")
         .order("starts_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data?.id) setLobbyId(data.id);
-    })();
+      if (cancelled || !data?.id) return;
+      setLobbyId(data.id);
+      setMaxPlayers(data.max_players || 500);
+      setPrizePool(Number(data.prize_pool_eur) || 100);
+      setEscalatorStep(Number(data.prize_escalator_step) || 25);
+      const { count } = await supabase
+        .from("tournament_registrations")
+        .select("user_id", { count: "exact", head: true })
+        .eq("tournament_id", data.id);
+      if (!cancelled) setPlayerCount(count || 0);
+    }
+    load();
+    const i = setInterval(load, 20000);
+    return () => { cancelled = true; clearInterval(i); };
   }, []);
+
+  const escalatedPrize = prizePool + Math.floor(playerCount / 50) * escalatorStep;
+  const nextMilestone = (Math.floor(playerCount / 50) + 1) * 50;
+
+  const shareText = encodeURIComponent(
+    `Dragan Brakus Cup — 9-round Swiss Blitz on MasterChess. Free entry, live standings, Chess-Results export. Register: ${URL}`
+  );
+
 
   const jsonLd = [
     {
@@ -137,13 +162,45 @@ export default function DraganBrakusCup() {
                 Register now <ChevronRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/dragan-brakus/live">Live standings</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/dragan-brakus/press">Press kit</Link>
+            </Button>
             {lobbyId && (
               <Button asChild size="lg" variant="outline">
                 <Link to={`/tournaments/${lobbyId}`}>Open lobby</Link>
               </Button>
             )}
           </div>
+
+          {/* Live counter + prize escalator */}
+          <div className="mt-8 grid sm:grid-cols-3 gap-3">
+            <Card className="p-4 border-yellow-500/30">
+              <div className="text-xs uppercase text-muted-foreground">Players registered</div>
+              <div className="text-3xl font-bold text-yellow-300">{playerCount} <span className="text-base text-muted-foreground">/ {maxPlayers}</span></div>
+              <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-yellow-400 to-amber-500" style={{ width: `${Math.min(100, (playerCount / maxPlayers) * 100)}%` }} />
+              </div>
+            </Card>
+            <Card className="p-4 border-yellow-500/30">
+              <div className="text-xs uppercase text-muted-foreground">Prize pool</div>
+              <div className="text-3xl font-bold text-yellow-300">€{escalatedPrize}</div>
+              <div className="text-xs text-muted-foreground mt-1">+€{escalatorStep} when we reach {nextMilestone} players</div>
+            </Card>
+            <Card className="p-4 border-yellow-500/30">
+              <div className="text-xs uppercase text-muted-foreground">Share the cup</div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <a className="rounded-md bg-green-600 text-white text-xs px-2.5 py-1.5" target="_blank" rel="noreferrer" href={`https://wa.me/?text=${shareText}`}>WhatsApp</a>
+                <a className="rounded-md bg-sky-500 text-white text-xs px-2.5 py-1.5" target="_blank" rel="noreferrer" href={`https://t.me/share/url?url=${encodeURIComponent(URL)}&text=${shareText}`}>Telegram</a>
+                <a className="rounded-md bg-black text-white text-xs px-2.5 py-1.5 border border-white/20" target="_blank" rel="noreferrer" href={`https://twitter.com/intent/tweet?text=${shareText}`}>X</a>
+                <a className="rounded-md bg-blue-700 text-white text-xs px-2.5 py-1.5" target="_blank" rel="noreferrer" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(URL)}`}>Facebook</a>
+              </div>
+            </Card>
+          </div>
         </section>
+
 
         {/* Format grid */}
         <section className="grid md:grid-cols-2 gap-4 mb-10">

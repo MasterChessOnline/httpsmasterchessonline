@@ -1,120 +1,67 @@
+## Dragan Brakus Cup — Pairings, Chess-Results & Marketing Wave
 
-# Dragan Brakus Humanitarian Blitz — Implementation Plan
+### 1. Swiss Pairings Engine (Chess-Pairings compatible)
 
-A focused Wave 1: ship this specific event on top of the existing tournament engine, plus four reusable upgrades (FIDE fields, check-in, extended tiebreaks, TRF export).
+Build a real FIDE Swiss pairing system inside MasterChess so the tournament doesn't depend on any external site at run time, but its exports drop straight into Chess-Pairings / Swiss-Manager / Chess-Results.
 
-## What gets built
+- New edge function `tournament-pair-round` — implements Dutch Swiss (FIDE 04.1):
+  - Sort by score → rating, split into score groups, top-half vs bottom-half pairing, color balancing, no repeat pairings, floaters, bye to lowest-rated unpaired.
+  - Writes into existing `tournament_pairings` (board, white_id, black_id, round, result).
+- Admin button on `/admin/tournaments/:id` → "Generate Round N" + "Publish round" + "Close round" (auto 1-0 / 0-1 / ½-½ from `online_games`, manual override).
+- After each round, auto-run `recalc_tournament_tiebreaks` (already exists).
 
-### 1. Database (single migration)
-Add to `tournaments`:
-- `checkin_opens_at timestamptz`, `checkin_closes_at timestamptz` (nullable — opt-in per tournament)
-- `roster_locked_at timestamptz`
-- `is_humanitarian boolean default false`, `organizer_label text`
+### 2. Chess-Results / Swiss-Manager export bridge
 
-Add to `tournament_registrations`:
-- `checked_in boolean default false`, `checked_in_at timestamptz`
-- `fide_id text`, `fide_title text`, `fide_blitz_rating int`, `federation text`, `birth_year int`
-- `buchholz_cut1 numeric default 0`, `progressive_score numeric default 0`, `performance_rating int`
+Extend the existing `tournament-export` function with the formats Chess-Results actually ingests:
 
-Add to `profiles`:
-- `first_name text`, `last_name text`, `fide_id text`, `fide_title text`, `federation text`, `birth_year int`, `club text`
+- **TRF16** (FIDE official) — already partially there, complete header (Tournament Name, Federation, Chief Arbiter Nikola Šakotić, Time Control 3+2, Date, City Belgrade, Type Swiss, Rounds 9, FIDE Rated yes).
+- **Swiss-Manager TUR** export (zipped TRF + crosstable).
+- **PGN bundle** per round, named `R{n}_{white}-{black}.pgn`.
+- One-click "Push to Chess-Results" panel in `/admin/tournaments/:id`: generates a `.zip` with TRF + crosstable + PGN and copies the upload URL `https://chess-results.com/AdminUpload.aspx`. (No public Chess-Results API exists — file upload is the only path.)
 
-Cron-style trigger (or extend existing watchdog edge function) to auto-remove non-checked-in players at `checkin_closes_at`.
+### 3. Tournament registration UX upgrade
 
-### 2. Tiebreak engine
-Extend `recalc_tournament_tiebreaks(_tid)`:
-- **Buchholz Cut 1**: Buchholz minus lowest opponent score
-- **Progressive Score**: sum of running score after each round
-- **Performance Rating**: standard FIDE Tournament Performance formula using opponents' `rating_at_join`
-- **Direct Encounter**: resolved at sort time in the standings query (not a stored column)
+`/tournaments/dragan-brakus-cup/register` already exists; harden it:
 
-Update standings sort order: Score → Buchholz → Buchholz Cut 1 → Sonneborn → Progressive → Wins → Direct Encounter.
+- Real-time **player counter** ("47 / 500"), starts-in countdown, "Check-in opens in …".
+- Auto-create `online_game` rooms when round is published, redirect players from `/tournament/:id/live` straight into their board with clock 3+2 pre-loaded.
+- Pairing display: bracket-style table + "My next game" card with opponent name, rating, board #, color.
+- Withdrawal & bye request buttons (half-point bye if requested before round start).
+- Anti-cheat hooks: tab-switch counter, paste blocker, already-flagged via `tournament_anti_cheat_flags`.
 
-### 3. Event seeding
-Insert one tournament row:
-- Name: "Dragan Brakus Humanitarian Blitz"
-- starts_at: 2026-06-30 17:00 Europe/Belgrade
-- checkin_opens_at: 16:45, checkin_closes_at: 16:55
-- 3+2 blitz, 9 Swiss rounds, signature event
-- Description with full schedule + humanitarian dedication
+### 4. Google Maps event marketing
 
-### 4. Frontend pages
+- Extend `gbp_posts` seed with **9 scheduled GBP posts** — one per round, plus pre-event teaser, check-in reminder, winner announcement.
+- Update `/dragan-brakus` with `Event` JSON-LD `eventStatus`, `eventAttendanceMode: OnlineEventAttendanceMode`, `organizer.location` linked to the GBP place ID → makes the event eligible to show in Google Maps "Upcoming events" panel.
+- Add `OG:image` (1200×630) generator for the event — used by GBP post + WhatsApp/Telegram shares.
+- New page `/dragan-brakus/live` — public live standings page, no login, indexable, with auto-refresh; the kind of page chess journalists screenshot.
 
-**`src/pages/TournamentRegister.tsx`** (route `/tournaments/:id/register`)
-Extended form: first/last name, email, country, city, club, FIDE ID (manual, numeric validation only), birth year, title dropdown (—/CM/FM/IM/GM/WCM/WFM/WIM/WGM), blitz rating. On submit: update profile + create registration. No FIDE auto-lookup (per user choice).
+### 5. "Brutal" marketing ideas to ship now
 
-**`src/components/tournaments/CheckInPanel.tsx`**
-Shows on the existing tournament detail page when `checkin_opens_at ≤ now ≤ checkin_closes_at`. Big "Check In" button → flips `checked_in = true`. Live countdown to close. Warning banner if user registered but not checked in.
+- **Prize escalator**: every 50 registrations unlocks +€X to prize fund — shown live on landing page → creates FOMO + share loop.
+- **Referral leaderboard for the Cup**: each player gets `/dragan-brakus?ref={code}`; top 3 referrers get free entry to next event + badge. Uses existing `referrals` table.
+- **Press kit page** `/dragan-brakus/press` — high-res logos, founder photo, one-line/one-paragraph/full bio, downloadable ZIP. Email-pitchable to Politika, B92, RTS, Šahovski glasnik.
+- **Founder angle**: every news article and GBP post leads with "13-year-old founder organizes 500-player FIDE-rated charity Swiss" — same angle that worked on `/nikola`.
+- **WhatsApp/Telegram share buttons** with pre-filled Serbian + English copy on the landing page (today the page has none).
+- **Auto-tweet/X post** edge function `tournament-broadcast` posts round results to an X account (requires user to add an X API token later — not blocking).
+- **Daily countdown email** to all registered players (T-7, T-3, T-1, day-of) via existing email infra.
+- **Embed widget** `/embed/dragan-brakus` (iframe) — clubs can paste it on their own sites, every embed is a backlink.
 
-**Standings table upgrade** (existing tournament detail page)
-Add columns: Federation, Title, Buchholz Cut 1, Progressive, Performance. Keep mobile-friendly with horizontal scroll.
+### Technical section
 
-### 5. Admin / organizer actions
-Extend `manage-tournament` edge function with actions:
-- `force_checkin` — admin checks in a player
-- `remove_unchecked` — fired by client at `checkin_closes_at` (idempotent, also covered server-side)
-- `export_trf` — returns FIDE TRF16 format string
-- `export_pgn` — concatenated PGN of all finished games
+- New file: `supabase/functions/tournament-pair-round/index.ts` (Dutch Swiss).
+- Extend: `supabase/functions/tournament-export/index.ts` (add `trf16`, `swiss-manager-zip`, `pgn-bundle`).
+- New pages: `src/pages/DraganBrakusLive.tsx`, `src/pages/DraganBrakusPress.tsx`, `src/pages/EmbedTournament.tsx`.
+- Update: `src/pages/DraganBrakusCup.tsx` (counter, share buttons, prize escalator, JSON-LD upgrade).
+- DB migration: add `prize_pool_eur`, `prize_escalator_step`, `referral_count` to `tournaments`; add `withdrew_at`, `bye_rounds` to `tournament_registrations`.
+- Seed: 9 additional `gbp_posts` rows for the Cup.
+- Sitemap: add `/dragan-brakus/live`, `/dragan-brakus/press`, IndexNow ping.
 
-Add a compact "Organizer Tools" panel on the tournament page, visible only to users with `admin` or `organizer` role, with download buttons for TRF + PGN + CSV standings.
+### Out of scope (flag, don't build)
 
-### 6. TRF export (FIDE-compliant)
-Edge function `tournament-export-trf` generates the standard TRF16 layout:
-```
-012 Tournament Name
-022 City
-032 Federation
-042 Date start
-052 Date end
-062 Number of players
-072 Number of rated players
-082 Number of teams
-092 Type: Individual: Swiss-System
-102 Chief Arbiter
-112 Deputy Chief Arbiter
-122 3 min + 2 sec
-132 Round dates
-001 [board] [sex] [title] [name] [rating] [fed] [fide id] [birth] [score] [rank] [results...]
-```
-Output downloadable as `.trf` for arbiter to upload to Chess-Results Serbia manually (per spec §11–12).
+- Live Chess-Results API push — site has no public API, only file upload; covered by the export bridge.
+- X/Twitter auto-broadcast actual posting — needs user-provided API token (request later via `add_secret`).
 
-### 7. Event landing
-`src/pages/DraganBrakus.tsx` at `/dragan-brakus`:
-- Hero with dedication, date/time, time control, prize info
-- Full minute-by-minute schedule (from spec §2)
-- Register CTA → `/tournaments/:id/register`
-- Awards list (§13)
-- SEO meta + JSON-LD `SportsEvent`
+---
 
-Add to sitemap generator.
-
-## Explicitly NOT in this wave
-- FIDE auto-verification (user chose manual entry)
-- Anti-cheat enhancements beyond what `tournament_anti_cheat_flags` already provides
-- Cross-table view (TRF export covers Chess-Results upload)
-- Email notifications / certificates PDF generator
-- Spectator betting hooks for this event
-
-These can become Wave 2 after the June 30 event proves the flow.
-
-## Files touched
-
-**New**
-- `supabase/migrations/<ts>_dragan_brakus_tournament.sql`
-- `supabase/functions/tournament-export-trf/index.ts`
-- `src/pages/DraganBrakus.tsx`
-- `src/pages/TournamentRegister.tsx`
-- `src/components/tournaments/CheckInPanel.tsx`
-- `src/components/tournaments/OrganizerTools.tsx`
-
-**Modified**
-- `supabase/functions/manage-tournament/index.ts` (new actions)
-- `src/pages/TournamentDetail.tsx` (mount CheckInPanel + OrganizerTools, new standings columns)
-- `src/hooks/use-tournament.ts` (expose new fields)
-- `src/App.tsx` (routes)
-- `scripts/generate-sitemap.ts` (add `/dragan-brakus`)
-
-## Risks / open items
-- Performance Rating calc needs opponents' starting ratings — already stored as `rating_at_join`, so good.
-- Bye handling in tiebreaks: bye counts as a win worth 1.0 with no opponent contribution to Buchholz (FIDE standard) — will preserve current behavior.
-- The existing auto-start cron handles round transitions; check-in cutoff will reuse it.
+Ship all of it in one wave, or split (Pairings + Export first, marketing second)? And is the prize fund a fixed amount or fully escalator-based?
