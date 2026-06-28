@@ -56,6 +56,89 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_clicks: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_clicks_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      affiliates: {
+        Row: {
+          code: string
+          commission_coins_per_signup: number
+          commission_coins_per_tournament_join: number
+          created_at: string
+          is_active: boolean
+          owner_email: string | null
+          owner_name: string
+          owner_user_id: string | null
+          partner_tier: string
+          total_clicks: number
+          total_coins_paid: number
+          total_joins: number
+          total_signups: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          commission_coins_per_signup?: number
+          commission_coins_per_tournament_join?: number
+          created_at?: string
+          is_active?: boolean
+          owner_email?: string | null
+          owner_name: string
+          owner_user_id?: string | null
+          partner_tier?: string
+          total_clicks?: number
+          total_coins_paid?: number
+          total_joins?: number
+          total_signups?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          commission_coins_per_signup?: number
+          commission_coins_per_tournament_join?: number
+          created_at?: string
+          is_active?: boolean
+          owner_email?: string | null
+          owner_name?: string
+          owner_user_id?: string | null
+          partner_tier?: string
+          total_clicks?: number
+          total_coins_paid?: number
+          total_joins?: number
+          total_signups?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_game_reviews: {
         Row: {
           created_at: string
@@ -1494,6 +1577,51 @@ export type Database = {
           rating?: number
           time_control_label?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      media_outreach: {
+        Row: {
+          category: string
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          outlet: string
+          pitch_url: string | null
+          responded_at: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          outlet: string
+          pitch_url?: string | null
+          responded_at?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          outlet?: string
+          pitch_url?: string | null
+          responded_at?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3148,6 +3276,100 @@ export type Database = {
           },
         ]
       }
+      tournament_payouts: {
+        Row: {
+          badge_key: string | null
+          coins: number
+          cosmetic_key: string | null
+          id: string
+          label: string | null
+          paid_at: string
+          place: number | null
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          badge_key?: string | null
+          coins?: number
+          cosmetic_key?: string | null
+          id?: string
+          label?: string | null
+          paid_at?: string
+          place?: number | null
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          badge_key?: string | null
+          coins?: number
+          cosmetic_key?: string | null
+          id?: string
+          label?: string | null
+          paid_at?: string
+          place?: number | null
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_payouts_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_prizes: {
+        Row: {
+          badge_key: string | null
+          coins: number
+          cosmetic_key: string | null
+          created_at: string
+          id: string
+          is_special: boolean
+          label: string
+          place_from: number
+          place_to: number
+          sort_order: number
+          tournament_id: string
+        }
+        Insert: {
+          badge_key?: string | null
+          coins?: number
+          cosmetic_key?: string | null
+          created_at?: string
+          id?: string
+          is_special?: boolean
+          label: string
+          place_from: number
+          place_to: number
+          sort_order?: number
+          tournament_id: string
+        }
+        Update: {
+          badge_key?: string | null
+          coins?: number
+          cosmetic_key?: string | null
+          created_at?: string
+          id?: string
+          is_special?: boolean
+          label?: string
+          place_from?: number
+          place_to?: number
+          sort_order?: number
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_prizes_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_registrations: {
         Row: {
           birth_year: number | null
@@ -3249,6 +3471,47 @@ export type Database = {
           },
         ]
       }
+      tournament_sponsors: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          logo_url: string | null
+          name: string
+          tier: string
+          tournament_id: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          logo_url?: string | null
+          name: string
+          tier?: string
+          tournament_id: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          logo_url?: string | null
+          name?: string
+          tier?: string
+          tournament_id?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_sponsors_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_streaks: {
         Row: {
           current_streak: number
@@ -3330,6 +3593,7 @@ export type Database = {
           description: string
           donation_total_eur: number
           entry_fee: number
+          external_results_url: string | null
           format: string
           id: string
           is_humanitarian: boolean
@@ -3339,6 +3603,7 @@ export type Database = {
           name: string
           organizer_label: string | null
           prize_escalator_step: number
+          prize_kind: string
           prize_pool_eur: number
           registration_deadline: string | null
           roster_locked_at: string | null
@@ -3370,6 +3635,7 @@ export type Database = {
           description?: string
           donation_total_eur?: number
           entry_fee?: number
+          external_results_url?: string | null
           format?: string
           id?: string
           is_humanitarian?: boolean
@@ -3379,6 +3645,7 @@ export type Database = {
           name: string
           organizer_label?: string | null
           prize_escalator_step?: number
+          prize_kind?: string
           prize_pool_eur?: number
           registration_deadline?: string | null
           roster_locked_at?: string | null
@@ -3410,6 +3677,7 @@ export type Database = {
           description?: string
           donation_total_eur?: number
           entry_fee?: number
+          external_results_url?: string | null
           format?: string
           id?: string
           is_humanitarian?: boolean
@@ -3419,6 +3687,7 @@ export type Database = {
           name?: string
           organizer_label?: string | null
           prize_escalator_step?: number
+          prize_kind?: string
           prize_pool_eur?: number
           registration_deadline?: string | null
           roster_locked_at?: string | null
@@ -3950,6 +4219,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_affiliate_public: {
+        Args: { _code: string }
+        Returns: {
+          code: string
+          created_at: string
+          owner_name: string
+          partner_tier: string
+          total_clicks: number
+          total_joins: number
+          total_signups: number
+        }[]
+      }
       get_beat_nikola_leaderboard: {
         Args: { _limit?: number }
         Returns: {
@@ -4140,6 +4421,10 @@ export type Database = {
         Returns: boolean
       }
       join_battle_royale: { Args: never; Returns: Json }
+      log_affiliate_click: {
+        Args: { _code: string; _referrer?: string; _ua?: string }
+        Returns: undefined
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string

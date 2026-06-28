@@ -12,8 +12,19 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Trophy, Clock, Users, ShieldCheck, MapPin, Calendar,
-  Zap, Target, Award, ChevronRight,
+  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink,
 } from "lucide-react";
+
+type Prize = {
+  place_from: number; place_to: number; label: string;
+  coins: number; badge_key: string | null; cosmetic_key: string | null;
+  is_special: boolean; sort_order: number;
+};
+type Sponsor = {
+  name: string; logo_url: string | null; website: string | null;
+  tier: "title" | "gold" | "silver" | "community"; display_order: number;
+};
+
 
 const EVENT_NAME = "Dragan Brakus Cup";
 const EVENT_START = "2026-06-30T17:00:00+02:00"; // 17:00 CEST / 15:00 UTC
@@ -25,15 +36,16 @@ export default function DraganBrakusCup() {
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(0);
   const [maxPlayers, setMaxPlayers] = useState<number>(500);
-  const [prizePool, setPrizePool] = useState<number>(100);
-  const [escalatorStep, setEscalatorStep] = useState<number>(25);
+  const [externalResultsUrl, setExternalResultsUrl] = useState<string | null>(null);
+  const [prizes, setPrizes] = useState<Prize[]>([]);
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       const { data } = await supabase
         .from("tournaments")
-        .select("id, max_players, prize_pool_eur, prize_escalator_step")
+        .select("id, max_players, external_results_url")
         .ilike("name", "%Dragan Brakus%")
         .order("starts_at", { ascending: false })
         .limit(1)
@@ -41,25 +53,40 @@ export default function DraganBrakusCup() {
       if (cancelled || !data?.id) return;
       setLobbyId(data.id);
       setMaxPlayers(data.max_players || 500);
-      setPrizePool(Number(data.prize_pool_eur) || 100);
-      setEscalatorStep(Number(data.prize_escalator_step) || 25);
-      const { count } = await supabase
-        .from("tournament_registrations")
-        .select("user_id", { count: "exact", head: true })
-        .eq("tournament_id", data.id);
-      if (!cancelled) setPlayerCount(count || 0);
+      setExternalResultsUrl((data as any).external_results_url || null);
+      const [{ count }, prizesRes, sponsorsRes] = await Promise.all([
+        supabase.from("tournament_registrations")
+          .select("user_id", { count: "exact", head: true })
+          .eq("tournament_id", data.id),
+        supabase.from("tournament_prizes")
+          .select("place_from, place_to, label, coins, badge_key, cosmetic_key, is_special, sort_order")
+          .eq("tournament_id", data.id)
+          .order("sort_order"),
+        supabase.from("tournament_sponsors")
+          .select("name, logo_url, website, tier, display_order")
+          .eq("tournament_id", data.id)
+          .order("display_order"),
+      ]);
+      if (cancelled) return;
+      setPlayerCount(count || 0);
+      setPrizes((prizesRes.data as any) || []);
+      setSponsors((sponsorsRes.data as any) || []);
     }
     load();
     const i = setInterval(load, 20000);
     return () => { cancelled = true; clearInterval(i); };
   }, []);
 
-  const escalatedPrize = prizePool + Math.floor(playerCount / 50) * escalatorStep;
-  const nextMilestone = (Math.floor(playerCount / 50) + 1) * 50;
+  const totalCoinPool = prizes.reduce((acc, p) => {
+    const places = Math.max(1, p.place_to - p.place_from + 1);
+    return acc + p.coins * (p.is_special ? 1 : places);
+  }, 0);
+  const nextMilestone = Math.min(maxPlayers, (Math.floor(playerCount / 100) + 1) * 100);
 
   const shareText = encodeURIComponent(
-    `Dragan Brakus Cup — 9-round Swiss Blitz on MasterChess. Free entry, live standings, Chess-Results export. Register: ${URL}`
+    `Dragan Brakus Cup — 9-round Swiss Blitz on MasterChess. Free entry, MasterChess loot prizes, live standings on Chess-Results. Register: ${URL}`
   );
+
 
 
   const jsonLd = [
@@ -185,10 +212,11 @@ export default function DraganBrakusCup() {
               </div>
             </Card>
             <Card className="p-4 border-yellow-500/30">
-              <div className="text-xs uppercase text-muted-foreground">Prize pool</div>
-              <div className="text-3xl font-bold text-yellow-300">€{escalatedPrize}</div>
-              <div className="text-xs text-muted-foreground mt-1">+€{escalatorStep} when we reach {nextMilestone} players</div>
+              <div className="text-xs uppercase text-muted-foreground flex items-center gap-1"><Coins className="h-3 w-3" /> MasterChess loot pool</div>
+              <div className="text-3xl font-bold text-yellow-300">{totalCoinPool.toLocaleString()} <span className="text-sm text-muted-foreground">coins</span></div>
+              <div className="text-xs text-muted-foreground mt-1">+ exclusive badges & cosmetics. No cash — pure MasterChess rewards.</div>
             </Card>
+
             <Card className="p-4 border-yellow-500/30">
               <div className="text-xs uppercase text-muted-foreground">Share the cup</div>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -263,28 +291,105 @@ export default function DraganBrakusCup() {
           </Card>
         </section>
 
-        {/* Awards */}
+        {/* MasterChess loot ladder */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">Awards</h2>
+          <div className="flex items-end justify-between mb-4">
+            <h2 className="text-2xl font-bold">MasterChess Loot Ladder</h2>
+            <div className="text-xs text-muted-foreground">No cash prizes — coins, badges & cosmetics only.</div>
+          </div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {[
-              ["🏆", "Champion Trophy", "Dragan Brakus Cup winner"],
-              ["🥈", "Silver Medal", "2nd place"],
-              ["🥉", "Bronze Medal", "3rd place"],
-              ["🤝", "Fair Play Award", "Cleanest play"],
-              ["⭐", "Best Junior", "Top U18 finisher"],
-              ["👑", "Best Female", "Top female finisher"],
-              ["🎖️", "Best Veteran", "Top 60+ finisher"],
-              ["📜", "Participation Certificate", "All players who complete 9 rounds"],
-            ].map(([e, t, d]) => (
-              <Card key={t} className="p-4">
-                <div className="text-2xl">{e}</div>
-                <div className="font-semibold mt-1">{t}</div>
-                <div className="text-xs text-muted-foreground">{d}</div>
+            {(prizes.length ? prizes : []).map((p) => {
+              const placeLabel = p.is_special
+                ? "Special"
+                : p.place_from === p.place_to
+                  ? `#${p.place_from}`
+                  : `#${p.place_from}–${p.place_to}`;
+              return (
+                <Card key={`${p.sort_order}-${p.label}`} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold">{p.label}</div>
+                    <Badge variant="outline" className="text-xs">{placeLabel}</Badge>
+                  </div>
+                  <div className="mt-2 flex items-center gap-3 text-sm">
+                    <span className="inline-flex items-center gap-1 text-yellow-300">
+                      <Coins className="h-3.5 w-3.5" /> {p.coins.toLocaleString()} coins
+                    </span>
+                    {p.badge_key && (
+                      <span className="inline-flex items-center gap-1 text-fuchsia-300">
+                        <Award className="h-3.5 w-3.5" /> badge
+                      </span>
+                    )}
+                    {p.cosmetic_key && (
+                      <span className="inline-flex items-center gap-1 text-cyan-300">
+                        <Sparkles className="h-3.5 w-3.5" /> cosmetic
+                      </span>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+            {prizes.length === 0 && (
+              <Card className="p-4 col-span-full text-sm text-muted-foreground">
+                Prize ladder loading…
               </Card>
-            ))}
+            )}
           </div>
         </section>
+
+        {/* Sponsors */}
+        {sponsors.length > 0 && (
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">Powered by</h2>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {sponsors.map((s) => (
+                <Card key={s.name} className="p-4 flex items-center gap-3">
+                  {s.logo_url && (
+                    <img src={s.logo_url} alt={s.name} className="h-10 w-10 rounded" />
+                  )}
+                  <div className="flex-1">
+                    <div className="font-semibold">{s.name}</div>
+                    <div className="text-xs uppercase text-muted-foreground">{s.tier}</div>
+                  </div>
+                  {s.website && (
+                    <a href={s.website} target="_blank" rel="noreferrer" className="text-yellow-300 text-sm inline-flex items-center gap-1">
+                      Visit <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </Card>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Become a partner — write to <a className="underline" href="mailto:nikola@masterchess.live">nikola@masterchess.live</a>.
+            </p>
+          </section>
+        )}
+
+        {/* Chess-Results Serbia integration */}
+        <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 mb-10">
+          <h2 className="text-xl font-bold mb-2">Chess-Results Serbia</h2>
+          <p className="text-sm text-muted-foreground mb-3">
+            Full pairings, standings and tie-breaks are published on Chess-Results
+            Serbia ({" "}
+            <a href="https://chess-results.com" className="underline" target="_blank" rel="noreferrer">chess-results.com</a>
+            ) immediately after the tournament. TRF16, Swiss-Manager .tur and
+            crosstable files are available below.
+          </p>
+          {externalResultsUrl ? (
+            <a
+              href={externalResultsUrl}
+              target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-md bg-yellow-500 text-black px-4 py-2 text-sm font-semibold"
+            >
+              Open on Chess-Results <ExternalLink className="h-4 w-4" />
+            </a>
+          ) : (
+            <div className="text-xs text-muted-foreground">
+              Chess-Results URL will be published here after the organizer registers the event.
+              See <Link className="underline" to="/docs/chess-results">submission guide</Link>.
+            </div>
+          )}
+        </section>
+
 
         {/* Exports for Chess-Results */}
         {lobbyId && (
@@ -295,7 +400,7 @@ export default function DraganBrakusCup() {
               official tournament files for upload to Chess-Results Serbia.
             </p>
             <div className="flex flex-wrap gap-2 text-sm">
-              {(["trf", "pgn", "json", "csv-standings", "csv-crosstable"] as const).map((fmt) => (
+              {(["trf", "announcement-trf", "swiss-manager-tur", "pgn", "json", "csv-standings", "csv-crosstable"] as const).map((fmt) => (
                 <a
                   key={fmt}
                   className="rounded-md border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10"
