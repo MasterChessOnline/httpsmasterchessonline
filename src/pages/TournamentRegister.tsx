@@ -37,33 +37,27 @@ export default function TournamentRegister() {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fideBusy, setFideBusy] = useState(false);
+  const [fideFound, setFideFound] = useState<null | { name: string; federation?: string; rating?: number }>(null);
+  const [fideError, setFideError] = useState<string | null>(null);
+  const debounceRef = useRef<number | null>(null);
 
-  const lookupFide = async () => {
-    const id = form.fide_id.trim();
-    if (!/^\d{4,10}$/.test(id)) {
-      toast({ title: "Enter a valid FIDE ID", description: "Numeric, 4–10 digits.", variant: "destructive" });
+  const lookupFide = async (idArg?: string) => {
+    const fid = (idArg ?? form.fide_id).trim();
+    if (!/^\d{4,10}$/.test(fid)) {
+      setFideError("FIDE ID must be 4–10 digits.");
       return;
     }
     setFideBusy(true);
+    setFideError(null);
     try {
-      const { data, error } = await supabase.functions.invoke("fide-lookup", {
-        method: "GET" as any,
-        body: undefined,
-        // pass via query string
-        headers: {},
-      } as any);
-      // The supabase-js client doesn't support query params on invoke cleanly — fall back to fetch.
-      let json: any = data;
-      if (error || !json?.name) {
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fide-lookup?id=${id}`;
-        const r = await fetch(url, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } });
-        json = await r.json();
-      }
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fide-lookup?id=${fid}`;
+      const r = await fetch(url, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } });
+      const json: any = await r.json();
       if (!json?.name) {
-        toast({ title: "FIDE profile not found", description: json?.error || "Check the ID.", variant: "destructive" });
+        setFideError(json?.error || "FIDE profile not found.");
+        setFideFound(null);
         return;
       }
-      // FIDE names come as "LASTNAME, Firstname" — split sensibly.
       const raw: string = json.name;
       let first = "", last = "";
       if (raw.includes(",")) {
@@ -82,11 +76,28 @@ export default function TournamentRegister() {
         fide_title: json.title || s.fide_title,
         birth_year: json.birth_year ? String(json.birth_year) : s.birth_year,
       }));
-      toast({ title: `Found: ${raw}`, description: `${json.federation || ""}${json.rating ? " · " + json.rating : ""}` });
+      setFideFound({ name: raw, federation: json.federation, rating: json.rating });
+    } catch (e: any) {
+      setFideError(String(e?.message || e));
     } finally {
       setFideBusy(false);
     }
   };
+
+  // Debounced auto-lookup: as soon as the user types a valid FIDE ID, fetch.
+  useEffect(() => {
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    const fid = form.fide_id.trim();
+    if (!/^\d{5,10}$/.test(fid)) {
+      setFideFound(null);
+      setFideError(null);
+      return;
+    }
+    debounceRef.current = window.setTimeout(() => { lookupFide(fid); }, 600);
+    return () => { if (debounceRef.current) window.clearTimeout(debounceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.fide_id]);
+
 
   useEffect(() => {
     if (!id) return;
