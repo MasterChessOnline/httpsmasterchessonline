@@ -126,11 +126,15 @@ const Tournaments = () => {
 
   const fetchTournaments = async () => {
     setDbLoading(true);
+    // Show all upcoming/live events, plus finished events from the last 2 days only —
+    // otherwise old finished events crowd out tournaments that haven't started yet.
+    const cutoff = new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString();
     const { data } = await supabase
       .from("tournaments")
       .select("*")
+      .gte("starts_at", cutoff)
       .order("starts_at", { ascending: true })
-      .limit(50);
+      .limit(100);
 
     if (data) {
       const tournaments = data as DbTournament[];
