@@ -41,9 +41,10 @@ export default function HomeTrustStrip() {
   return (
     <section
       aria-label="Why MasterChess"
-      className="container mx-auto px-4 py-6"
+      className="py-2"
     >
       <div className="rounded-2xl border border-yellow-500/15 bg-gradient-to-br from-yellow-500/5 via-white/[0.02] to-transparent p-3 sm:p-4">
+
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
           {items.map((it) => (
             <li key={it.label}>
