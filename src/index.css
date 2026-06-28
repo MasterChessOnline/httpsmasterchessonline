@@ -209,6 +209,73 @@
   --shadow-glow-purple: 0 0 24px hsl(30 60% 45% / 0.12);
 }
 
+/* Terracotta Café — light warm theme: cream paper background, terracotta + olive accents */
+:root[data-site-theme="terracotta"] {
+  --background: 28 35% 95%;
+  --foreground: 20 25% 14%;
+  --card: 30 30% 98%;
+  --card-foreground: 20 25% 14%;
+  --popover: 30 30% 98%;
+  --popover-foreground: 20 25% 14%;
+  --primary: 18 75% 45%;
+  --primary-foreground: 30 35% 97%;
+  --secondary: 28 25% 86%;
+  --secondary-foreground: 20 25% 14%;
+  --muted: 28 22% 90%;
+  --muted-foreground: 22 12% 38%;
+  --accent: 70 35% 42%;          /* olive */
+  --accent-foreground: 30 35% 97%;
+  --border: 28 18% 80%;
+  --input: 28 18% 80%;
+  --ring: 18 75% 45%;
+  --neon-blue: 18 75% 45%;
+  --neon-purple: 70 35% 42%;
+  --neon-cyan: 35 80% 55%;
+  --neon-pink: 18 75% 45%;
+  --gradient-hero: linear-gradient(180deg, hsl(28 35% 95% / 0.2) 0%, hsl(28 35% 95% / 0.98) 100%);
+  --gradient-neon: linear-gradient(135deg, hsl(18 75% 45%), hsl(35 80% 55%));
+  --gradient-cyan: linear-gradient(135deg, hsl(70 35% 42%), hsl(18 75% 45%));
+  --gradient-card: linear-gradient(145deg, hsl(30 30% 98%), hsl(28 25% 93%));
+  --shadow-neon: 0 0 18px hsl(18 75% 45% / 0.14);
+  --shadow-neon-lg: 0 0 32px hsl(18 75% 45% / 0.18);
+  --shadow-card: 0 4px 24px hsl(20 25% 14% / 0.10);
+  --shadow-glow-purple: 0 0 24px hsl(70 35% 42% / 0.14);
+}
+
+/* Sky Studio — light cool theme: sky-blue accents on near-white */
+:root[data-site-theme="sky"] {
+  --background: 210 40% 97%;
+  --foreground: 215 30% 15%;
+  --card: 210 50% 99%;
+  --card-foreground: 215 30% 15%;
+  --popover: 210 50% 99%;
+  --popover-foreground: 215 30% 15%;
+  --primary: 199 90% 48%;
+  --primary-foreground: 210 50% 99%;
+  --secondary: 210 25% 88%;
+  --secondary-foreground: 215 30% 15%;
+  --muted: 210 25% 92%;
+  --muted-foreground: 215 12% 40%;
+  --accent: 188 85% 45%;
+  --accent-foreground: 210 50% 99%;
+  --border: 210 20% 82%;
+  --input: 210 20% 82%;
+  --ring: 199 90% 48%;
+  --neon-blue: 199 90% 48%;
+  --neon-purple: 222 85% 60%;
+  --neon-cyan: 188 85% 45%;
+  --neon-pink: 199 90% 48%;
+  --gradient-hero: linear-gradient(180deg, hsl(210 40% 97% / 0.2) 0%, hsl(210 40% 97% / 0.98) 100%);
+  --gradient-neon: linear-gradient(135deg, hsl(199 90% 48%), hsl(222 85% 60%));
+  --gradient-cyan: linear-gradient(135deg, hsl(188 85% 45%), hsl(199 90% 48%));
+  --gradient-card: linear-gradient(145deg, hsl(210 50% 99%), hsl(210 35% 95%));
+  --shadow-neon: 0 0 18px hsl(199 90% 48% / 0.16);
+  --shadow-neon-lg: 0 0 32px hsl(199 90% 48% / 0.20);
+  --shadow-card: 0 4px 24px hsl(215 30% 15% / 0.08);
+  --shadow-glow-purple: 0 0 24px hsl(222 85% 60% / 0.14);
+}
+
+
 @layer base {
   /* === Game mode: hide site chrome when inside a live game === */
   body[data-game-active="true"] .app-navbar,

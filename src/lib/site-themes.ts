@@ -1,9 +1,7 @@
 // Site-wide color themes. Each theme writes a small set of CSS variables on
 // :root (via data-site-theme="..." attribute, with the CSS overrides defined in
-// index.css). The default "gold" theme keeps the existing MasterChess look.
-//
-// Users pick a theme from the navbar Palette button; the choice is persisted
-// to localStorage and re-applied on every page load.
+// index.css). Five vibrant top themes show as inline swatches; the rest live in
+// the "More" popover so the navbar stays clean.
 
 export interface SiteTheme {
   key: string;
@@ -12,15 +10,20 @@ export interface SiteTheme {
   description: string;
 }
 
+// Top 5 (inline swatches in navbar) intentionally mix dark + light + warm + cool
+// so the picker visibly reads as "puno boja, ljudski", not all-black.
 export const SITE_THEMES: SiteTheme[] = [
-  { key: "gold",     label: "Gold & Black",  swatch: "#d4af37", description: "Signature MasterChess gold on deep black" },
-  { key: "royal",    label: "Royal Sapphire", swatch: "#3b82f6", description: "Tournament-blue accents on midnight" },
-  { key: "emerald",  label: "Emerald Hall",  swatch: "#10b981", description: "Deep green felt, classic club energy" },
-  { key: "ruby",     label: "Ruby Knight",   swatch: "#ef4444", description: "Crimson red on charcoal" },
-  { key: "violet",   label: "Violet Arena",  swatch: "#a855f7", description: "Twitch-purple cinematic accents" },
-  { key: "ocean",    label: "Ocean Cyan",    swatch: "#06b6d4", description: "Cool cyan on deep navy" },
-  { key: "sunset",   label: "Sunset Coral",  swatch: "#fb923c", description: "Warm coral on warm black" },
-  { key: "ivory",    label: "Ivory Day",     swatch: "#f5f3ee", description: "Light tournament-room mode" },
+  { key: "royal",      label: "Royal Sapphire",  swatch: "#3b82f6", description: "Tournament-blue accents on midnight" },
+  { key: "emerald",    label: "Emerald Hall",    swatch: "#10b981", description: "Deep green felt, classic club energy" },
+  { key: "sunset",     label: "Sunset Coral",    swatch: "#fb923c", description: "Warm coral on warm black" },
+  { key: "terracotta", label: "Terracotta Café", swatch: "#c2410c", description: "Light warm café — terracotta + olive" },
+  { key: "sky",        label: "Sky Studio",      swatch: "#0ea5e9", description: "Light sky blue tournament-room mode" },
+  // overflow themes (still selectable from the "More" popover)
+  { key: "gold",       label: "Gold & Black",    swatch: "#d4af37", description: "Signature MasterChess gold on deep black" },
+  { key: "ruby",       label: "Ruby Knight",     swatch: "#ef4444", description: "Crimson red on charcoal" },
+  { key: "violet",     label: "Violet Arena",    swatch: "#a855f7", description: "Twitch-purple cinematic accents" },
+  { key: "ocean",      label: "Ocean Cyan",      swatch: "#06b6d4", description: "Cool cyan on deep navy" },
+  { key: "ivory",      label: "Ivory Day",       swatch: "#f5f3ee", description: "Light tournament-room mode" },
 ];
 
 const STORAGE_KEY = "mc.site-theme";
@@ -37,8 +40,8 @@ export function applySiteTheme(key: string) {
 }
 
 export function getActiveSiteTheme(): string {
-  if (typeof document === "undefined") return "gold";
-  return document.documentElement.getAttribute("data-site-theme") || "gold";
+  if (typeof document === "undefined") return "royal";
+  return document.documentElement.getAttribute("data-site-theme") || "royal";
 }
 
 export function onSiteThemeChange(listener: () => void): () => void {
@@ -51,5 +54,6 @@ export function bootstrapSiteTheme() {
   if (typeof window === "undefined") return;
   let saved: string | null = null;
   try { saved = localStorage.getItem(STORAGE_KEY); } catch {}
+  // Default kept as "gold" to preserve existing users' experience.
   applySiteTheme(saved || "gold");
 }
