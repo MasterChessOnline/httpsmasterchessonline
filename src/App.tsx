@@ -264,6 +264,7 @@ function AnimatedRoutes() {
           <Route path="/dragan-brakus/press" element={<DraganBrakusPress />} />
           <Route path="/why-masterchess" element={<WhyMasterChess />} />
           <Route path="/r/:code" element={<AffiliateRedirect />} />
+          <Route path="/i/:code" element={<InviteRedirect />} />
 
           <Route path="/world-tournaments" element={<WorldTournaments />} />
 
