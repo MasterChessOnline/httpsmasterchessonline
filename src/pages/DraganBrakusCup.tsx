@@ -331,6 +331,11 @@ export default function DraganBrakusCup() {
             </Card>
           )}
 
+          {/* Personal invite card */}
+          {isRegistered && user?.id && lobbyId && (
+            <InviteShareCard userId={user.id} tournamentId={lobbyId} />
+          )}
+
           {/* Live counter + prize escalator */}
           <div className="mt-8 grid sm:grid-cols-3 gap-3">
             <Card className="p-4 border-yellow-500/30">
