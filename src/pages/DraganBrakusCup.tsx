@@ -438,12 +438,26 @@ export default function DraganBrakusCup() {
           </Card>
         </section>
 
-        {/* MasterChess loot ladder */}
+        {/* MasterChess loot ladder + Grand Prize hype */}
         <section className="mb-10">
-          <div className="flex items-end justify-between mb-4">
+          <div className="flex items-end justify-between mb-4 flex-wrap gap-2">
             <h2 className="text-2xl font-bold">MasterChess Loot Ladder</h2>
-            <div className="text-xs text-muted-foreground">No cash prizes — coins, badges & cosmetics only.</div>
+            <div className="text-xs text-muted-foreground">Coins · Badges · Cosmetics · 1-on-1 lesson with Nikola for the winner.</div>
           </div>
+
+          <Card className="p-5 mb-4 border-yellow-500/40 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-transparent">
+            <div className="flex items-start gap-3">
+              <Trophy className="h-6 w-6 text-yellow-300 mt-0.5 shrink-0" />
+              <div>
+                <div className="text-xs uppercase tracking-wider text-yellow-300/80">Grand Prize · revealed live on stream</div>
+                <div className="font-semibold mt-1">Surprise champion bonus + lifetime "DB Cup Champion 2026" animated trophy on profile + featured on the homepage for 7 days.</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Plus side categories: Best U18 · Best Female · Best Unrated · Biggest Upset · Lucky Draw (anyone who plays all 9 rounds).
+                </div>
+              </div>
+            </div>
+          </Card>
+
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
             {(prizes.length ? prizes : []).map((p) => {
               const placeLabel = p.is_special
