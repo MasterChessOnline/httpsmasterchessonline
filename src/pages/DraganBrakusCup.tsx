@@ -400,7 +400,7 @@ export default function DraganBrakusCup() {
               official tournament files for upload to Chess-Results Serbia.
             </p>
             <div className="flex flex-wrap gap-2 text-sm">
-              {(["trf", "pgn", "json", "csv-standings", "csv-crosstable"] as const).map((fmt) => (
+              {(["trf", "announcement-trf", "swiss-manager-tur", "pgn", "json", "csv-standings", "csv-crosstable"] as const).map((fmt) => (
                 <a
                   key={fmt}
                   className="rounded-md border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10"
