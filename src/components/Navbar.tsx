@@ -401,12 +401,8 @@ const Navbar = () => {
                                           {item.highlight && (
                                             <span className="text-[8px] px-1 py-0.5 rounded-full font-bold" style={{ backgroundColor: `hsla(${section.accent} / 0.25)`, color: accentColor }}>GO</span>
                                           )}
-                                          {item.comingSoon && (
-                                            <span className="text-[8px] px-1 py-0.5 rounded-full font-bold tracking-wide" style={{ backgroundColor: `hsla(${section.accent} / 0.2)`, color: accentColor }}>SOON</span>
-                                          )}
                                         </div>
                                       </div>
-                                      {item.comingSoon && <Lock className="h-3 w-3 shrink-0" style={{ color: `hsla(${section.accent} / 0.4)` }} />}
                                     </Link>
                                   </div>
                                 );
