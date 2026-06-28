@@ -1,8 +1,10 @@
-# Chess-Results Serbia — Submission Guide (Dragan Brakus Cup)
+# Chess-Results Serbia — Submission Guide (DB Chess Cup)
 
-Goal: get the Dragan Brakus Cup officially listed on
-[chess-results.com](https://chess-results.com/) under Serbia, with full
-pairings, standings, and tiebreaks visible to the FIDE community.
+Goal: get the **Dragan Brakus Cup** officially listed on
+[chess-results.com](https://chess-results.com/) under **Federation: Serbia (SRB)**
+as **"DB Chess Cup"** (short form — chess-results.com truncates long names in
+the federation list, so the short form is what we register).
+
 
 ---
 
