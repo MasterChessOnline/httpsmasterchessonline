@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Trophy, Search, Zap, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, Trophy, Zap, CheckCircle2, AlertCircle } from "lucide-react";
 
 
 interface FormState {
