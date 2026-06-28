@@ -263,6 +263,7 @@ export default function TournamentRegister() {
             <a className="underline" href="https://ratings.fide.com/" target="_blank" rel="noreferrer">ratings.fide.com</a>{" "}
             so you don't have to type anything. Used only for official Chess-Results publication.
           </p>
+        </Card>
       </main>
       <Footer />
     </div>
