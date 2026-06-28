@@ -94,7 +94,7 @@ export default function DraganBrakusCup() {
         title="Dragan Brakus Cup — Official MasterChess Blitz Tournament"
         description="Dragan Brakus Cup — 30 June 2026, 16:00 CET. 7-round Swiss Blitz (3+2), live leaderboard, fair-play monitored. Register on MasterChess."
         path="/dragan-brakus"
-        type="event"
+        type="website"
         jsonLd={jsonLd}
       />
       <Navbar />
