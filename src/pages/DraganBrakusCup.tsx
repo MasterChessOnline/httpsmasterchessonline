@@ -291,28 +291,105 @@ export default function DraganBrakusCup() {
           </Card>
         </section>
 
-        {/* Awards */}
+        {/* MasterChess loot ladder */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">Awards</h2>
+          <div className="flex items-end justify-between mb-4">
+            <h2 className="text-2xl font-bold">MasterChess Loot Ladder</h2>
+            <div className="text-xs text-muted-foreground">No cash prizes — coins, badges & cosmetics only.</div>
+          </div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {[
-              ["🏆", "Champion Trophy", "Dragan Brakus Cup winner"],
-              ["🥈", "Silver Medal", "2nd place"],
-              ["🥉", "Bronze Medal", "3rd place"],
-              ["🤝", "Fair Play Award", "Cleanest play"],
-              ["⭐", "Best Junior", "Top U18 finisher"],
-              ["👑", "Best Female", "Top female finisher"],
-              ["🎖️", "Best Veteran", "Top 60+ finisher"],
-              ["📜", "Participation Certificate", "All players who complete 9 rounds"],
-            ].map(([e, t, d]) => (
-              <Card key={t} className="p-4">
-                <div className="text-2xl">{e}</div>
-                <div className="font-semibold mt-1">{t}</div>
-                <div className="text-xs text-muted-foreground">{d}</div>
+            {(prizes.length ? prizes : []).map((p) => {
+              const placeLabel = p.is_special
+                ? "Special"
+                : p.place_from === p.place_to
+                  ? `#${p.place_from}`
+                  : `#${p.place_from}–${p.place_to}`;
+              return (
+                <Card key={`${p.sort_order}-${p.label}`} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold">{p.label}</div>
+                    <Badge variant="outline" className="text-xs">{placeLabel}</Badge>
+                  </div>
+                  <div className="mt-2 flex items-center gap-3 text-sm">
+                    <span className="inline-flex items-center gap-1 text-yellow-300">
+                      <Coins className="h-3.5 w-3.5" /> {p.coins.toLocaleString()} coins
+                    </span>
+                    {p.badge_key && (
+                      <span className="inline-flex items-center gap-1 text-fuchsia-300">
+                        <Award className="h-3.5 w-3.5" /> badge
+                      </span>
+                    )}
+                    {p.cosmetic_key && (
+                      <span className="inline-flex items-center gap-1 text-cyan-300">
+                        <Sparkles className="h-3.5 w-3.5" /> cosmetic
+                      </span>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+            {prizes.length === 0 && (
+              <Card className="p-4 col-span-full text-sm text-muted-foreground">
+                Prize ladder loading…
               </Card>
-            ))}
+            )}
           </div>
         </section>
+
+        {/* Sponsors */}
+        {sponsors.length > 0 && (
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">Powered by</h2>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {sponsors.map((s) => (
+                <Card key={s.name} className="p-4 flex items-center gap-3">
+                  {s.logo_url && (
+                    <img src={s.logo_url} alt={s.name} className="h-10 w-10 rounded" />
+                  )}
+                  <div className="flex-1">
+                    <div className="font-semibold">{s.name}</div>
+                    <div className="text-xs uppercase text-muted-foreground">{s.tier}</div>
+                  </div>
+                  {s.website && (
+                    <a href={s.website} target="_blank" rel="noreferrer" className="text-yellow-300 text-sm inline-flex items-center gap-1">
+                      Visit <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </Card>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Become a partner — write to <a className="underline" href="mailto:nikola@masterchess.live">nikola@masterchess.live</a>.
+            </p>
+          </section>
+        )}
+
+        {/* Chess-Results Serbia integration */}
+        <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 mb-10">
+          <h2 className="text-xl font-bold mb-2">Chess-Results Serbia</h2>
+          <p className="text-sm text-muted-foreground mb-3">
+            Full pairings, standings and tie-breaks are published on Chess-Results
+            Serbia ({" "}
+            <a href="https://chess-results.com" className="underline" target="_blank" rel="noreferrer">chess-results.com</a>
+            ) immediately after the tournament. TRF16, Swiss-Manager .tur and
+            crosstable files are available below.
+          </p>
+          {externalResultsUrl ? (
+            <a
+              href={externalResultsUrl}
+              target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-md bg-yellow-500 text-black px-4 py-2 text-sm font-semibold"
+            >
+              Open on Chess-Results <ExternalLink className="h-4 w-4" />
+            </a>
+          ) : (
+            <div className="text-xs text-muted-foreground">
+              Chess-Results URL will be published here after the organizer registers the event.
+              See <Link className="underline" to="/docs/chess-results">submission guide</Link>.
+            </div>
+          )}
+        </section>
+
 
         {/* Exports for Chess-Results */}
         {lobbyId && (
