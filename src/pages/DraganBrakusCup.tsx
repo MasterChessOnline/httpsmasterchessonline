@@ -2,17 +2,20 @@
 // Full tournament info + Event JSON-LD so Google Search / Maps / GBP can pick
 // it up as a structured event tied to the MasterChess organization.
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 import {
   Trophy, Clock, Users, ShieldCheck, MapPin, Calendar,
-  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink,
+  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink, Loader2,
 } from "lucide-react";
 
 type Prize = {
@@ -33,12 +36,18 @@ const SITE = "https://masterchess.live";
 const URL = `${SITE}/dragan-brakus`;
 
 export default function DraganBrakusCup() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(0);
   const [maxPlayers, setMaxPlayers] = useState<number>(500);
   const [externalResultsUrl, setExternalResultsUrl] = useState<string | null>(null);
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [fideId, setFideId] = useState("");
+  const [savingFide, setSavingFide] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +85,76 @@ export default function DraganBrakusCup() {
     const i = setInterval(load, 20000);
     return () => { cancelled = true; clearInterval(i); };
   }, []);
+
+  // Check whether the current user is already registered for this lobby.
+  useEffect(() => {
+    if (!user?.id || !lobbyId) { setIsRegistered(false); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("tournament_registrations")
+        .select("id, fide_id")
+        .eq("tournament_id", lobbyId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      setIsRegistered(Boolean(data));
+      if ((data as any)?.fide_id) setFideId(String((data as any).fide_id));
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, lobbyId]);
+
+  const handleInstantRegister = async () => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent("/dragan-brakus")}`);
+      return;
+    }
+    if (!lobbyId) return;
+    setRegistering(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-tournament", {
+        body: { action: "join", tournament_id: lobbyId },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) {
+        toast({ title: "Registration blocked", description: (data as any).error, variant: "destructive" });
+        return;
+      }
+      setIsRegistered(true);
+      setPlayerCount(c => c + 1);
+      toast({ title: "You're in! ✓", description: "Registered for the Dragan Brakus Cup. Add your FIDE ID below (optional)." });
+    } catch (e: any) {
+      toast({ title: "Could not register", description: e?.message || String(e), variant: "destructive" });
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleSaveFide = async () => {
+    if (!user || !lobbyId) return;
+    const id = fideId.trim();
+    if (id && !/^\d{4,10}$/.test(id)) {
+      toast({ title: "Invalid FIDE ID", description: "Numeric, 4–10 digits.", variant: "destructive" });
+      return;
+    }
+    setSavingFide(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-tournament", {
+        body: {
+          action: "update_player_details",
+          tournament_id: lobbyId,
+          player_details: { fide_id: id || null },
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: id ? "FIDE ID saved" : "FIDE ID cleared" });
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e?.message || String(e), variant: "destructive" });
+    } finally {
+      setSavingFide(false);
+    }
+  };
 
   const totalCoinPool = prizes.reduce((acc, p) => {
     const places = Math.max(1, p.place_to - p.place_from + 1);
@@ -184,11 +263,23 @@ export default function DraganBrakusCup() {
             </span>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400">
-              <Link to={lobbyId ? `/tournaments/${lobbyId}/register` : "/tournaments"}>
-                Register now <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </Button>
+            {isRegistered ? (
+              <Button asChild size="lg" className="bg-green-600 text-white hover:bg-green-500">
+                <Link to={lobbyId ? `/tournaments/${lobbyId}` : "/tournaments"}>
+                  Registered ✓ — Open lobby <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                className="bg-yellow-500 text-black hover:bg-yellow-400"
+                onClick={handleInstantRegister}
+                disabled={registering || !lobbyId}
+              >
+                {registering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
+                Register now (1 click) <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            )}
             <Button asChild size="lg" variant="outline">
               <Link to="/dragan-brakus/live">Live standings</Link>
             </Button>
@@ -201,6 +292,32 @@ export default function DraganBrakusCup() {
               </Button>
             )}
           </div>
+
+          {/* Optional FIDE ID — only shown once registered. Anything else (name,
+              federation, title) is filled automatically from FIDE on save. */}
+          {isRegistered && (
+            <Card className="mt-4 p-4 border-yellow-500/30 max-w-xl">
+              <div className="text-xs uppercase text-muted-foreground mb-1 flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-yellow-400" /> Optional · FIDE ID
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">
+                Add your FIDE ID so your name appears correctly on the Chess-Results Serbia listing.
+                Skip if you don't have one — you're still fully registered.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  inputMode="numeric"
+                  placeholder="e.g. 14600340"
+                  value={fideId}
+                  onChange={(e) => setFideId(e.target.value.replace(/[^\d]/g, "").slice(0, 10))}
+                  maxLength={10}
+                />
+                <Button onClick={handleSaveFide} disabled={savingFide} variant="secondary">
+                  {savingFide ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                </Button>
+              </div>
+            </Card>
+          )}
 
           {/* Live counter + prize escalator */}
           <div className="mt-8 grid sm:grid-cols-3 gap-3">
@@ -466,11 +583,23 @@ export default function DraganBrakusCup() {
         </section>
 
         <div className="text-center">
-          <Button asChild size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400">
-            <Link to={lobbyId ? `/tournaments/${lobbyId}/register` : "/tournaments"}>
+          {isRegistered ? (
+            <Button asChild size="lg" className="bg-green-600 text-white hover:bg-green-500">
+              <Link to={lobbyId ? `/tournaments/${lobbyId}` : "/tournaments"}>
+                Registered ✓ — Open lobby
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              className="bg-yellow-500 text-black hover:bg-yellow-400"
+              onClick={handleInstantRegister}
+              disabled={registering || !lobbyId}
+            >
+              {registering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
               Register for the Dragan Brakus Cup
-            </Link>
-          </Button>
+            </Button>
+          )}
         </div>
       </main>
       <Footer />
