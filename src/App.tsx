@@ -12,6 +12,7 @@ import SiteRatingJsonLd from "@/components/SiteRatingJsonLd";
 import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import AdminChessResults from "@/pages/AdminChessResults";
 // Critical / eager routes — needed for first paint & primary CTAs
 import Index from "./pages/Index";
 import Play from "./pages/Play";
@@ -436,6 +437,7 @@ function AnimatedRoutes() {
           <Route path="/admin/gbp-posts" element={<AdminGbpPosts />} />
           <Route path="/admin/gsc" element={<AdminGsc />} />
           <Route path="/admin/maps-setup" element={<AdminMapsSetup />} />
+          <Route path="/admin/chess-results" element={<AdminChessResults />} />
           <Route path="/chess/:slug" element={<ChessInCity />} />
           <Route path="/near-me" element={<NearMe />} />
           <Route path="/players/world" element={<PlayerHeatmap />} />
