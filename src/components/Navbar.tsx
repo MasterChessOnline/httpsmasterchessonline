@@ -231,7 +231,7 @@ const Navbar = () => {
   return (
     <>
       <div
-        className={`app-navbar fixed top-0 left-0 right-0 z-50 transition-shadow duration-500 ${
+        className={`app-navbar hidden lg:block fixed top-0 left-0 right-0 z-50 transition-shadow duration-500 ${
           scrolled
             ? "shadow-[0_10px_30px_-6px_rgba(0,0,0,0.7),0_2px_0_hsl(var(--primary)/0.18)]"
             : "shadow-[0_4px_18px_rgba(0,0,0,0.5),0_1px_0_hsl(var(--border))]"
