@@ -38,6 +38,7 @@ const LearnArticle = lazy(() => import("./pages/LearnArticle"));
 const Lessons = lazy(() => import("./pages/Lessons"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Tournaments = lazy(() => import("./pages/Tournaments"));
+const TournamentsWall = lazy(() => import("./pages/TournamentsWall"));
 const WorldTournaments = lazy(() => import("./pages/WorldTournaments"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -257,6 +258,7 @@ function AnimatedRoutes() {
           <Route path="/news/:slug" element={<NewsItem />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/tournaments" element={<Tournaments />} />
+          <Route path="/tournaments/wall" element={<TournamentsWall />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
           <Route path="/tournaments/:id/register" element={<TournamentRegister />} />
           <Route path="/dragan-brakus" element={<DraganBrakusCup />} />
