@@ -88,6 +88,8 @@ const staticEntries: SitemapEntry[] = [
   { path: "/topics", changefreq: "weekly", priority: "0.7" },
   { path: "/tournaments", changefreq: "daily", priority: "0.9" },
   { path: "/dragan-brakus", changefreq: "weekly", priority: "0.8" },
+  { path: "/dragan-brakus/live", changefreq: "hourly", priority: "0.7" },
+  { path: "/dragan-brakus/press", changefreq: "monthly", priority: "0.6" },
   { path: "/leaderboard", changefreq: "daily", priority: "0.7" },
   { path: "/analysis", changefreq: "weekly", priority: "0.8" },
   { path: "/community", changefreq: "daily", priority: "0.7" },
