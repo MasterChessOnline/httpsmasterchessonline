@@ -46,7 +46,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Train against 9 bots" },
       { label: "Play as Guest", href: "/play-guest", icon: Play, desc: "No signup required" },
       { label: "Puzzles", href: "/puzzles", icon: Target, desc: "Daily tactics" },
-      { label: "Daily Challenge", href: "/daily-challenge", icon: Star, desc: "One puzzle a day" },
+      { label: "Daily Puzzle", href: "/daily-puzzle", icon: Star, desc: "One puzzle a day" },
     ],
   },
   {
@@ -60,7 +60,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "AI Coach", href: "/coach", icon: Brain, desc: "Ask anything, review games" },
       { label: "Openings", href: "/openings", icon: BookOpen, desc: "Explore & drill openings" },
       { label: "Game Review", href: "/analysis", icon: FileText, desc: "Analyze your games" },
-      { label: "Masterclass", href: "/masterclass", icon: GraduationCap, desc: "Deep dives by Nikola" },
+      { label: "Lesson Library", href: "/lessons", icon: GraduationCap, desc: "Deep dives by Nikola" },
     ],
   },
   {
@@ -100,7 +100,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Feed", href: "/community", icon: Users, desc: "Chess moments", highlight: true },
       { label: "Clubs", href: "/clubs", icon: Shield, desc: "Find or create a team" },
-      { label: "Chess Map", href: "/map", icon: Eye, desc: "Players worldwide" },
+      { label: "Chess Map", href: "/community/map", icon: Eye, desc: "Players worldwide" },
       { label: "Friends", href: "/friends", icon: Heart, desc: "Your network" },
       { label: "Achievements", href: "/achievements", icon: Medal, desc: "Badges & titles" },
     ],
