@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Trophy } from "lucide-react";
+import { Loader2, Trophy, Search, Zap } from "lucide-react";
 
 interface FormState {
   first_name: string;
@@ -35,6 +35,57 @@ export default function TournamentRegister() {
   const [tournament, setTournament] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [fideBusy, setFideBusy] = useState(false);
+
+  const lookupFide = async () => {
+    const id = form.fide_id.trim();
+    if (!/^\d{4,10}$/.test(id)) {
+      toast({ title: "Enter a valid FIDE ID", description: "Numeric, 4–10 digits.", variant: "destructive" });
+      return;
+    }
+    setFideBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fide-lookup", {
+        method: "GET" as any,
+        body: undefined,
+        // pass via query string
+        headers: {},
+      } as any);
+      // The supabase-js client doesn't support query params on invoke cleanly — fall back to fetch.
+      let json: any = data;
+      if (error || !json?.name) {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fide-lookup?id=${id}`;
+        const r = await fetch(url, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } });
+        json = await r.json();
+      }
+      if (!json?.name) {
+        toast({ title: "FIDE profile not found", description: json?.error || "Check the ID.", variant: "destructive" });
+        return;
+      }
+      // FIDE names come as "LASTNAME, Firstname" — split sensibly.
+      const raw: string = json.name;
+      let first = "", last = "";
+      if (raw.includes(",")) {
+        const [l, f] = raw.split(",").map((s: string) => s.trim());
+        last = l; first = f;
+      } else {
+        const parts = raw.trim().split(/\s+/);
+        first = parts.slice(0, -1).join(" ") || parts[0];
+        last = parts.length > 1 ? parts[parts.length - 1] : "";
+      }
+      setForm(s => ({
+        ...s,
+        first_name: first || s.first_name,
+        last_name: last || s.last_name,
+        federation: json.federation || s.federation,
+        fide_title: json.title || s.fide_title,
+        birth_year: json.birth_year ? String(json.birth_year) : s.birth_year,
+      }));
+      toast({ title: `Found: ${raw}`, description: `${json.federation || ""}${json.rating ? " · " + json.rating : ""}` });
+    } finally {
+      setFideBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -162,9 +213,35 @@ export default function TournamentRegister() {
             <Trophy className="h-5 w-5 text-primary" />
             <h1 className="text-2xl font-bold">Register · {tournament.name}</h1>
           </div>
-          <p className="text-sm text-muted-foreground mb-6">
+          <p className="text-sm text-muted-foreground mb-4">
             {tournament.time_control_label} · {tournament.total_rounds} rounds · {tournament.format}
           </p>
+
+          {/* FIDE Quick Lookup */}
+          <div className="mb-5 rounded-lg border border-primary/30 bg-primary/5 p-3">
+            <Label className="text-xs font-bold uppercase tracking-wide text-primary">FIDE Quick Lookup</Label>
+            <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+              Enter your FIDE ID and we'll fetch your name, federation & title automatically.
+            </p>
+            <div className="flex gap-2">
+              <Input value={form.fide_id} onChange={handle("fide_id")} placeholder="e.g. 14600340" maxLength={10} />
+              <Button type="button" onClick={lookupFide} disabled={fideBusy} variant="secondary">
+                {fideBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Search className="h-4 w-4 mr-1" /> Find me</>}
+              </Button>
+            </div>
+          </div>
+
+          {(form.first_name && form.last_name) && (
+            <Button
+              type="button"
+              className="w-full mb-4 bg-gradient-to-r from-yellow-500 to-amber-400 text-black hover:from-yellow-400 hover:to-amber-300"
+              onClick={(e) => submit(e as any)}
+              disabled={busy}
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Zap className="h-4 w-4 mr-1" /> Register as {form.first_name} {form.last_name}</>}
+            </Button>
+          )}
+
           <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="First name *" value={form.first_name} onChange={handle("first_name")} />
             <Field label="Last name *" value={form.last_name} onChange={handle("last_name")} />
@@ -182,8 +259,9 @@ export default function TournamentRegister() {
             </div>
           </form>
           <p className="text-xs text-muted-foreground mt-4">
-            FIDE data is used only for official Chess-Results publication. We do not auto-query the FIDE database; please copy your details from{" "}
-            <a className="underline" href="https://ratings.fide.com/" target="_blank" rel="noreferrer">ratings.fide.com</a>.
+            FIDE Quick Lookup reads your public profile from{" "}
+            <a className="underline" href="https://ratings.fide.com/" target="_blank" rel="noreferrer">ratings.fide.com</a>{" "}
+            so you don't have to type anything. Used only for official Chess-Results publication.
           </p>
         </Card>
       </main>
