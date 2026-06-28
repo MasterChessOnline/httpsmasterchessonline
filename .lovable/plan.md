@@ -1,57 +1,47 @@
-## Status: Turnir NIJE na Chess-Results.com
+## Goal
+Strip the "casino" look the IT friend flagged: lock the site to a 5-color high-contrast palette, simplify mobile to a single bottom bar, make the board fill the screen in every game, and finish the Chess-Results tournament setup.
 
-Pretražio sam chess-results.com za "Brakus", "DB Chess Cup" i "MasterChess" — **nema rezultata**. Razlog: Chess-Results ne prihvata automatske API submisije. Turnir mora ručno da pošalje arbitar/organizator (ili da se uploaduje `.tur` fajl iz Swiss-Managera).
+## 1. 5-color theme + contrast pass
+- Rewrite `src/index.css` tokens to a strict 5-color system:
+  1. `--bg` deep black `#0A0A0B`
+  2. `--surface` graphite `#16171A`
+  3. `--text` near-white `#F5F5F2`
+  4. `--muted` cool gray `#8A8F98`
+  5. `--accent` MasterChess gold `#D4A24A`
+- Delete/alias every secondary hue (purple, pink, cyan, green glows, multi-gradient backgrounds) → map to the 5 tokens.
+- Remove decorative gradients/glass blurs from `Home`, `Nav`, cards, banners. Replace with flat surface + 1px hairline border `hsl(var(--text)/0.08)`.
+- Audit hard-coded color classes (`text-white`, `bg-purple-*`, `from-pink-*`, etc.) site-wide and swap to tokens. WCAG AA contrast verified on text + buttons.
 
-To znači — ja ne mogu da "stavim" turnir na chess-results sa svoje strane. Ali mogu sve oko toga da pripremim tako da ti (ili arbitar) samo pošalješ jedan email i turnir bude objavljen za par sati.
+## 2. Mobile chrome cleanup
+- On `< md` viewport, hide the top app bar entirely (logo + search + menu). Keep only the existing bottom tab bar.
+- Remove the "search rich" / command bar from mobile header. Search stays accessible from the bottom bar's Search tab + `Cmd+K` on desktop.
+- Add a thin safe-area-aware spacer so page content starts at the top edge on phones.
+- Desktop keeps its current top nav unchanged.
 
----
+## 3. Full-screen game board (online + bot)
+On `/play` and `/play-online`, when viewport `< md`:
+- Board takes 100vw × 100vw, centered, no padding.
+- Opponent strip (avatar · name · rating · clock · captures) collapses to a single 44px bar above the board.
+- Player strip (same) sits directly below the board.
+- A compact right-edge floating column of icon buttons: Resign, Draw, Flag, Chat, More — each 40px, tap-target friendly. No labels, tooltips on long-press.
+- Hide page chrome (header, footer, bottom tab bar) while in an active game; show a single "Back" pill top-left.
+On `md+`:
+- Board centered, capped at `min(80vh, 720px)`. Side panel (clocks/moves/chat) docks right. Names + clocks inline as already shipped.
 
-## Plan: Chess-Results Submission Pack (auto-generisan)
+## 4. Chess-Results / DB Chess Cup finalization
+- Confirm `tournaments` row for Dragan Brakus Cup has: `chief_arbiter`, `deputy_arbiter`, `organizer_email`, `rating_type='unrated'`, `venue`, `city`, `chess_results_url` (nullable until listed).
+- Add a one-click "Copy submission email" button next to the existing mailto on `/dragan-brakus` so the user can paste the full body if their mail client misbehaves.
+- Add an admin-only `Chess-Results status` widget on `/admin` showing: submitted? listed? URL? — with a single input to paste the CR URL once it's live; flips the public badge from "Pending submission" → "Listed on Chess-Results".
+- Update `docs/CHESS_RESULTS_SUBMIT.md` with the new admin step.
+- Re-ping IndexNow for `/dragan-brakus` after status flips.
 
-### 1. Edge funkcija `tournament-chess-results-pack`
-Jedna ruta koja vraća **kompletan ZIP/JSON paket** spreman za slanje na `chess-results@swiss-manager.at`:
-- `DB_Chess_Cup_announcement.trf` (FIDE TRF sa svim poljima koje CR zahteva)
-- `DB_Chess_Cup.tur` (Swiss-Manager native fajl — najbrži put, CR ga direktno učita)
-- `announcement_email.txt` (popunjen email body na engleskom + srpskom)
-- `tournament_details.json` (fallback metadata)
+## Technical notes
+- Theme tokens are HSL in `src/index.css` + `tailwind.config.ts`; no component-level hex.
+- Game full-screen uses a `<GameShell>` wrapper that sets `body[data-game-active]` so global `Header`/`BottomBar`/`Footer` hide via CSS, no router changes needed.
+- Admin CR widget reads/writes `tournaments.chess_results_url` + `chess_results_status` (already in schema).
+- No new tables, no schema migration required.
 
-### 2. Novi tab "Chess-Results SRB" na `/dragan-brakus`
-Trenutno postoji panel sa exportima, ali nedostaje:
-- **Status badge**: "Pending submission" / "Listed on Chess-Results" (ručno toggle iz admina)
-- **One-click "Generate submission pack"** dugme — skida sve fajlove odjednom
-- **Pre-filled mailto:** link sa popunjenim subject/body — arbitar samo klikne Send
-- **Link polje** za CR URL kad bude objavljen (čuva se u `tournaments.chess_results_url`)
-
-### 3. DB migracija
-- `tournaments.chess_results_url` (text)
-- `tournaments.chess_results_status` (enum: not_submitted, submitted, listed)
-- `tournaments.chess_results_submitted_at` (timestamptz)
-
-### 4. Provera obaveznih polja koje CR traži
-CR neće objaviti turnir ako fali ijedno od ovih — proveriću trenutni record u `tournaments` i popuniti šta nedostaje:
-- Chief Arbiter (ime + FIDE ID) — **trenutno prazno**
-- Organizer federation: SRB ✓
-- Time control u FIDE formatu: `3+2` blitz ✓
-- Rating type: FIDE Blitz / National / Unrated — **treba odluka**
-- Place: "Beograd, Srbija" + venue (online ili fizička adresa)
-- Tournament director email
-
-### 5. Docs update
-- `docs/CHESS_RESULTS_SUBMIT.md`: dodati tačan workflow ("Klik Generate → otvoriće se mail klijent → Send")
-- Vremenski plan: pošalji najmanje 48h pre starta da bi turnir bio listovan na vreme
-
----
-
-## Šta mi treba od tebe pre nego što počnem
-
-Nekoliko podataka koja CR **obavezno zahteva** a kojih trenutno nema u bazi:
-
-1. **Chief Arbiter** — ime i FIDE ID (može i tvoje ako si registrovan, inače treba neko sa FIDE arbiter titulom)
-2. **Rating tip** — da li hoćeš da bude:
-   - FIDE Blitz rated (treba prijava kod FIDE-a + arbiter sa licencom)
-   - Nacionalno rated (preko ŠSS)
-   - **Unrated/Friendly** (najlakše, ide odmah na CR bez dodatnih dozvola)
-3. **Mesto održavanja** — online (`masterchess.live`) ili fizička lokacija?
-4. **Tvoj kontakt email** za organizator polje
-
-Reci mi te 4 stvari (ili "stavi unrated, online, ja sam organizator, email X") i kreniem sa implementacijom.
+## Out of scope (ask separately if wanted)
+- Redesign of `/news`, `/blog`, `/nikola` (only token swap, no layout change).
+- New piece sets or board themes.
+- Replacing the bottom bar icons.
