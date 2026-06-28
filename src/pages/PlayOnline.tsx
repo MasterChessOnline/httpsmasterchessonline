@@ -932,7 +932,7 @@ const PlayOnline = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="px-1 sm:px-3 pt-14 sm:pt-16 pb-24 lg:pb-3">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-4 lg:items-start max-w-[1800px] mx-auto">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_15rem] gap-4 lg:items-start max-w-[1800px] mx-auto">
           {/* Board + Clocks — fills the full viewport */}
           <div className="min-w-0 flex flex-col items-center">
             <div className={`${BOARD_CONTAINER_CLASS} space-y-1.5`}>
