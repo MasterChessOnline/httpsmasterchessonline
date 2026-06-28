@@ -100,7 +100,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Feed", href: "/community", icon: Users, desc: "Chess moments", highlight: true },
       { label: "Clubs", href: "/clubs", icon: Shield, desc: "Find or create a team" },
-      { label: "Chess Map", href: "/map", icon: Eye, desc: "Players worldwide" },
+      { label: "Chess Map", href: "/community/map", icon: Eye, desc: "Players worldwide" },
       { label: "Friends", href: "/friends", icon: Heart, desc: "Your network" },
       { label: "Achievements", href: "/achievements", icon: Medal, desc: "Badges & titles" },
     ],
