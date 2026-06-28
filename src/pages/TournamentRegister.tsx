@@ -229,19 +229,43 @@ export default function TournamentRegister() {
             {tournament.time_control_label} · {tournament.total_rounds} rounds · {tournament.format}
           </p>
 
-          {/* FIDE Quick Lookup */}
+          {/* FIDE Quick Lookup — debounced auto-fill */}
           <div className="mb-5 rounded-lg border border-primary/30 bg-primary/5 p-3">
-            <Label className="text-xs font-bold uppercase tracking-wide text-primary">FIDE Quick Lookup</Label>
+            <Label className="text-xs font-bold uppercase tracking-wide text-primary">FIDE Quick Lookup (optional)</Label>
             <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-              Enter your FIDE ID and we'll fetch your name, federation & title automatically.
+              Type your FIDE ID (e.g. <span className="font-mono">9218275</span>) and we auto-fill your name, federation & title. Skip it if you don't have one — registration still works.
             </p>
-            <div className="flex gap-2">
-              <Input value={form.fide_id} onChange={handle("fide_id")} placeholder="e.g. 14600340" maxLength={10} />
-              <Button type="button" onClick={lookupFide} disabled={fideBusy} variant="secondary">
-                {fideBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Search className="h-4 w-4 mr-1" /> Find me</>}
-              </Button>
+            <div className="relative">
+              <Input
+                value={form.fide_id}
+                onChange={handle("fide_id")}
+                placeholder="e.g. 9218275"
+                maxLength={10}
+                inputMode="numeric"
+                className="pr-10"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {fideBusy && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                {!fideBusy && fideFound && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
+                {!fideBusy && fideError && form.fide_id.length >= 5 && <AlertCircle className="h-4 w-4 text-orange-400" />}
+              </div>
             </div>
+            {fideFound && (
+              <div className="mt-2 text-xs text-emerald-400 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Found: <strong className="text-foreground">{fideFound.name}</strong>
+                {fideFound.federation && <span className="text-muted-foreground"> · {fideFound.federation}</span>}
+                {fideFound.rating && <span className="text-muted-foreground"> · {fideFound.rating}</span>}
+              </div>
+            )}
+            {fideError && form.fide_id.length >= 5 && (
+              <div className="mt-2 text-xs text-orange-400 flex items-center gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5" /> {fideError}
+                <button type="button" className="ml-1 underline" onClick={() => lookupFide()}>retry</button>
+              </div>
+            )}
           </div>
+
 
           {(form.first_name && form.last_name) && (
             <Button
