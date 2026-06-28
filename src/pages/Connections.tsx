@@ -24,16 +24,21 @@ export default function Connections() {
 
   const load = async () => {
     if (!user) return;
-    const { data } = await supabase.from("profiles")
-      .select("discord_user_id, discord_username, discord_avatar, show_on_map, map_lat, map_lng, city")
-      .eq("user_id", user.id).maybeSingle();
+    const [{ data }, { data: priv }] = await Promise.all([
+      supabase.from("profiles")
+        .select("discord_user_id, discord_username, discord_avatar, show_on_map, city")
+        .eq("user_id", user.id).maybeSingle(),
+      supabase.rpc("get_my_private_profile"),
+    ]);
+    const p: any = Array.isArray(priv) ? priv[0] : priv;
     setProfile(data);
     setCoords({
-      lat: data?.map_lat?.toString() ?? "",
-      lng: data?.map_lng?.toString() ?? "",
+      lat: p?.map_lat?.toString() ?? "",
+      lng: p?.map_lng?.toString() ?? "",
       city: data?.city ?? "",
     });
   };
+
   useEffect(() => { load(); }, [user]);
 
   // Handle Discord OAuth redirect
