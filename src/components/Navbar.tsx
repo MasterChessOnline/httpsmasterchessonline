@@ -474,10 +474,8 @@ const Navbar = () => {
               </Link>
 
 
-              {/* Site-wide color theme picker */}
-              <div className="hidden md:block">
-                <SiteThemePicker compact />
-              </div>
+              {/* Theme picker removed — site uses one unified multi-color "live" look */}
+
 
               {/* Language switcher removed — site is English-only */}
 
