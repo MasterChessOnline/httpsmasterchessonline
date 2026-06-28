@@ -15,11 +15,12 @@ export default function AffiliateRedirect() {
     try {
       sessionStorage.setItem("affiliate_code", code);
     } catch {}
-    supabase.rpc("log_affiliate_click", {
+    void (supabase.rpc as any)("log_affiliate_click", {
       _code: code,
       _referrer: document.referrer || null,
       _ua: navigator.userAgent || null,
-    }).catch(() => {});
+    }).then(() => {}, () => {});
+
   }, [code]);
 
   return <Navigate to={to} replace />;
