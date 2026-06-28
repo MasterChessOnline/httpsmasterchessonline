@@ -8,7 +8,9 @@ import { bootstrapVisualSettings } from "./lib/board-themes";
 import { bootstrapSoundPack } from "./lib/chess-sounds";
 import { bootstrapA11y } from "./lib/accessibility";
 import { captureAttribution } from "./lib/track";
+import { bootstrapSiteTheme } from "./lib/site-themes";
 
+bootstrapSiteTheme();
 bootstrapVisualSettings();
 bootstrapSoundPack();
 bootstrapA11y();

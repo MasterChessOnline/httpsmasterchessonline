@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import StreakIndicator from "@/components/StreakIndicator";
 import CoinBalancePill from "@/components/CoinBalancePill";
 import NavSearchPalette from "@/components/NavSearchPalette";
+import SiteThemePicker from "@/components/SiteThemePicker";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface DropdownItem {
@@ -465,6 +466,11 @@ const Navbar = () => {
                 </Button>
               </Link>
 
+
+              {/* Site-wide color theme picker */}
+              <div className="hidden md:block">
+                <SiteThemePicker compact />
+              </div>
 
               {/* Language switcher removed — site is English-only */}
 
