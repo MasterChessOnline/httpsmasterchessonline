@@ -53,6 +53,7 @@ const PHASE_RECOMMENDATIONS = [
 
 const Play = () => {
   const { user, profile, refreshProfile } = useAuth();
+  useGameMode(true);
   const [fen, setFen] = useState("start");
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
