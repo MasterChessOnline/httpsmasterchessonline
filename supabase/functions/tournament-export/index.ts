@@ -242,3 +242,12 @@ function text(s: string, status = 200) {
 function json(d: any, status = 200) {
   return new Response(JSON.stringify(d), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
+function csvCell(v: any): string {
+  const s = v === null || v === undefined ? "" : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function csv(body: string, filename: string) {
+  return new Response(body, {
+    headers: { ...corsHeaders, "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${filename}"` },
+  });
+}
