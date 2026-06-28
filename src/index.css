@@ -69,6 +69,7 @@
   body[data-game-active="true"] footer.site-footer {
     display: none !important;
   }
+}
 
 @layer base {
   * {
