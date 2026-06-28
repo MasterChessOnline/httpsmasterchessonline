@@ -255,7 +255,10 @@ function AnimatedRoutes() {
           <Route path="/tournaments/:id/register" element={<TournamentRegister />} />
           <Route path="/dragan-brakus" element={<DraganBrakusCup />} />
           <Route path="/dragan-brakus/lobby" element={<DraganBrakusRedirect />} />
+          <Route path="/dragan-brakus/live" element={<DraganBrakusLive />} />
+          <Route path="/dragan-brakus/press" element={<DraganBrakusPress />} />
           <Route path="/world-tournaments" element={<WorldTournaments />} />
+
           
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<ProfileRedirect />} />
