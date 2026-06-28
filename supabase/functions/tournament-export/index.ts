@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
 
   // ----- TRF (FIDE Tournament Report File) -----
   const trf: string[] = [];
-  trf.push(pad("012", 3) + " " + t.name);
+  trf.push(pad("012", 3) + " " + crName);
   trf.push(pad("022", 3) + " MasterChess.live");
   trf.push(pad("032", 3) + " " + (t.organizer_label || "MasterChess"));
   trf.push(pad("042", 3) + " " + (t.starts_at || "").slice(0, 10));
