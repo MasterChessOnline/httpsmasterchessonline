@@ -67,7 +67,10 @@ const NAV_SECTIONS: NavSection[] = [
     accentRgb: "245,158,11",
     items: [
       { label: "All Tournaments", href: "/tournaments", icon: Trophy, desc: "Browse upcoming events", highlight: true },
-      { label: "DB Chess Cup", href: "/dragan-brakus", icon: Award, desc: "Official MasterChess Cup" },
+      { label: "DB Chess Cup", href: "/dragan-brakus", icon: Award, desc: "Official MasterChess Cup · 30 Jun" },
+      { label: "DB Cup · Register", href: "/dragan-brakus#register", icon: UserPlus, desc: "Sign up with your FIDE ID" },
+      { label: "DB Cup · Live", href: "/dragan-brakus/live", icon: Radio, desc: "Live standings & pairings" },
+      { label: "DB Cup · Press", href: "/dragan-brakus/press", icon: FileText, desc: "Media kit & assets" },
       { label: "Leaderboard", href: "/leaderboard", icon: Crown, desc: "Top players globally" },
     ],
   },
