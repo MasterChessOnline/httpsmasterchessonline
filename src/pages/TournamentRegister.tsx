@@ -42,24 +42,29 @@ export default function TournamentRegister() {
       const { data: t } = await supabase.from("tournaments").select("*").eq("id", id).single();
       setTournament(t);
       if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, federation, country, club, fide_id, fide_title, birth_year, city")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (profile) {
+        const [{ data: profile }, { data: priv }] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("federation, country, club, fide_id, fide_title, city")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase.rpc("get_my_private_profile"),
+        ]);
+        const p: any = Array.isArray(priv) ? priv[0] : priv;
+        if (profile || p) {
           setForm({
-            first_name: profile.first_name || "",
-            last_name: profile.last_name || "",
-            federation: (profile.federation || profile.country || "").toUpperCase(),
-            city: profile.city || "",
-            club: profile.club || "",
-            fide_id: profile.fide_id || "",
-            fide_title: profile.fide_title || "",
-            birth_year: profile.birth_year ? String(profile.birth_year) : "",
+            first_name: p?.first_name || "",
+            last_name: p?.last_name || "",
+            federation: (profile?.federation || profile?.country || "").toUpperCase(),
+            city: profile?.city || "",
+            club: profile?.club || "",
+            fide_id: profile?.fide_id || "",
+            fide_title: profile?.fide_title || "",
+            birth_year: p?.birth_year ? String(p.birth_year) : "",
           });
         }
       }
+
       setLoading(false);
     })();
   }, [id, user?.id]);
