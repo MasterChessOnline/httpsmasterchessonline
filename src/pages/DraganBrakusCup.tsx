@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 
 const EVENT_NAME = "Dragan Brakus Cup";
-const EVENT_START = "2026-06-30T16:00:00+02:00"; // 16:00 CET
-const EVENT_END = "2026-06-30T19:30:00+02:00";
+const EVENT_START = "2026-06-30T17:00:00+02:00"; // 17:00 CEST / 15:00 UTC
+const EVENT_END = "2026-06-30T20:30:00+02:00";
 const SITE = "https://masterchess.live";
 const URL = `${SITE}/dragan-brakus`;
 
@@ -92,7 +92,7 @@ export default function DraganBrakusCup() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="Dragan Brakus Cup — Official MasterChess Blitz Tournament"
-        description="Dragan Brakus Cup — 30 June 2026, 16:00 CET. 7-round Swiss Blitz (3+2), live leaderboard, fair-play monitored. Register on MasterChess."
+        description="Dragan Brakus Cup — 30 June 2026, 17:00 CEST. 7-round Swiss Blitz (3+2), live leaderboard, fair-play monitored. Register on MasterChess."
         path="/dragan-brakus"
         type="website"
         jsonLd={jsonLd}
@@ -115,7 +115,7 @@ export default function DraganBrakusCup() {
           </p>
           <div className="mt-6 flex flex-wrap gap-2 text-sm">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Calendar className="h-4 w-4 text-yellow-400" /> 30 June 2026 · 16:00 CET
+              <Calendar className="h-4 w-4 text-yellow-400" /> 30 June 2026 · 17:00 CEST
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
               <Clock className="h-4 w-4 text-yellow-400" /> Blitz 3+2
@@ -166,7 +166,7 @@ export default function DraganBrakusCup() {
             suspicious games are reviewed and may be voided.
           </InfoCard>
           <InfoCard icon={<Clock className="h-5 w-5" />} title="Check-in">
-            Check-in opens 30 min before R1 and closes at 16:00 CET. Late
+            Check-in opens 30 min before R1 and closes at 17:00 CEST. Late
             check-in may miss the first pairing.
           </InfoCard>
         </section>
@@ -176,7 +176,7 @@ export default function DraganBrakusCup() {
           <h2 className="text-2xl font-bold mb-4">Round schedule</h2>
           <Card className="divide-y divide-white/5">
             {[
-              ["Round 1", "16:00 CET", "Initial pairings"],
+              ["Round 1", "17:00 CEST", "Initial pairings"],
               ["Round 2", "after R1", "Swiss pairing on results"],
               ["Round 3", "after R2", "Updated standings"],
               ["Round 4", "after R3", "Mid-tournament separation"],
