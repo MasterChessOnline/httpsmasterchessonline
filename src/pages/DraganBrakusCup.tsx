@@ -17,6 +17,8 @@ import {
   Trophy, Clock, Users, ShieldCheck, MapPin, Calendar,
   Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink, Loader2,
 } from "lucide-react";
+import InviteShareCard from "@/components/db-cup/InviteShareCard";
+import ChessHostBridge from "@/components/db-cup/ChessHostBridge";
 
 type Prize = {
   place_from: number; place_to: number; label: string;
