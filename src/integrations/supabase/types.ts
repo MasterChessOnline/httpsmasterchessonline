@@ -3430,6 +3430,7 @@ export type Database = {
           fide_title: string | null
           first_name: string | null
           id: string
+          is_test_bot: boolean
           last_name: string | null
           no_mistake_bonus: number
           performance_rating: number | null
@@ -3441,7 +3442,7 @@ export type Database = {
           sonneborn: number
           tiebreak: number
           tournament_id: string
-          user_id: string
+          user_id: string | null
           wins: number
           withdrew_at: string | null
         }
@@ -3463,6 +3464,7 @@ export type Database = {
           fide_title?: string | null
           first_name?: string | null
           id?: string
+          is_test_bot?: boolean
           last_name?: string | null
           no_mistake_bonus?: number
           performance_rating?: number | null
@@ -3474,7 +3476,7 @@ export type Database = {
           sonneborn?: number
           tiebreak?: number
           tournament_id: string
-          user_id: string
+          user_id?: string | null
           wins?: number
           withdrew_at?: string | null
         }
@@ -3496,6 +3498,7 @@ export type Database = {
           fide_title?: string | null
           first_name?: string | null
           id?: string
+          is_test_bot?: boolean
           last_name?: string | null
           no_mistake_bonus?: number
           performance_rating?: number | null
@@ -3507,7 +3510,7 @@ export type Database = {
           sonneborn?: number
           tiebreak?: number
           tournament_id?: string
-          user_id?: string
+          user_id?: string | null
           wins?: number
           withdrew_at?: string | null
         }
