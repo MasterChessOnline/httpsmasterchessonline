@@ -1,4 +1,4 @@
-import { Crown, GraduationCap, Trophy, User, Swords } from "lucide-react";
+import { Crown, GraduationCap, Trophy, User, Swords, Radio } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { icon: Crown, label: "Home", href: "/" },
   { icon: GraduationCap, label: "Learn", href: "/learn" },
   { icon: Trophy, label: "Compete", href: "/tournaments" },
-  { icon: User, label: "Profile", href: "/profile" },
+  { icon: Radio, label: "News", href: "/news" },
 ];
 
 const focusRing =
