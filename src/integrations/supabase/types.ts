@@ -3153,6 +3153,7 @@ export type Database = {
           birth_year: number | null
           buchholz: number
           buchholz_cut1: number
+          bye_rounds: number[]
           checked_in: boolean
           checked_in_at: string | null
           city: string | null
@@ -3176,11 +3177,13 @@ export type Database = {
           tournament_id: string
           user_id: string
           wins: number
+          withdrew_at: string | null
         }
         Insert: {
           birth_year?: number | null
           buchholz?: number
           buchholz_cut1?: number
+          bye_rounds?: number[]
           checked_in?: boolean
           checked_in_at?: string | null
           city?: string | null
@@ -3204,11 +3207,13 @@ export type Database = {
           tournament_id: string
           user_id: string
           wins?: number
+          withdrew_at?: string | null
         }
         Update: {
           birth_year?: number | null
           buchholz?: number
           buchholz_cut1?: number
+          bye_rounds?: number[]
           checked_in?: boolean
           checked_in_at?: string | null
           city?: string | null
@@ -3232,6 +3237,7 @@ export type Database = {
           tournament_id?: string
           user_id?: string
           wins?: number
+          withdrew_at?: string | null
         }
         Relationships: [
           {
@@ -3322,6 +3328,7 @@ export type Database = {
           created_by: string | null
           current_round: number
           description: string
+          donation_total_eur: number
           entry_fee: number
           format: string
           id: string
@@ -3331,10 +3338,13 @@ export type Database = {
           max_players: number
           name: string
           organizer_label: string | null
+          prize_escalator_step: number
+          prize_pool_eur: number
           registration_deadline: string | null
           roster_locked_at: string | null
           round_started_at: string | null
           signature_series: string | null
+          sponsor_label: string | null
           start_time_locked: boolean
           starts_at: string
           status: string
@@ -3358,6 +3368,7 @@ export type Database = {
           created_by?: string | null
           current_round?: number
           description?: string
+          donation_total_eur?: number
           entry_fee?: number
           format?: string
           id?: string
@@ -3367,10 +3378,13 @@ export type Database = {
           max_players?: number
           name: string
           organizer_label?: string | null
+          prize_escalator_step?: number
+          prize_pool_eur?: number
           registration_deadline?: string | null
           roster_locked_at?: string | null
           round_started_at?: string | null
           signature_series?: string | null
+          sponsor_label?: string | null
           start_time_locked?: boolean
           starts_at?: string
           status?: string
@@ -3394,6 +3408,7 @@ export type Database = {
           created_by?: string | null
           current_round?: number
           description?: string
+          donation_total_eur?: number
           entry_fee?: number
           format?: string
           id?: string
@@ -3403,10 +3418,13 @@ export type Database = {
           max_players?: number
           name?: string
           organizer_label?: string | null
+          prize_escalator_step?: number
+          prize_pool_eur?: number
           registration_deadline?: string | null
           roster_locked_at?: string | null
           round_started_at?: string | null
           signature_series?: string | null
+          sponsor_label?: string | null
           start_time_locked?: boolean
           starts_at?: string
           status?: string
