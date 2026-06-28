@@ -263,11 +263,23 @@ export default function DraganBrakusCup() {
             </span>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400">
-              <Link to={lobbyId ? `/tournaments/${lobbyId}/register` : "/tournaments"}>
-                Register now <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </Button>
+            {isRegistered ? (
+              <Button asChild size="lg" className="bg-green-600 text-white hover:bg-green-500">
+                <Link to={lobbyId ? `/tournaments/${lobbyId}` : "/tournaments"}>
+                  Registered ✓ — Open lobby <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                className="bg-yellow-500 text-black hover:bg-yellow-400"
+                onClick={handleInstantRegister}
+                disabled={registering || !lobbyId}
+              >
+                {registering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
+                Register now (1 click) <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            )}
             <Button asChild size="lg" variant="outline">
               <Link to="/dragan-brakus/live">Live standings</Link>
             </Button>
@@ -280,6 +292,32 @@ export default function DraganBrakusCup() {
               </Button>
             )}
           </div>
+
+          {/* Optional FIDE ID — only shown once registered. Anything else (name,
+              federation, title) is filled automatically from FIDE on save. */}
+          {isRegistered && (
+            <Card className="mt-4 p-4 border-yellow-500/30 max-w-xl">
+              <div className="text-xs uppercase text-muted-foreground mb-1 flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-yellow-400" /> Optional · FIDE ID
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">
+                Add your FIDE ID so your name appears correctly on the Chess-Results Serbia listing.
+                Skip if you don't have one — you're still fully registered.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  inputMode="numeric"
+                  placeholder="e.g. 14600340"
+                  value={fideId}
+                  onChange={(e) => setFideId(e.target.value.replace(/[^\d]/g, "").slice(0, 10))}
+                  maxLength={10}
+                />
+                <Button onClick={handleSaveFide} disabled={savingFide} variant="secondary">
+                  {savingFide ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                </Button>
+              </div>
+            </Card>
+          )}
 
           {/* Live counter + prize escalator */}
           <div className="mt-8 grid sm:grid-cols-3 gap-3">
