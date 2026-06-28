@@ -33,8 +33,7 @@ interface NavSection {
   accentRgb: string;
 }
 
-// Slimmed navbar — each section has only the 4 most useful links. Everything else
-// is reachable via the Cmd/Ctrl+K search palette or the relevant pages.
+// Each section carries 4–5 essential links. Less-used pages live in Cmd/Ctrl+K search.
 const NAV_SECTIONS: NavSection[] = [
   {
     key: "play",
@@ -47,6 +46,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Train against 9 bots" },
       { label: "Play as Guest", href: "/play-guest", icon: Play, desc: "No signup required" },
       { label: "Puzzles", href: "/puzzles", icon: Target, desc: "Daily tactics" },
+      { label: "Daily Challenge", href: "/daily-challenge", icon: Star, desc: "One puzzle a day" },
     ],
   },
   {
@@ -60,6 +60,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "AI Coach", href: "/coach", icon: Brain, desc: "Ask anything, review games" },
       { label: "Openings", href: "/openings", icon: BookOpen, desc: "Explore & drill openings" },
       { label: "Game Review", href: "/analysis", icon: FileText, desc: "Analyze your games" },
+      { label: "Masterclass", href: "/masterclass", icon: GraduationCap, desc: "Deep dives by Nikola" },
     ],
   },
   {
@@ -71,7 +72,9 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "All Tournaments", href: "/tournaments", icon: Trophy, desc: "Browse upcoming events", highlight: true },
       { label: "DB Chess Cup", href: "/dragan-brakus", icon: Award, desc: "Official MasterChess Cup" },
+      { label: "Live Hub", href: "/dragan-brakus/live", icon: Radio, desc: "Live boards & standings" },
       { label: "Leaderboard", href: "/leaderboard", icon: Medal, desc: "Top players globally" },
+      { label: "World Events", href: "/world-tournaments", icon: Eye, desc: "FIDE & global calendar" },
     ],
   },
   {
@@ -84,6 +87,8 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Newsroom", href: "/news", icon: Radio, desc: "Latest chess news", highlight: true },
       { label: "Blog", href: "/blog", icon: BookOpen, desc: "Guides & deep dives" },
       { label: "About Nikola", href: "/nikola", icon: Crown, desc: "Founder story" },
+      { label: "Why MasterChess", href: "/why-masterchess", icon: Heart, desc: "What makes us different" },
+      { label: "Press", href: "/dragan-brakus/press", icon: FileText, desc: "Media kit & releases" },
     ],
   },
   {
@@ -96,6 +101,8 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Feed", href: "/community", icon: Users, desc: "Chess moments", highlight: true },
       { label: "Clubs", href: "/clubs", icon: Shield, desc: "Find or create a team" },
       { label: "Chess Map", href: "/map", icon: Eye, desc: "Players worldwide" },
+      { label: "Friends", href: "/friends", icon: Heart, desc: "Your network" },
+      { label: "Achievements", href: "/achievements", icon: Medal, desc: "Badges & titles" },
     ],
   },
 ];
