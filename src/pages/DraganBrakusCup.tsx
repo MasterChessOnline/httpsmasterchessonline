@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import InviteShareCard from "@/components/db-cup/InviteShareCard";
 import ChessHostBridge from "@/components/db-cup/ChessHostBridge";
+import TournamentTestHarness from "@/components/admin/TournamentTestHarness";
 
 type Prize = {
   place_from: number; place_to: number; label: string;
@@ -48,6 +49,11 @@ export default function DraganBrakusCup() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [isRegistered, setIsRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    if (!user?.id) { setIsAdmin(false); return; }
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
+  }, [user?.id]);
   const [fideId, setFideId] = useState("");
   const [savingFide, setSavingFide] = useState(false);
 
@@ -507,6 +513,13 @@ export default function DraganBrakusCup() {
 
         {/* Pairing bridge */}
         {lobbyId && <ChessHostBridge tournamentId={lobbyId} />}
+
+        {/* Admin-only: test harness */}
+        {lobbyId && isAdmin && (
+          <div className="mb-10">
+            <TournamentTestHarness tournamentId={lobbyId} />
+          </div>
+        )}
 
         {/* Chess-Results Serbia integration */}
         <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 mb-10">
