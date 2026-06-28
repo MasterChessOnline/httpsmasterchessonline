@@ -229,6 +229,29 @@ export default function DraganBrakusCup() {
           </div>
         </section>
 
+        {/* Exports for Chess-Results */}
+        {lobbyId && (
+          <section className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-10">
+            <h2 className="text-xl font-bold mb-2">Chess-Results / Swiss-Manager exports</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              After the final round, the organizer (or any visitor) can download
+              official tournament files for upload to Chess-Results Serbia.
+            </p>
+            <div className="flex flex-wrap gap-2 text-sm">
+              {(["trf", "pgn", "json", "csv-standings", "csv-crosstable"] as const).map((fmt) => (
+                <a
+                  key={fmt}
+                  className="rounded-md border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10"
+                  href={`https://kicabdwgdyabibioycbq.supabase.co/functions/v1/tournament-export?tournament_id=${lobbyId}&format=${fmt}`}
+                  target="_blank" rel="noreferrer"
+                >
+                  Download {fmt.toUpperCase()}
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Series */}
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-10">
           <h2 className="text-xl font-bold mb-2">Series structure</h2>
