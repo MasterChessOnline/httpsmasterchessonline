@@ -2,17 +2,20 @@
 // Full tournament info + Event JSON-LD so Google Search / Maps / GBP can pick
 // it up as a structured event tied to the MasterChess organization.
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 import {
   Trophy, Clock, Users, ShieldCheck, MapPin, Calendar,
-  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink,
+  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink, Loader2,
 } from "lucide-react";
 
 type Prize = {
