@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Trophy, Search, Zap } from "lucide-react";
+import { Loader2, Trophy, Zap, CheckCircle2, AlertCircle } from "lucide-react";
+
 
 interface FormState {
   first_name: string;
@@ -36,33 +37,27 @@ export default function TournamentRegister() {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fideBusy, setFideBusy] = useState(false);
+  const [fideFound, setFideFound] = useState<null | { name: string; federation?: string; rating?: number }>(null);
+  const [fideError, setFideError] = useState<string | null>(null);
+  const debounceRef = useRef<number | null>(null);
 
-  const lookupFide = async () => {
-    const id = form.fide_id.trim();
-    if (!/^\d{4,10}$/.test(id)) {
-      toast({ title: "Enter a valid FIDE ID", description: "Numeric, 4–10 digits.", variant: "destructive" });
+  const lookupFide = async (idArg?: string) => {
+    const fid = (idArg ?? form.fide_id).trim();
+    if (!/^\d{4,10}$/.test(fid)) {
+      setFideError("FIDE ID must be 4–10 digits.");
       return;
     }
     setFideBusy(true);
+    setFideError(null);
     try {
-      const { data, error } = await supabase.functions.invoke("fide-lookup", {
-        method: "GET" as any,
-        body: undefined,
-        // pass via query string
-        headers: {},
-      } as any);
-      // The supabase-js client doesn't support query params on invoke cleanly — fall back to fetch.
-      let json: any = data;
-      if (error || !json?.name) {
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fide-lookup?id=${id}`;
-        const r = await fetch(url, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } });
-        json = await r.json();
-      }
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fide-lookup?id=${fid}`;
+      const r = await fetch(url, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } });
+      const json: any = await r.json();
       if (!json?.name) {
-        toast({ title: "FIDE profile not found", description: json?.error || "Check the ID.", variant: "destructive" });
+        setFideError(json?.error || "FIDE profile not found.");
+        setFideFound(null);
         return;
       }
-      // FIDE names come as "LASTNAME, Firstname" — split sensibly.
       const raw: string = json.name;
       let first = "", last = "";
       if (raw.includes(",")) {
@@ -81,11 +76,28 @@ export default function TournamentRegister() {
         fide_title: json.title || s.fide_title,
         birth_year: json.birth_year ? String(json.birth_year) : s.birth_year,
       }));
-      toast({ title: `Found: ${raw}`, description: `${json.federation || ""}${json.rating ? " · " + json.rating : ""}` });
+      setFideFound({ name: raw, federation: json.federation, rating: json.rating });
+    } catch (e: any) {
+      setFideError(String(e?.message || e));
     } finally {
       setFideBusy(false);
     }
   };
+
+  // Debounced auto-lookup: as soon as the user types a valid FIDE ID, fetch.
+  useEffect(() => {
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    const fid = form.fide_id.trim();
+    if (!/^\d{5,10}$/.test(fid)) {
+      setFideFound(null);
+      setFideError(null);
+      return;
+    }
+    debounceRef.current = window.setTimeout(() => { lookupFide(fid); }, 600);
+    return () => { if (debounceRef.current) window.clearTimeout(debounceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.fide_id]);
+
 
   useEffect(() => {
     if (!id) return;
@@ -217,19 +229,43 @@ export default function TournamentRegister() {
             {tournament.time_control_label} · {tournament.total_rounds} rounds · {tournament.format}
           </p>
 
-          {/* FIDE Quick Lookup */}
+          {/* FIDE Quick Lookup — debounced auto-fill */}
           <div className="mb-5 rounded-lg border border-primary/30 bg-primary/5 p-3">
-            <Label className="text-xs font-bold uppercase tracking-wide text-primary">FIDE Quick Lookup</Label>
+            <Label className="text-xs font-bold uppercase tracking-wide text-primary">FIDE Quick Lookup (optional)</Label>
             <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-              Enter your FIDE ID and we'll fetch your name, federation & title automatically.
+              Type your FIDE ID (e.g. <span className="font-mono">9218275</span>) and we auto-fill your name, federation & title. Skip it if you don't have one — registration still works.
             </p>
-            <div className="flex gap-2">
-              <Input value={form.fide_id} onChange={handle("fide_id")} placeholder="e.g. 14600340" maxLength={10} />
-              <Button type="button" onClick={lookupFide} disabled={fideBusy} variant="secondary">
-                {fideBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Search className="h-4 w-4 mr-1" /> Find me</>}
-              </Button>
+            <div className="relative">
+              <Input
+                value={form.fide_id}
+                onChange={handle("fide_id")}
+                placeholder="e.g. 9218275"
+                maxLength={10}
+                inputMode="numeric"
+                className="pr-10"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {fideBusy && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                {!fideBusy && fideFound && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
+                {!fideBusy && fideError && form.fide_id.length >= 5 && <AlertCircle className="h-4 w-4 text-orange-400" />}
+              </div>
             </div>
+            {fideFound && (
+              <div className="mt-2 text-xs text-emerald-400 flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Found: <strong className="text-foreground">{fideFound.name}</strong>
+                {fideFound.federation && <span className="text-muted-foreground"> · {fideFound.federation}</span>}
+                {fideFound.rating && <span className="text-muted-foreground"> · {fideFound.rating}</span>}
+              </div>
+            )}
+            {fideError && form.fide_id.length >= 5 && (
+              <div className="mt-2 text-xs text-orange-400 flex items-center gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5" /> {fideError}
+                <button type="button" className="ml-1 underline" onClick={() => lookupFide()}>retry</button>
+              </div>
+            )}
           </div>
+
 
           {(form.first_name && form.last_name) && (
             <Button
