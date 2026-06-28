@@ -61,6 +61,154 @@
   }
 }
 
+/* ============================================================
+   Site-wide color themes — toggled via [data-site-theme] on <html>.
+   Each block re-writes only the tokens that differ from the default
+   "gold" theme so every component (cards, buttons, accents, board)
+   recolors instantly without React state plumbing.
+   ============================================================ */
+
+:root[data-site-theme="royal"] {
+  --primary: 217 91% 60%;
+  --primary-foreground: 220 40% 8%;
+  --accent: 217 80% 50%;
+  --accent-foreground: 220 40% 8%;
+  --ring: 217 91% 60%;
+  --secondary: 217 50% 30%;
+  --neon-blue: 217 91% 60%;
+  --neon-purple: 250 80% 60%;
+  --neon-cyan: 195 90% 65%;
+  --neon-pink: 217 91% 60%;
+  --gradient-neon: linear-gradient(135deg, hsl(217 91% 60%), hsl(250 80% 60%));
+  --gradient-cyan: linear-gradient(135deg, hsl(195 90% 65%), hsl(217 91% 60%));
+  --shadow-neon: 0 0 18px hsl(217 91% 60% / 0.12);
+  --shadow-neon-lg: 0 0 32px hsl(217 91% 60% / 0.18);
+  --shadow-glow-purple: 0 0 24px hsl(250 80% 60% / 0.12);
+}
+
+:root[data-site-theme="emerald"] {
+  --primary: 152 76% 45%;
+  --primary-foreground: 150 30% 6%;
+  --accent: 152 70% 38%;
+  --accent-foreground: 150 30% 6%;
+  --ring: 152 76% 45%;
+  --secondary: 152 40% 25%;
+  --neon-blue: 152 76% 45%;
+  --neon-purple: 165 65% 40%;
+  --neon-cyan: 175 70% 55%;
+  --neon-pink: 152 76% 45%;
+  --gradient-neon: linear-gradient(135deg, hsl(152 76% 45%), hsl(165 65% 40%));
+  --gradient-cyan: linear-gradient(135deg, hsl(175 70% 55%), hsl(152 76% 45%));
+  --shadow-neon: 0 0 18px hsl(152 76% 45% / 0.12);
+  --shadow-neon-lg: 0 0 32px hsl(152 76% 45% / 0.18);
+  --shadow-glow-purple: 0 0 24px hsl(165 65% 40% / 0.12);
+}
+
+:root[data-site-theme="ruby"] {
+  --primary: 0 84% 60%;
+  --primary-foreground: 0 30% 6%;
+  --accent: 12 80% 55%;
+  --accent-foreground: 0 30% 6%;
+  --ring: 0 84% 60%;
+  --secondary: 0 50% 30%;
+  --neon-blue: 0 84% 60%;
+  --neon-purple: 340 80% 55%;
+  --neon-cyan: 25 90% 60%;
+  --neon-pink: 0 84% 60%;
+  --gradient-neon: linear-gradient(135deg, hsl(0 84% 60%), hsl(340 80% 55%));
+  --gradient-cyan: linear-gradient(135deg, hsl(25 90% 60%), hsl(0 84% 60%));
+  --shadow-neon: 0 0 18px hsl(0 84% 60% / 0.14);
+  --shadow-neon-lg: 0 0 32px hsl(0 84% 60% / 0.2);
+  --shadow-glow-purple: 0 0 24px hsl(340 80% 55% / 0.12);
+}
+
+:root[data-site-theme="violet"] {
+  --primary: 270 85% 65%;
+  --primary-foreground: 270 30% 8%;
+  --accent: 285 80% 60%;
+  --accent-foreground: 270 30% 8%;
+  --ring: 270 85% 65%;
+  --secondary: 270 50% 30%;
+  --neon-blue: 270 85% 65%;
+  --neon-purple: 285 80% 60%;
+  --neon-cyan: 220 80% 65%;
+  --neon-pink: 320 80% 65%;
+  --gradient-neon: linear-gradient(135deg, hsl(270 85% 65%), hsl(320 80% 65%));
+  --gradient-cyan: linear-gradient(135deg, hsl(220 80% 65%), hsl(270 85% 65%));
+  --shadow-neon: 0 0 18px hsl(270 85% 65% / 0.14);
+  --shadow-neon-lg: 0 0 32px hsl(270 85% 65% / 0.2);
+  --shadow-glow-purple: 0 0 24px hsl(285 80% 60% / 0.14);
+}
+
+:root[data-site-theme="ocean"] {
+  --primary: 188 86% 53%;
+  --primary-foreground: 200 40% 6%;
+  --background: 215 35% 6%;
+  --card: 215 30% 10%;
+  --popover: 215 30% 10%;
+  --accent: 195 80% 50%;
+  --accent-foreground: 200 40% 6%;
+  --ring: 188 86% 53%;
+  --secondary: 200 50% 25%;
+  --neon-blue: 188 86% 53%;
+  --neon-purple: 220 80% 60%;
+  --neon-cyan: 175 80% 55%;
+  --neon-pink: 188 86% 53%;
+  --gradient-neon: linear-gradient(135deg, hsl(188 86% 53%), hsl(220 80% 60%));
+  --gradient-cyan: linear-gradient(135deg, hsl(175 80% 55%), hsl(188 86% 53%));
+  --shadow-neon: 0 0 18px hsl(188 86% 53% / 0.14);
+  --shadow-neon-lg: 0 0 32px hsl(188 86% 53% / 0.2);
+}
+
+:root[data-site-theme="sunset"] {
+  --primary: 22 92% 58%;
+  --primary-foreground: 20 30% 6%;
+  --accent: 12 85% 55%;
+  --accent-foreground: 20 30% 6%;
+  --ring: 22 92% 58%;
+  --secondary: 22 50% 30%;
+  --neon-blue: 22 92% 58%;
+  --neon-purple: 340 80% 60%;
+  --neon-cyan: 45 95% 60%;
+  --neon-pink: 12 85% 55%;
+  --gradient-neon: linear-gradient(135deg, hsl(22 92% 58%), hsl(340 80% 60%));
+  --gradient-cyan: linear-gradient(135deg, hsl(45 95% 60%), hsl(22 92% 58%));
+  --shadow-neon: 0 0 18px hsl(22 92% 58% / 0.14);
+  --shadow-neon-lg: 0 0 32px hsl(22 92% 58% / 0.2);
+}
+
+:root[data-site-theme="ivory"] {
+  --background: 40 30% 96%;
+  --foreground: 30 15% 12%;
+  --card: 40 25% 99%;
+  --card-foreground: 30 15% 12%;
+  --popover: 40 25% 99%;
+  --popover-foreground: 30 15% 12%;
+  --primary: 30 70% 38%;
+  --primary-foreground: 40 30% 98%;
+  --secondary: 40 20% 88%;
+  --secondary-foreground: 30 15% 12%;
+  --muted: 40 18% 90%;
+  --muted-foreground: 30 10% 40%;
+  --accent: 30 60% 45%;
+  --accent-foreground: 40 30% 98%;
+  --border: 40 15% 82%;
+  --input: 40 15% 82%;
+  --ring: 30 70% 38%;
+  --neon-blue: 30 70% 38%;
+  --neon-purple: 30 60% 45%;
+  --neon-cyan: 30 70% 55%;
+  --neon-pink: 30 70% 38%;
+  --gradient-hero: linear-gradient(180deg, hsl(40 30% 96% / 0.2) 0%, hsl(40 30% 96% / 0.98) 100%);
+  --gradient-neon: linear-gradient(135deg, hsl(30 70% 38%), hsl(30 60% 45%));
+  --gradient-cyan: linear-gradient(135deg, hsl(30 70% 55%), hsl(30 70% 38%));
+  --gradient-card: linear-gradient(145deg, hsl(40 25% 99%), hsl(40 22% 95%));
+  --shadow-neon: 0 0 18px hsl(30 70% 38% / 0.12);
+  --shadow-neon-lg: 0 0 32px hsl(30 70% 38% / 0.18);
+  --shadow-card: 0 4px 24px hsl(30 15% 12% / 0.08);
+  --shadow-glow-purple: 0 0 24px hsl(30 60% 45% / 0.12);
+}
+
 @layer base {
   /* === Game mode: hide site chrome when inside a live game === */
   body[data-game-active="true"] .app-navbar,
