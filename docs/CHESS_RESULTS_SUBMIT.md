@@ -1,8 +1,10 @@
-# Chess-Results Serbia — Submission Guide (Dragan Brakus Cup)
+# Chess-Results Serbia — Submission Guide (DB Chess Cup)
 
-Goal: get the Dragan Brakus Cup officially listed on
-[chess-results.com](https://chess-results.com/) under Serbia, with full
-pairings, standings, and tiebreaks visible to the FIDE community.
+Goal: get the **Dragan Brakus Cup** officially listed on
+[chess-results.com](https://chess-results.com/) under **Federation: Serbia (SRB)**
+as **"DB Chess Cup"** (short form — chess-results.com truncates long names in
+the federation list, so the short form is what we register).
+
 
 ---
 
@@ -20,7 +22,7 @@ pairings, standings, and tiebreaks visible to the FIDE community.
 4. Email both files to **Chess-Results Serbia** desk:
    - To: `office@chess-results.com`
    - CC: Serbian arbiter contact (Šahovski savez Srbije)
-   - Subject: `Tournament announcement — Dragan Brakus Cup — 30 June 2026`
+   - Subject: `Tournament announcement — DB Chess Cup (Dragan Brakus Cup) — 30 June 2026`
    - Body: copy from `docs/CHESS_RESULTS_EMAIL.md` (template below).
 5. Wait for the assigned `tnr` number. Store it in
    `tournaments.external_results_url`
@@ -53,12 +55,12 @@ pairings, standings, and tiebreaks visible to the FIDE community.
 
 ## 4. Email template
 
-> Subject: Dragan Brakus Cup — TRF16 announcement (RS, online, 30 Jun 2026)
+> Subject: DB Chess Cup (Dragan Brakus Cup) — TRF16 announcement (RS, online, 30 Jun 2026)
 >
 > Dear Chess-Results team,
 >
 > Please find attached the TRF16 announcement and Swiss-Manager `.tur` seed
-> for the *Dragan Brakus Cup* — a 9-round Swiss online blitz (3+2) on
+> for the *DB Chess Cup* (full name: Dragan Brakus Cup) — a 9-round Swiss online blitz (3+2) on
 > MasterChess.live, scheduled for **30 June 2026, 17:00 CEST**.
 >
 > Organizer: MasterChess (Belgrade, Serbia) — Nikola Sakotić, founder.
