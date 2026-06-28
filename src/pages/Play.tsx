@@ -1354,7 +1354,7 @@ const Play = () => {
           </div>
 
           {/* Controls column */}
-          <div className="w-full lg:w-[320px] lg:sticky lg:top-20 lg:max-h-[calc(100svh-6rem)] lg:overflow-y-auto space-y-3 pr-1">
+          <div className="w-full lg:w-[260px] lg:sticky lg:top-20 lg:max-h-[calc(100svh-6rem)] lg:overflow-y-auto space-y-3 pr-1">
             {/* Continue course (when game was launched from Opening Trainer) */}
             {returnToOpening && (
               <Link
@@ -1376,26 +1376,54 @@ const Play = () => {
             <div className="rounded-xl border border-border/50 bg-card/60 p-3 text-center">
               <p className="text-sm font-medium text-foreground">{statusText}</p>
             </div>
-            <GameControls
-              mode={mode}
-              difficulty={difficulty}
-              playerColor={playerColor}
-              timeControlIdx={timeControlIdx}
-              statusText={statusText}
-              moveHistory={moveHistory}
-              isGameOver={isGameOver}
-              hintsEnabled={hintsEnabled}
-              onModeChange={setMode}
-              onDifficultyChange={changeDifficulty}
-              onColorChange={setPlayerColor}
-              onTimeControlChange={changeTimeControl}
-              onNewGame={goToLobby}
-              onToggleHints={() => setHintsEnabled(!hintsEnabled)}
-              onResign={handleResign}
-              onOfferDraw={handleOfferDraw}
-              canResign={true}
-              settingsLocked={!isGameOver && moveHistory.length > 0}
-            />
+
+            {/* Slim in-game panel: only Resign / Draw while a game is active.
+                Full settings (mode, difficulty, color, time) appear before move 1 and after game over,
+                matching pro-board layouts where active play stays focused on the board. */}
+            {!isGameOver && moveHistory.length > 0 ? (
+              <div className="rounded-xl border border-border/60 bg-card/70 backdrop-blur-sm p-3 space-y-2">
+                <div className="flex gap-2">
+                  <Button onClick={handleResign} variant="destructive" size="sm" className="flex-1 gap-1.5">
+                    <Flag className="h-3.5 w-3.5" /> Resign
+                  </Button>
+                  <Button
+                    onClick={handleOfferDraw}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-1.5"
+                    disabled={drawOfferPending || moveHistory.length < 2}
+                  >
+                    <Handshake className="h-3.5 w-3.5" />
+                    {drawOfferPending ? "Offered…" : "Draw"}
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Press <kbd className="px-1 rounded bg-muted/60">R</kbd> to resign · <kbd className="px-1 rounded bg-muted/60">D</kbd> to offer draw
+                </p>
+              </div>
+            ) : (
+              <GameControls
+                mode={mode}
+                difficulty={difficulty}
+                playerColor={playerColor}
+                timeControlIdx={timeControlIdx}
+                statusText={statusText}
+                moveHistory={moveHistory}
+                isGameOver={isGameOver}
+                hintsEnabled={hintsEnabled}
+                onModeChange={setMode}
+                onDifficultyChange={changeDifficulty}
+                onColorChange={setPlayerColor}
+                onTimeControlChange={changeTimeControl}
+                onNewGame={goToLobby}
+                onToggleHints={() => setHintsEnabled(!hintsEnabled)}
+                onResign={handleResign}
+                onOfferDraw={handleOfferDraw}
+                canResign={true}
+                settingsLocked={!isGameOver && moveHistory.length > 0}
+              />
+            )}
+
 
             {/* Draw offer status */}
             {drawOfferPending && !drawAgreed && (
