@@ -148,7 +148,7 @@ export default function DraganBrakusCup() {
         {/* Format grid */}
         <section className="grid md:grid-cols-2 gap-4 mb-10">
           <InfoCard icon={<Zap className="h-5 w-5" />} title="Format">
-            Blitz 3 min + 2 sec increment · 7-round Swiss · no elimination ·
+            Blitz 3 min + 2 sec increment · 9-round Swiss · no elimination ·
             every player plays every round.
           </InfoCard>
           <InfoCard icon={<Target className="h-5 w-5" />} title="Pairing (Swiss)">
@@ -156,39 +156,51 @@ export default function DraganBrakusCup() {
             balanced color distribution.
           </InfoCard>
           <InfoCard icon={<Trophy className="h-5 w-5" />} title="Scoring">
-            Win 1.0 · Draw 0.5 · Loss 0.0. Final ranking = total points after 7
+            Win 1.0 · Draw 0.5 · Loss 0.0. Final ranking = total points after 9
             rounds.
           </InfoCard>
           <InfoCard icon={<Award className="h-5 w-5" />} title="Tie-breaks">
-            1) Buchholz · 2) Direct encounter · 3) Number of wins.
+            Buchholz · Buchholz Cut 1 · Sonneborn-Berger · Progressive ·
+            Performance Rating · Direct encounter · Wins.
           </InfoCard>
           <InfoCard icon={<ShieldCheck className="h-5 w-5" />} title="Fair play">
             Engine assistance strictly forbidden. Anti-cheat is live every round;
             suspicious games are reviewed and may be voided.
           </InfoCard>
           <InfoCard icon={<Clock className="h-5 w-5" />} title="Check-in">
-            Check-in opens 30 min before R1 and closes at 17:00 CEST. Late
-            check-in may miss the first pairing.
+            Check-in 16:45–16:55 CEST. Roster locks at 16:57, pairings published
+            16:59, Round 1 starts 17:00 sharp.
           </InfoCard>
         </section>
 
         {/* Schedule */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">Round schedule</h2>
+          <h2 className="text-2xl font-bold mb-4">Full schedule (Europe/Belgrade, CEST)</h2>
           <Card className="divide-y divide-white/5">
             {[
-              ["Round 1", "17:00 CEST", "Initial pairings"],
-              ["Round 2", "after R1", "Swiss pairing on results"],
-              ["Round 3", "after R2", "Updated standings"],
-              ["Round 4", "after R3", "Mid-tournament separation"],
-              ["Round 5", "after R4", "Top group forms"],
-              ["Round 6", "after R5", "Final ranking battles"],
-              ["Round 7", "after R6", "Decisive final round"],
-            ].map(([r, t, d]) => (
-              <div key={r} className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="font-semibold text-yellow-300 w-24">{r}</span>
-                <span className="text-muted-foreground w-32">{t}</span>
-                <span className="flex-1 text-right md:text-left md:pl-6">{d}</span>
+              ["09:00", "Tournament & registration open"],
+              ["16:30", "Registration closes"],
+              ["16:45", "Check-in opens"],
+              ["16:55", "Check-in closes"],
+              ["16:57", "Final player list locked"],
+              ["16:58", "Swiss pairings generated"],
+              ["16:59", "Pairings published"],
+              ["17:00", "Round 1"],
+              ["17:12", "Round 2"],
+              ["17:24", "Round 3"],
+              ["17:36", "Round 4"],
+              ["17:48", "Round 5"],
+              ["18:00", "Round 6"],
+              ["18:12", "Round 7"],
+              ["18:24", "Round 8"],
+              ["18:36", "Round 9"],
+              ["18:48", "Final standings"],
+              ["18:55", "Awards"],
+              ["19:00", "Tournament ends"],
+            ].map(([t, d]) => (
+              <div key={t + d} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                <span className="font-semibold text-yellow-300 w-20">{t}</span>
+                <span className="flex-1">{d}</span>
               </div>
             ))}
           </Card>
