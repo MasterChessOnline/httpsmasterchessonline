@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 
 const EVENT_NAME = "Dragan Brakus Cup";
-const EVENT_START = "2026-06-30T16:00:00+02:00"; // 16:00 CET
-const EVENT_END = "2026-06-30T19:30:00+02:00";
+const EVENT_START = "2026-06-30T17:00:00+02:00"; // 17:00 CEST / 15:00 UTC
+const EVENT_END = "2026-06-30T20:30:00+02:00";
 const SITE = "https://masterchess.live";
 const URL = `${SITE}/dragan-brakus`;
 
