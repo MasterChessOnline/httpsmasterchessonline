@@ -138,14 +138,14 @@
 :root[data-zone="community"] { --zone: 18 90% 60%;  --zone-glow: 18 95% 65%;  }
 :root[data-zone="news"]      { --zone: 264 80% 65%; --zone-glow: 264 85% 70%; }
 
-/* Polychrome glow — every page shows all 5 brand colors at once. */
+/* Polychrome glow — every page shows all 5 brand colors at once (boosted). */
 :root[data-site-theme="live"] body::before {
   background:
-    radial-gradient(700px 500px at 8% -10%,  hsl(43 90% 55% / 0.14), transparent 70%),
-    radial-gradient(650px 500px at 95% 5%,   hsl(217 91% 60% / 0.13), transparent 70%),
-    radial-gradient(600px 500px at 50% 105%, hsl(160 84% 42% / 0.11), transparent 70%),
-    radial-gradient(500px 400px at 0% 60%,   hsl(264 80% 65% / 0.10), transparent 70%),
-    radial-gradient(500px 400px at 100% 70%, hsl(18 90% 60% / 0.10),  transparent 70%);
+    radial-gradient(720px 520px at 6% -8%,   hsl(43 95% 58% / 0.22), transparent 70%),
+    radial-gradient(680px 520px at 96% 4%,   hsl(217 92% 62% / 0.22), transparent 70%),
+    radial-gradient(620px 520px at 50% 108%, hsl(160 84% 45% / 0.18), transparent 70%),
+    radial-gradient(520px 420px at -2% 62%,  hsl(264 82% 67% / 0.18), transparent 70%),
+    radial-gradient(520px 420px at 102% 72%, hsl(18 92% 62% / 0.18),  transparent 70%);
 }
 
 /* Zone-tinted scroll indicator under the navbar */
@@ -153,15 +153,33 @@
   content: "";
   position: fixed;
   top: 64px; left: 0; right: 0;
-  height: 2px;
+  height: 3px;
   background: linear-gradient(90deg,
     transparent,
-    hsl(var(--zone) / 0.85) 50%,
+    hsl(var(--zone) / 0.95) 50%,
     transparent);
-  box-shadow: 0 0 22px hsl(var(--zone-glow) / 0.6);
+  box-shadow: 0 0 28px hsl(var(--zone-glow) / 0.85);
   z-index: 40;
   pointer-events: none;
 }
+
+/* Cards inherit a subtle zone-tinted top accent line for polychrome feel */
+[data-zone] main [data-slot="card"] { position: relative; }
+[data-zone] main [data-slot="card"]::before {
+  content: "";
+  position: absolute; left: 12%; right: 12%; top: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, hsl(var(--zone) / 0.55), transparent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Footer pillar — 5 colored top bars, one per column (visual signature) */
+.site-footer .grid > div { padding-top: 14px; border-radius: 6px; }
+.site-footer .grid > div:nth-child(1) { box-shadow: inset 0 3px 0 hsl(43 95% 58% / 0.7); }
+.site-footer .grid > div:nth-child(2) { box-shadow: inset 0 3px 0 hsl(217 92% 62% / 0.7); }
+.site-footer .grid > div:nth-child(3) { box-shadow: inset 0 3px 0 hsl(160 84% 45% / 0.7); }
+.site-footer .grid > div:nth-child(4) { box-shadow: inset 0 3px 0 hsl(264 82% 67% / 0.7); }
+.site-footer .grid > div:nth-child(5) { box-shadow: inset 0 3px 0 hsl(18 92% 62% / 0.7); }
 
 /* Navbar link gets a colored under-glow that matches its zone */
 [data-nav-zone="play"]      { --zone: 217 91% 60%; --zone-glow: 217 91% 60%; }
