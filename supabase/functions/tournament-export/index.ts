@@ -74,10 +74,14 @@ Deno.serve(async (req) => {
     return json({ tournament: t, players, pairings });
   }
 
+  // Short name used on Chess-Results Serbia (their list truncates long titles).
+  const isBrakus = /brakus/i.test(t.name || "");
+  const crName = isBrakus ? "DB Chess Cup" : (t.name || "Tournament");
+
   if (format === "announcement-trf") {
     // Pre-tournament TRF16 announcement header used by Chess-Results Serbia.
     const lines = [
-      `012 ${t.name}`,
+      `012 ${crName}`,
       `022 ${t.city || "Online"}`,
       `032 RS`,
       `042 ${(t.starts_at || "").slice(0,10)}`,
@@ -93,9 +97,10 @@ Deno.serve(async (req) => {
     ];
     return new Response(lines.join("\n") + "\n", {
       headers: { ...corsHeaders, "Content-Type": "text/plain; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${safeName(t.name)}-announcement.trf"` },
+        "Content-Disposition": `attachment; filename="${safeName(crName)}-announcement.trf"` },
     });
   }
+
 
   if (format === "swiss-manager-tur") {
     // Minimal Swiss-Manager .tur (INI-style) seed file.
