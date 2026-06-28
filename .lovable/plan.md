@@ -1,93 +1,93 @@
-# DB Chess Cup — Growth & Integration Plan
+## Cilj
+Verifikovati da DB Chess Cup radi end-to-end (registracija → parovi po FIDE Dutch → 9 kola → Buchholz/Sonneborn → izvoz), dodati pravu integraciju sa **chesshost.app**, i osvežiti vizuelni identitet sa **5 živih tema** umesto samo zlatno-crne.
 
-Goal: get DB Chess Cup to 50+ registered players with friction-free signup, third-party pairing bridge (chesshost.app), shareable invite link, instant email confirmation, and a visible prize ladder.
+---
 
-## 1. ChessHost.app pairing bridge
+## 1. Tournament Engine — Full Test Harness
 
-ChessHost.app does not expose a public REST pairing API, so we integrate at the data-exchange layer (same way arbiters use Swiss-Manager).
+### 1a. Seed bot players (test mod)
+- Nova edge funkcija `tournament-seed-bots`:
+  - Parametri: `tournament_id`, `count` (default 32).
+  - Kreira N "ghost" registracija sa `is_test_bot=true` flag-om u `tournament_registrations` (nova kolona, default false).
+  - Imena/FIDE ID iz fiksne test liste (TestBot_0001 … TestBot_0032, rejtinzi 1200–2400).
+- Admin dugme na `/admin/tournaments/:id` → "Seed 32 test bots" (vidljivo samo adminu).
+- **Bitno**: bot redovi se filtriraju iz svih javnih leaderboard-a i email-flow-ova (`is_test_bot=false` filter), i brišu se jednim klikom "Purge test bots" pre live starta.
 
-- New edge function `chesshost-export`:
-  - Output the tournament in **TRF(x)** format (FIDE standard, what ChessHost imports).
-  - Output a JSON manifest (players, round, pairings, results) for re-import.
-- New edge function `chesshost-import-results`:
-  - Accepts pasted TRF/JSON from ChessHost after each round.
-  - Writes results back into `tournament_pairings` and recomputes standings/tiebreaks.
-- Admin UI on `/dragan-brakus` (arbiter-only):
-  - "Open in ChessHost" button → downloads TRF and opens https://chesshost.app in a new tab with copy-paste instructions.
-  - "Import round results" textarea.
-- Public note on landing page: "Pairings powered by FIDE Dutch Swiss · mirrored to ChessHost.app".
+### 1b. Auto-play simulacija
+- Edge funkcija `tournament-simulate-round`:
+  - Za sve `tournament_pairings` u datom kolu gde su oba igrača `is_test_bot=true`, generiše rezultat po Elo verovatnoći (Glicko-lite).
+  - Upisuje rezultat, pokreće postojeći `generateNextRound`.
+- Admin može pokrenuti "Simulate all 9 rounds" → testira ceo tok za 30 sekundi.
 
-## 2. Invite link system
+### 1c. Validacija Buchholz/Sonneborn/Progressive
+- Postojeći `calculateTiebreaks` već postoji; dodati **unit test** (`supabase/functions/tournament-pair-round/tiebreaks_test.ts`) sa fiksnim 8-igrača scenariom čiji su tačni Buchholz/Sonneborn izračunati ručno → assert da se brojevi poklapaju.
+- Vizuelni "Tiebreak audit" panel na `/dragan-brakus/live` koji prikazuje formulu po igraču (pomaže arbitru objasniti rang).
 
-- New table `tournament_invites` (code, tournament_id, created_by, uses, max_uses, reward_coins).
-- Route `/i/:code` → resolves to tournament register page, auto-fills referrer.
-- Each registered player gets a personal invite link from their profile; +50 Master Coins per successful registration (capped 10).
-- Share buttons: WhatsApp, Telegram, X, Facebook, copy link, QR code (using existing `qrcode` lib).
+---
 
-## 3. Open registration + email confirmation
+## 2. ChessHost.app — prava integracija
 
-- Registration form on `/dragan-brakus`:
-  - Email required, name required, FIDE ID optional (auto-fill via existing `fide-lookup`).
-  - Works for guests (no login wall) — creates a pending registration tied to email; converts to account on first login.
-- Trigger send via existing `send-transactional-email`:
-  - New template `db-cup-registration-confirmed.tsx` (start time, venue, what to bring, calendar .ics link, invite link).
-  - Idempotency key `db-cup-confirm-{registration_id}`.
-- Existing 2h reminder cron already covers pre-tournament email.
-- Add `db-cup-24h-reminder` template + cron filter.
+Trenutno samo eksportujemo TRF(x) fajl za ručni upload. Plan:
 
-## 4. Prize ladder (visible on landing)
+### 2a. Bridge mod (radi odmah, bez API ključa)
+- Postojeći `ChessHostBridge.tsx` proširiti:
+  - Prikaz statusa svakog kola: TRF generisan ✓ / Parovi importovani ✓ / Rezultati uneti ✓.
+  - "Open ChessHost" dugme otvara `https://chesshost.app/import` u novom tabu sa već kopiranim TRF u clipboard.
+  - Posle kola, "Paste results" textarea → parsira TRF rezultat string i upisuje u `tournament_pairings`.
 
-Non-cash, MasterChess-native (per existing memory: no cash prizes):
-- 1st: Grandmaster Crown badge + 10,000 Master Coins + custom board skin + featured Founder interview
-- 2nd: Master badge + 5,000 coins + premium piece set
-- 3rd: 3,000 coins + bronze badge
-- Top 10: "DB Cup Finalist" profile flair
-- Best U1600 / U1200 / Junior (U14) / Female / Senior (50+): 1,000 coins each
-- Biggest upset: "Giant Slayer" unique badge
-- Every finisher: participation NFT-style badge + 200 coins
-- Sponsor spot: small Dragan Brakus tribute banner
+### 2b. API mod (ako chesshost.app ima public API)
+- Provera dokumentacije pre implementacije. Ako postoji REST endpoint za `POST /tournament/{id}/round/{n}/pairings` → edge funkcija `chesshost-sync` sinhronizuje automatski svako kolo.
+- Ako ne — ostajemo na bridge modu, koji je dovoljan za arbitra.
 
-Stored in existing `tournament_prizes`.
+---
 
-## 5. Growth pack to hit 50+ players
+## 3. Vizuelni identitet — 5 živih tema
 
-- **Public registrant counter** on landing ("32 / 50 seats filled") with progress bar — social proof.
-- **Early-bird perk**: first 20 registrants get exclusive "Founder's Knight" badge.
-- **Team captain mode**: anyone who brings 3 friends gets free entry to next event + Captain badge.
-- **Country/city leaderboard** on landing (who has most signups from Belgrade, Novi Sad, etc.).
-- **Auto-post to /news** when milestones hit (10, 25, 40, 50 registrants) + IndexNow ping.
-- **Homepage countdown ribbon** (already exists) — extend with live registrant count.
-- **Cross-promo banners** on `/play`, `/puzzles`, `/lessons` for logged-in users with one-click register.
-- **Push notification** to all opted-in users 48h, 24h, 2h before start.
-- **Embed widget** (`/embed/db-cup`) so partner sites/blogs can paste a live counter iframe.
-- **Affiliate codes** for chess coaches/clubs to track sign-ups (uses existing `affiliates`).
-- **Post-registration share prompt** ("You're in! Share to unlock bonus coins").
+Trenutni `SiteThemePicker` ima 8 tema ali su sve tamne varijante. Korisnik traži **više boja, ljudskije, ne samo crno**.
 
-## 6. Technical sections
+Predlog 5 default tema (vidljive odmah u headeru kao swatch krug):
 
-### DB
-- `tournament_invites` table + GRANTs + RLS (read public, insert authenticated, update via RPC).
-- Add `referrer_invite_code`, `confirmation_sent_at` columns to `tournament_registrations`.
-- RPC `redeem_invite(code)` — atomic uses++.
+```text
+1. Royal Sunset    — duboko ljubičasta + topli koralni akcent + krem pozadina
+2. Forest Library  — tamno zelena drvo tekstura + zlato + ivory
+3. Ocean Blueprint — denim plava + bela + neon turkiz
+4. Terracotta Cafe — terakota + maslinasta + topla beige (svetla tema)
+5. Midnight Gold   — postojeća (default, za nostalgiju)
+```
 
-### Edge functions
-- `chesshost-export` (GET, TRF + JSON).
-- `chesshost-import-results` (POST, arbiter only).
-- `db-cup-register` (POST, public; creates registration, sends confirmation, awards invite bonus).
-- Extend `tournament-reminder-2h` with 24h variant.
+- Refactor `src/lib/site-themes.ts`: svaka tema definiše **kompletan HSL set** (background, foreground, primary, secondary, accent, muted, border, card) — ne samo accent boju.
+- `index.css` čita iz `data-theme` atributa na `<html>`.
+- Sve shadcn komponente automatski preuzimaju nove tokene jer već koriste semantic vars.
+- **Bitno**: tri od pet tema su **svetle** (Terracotta Cafe, delom Ocean Blueprint, Forest Library light variant) — sajt više neće delovati monohromatski.
 
-### Frontend
-- `src/pages/DraganBrakusCup.tsx` — registrant counter, share/invite block, prize ladder grid, early-bird badge.
-- `src/pages/InviteRedirect.tsx` at `/i/:code`.
-- `src/components/db-cup/InviteShareCard.tsx` (QR + socials).
-- `src/components/db-cup/PrizeLadder.tsx`.
-- Admin pairing bridge panel (arbiter role only).
+---
 
-### Email
-- New template `db-cup-registration-confirmed.tsx` with .ics attachment-link.
-- New template `db-cup-24h-reminder.tsx`.
+## 4. Navbar — dodaci
 
-## Out of scope (will not do this round)
-- Real-time chesshost.app API streaming (no public API exists).
-- Cash payouts (project policy).
-- Redesigning the homepage.
+Trenutno 5 sekcija po 3–4 linka. Predlog dodavanja:
+
+- **Theme swatch row** u dropdown svake sekcije (top): 5 krugova u boji → instant theme change.
+- **"Live Now" indikator** (zeleni puls) pored "Tournaments" ako trenutno teče bar jedno kolo.
+- **Search ikonica** (Cmd+K palette već postoji, samo dodati vidljiv trigger na mobile bottom bar).
+
+Bez novih sekcija — korisnik je tražio manje, ne više.
+
+---
+
+## 5. Test plan (posle implementacije)
+
+1. Admin klikne "Seed 32 bots" na DB Chess Cup.
+2. Klikne "Start Tournament" → generiše se 1. kolo (16 parova).
+3. Klikne "Simulate round" 9 puta → svih 9 kola odigrano.
+4. Otvara `/dragan-brakus/live` → leaderboard prikazuje finalni rang sa Buchholz/Sonneborn/Progressive vrednostima.
+5. Eksportuje TRF → poredi sa ručno proveravanim primerom.
+6. Klikne "Purge test bots" → svi ghost redovi obrisani, tabela spremna za live.
+7. Menja temu kroz svih 5 paleta → svaka stranica čita tokene bez hardcoded boja.
+
+---
+
+## Pitanja pre implementacije
+
+1. **ChessHost.app API**: imaš li credentials/dokumentaciju, ili idemo samo bridge mod (TRF copy-paste)?
+2. **Test botovi**: hoćeš da ostanu posle testa kao "demo turnir" za nove posetioce, ili strogo purge pre starta?
+3. **Svetle teme**: OK da 3 od 5 tema budu svetle pozadine (beli/krem), ili sve moraju ostati tamne sa različitim akcentima?
