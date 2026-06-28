@@ -35,6 +35,57 @@ export default function TournamentRegister() {
   const [tournament, setTournament] = useState<any>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [fideBusy, setFideBusy] = useState(false);
+
+  const lookupFide = async () => {
+    const id = form.fide_id.trim();
+    if (!/^\d{4,10}$/.test(id)) {
+      toast({ title: "Enter a valid FIDE ID", description: "Numeric, 4–10 digits.", variant: "destructive" });
+      return;
+    }
+    setFideBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fide-lookup", {
+        method: "GET" as any,
+        body: undefined,
+        // pass via query string
+        headers: {},
+      } as any);
+      // The supabase-js client doesn't support query params on invoke cleanly — fall back to fetch.
+      let json: any = data;
+      if (error || !json?.name) {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fide-lookup?id=${id}`;
+        const r = await fetch(url, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } });
+        json = await r.json();
+      }
+      if (!json?.name) {
+        toast({ title: "FIDE profile not found", description: json?.error || "Check the ID.", variant: "destructive" });
+        return;
+      }
+      // FIDE names come as "LASTNAME, Firstname" — split sensibly.
+      const raw: string = json.name;
+      let first = "", last = "";
+      if (raw.includes(",")) {
+        const [l, f] = raw.split(",").map((s: string) => s.trim());
+        last = l; first = f;
+      } else {
+        const parts = raw.trim().split(/\s+/);
+        first = parts.slice(0, -1).join(" ") || parts[0];
+        last = parts.length > 1 ? parts[parts.length - 1] : "";
+      }
+      setForm(s => ({
+        ...s,
+        first_name: first || s.first_name,
+        last_name: last || s.last_name,
+        federation: json.federation || s.federation,
+        fide_title: json.title || s.fide_title,
+        birth_year: json.birth_year ? String(json.birth_year) : s.birth_year,
+      }));
+      toast({ title: `Found: ${raw}`, description: `${json.federation || ""}${json.rating ? " · " + json.rating : ""}` });
+    } finally {
+      setFideBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
