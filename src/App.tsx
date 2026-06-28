@@ -260,6 +260,9 @@ function AnimatedRoutes() {
           <Route path="/dragan-brakus/lobby" element={<DraganBrakusRedirect />} />
           <Route path="/dragan-brakus/live" element={<DraganBrakusLive />} />
           <Route path="/dragan-brakus/press" element={<DraganBrakusPress />} />
+          <Route path="/why-masterchess" element={<WhyMasterChess />} />
+          <Route path="/r/:code" element={<AffiliateRedirect />} />
+
           <Route path="/world-tournaments" element={<WorldTournaments />} />
 
           
