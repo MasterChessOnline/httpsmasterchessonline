@@ -1,65 +1,93 @@
-## Goal
+# DB Chess Cup — Growth & Integration Plan
 
-1. **Chess-Results Serbia listing for DB Chess Cup** — wire the URL/ID into the site so the public badge on `/dragan-brakus` flips from "Pending submission" to "Listed on Chess-Results (SRB)" with a real link.
-2. **Slim navbar** — collapse the current 6-section mega-menu (Play / Learn / Compete / Community / Watch / More with ~60 links) down to the few items a normal user actually needs.
-3. **Extra ideas** — small, high-leverage additions that fit the same wave.
+Goal: get DB Chess Cup to 50+ registered players with friction-free signup, third-party pairing bridge (chesshost.app), shareable invite link, instant email confirmation, and a visible prize ladder.
 
----
+## 1. ChessHost.app pairing bridge
 
-## 1. Chess-Results listing
+ChessHost.app does not expose a public REST pairing API, so we integrate at the data-exchange layer (same way arbiters use Swiss-Manager).
 
-Today `/dragan-brakus` shows "Pending submission". The schema already has `chess_results_url`, `chess_results_id`, `chess_results_status` on `tournaments`, plus an admin page at `/admin/chess-results` to paste the URL.
+- New edge function `chesshost-export`:
+  - Output the tournament in **TRF(x)** format (FIDE standard, what ChessHost imports).
+  - Output a JSON manifest (players, round, pairings, results) for re-import.
+- New edge function `chesshost-import-results`:
+  - Accepts pasted TRF/JSON from ChessHost after each round.
+  - Writes results back into `tournament_pairings` and recomputes standings/tiebreaks.
+- Admin UI on `/dragan-brakus` (arbiter-only):
+  - "Open in ChessHost" button → downloads TRF and opens https://chesshost.app in a new tab with copy-paste instructions.
+  - "Import round results" textarea.
+- Public note on landing page: "Pairings powered by FIDE Dutch Swiss · mirrored to ChessHost.app".
 
-Two parts:
+## 2. Invite link system
 
-- **Data**: ask you for the actual Chess-Results tournament URL (e.g. `https://chess-results.com/tnr<ID>.aspx?lan=1`). I'll `UPDATE` the Brakus row with `chess_results_url`, `chess_results_id`, `chess_results_status = 'listed'`, `federation = 'SRB'`, and re-ping IndexNow.
-- **UI**: replace the "Pending submission" block on `/dragan-brakus` with a green "Listed on Chess-Results Serbia (SRB)" badge + outbound link, add the link to the press page, the news article, the footer of the tournament card on the Home/Compete tabs, and to the `Event` JSON-LD as `sameAs` so Google can attach it to the listing.
+- New table `tournament_invites` (code, tournament_id, created_by, uses, max_uses, reward_coins).
+- Route `/i/:code` → resolves to tournament register page, auto-fills referrer.
+- Each registered player gets a personal invite link from their profile; +50 Master Coins per successful registration (capped 10).
+- Share buttons: WhatsApp, Telegram, X, Facebook, copy link, QR code (using existing `qrcode` lib).
 
-If you don't have the URL yet, I'll add the federation/short-name to the announcement-TRF export and keep the badge as "Pending" until you paste it into `/admin/chess-results`.
+## 3. Open registration + email confirmation
 
-## 2. Slim, normalized navbar
+- Registration form on `/dragan-brakus`:
+  - Email required, name required, FIDE ID optional (auto-fill via existing `fide-lookup`).
+  - Works for guests (no login wall) — creates a pending registration tied to email; converts to account on first login.
+- Trigger send via existing `send-transactional-email`:
+  - New template `db-cup-registration-confirmed.tsx` (start time, venue, what to bring, calendar .ics link, invite link).
+  - Idempotency key `db-cup-confirm-{registration_id}`.
+- Existing 2h reminder cron already covers pre-tournament email.
+- Add `db-cup-24h-reminder` template + cron filter.
 
-Target: one row, ≤7 top-level items, no mega-dropdowns, mobile parity. Everything else moves into the existing Command Palette (Cmd/Ctrl+K) and the relevant pages.
+## 4. Prize ladder (visible on landing)
 
-New desktop top bar:
+Non-cash, MasterChess-native (per existing memory: no cash prizes):
+- 1st: Grandmaster Crown badge + 10,000 Master Coins + custom board skin + featured Founder interview
+- 2nd: Master badge + 5,000 coins + premium piece set
+- 3rd: 3,000 coins + bronze badge
+- Top 10: "DB Cup Finalist" profile flair
+- Best U1600 / U1200 / Junior (U14) / Female / Senior (50+): 1,000 coins each
+- Biggest upset: "Giant Slayer" unique badge
+- Every finisher: participation NFT-style badge + 200 coins
+- Sponsor spot: small Dragan Brakus tribute banner
 
-```text
-[Logo]  Play   Learn   Tournaments   News   Community   [🔍 search]  [Coins]  [Avatar]
-```
+Stored in existing `tournament_prizes`.
 
-- **Play** → plain link to `/play/online` (Quick Match). A tiny chevron opens a 3-item popover only: Quick Match, vs Bot, Ongoing Games.
-- **Learn** → plain link to `/learn`. Popover: Lessons, AI Coach, Analysis.
-- **Tournaments** → plain link to `/tournaments`. Popover: Upcoming, DB Chess Cup, Arena.
-- **News** → `/news` (no dropdown).
-- **Community** → `/community`. Popover: Feed, Clubs, Leaderboard.
-- Search icon opens the existing Cmd+K palette — that's where every removed link still lives (Repertoire, Puzzles, Stats, Battle Pass, Stream Hub, Settings, etc.), so nothing is lost.
-- Coin pill + avatar menu stay. Streak indicator moves into the avatar menu to reduce noise.
+## 5. Growth pack to hit 50+ players
 
-Mobile: bottom bar already exists and stays the source of truth. Top bar is hidden on mobile (already done last turn). The bottom bar is reduced to the same 5 items: Play, Learn, Tournaments, News, Profile.
+- **Public registrant counter** on landing ("32 / 50 seats filled") with progress bar — social proof.
+- **Early-bird perk**: first 20 registrants get exclusive "Founder's Knight" badge.
+- **Team captain mode**: anyone who brings 3 friends gets free entry to next event + Captain badge.
+- **Country/city leaderboard** on landing (who has most signups from Belgrade, Novi Sad, etc.).
+- **Auto-post to /news** when milestones hit (10, 25, 40, 50 registrants) + IndexNow ping.
+- **Homepage countdown ribbon** (already exists) — extend with live registrant count.
+- **Cross-promo banners** on `/play`, `/puzzles`, `/lessons` for logged-in users with one-click register.
+- **Push notification** to all opted-in users 48h, 24h, 2h before start.
+- **Embed widget** (`/embed/db-cup`) so partner sites/blogs can paste a live counter iframe.
+- **Affiliate codes** for chess coaches/clubs to track sign-ups (uses existing `affiliates`).
+- **Post-registration share prompt** ("You're in! Share to unlock bonus coins").
 
-Removed from top-level (still reachable via palette / profile menu / footer): Watch, Stream Hub, Clubs sub-pages, Battle Pass, Battle Royale, Hand & Brain, Puzzles, Stats, Achievements, Settings, Admin, Why MasterChess.
+## 6. Technical sections
 
-## 3. Extra ideas worth adding in the same wave
+### DB
+- `tournament_invites` table + GRANTs + RLS (read public, insert authenticated, update via RPC).
+- Add `referrer_invite_code`, `confirmation_sent_at` columns to `tournament_registrations`.
+- RPC `redeem_invite(code)` — atomic uses++.
 
-Pick any subset — I'll default to all four if you just say "do it":
+### Edge functions
+- `chesshost-export` (GET, TRF + JSON).
+- `chesshost-import-results` (POST, arbiter only).
+- `db-cup-register` (POST, public; creates registration, sends confirmation, awards invite bonus).
+- Extend `tournament-reminder-2h` with 24h variant.
 
-- **a. Persistent DB Chess Cup ribbon** — thin gold strip under the navbar showing "DB Chess Cup · June 30 · Register" with a live countdown and registered-player counter. Auto-hides 24h after the event. Single biggest funnel for the tournament.
-- **b. "Listed on Chess-Results" trust row** on Home — small logo strip (Chess-Results SRB, FIDE-style rating, Belgrade venue, Nikola founder) right under the hero. Cheap credibility for first-time visitors.
-- **c. Auto-publish news article** "DB Chess Cup officially listed on Chess-Results Serbia" the moment the URL is saved in `/admin/chess-results` — pings IndexNow + Google News. Free SEO hit.
-- **d. Share card generator** for registrants — after registering, user gets a personal OG image ("I'm player #47 in the DB Chess Cup") with a `/r/{affiliateCode}` link. Drives the viral loop you already built the affiliate table for.
+### Frontend
+- `src/pages/DraganBrakusCup.tsx` — registrant counter, share/invite block, prize ladder grid, early-bird badge.
+- `src/pages/InviteRedirect.tsx` at `/i/:code`.
+- `src/components/db-cup/InviteShareCard.tsx` (QR + socials).
+- `src/components/db-cup/PrizeLadder.tsx`.
+- Admin pairing bridge panel (arbiter role only).
 
----
+### Email
+- New template `db-cup-registration-confirmed.tsx` with .ics attachment-link.
+- New template `db-cup-24h-reminder.tsx`.
 
-## Technical details
-
-- DB: single `UPDATE tournaments SET chess_results_url=…, chess_results_id=…, chess_results_status='listed', federation='SRB' WHERE slug='dragan-brakus-cup';` + insert into `news_posts` for idea (c).
-- `src/components/Navbar.tsx`: rewrite `NAV_SECTIONS` to the 5-item shape, drop the wide mega-panel rendering branch, keep `NavSearchPalette` as the escape hatch.
-- `src/components/MobileBottomNav.tsx`: reduce to 5 tabs matching desktop.
-- `src/pages/DraganBrakusCup.tsx`: replace the pending-submission card with a listed-state card, add Chess-Results link to JSON-LD `sameAs`.
-- `src/pages/Index.tsx` (or wherever the hero lives): add the trust strip (idea b) and the Brakus ribbon (idea a) as a single component `<BrakusRibbon />` mounted in `App.tsx` so it sits under the navbar globally.
-- `src/pages/AdminChessResults.tsx`: on save, also POST to `news-indexnow-ping` and insert the auto-news row (idea c).
-- Share card (idea d): reuse the existing OG image generator pattern; new route `/dragan-brakus/share/:userId`.
-
-## Open question
-
-Do you already have the Chess-Results URL/ID for DB Chess Cup? If yes, paste it and I'll mark it listed in the same migration. If no, I'll ship everything except the live link and you flip it via `/admin/chess-results` once Chess-Results SRB replies.
+## Out of scope (will not do this round)
+- Real-time chesshost.app API streaming (no public API exists).
+- Cash payouts (project policy).
+- Redesigning the homepage.

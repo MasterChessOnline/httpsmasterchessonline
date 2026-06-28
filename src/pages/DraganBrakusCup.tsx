@@ -17,6 +17,8 @@ import {
   Trophy, Clock, Users, ShieldCheck, MapPin, Calendar,
   Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink, Loader2,
 } from "lucide-react";
+import InviteShareCard from "@/components/db-cup/InviteShareCard";
+import ChessHostBridge from "@/components/db-cup/ChessHostBridge";
 
 type Prize = {
   place_from: number; place_to: number; label: string;
@@ -112,8 +114,14 @@ export default function DraganBrakusCup() {
     if (!lobbyId) return;
     setRegistering(true);
     try {
-      const { data, error } = await supabase.functions.invoke("manage-tournament", {
-        body: { action: "join", tournament_id: lobbyId },
+      // Pull invite code from URL ?invite= or sessionStorage (set by /i/:code)
+      const url = new window.URL(window.location.href);
+      const inviteFromUrl = url.searchParams.get("invite") || "";
+      const inviteFromStore = (() => { try { return sessionStorage.getItem("db_cup_invite_code") || ""; } catch { return ""; } })();
+      const invite_code = (inviteFromUrl || inviteFromStore || "").trim().toUpperCase() || null;
+
+      const { data, error } = await supabase.functions.invoke("db-cup-register", {
+        body: { tournament_id: lobbyId, invite_code },
       });
       if (error) throw error;
       if ((data as any)?.error) {
@@ -122,7 +130,11 @@ export default function DraganBrakusCup() {
       }
       setIsRegistered(true);
       setPlayerCount(c => c + 1);
-      toast({ title: "You're in! ✓", description: "Registered for the Dragan Brakus Cup. Add your FIDE ID below (optional)." });
+      try { sessionStorage.removeItem("db_cup_invite_code"); } catch {}
+      toast({
+        title: "You're in! ✓",
+        description: "A confirmation email is on its way. Share your invite link to earn coins.",
+      });
     } catch (e: any) {
       toast({ title: "Could not register", description: e?.message || String(e), variant: "destructive" });
     } finally {
@@ -319,6 +331,11 @@ export default function DraganBrakusCup() {
             </Card>
           )}
 
+          {/* Personal invite card */}
+          {isRegistered && user?.id && lobbyId && (
+            <InviteShareCard userId={user.id} tournamentId={lobbyId} />
+          )}
+
           {/* Live counter + prize escalator */}
           <div className="mt-8 grid sm:grid-cols-3 gap-3">
             <Card className="p-4 border-yellow-500/30">
@@ -326,6 +343,13 @@ export default function DraganBrakusCup() {
               <div className="text-3xl font-bold text-yellow-300">{playerCount} <span className="text-base text-muted-foreground">/ {maxPlayers}</span></div>
               <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-yellow-400 to-amber-500" style={{ width: `${Math.min(100, (playerCount / maxPlayers) * 100)}%` }} />
+              </div>
+              <div className="mt-2 text-[11px] text-muted-foreground">
+                {playerCount < 20
+                  ? <>🥇 First 20 get the <span className="text-yellow-300">Founder's Knight</span> badge — {20 - playerCount} seats left.</>
+                  : playerCount < 50
+                    ? <>Next milestone: <span className="text-yellow-300">50 players</span> unlocks the bonus coin pool.</>
+                    : <>Goal reached — bonus coin pool unlocked. Next milestone: {nextMilestone}.</>}
               </div>
             </Card>
             <Card className="p-4 border-yellow-500/30">
@@ -480,6 +504,9 @@ export default function DraganBrakusCup() {
             </p>
           </section>
         )}
+
+        {/* Pairing bridge */}
+        {lobbyId && <ChessHostBridge tournamentId={lobbyId} />}
 
         {/* Chess-Results Serbia integration */}
         <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 mb-10">
