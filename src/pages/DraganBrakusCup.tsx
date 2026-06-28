@@ -12,8 +12,19 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Trophy, Clock, Users, ShieldCheck, MapPin, Calendar,
-  Zap, Target, Award, ChevronRight,
+  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink,
 } from "lucide-react";
+
+type Prize = {
+  place_from: number; place_to: number; label: string;
+  coins: number; badge_key: string | null; cosmetic_key: string | null;
+  is_special: boolean; sort_order: number;
+};
+type Sponsor = {
+  name: string; logo_url: string | null; website: string | null;
+  tier: "title" | "gold" | "silver" | "community"; display_order: number;
+};
+
 
 const EVENT_NAME = "Dragan Brakus Cup";
 const EVENT_START = "2026-06-30T17:00:00+02:00"; // 17:00 CEST / 15:00 UTC
