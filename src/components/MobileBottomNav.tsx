@@ -110,6 +110,7 @@ const MobileBottomNav = () => {
   return (
     <nav
       ref={navRef}
+      data-mobile-bottom-nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-bottom"
       aria-label="Primary mobile navigation"
     >
