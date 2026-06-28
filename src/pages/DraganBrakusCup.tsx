@@ -212,10 +212,11 @@ export default function DraganBrakusCup() {
               </div>
             </Card>
             <Card className="p-4 border-yellow-500/30">
-              <div className="text-xs uppercase text-muted-foreground">Prize pool</div>
-              <div className="text-3xl font-bold text-yellow-300">€{escalatedPrize}</div>
-              <div className="text-xs text-muted-foreground mt-1">+€{escalatorStep} when we reach {nextMilestone} players</div>
+              <div className="text-xs uppercase text-muted-foreground flex items-center gap-1"><Coins className="h-3 w-3" /> MasterChess loot pool</div>
+              <div className="text-3xl font-bold text-yellow-300">{totalCoinPool.toLocaleString()} <span className="text-sm text-muted-foreground">coins</span></div>
+              <div className="text-xs text-muted-foreground mt-1">+ exclusive badges & cosmetics. No cash — pure MasterChess rewards.</div>
             </Card>
+
             <Card className="p-4 border-yellow-500/30">
               <div className="text-xs uppercase text-muted-foreground">Share the cup</div>
               <div className="mt-2 flex flex-wrap gap-2">
