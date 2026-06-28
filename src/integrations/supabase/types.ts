@@ -3587,9 +3587,14 @@ export type Database = {
           category: string
           checkin_closes_at: string | null
           checkin_opens_at: string | null
+          chess_results_status: string | null
+          chess_results_submitted_at: string | null
+          chief_arbiter: string | null
+          city: string | null
           created_at: string
           created_by: string | null
           current_round: number
+          deputy_arbiter: string | null
           description: string
           donation_total_eur: number
           entry_fee: number
@@ -3601,10 +3606,12 @@ export type Database = {
           is_signature: boolean
           max_players: number
           name: string
+          organizer_email: string | null
           organizer_label: string | null
           prize_escalator_step: number
           prize_kind: string
           prize_pool_eur: number
+          rating_type: string | null
           registration_deadline: string | null
           roster_locked_at: string | null
           round_started_at: string | null
@@ -3619,6 +3626,7 @@ export type Database = {
           total_rounds: number
           tournament_type: string
           updated_at: string
+          venue: string | null
           visibility: string
         }
         Insert: {
@@ -3629,9 +3637,14 @@ export type Database = {
           category?: string
           checkin_closes_at?: string | null
           checkin_opens_at?: string | null
+          chess_results_status?: string | null
+          chess_results_submitted_at?: string | null
+          chief_arbiter?: string | null
+          city?: string | null
           created_at?: string
           created_by?: string | null
           current_round?: number
+          deputy_arbiter?: string | null
           description?: string
           donation_total_eur?: number
           entry_fee?: number
@@ -3643,10 +3656,12 @@ export type Database = {
           is_signature?: boolean
           max_players?: number
           name: string
+          organizer_email?: string | null
           organizer_label?: string | null
           prize_escalator_step?: number
           prize_kind?: string
           prize_pool_eur?: number
+          rating_type?: string | null
           registration_deadline?: string | null
           roster_locked_at?: string | null
           round_started_at?: string | null
@@ -3661,6 +3676,7 @@ export type Database = {
           total_rounds?: number
           tournament_type?: string
           updated_at?: string
+          venue?: string | null
           visibility?: string
         }
         Update: {
@@ -3671,9 +3687,14 @@ export type Database = {
           category?: string
           checkin_closes_at?: string | null
           checkin_opens_at?: string | null
+          chess_results_status?: string | null
+          chess_results_submitted_at?: string | null
+          chief_arbiter?: string | null
+          city?: string | null
           created_at?: string
           created_by?: string | null
           current_round?: number
+          deputy_arbiter?: string | null
           description?: string
           donation_total_eur?: number
           entry_fee?: number
@@ -3685,10 +3706,12 @@ export type Database = {
           is_signature?: boolean
           max_players?: number
           name?: string
+          organizer_email?: string | null
           organizer_label?: string | null
           prize_escalator_step?: number
           prize_kind?: string
           prize_pool_eur?: number
+          rating_type?: string | null
           registration_deadline?: string | null
           roster_locked_at?: string | null
           round_started_at?: string | null
@@ -3703,6 +3726,7 @@ export type Database = {
           total_rounds?: number
           tournament_type?: string
           updated_at?: string
+          venue?: string | null
           visibility?: string
         }
         Relationships: []
