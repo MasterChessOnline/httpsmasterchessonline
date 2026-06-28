@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import StreakIndicator from "@/components/StreakIndicator";
 import CoinBalancePill from "@/components/CoinBalancePill";
 import NavSearchPalette from "@/components/NavSearchPalette";
-import SiteThemePicker from "@/components/SiteThemePicker";
+// SiteThemePicker removed — see src/lib/site-themes.ts (forced "live" theme).
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface DropdownItem {
