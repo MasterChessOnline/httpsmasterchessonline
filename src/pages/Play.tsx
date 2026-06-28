@@ -1,4 +1,5 @@
 import Seo from "@/components/Seo";
+import { useGameMode } from "@/hooks/use-game-mode";
 import BotAvatar from "@/components/BotAvatar";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Chess, Square } from "chess.js";
