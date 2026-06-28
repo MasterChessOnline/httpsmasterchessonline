@@ -231,7 +231,7 @@ const Navbar = () => {
   return (
     <>
       <div
-        className={`fixed top-0 left-0 right-0 z-50 transition-shadow duration-500 ${
+        className={`app-navbar fixed top-0 left-0 right-0 z-50 transition-shadow duration-500 ${
           scrolled
             ? "shadow-[0_10px_30px_-6px_rgba(0,0,0,0.7),0_2px_0_hsl(var(--primary)/0.18)]"
             : "shadow-[0_4px_18px_rgba(0,0,0,0.5),0_1px_0_hsl(var(--border))]"
@@ -543,8 +543,8 @@ const Navbar = () => {
       <NavSearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
 
 
-      {/* Spacer */}
-      <div className={`transition-all duration-500 ${shrunk ? "h-14" : "h-[88px]"}`} />
+      {/* Spacer (hidden on mobile — the top bar itself is hidden on < lg) */}
+      <div className={`app-navbar-spacer hidden lg:block transition-all duration-500 ${shrunk ? "h-14" : "h-[88px]"}`} />
 
 
       {/* Mobile full-screen overlay */}
