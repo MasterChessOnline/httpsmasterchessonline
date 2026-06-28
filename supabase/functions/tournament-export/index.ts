@@ -74,6 +74,57 @@ Deno.serve(async (req) => {
     return json({ tournament: t, players, pairings });
   }
 
+  if (format === "announcement-trf") {
+    // Pre-tournament TRF16 announcement header used by Chess-Results Serbia.
+    const lines = [
+      `012 ${t.name}`,
+      `022 ${t.city || "Online"}`,
+      `032 RS`,
+      `042 ${(t.starts_at || "").slice(0,10)}`,
+      `052 ${(t.ends_at || t.starts_at || "").slice(0,10)}`,
+      `062 ${players.length}`,
+      `072 ${players.length}`,
+      `082 0`,
+      `092 ${t.format || "Swiss"}`,
+      `102 ${t.chief_arbiter || "MasterChess Arbiter Team"}`,
+      `112 ${t.deputy_arbiter || ""}`,
+      `122 ${t.time_control_label || "3+2 Blitz"}`,
+      `132 ${t.total_rounds || 9}`,
+    ];
+    return new Response(lines.join("\n") + "\n", {
+      headers: { ...corsHeaders, "Content-Type": "text/plain; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${safeName(t.name)}-announcement.trf"` },
+    });
+  }
+
+  if (format === "swiss-manager-tur") {
+    // Minimal Swiss-Manager .tur (INI-style) seed file.
+    const lines = [
+      "[Tournament]",
+      `Name=${t.name}`,
+      `Place=${t.city || "Online"}`,
+      `Federation=RS`,
+      `Begin=${(t.starts_at || "").slice(0,10)}`,
+      `End=${(t.ends_at || t.starts_at || "").slice(0,10)}`,
+      `Rounds=${t.total_rounds || 9}`,
+      `System=Swiss`,
+      `TimeControl=${t.time_control_label || "3+2"}`,
+      `ChiefArbiter=${t.chief_arbiter || "MasterChess Arbiter Team"}`,
+      "",
+      "[Players]",
+      ...players.map((p, i) => {
+        const sn = i + 1;
+        const name = `${p.last_name}, ${p.first_name}`.trim().replace(/^,\s*/, "");
+        return `${sn}|${name}|${p.federation || ""}|${p.fide_id || ""}|${p.rating || 0}|${p.fide_title || ""}|${p.birth_year || ""}`;
+      }),
+    ];
+    return new Response(lines.join("\n") + "\n", {
+      headers: { ...corsHeaders, "Content-Type": "text/plain; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${safeName(t.name)}.tur"` },
+    });
+  }
+
+
   if (format === "csv-standings") {
     // Pull tiebreaks alongside.
     const { data: tb } = await supabase
