@@ -3196,6 +3196,47 @@ export type Database = {
           },
         ]
       }
+      tournament_invites: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          max_uses: number
+          reward_coins: number
+          tournament_id: string
+          uses: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          max_uses?: number
+          reward_coins?: number
+          tournament_id: string
+          uses?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          max_uses?: number
+          reward_coins?: number
+          tournament_id?: string
+          uses?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_invites_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_messages: {
         Row: {
           content: string
@@ -3380,6 +3421,7 @@ export type Database = {
           checked_in_at: string | null
           city: string | null
           club: string | null
+          confirmation_sent_at: string | null
           created_at: string
           fast_win_bonus: number
           federation: string | null
@@ -3393,6 +3435,7 @@ export type Database = {
           performance_rating: number | null
           progressive_score: number
           rating_at_join: number
+          referrer_invite_code: string | null
           reminded_2h_at: string | null
           score: number
           sonneborn: number
@@ -3411,6 +3454,7 @@ export type Database = {
           checked_in_at?: string | null
           city?: string | null
           club?: string | null
+          confirmation_sent_at?: string | null
           created_at?: string
           fast_win_bonus?: number
           federation?: string | null
@@ -3424,6 +3468,7 @@ export type Database = {
           performance_rating?: number | null
           progressive_score?: number
           rating_at_join?: number
+          referrer_invite_code?: string | null
           reminded_2h_at?: string | null
           score?: number
           sonneborn?: number
@@ -3442,6 +3487,7 @@ export type Database = {
           checked_in_at?: string | null
           city?: string | null
           club?: string | null
+          confirmation_sent_at?: string | null
           created_at?: string
           fast_win_bonus?: number
           federation?: string | null
@@ -3455,6 +3501,7 @@ export type Database = {
           performance_rating?: number | null
           progressive_score?: number
           rating_at_join?: number
+          referrer_invite_code?: string | null
           reminded_2h_at?: string | null
           score?: number
           sonneborn?: number
@@ -4504,6 +4551,14 @@ export type Database = {
           created_at: string
           currency: string
           display_name: string
+        }[]
+      }
+      redeem_invite: {
+        Args: { _code: string }
+        Returns: {
+          inviter_id: string
+          reward_coins: number
+          tournament_id: string
         }[]
       }
       report_battle_royale_winner: {
