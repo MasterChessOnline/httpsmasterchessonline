@@ -366,14 +366,20 @@ export default function DraganBrakusCup() {
 
         {/* Chess-Results Serbia integration */}
         <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 mb-10">
-          <h2 className="text-xl font-bold mb-2">Chess-Results Serbia</h2>
-          <p className="text-sm text-muted-foreground mb-3">
-            Full pairings, standings and tie-breaks are published on Chess-Results
-            Serbia ({" "}
-            <a href="https://chess-results.com" className="underline" target="_blank" rel="noreferrer">chess-results.com</a>
-            ) immediately after the tournament. TRF16, Swiss-Manager .tur and
-            crosstable files are available below.
-          </p>
+          <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
+            <div>
+              <h2 className="text-xl font-bold mb-1">Chess-Results Serbia</h2>
+              <p className="text-sm text-muted-foreground">
+                Listed on{" "}
+                <a href="https://chess-results.com" className="underline" target="_blank" rel="noreferrer">chess-results.com</a>{" "}
+                under the short name <strong className="text-yellow-300">DB Chess Cup</strong> (SRB federation).
+              </p>
+            </div>
+            <Badge variant="outline" className={externalResultsUrl ? "border-green-500/40 text-green-300" : "border-yellow-500/40 text-yellow-300"}>
+              {externalResultsUrl ? "Listed" : "Pending submission"}
+            </Badge>
+          </div>
+
           {externalResultsUrl ? (
             <a
               href={externalResultsUrl}
@@ -382,25 +388,60 @@ export default function DraganBrakusCup() {
             >
               Open on Chess-Results <ExternalLink className="h-4 w-4" />
             </a>
-          ) : (
-            <div className="text-xs text-muted-foreground">
-              Chess-Results URL will be published here after the organizer registers the event.
-              See <Link className="underline" to="/docs/chess-results">submission guide</Link>.
+          ) : lobbyId ? (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Submission pack is auto-generated. Download the three files, then
+                send them to <code className="text-yellow-300">chess-results@swiss-manager.at</code>.
+                Chess-Results desk usually publishes within 24–48 hours.
+              </p>
+              <div className="flex flex-wrap gap-2 text-sm">
+                <a
+                  className="rounded-md bg-yellow-500 text-black px-3 py-2 font-semibold hover:bg-yellow-400"
+                  href={`https://kicabdwgdyabibioycbq.supabase.co/functions/v1/tournament-export?tournament_id=${lobbyId}&format=announcement-trf`}
+                  target="_blank" rel="noreferrer"
+                >
+                  1. Download announcement.trf
+                </a>
+                <a
+                  className="rounded-md bg-yellow-500 text-black px-3 py-2 font-semibold hover:bg-yellow-400"
+                  href={`https://kicabdwgdyabibioycbq.supabase.co/functions/v1/tournament-export?tournament_id=${lobbyId}&format=swiss-manager-tur`}
+                  target="_blank" rel="noreferrer"
+                >
+                  2. Download .tur (Swiss-Manager)
+                </a>
+                <a
+                  className="rounded-md bg-yellow-500 text-black px-3 py-2 font-semibold hover:bg-yellow-400"
+                  href={`https://kicabdwgdyabibioycbq.supabase.co/functions/v1/tournament-export?tournament_id=${lobbyId}&format=submission-email`}
+                  target="_blank" rel="noreferrer"
+                >
+                  3. Download email body
+                </a>
+                <a
+                  className="rounded-md border border-yellow-500/40 px-3 py-2 hover:bg-yellow-500/10"
+                  href={`mailto:chess-results@swiss-manager.at?subject=${encodeURIComponent("Tournament announcement — DB Chess Cup (SRB)")}&body=${encodeURIComponent("Dear Chess-Results desk,\n\nPlease publish the attached tournament on Chess-Results Serbia.\nShort name: DB Chess Cup\nFull name: Dragan Brakus Cup\nFederation: SRB\nStart: 2026-06-30 17:00 CEST\nFormat: 9-round Swiss Blitz 3+2\nWebsite: https://masterchess.live/dragan-brakus\n\nFiles attached.\n\nThank you,\nMasterChess.live\nnikola@masterchess.live")}`}
+                >
+                  4. Open mail client →
+                </a>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Full guide: <Link className="underline" to="/docs/chess-results">submission workflow</Link>.
+              </p>
             </div>
-          )}
+          ) : null}
         </section>
 
 
         {/* Exports for Chess-Results */}
         {lobbyId && (
           <section className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-10">
-            <h2 className="text-xl font-bold mb-2">Chess-Results / Swiss-Manager exports</h2>
+            <h2 className="text-xl font-bold mb-2">Post-tournament exports</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              After the final round, the organizer (or any visitor) can download
-              official tournament files for upload to Chess-Results Serbia.
+              After the final round, download official tournament files (final TRF,
+              PGN archive, crosstable, standings with all tie-breaks).
             </p>
             <div className="flex flex-wrap gap-2 text-sm">
-              {(["trf", "announcement-trf", "swiss-manager-tur", "pgn", "json", "csv-standings", "csv-crosstable"] as const).map((fmt) => (
+              {(["trf", "pgn", "json", "csv-standings", "csv-crosstable"] as const).map((fmt) => (
                 <a
                   key={fmt}
                   className="rounded-md border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10"
