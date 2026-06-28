@@ -36,15 +36,16 @@ export default function DraganBrakusCup() {
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(0);
   const [maxPlayers, setMaxPlayers] = useState<number>(500);
-  const [prizePool, setPrizePool] = useState<number>(100);
-  const [escalatorStep, setEscalatorStep] = useState<number>(25);
+  const [externalResultsUrl, setExternalResultsUrl] = useState<string | null>(null);
+  const [prizes, setPrizes] = useState<Prize[]>([]);
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       const { data } = await supabase
         .from("tournaments")
-        .select("id, max_players, prize_pool_eur, prize_escalator_step")
+        .select("id, max_players, external_results_url")
         .ilike("name", "%Dragan Brakus%")
         .order("starts_at", { ascending: false })
         .limit(1)
@@ -52,25 +53,40 @@ export default function DraganBrakusCup() {
       if (cancelled || !data?.id) return;
       setLobbyId(data.id);
       setMaxPlayers(data.max_players || 500);
-      setPrizePool(Number(data.prize_pool_eur) || 100);
-      setEscalatorStep(Number(data.prize_escalator_step) || 25);
-      const { count } = await supabase
-        .from("tournament_registrations")
-        .select("user_id", { count: "exact", head: true })
-        .eq("tournament_id", data.id);
-      if (!cancelled) setPlayerCount(count || 0);
+      setExternalResultsUrl((data as any).external_results_url || null);
+      const [{ count }, prizesRes, sponsorsRes] = await Promise.all([
+        supabase.from("tournament_registrations")
+          .select("user_id", { count: "exact", head: true })
+          .eq("tournament_id", data.id),
+        supabase.from("tournament_prizes")
+          .select("place_from, place_to, label, coins, badge_key, cosmetic_key, is_special, sort_order")
+          .eq("tournament_id", data.id)
+          .order("sort_order"),
+        supabase.from("tournament_sponsors")
+          .select("name, logo_url, website, tier, display_order")
+          .eq("tournament_id", data.id)
+          .order("display_order"),
+      ]);
+      if (cancelled) return;
+      setPlayerCount(count || 0);
+      setPrizes((prizesRes.data as any) || []);
+      setSponsors((sponsorsRes.data as any) || []);
     }
     load();
     const i = setInterval(load, 20000);
     return () => { cancelled = true; clearInterval(i); };
   }, []);
 
-  const escalatedPrize = prizePool + Math.floor(playerCount / 50) * escalatorStep;
-  const nextMilestone = (Math.floor(playerCount / 50) + 1) * 50;
+  const totalCoinPool = prizes.reduce((acc, p) => {
+    const places = Math.max(1, p.place_to - p.place_from + 1);
+    return acc + p.coins * (p.is_special ? 1 : places);
+  }, 0);
+  const nextMilestone = Math.min(maxPlayers, (Math.floor(playerCount / 100) + 1) * 100);
 
   const shareText = encodeURIComponent(
-    `Dragan Brakus Cup — 9-round Swiss Blitz on MasterChess. Free entry, live standings, Chess-Results export. Register: ${URL}`
+    `Dragan Brakus Cup — 9-round Swiss Blitz on MasterChess. Free entry, MasterChess loot prizes, live standings on Chess-Results. Register: ${URL}`
   );
+
 
 
   const jsonLd = [
