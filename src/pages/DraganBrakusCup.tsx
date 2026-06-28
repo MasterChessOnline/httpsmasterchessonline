@@ -339,6 +339,13 @@ export default function DraganBrakusCup() {
               <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-yellow-400 to-amber-500" style={{ width: `${Math.min(100, (playerCount / maxPlayers) * 100)}%` }} />
               </div>
+              <div className="mt-2 text-[11px] text-muted-foreground">
+                {playerCount < 20
+                  ? <>🥇 First 20 get the <span className="text-yellow-300">Founder's Knight</span> badge — {20 - playerCount} seats left.</>
+                  : playerCount < 50
+                    ? <>Next milestone: <span className="text-yellow-300">50 players</span> unlocks the bonus coin pool.</>
+                    : <>Goal reached — bonus coin pool unlocked. Next milestone: {nextMilestone}.</>}
+              </div>
             </Card>
             <Card className="p-4 border-yellow-500/30">
               <div className="text-xs uppercase text-muted-foreground flex items-center gap-1"><Coins className="h-3 w-3" /> MasterChess loot pool</div>
