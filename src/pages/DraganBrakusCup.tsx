@@ -583,11 +583,23 @@ export default function DraganBrakusCup() {
         </section>
 
         <div className="text-center">
-          <Button asChild size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400">
-            <Link to={lobbyId ? `/tournaments/${lobbyId}/register` : "/tournaments"}>
+          {isRegistered ? (
+            <Button asChild size="lg" className="bg-green-600 text-white hover:bg-green-500">
+              <Link to={lobbyId ? `/tournaments/${lobbyId}` : "/tournaments"}>
+                Registered ✓ — Open lobby
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              className="bg-yellow-500 text-black hover:bg-yellow-400"
+              onClick={handleInstantRegister}
+              disabled={registering || !lobbyId}
+            >
+              {registering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
               Register for the Dragan Brakus Cup
-            </Link>
-          </Button>
+            </Button>
+          )}
         </div>
       </main>
       <Footer />
