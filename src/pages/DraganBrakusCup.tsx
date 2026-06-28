@@ -86,6 +86,76 @@ export default function DraganBrakusCup() {
     return () => { cancelled = true; clearInterval(i); };
   }, []);
 
+  // Check whether the current user is already registered for this lobby.
+  useEffect(() => {
+    if (!user?.id || !lobbyId) { setIsRegistered(false); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("tournament_registrations")
+        .select("id, fide_id")
+        .eq("tournament_id", lobbyId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      setIsRegistered(Boolean(data));
+      if ((data as any)?.fide_id) setFideId(String((data as any).fide_id));
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, lobbyId]);
+
+  const handleInstantRegister = async () => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent("/dragan-brakus")}`);
+      return;
+    }
+    if (!lobbyId) return;
+    setRegistering(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-tournament", {
+        body: { action: "join", tournament_id: lobbyId },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) {
+        toast({ title: "Registration blocked", description: (data as any).error, variant: "destructive" });
+        return;
+      }
+      setIsRegistered(true);
+      setPlayerCount(c => c + 1);
+      toast({ title: "You're in! ✓", description: "Registered for the Dragan Brakus Cup. Add your FIDE ID below (optional)." });
+    } catch (e: any) {
+      toast({ title: "Could not register", description: e?.message || String(e), variant: "destructive" });
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleSaveFide = async () => {
+    if (!user || !lobbyId) return;
+    const id = fideId.trim();
+    if (id && !/^\d{4,10}$/.test(id)) {
+      toast({ title: "Invalid FIDE ID", description: "Numeric, 4–10 digits.", variant: "destructive" });
+      return;
+    }
+    setSavingFide(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-tournament", {
+        body: {
+          action: "update_player_details",
+          tournament_id: lobbyId,
+          player_details: { fide_id: id || null },
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: id ? "FIDE ID saved" : "FIDE ID cleared" });
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e?.message || String(e), variant: "destructive" });
+    } finally {
+      setSavingFide(false);
+    }
+  };
+
   const totalCoinPool = prizes.reduce((acc, p) => {
     const places = Math.max(1, p.place_to - p.place_from + 1);
     return acc + p.coins * (p.is_special ? 1 : places);
