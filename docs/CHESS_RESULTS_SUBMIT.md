@@ -1,85 +1,103 @@
-# Chess-Results Serbia — Submission Guide (DB Chess Cup)
+# Chess-Results Serbia — Submission Workflow
 
-Goal: get the **Dragan Brakus Cup** officially listed on
-[chess-results.com](https://chess-results.com/) under **Federation: Serbia (SRB)**
-as **"DB Chess Cup"** (short form — chess-results.com truncates long names in
-the federation list, so the short form is what we register).
+The MasterChess `/dragan-brakus` page now generates a complete submission pack
+for Chess-Results Serbia. Tournament will be listed under the short name
+**"DB Chess Cup"** (SRB federation) — the full name "Dragan Brakus Cup" stays
+in the email body and TRF header.
 
+> Status (as of last check): **NOT YET LISTED** on chess-results.com.
+> Chess-Results does not accept automatic API submissions — an organizer or
+> arbiter must email the desk. Follow the 4 steps below.
 
 ---
 
-## 1. Pre-tournament (T-7 days)
+## 4-step submission (≈ 5 minutes)
 
-1. Open the lobby page `/dragan-brakus`.
-2. Download the announcement TRF (header only):
-   ```
-   /functions/v1/tournament-export?tournament_id=<id>&format=announcement-trf
-   ```
-3. Download the Swiss-Manager seed file:
-   ```
-   /functions/v1/tournament-export?tournament_id=<id>&format=swiss-manager-tur
-   ```
-4. Email both files to **Chess-Results Serbia** desk:
-   - To: `office@chess-results.com`
-   - CC: Serbian arbiter contact (Šahovski savez Srbije)
-   - Subject: `Tournament announcement — DB Chess Cup (Dragan Brakus Cup) — 30 June 2026`
-   - Body: copy from `docs/CHESS_RESULTS_EMAIL.md` (template below).
-5. Wait for the assigned `tnr` number. Store it in
-   `tournaments.external_results_url`
-   (e.g. `https://chess-results.com/tnr1234567.aspx`).
+Open https://masterchess.live/dragan-brakus and scroll to the
+**Chess-Results Serbia** section. You will see four buttons:
 
-## 2. During the tournament
+1. **Download `announcement.trf`** — pre-tournament TRF16 header
+2. **Download `.tur`** — Swiss-Manager native seed file (preferred by CR desk)
+3. **Download email body** — pre-filled English email body
+4. **Open mail client** — opens your default email app with subject/body filled
 
-- Round N closes → pairings auto-saved in `tournament_pairings`.
-- After every round, re-export and **re-upload** the TRF:
-  ```
-  /functions/v1/tournament-export?tournament_id=<id>&format=trf
-  ```
-- Chess-Results re-reads the file and updates standings + tiebreaks live.
+### Manual workflow
 
-## 3. Post-tournament (T+1h)
+```
+To:      chess-results@swiss-manager.at
+Subject: Tournament announcement — DB Chess Cup (SRB)
+Attach:  DB_Chess_Cup-announcement.trf
+         DB_Chess_Cup.tur
+Body:    (paste contents of submission-email.txt)
+```
 
-1. Final TRF upload (same URL).
-2. PGN archive of all games:
-   ```
-   /functions/v1/tournament-export?tournament_id=<id>&format=pgn
-   ```
-3. Cross-table CSV for press / sponsors:
-   ```
-   /functions/v1/tournament-export?tournament_id=<id>&format=csv-crosstable
-   ```
-4. Standings CSV (with all tiebreaks):
-   ```
-   /functions/v1/tournament-export?tournament_id=<id>&format=csv-standings
-   ```
+Hit send. The Chess-Results desk usually publishes the event within 24–48 hours
+and replies with the public URL (format: `https://chess-results.com/tnr######.aspx`).
 
-## 4. Email template
+### After publication
 
-> Subject: DB Chess Cup (Dragan Brakus Cup) — TRF16 announcement (RS, online, 30 Jun 2026)
->
-> Dear Chess-Results team,
->
-> Please find attached the TRF16 announcement and Swiss-Manager `.tur` seed
-> for the *DB Chess Cup* (full name: Dragan Brakus Cup) — a 9-round Swiss online blitz (3+2) on
-> MasterChess.live, scheduled for **30 June 2026, 17:00 CEST**.
->
-> Organizer: MasterChess (Belgrade, Serbia) — Nikola Sakotić, founder.
-> Chief arbiter: MasterChess Arbiter Team. Anti-cheat is run on the platform.
->
-> Please assign a tournament number (`tnr…`) and reply with the public URL.
-> We will upload updated TRF files after each round and the final TRF + PGN
-> archive within one hour of the last round.
->
-> Public landing page: https://masterchess.live/dragan-brakus
-> Live standings: https://masterchess.live/dragan-brakus/live
-> Press kit: https://masterchess.live/dragan-brakus/press
->
-> Thank you,
-> Nikola Sakotić — nikola@masterchess.live
+1. Copy the returned URL.
+2. Run in the Lovable admin SQL editor:
 
-## 5. Prizes disclosure (important for Chess-Results)
+```sql
+UPDATE tournaments
+SET external_results_url = 'https://chess-results.com/tnrXXXXXX.aspx',
+    chess_results_status = 'listed',
+    chess_results_submitted_at = now()
+WHERE name ILIKE '%Brakus%';
+```
 
-The Dragan Brakus Cup awards **MasterChess loot only** — Master Coins,
-exclusive badges, and cosmetic items. There are **no cash prizes**. This is
-mentioned explicitly in the announcement so Chess-Results categorises it
-correctly under "online / community / no-prize-fund" events.
+The landing page badge will flip from "Pending submission" to "Listed" and the
+"Open on Chess-Results" CTA will appear automatically.
+
+---
+
+## Required tournament fields (already filled)
+
+| Field          | Value                                          |
+|----------------|------------------------------------------------|
+| Short name     | DB Chess Cup                                   |
+| Full name      | Dragan Brakus Cup                              |
+| Federation     | SRB                                            |
+| City / Venue   | Belgrade — Online (masterchess.live)           |
+| Start          | 2026-06-30 17:00 CEST                          |
+| Format         | 9-round Swiss Blitz                            |
+| Time control   | 3+2 (Blitz)                                    |
+| Rating type    | Unrated / Friendly (no FIDE rating change)     |
+| Chief Arbiter  | Nikola Sakotic (MasterChess Arbiter Team)      |
+| Organizer      | MasterChess.live                               |
+| Email          | nikola@masterchess.live                        |
+
+To upgrade to **FIDE-rated** later: register the event with FIDE Calendar (via
+Šahovski Savez Srbije) at least 14 days before, attach a licensed FIDE arbiter,
+and add their FIDE ID to `tournaments.chief_arbiter`.
+
+---
+
+## Tie-breaks declared on Chess-Results
+
+1. Buchholz Cut 1
+2. Buchholz Total
+3. Sonneborn-Berger
+4. Progressive Score
+5. Performance Rating
+6. Direct Encounter
+7. Wins
+
+All are computed live by the `recalc_tournament_tiebreaks` SQL function and
+included in the `csv-standings` export.
+
+---
+
+## Post-tournament uploads
+
+After round 9 ends, download from the same page:
+
+- `trf` — final TRF with all rounds and tie-breaks (upload to CR for final
+  standings page)
+- `pgn` — full game archive
+- `csv-crosstable` — Swiss cross-table with colors and opponent numbers
+- `csv-standings` — final ranking with all tie-breaks
+
+Send the final TRF as a reply to the original CR thread; they will update the
+existing event page rather than create a new one.
