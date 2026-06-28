@@ -1,4 +1,4 @@
-import { Crown, GraduationCap, Trophy, User, Swords } from "lucide-react";
+import { Crown, GraduationCap, Trophy, User, Swords, Radio } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { icon: Crown, label: "Home", href: "/" },
   { icon: GraduationCap, label: "Learn", href: "/learn" },
   { icon: Trophy, label: "Compete", href: "/tournaments" },
-  { icon: User, label: "Profile", href: "/profile" },
+  { icon: Radio, label: "News", href: "/news" },
 ];
 
 const focusRing =
@@ -119,6 +119,17 @@ const MobileBottomNav = () => {
         aria-hidden="true"
         className="pointer-events-none absolute -top-6 left-0 right-0 h-6 bg-gradient-to-t from-[hsl(220,15%,5%)] to-transparent"
       />
+
+      {/* Floating profile shortcut — top-left */}
+      {user && (
+        <Link
+          to={`/profile/${user.id}`}
+          aria-label="Open your profile"
+          className="pointer-events-auto absolute -top-9 left-4 z-10 h-9 w-9 rounded-full bg-[hsl(220,15%,10%)]/95 border border-primary/40 flex items-center justify-center shadow-[0_4px_14px_rgba(0,0,0,0.5)] backdrop-blur"
+        >
+          <User className="h-4 w-4 text-primary" />
+        </Link>
+      )}
 
       {/* Floating coin balance pill — always visible to logged-in users */}
       {user && (

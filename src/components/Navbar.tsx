@@ -43,7 +43,12 @@ const NAV_SECTIONS: NavSection[] = [
     accentRgb: "77,163,255",
     items: [
       { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find an opponent instantly", highlight: true },
-      { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Pick a bot and time control" },
+      { label: "Play vs Bot", href: "/play", icon: Brain, desc: "9 bots · 400–2000 ELO" },
+      { label: "Play as Guest", href: "/play-guest", icon: Play, desc: "No signup · instant board" },
+      { label: "Challenge Friend", href: "/vs/new", icon: UserPlus, desc: "Share a private link" },
+      { label: "Puzzles", href: "/puzzles", icon: Target, desc: "Daily tactics & rush" },
+      { label: "Battle Royale", href: "/battle-royale", icon: Crosshair, desc: "8-player single-elim" },
+      { label: "Challenge Modes", href: "/challenges", icon: Sparkles, desc: "Win in 10, No castling…" },
       { label: "Ongoing Games", href: "/play/online", icon: Gamepad2, desc: "Resume your matches" },
     ],
   },
@@ -56,7 +61,11 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Lessons", href: "/learn", icon: Crown, desc: "Structured learning path", highlight: true },
       { label: "AI Coach", href: "/coach", icon: Brain, desc: "Ask anything, review games" },
-      { label: "Analysis", href: "/analysis", icon: FileText, desc: "Analyze games & explore lines" },
+      { label: "Openings Trainer", href: "/openings", icon: BookOpen, desc: "Explore & drill openings" },
+      { label: "Game Review", href: "/analysis", icon: FileText, desc: "Analyze games & explore lines" },
+      { label: "Guess the Move", href: "/guess-the-move", icon: Eye, desc: "Train your intuition" },
+      { label: "Play Like a GM", href: "/play-like-gm", icon: Star, desc: "Match grandmaster moves" },
+      { label: "Battle Pass", href: "/battle-pass", icon: Gift, desc: "30 tiers · XP rewards" },
     ],
   },
   {
@@ -68,11 +77,17 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "All Tournaments", href: "/tournaments", icon: Trophy, desc: "Browse upcoming events", highlight: true },
       { label: "DB Chess Cup", href: "/dragan-brakus", icon: Award, desc: "Official MasterChess Cup · 30 Jun" },
-      { label: "DB Cup · Register", href: "/dragan-brakus#register", icon: UserPlus, desc: "Sign up with your FIDE ID" },
+      { label: "DB Cup · Register", href: "/tournaments/db-chess-cup/register", icon: UserPlus, desc: "Sign up with your FIDE ID" },
       { label: "DB Cup · Live", href: "/dragan-brakus/live", icon: Radio, desc: "Live standings & pairings" },
-      { label: "DB Cup · Press", href: "/dragan-brakus/press", icon: FileText, desc: "Media kit & assets" },
-      { label: "Leaderboard", href: "/leaderboard", icon: Crown, desc: "Top players globally" },
+      { label: "MasterChess Monday", href: "/tournaments?series=monday", icon: Zap, desc: "Weekly blitz arena" },
+      { label: "Friday Night Fire", href: "/tournaments?series=friday", icon: Sparkles, desc: "Bullet chaos · prizes" },
+      { label: "Sunday Classic", href: "/tournaments?series=sunday", icon: Clock, desc: "Rapid swiss · every week" },
+      { label: "Arena", href: "/tournaments?type=arena", icon: Crosshair, desc: "Open-entry timed arenas" },
+      { label: "Team Battle", href: "/tournaments?type=team", icon: Shield, desc: "Club vs club" },
+      { label: "Puzzle Tournament", href: "/puzzle-tournament", icon: Target, desc: "Solve fastest, win coins" },
+      { label: "Leaderboard", href: "/leaderboard", icon: Medal, desc: "Top players globally" },
     ],
+    wide: true,
   },
   {
     key: "news",
@@ -83,7 +98,10 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Newsroom", href: "/news", icon: Radio, desc: "Chess news & MasterChess updates", highlight: true },
       { label: "Blog", href: "/blog", icon: BookOpen, desc: "Guides, openings, deep dives" },
+      { label: "Submit Story", href: "/news/submit", icon: Plus, desc: "Share what you found", auth: true },
+      { label: "Stream Hub", href: "/live", icon: Radio, desc: "DailyChess_12 live & VODs" },
       { label: "About Nikola", href: "/nikola", icon: Crown, desc: "Founder · 13 years old" },
+      { label: "Why MasterChess", href: "/why-masterchess", icon: Star, desc: "For partners & press" },
     ],
   },
   {
@@ -95,7 +113,11 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Feed", href: "/community", icon: Users, desc: "Chess moments & posts", highlight: true },
       { label: "Friends", href: "/friends", icon: UserPlus, desc: "Your friends & requests", auth: true },
+      { label: "Messages", href: "/messages", icon: Bell, desc: "Direct chats", auth: true },
       { label: "Clubs", href: "/clubs", icon: Shield, desc: "Find or create a team" },
+      { label: "Chess Map", href: "/map", icon: Eye, desc: "Players around the world" },
+      { label: "Confessions", href: "/confessions", icon: Heart, desc: "Anonymous chess thoughts" },
+      { label: "Achievements", href: "/achievements", icon: Medal, desc: "Badges & milestones", auth: true },
     ],
   },
 ];
