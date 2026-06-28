@@ -123,6 +123,60 @@
 }
 :root[data-site-theme="live"] #root { position: relative; z-index: 1; }
 
+/* ============================================================
+   Color zones — each top-level area of the site gets its own
+   accent color so the whole sajt looks polychrome, not all-black.
+   Toggled by `data-zone` on <html> (set by RouteZone in App.tsx).
+   ============================================================ */
+:root {
+  --zone: 43 90% 55%;
+  --zone-glow: 43 90% 55%;
+}
+:root[data-zone="play"]      { --zone: 217 91% 60%; --zone-glow: 217 91% 60%; }
+:root[data-zone="learn"]     { --zone: 160 84% 42%; --zone-glow: 160 84% 50%; }
+:root[data-zone="tourney"]   { --zone: 43 90% 55%;  --zone-glow: 43 95% 60%;  }
+:root[data-zone="community"] { --zone: 18 90% 60%;  --zone-glow: 18 95% 65%;  }
+:root[data-zone="news"]      { --zone: 264 80% 65%; --zone-glow: 264 85% 70%; }
+
+/* Polychrome glow — every page shows all 5 brand colors at once. */
+:root[data-site-theme="live"] body::before {
+  background:
+    radial-gradient(700px 500px at 8% -10%,  hsl(43 90% 55% / 0.14), transparent 70%),
+    radial-gradient(650px 500px at 95% 5%,   hsl(217 91% 60% / 0.13), transparent 70%),
+    radial-gradient(600px 500px at 50% 105%, hsl(160 84% 42% / 0.11), transparent 70%),
+    radial-gradient(500px 400px at 0% 60%,   hsl(264 80% 65% / 0.10), transparent 70%),
+    radial-gradient(500px 400px at 100% 70%, hsl(18 90% 60% / 0.10),  transparent 70%);
+}
+
+/* Zone-tinted scroll indicator under the navbar */
+[data-zone] body > #root::before {
+  content: "";
+  position: fixed;
+  top: 64px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent,
+    hsl(var(--zone) / 0.85) 50%,
+    transparent);
+  box-shadow: 0 0 22px hsl(var(--zone-glow) / 0.6);
+  z-index: 40;
+  pointer-events: none;
+}
+
+/* Navbar link gets a colored under-glow that matches its zone */
+[data-nav-zone="play"]      { --zone: 217 91% 60%; --zone-glow: 217 91% 60%; }
+[data-nav-zone="learn"]     { --zone: 160 84% 42%; --zone-glow: 160 84% 50%; }
+[data-nav-zone="tourney"]   { --zone: 43 90% 55%;  --zone-glow: 43 95% 60%;  }
+[data-nav-zone="community"] { --zone: 18 90% 60%;  --zone-glow: 18 95% 65%;  }
+[data-nav-zone="news"]      { --zone: 264 80% 65%; --zone-glow: 264 85% 70%; }
+[data-nav-zone]:hover,
+[data-nav-zone].active {
+  color: hsl(var(--zone)) !important;
+  text-shadow: 0 0 18px hsl(var(--zone-glow) / 0.55);
+}
+
+
+
 
 
 :root[data-site-theme="royal"] {
