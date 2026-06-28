@@ -13,18 +13,14 @@ export interface SiteTheme {
 // Top 5 (inline swatches in navbar) intentionally mix dark + light + warm + cool
 // so the picker visibly reads as "puno boja, ljudski", not all-black.
 export const SITE_THEMES: SiteTheme[] = [
-  { key: "royal",      label: "Royal Sapphire",  swatch: "#3b82f6", description: "Tournament-blue accents on midnight" },
-  { key: "emerald",    label: "Emerald Hall",    swatch: "#10b981", description: "Deep green felt, classic club energy" },
-  { key: "sunset",     label: "Sunset Coral",    swatch: "#fb923c", description: "Warm coral on warm black" },
-  { key: "terracotta", label: "Terracotta Café", swatch: "#c2410c", description: "Light warm café — terracotta + olive" },
-  { key: "sky",        label: "Sky Studio",      swatch: "#0ea5e9", description: "Light sky blue tournament-room mode" },
-  // overflow themes (still selectable from the "More" popover)
-  { key: "gold",       label: "Gold & Black",    swatch: "#d4af37", description: "Signature MasterChess gold on deep black" },
-  { key: "ruby",       label: "Ruby Knight",     swatch: "#ef4444", description: "Crimson red on charcoal" },
-  { key: "violet",     label: "Violet Arena",    swatch: "#a855f7", description: "Twitch-purple cinematic accents" },
-  { key: "ocean",      label: "Ocean Cyan",      swatch: "#06b6d4", description: "Cool cyan on deep navy" },
-  { key: "ivory",      label: "Ivory Day",       swatch: "#f5f3ee", description: "Light tournament-room mode" },
+  // Single canonical look used site-wide. Five-color palette: gold accent,
+  // sapphire CTAs, emerald "live", coral timers, deep-night background.
+  { key: "live",       label: "MasterChess Live", swatch: "#d4af37", description: "Five-color tournament look — gold, sapphire, emerald, coral on midnight" },
+  // Kept only for back-compat with old localStorage values; not selectable.
+  { key: "royal",      label: "Royal Sapphire",  swatch: "#3b82f6", description: "Legacy" },
+  { key: "gold",       label: "Gold & Black",    swatch: "#d4af37", description: "Legacy" },
 ];
+
 
 const STORAGE_KEY = "mc.site-theme";
 const EVENT = "masterchess:site-theme-change";
@@ -52,8 +48,9 @@ export function onSiteThemeChange(listener: () => void): () => void {
 
 export function bootstrapSiteTheme() {
   if (typeof window === "undefined") return;
-  let saved: string | null = null;
-  try { saved = localStorage.getItem(STORAGE_KEY); } catch {}
-  // Default kept as "gold" to preserve existing users' experience.
-  applySiteTheme(saved || "gold");
+  // Theme picker removed — every visitor gets the same rich multi-color
+  // "MasterChess Live" look. Any legacy localStorage value is ignored.
+  try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  applySiteTheme("live");
 }
+

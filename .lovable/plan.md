@@ -1,93 +1,53 @@
-## Cilj
-Verifikovati da DB Chess Cup radi end-to-end (registracija → parovi po FIDE Dutch → 9 kola → Buchholz/Sonneborn → izvoz), dodati pravu integraciju sa **chesshost.app**, i osvežiti vizuelni identitet sa **5 živih tema** umesto samo zlatno-crne.
+## 1. Boje & teksture — automatski, bez switcher-a
 
----
+**Skidamo theme picker iz navbar-a.** Umesto izbora, sajt dobija jedan bogat, višebojni "MasterChess Live" izgled koji svi vide isto:
 
-## 1. Tournament Engine — Full Test Harness
+- Ukloniti `<SiteThemePicker/>` iz navbar-a (desktop + mobile), zadržati `applySiteTheme("live")` kao jedini bootstrap u `main.tsx`.
+- Novi `live` theme u `src/lib/site-themes.ts` + odgovarajući blok u `src/index.css`:
+  - **5 boja u paleti:** zlatna (#d4af37 akcenat), safir plava (#3b82f6 linkovi/CTA), smaragd (#10b981 "online/live"), korala (#fb923c upozorenja/timer), duboka noć (#0b1020 pozadina).
+  - **Teksture:** suptilan noise/grain layer preko `body::before`, radial gold glow iza hero sekcija, dijagonalni "felt" pattern na karticama turnira, šahovska 8×8 vodena marka u footeru.
+- Ostali themes/key-evi ostaju u kodu samo radi backward-compat (localStorage migracija → `live`), ali se nigde ne biraju.
 
-### 1a. Seed bot players (test mod)
-- Nova edge funkcija `tournament-seed-bots`:
-  - Parametri: `tournament_id`, `count` (default 32).
-  - Kreira N "ghost" registracija sa `is_test_bot=true` flag-om u `tournament_registrations` (nova kolona, default false).
-  - Imena/FIDE ID iz fiksne test liste (TestBot_0001 … TestBot_0032, rejtinzi 1200–2400).
-- Admin dugme na `/admin/tournaments/:id` → "Seed 32 test bots" (vidljivo samo adminu).
-- **Bitno**: bot redovi se filtriraju iz svih javnih leaderboard-a i email-flow-ova (`is_test_bot=false` filter), i brišu se jednim klikom "Purge test bots" pre live starta.
+## 2. End-to-end test DB Chess Cup sa 50+ igrača
 
-### 1b. Auto-play simulacija
-- Edge funkcija `tournament-simulate-round`:
-  - Za sve `tournament_pairings` u datom kolu gde su oba igrača `is_test_bot=true`, generiše rezultat po Elo verovatnoći (Glicko-lite).
-  - Upisuje rezultat, pokreće postojeći `generateNextRound`.
-- Admin može pokrenuti "Simulate all 9 rounds" → testira ceo tok za 30 sekundi.
+Pun FIDE Dutch Swiss probni run, bez ljudi:
 
-### 1c. Validacija Buchholz/Sonneborn/Progressive
-- Postojeći `calculateTiebreaks` već postoji; dodati **unit test** (`supabase/functions/tournament-pair-round/tiebreaks_test.ts`) sa fiksnim 8-igrača scenariom čiji su tačni Buchholz/Sonneborn izračunati ručno → assert da se brojevi poklapaju.
-- Vizuelni "Tiebreak audit" panel na `/dragan-brakus/live` koji prikazuje formulu po igraču (pomaže arbitru objasniti rang).
+1. **Seed:** `tournament-seed-bots` pozvati sa `count=64` (već postoji u `TournamentTestHarness`). Botovi: realistični rating spread 1400–2400, FIDE ID placeholder, federation = SRB.
+2. **9 rundi simulacije:** novi orchestrator edge function `tournament-simulate-full` koji u petlji zove `tournament-pair-round` → `tournament-simulate-round` × 9 i loguje izveštaj.
+3. **Validacija (assertions u funkciji):**
+   - svaki igrač igra svaku rundu (pairings count == ceil(N/2))
+   - nijedan par se ne ponavlja
+   - color balance ≤ 2 razlike, nikad 3 iste boje u nizu
+   - bye: max 1 po igraču, najniže rangirani bez prethodnog bye-a
+   - half-point bye request poštovan
+   - Buchholz/Buchholz Cut1/Sonneborn/Progressive ručno preračunati i upoređeni sa DB vrednostima
+4. **UI test harness:** dodati dugme "Simuliraj ceo turnir (9 rundi)" + "Audit izveštaj" u `TournamentTestHarness`, prikazuje JSON dijagnostiku i greške crveno.
+5. **Purge** ostaje pre live eventa.
 
----
+## 3. Više turnira (ne samo DB Cup)
 
-## 2. ChessHost.app — prava integracija
+Dodati 4 ponavljajuća turnira u `tournaments` tabelu + UI kartice na `/tournaments`:
 
-Trenutno samo eksportujemo TRF(x) fajl za ručni upload. Plan:
+| Naziv | Format | Vreme | Ritam |
+|---|---|---|---|
+| **MasterChess Monday Blitz** | 7-round Swiss | Pon 20:00 | 3+2 |
+| **Tuesday Titled Arena** | 90-min Arena | Uto 19:00 | 3+0 |
+| **Thursday 960 Chaos** | 5-round Swiss, Chess960 | Čet 20:00 | 5+3 |
+| **Sunday Classical Open** | 5-round Swiss | Ned 17:00 | 15+10 |
 
-### 2a. Bridge mod (radi odmah, bez API ključa)
-- Postojeći `ChessHostBridge.tsx` proširiti:
-  - Prikaz statusa svakog kola: TRF generisan ✓ / Parovi importovani ✓ / Rezultati uneti ✓.
-  - "Open ChessHost" dugme otvara `https://chesshost.app/import` u novom tabu sa već kopiranim TRF u clipboard.
-  - Posle kola, "Paste results" textarea → parsira TRF rezultat string i upisuje u `tournament_pairings`.
+Plus jednokratni **"Brakus Warm-Up"** 3 dana pre DB Cup-a (5 rundi blitz, free entry, top 10 dobija seed-prednost). Svaki ima auto-pairings, prize tier u Master Coins, i ulazi u zajednički "Tournaments hub" sa countdown-om.
 
-### 2b. API mod (ako chesshost.app ima public API)
-- Provera dokumentacije pre implementacije. Ako postoji REST endpoint za `POST /tournament/{id}/round/{n}/pairings` → edge funkcija `chesshost-sync` sinhronizuje automatski svako kolo.
-- Ako ne — ostajemo na bridge modu, koji je dovoljan za arbitra.
+## 4. Brutalne ideje (1 odabrati za prvu turu)
 
----
+- **A. Live Bracket Wall** — `/tournaments/wall` veliki TV-mode prikaz svih aktivnih partija turnira u realnom vremenu, jedan klik → spectate.
+- **B. Predict & Earn** — pred svaku rundu DB Cup-a gledaoci predviđaju ishode tabli, tačan pogodak = Master Coins. Drži publiku angažovanu 9 rundi.
+- **C. "Last Pawn Standing"** — Brakus dan-1 sporedni event: knockout, eliminisani gledaju i navijaju sa chat reaction-ima, pobednik dobija ulaz u glavni turnir.
+- **D. Sponsor Boards** — top 10 tabli svake runde imaju "presented by [partner]" overlay → monetizacija + razlog partnerima da promovišu link.
 
-## 3. Vizuelni identitet — 5 živih tema
+## Tehnički sažetak
 
-Trenutni `SiteThemePicker` ima 8 tema ali su sve tamne varijante. Korisnik traži **više boja, ljudskije, ne samo crno**.
+- **Frontend:** uklanjanje `SiteThemePicker` (Navbar + mobile bottom bar), novi `live` token-set u `index.css`, noise/glow tekstura kao CSS layers, kartice turnira na `/tournaments`.
+- **Backend:** `tournament-simulate-full` edge function, insert 4 recurring + 1 warm-up turnira (insert tool, ne migration), proširenje audit logike u `tournament-simulate-round`.
+- **Test:** dugme "Simulate full Swiss" u `TournamentTestHarness`, prikaz audit JSON-a.
 
-Predlog 5 default tema (vidljive odmah u headeru kao swatch krug):
-
-```text
-1. Royal Sunset    — duboko ljubičasta + topli koralni akcent + krem pozadina
-2. Forest Library  — tamno zelena drvo tekstura + zlato + ivory
-3. Ocean Blueprint — denim plava + bela + neon turkiz
-4. Terracotta Cafe — terakota + maslinasta + topla beige (svetla tema)
-5. Midnight Gold   — postojeća (default, za nostalgiju)
-```
-
-- Refactor `src/lib/site-themes.ts`: svaka tema definiše **kompletan HSL set** (background, foreground, primary, secondary, accent, muted, border, card) — ne samo accent boju.
-- `index.css` čita iz `data-theme` atributa na `<html>`.
-- Sve shadcn komponente automatski preuzimaju nove tokene jer već koriste semantic vars.
-- **Bitno**: tri od pet tema su **svetle** (Terracotta Cafe, delom Ocean Blueprint, Forest Library light variant) — sajt više neće delovati monohromatski.
-
----
-
-## 4. Navbar — dodaci
-
-Trenutno 5 sekcija po 3–4 linka. Predlog dodavanja:
-
-- **Theme swatch row** u dropdown svake sekcije (top): 5 krugova u boji → instant theme change.
-- **"Live Now" indikator** (zeleni puls) pored "Tournaments" ako trenutno teče bar jedno kolo.
-- **Search ikonica** (Cmd+K palette već postoji, samo dodati vidljiv trigger na mobile bottom bar).
-
-Bez novih sekcija — korisnik je tražio manje, ne više.
-
----
-
-## 5. Test plan (posle implementacije)
-
-1. Admin klikne "Seed 32 bots" na DB Chess Cup.
-2. Klikne "Start Tournament" → generiše se 1. kolo (16 parova).
-3. Klikne "Simulate round" 9 puta → svih 9 kola odigrano.
-4. Otvara `/dragan-brakus/live` → leaderboard prikazuje finalni rang sa Buchholz/Sonneborn/Progressive vrednostima.
-5. Eksportuje TRF → poredi sa ručno proveravanim primerom.
-6. Klikne "Purge test bots" → svi ghost redovi obrisani, tabela spremna za live.
-7. Menja temu kroz svih 5 paleta → svaka stranica čita tokene bez hardcoded boja.
-
----
-
-## Pitanja pre implementacije
-
-1. **ChessHost.app API**: imaš li credentials/dokumentaciju, ili idemo samo bridge mod (TRF copy-paste)?
-2. **Test botovi**: hoćeš da ostanu posle testa kao "demo turnir" za nove posetioce, ili strogo purge pre starta?
-3. **Svetle teme**: OK da 3 od 5 tema budu svetle pozadine (beli/krem), ili sve moraju ostati tamne sa različitim akcentima?
+Reci samo koju "brutalnu ideju" (A/B/C/D) da uključim u prvi build — ostalo radim sve gore navedeno.

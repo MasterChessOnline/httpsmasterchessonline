@@ -63,10 +63,67 @@
 
 /* ============================================================
    Site-wide color themes — toggled via [data-site-theme] on <html>.
-   Each block re-writes only the tokens that differ from the default
-   "gold" theme so every component (cards, buttons, accents, board)
-   recolors instantly without React state plumbing.
+   The picker is gone; "live" is now the canonical look that every
+   visitor sees. Legacy theme blocks below are kept for back-compat
+   with old localStorage values but are no longer surfaced in UI.
    ============================================================ */
+
+:root[data-site-theme="live"] {
+  /* 5-color palette */
+  --primary: 43 90% 55%;          /* gold accent */
+  --primary-foreground: 222 47% 6%;
+  --accent: 217 91% 60%;          /* sapphire CTA */
+  --accent-foreground: 222 47% 6%;
+  --secondary: 160 84% 32%;       /* emerald "live" */
+  --secondary-foreground: 40 30% 95%;
+  --destructive: 18 90% 55%;      /* coral timer/danger */
+  --destructive-foreground: 222 47% 6%;
+  --background: 222 47% 5%;       /* deep night */
+  --foreground: 40 30% 94%;
+  --card: 222 40% 9%;
+  --card-foreground: 40 30% 94%;
+  --popover: 222 45% 7%;
+  --popover-foreground: 40 30% 94%;
+  --muted: 222 30% 13%;
+  --muted-foreground: 220 12% 65%;
+  --border: 222 30% 16%;
+  --input: 222 30% 16%;
+  --ring: 43 90% 55%;
+  --neon-blue: 217 91% 60%;
+  --neon-purple: 264 80% 65%;
+  --neon-cyan: 187 90% 55%;
+  --neon-pink: 18 90% 60%;
+  --gradient-neon: linear-gradient(135deg, hsl(43 90% 55%), hsl(217 91% 60%));
+  --gradient-cyan: linear-gradient(135deg, hsl(160 84% 42%), hsl(187 90% 55%));
+  --gradient-card: linear-gradient(145deg, hsl(222 40% 11%), hsl(222 45% 6%));
+  --shadow-neon:    0 0 22px hsl(43 90% 55% / 0.18);
+  --shadow-neon-lg: 0 0 44px hsl(217 91% 60% / 0.20);
+}
+
+/* Subtle film-grain + warm gold/sapphire glow behind everything.
+   Fixed-position layers, pointer-events:none, so they never block input. */
+:root[data-site-theme="live"] body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(900px 600px at 12% -10%, hsl(43 90% 55% / 0.10), transparent 70%),
+    radial-gradient(800px 600px at 100% 10%, hsl(217 91% 60% / 0.10), transparent 70%),
+    radial-gradient(700px 500px at 50% 110%, hsl(160 84% 42% / 0.08), transparent 70%);
+}
+:root[data-site-theme="live"] body::after {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: .035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+:root[data-site-theme="live"] #root { position: relative; z-index: 1; }
+
+
 
 :root[data-site-theme="royal"] {
   --primary: 217 91% 60%;
