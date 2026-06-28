@@ -12,6 +12,7 @@ import SiteRatingJsonLd from "@/components/SiteRatingJsonLd";
 import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import BrakusRibbon from "@/components/BrakusRibbon";
 import AdminChessResults from "@/pages/AdminChessResults";
 // Critical / eager routes — needed for first paint & primary CTAs
 import Index from "./pages/Index";
@@ -494,6 +495,7 @@ const App = () => (
             <EntryQuickDashboard />
             <GameInviteListener />
             <MobileBottomNav />
+            <BrakusRibbon />
             <NotificationPrompt />
             <DailyReminderNotifier />
             <SmartNotifier />

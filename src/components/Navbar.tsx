@@ -32,104 +32,81 @@ interface NavSection {
   accentRgb: string;
 }
 
+// Slimmed navbar — only the essentials. Everything else is reachable via the
+// Cmd/Ctrl+K search palette, the user avatar menu, or the relevant pages.
 const NAV_SECTIONS: NavSection[] = [
   {
     key: "play",
     label: "Play",
     icon: Swords,
-    wide: true,
     accent: "217 91% 65%",
     accentRgb: "77,163,255",
     items: [
-      { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find opponent instantly", highlight: true },
-      { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Multiple AI difficulty levels" },
-      { label: "Play vs Bot · Custom", href: "/play", icon: Settings, desc: "Pick a bot, time control & color" },
-      { label: "Titles & Ratings", href: "/play/titles", icon: Award, desc: "View rating thresholds", separator: true },
-      { label: "Bullet (1–2 min)", href: "/play/online?tc=bullet", icon: Zap, desc: "Lightning fast games", separator: true, subheading: "Time Controls" },
-      { label: "Blitz (3–5 min)", href: "/play/online?tc=blitz", icon: Clock, desc: "Quick tactical battles" },
-      { label: "Rapid (10+ min)", href: "/play/online?tc=rapid", icon: Clock, desc: "Deep strategic play" },
-      { label: "Ongoing Games", href: "/play/online", icon: Gamepad2, desc: "Resume your matches", separator: true },
+      { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find an opponent instantly", highlight: true },
+      { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Pick a bot and time control" },
+      { label: "Ongoing Games", href: "/play/online", icon: Gamepad2, desc: "Resume your matches" },
     ],
   },
   {
     key: "learn",
     label: "Learn",
     icon: GraduationCap,
-    wide: true,
     accent: "271 91% 65%",
     accentRgb: "168,85,247",
     items: [
-      { label: "Daily Training Plan", href: "/daily-plan", icon: Sparkles, desc: "Your personalized daily tasks", highlight: true, subheading: "Improve" },
-      { label: "AI Coach", href: "/coach", icon: Brain, desc: "Chat with your AI coach — ask anything, review games, get a plan" },
-      { label: "Opening Repertoire", href: "/repertoire", icon: BookOpen, desc: "Build your personal repertoire" },
-      { label: "Training", href: "/learn", icon: Target, desc: "Structured learning path", separator: true, subheading: "Fundamentals" },
-      
-      { label: "All Lessons", href: "/learn", icon: Crown, desc: "Browse every lesson topic" },
-      { label: "Analysis", href: "/analysis", icon: FileText, desc: "Analyze games & explore lines", separator: true, subheading: "Analysis" },
-      { label: "Game History", href: "/history", icon: History, desc: "Online & bot games to review" },
-      { label: "Game Review", href: "/game-review", icon: History, desc: "Move-by-move replay" },
-      
+      { label: "Lessons", href: "/learn", icon: Crown, desc: "Structured learning path", highlight: true },
+      { label: "AI Coach", href: "/coach", icon: Brain, desc: "Ask anything, review games" },
+      { label: "Analysis", href: "/analysis", icon: FileText, desc: "Analyze games & explore lines" },
     ],
   },
   {
     key: "tournaments",
-    label: "Compete",
+    label: "Tournaments",
     icon: Trophy,
-    wide: true,
     accent: "38 92% 50%",
     accentRgb: "245,158,11",
     items: [
-      { label: "Top Players", href: "/leaderboard", icon: Crown, desc: "Global leaderboard ranking", highlight: true, subheading: "Ranks" },
-      { label: "Bullet Ranks", href: "/leaderboard?tc=bullet", icon: Zap, desc: "1–2 min rankings" },
-      { label: "Blitz Ranks", href: "/leaderboard?tc=blitz", icon: Clock, desc: "3–5 min rankings" },
-      { label: "Rapid Ranks", href: "/leaderboard?tc=rapid", icon: Clock, desc: "10+ min rankings" },
-      { label: "Join Tournament", href: "/tournaments", icon: Trophy, desc: "Browse open tournaments", separator: true, subheading: "Tournaments" },
-      { label: "Starting Soon", href: "/tournaments?filter=starting", icon: Clock, desc: "Upcoming events" },
-      { label: "Create Tournament", href: "/tournaments?filter=create", icon: Plus, desc: "Host your own event" },
-      { label: "My Tournaments", href: "/tournaments?filter=mine", icon: ListChecks, desc: "Your active tournaments" },
-      { label: "Team Battles", href: "/team-battles", icon: Swords, desc: "Battle team vs team in real time" },
-      { label: "Community", href: "/community", icon: Users, desc: "Posts & chess moments", separator: true, subheading: "Connect" },
-      { label: "Chess World Map", href: "/chess-map", icon: Crosshair, desc: "Live players across 130+ cities" },
-      { label: "Beat the Founder", href: "/beat-nikola", icon: Crown, desc: "Pobedi Nikolu (13) i osvoji sertifikat" },
-      { label: "News Feed", href: "/news", icon: Radio, desc: "Vote on chess news & updates" },
+      { label: "All Tournaments", href: "/tournaments", icon: Trophy, desc: "Browse upcoming events", highlight: true },
+      { label: "DB Chess Cup", href: "/dragan-brakus", icon: Award, desc: "Official MasterChess Cup" },
+      { label: "Leaderboard", href: "/leaderboard", icon: Crown, desc: "Top players globally" },
     ],
   },
   {
-    key: "profile",
-    label: "Profile",
-    icon: User,
+    key: "news",
+    label: "News",
+    icon: Radio,
+    accent: "150 70% 55%",
+    accentRgb: "74,222,128",
+    items: [
+      { label: "Newsroom", href: "/news", icon: Radio, desc: "Chess news & MasterChess updates", highlight: true },
+      { label: "Blog", href: "/blog", icon: BookOpen, desc: "Guides, openings, deep dives" },
+      { label: "About Nikola", href: "/nikola", icon: Crown, desc: "Founder · 13 years old" },
+    ],
+  },
+  {
+    key: "community",
+    label: "Community",
+    icon: Users,
     accent: "190 95% 55%",
     accentRgb: "34,211,238",
     items: [
-      { label: "My Profile", href: "/profile", icon: User, desc: "Rating & stats", auth: true, highlight: true },
-      { label: "Chess Card", href: "/chess-card", icon: Sparkles, desc: "Your skill profile & compare", auth: true },
-      { label: "Match History", href: "/history", icon: History, desc: "Wins, losses & draws" },
-      { label: "Stats", href: "/stats", icon: BarChart3, desc: "Detailed analytics", subheading: "Insights", separator: true },
-      { label: "Achievements", href: "/achievements", icon: Medal, desc: "Unlocked milestones" },
-      { label: "Reward Chests", href: "/chests", icon: Gift, desc: "Open chests, unlock boards & pieces", highlight: true },
-      { label: "Settings", href: "/settings", icon: Settings, desc: "Account & preferences", separator: true, subheading: "Account" },
+      { label: "Feed", href: "/community", icon: Users, desc: "Chess moments & posts", highlight: true },
+      { label: "Friends", href: "/friends", icon: UserPlus, desc: "Your friends & requests", auth: true },
+      { label: "Clubs", href: "/clubs", icon: Shield, desc: "Find or create a team" },
     ],
   },
 ];
 
-// Friends mega-section — lives separately, rendered as the rightmost nav dropdown
+// FRIENDS_SECTION kept for backward compatibility (no longer rendered).
 const FRIENDS_SECTION: NavSection = {
   key: "friends",
   label: "Friends",
   icon: Users,
   accent: "150 70% 55%",
   accentRgb: "74,222,128",
-  items: [
-    { label: "All Friends", href: "/friends#all", icon: Users, desc: "View your friends list", auth: true, highlight: true },
-    { label: "Add a Friend", href: "/friends#add", icon: UserPlus, desc: "Search players & send a request", auth: true },
-    { label: "Friend Requests", href: "/friends#requests", icon: Bell, desc: "Pending invitations", auth: true },
-    { label: "Challenge a Friend", href: "/friends#challenge", icon: Swords, desc: "Send a game invite", auth: true, separator: true, subheading: "Play Together" },
-    { label: "Browse Teams", href: "/clubs", icon: Shield, desc: "Find a club or team", separator: true, subheading: "Teams & Clubs" },
-    { label: "Create a Team", href: "/clubs", icon: Plus, desc: "Build your own group", auth: true },
-    { label: "Chat", href: "/chat", icon: FileText, desc: "Direct messages", auth: true, separator: true },
-    { label: "Blog & Guides", href: "/blog", icon: BookOpen, desc: "Chess guides, openings & rules", separator: true, subheading: "Read" },
-  ],
+  items: [],
 };
+
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -269,7 +246,7 @@ const Navbar = () => {
 
             {/* Desktop nav */}
             <div className="hidden lg:flex items-center gap-2">
-              {[...NAV_SECTIONS, FRIENDS_SECTION].map((section) => {
+              {NAV_SECTIONS.map((section) => {
                 const isActive = section.items.some(item =>
                   item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
                 );
@@ -577,7 +554,7 @@ const Navbar = () => {
 
             <div className="max-w-lg mx-auto space-y-3 px-4 pt-4">
 
-              {[...NAV_SECTIONS, FRIENDS_SECTION].map((section) => {
+              {NAV_SECTIONS.map((section) => {
                 const accentColor = `hsl(${section.accent})`;
                 return (
                   <div
