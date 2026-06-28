@@ -27,7 +27,7 @@ const TOOLS = [
     items: [
       { title: "vs Computer", desc: "Play against AI with adjustable difficulty", icon: Brain, href: "/play", color: "text-purple-400", bg: "bg-purple-500/10" },
       { title: "Online Multiplayer", desc: "Play against real players worldwide", icon: Users, href: "/play/online", color: "text-primary", bg: "bg-primary/10" },
-      { title: "Daily Challenge", desc: "Solve today's puzzle challenge", icon: Puzzle, href: "/daily-challenge", color: "text-orange-400", bg: "bg-orange-500/10" },
+      { title: "Daily Challenge", desc: "Solve today's puzzle challenge", icon: Puzzle, href: "/daily-puzzle", color: "text-orange-400", bg: "bg-orange-500/10" },
       { title: "Tournaments", desc: "Compete in Swiss tournaments", icon: Trophy, href: "/tournaments", color: "text-primary", bg: "bg-primary/10" },
     ],
   },
