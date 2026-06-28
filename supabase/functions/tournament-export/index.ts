@@ -280,7 +280,7 @@ Deno.serve(async (req) => {
     headers: {
       ...corsHeaders,
       "Content-Type": "text/plain; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${safeName(t.name)}.trf"`,
+      "Content-Disposition": `attachment; filename="${safeName(crName)}.trf"`,
     },
   });
 });
