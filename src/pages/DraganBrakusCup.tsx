@@ -505,6 +505,9 @@ export default function DraganBrakusCup() {
           </section>
         )}
 
+        {/* Pairing bridge */}
+        {lobbyId && <ChessHostBridge tournamentId={lobbyId} />}
+
         {/* Chess-Results Serbia integration */}
         <section className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 mb-10">
           <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
