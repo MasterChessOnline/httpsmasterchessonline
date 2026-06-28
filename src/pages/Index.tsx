@@ -61,6 +61,7 @@ import InstallAppButton from "@/components/InstallAppButton";
 import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
+import HomeTrustStrip from "@/components/HomeTrustStrip";
 import LazyMount from "@/components/LazyMount";
 import TonightArenaBanner from "@/components/TonightArenaBanner";
 import WinStreakFlame from "@/components/WinStreakFlame";
@@ -383,6 +384,10 @@ const Index = () => {
         <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
           {/* ─── Tonight Arena — daily ritual at 20:00, fights cold-start ─── */}
           <TonightArenaBanner />
+
+          {/* ─── Trust strip — credibility in the first 3 seconds ─── */}
+          <HomeTrustStrip />
+
 
           {/* ─── Daily Spin Wheel — reward hook ─── */}
           <React.Suspense fallback={<div className="h-[280px]" />}>
