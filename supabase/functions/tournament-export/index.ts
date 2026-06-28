@@ -82,8 +82,8 @@ Deno.serve(async (req) => {
     // Pre-tournament TRF16 announcement header used by Chess-Results Serbia.
     const lines = [
       `012 ${crName}`,
-      `022 ${t.city || "Online"}`,
-      `032 RS`,
+      `022 ${t.city || "Belgrade"}`,
+      `032 SRB`,
       `042 ${(t.starts_at || "").slice(0,10)}`,
       `052 ${(t.ends_at || t.starts_at || "").slice(0,10)}`,
       `062 ${players.length}`,
@@ -98,6 +98,50 @@ Deno.serve(async (req) => {
     return new Response(lines.join("\n") + "\n", {
       headers: { ...corsHeaders, "Content-Type": "text/plain; charset=utf-8",
         "Content-Disposition": `attachment; filename="${safeName(crName)}-announcement.trf"` },
+    });
+  }
+
+  if (format === "submission-email") {
+    // Ready-to-send email body for chess-results@swiss-manager.at
+    const startDate = (t.starts_at || "").slice(0,10);
+    const startTime = (t.starts_at || "").slice(11,16);
+    const ratingType = (t.rating_type || "unrated").toString();
+    const ratingLabel = ratingType === "fide" ? "FIDE Blitz rated"
+      : ratingType === "national" ? "National (SRB) rated"
+      : "Unrated / Friendly";
+    const body = [
+      `Subject: Tournament announcement — ${crName} (SRB)`,
+      ``,
+      `Dear Chess-Results desk,`,
+      ``,
+      `Please publish the following tournament on Chess-Results Serbia:`,
+      ``,
+      `Short name (for the list): ${crName}`,
+      `Full name:                 ${t.name}`,
+      `Federation:                SRB`,
+      `City / Venue:              ${t.city || "Belgrade"} — ${t.venue || "Online (masterchess.live)"}`,
+      `Start:                     ${startDate} ${startTime} CEST`,
+      `Format:                    ${t.format || "Swiss"}`,
+      `Rounds:                    ${t.total_rounds || 9}`,
+      `Time control:              ${t.time_control_label || "3+2 Blitz"}`,
+      `Rating type:               ${ratingLabel}`,
+      `Chief Arbiter:             ${t.chief_arbiter || "Nikola Sakotic (MasterChess Arbiter Team)"}`,
+      `Organizer:                 ${t.organizer_label || "MasterChess.live"}`,
+      `Organizer email:           ${t.organizer_email || "nikola@masterchess.live"}`,
+      `Tournament website:        https://masterchess.live/dragan-brakus`,
+      `Online standings (live):   https://masterchess.live/dragan-brakus/live`,
+      ``,
+      `Attached:`,
+      `  - ${safeName(crName)}-announcement.trf`,
+      `  - ${safeName(crName)}.tur  (Swiss-Manager seed file)`,
+      ``,
+      `Thank you,`,
+      `${t.organizer_label || "MasterChess.live"}`,
+      `${t.organizer_email || "nikola@masterchess.live"}`,
+    ].join("\n");
+    return new Response(body, {
+      headers: { ...corsHeaders, "Content-Type": "text/plain; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${safeName(crName)}-submission-email.txt"` },
     });
   }
 
