@@ -52,8 +52,9 @@ export function onSiteThemeChange(listener: () => void): () => void {
 
 export function bootstrapSiteTheme() {
   if (typeof window === "undefined") return;
-  let saved: string | null = null;
-  try { saved = localStorage.getItem(STORAGE_KEY); } catch {}
-  // Default kept as "gold" to preserve existing users' experience.
-  applySiteTheme(saved || "gold");
+  // Theme picker removed — every visitor gets the same rich multi-color
+  // "MasterChess Live" look. Any legacy localStorage value is ignored.
+  try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  applySiteTheme("live");
 }
+
