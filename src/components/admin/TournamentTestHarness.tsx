@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FlaskConical, Bot, Trash2, Play } from "lucide-react";
+import { FlaskConical, Bot, Trash2, Play, Rocket } from "lucide-react";
 
 interface Props {
   tournamentId: string;
@@ -15,16 +15,18 @@ interface Props {
 }
 
 export default function TournamentTestHarness({ tournamentId, currentRound = 1 }: Props) {
-  const [count, setCount] = useState(32);
+  const [count, setCount] = useState(64);
   const [round, setRound] = useState(currentRound);
   const [busy, setBusy] = useState<string | null>(null);
+  const [audit, setAudit] = useState<any>(null);
 
   async function call(fn: string, body: Record<string, unknown>, label: string) {
     setBusy(label);
     try {
       const { data, error } = await supabase.functions.invoke(fn, { body });
       if (error) throw error;
-      toast.success(`${label} ✓ — ${JSON.stringify(data)}`);
+      toast.success(`${label} ✓`);
+      return data;
     } catch (e) {
       toast.error(`${label} failed: ${(e as Error).message}`);
     } finally {
@@ -72,6 +74,18 @@ export default function TournamentTestHarness({ tournamentId, currentRound = 1 }
         </Button>
         <Button
           size="sm"
+          variant="default"
+          disabled={!!busy}
+          onClick={async () => {
+            setAudit(null);
+            const data = await call("tournament-simulate-full", { tournament_id: tournamentId }, "Simulate full Swiss");
+            if (data) setAudit(data);
+          }}
+        >
+          <Rocket className="h-4 w-4 mr-1" /> Simulate full Swiss
+        </Button>
+        <Button
+          size="sm"
           variant="destructive"
           disabled={!!busy}
           onClick={() => {
@@ -82,6 +96,30 @@ export default function TournamentTestHarness({ tournamentId, currentRound = 1 }
           <Trash2 className="h-4 w-4 mr-1" /> Purge bots
         </Button>
       </div>
+
+      {audit?.audit && (
+        <div className="mt-4 p-3 rounded-md border bg-background/40 text-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className={`px-2 py-0.5 rounded-full font-semibold ${audit.audit.pass ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"}`}>
+              {audit.audit.pass ? "PASS" : "FAIL"}
+            </span>
+            <span className="text-muted-foreground">
+              {audit.players} players · {audit.pairings} pairings · {audit.rounds_attempted} rounds
+            </span>
+          </div>
+          {(["repeats", "color_streaks", "color_imbalance", "multi_bye"] as const).map((k) => {
+            const arr: string[] = audit.audit[k] || [];
+            if (!arr.length) return null;
+            return (
+              <details key={k} className="mb-1">
+                <summary className="cursor-pointer text-red-300">{k} ({arr.length})</summary>
+                <pre className="whitespace-pre-wrap text-[10px] mt-1 text-muted-foreground">{arr.slice(0, 20).join("\n")}</pre>
+              </details>
+            );
+          })}
+        </div>
+      )}
     </Card>
   );
 }
+
