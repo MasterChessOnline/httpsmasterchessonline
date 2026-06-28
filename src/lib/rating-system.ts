@@ -136,7 +136,7 @@ export async function applyBotRatingChange(opts: {
   else if (opts.result === "loss") updates.bot_games_lost = (await getBotStat(opts.userId, "bot_games_lost")) + 1;
   else updates.bot_games_drawn = (await getBotStat(opts.userId, "bot_games_drawn")) + 1;
 
-  await supabase.from("profiles").update(updates).eq("user_id", opts.userId);
+  await supabase.from("profiles").update(updates as any).eq("user_id", opts.userId);
 
   await supabase.from("rating_history" as any).insert({
     user_id: opts.userId,
