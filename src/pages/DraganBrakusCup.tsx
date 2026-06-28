@@ -92,7 +92,7 @@ export default function DraganBrakusCup() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="Dragan Brakus Cup — Official MasterChess Blitz Tournament"
-        description="Dragan Brakus Cup — 30 June 2026, 17:00 CEST. 7-round Swiss Blitz (3+2), live leaderboard, fair-play monitored. Register on MasterChess."
+        description="Dragan Brakus Cup — 30 June 2026, 17:00 CEST. 9-round Swiss Blitz (3+2), up to 500 players, live pairings, FIDE-style tie-breaks, Chess-Results export."
         path="/dragan-brakus"
         type="website"
         jsonLd={jsonLd}
@@ -110,8 +110,9 @@ export default function DraganBrakusCup() {
             </span>
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
-            A competitive Blitz tournament series organized by MasterChess and
-            published as an official Google Maps event.
+            A professional online Blitz tournament organized by MasterChess.
+            All games are played on MasterChess; final files are exported for
+            publication on Chess-Results Serbia.
           </p>
           <div className="mt-6 flex flex-wrap gap-2 text-sm">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
@@ -121,10 +122,10 @@ export default function DraganBrakusCup() {
               <Clock className="h-4 w-4 text-yellow-400" /> Blitz 3+2
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Users className="h-4 w-4 text-yellow-400" /> 10–256 players
+              <Users className="h-4 w-4 text-yellow-400" /> Up to 500 players
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Target className="h-4 w-4 text-yellow-400" /> 7-round Swiss
+              <Target className="h-4 w-4 text-yellow-400" /> 9-round Swiss
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
               <MapPin className="h-4 w-4 text-yellow-400" /> Online · MasterChess.live
@@ -147,7 +148,7 @@ export default function DraganBrakusCup() {
         {/* Format grid */}
         <section className="grid md:grid-cols-2 gap-4 mb-10">
           <InfoCard icon={<Zap className="h-5 w-5" />} title="Format">
-            Blitz 3 min + 2 sec increment · 7-round Swiss · no elimination ·
+            Blitz 3 min + 2 sec increment · 9-round Swiss · no elimination ·
             every player plays every round.
           </InfoCard>
           <InfoCard icon={<Target className="h-5 w-5" />} title="Pairing (Swiss)">
@@ -155,39 +156,51 @@ export default function DraganBrakusCup() {
             balanced color distribution.
           </InfoCard>
           <InfoCard icon={<Trophy className="h-5 w-5" />} title="Scoring">
-            Win 1.0 · Draw 0.5 · Loss 0.0. Final ranking = total points after 7
+            Win 1.0 · Draw 0.5 · Loss 0.0. Final ranking = total points after 9
             rounds.
           </InfoCard>
           <InfoCard icon={<Award className="h-5 w-5" />} title="Tie-breaks">
-            1) Buchholz · 2) Direct encounter · 3) Number of wins.
+            Buchholz · Buchholz Cut 1 · Sonneborn-Berger · Progressive ·
+            Performance Rating · Direct encounter · Wins.
           </InfoCard>
           <InfoCard icon={<ShieldCheck className="h-5 w-5" />} title="Fair play">
             Engine assistance strictly forbidden. Anti-cheat is live every round;
             suspicious games are reviewed and may be voided.
           </InfoCard>
           <InfoCard icon={<Clock className="h-5 w-5" />} title="Check-in">
-            Check-in opens 30 min before R1 and closes at 17:00 CEST. Late
-            check-in may miss the first pairing.
+            Check-in 16:45–16:55 CEST. Roster locks at 16:57, pairings published
+            16:59, Round 1 starts 17:00 sharp.
           </InfoCard>
         </section>
 
         {/* Schedule */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">Round schedule</h2>
+          <h2 className="text-2xl font-bold mb-4">Full schedule (Europe/Belgrade, CEST)</h2>
           <Card className="divide-y divide-white/5">
             {[
-              ["Round 1", "17:00 CEST", "Initial pairings"],
-              ["Round 2", "after R1", "Swiss pairing on results"],
-              ["Round 3", "after R2", "Updated standings"],
-              ["Round 4", "after R3", "Mid-tournament separation"],
-              ["Round 5", "after R4", "Top group forms"],
-              ["Round 6", "after R5", "Final ranking battles"],
-              ["Round 7", "after R6", "Decisive final round"],
-            ].map(([r, t, d]) => (
-              <div key={r} className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="font-semibold text-yellow-300 w-24">{r}</span>
-                <span className="text-muted-foreground w-32">{t}</span>
-                <span className="flex-1 text-right md:text-left md:pl-6">{d}</span>
+              ["09:00", "Tournament & registration open"],
+              ["16:30", "Registration closes"],
+              ["16:45", "Check-in opens"],
+              ["16:55", "Check-in closes"],
+              ["16:57", "Final player list locked"],
+              ["16:58", "Swiss pairings generated"],
+              ["16:59", "Pairings published"],
+              ["17:00", "Round 1"],
+              ["17:12", "Round 2"],
+              ["17:24", "Round 3"],
+              ["17:36", "Round 4"],
+              ["17:48", "Round 5"],
+              ["18:00", "Round 6"],
+              ["18:12", "Round 7"],
+              ["18:24", "Round 8"],
+              ["18:36", "Round 9"],
+              ["18:48", "Final standings"],
+              ["18:55", "Awards"],
+              ["19:00", "Tournament ends"],
+            ].map(([t, d]) => (
+              <div key={t + d} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                <span className="font-semibold text-yellow-300 w-20">{t}</span>
+                <span className="flex-1">{d}</span>
               </div>
             ))}
           </Card>
@@ -203,7 +216,9 @@ export default function DraganBrakusCup() {
               ["🥉", "Bronze Medal", "3rd place"],
               ["🤝", "Fair Play Award", "Cleanest play"],
               ["⭐", "Best Junior", "Top U18 finisher"],
-              ["🎖️", "Special Honor", "Organizer's pick"],
+              ["👑", "Best Female", "Top female finisher"],
+              ["🎖️", "Best Veteran", "Top 60+ finisher"],
+              ["📜", "Participation Certificate", "All players who complete 9 rounds"],
             ].map(([e, t, d]) => (
               <Card key={t} className="p-4">
                 <div className="text-2xl">{e}</div>
@@ -213,6 +228,29 @@ export default function DraganBrakusCup() {
             ))}
           </div>
         </section>
+
+        {/* Exports for Chess-Results */}
+        {lobbyId && (
+          <section className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-10">
+            <h2 className="text-xl font-bold mb-2">Chess-Results / Swiss-Manager exports</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              After the final round, the organizer (or any visitor) can download
+              official tournament files for upload to Chess-Results Serbia.
+            </p>
+            <div className="flex flex-wrap gap-2 text-sm">
+              {(["trf", "pgn", "json", "csv-standings", "csv-crosstable"] as const).map((fmt) => (
+                <a
+                  key={fmt}
+                  className="rounded-md border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10"
+                  href={`https://kicabdwgdyabibioycbq.supabase.co/functions/v1/tournament-export?tournament_id=${lobbyId}&format=${fmt}`}
+                  target="_blank" rel="noreferrer"
+                >
+                  Download {fmt.toUpperCase()}
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Series */}
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-10">
