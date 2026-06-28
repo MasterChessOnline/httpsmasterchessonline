@@ -1,4 +1,5 @@
 import Seo from "@/components/Seo";
+import { useGameMode } from "@/hooks/use-game-mode";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
@@ -73,6 +74,7 @@ function resolveTcParam(raw: string): number {
 
 const PlayOnline = () => {
   const { user, profile, loading: authLoading } = useAuth();
+  useGameMode(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tcParam = searchParams.get("tc") || "";
