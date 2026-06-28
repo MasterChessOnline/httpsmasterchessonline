@@ -114,8 +114,14 @@ export default function DraganBrakusCup() {
     if (!lobbyId) return;
     setRegistering(true);
     try {
-      const { data, error } = await supabase.functions.invoke("manage-tournament", {
-        body: { action: "join", tournament_id: lobbyId },
+      // Pull invite code from URL ?invite= or sessionStorage (set by /i/:code)
+      const url = new URL(window.location.href);
+      const inviteFromUrl = url.searchParams.get("invite") || "";
+      const inviteFromStore = (() => { try { return sessionStorage.getItem("db_cup_invite_code") || ""; } catch { return ""; } })();
+      const invite_code = (inviteFromUrl || inviteFromStore || "").trim().toUpperCase() || null;
+
+      const { data, error } = await supabase.functions.invoke("db-cup-register", {
+        body: { tournament_id: lobbyId, invite_code },
       });
       if (error) throw error;
       if ((data as any)?.error) {
@@ -124,7 +130,11 @@ export default function DraganBrakusCup() {
       }
       setIsRegistered(true);
       setPlayerCount(c => c + 1);
-      toast({ title: "You're in! ✓", description: "Registered for the Dragan Brakus Cup. Add your FIDE ID below (optional)." });
+      try { sessionStorage.removeItem("db_cup_invite_code"); } catch {}
+      toast({
+        title: "You're in! ✓",
+        description: "A confirmation email is on its way. Share your invite link to earn coins.",
+      });
     } catch (e: any) {
       toast({ title: "Could not register", description: e?.message || String(e), variant: "destructive" });
     } finally {
