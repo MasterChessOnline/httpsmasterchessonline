@@ -3983,6 +3983,16 @@ export type Database = {
         }[]
       }
       get_donation_progress: { Args: never; Returns: Json }
+      get_my_private_profile: {
+        Args: never
+        Returns: {
+          birth_year: number
+          first_name: string
+          last_name: string
+          map_lat: number
+          map_lng: number
+        }[]
+      }
       get_my_profile: {
         Args: never
         Returns: {
@@ -4056,6 +4066,13 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_my_tournament_registration: {
+        Args: { _tournament_id: string }
+        Returns: {
+          birth_year: number
+          fide_id: string
+        }[]
       }
       get_or_create_clan_quest: {
         Args: { p_club_id: string }

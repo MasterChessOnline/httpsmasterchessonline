@@ -6,41 +6,76 @@
     <atom:link href="https://masterchess.live/rss.xml" rel="self" type="application/rss+xml" />
     <description>Official news of MasterChess.live — platform updates, founder story, tournaments and community.</description>
     <language>en</language>
-    <lastBuildDate>Thu, 25 Jun 2026 00:12:31 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 28 Jun 2026 16:45:36 GMT</lastBuildDate>
+    <item>
+      <title>How a 13-Year-Old Built MasterChess.live — The Full Story</title>
+      <link>https://masterchess.live/news/how-13-year-old-built-masterchess-live</link>
+      <guid isPermaLink="true">https://masterchess.live/news/how-13-year-old-built-masterchess-live</guid>
+      <pubDate>Sun, 28 Jun 2026 15:45:36 GMT</pubDate>
+      <description>Nikola Šakotić, 13, from Serbia, built MasterChess.live by himself — every line of code, every bot, every pixel. This is the full story.</description>
+    </item>
+    <item>
+      <title>Meeting Hans Niemann at the Board in Belgrade</title>
+      <link>https://masterchess.live/news/meeting-hans-niemann-at-the-board-belgrade</link>
+      <guid isPermaLink="true">https://masterchess.live/news/meeting-hans-niemann-at-the-board-belgrade</guid>
+      <pubDate>Sun, 28 Jun 2026 14:45:36 GMT</pubDate>
+      <description>MasterChess.live founder Nikola Šakotić at the Serbian Chess Federation board where Hans Niemann faced Ian Nepomniachtchi.</description>
+    </item>
+    <item>
+      <title>Backstage with a Grandmaster: Lessons from the Top</title>
+      <link>https://masterchess.live/news/backstage-with-a-grandmaster-lessons-from-the-top</link>
+      <guid isPermaLink="true">https://masterchess.live/news/backstage-with-a-grandmaster-lessons-from-the-top</guid>
+      <pubDate>Sun, 28 Jun 2026 13:45:36 GMT</pubDate>
+      <description>Four lessons from a grandmaster — and how they shape the next training tools on MasterChess.live.</description>
+    </item>
+    <item>
+      <title>Founder&apos;s Letter: Why MasterChess.live Exists</title>
+      <link>https://masterchess.live/news/founders-letter-why-masterchess-live-exists</link>
+      <guid isPermaLink="true">https://masterchess.live/news/founders-letter-why-masterchess-live-exists</guid>
+      <pubDate>Sun, 28 Jun 2026 11:45:36 GMT</pubDate>
+      <description>An open letter from MasterChess.live founder Nikola Šakotić about why he built a free, ad-free chess platform at 13.</description>
+    </item>
+    <item>
+      <title>MasterChess.live Launch Notes — Everything That&apos;s Live Today</title>
+      <link>https://masterchess.live/news/masterchess-live-launch-notes-2026</link>
+      <guid isPermaLink="true">https://masterchess.live/news/masterchess-live-launch-notes-2026</guid>
+      <pubDate>Sun, 28 Jun 2026 12:45:36 GMT</pubDate>
+      <description>A full map of every feature live on MasterChess.live today — play, compete, learn, identity.</description>
+    </item>
+    <item>
+      <title>Roadmap 2026: Tournaments, Clans, and Battle Royale</title>
+      <link>https://masterchess.live/news/roadmap-2026-tournaments-clans-battle-royale</link>
+      <guid isPermaLink="true">https://masterchess.live/news/roadmap-2026-tournaments-clans-battle-royale</guid>
+      <pubDate>Sun, 28 Jun 2026 10:45:36 GMT</pubDate>
+      <description>What ships next on MasterChess.live — arena tournaments, clan quests, battle royale and native mobile apps.</description>
+    </item>
     <item>
       <title>A 13-Year-Old Who Built His Own Chess App</title>
       <link>https://masterchess.live/news/a-13-year-old-who-built-his-own-chess-app</link>
       <guid isPermaLink="true">https://masterchess.live/news/a-13-year-old-who-built-his-own-chess-app</guid>
-      <pubDate>Wed, 24 Jun 2026 00:12:31 GMT</pubDate>
+      <pubDate>Sat, 27 Jun 2026 16:45:36 GMT</pubDate>
       <description>Meet Nikola Šakotić, the Serbian U14 Chess Champion who built MasterChess.live — a free chess platform for competitive players.</description>
     </item>
     <item>
       <title>MasterChess Wears the Brand at Top Serbian Chess Events</title>
       <link>https://masterchess.live/news/masterchess-brand-serbian-chess-events</link>
       <guid isPermaLink="true">https://masterchess.live/news/masterchess-brand-serbian-chess-events</guid>
-      <pubDate>Wed, 24 Jun 2026 18:12:31 GMT</pubDate>
+      <pubDate>Sun, 28 Jun 2026 10:45:36 GMT</pubDate>
       <description>MasterChess shows up at top-tier chess events in Serbia, building the brand in person and online.</description>
     </item>
     <item>
-      <title>New Analysis System Released on MasterChess</title>
+      <title>New Analysis System Released on MasterChess.live</title>
       <link>https://masterchess.live/news/new-analysis-system-released</link>
       <guid isPermaLink="true">https://masterchess.live/news/new-analysis-system-released</guid>
-      <pubDate>Wed, 24 Jun 2026 12:12:31 GMT</pubDate>
-      <description>Move-by-move classification, key-moment highlighting and one-click opening detection — free on MasterChess.</description>
+      <pubDate>Sun, 28 Jun 2026 04:45:36 GMT</pubDate>
+      <description>Move-by-move classification, key-moment highlighting and one-click opening detection — free on MasterChess.live.</description>
     </item>
     <item>
-      <title>Weekly Signature Tournaments Now Live</title>
+      <title>Weekly Signature Tournaments Now Live on MasterChess.live</title>
       <link>https://masterchess.live/news/weekly-signature-tournaments-live</link>
       <guid isPermaLink="true">https://masterchess.live/news/weekly-signature-tournaments-live</guid>
-      <pubDate>Wed, 24 Jun 2026 00:12:31 GMT</pubDate>
+      <pubDate>Sat, 27 Jun 2026 16:45:36 GMT</pubDate>
       <description>MasterChess Monday, Friday Night Fire and Sunday Classic — three signature events every week.</description>
-    </item>
-    <item>
-      <title>MasterChess Community Update — June</title>
-      <link>https://masterchess.live/news/masterchess-community-update-june</link>
-      <guid isPermaLink="true">https://masterchess.live/news/masterchess-community-update-june</guid>
-      <pubDate>Tue, 23 Jun 2026 00:12:31 GMT</pubDate>
-      <description>Clan banners, voice chat, daily missions and Battle Pass — fresh updates from the MasterChess community.</description>
     </item>
   </channel>
 </rss>
