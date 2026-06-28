@@ -92,7 +92,7 @@ export default function DraganBrakusCup() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="Dragan Brakus Cup — Official MasterChess Blitz Tournament"
-        description="Dragan Brakus Cup — 30 June 2026, 17:00 CEST. 7-round Swiss Blitz (3+2), live leaderboard, fair-play monitored. Register on MasterChess."
+        description="Dragan Brakus Cup — 30 June 2026, 17:00 CEST. 9-round Swiss Blitz (3+2), up to 500 players, live pairings, FIDE-style tie-breaks, Chess-Results export."
         path="/dragan-brakus"
         type="website"
         jsonLd={jsonLd}
@@ -110,8 +110,9 @@ export default function DraganBrakusCup() {
             </span>
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
-            A competitive Blitz tournament series organized by MasterChess and
-            published as an official Google Maps event.
+            A professional online Blitz tournament organized by MasterChess.
+            All games are played on MasterChess; final files are exported for
+            publication on Chess-Results Serbia.
           </p>
           <div className="mt-6 flex flex-wrap gap-2 text-sm">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
@@ -121,10 +122,10 @@ export default function DraganBrakusCup() {
               <Clock className="h-4 w-4 text-yellow-400" /> Blitz 3+2
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Users className="h-4 w-4 text-yellow-400" /> 10–256 players
+              <Users className="h-4 w-4 text-yellow-400" /> Up to 500 players
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Target className="h-4 w-4 text-yellow-400" /> 7-round Swiss
+              <Target className="h-4 w-4 text-yellow-400" /> 9-round Swiss
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
               <MapPin className="h-4 w-4 text-yellow-400" /> Online · MasterChess.live
