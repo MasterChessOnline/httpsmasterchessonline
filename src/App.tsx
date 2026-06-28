@@ -112,6 +112,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
 const TournamentRegister = lazy(() => import("./pages/TournamentRegister"));
 const DraganBrakusRedirect = lazy(() => import("./pages/DraganBrakusRedirect"));
+const DraganBrakusCup = lazy(() => import("./pages/DraganBrakusCup"));
 const StoryMode = lazy(() => import("./pages/StoryMode"));
 const OpeningTrainer = lazy(() => import("./pages/OpeningTrainer"));
 const OpeningExplorer = lazy(() => import("./pages/OpeningExplorer"));
