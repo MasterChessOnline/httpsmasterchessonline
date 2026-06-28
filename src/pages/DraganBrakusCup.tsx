@@ -36,12 +36,18 @@ const SITE = "https://masterchess.live";
 const URL = `${SITE}/dragan-brakus`;
 
 export default function DraganBrakusCup() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(0);
   const [maxPlayers, setMaxPlayers] = useState<number>(500);
   const [externalResultsUrl, setExternalResultsUrl] = useState<string | null>(null);
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [fideId, setFideId] = useState("");
+  const [savingFide, setSavingFide] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
