@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
     // Minimal Swiss-Manager .tur (INI-style) seed file.
     const lines = [
       "[Tournament]",
-      `Name=${t.name}`,
+      `Name=${crName}`,
       `Place=${t.city || "Online"}`,
       `Federation=RS`,
       `Begin=${(t.starts_at || "").slice(0,10)}`,
@@ -125,8 +125,9 @@ Deno.serve(async (req) => {
     ];
     return new Response(lines.join("\n") + "\n", {
       headers: { ...corsHeaders, "Content-Type": "text/plain; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${safeName(t.name)}.tur"` },
+        "Content-Disposition": `attachment; filename="${safeName(crName)}.tur"` },
     });
+
   }
 
 
