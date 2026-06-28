@@ -74,6 +74,56 @@ Deno.serve(async (req) => {
     return json({ tournament: t, players, pairings });
   }
 
+  if (format === "csv-standings") {
+    // Pull tiebreaks alongside.
+    const { data: tb } = await supabase
+      .from("tournament_registrations")
+      .select("user_id, score, buchholz, buchholz_cut1, sonneborn, progressive_score, performance_rating, wins")
+      .eq("tournament_id", tournament_id);
+    const tbMap = new Map((tb || []).map((r: any) => [r.user_id, r]));
+    const header = ["Rank","StartNo","Title","Name","Federation","FIDE_ID","BirthYear","Rating","Points","Buchholz","BuchholzCut1","Sonneborn","Progressive","PerfRating","Wins"];
+    const rows = players.map((p, i) => {
+      const r: any = tbMap.get(p.user_id) || {};
+      return [
+        i + 1, startNo.get(p.user_id) || (i + 1), p.fide_title || "",
+        `${p.last_name}, ${p.first_name}`.trim().replace(/^,\s*/, ""),
+        p.federation || "", p.fide_id || "", p.birth_year || "",
+        p.rating || "", Number(p.score || 0).toFixed(1),
+        Number(r.buchholz || 0).toFixed(2), Number(r.buchholz_cut1 || 0).toFixed(2),
+        Number(r.sonneborn || 0).toFixed(2), Number(r.progressive_score || 0).toFixed(2),
+        r.performance_rating ?? "", r.wins ?? 0,
+      ].map(csvCell).join(",");
+    });
+    return csv([header.join(","), ...rows].join("\n"), `${safeName(t.name)}-standings.csv`);
+  }
+
+  if (format === "csv-crosstable") {
+    const totalRounds = t.total_rounds || 9;
+    const header = ["StartNo","Name","Rating","Points", ...Array.from({length: totalRounds}, (_,i) => `R${i+1}`)];
+    const rows = players.map((p) => {
+      const sn = startNo.get(p.user_id)!;
+      const cells: string[] = [];
+      for (let r = 1; r <= totalRounds; r++) {
+        const m = (pairings || []).find((x: any) => x.round === r && (x.white_player_id === p.user_id || x.black_player_id === p.user_id));
+        if (!m) { cells.push(""); continue; }
+        if (!m.black_player_id) { cells.push("bye"); continue; }
+        const oppId = m.white_player_id === p.user_id ? m.black_player_id : m.white_player_id;
+        const oppSn = startNo.get(oppId) || "?";
+        const color = m.white_player_id === p.user_id ? "w" : "b";
+        let pts = "*";
+        if (m.result === "1/2-1/2") pts = "½";
+        else if (m.result === "1-0") pts = color === "w" ? "1" : "0";
+        else if (m.result === "0-1") pts = color === "b" ? "1" : "0";
+        cells.push(`${pts}${color}${oppSn}`);
+      }
+      return [sn, `${p.last_name}, ${p.first_name}`.trim().replace(/^,\s*/, ""), p.rating || "", Number(p.score || 0).toFixed(1), ...cells]
+        .map(csvCell).join(",");
+    });
+    return csv([header.join(","), ...rows].join("\n"), `${safeName(t.name)}-crosstable.csv`);
+  }
+
+
+
   if (format === "pgn") {
     const ids = (pairings || []).map((p: any) => p.game_id).filter(Boolean);
     const { data: games } = await supabase
