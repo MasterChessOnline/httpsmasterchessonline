@@ -216,7 +216,9 @@ export default function DraganBrakusCup() {
               ["🥉", "Bronze Medal", "3rd place"],
               ["🤝", "Fair Play Award", "Cleanest play"],
               ["⭐", "Best Junior", "Top U18 finisher"],
-              ["🎖️", "Special Honor", "Organizer's pick"],
+              ["👑", "Best Female", "Top female finisher"],
+              ["🎖️", "Best Veteran", "Top 60+ finisher"],
+              ["📜", "Participation Certificate", "All players who complete 9 rounds"],
             ].map(([e, t, d]) => (
               <Card key={t} className="p-4">
                 <div className="text-2xl">{e}</div>
