@@ -163,6 +163,12 @@
   pointer-events: none;
 }
 
+@media (max-width: 768px) {
+  [data-zone] body > #root::before {
+    display: none;
+  }
+}
+
 /* Cards inherit a subtle zone-tinted top accent line for polychrome feel */
 [data-zone] main [data-slot="card"] { position: relative; }
 [data-zone] main [data-slot="card"]::before {
