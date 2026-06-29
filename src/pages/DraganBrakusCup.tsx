@@ -347,7 +347,7 @@ export default function DraganBrakusCup() {
           <div className="mt-4">
             <TournamentInvitePanel
               url={`${typeof window !== "undefined" ? window.location.origin : "https://masterchess.live"}/dragan-brakus?utm_source=share`}
-              title="DB Chess Cup — 1 July 2026"
+              title="DB Chess Cup — 2 July 2026"
               message="Join me in the DB Chess Cup on MasterChess."
             />
           </div>
