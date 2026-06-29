@@ -11,26 +11,7 @@ import { captureAttribution } from "./lib/track";
 import { bootstrapSiteTheme } from "./lib/site-themes";
 
 function installEntryWatchdog() {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-
-  const isHome = window.location.pathname === "/" || window.location.pathname === "";
-  if (!isHome) return;
-
-  const check = async () => {
-    if (document.querySelector('[data-entry-ready="home"]')) return;
-
-    const key = "mc.entry.watchdog.reloaded";
-    const alreadyReloaded = sessionStorage.getItem(key) === "1";
-
-    if (!alreadyReloaded) {
-      sessionStorage.setItem(key, "1");
-      const url = new URL(window.location.href);
-      url.searchParams.set("entry", "fresh");
-      window.location.replace(url.toString());
-    }
-  };
-
-  window.setTimeout(check, 3500);
+  // Disabled: entry must never auto-reload or replace the page.
 }
 
 bootstrapSiteTheme();
@@ -67,6 +48,16 @@ installEntryWatchdog();
 //      the user lands on the new build — no manual hard-refresh required.
 (() => {
   if (!("serviceWorker" in navigator)) return;
+  // Entry reset: clear every old worker/cache and do not register a new shell.
+  navigator.serviceWorker.getRegistrations?.()
+    .then((rs) => rs.forEach((r) => r.unregister()))
+    .catch(() => {});
+  if ("caches" in window) {
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("mc-shell")).map((k) => caches.delete(k))))
+      .catch(() => {});
+  }
+  return;
   const inIframe = (() => {
     try {
       return window.self !== window.top;
