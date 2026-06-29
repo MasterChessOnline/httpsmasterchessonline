@@ -178,6 +178,7 @@ export default function DraganBrakusRegister() {
   const validate = () => {
     if (!form.first_name.trim()) return "First name is required.";
     if (!form.last_name.trim()) return "Last name is required.";
+    if (!form.federation.trim()) return "Country is required (3-letter code, e.g. SRB).";
     if (form.fide_id && !/^\d{4,10}$/.test(form.fide_id.trim())) return "FIDE ID must be 4–10 digits.";
     if (form.birth_year && !/^\d{4}$/.test(form.birth_year.trim())) return "Birth year must be 4 digits.";
     return null;
