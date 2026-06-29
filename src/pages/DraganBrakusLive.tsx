@@ -24,7 +24,10 @@ type Row = {
   federation: string | null;
   fide_title: string | null;
   rating_at_join: number;
+  fide_verified: boolean | null;
+  fide_blitz_rating: number | null;
 };
+
 
 export default function DraganBrakusLive() {
   const params = useParams();
@@ -48,7 +51,7 @@ export default function DraganBrakusLive() {
     }
     const { data: regs } = await supabase
       .from("tournament_registrations")
-      .select("user_id, score, buchholz, buchholz_cut1, progressive_score, performance_rating, wins, first_name, last_name, federation, fide_title, rating_at_join")
+      .select("user_id, score, buchholz, buchholz_cut1, progressive_score, performance_rating, wins, first_name, last_name, federation, fide_title, rating_at_join, fide_verified, fide_blitz_rating")
       .eq("tournament_id", id);
     const sorted = (regs || []).sort((a: any, b: any) =>
       b.score - a.score ||
