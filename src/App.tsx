@@ -118,6 +118,7 @@ const DraganBrakusCup = lazy(() => import("./pages/DraganBrakusCup"));
 const DraganBrakusLive = lazy(() => import("./pages/DraganBrakusLive"));
 const DraganBrakusPress = lazy(() => import("./pages/DraganBrakusPress"));
 const DraganBrakusRules = lazy(() => import("./pages/DraganBrakusRules"));
+const AdminTournament = lazy(() => import("./pages/AdminTournament"));
 const DraganBrakusRegister = lazy(() => import("./pages/DraganBrakusRegister"));
 const InviteRedirect = lazy(() => import("./pages/InviteRedirect"));
 const WhyMasterChess = lazy(() => import("./pages/WhyMasterChess"));
