@@ -225,6 +225,27 @@ const Ranked = lazy(() => import("./pages/Ranked"));
 const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
 
+function RootSafeOverlays() {
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+
+  return (
+    <>
+      <Suspense fallback={null}><NotificationPrompt /></Suspense>
+      <Suspense fallback={null}><DailyReminderNotifier /></Suspense>
+      <Suspense fallback={null}><SmartNotifier /></Suspense>
+      <Suspense fallback={null}><AppBadgeSync /></Suspense>
+      <Suspense fallback={null}><RewardFXLayer /></Suspense>
+      <Suspense fallback={null}><MatchResultLayer /></Suspense>
+      {!isHome && <Suspense fallback={null}><WelcomeBonusModal /></Suspense>}
+      {!isHome && <Suspense fallback={null}><ExitIntentModal /></Suspense>}
+      {!isHome && <Suspense fallback={null}><OnboardingWizard /></Suspense>}
+      {!isHome && <Suspense fallback={null}><WeeklyRecapModal /></Suspense>}
+      <Suspense fallback={null}><PwaInstallBanner /></Suspense>
+    </>
+  );
+}
+
 function useRouteZone() {
   const location = useLocation();
   if (typeof document === "undefined") return;
@@ -521,18 +542,8 @@ const App = () => (
           <BrakusRibbon />
           <StreakFlexController />
           <FloatingShareButton />
-          {/* Non-blocking overlays — each isolated so it can NEVER block first paint */}
-          <Suspense fallback={null}><NotificationPrompt /></Suspense>
-          <Suspense fallback={null}><DailyReminderNotifier /></Suspense>
-          <Suspense fallback={null}><SmartNotifier /></Suspense>
-          <Suspense fallback={null}><AppBadgeSync /></Suspense>
-          <Suspense fallback={null}><RewardFXLayer /></Suspense>
-          <Suspense fallback={null}><MatchResultLayer /></Suspense>
-          <Suspense fallback={null}><WelcomeBonusModal /></Suspense>
-          <Suspense fallback={null}><ExitIntentModal /></Suspense>
-          <Suspense fallback={null}><OnboardingWizard /></Suspense>
-          <Suspense fallback={null}><WeeklyRecapModal /></Suspense>
-          <Suspense fallback={null}><PwaInstallBanner /></Suspense>
+          {/* Root-safe overlays — no welcome/onboarding modal is allowed to cover the entry homepage. */}
+          <RootSafeOverlays />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
