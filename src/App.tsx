@@ -13,7 +13,7 @@ import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
 // Critical / eager routes — needed for first paint & primary CTAs
-import Index from "./pages/Index";
+import Index from "./pages/IndexFast";
 import NotFound from "./pages/NotFound";
 const Play = lazy(() => import("./pages/Play"));
 const PlayOnline = lazy(() => import("./pages/PlayOnline"));
