@@ -248,6 +248,7 @@ const Index = () => {
         type="website"
       />
       <Navbar />
+      <BrakusHeroBanner />
 
       <main>
         {/* ── HERO with parallax + 4D depth ── */}
