@@ -13,8 +13,6 @@ import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
 import EntrySplash from "@/components/EntrySplash";
-import StartupErrorBoundary from "@/components/StartupErrorBoundary";
-import StartupFallbackHome from "@/components/StartupFallbackHome";
 // Critical / eager route — original Home entry, no replacement shell.
 import Index from "./pages/IndexFull";
 import NotFound from "./pages/NotFound";
@@ -332,35 +330,14 @@ function useRouteZone() {
 function AnimatedRoutes() {
   const location = useLocation();
   useRouteZone();
-  const [forceSafeHome, setForceSafeHome] = useState(false);
 
   useEffect(() => {
     entryLog("ROUTE_CHECK", { path: location.pathname || "/" });
-    setForceSafeHome(false);
-
-    const timer = window.setTimeout(() => {
-      const hasReadyRoute = Boolean(document.querySelector("[data-entry-ready]"));
-      const hasVisibleText = document.body.innerText.trim().length > 20;
-      if (!hasReadyRoute && !hasVisibleText) {
-        entryLog("ERROR_STATE", {
-          step: "RENDER_HOME",
-          message: "startup watchdog forced safe home",
-          path: location.pathname || "/",
-          hasReadyRoute,
-          hasVisibleText,
-        });
-        setForceSafeHome(true);
-      }
-    }, STARTUP_TIMEOUT_MS);
-
-    return () => window.clearTimeout(timer);
   }, [location.pathname]);
 
   useEffect(() => {
     if (location.pathname === "/") entryLog("HOME_RENDER");
   }, [location.pathname]);
-
-  if (forceSafeHome) return <StartupFallbackHome reason="startup-watchdog" />;
 
   // Skip route transition animation on phones — it causes layout thrash and
   // janky scroll on low-end devices. Desktop still gets the smooth fade.
@@ -611,16 +588,8 @@ function AnimatedRoutes() {
     </AnimatePresence>
   );
 
-  const routeContent = isHome ? (
-    <StartupErrorBoundary fallback={<StartupFallbackHome reason="home-render-error" />}>
-      <Suspense fallback={<StartupFallbackHome reason="home-suspense" />}>
-        {renderedRoutes}
-      </Suspense>
-    </StartupErrorBoundary>
-  ) : (
-    <StartupErrorBoundary fallback={<StartupFallbackHome reason="route-render-error" />}>
-      <Suspense fallback={<RouteLoader />}>{renderedRoutes}</Suspense>
-    </StartupErrorBoundary>
+  const routeContent = (
+    <Suspense fallback={<RouteLoader />}>{renderedRoutes}</Suspense>
   );
 
   return (
@@ -640,29 +609,23 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StartupErrorBoundary fallback={<StartupFallbackHome reason="app-render-error" />}>
-        <AuthProvider>
-          <TooltipProvider>
-            <OfflineBanner />
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <SiteRatingJsonLd />
-              {/* Home is eager and never sits behind an infinite route loader. */}
-              <div className="pb-16 md:pb-0">
-                <AnimatedRoutes />
-              </div>
-              {/* Deferred chrome: Home paints first, decorative/listener layers attach after idle. */}
-              <EntryDeferredChrome />
-              <MobileBottomNav />
-              {/* Root-safe overlays — no welcome/onboarding modal is allowed to cover the entry homepage. */}
-              <RootSafeOverlays />
-              {/* Entry splash — once per session, non-blocking, auto-hides ≤4s */}
-              <EntrySplash />
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </StartupErrorBoundary>
+      <AuthProvider>
+        <TooltipProvider>
+          <OfflineBanner />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <SiteRatingJsonLd />
+            <div className="pb-16 md:pb-0">
+              <AnimatedRoutes />
+            </div>
+            <EntryDeferredChrome />
+            <MobileBottomNav />
+            <RootSafeOverlays />
+            <EntrySplash />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
