@@ -547,7 +547,6 @@ function AnimatedRoutes() {
           <Route path="/players/world" element={<PlayerHeatmap />} />
           <Route path="/chess-map" element={<ChessMap />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="*" element={<NotFound />} />
 
         </Routes>
   );
