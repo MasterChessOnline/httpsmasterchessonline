@@ -233,7 +233,7 @@ const Index = () => {
     profile && profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background relative" data-entry-ready="home">
       {/* Heavy animated bg: skip entirely on mobile/low-end to protect LCP & INP. */}
       {allowHeavy && (
         <React.Suspense fallback={null}>
