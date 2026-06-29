@@ -56,6 +56,7 @@ function parseFideName(raw: string) {
 export default function DraganBrakusRegister() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const push = usePushSubscription();
   const [form, setForm] = useState<FormState>(emptyForm);
   const [tournament, setTournament] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +64,7 @@ export default function DraganBrakusRegister() {
   const [fideBusy, setFideBusy] = useState(false);
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string; rating?: number }>(null);
   const [fideError, setFideError] = useState<string | null>(null);
+  const [showMore, setShowMore] = useState(false);
   const debounceRef = useRef<number | null>(null);
 
   const handle = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
