@@ -45,16 +45,32 @@ export default function TournamentTestHarness({ tournamentId, currentRound = 1 }
         before the live event. Bots never appear in public leaderboards.
       </p>
 
-      <div className="grid sm:grid-cols-3 gap-3 mb-4">
+      <div className="grid sm:grid-cols-3 gap-3 mb-3">
         <div>
           <label className="text-xs text-muted-foreground">Bot count</label>
-          <Input type="number" min={2} max={128} value={count} onChange={(e) => setCount(Number(e.target.value) || 0)} />
+          <Input type="number" min={2} max={512} value={count} onChange={(e) => setCount(Number(e.target.value) || 0)} />
         </div>
         <div>
           <label className="text-xs text-muted-foreground">Round to simulate</label>
           <Input type="number" min={1} value={round} onChange={(e) => setRound(Number(e.target.value) || 1)} />
         </div>
       </div>
+
+      <div className="flex flex-wrap gap-1 mb-4">
+        <span className="text-[11px] text-muted-foreground self-center mr-1">Stress presets:</span>
+        {[32, 64, 128, 256, 512].map((n) => (
+          <Button
+            key={n}
+            size="sm"
+            variant={count === n ? "default" : "outline"}
+            className="h-7 px-2 text-xs"
+            onClick={() => setCount(n)}
+          >
+            {n}
+          </Button>
+        ))}
+      </div>
+
 
       <div className="flex flex-wrap gap-2">
         <Button
