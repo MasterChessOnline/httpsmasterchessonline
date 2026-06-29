@@ -357,6 +357,8 @@ function AnimatedRoutes() {
           <Route path="/dragan-brakus/press" element={<DraganBrakusPress />} />
           <Route path="/dragan-brakus/register" element={<DraganBrakusRegister />} />
           <Route path="/dragan-brakus/rules" element={<DraganBrakusRules />} />
+          <Route path="/dragan-brakus/hall-of-fame" element={<DraganBrakusHallOfFame />} />
+          <Route path="/dragan-brakus/overlay" element={<DraganBrakusOverlay />} />
           <Route path="/admin/tournaments/:id" element={<AdminTournament />} />
           <Route path="/why-masterchess" element={<WhyMasterChess />} />
           <Route path="/r/:code" element={<AffiliateRedirect />} />
