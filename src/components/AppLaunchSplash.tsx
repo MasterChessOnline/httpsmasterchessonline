@@ -84,7 +84,7 @@ export default function AppLaunchSplash() {
             </motion.div>
 
             {/* Wordmark */}
-            <motion.h1
+            <motion.div
               className="mt-7 font-display font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-600 text-[clamp(2.35rem,11vw,4.35rem)] leading-none select-none"
               style={{ letterSpacing: "0.04em" }}
               initial={{ opacity: 0, y: 14 }}
@@ -92,7 +92,7 @@ export default function AppLaunchSplash() {
               transition={{ duration: 0.9, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               MASTERCHESS
-            </motion.h1>
+            </motion.div>
 
             {/* Tagline */}
             <motion.div
