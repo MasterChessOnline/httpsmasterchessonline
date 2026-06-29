@@ -506,32 +506,35 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <SiteRatingJsonLd />
+          {/* Primary route boundary — only this shows the thin loader bar */}
           <Suspense fallback={<RouteLoader />}>
             <div className="pb-16 md:pb-0">
               <AnimatedRoutes />
             </div>
-            <AntiTiltWatcher />
-            <TitleUnlockGate />
-            <WelcomeIntroPopup />
-            <CinematicIntro />
-            <EntryQuickDashboard />
-            <GameInviteListener />
-            <MobileBottomNav />
-            <BrakusRibbon />
-            <NotificationPrompt />
-            <DailyReminderNotifier />
-            <SmartNotifier />
-            <AppBadgeSync />
-            <RewardFXLayer />
-            <MatchResultLayer />
-            <WelcomeBonusModal />
-            <ExitIntentModal />
-            <OnboardingWizard />
-            <WeeklyRecapModal />
-            <StreakFlexController />
-            <FloatingShareButton />
-            <PwaInstallBanner />
           </Suspense>
+          {/* Eager chrome — never suspends */}
+          <AntiTiltWatcher />
+          <TitleUnlockGate />
+          <EntryQuickDashboard />
+          <GameInviteListener />
+          <MobileBottomNav />
+          <BrakusRibbon />
+          <StreakFlexController />
+          <FloatingShareButton />
+          {/* Non-blocking overlays — each isolated so it can NEVER block first paint */}
+          <Suspense fallback={null}><WelcomeIntroPopup /></Suspense>
+          <Suspense fallback={null}><CinematicIntro /></Suspense>
+          <Suspense fallback={null}><NotificationPrompt /></Suspense>
+          <Suspense fallback={null}><DailyReminderNotifier /></Suspense>
+          <Suspense fallback={null}><SmartNotifier /></Suspense>
+          <Suspense fallback={null}><AppBadgeSync /></Suspense>
+          <Suspense fallback={null}><RewardFXLayer /></Suspense>
+          <Suspense fallback={null}><MatchResultLayer /></Suspense>
+          <Suspense fallback={null}><WelcomeBonusModal /></Suspense>
+          <Suspense fallback={null}><ExitIntentModal /></Suspense>
+          <Suspense fallback={null}><OnboardingWizard /></Suspense>
+          <Suspense fallback={null}><WeeklyRecapModal /></Suspense>
+          <Suspense fallback={null}><PwaInstallBanner /></Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
