@@ -62,6 +62,7 @@ import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import HomeTrustStrip from "@/components/HomeTrustStrip";
+import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import LazyMount from "@/components/LazyMount";
 import TonightArenaBanner from "@/components/TonightArenaBanner";
 import WinStreakFlame from "@/components/WinStreakFlame";
@@ -248,6 +249,7 @@ const Index = () => {
         type="website"
       />
       <Navbar />
+      <BrakusHeroBanner />
 
       <main>
         {/* ── HERO with parallax + 4D depth ── */}
