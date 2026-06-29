@@ -52,6 +52,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
+  const authSuffix = redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -288,7 +289,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-primary font-medium hover:underline transition-colors">
+            <Link to={`/signup${authSuffix}`} className="text-primary font-medium hover:underline transition-colors">
               Sign up
             </Link>
           </p>

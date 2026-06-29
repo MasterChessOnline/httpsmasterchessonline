@@ -201,7 +201,6 @@ import StreakFlexController from "@/components/StreakFlexController";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
-import AppLaunchSplash from "@/components/AppLaunchSplash";
 import OfflineBanner from "@/components/OfflineBanner";
 import ReferralTracker from "@/hooks/useReferralTracker";
 import DonationMilestoneBodyAttr from "@/components/DonationMilestoneBodyAttr";
@@ -576,7 +575,6 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        <AppLaunchSplash />
         <OfflineBanner />
         <Toaster />
         <Sonner />
