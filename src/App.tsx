@@ -13,8 +13,6 @@ import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
 import EntrySplash from "@/components/EntrySplash";
-import StartupErrorBoundary from "@/components/StartupErrorBoundary";
-import StartupFallbackHome from "@/components/StartupFallbackHome";
 // Critical / eager route — original Home entry, no replacement shell.
 import Index from "./pages/IndexFull";
 import NotFound from "./pages/NotFound";
@@ -332,35 +330,14 @@ function useRouteZone() {
 function AnimatedRoutes() {
   const location = useLocation();
   useRouteZone();
-  const [forceSafeHome, setForceSafeHome] = useState(false);
 
   useEffect(() => {
     entryLog("ROUTE_CHECK", { path: location.pathname || "/" });
-    setForceSafeHome(false);
-
-    const timer = window.setTimeout(() => {
-      const hasReadyRoute = Boolean(document.querySelector("[data-entry-ready]"));
-      const hasVisibleText = document.body.innerText.trim().length > 20;
-      if (!hasReadyRoute && !hasVisibleText) {
-        entryLog("ERROR_STATE", {
-          step: "RENDER_HOME",
-          message: "startup watchdog forced safe home",
-          path: location.pathname || "/",
-          hasReadyRoute,
-          hasVisibleText,
-        });
-        setForceSafeHome(true);
-      }
-    }, STARTUP_TIMEOUT_MS);
-
-    return () => window.clearTimeout(timer);
   }, [location.pathname]);
 
   useEffect(() => {
     if (location.pathname === "/") entryLog("HOME_RENDER");
   }, [location.pathname]);
-
-  if (forceSafeHome) return <StartupFallbackHome reason="startup-watchdog" />;
 
   // Skip route transition animation on phones — it causes layout thrash and
   // janky scroll on low-end devices. Desktop still gets the smooth fade.
@@ -611,16 +588,8 @@ function AnimatedRoutes() {
     </AnimatePresence>
   );
 
-  const routeContent = isHome ? (
-    <StartupErrorBoundary fallback={<StartupFallbackHome reason="home-render-error" />}>
-      <Suspense fallback={<StartupFallbackHome reason="home-suspense" />}>
-        {renderedRoutes}
-      </Suspense>
-    </StartupErrorBoundary>
-  ) : (
-    <StartupErrorBoundary fallback={<StartupFallbackHome reason="route-render-error" />}>
-      <Suspense fallback={<RouteLoader />}>{renderedRoutes}</Suspense>
-    </StartupErrorBoundary>
+  const routeContent = (
+    <Suspense fallback={<RouteLoader />}>{renderedRoutes}</Suspense>
   );
 
   return (
