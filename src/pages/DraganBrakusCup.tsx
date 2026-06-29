@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import {
   Trophy, Clock, Users, ShieldCheck, MapPin, Calendar,
-  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink,
+  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink, Loader2,
 } from "lucide-react";
 import InviteShareCard from "@/components/db-cup/InviteShareCard";
 import TournamentInvitePanel from "@/components/TournamentInvitePanel";

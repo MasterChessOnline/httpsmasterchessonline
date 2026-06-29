@@ -40,13 +40,15 @@ const afterFirstPaint = (cb: () => void) => {
 };
 
 afterFirstPaint(async () => {
-  const [themes, sounds, a11y, track] = await Promise.all([
+  const [themes, boardThemes, sounds, a11y, track] = await Promise.all([
     import("./lib/site-themes"),
+    import("./lib/board-themes"),
     import("./lib/chess-sounds"),
     import("./lib/accessibility"),
     import("./lib/track"),
   ]);
   safeRun(themes.bootstrapSiteTheme);
+  safeRun(boardThemes.bootstrapVisualSettings);
   safeRun(sounds.bootstrapSoundPack);
   safeRun(a11y.bootstrapA11y);
   safeRun(track.captureAttribution);
