@@ -21,6 +21,9 @@ import InviteShareCard from "@/components/db-cup/InviteShareCard";
 import TournamentInvitePanel from "@/components/TournamentInvitePanel";
 import ChessHostBridge from "@/components/db-cup/ChessHostBridge";
 import TournamentTestHarness from "@/components/admin/TournamentTestHarness";
+import SpecialPrizeGrid from "@/components/tournament/SpecialPrizeGrid";
+import PredictionsMarket from "@/components/tournament/PredictionsMarket";
+import AmbassadorLeaderboard from "@/components/tournament/AmbassadorLeaderboard";
 
 type Prize = {
   place_from: number; place_to: number; label: string;
