@@ -118,6 +118,7 @@ const DraganBrakusCup = lazy(() => import("./pages/DraganBrakusCup"));
 const DraganBrakusLive = lazy(() => import("./pages/DraganBrakusLive"));
 const DraganBrakusPress = lazy(() => import("./pages/DraganBrakusPress"));
 const DraganBrakusRules = lazy(() => import("./pages/DraganBrakusRules"));
+const AdminTournament = lazy(() => import("./pages/AdminTournament"));
 const DraganBrakusRegister = lazy(() => import("./pages/DraganBrakusRegister"));
 const InviteRedirect = lazy(() => import("./pages/InviteRedirect"));
 const WhyMasterChess = lazy(() => import("./pages/WhyMasterChess"));
@@ -354,6 +355,7 @@ function AnimatedRoutes() {
           <Route path="/dragan-brakus/press" element={<DraganBrakusPress />} />
           <Route path="/dragan-brakus/register" element={<DraganBrakusRegister />} />
           <Route path="/dragan-brakus/rules" element={<DraganBrakusRules />} />
+          <Route path="/admin/tournaments/:id" element={<AdminTournament />} />
           <Route path="/why-masterchess" element={<WhyMasterChess />} />
           <Route path="/r/:code" element={<AffiliateRedirect />} />
           <Route path="/i/:code" element={<InviteRedirect />} />

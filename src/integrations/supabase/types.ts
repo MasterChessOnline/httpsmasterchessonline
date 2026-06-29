@@ -3164,6 +3164,41 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          payload: Json
+          tournament_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          tournament_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          payload?: Json
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_audit_log_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_chat_messages: {
         Row: {
           created_at: string
@@ -3273,30 +3308,42 @@ export type Database = {
         Row: {
           black_player_id: string | null
           created_at: string
+          end_reason: string | null
+          finished_at: string | null
+          forfeit: boolean
           game_id: string | null
           id: string
           result: string | null
           round: number
+          started_at: string | null
           tournament_id: string
           white_player_id: string
         }
         Insert: {
           black_player_id?: string | null
           created_at?: string
+          end_reason?: string | null
+          finished_at?: string | null
+          forfeit?: boolean
           game_id?: string | null
           id?: string
           result?: string | null
           round: number
+          started_at?: string | null
           tournament_id: string
           white_player_id: string
         }
         Update: {
           black_player_id?: string | null
           created_at?: string
+          end_reason?: string | null
+          finished_at?: string | null
+          forfeit?: boolean
           game_id?: string | null
           id?: string
           result?: string | null
           round?: number
+          started_at?: string | null
           tournament_id?: string
           white_player_id?: string
         }
@@ -3524,6 +3571,50 @@ export type Database = {
           },
         ]
       }
+      tournament_round_state: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          id: string
+          locked_at: string | null
+          published_at: string | null
+          round: number
+          status: string
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          locked_at?: string | null
+          published_at?: string | null
+          round: number
+          status?: string
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          id?: string
+          locked_at?: string | null
+          published_at?: string | null
+          round?: number
+          status?: string
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_round_state_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tournament_sponsors: {
         Row: {
           created_at: string
@@ -3652,6 +3743,8 @@ export type Database = {
           donation_total_eur: number
           entry_fee: number
           external_results_url: string | null
+          finished_at: string | null
+          forfeit_minutes: number
           format: string
           id: string
           is_humanitarian: boolean
@@ -3661,11 +3754,13 @@ export type Database = {
           name: string
           organizer_email: string | null
           organizer_label: string | null
+          paused_at: string | null
           prize_escalator_step: number
           prize_kind: string
           prize_pool_eur: number
           rating_type: string | null
           registration_deadline: string | null
+          registration_locked_at: string | null
           roster_locked_at: string | null
           round_started_at: string | null
           signature_series: string | null
@@ -3681,6 +3776,7 @@ export type Database = {
           updated_at: string
           venue: string | null
           visibility: string
+          winner_user_id: string | null
         }
         Insert: {
           anti_cheat_level?: string
@@ -3702,6 +3798,8 @@ export type Database = {
           donation_total_eur?: number
           entry_fee?: number
           external_results_url?: string | null
+          finished_at?: string | null
+          forfeit_minutes?: number
           format?: string
           id?: string
           is_humanitarian?: boolean
@@ -3711,11 +3809,13 @@ export type Database = {
           name: string
           organizer_email?: string | null
           organizer_label?: string | null
+          paused_at?: string | null
           prize_escalator_step?: number
           prize_kind?: string
           prize_pool_eur?: number
           rating_type?: string | null
           registration_deadline?: string | null
+          registration_locked_at?: string | null
           roster_locked_at?: string | null
           round_started_at?: string | null
           signature_series?: string | null
@@ -3731,6 +3831,7 @@ export type Database = {
           updated_at?: string
           venue?: string | null
           visibility?: string
+          winner_user_id?: string | null
         }
         Update: {
           anti_cheat_level?: string
@@ -3752,6 +3853,8 @@ export type Database = {
           donation_total_eur?: number
           entry_fee?: number
           external_results_url?: string | null
+          finished_at?: string | null
+          forfeit_minutes?: number
           format?: string
           id?: string
           is_humanitarian?: boolean
@@ -3761,11 +3864,13 @@ export type Database = {
           name?: string
           organizer_email?: string | null
           organizer_label?: string | null
+          paused_at?: string | null
           prize_escalator_step?: number
           prize_kind?: string
           prize_pool_eur?: number
           rating_type?: string | null
           registration_deadline?: string | null
+          registration_locked_at?: string | null
           roster_locked_at?: string | null
           round_started_at?: string | null
           signature_series?: string | null
@@ -3781,6 +3886,7 @@ export type Database = {
           updated_at?: string
           venue?: string | null
           visibility?: string
+          winner_user_id?: string | null
         }
         Relationships: []
       }
@@ -4495,6 +4601,10 @@ export type Database = {
       heartbeat_online_game: { Args: { p_game_id: string }; Returns: undefined }
       is_club_member: {
         Args: { _club: string; _user: string }
+        Returns: boolean
+      }
+      is_tournament_admin: {
+        Args: { _tid: string; _user: string }
         Returns: boolean
       }
       join_battle_royale: { Args: never; Returns: Json }
