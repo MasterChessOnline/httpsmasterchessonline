@@ -498,6 +498,7 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         <AppLaunchSplash />
+        <OfflineBanner />
         <DepthLayers />
         <CursorGlow />
         <Toaster />
