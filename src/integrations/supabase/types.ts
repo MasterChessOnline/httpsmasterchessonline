@@ -3590,7 +3590,13 @@ export type Database = {
           federation: string | null
           fide_blitz_rating: number | null
           fide_id: string | null
+          fide_profile_url: string | null
+          fide_rapid_rating: number | null
+          fide_standard_rating: number | null
           fide_title: string | null
+          fide_verified: boolean
+          fide_verified_at: string | null
+          fide_verified_name: string | null
           first_name: string | null
           id: string
           is_test_bot: boolean
@@ -3605,6 +3611,7 @@ export type Database = {
           sonneborn: number
           tiebreak: number
           tournament_id: string
+          tournament_seed: number | null
           user_id: string | null
           wins: number
           withdrew_at: string | null
@@ -3624,7 +3631,13 @@ export type Database = {
           federation?: string | null
           fide_blitz_rating?: number | null
           fide_id?: string | null
+          fide_profile_url?: string | null
+          fide_rapid_rating?: number | null
+          fide_standard_rating?: number | null
           fide_title?: string | null
+          fide_verified?: boolean
+          fide_verified_at?: string | null
+          fide_verified_name?: string | null
           first_name?: string | null
           id?: string
           is_test_bot?: boolean
@@ -3639,6 +3652,7 @@ export type Database = {
           sonneborn?: number
           tiebreak?: number
           tournament_id: string
+          tournament_seed?: number | null
           user_id?: string | null
           wins?: number
           withdrew_at?: string | null
@@ -3658,7 +3672,13 @@ export type Database = {
           federation?: string | null
           fide_blitz_rating?: number | null
           fide_id?: string | null
+          fide_profile_url?: string | null
+          fide_rapid_rating?: number | null
+          fide_standard_rating?: number | null
           fide_title?: string | null
+          fide_verified?: boolean
+          fide_verified_at?: string | null
+          fide_verified_name?: string | null
           first_name?: string | null
           id?: string
           is_test_bot?: boolean
@@ -3673,6 +3693,7 @@ export type Database = {
           sonneborn?: number
           tiebreak?: number
           tournament_id?: string
+          tournament_seed?: number | null
           user_id?: string | null
           wins?: number
           withdrew_at?: string | null
@@ -3911,6 +3932,9 @@ export type Database = {
           donation_total_eur: number
           entry_fee: number
           external_results_url: string | null
+          fide_seeding_fallback: string
+          fide_seeding_rating: string
+          fide_verification_mode: string
           finished_at: string | null
           forfeit_minutes: number
           format: string
@@ -3966,6 +3990,9 @@ export type Database = {
           donation_total_eur?: number
           entry_fee?: number
           external_results_url?: string | null
+          fide_seeding_fallback?: string
+          fide_seeding_rating?: string
+          fide_verification_mode?: string
           finished_at?: string | null
           forfeit_minutes?: number
           format?: string
@@ -4021,6 +4048,9 @@ export type Database = {
           donation_total_eur?: number
           entry_fee?: number
           external_results_url?: string | null
+          fide_seeding_fallback?: string
+          fide_seeding_rating?: string
+          fide_verification_mode?: string
           finished_at?: string | null
           forfeit_minutes?: number
           format?: string
