@@ -227,6 +227,8 @@ export default function DraganBrakusRegister() {
         sessionStorage.removeItem("db_cup_invite_code");
       } catch {}
       toast({ title: "Registered ✓", description: "You are now on the DB Chess Cup standings list." });
+      // Best-effort: subscribe this device to push so reminders/pairings arrive automatically.
+      try { if (push.supported && push.status !== "subscribed" && push.status !== "denied") await push.enable(); } catch {}
       navigate("/dragan-brakus/live?registered=1");
     } catch (e: any) {
       toast({ title: "Registration failed", description: e?.message || String(e), variant: "destructive" });
