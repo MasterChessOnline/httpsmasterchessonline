@@ -19,18 +19,12 @@ export default function WelcomeIntroPopup() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Guest visitors: show once per browser based on a generic key.
-    // Logged-in new users: show once per user, only before any games.
-    const guestKey = `${STORAGE_KEY_PREFIX}guest`;
+    // Never block the public entry/home screen for guests. Logged-in new users
+    // can still see this once after their profile is ready.
     const userKey = user ? `${STORAGE_KEY_PREFIX}${user.id}` : null;
 
     if (typeof window === "undefined") return;
-
-    if (!user) {
-      if (localStorage.getItem(guestKey)) return;
-      const t = setTimeout(() => setOpen(true), 600);
-      return () => clearTimeout(t);
-    }
+    if (!user) return;
 
     if (!profile || !userKey) return;
     if (localStorage.getItem(userKey)) return;
@@ -47,8 +41,6 @@ export default function WelcomeIntroPopup() {
     if (typeof window === "undefined") return;
     if (user) {
       localStorage.setItem(`${STORAGE_KEY_PREFIX}${user.id}`, "1");
-    } else {
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}guest`, "1");
     }
   };
 
