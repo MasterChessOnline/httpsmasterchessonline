@@ -603,6 +603,8 @@ const App = () => (
           <MobileBottomNav />
           {/* Root-safe overlays — no welcome/onboarding modal is allowed to cover the entry homepage. */}
           <RootSafeOverlays />
+          {/* Entry splash — once per session, non-blocking, auto-hides ≤4s */}
+          <EntrySplash />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
