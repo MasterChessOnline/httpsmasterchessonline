@@ -210,6 +210,12 @@ export default function TournamentRegister() {
       } else {
         toast({ title: "Registered ✓", description: "Don't forget to check in before the window closes." });
       }
+      // Best-effort confirmation email for the DB Chess Cup.
+      if (/brakus|db chess/i.test(tournament?.name || "")) {
+        supabase.functions.invoke("db-cup-register", {
+          body: { tournament_id: id, invite_code: new URLSearchParams(window.location.search).get("invite") || null },
+        }).catch(() => { /* email is best effort */ });
+      }
       navigate(`/tournaments/${id}`);
     } finally {
       setBusy(false);
