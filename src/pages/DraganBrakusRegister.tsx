@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { AlertCircle, CheckCircle2, Loader2, LogIn, Trophy, UserPlus, Zap } from "lucide-react";
+import { AlertCircle, Bell, CheckCircle2, ChevronDown, ChevronUp, Loader2, LogIn, Trophy, UserPlus, Zap } from "lucide-react";
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 
 type FormState = {
   first_name: string;
@@ -55,6 +56,7 @@ function parseFideName(raw: string) {
 export default function DraganBrakusRegister() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const push = usePushSubscription();
   const [form, setForm] = useState<FormState>(emptyForm);
   const [tournament, setTournament] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -62,6 +64,7 @@ export default function DraganBrakusRegister() {
   const [fideBusy, setFideBusy] = useState(false);
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string; rating?: number }>(null);
   const [fideError, setFideError] = useState<string | null>(null);
+  const [showMore, setShowMore] = useState(false);
   const debounceRef = useRef<number | null>(null);
 
   const handle = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,6 +178,7 @@ export default function DraganBrakusRegister() {
   const validate = () => {
     if (!form.first_name.trim()) return "First name is required.";
     if (!form.last_name.trim()) return "Last name is required.";
+    if (!form.federation.trim()) return "Country is required (3-letter code, e.g. SRB).";
     if (form.fide_id && !/^\d{4,10}$/.test(form.fide_id.trim())) return "FIDE ID must be 4–10 digits.";
     if (form.birth_year && !/^\d{4}$/.test(form.birth_year.trim())) return "Birth year must be 4 digits.";
     return null;
@@ -223,6 +227,8 @@ export default function DraganBrakusRegister() {
         sessionStorage.removeItem("db_cup_invite_code");
       } catch {}
       toast({ title: "Registered ✓", description: "You are now on the DB Chess Cup standings list." });
+      // Best-effort: subscribe this device to push so reminders/pairings arrive automatically.
+      try { if (push.supported && push.status !== "subscribed" && push.status !== "denied") await push.enable(); } catch {}
       navigate("/dragan-brakus/live?registered=1");
     } catch (e: any) {
       toast({ title: "Registration failed", description: e?.message || String(e), variant: "destructive" });
@@ -281,11 +287,30 @@ export default function DraganBrakusRegister() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="First name *" value={form.first_name} onChange={handle("first_name")} autoComplete="given-name" />
                   <Field label="Last name *" value={form.last_name} onChange={handle("last_name")} autoComplete="family-name" />
-                  <Field label="Federation" value={form.federation} onChange={handle("federation")} placeholder="SRB" maxLength={3} />
-                  <Field label="FIDE title" value={form.fide_title} onChange={handle("fide_title")} placeholder="GM / IM / FM" maxLength={3} />
-                  <Field label="City" value={form.city} onChange={handle("city")} />
-                  <Field label="Club" value={form.club} onChange={handle("club")} />
-                  <Field label="Birth year" value={form.birth_year} onChange={handle("birth_year")} inputMode="numeric" maxLength={4} />
+                  <Field label="Country * (3-letter code)" value={form.federation} onChange={handle("federation")} placeholder="SRB" maxLength={3} />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowMore((v) => !v)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300 hover:text-amber-200"
+                >
+                  {showMore ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  More details (optional) — FIDE title, city, club, birth year
+                </button>
+
+                {showMore && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="FIDE title" value={form.fide_title} onChange={handle("fide_title")} placeholder="GM / IM / FM" maxLength={3} />
+                    <Field label="City" value={form.city} onChange={handle("city")} />
+                    <Field label="Club" value={form.club} onChange={handle("club")} />
+                    <Field label="Birth year" value={form.birth_year} onChange={handle("birth_year")} inputMode="numeric" maxLength={4} />
+                  </div>
+                )}
+
+                <div className="flex items-start gap-2 rounded-lg border border-sky-400/30 bg-sky-400/5 p-3 text-xs text-sky-100">
+                  <Bell className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" />
+                  <span>After you register we email a confirmation and send tournament reminders (24h + 2h before start) and live pairing notifications.</span>
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
