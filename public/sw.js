@@ -1,5 +1,5 @@
 // MasterChess service worker - lightweight offline shell + cache for static assets
-const CACHE = "mc-shell-v6";
+const CACHE = "mc-shell-v7-entry-fix";
 const SHELL = ["/", "/manifest.json", "/favicon.ico", "/app-icon-192.png", "/app-icon-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
@@ -56,6 +56,23 @@ self.addEventListener("fetch", (e) => {
   }
 
   if (/\.(?:js|css|png|jpg|jpeg|svg|webp|woff2?|ico|json)$/.test(url.pathname)) {
+    // Entry reliability: JS/CSS must be network-first so an old cached chunk
+    // can never keep users stuck on the splash/loader after a new release.
+    if (/\.(?:js|css)$/.test(url.pathname)) {
+      e.respondWith(
+        fetch(req)
+          .then((res) => {
+            if (res && res.ok) {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+            }
+            return res;
+          })
+          .catch(() => caches.match(req))
+      );
+      return;
+    }
+
     // Piece artwork: network-first so any broken cache heals on next load.
     const isPieceAsset = url.pathname.startsWith("/pieces/");
     if (isPieceAsset) {
