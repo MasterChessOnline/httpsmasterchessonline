@@ -62,8 +62,9 @@ export default function DraganBrakusRegister() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [fideBusy, setFideBusy] = useState(false);
-  const [fideFound, setFideFound] = useState<null | { name: string; federation?: string; rating?: number }>(null);
+  const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null; profile_url?: string }>(null);
   const [fideError, setFideError] = useState<string | null>(null);
+
   const [showMore, setShowMore] = useState(false);
   const debounceRef = useRef<number | null>(null);
 
@@ -103,7 +104,16 @@ export default function DraganBrakusRegister() {
         fide_title: (json.title || s.fide_title || "").toUpperCase().slice(0, 3),
         birth_year: json.birth_year ? String(json.birth_year) : s.birth_year,
       }));
-      setFideFound({ name: String(json.name), federation: json.federation, rating: json.rating });
+      setFideFound({
+        name: String(json.name),
+        federation: json.federation,
+        title: json.title,
+        standard_rating: json.standard_rating ?? json.rating ?? null,
+        rapid_rating: json.rapid_rating ?? null,
+        blitz_rating: json.blitz_rating ?? null,
+        profile_url: json.profile_url,
+      });
+
     } catch (e: any) {
       setFideFound(null);
       setFideError(e?.name === "AbortError" ? "FIDE lookup timed out. Type your name manually." : (e?.message || "Lookup failed."));
