@@ -24,23 +24,13 @@ function installEntryWatchdog() {
 
     if (!alreadyReloaded) {
       sessionStorage.setItem(key, "1");
-      try {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map((name) => caches.delete(name)));
-      } catch {}
-      try {
-        const regs = await navigator.serviceWorker?.getRegistrations?.();
-        await Promise.all((regs ?? []).map((reg) => reg.unregister()));
-      } catch {}
       const url = new URL(window.location.href);
       url.searchParams.set("entry", "fresh");
       window.location.replace(url.toString());
-      return;
     }
   };
 
-  window.setTimeout(check, 5200);
-  window.setTimeout(check, 8000);
+  window.setTimeout(check, 3500);
 }
 
 bootstrapSiteTheme();
@@ -96,6 +86,7 @@ installEntryWatchdog();
 
   const APP_VERSION = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "0.0.0";
   const SW_URL = `/sw.js?v=${encodeURIComponent(APP_VERSION)}`;
+  const isHome = window.location.pathname === "/" || window.location.pathname === "";
 
   const promptUpdate = (worker: ServiceWorker) => {
     toast("New version available", {
@@ -124,7 +115,7 @@ installEntryWatchdog();
     });
   };
 
-  window.addEventListener("load", () => {
+  const registerWorker = () => {
     navigator.serviceWorker
       .register(SW_URL)
       .then((reg) => {
@@ -155,7 +146,15 @@ installEntryWatchdog();
       reloaded = true;
       window.location.reload();
     });
-  });
+  };
+
+  if (isHome) {
+    const start = () => window.setTimeout(registerWorker, 2500);
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+  } else {
+    window.addEventListener("load", registerWorker, { once: true });
+  }
 })();
 
 createRoot(document.getElementById("root")!).render(

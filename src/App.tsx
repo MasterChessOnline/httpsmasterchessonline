@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import RouteLoader from "@/components/RouteLoader";
 import SiteRatingJsonLd from "@/components/SiteRatingJsonLd";
@@ -12,19 +12,18 @@ import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
-import AdminChessResults from "@/pages/AdminChessResults";
 // Critical / eager routes — needed for first paint & primary CTAs
-import Index from "./pages/Index";
-import Play from "./pages/Play";
-import PlayOnline from "./pages/PlayOnline";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
+import Index from "./pages/IndexFast";
 import NotFound from "./pages/NotFound";
-import PlayGuest from "./pages/PlayGuest";
-import IgLanding from "./pages/IgLanding";
-import IgBonus from "./pages/IgBonus";
+const Play = lazy(() => import("./pages/Play"));
+const PlayOnline = lazy(() => import("./pages/PlayOnline"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PlayGuest = lazy(() => import("./pages/PlayGuest"));
+const IgLanding = lazy(() => import("./pages/IgLanding"));
+const IgBonus = lazy(() => import("./pages/IgBonus"));
 const StyleQuiz = lazy(() => import("./pages/StyleQuiz"));
 const BeatMe = lazy(() => import("./pages/BeatMe"));
 const BeatNikola = lazy(() => import("./pages/BeatNikola"));
@@ -108,6 +107,7 @@ const AdminSeoConsole = lazy(() => import("./pages/AdminSeoConsole"));
 const AdminGbpPosts = lazy(() => import("./pages/AdminGbpPosts"));
 const AdminGsc = lazy(() => import("./pages/AdminGsc"));
 const AdminMapsSetup = lazy(() => import("./pages/AdminMapsSetup"));
+const AdminChessResults = lazy(() => import("@/pages/AdminChessResults"));
 const PwaInstallBanner = lazy(() => import("./components/PwaInstallBanner"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
@@ -229,6 +229,23 @@ const queryClient = new QueryClient();
 function RootSafeOverlays() {
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const [ready, setReady] = useState(!isHome);
+
+  useEffect(() => {
+    if (!isHome) {
+      setReady(true);
+      return;
+    }
+    const start = () => setReady(true);
+    if (typeof window.requestIdleCallback === "function") {
+      const idle = window.requestIdleCallback(start, { timeout: 1500 });
+      return () => window.cancelIdleCallback?.(idle);
+    }
+    const timer = globalThis.setTimeout(start, 900);
+    return () => globalThis.clearTimeout(timer);
+  }, [isHome]);
+
+  if (!ready) return null;
 
   return (
     <>
@@ -243,6 +260,41 @@ function RootSafeOverlays() {
       {!isHome && <Suspense fallback={null}><OnboardingWizard /></Suspense>}
       {!isHome && <Suspense fallback={null}><WeeklyRecapModal /></Suspense>}
       <Suspense fallback={null}><PwaInstallBanner /></Suspense>
+    </>
+  );
+}
+
+function EntryDeferredChrome() {
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+  const [ready, setReady] = useState(!isHome);
+
+  useEffect(() => {
+    if (!isHome) {
+      setReady(true);
+      return;
+    }
+    const start = () => setReady(true);
+    if (typeof window.requestIdleCallback === "function") {
+      const idle = window.requestIdleCallback(start, { timeout: 1200 });
+      return () => window.cancelIdleCallback?.(idle);
+    }
+    const timer = globalThis.setTimeout(start, 700);
+    return () => globalThis.clearTimeout(timer);
+  }, [isHome]);
+
+  if (!ready) return null;
+
+  return (
+    <>
+      <DepthLayers />
+      <CursorGlow />
+      <AntiTiltWatcher />
+      <TitleUnlockGate />
+      <GameInviteListener />
+      <BrakusRibbon />
+      <StreakFlexController />
+      <FloatingShareButton />
     </>
   );
 }
@@ -526,8 +578,6 @@ const App = () => (
       <TooltipProvider>
         <AppLaunchSplash />
         <OfflineBanner />
-        <DepthLayers />
-        <CursorGlow />
         <Toaster />
         <Sonner />
         <BrowserRouter>
@@ -536,14 +586,9 @@ const App = () => (
           <div className="pb-16 md:pb-0">
             <AnimatedRoutes />
           </div>
-          {/* Eager chrome — never suspends */}
-          <AntiTiltWatcher />
-          <TitleUnlockGate />
-          <GameInviteListener />
+          {/* Deferred chrome: Home paints first, decorative/listener layers attach after idle. */}
+          <EntryDeferredChrome />
           <MobileBottomNav />
-          <BrakusRibbon />
-          <StreakFlexController />
-          <FloatingShareButton />
           {/* Root-safe overlays — no welcome/onboarding modal is allowed to cover the entry homepage. */}
           <RootSafeOverlays />
         </BrowserRouter>
