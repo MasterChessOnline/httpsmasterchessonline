@@ -1,6 +1,6 @@
 // MasterChess service worker - lightweight offline shell + cache for static assets
-const CACHE = "mc-shell-v10-fast-entry";
-const SHELL = ["/", "/manifest.json", "/favicon.ico", "/app-icon-192.png", "/app-icon-512.png", "/apple-touch-icon.png"];
+const CACHE = "mc-shell-v11-entry-watchdog";
+const SHELL = ["/manifest.json", "/favicon.ico", "/app-icon-192.png", "/app-icon-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}));
@@ -11,9 +11,8 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // Allow the page to trigger immediate activation of a newly installed worker.
@@ -41,16 +40,18 @@ self.addEventListener("fetch", (e) => {
     url.pathname === "/humans.txt"
   ) return;
 
-  // Network-first for HTML, cache-first for static
+  // P0 entry safety: HTML navigations must never be served from an old cached
+  // app shell. If the network is unavailable, return a tiny visible offline
+  // page instead of a blank gradient/background-only shell.
   if (req.mode === "navigate") {
     e.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(req).then((r) => r || caches.match("/")))
+        .catch(() => new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MasterChess — Offline</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#071226;color:#f7ecd1;font-family:system-ui;text-align:center;padding:24px}a,button{display:inline-flex;align-items:center;justify-content:center;height:44px;border-radius:8px;border:1px solid #d4af37;background:#d4af37;color:#071226;font-weight:800;padding:0 16px;text-decoration:none}</style></head><body><main><h1>MasterChess</h1><p>You're offline. Reconnect and retry.</p><button onclick="location.reload()">Retry</button></main></body></html>`, {
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }))
     );
     return;
   }
