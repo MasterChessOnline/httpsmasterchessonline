@@ -341,7 +341,7 @@ function AnimatedRoutes() {
     const timer = window.setTimeout(() => {
       const hasReadyRoute = Boolean(document.querySelector("[data-entry-ready]"));
       const hasVisibleText = document.body.innerText.trim().length > 20;
-      if (!hasReadyRoute || !hasVisibleText) {
+      if (!hasReadyRoute && !hasVisibleText) {
         entryLog("ERROR_STATE", {
           step: "RENDER_HOME",
           message: "startup watchdog forced safe home",
