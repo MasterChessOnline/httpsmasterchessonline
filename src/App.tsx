@@ -13,6 +13,8 @@ import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
 import EntrySplash from "@/components/EntrySplash";
+import StartupErrorBoundary from "@/components/StartupErrorBoundary";
+import StartupFallbackHome from "@/components/StartupFallbackHome";
 // Critical / eager route — original Home entry, no replacement shell.
 import Index from "./pages/IndexFull";
 import NotFound from "./pages/NotFound";
@@ -230,6 +232,16 @@ const Ranked = lazy(() => import("./pages/Ranked"));
 const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
 
+const STARTUP_TIMEOUT_MS = 5000;
+
+function entryLog(label: string, payload?: unknown) {
+  try {
+    console.info(`[MasterChess Entry] ${label}`, payload ?? "");
+  } catch {
+    // Debug logging must never affect startup.
+  }
+}
+
 function RootSafeOverlays() {
   const location = useLocation();
   const isHome = location.pathname === "/";
@@ -320,6 +332,35 @@ function useRouteZone() {
 function AnimatedRoutes() {
   const location = useLocation();
   useRouteZone();
+  const [forceSafeHome, setForceSafeHome] = useState(false);
+
+  useEffect(() => {
+    entryLog("ROUTE_CHECK", { path: location.pathname || "/" });
+    setForceSafeHome(false);
+
+    const timer = window.setTimeout(() => {
+      const hasReadyRoute = Boolean(document.querySelector("[data-entry-ready]"));
+      const hasVisibleText = document.body.innerText.trim().length > 20;
+      if (!hasReadyRoute && !hasVisibleText) {
+        entryLog("ERROR_STATE", {
+          step: "RENDER_HOME",
+          message: "startup watchdog forced safe home",
+          path: location.pathname || "/",
+          hasReadyRoute,
+          hasVisibleText,
+        });
+        setForceSafeHome(true);
+      }
+    }, STARTUP_TIMEOUT_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (location.pathname === "/") entryLog("HOME_RENDER");
+  }, [location.pathname]);
+
+  if (forceSafeHome) return <StartupFallbackHome reason="startup-watchdog" />;
 
   // Skip route transition animation on phones — it causes layout thrash and
   // janky scroll on low-end devices. Desktop still gets the smooth fade.
@@ -338,6 +379,7 @@ function AnimatedRoutes() {
   const routes = (
     <Routes location={location}>
           <Route path="/" element={<Index />} />
+          <Route path="/home" element={<Index />} />
           <Route path="/pitch" element={<Pitch />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/play" element={<Play />} />
@@ -570,9 +612,15 @@ function AnimatedRoutes() {
   );
 
   const routeContent = isHome ? (
-    renderedRoutes
+    <StartupErrorBoundary fallback={<StartupFallbackHome reason="home-render-error" />}>
+      <Suspense fallback={<StartupFallbackHome reason="home-suspense" />}>
+        {renderedRoutes}
+      </Suspense>
+    </StartupErrorBoundary>
   ) : (
-    <Suspense fallback={<RouteLoader />}>{renderedRoutes}</Suspense>
+    <StartupErrorBoundary fallback={<StartupFallbackHome reason="route-render-error" />}>
+      <Suspense fallback={<RouteLoader />}>{renderedRoutes}</Suspense>
+    </StartupErrorBoundary>
   );
 
   return (
@@ -585,30 +633,38 @@ function AnimatedRoutes() {
   );
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <OfflineBanner />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <SiteRatingJsonLd />
-          {/* Home is eager and never sits behind the route loader. Lazy routes keep their own boundary inside AnimatedRoutes. */}
-          <div className="pb-16 md:pb-0">
-            <AnimatedRoutes />
-          </div>
-          {/* Deferred chrome: Home paints first, decorative/listener layers attach after idle. */}
-          <EntryDeferredChrome />
-          <MobileBottomNav />
-          {/* Root-safe overlays — no welcome/onboarding modal is allowed to cover the entry homepage. */}
-          <RootSafeOverlays />
-          {/* Entry splash — once per session, non-blocking, auto-hides ≤4s */}
-          <EntrySplash />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    entryLog("APP_INIT_START");
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <StartupErrorBoundary fallback={<StartupFallbackHome reason="app-render-error" />}>
+        <AuthProvider>
+          <TooltipProvider>
+            <OfflineBanner />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SiteRatingJsonLd />
+              {/* Home is eager and never sits behind an infinite route loader. */}
+              <div className="pb-16 md:pb-0">
+                <AnimatedRoutes />
+              </div>
+              {/* Deferred chrome: Home paints first, decorative/listener layers attach after idle. */}
+              <EntryDeferredChrome />
+              <MobileBottomNav />
+              {/* Root-safe overlays — no welcome/onboarding modal is allowed to cover the entry homepage. */}
+              <RootSafeOverlays />
+              {/* Entry splash — once per session, non-blocking, auto-hides ≤4s */}
+              <EntrySplash />
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </StartupErrorBoundary>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -2,6 +2,26 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+const AUTH_TIMEOUT_MS = 5000;
+const API_TIMEOUT_MS = 3000;
+
+function entryLog(label: string, payload?: unknown) {
+  try {
+    console.info(`[MasterChess Entry] ${label}`, payload ?? "");
+  } catch {
+    // Logging must never affect startup.
+  }
+}
+
+function withTimeout<T>(promise: PromiseLike<T>, ms = API_TIMEOUT_MS): Promise<T> {
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise<T>((_, reject) => {
+      window.setTimeout(() => reject(new Error(`timeout-${ms}ms`)), ms);
+    }),
+  ]);
+}
+
 interface Profile {
   id: string;
   user_id: string;
@@ -44,9 +64,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = async (userId: string) => {
     // Sensitive columns (master_coins, login_streak, welcome_*, push_notifications_enabled, etc.)
     // are not exposed through PostgREST. Use SECURITY DEFINER RPC for the owner's full row.
-    const { data } = await supabase.rpc("get_my_profile");
-    const row = Array.isArray(data) ? data[0] : data;
-    setProfile((row ?? null) as Profile | null);
+    try {
+      const { data } = await withTimeout(supabase.rpc("get_my_profile"));
+      const row = Array.isArray(data) ? data[0] : data;
+      setProfile((row ?? null) as Profile | null);
+    } catch (error) {
+      entryLog("ERROR_STATE", { step: "INIT_DATA", message: "profile skipped", error });
+      setProfile(null);
+    }
   };
 
   const refreshProfile = async () => {
@@ -110,31 +135,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    let alive = true;
+    entryLog("AUTH_START");
+    const authTimeout = window.setTimeout(() => {
+      if (!alive) return;
+      entryLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth timeout; continuing" });
+      setLoading(false);
+    }, AUTH_TIMEOUT_MS);
+
+    const finishAuth = (label: string) => {
+      if (!alive) return;
+      window.clearTimeout(authTimeout);
+      setLoading(false);
+      entryLog("AUTH_DONE", { source: label });
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!alive) return;
         setSession(session);
         if (session?.user) {
           setTimeout(() => {
             fetchProfile(session.user.id);
-            touchDailyStreak(session.user.id);
+            touchDailyStreak(session.user.id).catch((error) =>
+              entryLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
+            );
           }, 0);
         } else {
           setProfile(null);
         }
-        setLoading(false);
+        finishAuth("state-change");
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    withTimeout(supabase.auth.getSession(), API_TIMEOUT_MS).then(({ data: { session } }) => {
+      if (!alive) return;
       setSession(session);
       if (session?.user) {
         fetchProfile(session.user.id);
-        touchDailyStreak(session.user.id);
+        touchDailyStreak(session.user.id).catch((error) =>
+          entryLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
+        );
       }
-      setLoading(false);
+      finishAuth("get-session");
+    }).catch((error) => {
+      entryLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth skipped", error });
+      finishAuth("get-session-error");
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      alive = false;
+      window.clearTimeout(authTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
