@@ -58,32 +58,46 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ ok: true, purged: deleted ?? 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Default action: seed
-    const n = Math.max(2, Math.min(128, Number(count) || 32));
+    // Default action: seed (cap raised to 512 for stress testing)
+    const n = Math.max(2, Math.min(512, Number(count) || 32));
     const rows = [];
     for (let i = 0; i < n; i++) {
-      const first = BOT_FIRST[i % BOT_FIRST.length];
+      const first = BOT_FIRST[(i * 13) % BOT_FIRST.length];
       const last  = BOT_LAST[(i * 7) % BOT_LAST.length];
-      const rating = rand(1200, 2400);
+      const title = TITLES[(i * 17) % TITLES.length];
+      const fed   = FEDERATIONS[(i * 11) % FEDERATIONS.length];
+      // Title-correlated rating distribution for realism
+      const baseMin = title === "GM" ? 2450 : title === "IM" ? 2300 : title === "FM" ? 2150 : title === "CM" ? 2000 : 1200;
+      const baseMax = title === "GM" ? 2750 : title === "IM" ? 2450 : title === "FM" ? 2300 : title === "CM" ? 2150 : 2050;
+      const rating = rand(baseMin, baseMax);
       rows.push({
         tournament_id,
         user_id: crypto.randomUUID(),       // synthetic; bots are never real users
         is_test_bot: true,
-        first_name: `${first}`,
+        first_name: first,
         last_name: `${last} (bot)`,
         fide_id: `TB${String(100000 + i).padStart(7, "0")}`,
+        fide_title: title,
         fide_blitz_rating: rating,
         rating_at_join: rating,
-        federation: "SRB",
+        federation: fed,
         checked_in: true,
         checked_in_at: new Date().toISOString(),
         score: 0,
       });
     }
 
-    const { error, data } = await service.from("tournament_registrations").insert(rows).select("id");
-    if (error) throw error;
-    return new Response(JSON.stringify({ ok: true, seeded: data?.length ?? 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Chunk inserts so 512 rows don't exceed payload limits
+    const CHUNK = 100;
+    let total = 0;
+    for (let i = 0; i < rows.length; i += CHUNK) {
+      const slice = rows.slice(i, i + CHUNK);
+      const { error, data } = await service.from("tournament_registrations").insert(slice).select("id");
+      if (error) throw error;
+      total += data?.length ?? 0;
+    }
+    return new Response(JSON.stringify({ ok: true, seeded: total }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
   } catch (err) {
     return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
