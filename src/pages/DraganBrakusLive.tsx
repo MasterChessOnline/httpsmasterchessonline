@@ -24,7 +24,10 @@ type Row = {
   federation: string | null;
   fide_title: string | null;
   rating_at_join: number;
+  fide_verified: boolean | null;
+  fide_blitz_rating: number | null;
 };
+
 
 export default function DraganBrakusLive() {
   const params = useParams();
@@ -48,7 +51,7 @@ export default function DraganBrakusLive() {
     }
     const { data: regs } = await supabase
       .from("tournament_registrations")
-      .select("user_id, score, buchholz, buchholz_cut1, progressive_score, performance_rating, wins, first_name, last_name, federation, fide_title, rating_at_join")
+      .select("user_id, score, buchholz, buchholz_cut1, progressive_score, performance_rating, wins, first_name, last_name, federation, fide_title, rating_at_join, fide_verified, fide_blitz_rating")
       .eq("tournament_id", id);
     const sorted = (regs || []).sort((a: any, b: any) =>
       b.score - a.score ||
@@ -129,9 +132,17 @@ export default function DraganBrakusLive() {
                       <td className="px-3 py-2">
                         {r.fide_title && <span className="text-yellow-400 font-bold mr-1">{r.fide_title}</span>}
                         {name}
+                        {r.fide_verified && (
+                          <span title="Official FIDE Player Verified" className="ml-1.5 inline-flex items-center gap-0.5 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300 align-middle">
+                            ✓ FIDE
+                          </span>
+                        )}
                       </td>
                       <td className="px-3 py-2 text-muted-foreground">{r.federation || ""}</td>
-                      <td className="px-3 py-2 text-right">{r.rating_at_join}</td>
+                      <td className="px-3 py-2 text-right">
+                        {r.fide_blitz_rating ? <span className="text-emerald-300 font-semibold">{r.fide_blitz_rating}</span> : r.rating_at_join}
+                      </td>
+
                       <td className="px-3 py-2 text-right font-bold">{Number(r.score).toFixed(1)}</td>
                       <td className="px-3 py-2 text-right">{Number(r.buchholz_cut1).toFixed(1)}</td>
                       <td className="px-3 py-2 text-right">{Number(r.buchholz).toFixed(1)}</td>

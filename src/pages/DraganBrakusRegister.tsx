@@ -62,8 +62,9 @@ export default function DraganBrakusRegister() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [fideBusy, setFideBusy] = useState(false);
-  const [fideFound, setFideFound] = useState<null | { name: string; federation?: string; rating?: number }>(null);
+  const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null; profile_url?: string }>(null);
   const [fideError, setFideError] = useState<string | null>(null);
+
   const [showMore, setShowMore] = useState(false);
   const debounceRef = useRef<number | null>(null);
 
@@ -103,7 +104,16 @@ export default function DraganBrakusRegister() {
         fide_title: (json.title || s.fide_title || "").toUpperCase().slice(0, 3),
         birth_year: json.birth_year ? String(json.birth_year) : s.birth_year,
       }));
-      setFideFound({ name: String(json.name), federation: json.federation, rating: json.rating });
+      setFideFound({
+        name: String(json.name),
+        federation: json.federation,
+        title: json.title,
+        standard_rating: json.standard_rating ?? json.rating ?? null,
+        rapid_rating: json.rapid_rating ?? null,
+        blitz_rating: json.blitz_rating ?? null,
+        profile_url: json.profile_url,
+      });
+
     } catch (e: any) {
       setFideFound(null);
       setFideError(e?.name === "AbortError" ? "FIDE lookup timed out. Type your name manually." : (e?.message || "Lookup failed."));
@@ -280,7 +290,23 @@ export default function DraganBrakusRegister() {
                       {!fideBusy && fideError && form.fide_id.length >= 5 && <AlertCircle className="h-4 w-4 text-orange-400" />}
                     </div>
                   </div>
-                  {fideFound && <p className="mt-2 text-xs text-emerald-300">Found: <b>{fideFound.name}</b>{fideFound.federation ? ` · ${fideFound.federation}` : ""}{fideFound.rating ? ` · ${fideFound.rating}` : ""}</p>}
+                  {fideFound && (
+                    <div className="mt-3 rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-3 text-xs text-emerald-100">
+                      <div className="mb-2 flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                        <span className="font-bold uppercase tracking-wider text-emerald-200">Official FIDE Player Verified</span>
+                      </div>
+                      <div className="grid gap-1 sm:grid-cols-2">
+                        <div><span className="opacity-70">Name:</span> <b>{fideFound.title ? `${fideFound.title} ` : ""}{fideFound.name}</b></div>
+                        {fideFound.federation && <div><span className="opacity-70">Federation:</span> <b>{fideFound.federation}</b></div>}
+                        {fideFound.blitz_rating ? <div><span className="opacity-70">Blitz:</span> <b>{fideFound.blitz_rating}</b></div> : null}
+                        {fideFound.rapid_rating ? <div><span className="opacity-70">Rapid:</span> <b>{fideFound.rapid_rating}</b></div> : null}
+                        {fideFound.standard_rating ? <div><span className="opacity-70">Standard:</span> <b>{fideFound.standard_rating}</b></div> : null}
+                        <div className="sm:col-span-2 text-[11px] opacity-70">Seeding rating will use your FIDE Blitz (fallback Rapid → Standard).</div>
+                      </div>
+                    </div>
+                  )}
+
                   {fideError && form.fide_id.length >= 5 && <p className="mt-2 text-xs text-orange-300">{fideError}</p>}
                 </div>
 
