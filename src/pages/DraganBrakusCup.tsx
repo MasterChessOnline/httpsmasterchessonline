@@ -18,6 +18,7 @@ import {
   Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink, Loader2,
 } from "lucide-react";
 import InviteShareCard from "@/components/db-cup/InviteShareCard";
+import TournamentInvitePanel from "@/components/TournamentInvitePanel";
 import ChessHostBridge from "@/components/db-cup/ChessHostBridge";
 import TournamentTestHarness from "@/components/admin/TournamentTestHarness";
 
