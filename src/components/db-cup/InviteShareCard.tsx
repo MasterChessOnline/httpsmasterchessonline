@@ -93,7 +93,7 @@ export default function InviteShareCard({
     ctx.font = "bold 86px Georgia, serif";
     ctx.fillText("DRAGAN BRAKUS CUP", 540, 320);
     ctx.font = "italic 44px Georgia, serif"; ctx.fillStyle = "#cfd6e4";
-    ctx.fillText("9-round Swiss Blitz · 30 June 2026", 540, 400);
+    ctx.fillText("9-round Swiss Blitz · 2 July 2026", 540, 400);
     ctx.fillText("17:00 CEST · masterchess.live", 540, 460);
     ctx.fillStyle = "rgba(255,210,80,0.18)"; ctx.fillRect(140, 560, 800, 130);
     ctx.strokeStyle = "rgba(255,210,80,0.7)"; ctx.lineWidth = 3;

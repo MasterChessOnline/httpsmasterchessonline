@@ -48,10 +48,18 @@ Deno.serve(async (req) => {
     const user = u?.user;
     if (!user) return json({ error: "Unauthorized" }, 401);
 
-    const { tournament_id, invite_code } = await req.json();
+    const { tournament_id, invite_code, player_details } = await req.json();
     if (!tournament_id || typeof tournament_id !== "string") return json({ error: "tournament_id required" }, 400);
 
     const svc = createClient(SUPABASE_URL, SERVICE);
+
+    const allowedDetails = ["first_name", "last_name", "fide_id", "fide_title", "federation", "birth_year", "city", "club", "fide_blitz_rating"];
+    const detailPatch: Record<string, unknown> = {};
+    if (player_details && typeof player_details === "object") {
+      for (const key of allowedDetails) {
+        if (player_details[key] !== undefined) detailPatch[key] = player_details[key] || null;
+      }
+    }
 
     // Load tournament
     const { data: t, error: tErr } = await svc
@@ -84,6 +92,7 @@ Deno.serve(async (req) => {
           user_id: user.id,
           referrer_invite_code: invite_code || null,
           rating_at_join: 1200,
+          ...detailPatch,
         })
         .select("id").single();
       if (insErr) return json({ error: insErr.message }, 400);
@@ -99,6 +108,23 @@ Deno.serve(async (req) => {
               .catch(() => {/* RPC may not exist; ignore */});
           }
         } catch {/* invite invalid -> ignore */}
+      }
+    }
+
+    if (existing && Object.keys(detailPatch).length > 0) {
+      await svc
+        .from("tournament_registrations")
+        .update(detailPatch)
+        .eq("id", existing.id);
+    }
+
+    if (Object.keys(detailPatch).length > 0) {
+      const profilePatch: Record<string, unknown> = {};
+      for (const key of ["first_name", "last_name", "fide_id", "fide_title", "federation", "birth_year", "club"]) {
+        if (detailPatch[key] !== undefined) profilePatch[key] = detailPatch[key];
+      }
+      if (Object.keys(profilePatch).length > 0) {
+        await svc.from("profiles").update(profilePatch).eq("user_id", user.id);
       }
     }
 
