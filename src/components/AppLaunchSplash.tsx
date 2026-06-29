@@ -10,10 +10,10 @@ import { Crown } from "lucide-react";
  * page. No loading bar, no percentages, no "Loading…" text — the splash
  * is purely cinematic and gives the app time to settle in the background.
  *
- * Shown once per browser session. Never rendered inside the Lovable
- * editor iframe.
+ * Rendered on fresh homepage entry. Never rendered inside the Lovable editor
+ * iframe. It must never show recovery buttons or loading text.
  */
-const SPLASH_MS = 3200;
+const SPLASH_MS = 3600;
 
 export default function AppLaunchSplash() {
   const [visible, setVisible] = useState(false);
@@ -28,8 +28,8 @@ export default function AppLaunchSplash() {
       }
     })();
     if (isInIframe) return;
-    if (sessionStorage.getItem("mc.splash.shown") === "1") return;
-    sessionStorage.setItem("mc.splash.shown", "1");
+    const isHome = window.location.pathname === "/" || window.location.pathname === "";
+    if (!isHome) return;
     setVisible(true);
     const t = setTimeout(() => setVisible(false), SPLASH_MS);
     return () => clearTimeout(t);
@@ -40,9 +40,13 @@ export default function AppLaunchSplash() {
       {visible && (
         <motion.div
           key="splash"
-          className="fixed inset-0 z-[9999] overflow-hidden bg-black flex items-center justify-center"
+          className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center"
+          style={{
+            background:
+              "radial-gradient(ellipse 68% 48% at 50% 48%, rgba(120,84,12,0.46) 0%, rgba(42,31,10,0.78) 34%, rgba(0,0,0,0.98) 78%), #000",
+          }}
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.35, ease: "easeInOut" } }}
+          exit={{ opacity: 0, transition: { duration: 0.45, ease: "easeInOut" } }}
         >
           {/* Soft gold radial glow centered behind the logo */}
           <div
@@ -50,15 +54,15 @@ export default function AppLaunchSplash() {
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(ellipse 55% 45% at 50% 50%, rgba(251,191,36,0.22) 0%, rgba(251,191,36,0.06) 35%, transparent 70%)",
+                "radial-gradient(ellipse 55% 40% at 50% 50%, rgba(251,191,36,0.34) 0%, rgba(251,191,36,0.10) 40%, transparent 72%)",
             }}
           />
 
           {/* Centered crest + wordmark — cinematic 3D entrance */}
           <motion.div
-            className="relative flex flex-col items-center"
+            className="relative flex flex-col items-center px-5 text-center"
             style={{ perspective: 1200 }}
-            initial={{ opacity: 0, scale: 0.7, rotateX: -25 }}
+            initial={{ opacity: 0, scale: 0.74, rotateX: -22 }}
             animate={{ opacity: 1, scale: 1, rotateX: 0 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -71,7 +75,7 @@ export default function AppLaunchSplash() {
 
             {/* Crest with slow 3D float */}
             <motion.div
-              className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-3xl border-2 border-amber-300/60 bg-gradient-to-br from-amber-200/15 via-amber-500/10 to-black flex items-center justify-center shadow-[0_30px_80px_-10px_rgba(251,191,36,0.55)]"
+              className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-[2rem] border-2 border-amber-300/70 bg-gradient-to-br from-amber-100/20 via-amber-500/12 to-black flex items-center justify-center shadow-[0_34px_90px_-10px_rgba(251,191,36,0.72)]"
               style={{ transformStyle: "preserve-3d" }}
               animate={{ rotateY: [0, 12, 0, -12, 0], rotateX: [0, -6, 0, 6, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -81,8 +85,8 @@ export default function AppLaunchSplash() {
 
             {/* Wordmark */}
             <motion.div
-              className="mt-7 font-display font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-600 text-[clamp(2rem,9vw,3.75rem)] leading-none select-none"
-              style={{ letterSpacing: "0.06em" }}
+              className="mt-7 font-display font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-600 text-[clamp(2.35rem,11vw,4.35rem)] leading-none select-none"
+              style={{ letterSpacing: "0.04em" }}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
