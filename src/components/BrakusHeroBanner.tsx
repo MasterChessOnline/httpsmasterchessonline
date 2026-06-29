@@ -10,7 +10,7 @@ import heroBoard from "@/assets/hero-chess.jpg";
  * to the event, modern entrance animation, and a dismiss that auto-resets
  * the day after the tournament so the banner disappears on its own.
  *
- * Tournament date: 1 July 2026, 17:00 CEST.
+ * Tournament date: 2 July 2026, 17:00 CEST.
  */
 const DISMISS_KEY = "mc.dbcup.hero.dismissed";
 const EVENT_AT = new Date("2026-07-02T15:00:00Z").getTime(); // 17:00 CEST
@@ -53,7 +53,7 @@ export default function BrakusHeroBanner() {
 
   const onInvite = async () => {
     const shareData = {
-      title: "DB Chess Cup — 1 July 2026",
+      title: "DB Chess Cup — 2 July 2026",
       text: "Join me in the DB Chess Cup on MasterChess.",
       url: inviteUrl,
     };
@@ -118,7 +118,7 @@ export default function BrakusHeroBanner() {
             🏆 DB Chess Cup
           </h2>
           <p className="text-amber-100/90 text-sm sm:text-base font-semibold">
-            1 July 2026 · Official MasterChess Tournament
+            2 July 2026 · Official MasterChess Tournament
           </p>
           {!live && (
             <div className="mt-3 flex items-center gap-1.5" aria-label={`Starts in ${d} days ${h} hours ${m} minutes`}>
