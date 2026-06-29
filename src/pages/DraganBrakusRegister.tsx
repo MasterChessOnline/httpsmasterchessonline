@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { AlertCircle, CheckCircle2, Loader2, LogIn, Trophy, UserPlus, Zap } from "lucide-react";
+import { AlertCircle, Bell, CheckCircle2, ChevronDown, ChevronUp, Loader2, LogIn, Trophy, UserPlus, Zap } from "lucide-react";
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 
 type FormState = {
   first_name: string;
