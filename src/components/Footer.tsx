@@ -94,7 +94,7 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => {
             <h4 className="font-display text-xs font-semibold text-foreground mb-3 uppercase tracking-widest">{section.title}</h4>
             <div className="flex flex-col gap-2">
               {section.links.map((link) => (
-                <Link key={link.href} to={link.href} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                <Link key={`${section.title}-${link.label}-${link.href}`} to={link.href} className="text-xs text-muted-foreground hover:text-primary transition-colors">
                   {link.label}
                 </Link>
               ))}
