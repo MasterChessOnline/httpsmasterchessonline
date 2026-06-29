@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { AlertTriangle, Crown, RotateCw, Trophy, Play } from "lucide-react";
 
 export default function StartupFallbackHome({ reason = "safe-entry" }: { reason?: string }) {
@@ -43,18 +42,18 @@ export default function StartupFallbackHome({ reason = "safe-entry" }: { reason?
         </p>
 
         <div className="mt-8 flex w-full max-w-xl flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            to="/play-guest"
+          <a
+            href="/play-guest"
             className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border border-primary/60 bg-primary px-5 text-sm font-bold text-primary-foreground shadow-[0_0_28px_hsl(var(--primary)/0.22)] transition hover:bg-primary/90 sm:w-auto"
           >
             <Play className="h-4 w-4 fill-current" aria-hidden="true" /> Play now
-          </Link>
-          <Link
-            to="/dragan-brakus/register"
+          </a>
+          <a
+            href="/dragan-brakus/register"
             className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md border border-border bg-card px-5 text-sm font-bold text-foreground transition hover:border-primary/50 hover:text-primary sm:w-auto"
           >
             <Trophy className="h-4 w-4" aria-hidden="true" /> Register DB Cup
-          </Link>
+          </a>
           <button
             type="button"
             onClick={retry}
