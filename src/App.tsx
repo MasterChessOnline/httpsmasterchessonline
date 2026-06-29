@@ -237,13 +237,12 @@ function RootSafeOverlays() {
       return;
     }
     const start = () => setReady(true);
-    const idle = "requestIdleCallback" in window
-      ? window.requestIdleCallback(start, { timeout: 1500 })
-      : window.setTimeout(start, 900);
-    return () => {
-      if (typeof idle === "number") window.clearTimeout(idle);
-      else window.cancelIdleCallback?.(idle);
-    };
+    if (typeof window.requestIdleCallback === "function") {
+      const idle = window.requestIdleCallback(start, { timeout: 1500 });
+      return () => window.cancelIdleCallback?.(idle);
+    }
+    const timer = globalThis.setTimeout(start, 900);
+    return () => globalThis.clearTimeout(timer);
   }, [isHome]);
 
   if (!ready) return null;
@@ -276,13 +275,12 @@ function EntryDeferredChrome() {
       return;
     }
     const start = () => setReady(true);
-    const idle = "requestIdleCallback" in window
-      ? window.requestIdleCallback(start, { timeout: 1200 })
-      : window.setTimeout(start, 700);
-    return () => {
-      if (typeof idle === "number") window.clearTimeout(idle);
-      else window.cancelIdleCallback?.(idle);
-    };
+    if (typeof window.requestIdleCallback === "function") {
+      const idle = window.requestIdleCallback(start, { timeout: 1200 });
+      return () => window.cancelIdleCallback?.(idle);
+    }
+    const timer = globalThis.setTimeout(start, 700);
+    return () => globalThis.clearTimeout(timer);
   }, [isHome]);
 
   if (!ready) return null;
