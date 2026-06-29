@@ -21,6 +21,9 @@ import InviteShareCard from "@/components/db-cup/InviteShareCard";
 import TournamentInvitePanel from "@/components/TournamentInvitePanel";
 import ChessHostBridge from "@/components/db-cup/ChessHostBridge";
 import TournamentTestHarness from "@/components/admin/TournamentTestHarness";
+import SpecialPrizeGrid from "@/components/tournament/SpecialPrizeGrid";
+import PredictionsMarket from "@/components/tournament/PredictionsMarket";
+import AmbassadorLeaderboard from "@/components/tournament/AmbassadorLeaderboard";
 
 type Prize = {
   place_from: number; place_to: number; label: string;
@@ -464,6 +467,30 @@ export default function DraganBrakusCup() {
               </Card>
             )}
           </div>
+        </section>
+
+        {/* Special prize categories (10 ideas) */}
+        <SpecialPrizeGrid />
+
+        {/* Predictions market + Ambassador leaderboard */}
+        {lobbyId && (
+          <section className="grid md:grid-cols-2 gap-4 mb-10">
+            <PredictionsMarket tournamentId={lobbyId} />
+            <AmbassadorLeaderboard tournamentId={lobbyId} />
+          </section>
+        )}
+
+        {/* Hall of Fame teaser */}
+        <section className="rounded-2xl border border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 to-transparent p-6 mb-10 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-xl font-bold">Hall of Fame</h2>
+            <p className="text-sm text-muted-foreground">
+              Every champion and brilliancy winner is engraved forever. Be the first name on the wall.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="border-yellow-500/40">
+            <Link to="/dragan-brakus/hall-of-fame">View Hall of Fame →</Link>
+          </Button>
         </section>
 
         {/* Sponsors */}

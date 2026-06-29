@@ -1,143 +1,90 @@
-# DB Chess Cup — Pro Tournament Engine
+## DB Chess Cup — Full Production Wave + 20 New Ideas
 
-Goal: turn the existing DB Cup pipeline into a Swiss-Manager / Chess-Results-grade system with zero manual work for the organizer, end-to-end from registration to winner proclamation.
-
-A lot of the foundation already exists (`tournaments`, `tournament_registrations`, `tournament_pairings`, `recalc_tournament_tiebreaks`, `tournament-pair-swiss` edge function, `/dragan-brakus/live`, FIDE lookup). This plan fills the gaps and connects them into one professional flow.
+Goal: ship the remaining waves of the tournament engine so the Cup runs end-to-end with zero manual babysitting, then layer in high-impact "wow" features and a fresh prize structure that makes people actually show up.
 
 ---
 
-## 1. Tournament Lifecycle State Machine
+### PART A — Finish the Engine (Waves 2–5)
 
-Add a single source of truth for tournament status, driven by an edge function `tournament-engine`:
+**Wave 2 — Live Standings & Tiebreaks**
+- Materialised `tournament_standings` view: points, Buchholz, Buchholz Cut-1, Sonneborn–Berger, Direct Encounter, # of wins, performance rating.
+- Realtime channel `tournament:{id}:standings` so `/dragan-brakus/live` updates without refresh.
+- Top-3 podium animation, "biggest upset of the round" card, "longest win streak" card.
+
+**Wave 3 — Anti-Cheat Queue**
+- Edge function `tournament-anticheat-scan`: per move, compare to Stockfish top-3 via `stockfish_eval_cache`; flag >85% match rate, sudden ACPL drop, tab-blur events from `online_game_presence`.
+- Writes to `tournament_anti_cheat_flags` (already exists) with severity.
+- Admin panel tab "Fair Play" with one-click Warn / Forfeit Game / Disqualify + auto-recompute pairings.
+
+**Wave 4 — Pro Exports**
+- Upgrade `tournament-export`: TRF16 (FIDE), full PGN bundle, XLSX standings with formulas (uses xlsx skill), printable PDF crosstable + certificates per player (PDF skill).
+- One-click "Submit to Chess-Results" payload generator.
+
+**Wave 5 — 512-Bot Dry Run Harness**
+- Extend `TournamentTestHarness`: seed 512, auto-play all 9 rounds with Stockfish-lite, assert no pairing collisions, no color imbalance >1, no duplicate opponents, all standings consistent. Green check before opening real registration.
+
+---
+
+### PART B — 20 New Ideas to Make the Cup Actually Pop
+
+**Prize layer (real + interesting, not just cash)**
+1. **Master Coins prize ladder** — 1st 50k / 2nd 25k / 3rd 15k + top-10 all get 2k (already infra, just wire payouts table).
+2. **"Brakus Bishop" unique badge** — permanent profile NFT-style badge for top 3, animated gold.
+3. **1-year MasterChess Pro** for winner (unlock all themes, piece sets, AI review).
+4. **Custom title prefix** ("DB-Cup Champion 2026") shown next to username site-wide for a year.
+5. **Founder 1-on-1** — winner gets a recorded analysis session with Nikola, published on /news.
+6. **Brilliancy Prize** (best game, voted by community) — 10k coins + featured on homepage.
+7. **Upset of the Tournament** — biggest rating-diff win → 5k coins + badge.
+8. **Fighting Spirit Prize** — fewest draws among top 50 → 5k coins.
+9. **Junior Prize** (U16) and **Veteran Prize** (50+) — separate sub-podiums.
+10. **Country Cup** — top 3 countries by sum-of-top-5 points → team badge for all members.
+
+**Engagement / virality**
+11. **Live "On the Board Now" ticker** on /dragan-brakus/live showing top-board moves in real time.
+12. **Per-round share cards** auto-generated PNG ("I scored 4½/5 in DB Cup — join me") for Viber/IG/X.
+13. **Predictions market** — users spend Master Coins to predict champion; winners split a pot.
+14. **Spectator chat + emoji rain** on top 3 boards during live rounds.
+15. **Round recap auto-post** — edge function summarises each round into a /news article with crosstable.
+16. **Streamer overlay** — `/dragan-brakus/overlay?player={id}` transparent OBS widget with score, opponent, board.
+17. **Invite leaderboard** — most referrals to the Cup wins 10k coins + "Brakus Ambassador" badge.
+
+**Reliability / fairness**
+18. **Auto-bye recovery** — if a player disconnects, 60s reconnect grace + auto-forfeit timer with notification.
+19. **Pre-round readiness check** ("Click READY in next 2 min") to filter no-shows before pairings lock.
+20. **Post-tournament hall of fame** page `/dragan-brakus/hall-of-fame` — permanent record, JSON-LD `SportsEvent` + `Person` for SEO long-tail ("Dragan Brakus Cup 2026 winner").
+
+---
+
+### Files to add / change
 
 ```text
-draft → registration_open → registration_locked → round_in_progress
-  → round_closed → (next round)… → finished → archived
+supabase/migrations/<ts>_tournament_engine_wave2.sql    standings view, prize ladders, predictions, hall_of_fame
+supabase/functions/tournament-anticheat-scan/index.ts   anti-cheat worker
+supabase/functions/tournament-round-recap/index.ts      auto news post per round
+supabase/functions/tournament-export/index.ts           TRF16 + PGN + XLSX + PDF upgrade
+supabase/functions/tournament-engine/index.ts           readiness check + auto-bye recovery hooks
+src/pages/DraganBrakusLive.tsx                          ticker, top-board chat, podium
+src/pages/DraganBrakusHallOfFame.tsx                    new
+src/pages/DraganBrakusOverlay.tsx                       OBS streamer widget
+src/components/tournament/ShareCard.tsx                 per-round PNG share
+src/components/tournament/PredictionsMarket.tsx
+src/components/admin/TournamentFairPlay.tsx             new admin tab
+src/components/admin/TournamentTestHarness.tsx          512-bot dry run extension
+src/pages/AdminTournament.tsx                           wire Fair Play tab + prize ladder editor
+src/pages/DraganBrakus.tsx                              new prize section + ambassador CTA
+docs/DB_CUP_PRIZE_STRUCTURE.md                          single source of truth
 ```
 
-Transitions are admin-triggered OR cron-triggered (auto-start, auto-close round when all results in).
-
-Each transition runs validations (see §5) and writes a row to `tournament_audit_log` for traceability.
-
-## 2. Round Flow (automated)
-
-For each round 1…9:
-
-1. Lock previous round (no result edits without admin override).
-2. Verify all pairings have a result (forfeit timeout = loss after `forfeit_minutes`).
-3. Recompute scores + tiebreaks via `recalc_tournament_tiebreaks`.
-4. Generate next round via `tournament-pair-swiss` (Dutch Swiss, FIDE-compliant):
-   - No rematch
-   - Color balance (avoid 3rd same color in a row)
-   - Float handling
-   - Single bye per player; bye gets 1 point
-5. Publish pairings, notify players (push + email).
-6. Start clocks; players play 3+2 blitz.
-7. Auto-ingest results from `online_games` (link `game_id` ↔ `pairing_id`).
-8. When all results in → close round, advance.
-
-After round 9 → declare winner, lock standings, award `tournament_titles`, fire `tournament-finalize` (prizes, PGN bundle, exports).
-
-## 3. Admin Panel `/admin/tournaments/:id`
-
-One screen, four tabs:
-
-- **Players** — approve / reject / disqualify, edit FIDE info, set seed.
-- **Rounds** — start next round, edit individual results, force-pair, undo last round.
-- **Standings** — live table with all tiebreaks, export buttons.
-- **Settings** — name, date, time control, rounds, visibility, prize description, lock/unlock registration, pause/resume, end tournament early.
-
-Gated by `has_role(auth.uid(),'admin')` OR `tournaments.organizer_id = auth.uid()`.
-
-## 4. Live Public Pages
-
-- `/dragan-brakus/live` — already exists; extend with: per-round pairings tab, player click-through to mini profile, board-by-board live games widget.
-- `/tournaments/:id/standings` — printable table (rank, name, country flag, rating, points, Buchholz, BH Cut 1, SB, Progressive, wins, performance).
-- `/tournaments/:id/player/:userId` — per-player tournament card: every game, color, opponent, result, running score.
-
-Standings refresh: Supabase Realtime on `tournament_registrations` + `tournament_pairings`.
-
-## 5. Pre-Round Validation Checklist
-
-Run before publishing pairings, surface red banner if any fail:
-
-- All previous results entered
-- No duplicate pairings vs. history
-- No player gets 3rd consecutive same color (unless unavoidable)
-- Bye assigned to lowest-scoring eligible player who hasn't had one
-- Score totals reconcile (sum of points = games played × 1)
-
-## 6. Anti-Cheat
-
-Extend existing `tournament_anti_cheat_flags`:
-
-- Move-time variance check (engine-like uniformity)
-- Centipawn-loss vs. opponent rating (computed by `tournament-anticheat` edge function using Stockfish WASM job queue)
-- Disconnect / reconnect log per game
-- Auto-flag → admin review queue in admin panel
-- Severity: info / warn / critical (critical = auto-pause player pending review)
-
-## 7. Exports & Integrations
-
-`tournament-export` edge function (extend existing):
-
-- TRF16 (FIDE) — for rating submission
-- Chess-Results compatible CSV
-- PGN bundle (all games concatenated)
-- PDF standings (server-side via `@react-pdf/renderer` inside the function) 
-- Excel (xlsx) standings & crosstable
-- Public JSON feed at `/api/tournaments/:id.json` for embeds
-
-Notifications: reuse `tournament-notify` for round-start push + email "Round X pairing is live, you play <opponent> with <color>".
-
-## 8. Player Profile Enrichment
-
-Add to `/u/:username` (or `/profile/:username`):
-
-- Tournament history table (event, date, place, points, performance)
-- Last 20 games with PGN viewer
-- Opening repertoire derived from PGN (top 5 ECO codes by frequency) — computed by nightly `profile-stats-refresh` job
-- Win % by color, avg moves per game, longest streak
-
-## 9. Schema Additions (migration)
-
-Only what's missing — most tables exist:
-
-- `tournaments`: add `status_machine text`, `current_round int`, `forfeit_minutes int default 5`, `registration_locked_at timestamptz`, `finished_at timestamptz`, `winner_user_id uuid`
-- `tournament_pairings`: add `online_game_id uuid references online_games(id)`, `started_at`, `finished_at`, `end_reason`
-- New `tournament_audit_log` (tournament_id, actor_id, action, payload, created_at)
-- New `tournament_round_state` (tournament_id, round, status, locked_at, published_at)
-
-All with GRANTs + RLS (admin/organizer write, public read for non-sensitive fields).
-
-## 10. Edge Functions (new or upgraded)
-
-- `tournament-engine` — state machine driver (admin + cron)
-- `tournament-pair-swiss` — already exists, harden FIDE Dutch logic
-- `tournament-ingest-result` — links `online_games` → `tournament_pairings`, auto on game finish
-- `tournament-anticheat` — async batch scoring
-- `tournament-export` — extend formats
-- `tournament-finalize` — winner, titles, prize payout, PGN bundle to storage
-
-## 11. Rollout Order
-
-1. Schema migration + audit log
-2. State machine + admin panel skeleton
-3. Result auto-ingest from `online_games`
-4. Harden Swiss pairing + validation checklist
-5. Live standings / pairings UI polish
-6. Exports (TRF, PGN, PDF, XLSX)
-7. Anti-cheat queue + admin review
-8. Player profile enrichment
-9. End-to-end dry run with `tournament-seed-bots` (512 bots, 9 rounds)
+No schema changes touch `auth/storage/realtime`. All new public tables get GRANTs + RLS in the same migration.
 
 ---
 
-## Out of scope (ask before adding)
+### Order of execution
+1. Migration (standings view, prize ladders, predictions, hall_of_fame, readiness flag).
+2. Engine waves 2 → 3 → 4 → 5 (anti-cheat, exports, dry-run).
+3. Prize ladder UI + payouts wiring.
+4. Live ticker, share cards, overlay, predictions, recap function.
+5. Hall of Fame + ambassador leaderboard.
+6. Run 512-bot dry run end-to-end and post the green-check report.
 
-- Google Calendar sync
-- Live video stream embeds per board
-- Spectator betting integration with tournament games
-- Mobile push for non-participants
-
-Approve and I'll execute in the order above, starting with the schema migration and admin panel.
+Reply **continue** to ship.
