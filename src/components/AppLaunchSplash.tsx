@@ -13,7 +13,7 @@ import { Crown } from "lucide-react";
  * Shown once per browser session. Never rendered inside the Lovable
  * editor iframe.
  */
-const SPLASH_MS = 700;
+const SPLASH_MS = 3200;
 
 export default function AppLaunchSplash() {
   const [visible, setVisible] = useState(false);
@@ -54,37 +54,55 @@ export default function AppLaunchSplash() {
             }}
           />
 
-          {/* Centered crest + wordmark — single coordinated fade-in + zoom-in */}
+          {/* Centered crest + wordmark — cinematic 3D entrance */}
           <motion.div
             className="relative flex flex-col items-center"
-            initial={{ opacity: 0, scale: 0.88 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            style={{ perspective: 1200 }}
+            initial={{ opacity: 0, scale: 0.7, rotateX: -25 }}
+            animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Halo */}
-            <div className="absolute -inset-10 blur-3xl bg-amber-400/30 rounded-full pointer-events-none" />
+            {/* Halo pulse */}
+            <motion.div
+              className="absolute -inset-10 blur-3xl bg-amber-400/30 rounded-full pointer-events-none"
+              animate={{ opacity: [0.4, 0.8, 0.4], scale: [0.95, 1.08, 0.95] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            />
 
-            {/* Crest */}
-            <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-3xl border-2 border-amber-300/60 bg-gradient-to-br from-amber-200/15 via-amber-500/10 to-black flex items-center justify-center shadow-[0_30px_80px_-10px_rgba(251,191,36,0.55)]">
+            {/* Crest with slow 3D float */}
+            <motion.div
+              className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-3xl border-2 border-amber-300/60 bg-gradient-to-br from-amber-200/15 via-amber-500/10 to-black flex items-center justify-center shadow-[0_30px_80px_-10px_rgba(251,191,36,0.55)]"
+              style={{ transformStyle: "preserve-3d" }}
+              animate={{ rotateY: [0, 12, 0, -12, 0], rotateX: [0, -6, 0, 6, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            >
               <Crown className="h-14 w-14 sm:h-16 sm:w-16 text-amber-200 drop-shadow-[0_0_18px_rgba(251,191,36,0.9)]" />
-            </div>
+            </motion.div>
 
             {/* Wordmark */}
-            <div
+            <motion.div
               className="mt-7 font-display font-black uppercase text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-300 to-amber-600 text-[clamp(2rem,9vw,3.75rem)] leading-none select-none"
               style={{ letterSpacing: "0.06em" }}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               MASTERCHESS
-            </div>
+            </motion.div>
 
             {/* Tagline */}
-            <div className="mt-3 flex items-center gap-3">
+            <motion.div
+              className="mt-3 flex items-center gap-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 1.0 }}
+            >
               <span className="h-px w-8 bg-amber-300/40" />
               <span className="font-display text-[10px] sm:text-xs uppercase tracking-[0.45em] text-amber-200/70">
                 Play · Compete · Master
               </span>
               <span className="h-px w-8 bg-amber-300/40" />
-            </div>
+            </motion.div>
           </motion.div>
         </motion.div>
       )}
