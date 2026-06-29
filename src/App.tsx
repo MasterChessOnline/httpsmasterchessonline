@@ -12,6 +12,7 @@ import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
+import EntrySplash from "@/components/EntrySplash";
 // Critical / eager route — original Home entry, no replacement shell.
 import Index from "./pages/IndexFull";
 import NotFound from "./pages/NotFound";
@@ -602,6 +603,8 @@ const App = () => (
           <MobileBottomNav />
           {/* Root-safe overlays — no welcome/onboarding modal is allowed to cover the entry homepage. */}
           <RootSafeOverlays />
+          {/* Entry splash — once per session, non-blocking, auto-hides ≤4s */}
+          <EntrySplash />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
