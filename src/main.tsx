@@ -10,11 +10,60 @@ import { bootstrapA11y } from "./lib/accessibility";
 import { captureAttribution } from "./lib/track";
 import { bootstrapSiteTheme } from "./lib/site-themes";
 
+function installEntryWatchdog() {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+
+  const isHome = window.location.pathname === "/" || window.location.pathname === "";
+  if (!isHome) return;
+
+  const check = async () => {
+    if (document.querySelector('[data-entry-ready="home"]')) return;
+
+    const key = "mc.entry.watchdog.reloaded";
+    const alreadyReloaded = sessionStorage.getItem(key) === "1";
+    const root = document.getElementById("root");
+
+    if (!alreadyReloaded) {
+      sessionStorage.setItem(key, "1");
+      sessionStorage.removeItem("mc.splash.shown");
+      try {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      } catch {}
+      try {
+        const regs = await navigator.serviceWorker?.getRegistrations?.();
+        await Promise.all((regs ?? []).map((reg) => reg.unregister()));
+      } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.set("entry", "fresh");
+      window.location.replace(url.toString());
+      return;
+    }
+
+    if (root && !document.querySelector('[data-entry-ready="home"]')) {
+      root.innerHTML = `
+        <main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#070b14;color:#fff;font-family:Inter,system-ui,sans-serif;text-align:center">
+          <section style="max-width:440px;width:100%">
+            <div style="font-size:48px;margin-bottom:14px">♛</div>
+            <h1 style="margin:0 0 10px;font-size:34px;letter-spacing:.04em;color:#f5c542">MASTERCHESS</h1>
+            <p style="margin:0 0 24px;color:#cbd5e1">Entry recovered. Choose where to start.</p>
+            <a href="/play-guest" style="display:block;background:#f5c542;color:#09090b;border-radius:14px;padding:16px 18px;margin-bottom:12px;text-decoration:none;font-weight:800">PLAY ONLINE</a>
+            <a href="/dragan-brakus" style="display:block;border:1px solid rgba(245,197,66,.5);color:#f8e7a1;border-radius:14px;padding:15px 18px;text-decoration:none;font-weight:700">DB Chess Cup</a>
+          </section>
+        </main>`;
+    }
+  };
+
+  window.setTimeout(check, 1600);
+  window.setTimeout(check, 3200);
+}
+
 bootstrapSiteTheme();
 bootstrapVisualSettings();
 bootstrapSoundPack();
 bootstrapA11y();
 captureAttribution();
+installEntryWatchdog();
 
 // Capture the install prompt at the earliest possible moment so it's never
 // missed by late-mounting components. Chrome fires `beforeinstallprompt`
