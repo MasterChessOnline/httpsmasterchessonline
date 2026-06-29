@@ -13,8 +13,8 @@ import heroBoard from "@/assets/hero-chess.jpg";
  * Tournament date: 1 July 2026, 17:00 CEST.
  */
 const DISMISS_KEY = "mc.dbcup.hero.dismissed";
-const EVENT_AT = new Date("2026-07-01T15:00:00Z").getTime(); // 17:00 CEST
-const HIDE_AFTER = new Date("2026-07-02T00:00:00Z").getTime();
+const EVENT_AT = new Date("2026-07-02T15:00:00Z").getTime(); // 17:00 CEST
+const HIDE_AFTER = new Date("2026-07-03T00:00:00Z").getTime();
 
 function useCountdown(target: number) {
   const [now, setNow] = useState(() => Date.now());
