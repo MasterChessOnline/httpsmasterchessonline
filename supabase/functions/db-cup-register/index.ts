@@ -64,9 +64,63 @@ Deno.serve(async (req) => {
     // Load tournament
     const { data: t, error: tErr } = await svc
       .from("tournaments")
-      .select("id, name, starts_at, max_players")
+      .select("id, name, starts_at, max_players, fide_verification_mode, fide_seeding_rating, fide_seeding_fallback")
       .eq("id", tournament_id).maybeSingle();
     if (tErr || !t) return json({ error: "Tournament not found" }, 404);
+
+    // FIDE verification (anti-fraud: server-side lookup overrides client identity)
+    const rawFide = (detailPatch.fide_id as string | null | undefined)?.toString().trim() || "";
+    let verified: any = null;
+    if (rawFide) {
+      if (!/^\d{4,10}$/.test(rawFide)) return json({ error: "FIDE ID must be 4–10 digits." }, 400);
+      try {
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/fide-lookup?id=${rawFide}`, {
+          headers: { apikey: ANON, Authorization: `Bearer ${ANON}` },
+        });
+        const j: any = await r.json().catch(() => ({}));
+        if (r.ok && j?.name) verified = j;
+        else if (t.fide_verification_mode === "required") {
+          return json({ error: "FIDE ID not found. Please check the number and try again." }, 400);
+        }
+      } catch {
+        if (t.fide_verification_mode === "required") return json({ error: "FIDE verification temporarily unavailable." }, 503);
+      }
+    } else if (t.fide_verification_mode === "required") {
+      return json({ error: "This tournament requires a verified FIDE ID." }, 400);
+    }
+
+    // Compute seeding rating per tournament policy
+    let seedingRating: number | null = null;
+    if (verified) {
+      const start = (t.fide_seeding_rating as "blitz"|"rapid"|"standard") || "blitz";
+      const order: Array<"blitz"|"rapid"|"standard"> = t.fide_seeding_fallback === "cascade"
+        ? [start, ...(["blitz","rapid","standard"] as const).filter((x) => x !== start)]
+        : [start];
+      for (const k of order) {
+        const v = verified[`${k}_rating`];
+        if (typeof v === "number" && v > 0) { seedingRating = v; break; }
+      }
+    }
+
+    // Verified data is authoritative — overwrite client-supplied identity
+    if (verified) {
+      const nm = String(verified.name);
+      const parts = nm.includes(",") ? nm.split(",").map((s: string) => s.trim()) : null;
+      const first = parts ? (parts[1] || "") : nm.split(/\s+/).slice(0, -1).join(" ");
+      const last = parts ? parts[0] : nm.split(/\s+/).slice(-1)[0] || "";
+      detailPatch.first_name = first || detailPatch.first_name;
+      detailPatch.last_name = last || detailPatch.last_name;
+      detailPatch.federation = (verified.federation || detailPatch.federation || "")?.toString().toUpperCase().slice(0, 3) || null;
+      detailPatch.fide_title = (verified.title || detailPatch.fide_title || "")?.toString().toUpperCase().slice(0, 3) || null;
+      detailPatch.birth_year = verified.birth_year ?? (detailPatch.birth_year ?? null);
+      detailPatch.fide_blitz_rating = verified.blitz_rating ?? null;
+      (detailPatch as any).fide_rapid_rating = verified.rapid_rating ?? null;
+      (detailPatch as any).fide_standard_rating = verified.standard_rating ?? null;
+      (detailPatch as any).fide_verified = true;
+      (detailPatch as any).fide_verified_at = new Date().toISOString();
+      (detailPatch as any).fide_verified_name = verified.name;
+      (detailPatch as any).fide_profile_url = verified.profile_url;
+    }
 
     // Capacity check
     const { count: regCount } = await svc
@@ -74,6 +128,17 @@ Deno.serve(async (req) => {
       .select("user_id", { count: "exact", head: true })
       .eq("tournament_id", tournament_id);
     if ((regCount || 0) >= (t.max_players || 500)) return json({ error: "Tournament is full" }, 409);
+
+    // FIDE-ID uniqueness within tournament
+    if (rawFide) {
+      const { data: dupe } = await svc
+        .from("tournament_registrations")
+        .select("id, user_id")
+        .eq("tournament_id", tournament_id).eq("fide_id", rawFide).maybeSingle();
+      if (dupe && dupe.user_id !== user.id) {
+        return json({ error: "This FIDE ID is already registered for this tournament." }, 409);
+      }
+    }
 
     // Already registered? -> idempotent success
     const { data: existing } = await svc
@@ -91,12 +156,13 @@ Deno.serve(async (req) => {
           tournament_id,
           user_id: user.id,
           referrer_invite_code: invite_code || null,
-          rating_at_join: 1200,
+          rating_at_join: seedingRating ?? 1200,
           ...detailPatch,
         })
         .select("id").single();
       if (insErr) return json({ error: insErr.message }, 400);
       registrationId = ins.id;
+
 
       // Credit inviter (best effort)
       if (invite_code) {
