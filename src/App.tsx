@@ -609,29 +609,23 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StartupErrorBoundary fallback={<StartupFallbackHome reason="app-render-error" />}>
-        <AuthProvider>
-          <TooltipProvider>
-            <OfflineBanner />
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <SiteRatingJsonLd />
-              {/* Home is eager and never sits behind an infinite route loader. */}
-              <div className="pb-16 md:pb-0">
-                <AnimatedRoutes />
-              </div>
-              {/* Deferred chrome: Home paints first, decorative/listener layers attach after idle. */}
-              <EntryDeferredChrome />
-              <MobileBottomNav />
-              {/* Root-safe overlays — no welcome/onboarding modal is allowed to cover the entry homepage. */}
-              <RootSafeOverlays />
-              {/* Entry splash — once per session, non-blocking, auto-hides ≤4s */}
-              <EntrySplash />
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </StartupErrorBoundary>
+      <AuthProvider>
+        <TooltipProvider>
+          <OfflineBanner />
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <SiteRatingJsonLd />
+            <div className="pb-16 md:pb-0">
+              <AnimatedRoutes />
+            </div>
+            <EntryDeferredChrome />
+            <MobileBottomNav />
+            <RootSafeOverlays />
+            <EntrySplash />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
