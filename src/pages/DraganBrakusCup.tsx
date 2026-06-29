@@ -18,6 +18,7 @@ import {
   Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink, Loader2,
 } from "lucide-react";
 import InviteShareCard from "@/components/db-cup/InviteShareCard";
+import TournamentInvitePanel from "@/components/TournamentInvitePanel";
 import ChessHostBridge from "@/components/db-cup/ChessHostBridge";
 import TournamentTestHarness from "@/components/admin/TournamentTestHarness";
 
@@ -341,6 +342,16 @@ export default function DraganBrakusCup() {
           {isRegistered && user?.id && lobbyId && (
             <InviteShareCard userId={user.id} tournamentId={lobbyId} />
           )}
+
+          {/* Universal share grid — open to everyone, no signup required */}
+          <div className="mt-4">
+            <TournamentInvitePanel
+              url={`${typeof window !== "undefined" ? window.location.origin : "https://masterchess.live"}/dragan-brakus?utm_source=share`}
+              title="DB Chess Cup — 1 July 2026"
+              message="Join me in the DB Chess Cup on MasterChess."
+            />
+          </div>
+
 
           {/* Live counter + prize escalator */}
           <div className="mt-8 grid sm:grid-cols-3 gap-3">
