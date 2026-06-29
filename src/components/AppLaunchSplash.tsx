@@ -42,7 +42,7 @@ export default function AppLaunchSplash() {
           key="splash"
           className="fixed inset-0 z-[9999] overflow-hidden bg-black flex items-center justify-center"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.65, ease: "easeInOut" } }}
+          exit={{ opacity: 0, transition: { duration: 0.35, ease: "easeInOut" } }}
         >
           {/* Soft gold radial glow centered behind the logo */}
           <div
