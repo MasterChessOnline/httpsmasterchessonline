@@ -5,7 +5,7 @@ import { Crown } from "lucide-react";
  * Ultra-light launch mark. It never waits for APIs or chunks: Home renders
  * underneath immediately, this layer just fades out fast.
  */
-const SPLASH_MS = 520;
+const SPLASH_MS = 260;
 
 export default function AppLaunchSplash() {
   const [visible, setVisible] = useState(true);
