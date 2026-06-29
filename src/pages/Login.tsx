@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,8 @@ const Login = () => {
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -57,7 +59,7 @@ const Login = () => {
     // 1-click Google. No country/name modal — that was killing conversion.
     // Profile gets sensible defaults; user can edit in Settings later.
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/dashboard",
+      redirect_uri: window.location.origin + redirectTo,
     });
     if (result.error) {
       setError(result.error.message);
@@ -77,7 +79,7 @@ const Login = () => {
       setError(error.message);
       setLoading(false);
     } else {
-      navigate("/dashboard");
+      navigate(redirectTo);
     }
   };
 
@@ -91,7 +93,7 @@ const Login = () => {
     setMagicLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      options: { emailRedirectTo: `${window.location.origin}${redirectTo}` },
     });
     setMagicLoading(false);
     if (error) setError(error.message);

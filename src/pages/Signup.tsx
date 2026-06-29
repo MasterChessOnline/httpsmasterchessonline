@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,8 @@ const Signup = () => {
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -56,7 +58,7 @@ const Signup = () => {
     // 1-click Google: skip country/name modal (killed conversion).
     // Defaults are applied; user can edit anything in Settings.
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/dashboard",
+      redirect_uri: window.location.origin + redirectTo,
     });
     if (result.error) {
       setError(result.error.message);
@@ -86,7 +88,7 @@ const Signup = () => {
           starting_level: startingLevel.key,
           starting_rating: startingLevel.rating,
         },
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: `${window.location.origin}${redirectTo}`,
       },
     });
 
@@ -109,7 +111,7 @@ const Signup = () => {
     }
 
     track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key });
-    navigate("/dashboard");
+    navigate(redirectTo);
   };
 
   const handleAppleLogin = async () => {

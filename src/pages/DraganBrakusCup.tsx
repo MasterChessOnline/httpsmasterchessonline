@@ -2,7 +2,7 @@
 // Full tournament info + Event JSON-LD so Google Search / Maps / GBP can pick
 // it up as a structured event tied to the MasterChess organization.
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Seo from "@/components/Seo";
@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import {
   Trophy, Clock, Users, ShieldCheck, MapPin, Calendar,
-  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink, Loader2,
+  Zap, Target, Award, ChevronRight, Coins, Sparkles, ExternalLink,
 } from "lucide-react";
 import InviteShareCard from "@/components/db-cup/InviteShareCard";
 import TournamentInvitePanel from "@/components/TournamentInvitePanel";
@@ -34,13 +34,12 @@ type Sponsor = {
 
 
 const EVENT_NAME = "Dragan Brakus Cup";
-const EVENT_START = "2026-06-30T17:00:00+02:00"; // 17:00 CEST / 15:00 UTC
-const EVENT_END = "2026-06-30T20:30:00+02:00";
+const EVENT_START = "2026-07-02T17:00:00+02:00"; // 17:00 CEST / 15:00 UTC
+const EVENT_END = "2026-07-02T20:30:00+02:00";
 const SITE = "https://masterchess.live";
 const URL = `${SITE}/dragan-brakus`;
 
 export default function DraganBrakusCup() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [playerCount, setPlayerCount] = useState<number>(0);
@@ -49,7 +48,6 @@ export default function DraganBrakusCup() {
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [registering, setRegistering] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     if (!user?.id) { setIsAdmin(false); return; }
@@ -112,42 +110,6 @@ export default function DraganBrakusCup() {
     })();
     return () => { cancelled = true; };
   }, [user?.id, lobbyId]);
-
-  const handleInstantRegister = async () => {
-    if (!user) {
-      navigate(`/login?redirect=${encodeURIComponent("/dragan-brakus")}`);
-      return;
-    }
-    if (!lobbyId) return;
-    setRegistering(true);
-    try {
-      // Pull invite code from URL ?invite= or sessionStorage (set by /i/:code)
-      const url = new window.URL(window.location.href);
-      const inviteFromUrl = url.searchParams.get("invite") || "";
-      const inviteFromStore = (() => { try { return sessionStorage.getItem("db_cup_invite_code") || ""; } catch { return ""; } })();
-      const invite_code = (inviteFromUrl || inviteFromStore || "").trim().toUpperCase() || null;
-
-      const { data, error } = await supabase.functions.invoke("db-cup-register", {
-        body: { tournament_id: lobbyId, invite_code },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) {
-        toast({ title: "Registration blocked", description: (data as any).error, variant: "destructive" });
-        return;
-      }
-      setIsRegistered(true);
-      setPlayerCount(c => c + 1);
-      try { sessionStorage.removeItem("db_cup_invite_code"); } catch {}
-      toast({
-        title: "You're in! ✓",
-        description: "A confirmation email is on its way. Share your invite link to earn coins.",
-      });
-    } catch (e: any) {
-      toast({ title: "Could not register", description: e?.message || String(e), variant: "destructive" });
-    } finally {
-      setRegistering(false);
-    }
-  };
 
   const handleSaveFide = async () => {
     if (!user || !lobbyId) return;
@@ -242,7 +204,7 @@ export default function DraganBrakusCup() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="Dragan Brakus Cup — Official MasterChess Blitz Tournament"
-        description="Dragan Brakus Cup — 30 June 2026, 17:00 CEST. 9-round Swiss Blitz (3+2), up to 500 players, live pairings, FIDE-style tie-breaks, Chess-Results export."
+        description="Dragan Brakus Cup — 2 July 2026, 17:00 CEST. 9-round Swiss Blitz (3+2), up to 500 players, live pairings, FIDE-style tie-breaks, Chess-Results export."
         path="/dragan-brakus"
         type="website"
         jsonLd={jsonLd}
@@ -266,7 +228,7 @@ export default function DraganBrakusCup() {
           </p>
           <div className="mt-6 flex flex-wrap gap-2 text-sm">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Calendar className="h-4 w-4 text-yellow-400" /> 30 June 2026 · 17:00 CEST
+              <Calendar className="h-4 w-4 text-yellow-400" /> 2 July 2026 · 17:00 CEST
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
               <Clock className="h-4 w-4 text-yellow-400" /> Blitz 3+2
@@ -289,14 +251,10 @@ export default function DraganBrakusCup() {
                 </Link>
               </Button>
             ) : (
-              <Button
-                size="lg"
-                className="bg-yellow-500 text-black hover:bg-yellow-400"
-                onClick={handleInstantRegister}
-                disabled={registering || !lobbyId}
-              >
-                {registering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
-                Register now (1 click) <ChevronRight className="h-4 w-4 ml-1" />
+              <Button asChild size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400">
+                <Link to="/dragan-brakus/register">
+                  <Zap className="h-4 w-4 mr-1" /> Register now <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
               </Button>
             )}
             <Button asChild size="lg" variant="outline">
@@ -601,7 +559,7 @@ export default function DraganBrakusCup() {
                 </a>
                 <a
                   className="rounded-md border border-yellow-500/40 px-3 py-2 hover:bg-yellow-500/10"
-                  href={`mailto:chess-results@swiss-manager.at?subject=${encodeURIComponent("Tournament announcement — DB Chess Cup (SRB)")}&body=${encodeURIComponent("Dear Chess-Results desk,\n\nPlease publish the attached tournament on Chess-Results Serbia.\nShort name: DB Chess Cup\nFull name: Dragan Brakus Cup\nFederation: SRB\nStart: 2026-06-30 17:00 CEST\nFormat: 9-round Swiss Blitz 3+2\nWebsite: https://masterchess.live/dragan-brakus\n\nFiles attached.\n\nThank you,\nMasterChess.live\nnikola@masterchess.live")}`}
+                  href={`mailto:chess-results@swiss-manager.at?subject=${encodeURIComponent("Tournament announcement — DB Chess Cup (SRB)")}&body=${encodeURIComponent("Dear Chess-Results desk,\n\nPlease publish the attached tournament on Chess-Results Serbia.\nShort name: DB Chess Cup\nFull name: Dragan Brakus Cup\nFederation: SRB\nStart: 2026-07-02 17:00 CEST\nFormat: 9-round Swiss Blitz 3+2\nWebsite: https://masterchess.live/dragan-brakus\n\nFiles attached.\n\nThank you,\nMasterChess.live\nnikola@masterchess.live")}`}
                 >
                   4. Open mail client →
                 </a>
@@ -655,14 +613,10 @@ export default function DraganBrakusCup() {
               </Link>
             </Button>
           ) : (
-            <Button
-              size="lg"
-              className="bg-yellow-500 text-black hover:bg-yellow-400"
-              onClick={handleInstantRegister}
-              disabled={registering || !lobbyId}
-            >
-              {registering ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
-              Register for the Dragan Brakus Cup
+            <Button asChild size="lg" className="bg-yellow-500 text-black hover:bg-yellow-400">
+              <Link to="/dragan-brakus/register">
+                <Zap className="h-4 w-4 mr-1" /> Register for the Dragan Brakus Cup
+              </Link>
             </Button>
           )}
         </div>
