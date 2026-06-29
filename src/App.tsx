@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import ChessLoadingScreen from "@/components/ChessLoadingScreen";
 import RouteLoader from "@/components/RouteLoader";
 import SiteRatingJsonLd from "@/components/SiteRatingJsonLd";
 import CursorGlow from "@/components/CursorGlow";
@@ -203,14 +202,11 @@ import GameInviteListener from "@/components/GameInviteListener";
 import Analytics from "@/components/Analytics";
 import AppLaunchSplash from "@/components/AppLaunchSplash";
 import OfflineBanner from "@/components/OfflineBanner";
-import EntryQuickDashboard from "@/components/EntryQuickDashboard";
 import ReferralTracker from "@/hooks/useReferralTracker";
 import DonationMilestoneBodyAttr from "@/components/DonationMilestoneBodyAttr";
 
 
 // Non-critical overlays — lazy-loaded so they don't block first paint.
-const CinematicIntro = lazy(() => import("@/components/CinematicIntro"));
-const WelcomeIntroPopup = lazy(() => import("@/components/WelcomeIntroPopup"));
 const NotificationPrompt = lazy(() => import("@/components/NotificationPrompt"));
 const DailyReminderNotifier = lazy(() => import("@/components/DailyReminderNotifier"));
 const SmartNotifier = lazy(() => import("@/components/SmartNotifier"));
@@ -469,27 +465,34 @@ function AnimatedRoutes() {
         </Routes>
   );
 
+  const renderedRoutes = lite ? (
+    routes
+  ) : (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8, scale: 0.995 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -8, scale: 0.995 }}
+        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {routes}
+      </motion.div>
+    </AnimatePresence>
+  );
+
+  const routeContent = location.pathname === "/" ? (
+    renderedRoutes
+  ) : (
+    <Suspense fallback={<RouteLoader />}>{renderedRoutes}</Suspense>
+  );
+
   return (
     <>
       <Analytics />
       <ReferralTracker />
       <DonationMilestoneBodyAttr />
-      
-      {lite ? (
-        routes
-      ) : (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 8, scale: 0.995 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.995 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {routes}
-          </motion.div>
-        </AnimatePresence>
-      )}
+      {routeContent}
     </>
   );
 }
@@ -506,24 +509,19 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <SiteRatingJsonLd />
-          {/* Primary route boundary — only this shows the thin loader bar */}
-          <Suspense fallback={<RouteLoader />}>
-            <div className="pb-16 md:pb-0">
-              <AnimatedRoutes />
-            </div>
-          </Suspense>
+          {/* Home is eager and never sits behind the route loader. Lazy routes keep their own boundary inside AnimatedRoutes. */}
+          <div className="pb-16 md:pb-0">
+            <AnimatedRoutes />
+          </div>
           {/* Eager chrome — never suspends */}
           <AntiTiltWatcher />
           <TitleUnlockGate />
-          <EntryQuickDashboard />
           <GameInviteListener />
           <MobileBottomNav />
           <BrakusRibbon />
           <StreakFlexController />
           <FloatingShareButton />
           {/* Non-blocking overlays — each isolated so it can NEVER block first paint */}
-          <Suspense fallback={null}><WelcomeIntroPopup /></Suspense>
-          <Suspense fallback={null}><CinematicIntro /></Suspense>
           <Suspense fallback={null}><NotificationPrompt /></Suspense>
           <Suspense fallback={null}><DailyReminderNotifier /></Suspense>
           <Suspense fallback={null}><SmartNotifier /></Suspense>
