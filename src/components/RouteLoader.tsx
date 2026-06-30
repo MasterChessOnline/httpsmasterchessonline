@@ -5,18 +5,13 @@ export default function RouteLoader() {
     <div
       aria-label="Loading"
       role="status"
-      className="fixed inset-0 z-[60] grid place-items-center overflow-hidden bg-background pointer-events-none"
+      className="fixed left-1/2 top-20 z-[60] -translate-x-1/2 pointer-events-none"
     >
-      <div className="absolute left-0 right-0 top-0 h-1 overflow-hidden bg-primary/10">
-        <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-primary to-transparent animate-[routeloader_0.9s_ease-in-out_infinite]" />
-      </div>
-      <div className="flex flex-col items-center text-center px-6">
-        <div className="grid h-20 w-20 place-items-center rounded-2xl border border-primary/45 bg-primary/10 shadow-[0_22px_80px_hsl(var(--primary)/0.24)]">
-          <Crown className="h-10 w-10 text-primary" aria-hidden="true" />
-        </div>
-        <div className="mt-5 font-display text-5xl sm:text-7xl font-black uppercase text-primary leading-none tracking-normal">
-          MASTERCHESS
-        </div>
+      <div className="flex items-center gap-2 rounded-full border border-primary/25 bg-background/75 px-3 py-2 text-xs font-semibold text-primary shadow-[0_18px_60px_hsl(var(--primary)/0.16)] backdrop-blur-md">
+        <Crown className="h-4 w-4" aria-hidden="true" />
+        <span className="h-1.5 w-20 overflow-hidden rounded-full bg-primary/15">
+          <span className="block h-full w-1/3 bg-primary animate-[routeloader_0.9s_ease-in-out_infinite]" />
+        </span>
       </div>
       <style>{`@keyframes routeloader{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}`}</style>
     </div>
