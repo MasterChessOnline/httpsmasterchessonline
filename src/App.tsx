@@ -230,8 +230,6 @@ const Ranked = lazy(() => import("./pages/Ranked"));
 const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
 
-const STARTUP_TIMEOUT_MS = 5000;
-
 function entryLog(label: string, payload?: unknown) {
   try {
     console.info(`[MasterChess Entry] ${label}`, payload ?? "");
