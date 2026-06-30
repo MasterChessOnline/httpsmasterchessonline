@@ -238,7 +238,7 @@ function entryLog(label: string, payload?: unknown) {
   }
 }
 
-function RootSafeOverlays() {
+function RootDeferredOverlays() {
   const location = useLocation();
   const isHome = location.pathname === "/";
   const [ready, setReady] = useState(!isHome);
@@ -619,7 +619,7 @@ const App = () => {
             </div>
             <EntryDeferredChrome />
             <MobileBottomNav />
-            <RootSafeOverlays />
+            <RootDeferredOverlays />
             <EntrySplash />
           </BrowserRouter>
         </TooltipProvider>
