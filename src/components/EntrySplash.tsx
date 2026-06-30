@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 /**
- * Premium entry splash — plays once per browser session (sessionStorage),
- * fully NON-BLOCKING: the homepage is mounted underneath and stays
- * interactive. If anything goes wrong, the splash auto-removes after
- * MAX_MS so the user can never be stuck.
+ * Premium entry splash — plays once per browser session (sessionStorage).
+ * The homepage mounts underneath immediately; this overlay only performs the
+ * queen intro and then removes itself after a strict 3–4 second window.
  */
 const MIN_MS = 3000;
-const MAX_MS = 4000;
+const MAX_MS = 3800;
 const KEY = "mc.entrySplash.v3";
 
 export default function EntrySplash() {
@@ -25,27 +24,11 @@ export default function EntrySplash() {
   useEffect(() => {
     if (!show) return;
     try { sessionStorage.setItem(KEY, "done"); } catch {}
-
-    const start = performance.now();
-    let hideTimer: number | null = null;
-
-    const finish = () => {
-      const elapsed = performance.now() - start;
-      const wait = Math.max(0, MIN_MS - elapsed);
-      hideTimer = window.setTimeout(() => setShow(false), wait);
-    };
-
-    // Hide as soon as the window load event fires (or fallback at MAX_MS).
-    if (document.readyState === "complete") {
-      finish();
-    } else {
-      window.addEventListener("load", finish, { once: true });
-    }
+    const timer = window.setTimeout(() => setShow(false), MIN_MS);
     const hardCap = window.setTimeout(() => setShow(false), MAX_MS);
 
     return () => {
-      window.removeEventListener("load", finish);
-      if (hideTimer) window.clearTimeout(hideTimer);
+      window.clearTimeout(timer);
       window.clearTimeout(hardCap);
     };
   }, [show]);
