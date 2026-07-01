@@ -263,7 +263,7 @@ export default function DraganBrakusRegister() {
             <Badge className="mb-3 border-amber-300/40 bg-amber-400/20 text-amber-200">Registration open</Badge>
             <h1 className="text-3xl font-black sm:text-4xl">Register for {title}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              2 July 2026 · 17:00 CEST · FIDE ID optional. If you have FIDE ID, we auto-fill your public name; if not, type your name manually.
+              5 July 2026 · 17:00 CEST · FIDE ID optional. If you have FIDE ID, we auto-fill your public name; if not, type your name manually.
             </p>
           </div>
 

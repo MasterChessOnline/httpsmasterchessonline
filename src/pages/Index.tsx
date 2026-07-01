@@ -11,7 +11,7 @@ const quickLinks = [
   { to: "/play-guest", title: "Play instantly", text: "Start a chess game now — no waiting.", icon: Play },
   { to: "/play", title: "Play bots", text: "Train against MasterChess bots.", icon: Swords },
   { to: "/learn", title: "Learn chess", text: "Lessons, openings and puzzles.", icon: GraduationCap },
-  { to: "/dragan-brakus", title: "DB Chess Cup", text: "Official 2 July 2026 tournament.", icon: Trophy },
+  { to: "/dragan-brakus", title: "DB Chess Cup", text: "Official 5 July 2026 tournament.", icon: Trophy },
 ];
 
 export default function Index() {
@@ -92,7 +92,7 @@ export default function Index() {
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-300">
                   <Users className="h-4 w-4" /> Tournament registration is open
                 </div>
-                <h2 className="mt-2 text-2xl font-bold">DB Chess Cup · 2 July 2026 · 17:00 CEST</h2>
+                <h2 className="mt-2 text-2xl font-bold">DB Chess Cup · 5 July 2026 · 17:00 CEST</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Add your optional FIDE ID or just type your name. After registration you appear on the live standings list.
                 </p>

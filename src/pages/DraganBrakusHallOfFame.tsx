@@ -96,7 +96,7 @@ export default function DraganBrakusHallOfFame() {
             <Trophy className="h-10 w-10 text-yellow-300 mx-auto mb-3" />
             <h2 className="text-xl font-semibold">No editions have concluded yet.</h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-              The first edition is on 2 July 2026. Be one of the first names ever
+              The first edition is on 5 July 2026. Be one of the first names ever
               engraved here — register now.
             </p>
             <Button asChild className="mt-5 bg-yellow-500 text-black hover:bg-yellow-400">
