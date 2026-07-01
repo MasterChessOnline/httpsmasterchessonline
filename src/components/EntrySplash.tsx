@@ -6,16 +6,15 @@ import { AnimatePresence, motion } from "framer-motion";
  * The homepage mounts underneath immediately; this overlay only performs the
  * queen intro and then removes itself after a strict 3–4 second window.
  */
-const MIN_MS = 3000;
-const MAX_MS = 3800;
-const KEY = "mc.entrySplash.v3";
+const MIN_MS = 2200;
+const MAX_MS = 3000;
+const KEY = "mc.entrySplash.v4";
 
 export default function EntrySplash() {
   const [show, setShow] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
       if (sessionStorage.getItem(KEY) === "done") return false;
-      // Respect reduced motion users — skip entirely.
       if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return false;
     } catch {}
     return true;
@@ -24,12 +23,23 @@ export default function EntrySplash() {
   useEffect(() => {
     if (!show) return;
     try { sessionStorage.setItem(KEY, "done"); } catch {}
-    const timer = window.setTimeout(() => setShow(false), MIN_MS);
-    const hardCap = window.setTimeout(() => setShow(false), MAX_MS);
-
+    const dismiss = () => setShow(false);
+    const timer = window.setTimeout(dismiss, MIN_MS);
+    const hardCap = window.setTimeout(dismiss, MAX_MS);
+    // Safety net: if the tab is hidden or user interacts, drop the overlay.
+    window.addEventListener("pointerdown", dismiss, { once: true });
+    window.addEventListener("keydown", dismiss, { once: true });
+    const onVis = () => { if (document.visibilityState === "hidden") dismiss(); };
+    document.addEventListener("visibilitychange", onVis);
+    // Absolute failsafe — never let the splash outlive 3.5s under any condition.
+    const failsafe = window.setTimeout(dismiss, 3500);
     return () => {
       window.clearTimeout(timer);
       window.clearTimeout(hardCap);
+      window.clearTimeout(failsafe);
+      window.removeEventListener("pointerdown", dismiss);
+      window.removeEventListener("keydown", dismiss);
+      document.removeEventListener("visibilitychange", onVis);
     };
   }, [show]);
 
