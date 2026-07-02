@@ -1,9 +1,9 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-const AUTH_TIMEOUT_MS = 5000;
-const API_TIMEOUT_MS = 3000;
+const AUTH_TIMEOUT_MS = 1000;
+const API_TIMEOUT_MS = 5000;
 
 function entryLog(label: string, payload?: unknown) {
   try {
@@ -61,24 +61,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     // Sensitive columns (master_coins, login_streak, welcome_*, push_notifications_enabled, etc.)
     // are not exposed through PostgREST. Use SECURITY DEFINER RPC for the owner's full row.
     try {
+      entryLog("Loading profile...");
       const { data } = await withTimeout(supabase.rpc("get_my_profile"));
       const row = Array.isArray(data) ? data[0] : data;
       setProfile((row ?? null) as Profile | null);
+      entryLog("Finished", { step: "PROFILE_LOADED" });
     } catch (error) {
       entryLog("ERROR_STATE", { step: "INIT_DATA", message: "profile skipped", error });
       setProfile(null);
     }
-  };
+  }, []);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (session?.user?.id) {
       await fetchProfile(session.user.id);
     }
-  };
+  }, [fetchProfile, session?.user?.id]);
 
   // Touch the user's daily streak at most once per UTC day, per browser.
   // Auto-resets when a day is missed (handled inside the RPC logic below).
@@ -136,7 +138,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let alive = true;
+    let initialFinished = false;
+    let lastSessionKey = "__unset__";
     entryLog("AUTH_START");
+    entryLog("Checking auth...");
     const authTimeout = window.setTimeout(() => {
       if (!alive) return;
       entryLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth timeout; continuing" });
@@ -144,40 +149,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, AUTH_TIMEOUT_MS);
 
     const finishAuth = (label: string) => {
-      if (!alive) return;
+      if (!alive || initialFinished) return;
+      initialFinished = true;
       window.clearTimeout(authTimeout);
       setLoading(false);
       entryLog("AUTH_DONE", { source: label });
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!alive) return;
-        setSession(session);
-        if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-            touchDailyStreak(session.user.id).catch((error) =>
-              entryLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
-            );
-          }, 0);
+    const loadUserDataInBackground = (userId: string) => {
+      window.setTimeout(() => {
+        fetchProfile(userId);
+        withTimeout(touchDailyStreak(userId), API_TIMEOUT_MS).catch((error) =>
+          entryLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
+        );
+      }, 0);
+    };
+
+    const applySession = (nextSession: Session | null, source: string) => {
+      if (!alive) return;
+      const nextKey = nextSession?.access_token || "no-session";
+      if (nextKey !== lastSessionKey) {
+        lastSessionKey = nextKey;
+        setSession(nextSession);
+        if (nextSession?.user) {
+          entryLog("Auth OK", { source });
+          loadUserDataInBackground(nextSession.user.id);
         } else {
           setProfile(null);
         }
-        finishAuth("state-change");
+      }
+      finishAuth(source);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        applySession(session, "state-change");
       }
     );
 
     withTimeout(supabase.auth.getSession(), API_TIMEOUT_MS).then(({ data: { session } }) => {
-      if (!alive) return;
-      setSession(session);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-        touchDailyStreak(session.user.id).catch((error) =>
-          entryLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
-        );
-      }
-      finishAuth("get-session");
+      applySession(session, "get-session");
     }).catch((error) => {
       entryLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth skipped", error });
       finishAuth("get-session-error");
@@ -188,7 +199,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       window.clearTimeout(authTimeout);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfile]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

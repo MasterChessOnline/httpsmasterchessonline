@@ -1,7 +1,7 @@
 // Detects when the current user crosses a title threshold and persists
 // the highest title earned in profiles.highest_title_key so it never resets.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getTitle, maxTitleKey } from "@/lib/titles";
@@ -9,6 +9,7 @@ import { getTitle, maxTitleKey } from "@/lib/titles";
 export function useTitleUnlock() {
   const { user, profile, refreshProfile } = useAuth();
   const [unlockedKey, setUnlockedKey] = useState<string | null>(null);
+  const attemptedPersistRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user || !profile) return;
@@ -29,14 +30,23 @@ export function useTitleUnlock() {
 
     // If current title key is higher than what we've stored, that's a NEW unlock.
     if (currentTitle.key !== "unranked" && currentTitle.key !== highestKey && highest === currentTitle.key) {
+      const attemptKey = `${user.id}:${currentTitle.key}`;
+      if (attemptedPersistRef.current === attemptKey) return;
+      attemptedPersistRef.current = attemptKey;
       setUnlockedKey(currentTitle.key);
       supabase
         .from("profiles")
         .update({ highest_title_key: currentTitle.key } as any)
         .eq("user_id", user.id)
-        .then(() => refreshProfile?.());
+        .then(({ error }) => {
+          if (error) {
+            console.info("[MasterChess Entry] ERROR_STATE", { step: "TITLE_UNLOCK", message: "title persist skipped", error });
+            return;
+          }
+          window.setTimeout(() => refreshProfile?.(), 0);
+        });
     }
-  }, [user, profile, refreshProfile]);
+  }, [user?.id, profile, refreshProfile]);
 
   return {
     unlockedKey,

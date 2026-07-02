@@ -1,16 +1,28 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
 
 /**
  * Premium entry splash — plays once per browser session (sessionStorage).
  * The homepage mounts underneath immediately; this overlay only performs the
- * queen intro and then removes itself after a strict 3–4 second window.
+ * queen intro and then removes itself after a strict 3 second window.
  */
-const MIN_MS = 2200;
-const MAX_MS = 3000;
+const SPLASH_MS = 3000;
+const FAILSAFE_MS = 3500;
+const HOME_FORCE_MS = 5000;
 const KEY = "mc.entrySplash.v4";
 
+function entryLog(label: string, payload?: unknown) {
+  try {
+    console.info(`[MasterChess Entry] ${label}`, payload ?? "");
+  } catch {
+    // Entry logging must never affect startup.
+  }
+}
+
 export default function EntrySplash() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [show, setShow] = useState(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -22,26 +34,35 @@ export default function EntrySplash() {
 
   useEffect(() => {
     if (!show) return;
-    try { sessionStorage.setItem(KEY, "done"); } catch {}
-    const dismiss = () => setShow(false);
-    const timer = window.setTimeout(dismiss, MIN_MS);
-    const hardCap = window.setTimeout(dismiss, MAX_MS);
-    // Safety net: if the tab is hidden or user interacts, drop the overlay.
-    window.addEventListener("pointerdown", dismiss, { once: true });
-    window.addEventListener("keydown", dismiss, { once: true });
-    const onVis = () => { if (document.visibilityState === "hidden") dismiss(); };
-    document.addEventListener("visibilitychange", onVis);
+    try { window.dispatchEvent(new CustomEvent("mc:entry-started")); } catch {}
+    entryLog("Entry started");
+    const dismiss = () => {
+      try { sessionStorage.setItem(KEY, "done"); } catch {}
+      setShow(false);
+      entryLog("Loading homepage...");
+      try { window.dispatchEvent(new CustomEvent("mc:entry-finished")); } catch {}
+    };
+    const timer = window.setTimeout(dismiss, SPLASH_MS);
     // Absolute failsafe — never let the splash outlive 3.5s under any condition.
-    const failsafe = window.setTimeout(dismiss, 3500);
+    const failsafe = window.setTimeout(dismiss, FAILSAFE_MS);
     return () => {
       window.clearTimeout(timer);
-      window.clearTimeout(hardCap);
       window.clearTimeout(failsafe);
-      window.removeEventListener("pointerdown", dismiss);
-      window.removeEventListener("keydown", dismiss);
-      document.removeEventListener("visibilitychange", onVis);
     };
   }, [show]);
+
+  useEffect(() => {
+    if (!["/", "/home", "/homepage"].includes(location.pathname)) return;
+    const force = window.setTimeout(() => {
+      const homeReady = document.querySelector('[data-entry-ready="home"]');
+      if (!homeReady) {
+        entryLog("ERROR_STATE", { step: "HOME_FALLBACK", message: "Homepage not rendered after 5s; forcing /homepage" });
+        navigate("/homepage", { replace: true });
+      }
+      setShow(false);
+    }, HOME_FORCE_MS);
+    return () => window.clearTimeout(force);
+  }, [location.pathname, navigate]);
 
   return (
     <AnimatePresence>
