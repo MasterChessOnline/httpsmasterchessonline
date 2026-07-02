@@ -4625,6 +4625,7 @@ export type Database = {
         Returns: boolean
       }
       dismiss_game_invite: { Args: { p_invite_id: string }; Returns: Json }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
