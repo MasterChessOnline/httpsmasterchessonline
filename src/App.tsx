@@ -355,6 +355,7 @@ function AnimatedRoutes() {
     <Routes location={location}>
           <Route path="/" element={<Index />} />
           <Route path="/home" element={<Index />} />
+          <Route path="/homepage" element={<Index />} />
           <Route path="/pitch" element={<Pitch />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/play" element={<Play />} />

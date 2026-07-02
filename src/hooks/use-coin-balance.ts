@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+const COIN_TIMEOUT_MS = 5000;
+
+function withTimeout<T>(promise: PromiseLike<T>, ms = COIN_TIMEOUT_MS): Promise<T> {
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise<T>((_, reject) => window.setTimeout(() => reject(new Error(`timeout-${ms}ms`)), ms)),
+  ]);
+}
+
 /**
  * Live-subscribed coin balance for the current user. Refreshes on:
  *  - mount / auth change
@@ -18,11 +27,15 @@ export function useCoinBalance(): { balance: number | null; loading: boolean; re
     const fetchBal = async () => {
       if (!user) { setBalance(null); setLoading(false); return; }
       setLoading(true);
-      const { data } = await supabase.rpc("get_my_profile");
-      const row = Array.isArray(data) ? data[0] : data;
-      if (!cancelled) {
-        setBalance(((row as any)?.master_coins ?? 0) as number);
-        setLoading(false);
+      try {
+        const { data } = await withTimeout(supabase.rpc("get_my_profile"));
+        const row = Array.isArray(data) ? data[0] : data;
+        if (!cancelled) setBalance(((row as any)?.master_coins ?? 0) as number);
+      } catch (error) {
+        console.info("[MasterChess Entry] ERROR_STATE", { step: "COINS_LOAD", message: "coins skipped", error });
+        if (!cancelled) setBalance(null);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
     fetchBal();

@@ -197,16 +197,51 @@ const Index = () => {
   const heroScale = useTransform(scrollYProgress, [0, 1], allowHeavy ? [1, 0.95] : [1, 1]);
 
   useEffect(() => {
+    console.info("[MasterChess Entry] Homepage rendered");
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const withHomeTimeout = async <T,>(label: string, promise: PromiseLike<T>): Promise<T | null> => {
+      try {
+        return await Promise.race([
+          Promise.resolve(promise),
+          new Promise<T>((_, reject) => window.setTimeout(() => reject(new Error("timeout-5000ms")), 5000)),
+        ]);
+      } catch (error) {
+        console.info("[MasterChess Entry] ERROR_STATE", { step: label, message: "home data skipped", error });
+        return null;
+      }
+    };
+
     const fetchData = async () => {
-      if (user) {
-        const { data: games } = await supabase
+      const recentPromise = user
+        ? withHomeTimeout(
+            "HOME_RECENT_GAMES",
+            supabase
           .from("online_games")
           .select("id, result, time_control_label, pgn, created_at, white_player_id, black_player_id")
           .eq("status", "finished")
           .or(`white_player_id.eq.${user.id},black_player_id.eq.${user.id}`)
           .order("created_at", { ascending: false })
-          .limit(10);
-        if (games) {
+              .limit(10),
+          )
+        : Promise.resolve(null);
+
+      const leadersPromise = withHomeTimeout(
+        "HOME_LEADERBOARD",
+        supabase
+          .from("profiles")
+          .select("user_id, display_name, rating, games_won, games_played")
+          .order("rating", { ascending: false })
+          .limit(5),
+      );
+
+      const [recentResult, leadersResult] = await Promise.all([recentPromise, leadersPromise]);
+      if (cancelled) return;
+
+      const games = recentResult?.data;
+      if (user && games) {
           setRecentGames(games);
           let streak = 0;
           for (const g of games) {
@@ -216,18 +251,14 @@ const Index = () => {
             else break;
           }
           setWinStreak(streak);
-        }
       }
 
-      const { data: leaders } = await supabase
-        .from("profiles")
-        .select("user_id, display_name, rating, games_won, games_played")
-        .order("rating", { ascending: false })
-        .limit(5);
+      const leaders = leadersResult?.data;
       if (leaders) setTopPlayers(leaders);
     };
     fetchData();
-  }, [user]);
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   const winRate =
     profile && profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
