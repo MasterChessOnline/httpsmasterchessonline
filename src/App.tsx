@@ -229,6 +229,7 @@ const Beta = lazy(() => import("./pages/Beta"));
 const Ranked = lazy(() => import("./pages/Ranked"));
 const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
+const ENTRY_SPLASH_KEY = "mc.entrySplash.v4";
 
 function entryLog(label: string, payload?: unknown) {
   try {
@@ -238,12 +239,54 @@ function entryLog(label: string, payload?: unknown) {
   }
 }
 
+function isHomeEntryPath(pathname: string) {
+  return pathname === "/" || pathname === "/home" || pathname === "/homepage";
+}
+
+function hasEntryFinished() {
+  if (typeof window === "undefined") return true;
+  try {
+    return sessionStorage.getItem(ENTRY_SPLASH_KEY) === "done";
+  } catch {
+    return true;
+  }
+}
+
+function useEntryReleased(isHome: boolean, fallbackMs: number) {
+  const [released, setReleased] = useState(() => !isHome || hasEntryFinished());
+
+  useEffect(() => {
+    if (!isHome) {
+      setReleased(true);
+      return;
+    }
+    if (hasEntryFinished()) {
+      setReleased(true);
+      return;
+    }
+    const done = () => setReleased(true);
+    window.addEventListener("mc:entry-finished", done, { once: true });
+    const timer = window.setTimeout(done, fallbackMs);
+    return () => {
+      window.removeEventListener("mc:entry-finished", done);
+      window.clearTimeout(timer);
+    };
+  }, [fallbackMs, isHome]);
+
+  return released;
+}
+
 function RootDeferredOverlays() {
   const location = useLocation();
-  const isHome = location.pathname === "/";
+  const isHome = isHomeEntryPath(location.pathname);
+  const entryReleased = useEntryReleased(isHome, 3600);
   const [ready, setReady] = useState(!isHome);
 
   useEffect(() => {
+    if (isHome && !entryReleased) {
+      setReady(false);
+      return;
+    }
     if (!isHome) {
       setReady(true);
       return;
@@ -255,7 +298,7 @@ function RootDeferredOverlays() {
     }
     const timer = globalThis.setTimeout(start, 900);
     return () => globalThis.clearTimeout(timer);
-  }, [isHome]);
+  }, [entryReleased, isHome]);
 
   if (!ready) return null;
 
@@ -278,10 +321,15 @@ function RootDeferredOverlays() {
 
 function EntryDeferredChrome() {
   const location = useLocation();
-  const isHome = location.pathname === "/";
+  const isHome = isHomeEntryPath(location.pathname);
+  const entryReleased = useEntryReleased(isHome, 3600);
   const [ready, setReady] = useState(!isHome);
 
   useEffect(() => {
+    if (isHome && !entryReleased) {
+      setReady(false);
+      return;
+    }
     if (!isHome) {
       setReady(true);
       return;
@@ -293,7 +341,7 @@ function EntryDeferredChrome() {
     }
     const timer = globalThis.setTimeout(start, 700);
     return () => globalThis.clearTimeout(timer);
-  }, [isHome]);
+  }, [entryReleased, isHome]);
 
   if (!ready) return null;
 
