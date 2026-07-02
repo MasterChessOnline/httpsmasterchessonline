@@ -34,11 +34,13 @@ export default function EntrySplash() {
 
   useEffect(() => {
     if (!show) return;
+    try { window.dispatchEvent(new CustomEvent("mc:entry-started")); } catch {}
     entryLog("Entry started");
     const dismiss = () => {
       try { sessionStorage.setItem(KEY, "done"); } catch {}
       setShow(false);
       entryLog("Loading homepage...");
+      try { window.dispatchEvent(new CustomEvent("mc:entry-finished")); } catch {}
     };
     const timer = window.setTimeout(dismiss, SPLASH_MS);
     // Absolute failsafe — never let the splash outlive 3.5s under any condition.
@@ -54,8 +56,8 @@ export default function EntrySplash() {
     const force = window.setTimeout(() => {
       const homeReady = document.querySelector('[data-entry-ready="home"]');
       if (!homeReady) {
-        entryLog("ERROR_STATE", { step: "HOME_FALLBACK", message: "Homepage not rendered after 5s; forcing /home" });
-        navigate("/home", { replace: true });
+        entryLog("ERROR_STATE", { step: "HOME_FALLBACK", message: "Homepage not rendered after 5s; forcing /homepage" });
+        navigate("/homepage", { replace: true });
       }
       setShow(false);
     }, HOME_FORCE_MS);
