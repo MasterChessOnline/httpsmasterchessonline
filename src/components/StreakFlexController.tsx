@@ -69,7 +69,7 @@ export default function StreakFlexController() {
       window.removeEventListener("focus", onFocus);
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user?.id]);
 
   if (!user) return null;
   return <StreakFlexTakeover streak={allowTakeover ? streak : 0} username={username} />;
