@@ -229,7 +229,7 @@ const Beta = lazy(() => import("./pages/Beta"));
 const Ranked = lazy(() => import("./pages/Ranked"));
 const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
-const ENTRY_SPLASH_KEY = "mc.entrySplash.v4";
+const ENTRY_SPLASH_KEY = "mc.entrySplash.v5.clean";
 
 function entryLog(label: string, payload?: unknown) {
   try {
@@ -264,7 +264,10 @@ function useEntryReleased(isHome: boolean, fallbackMs: number) {
       setReleased(true);
       return;
     }
-    const done = () => setReleased(true);
+    const done = () => {
+      try { sessionStorage.setItem(ENTRY_SPLASH_KEY, "done"); } catch { /* ignore */ }
+      setReleased(true);
+    };
     window.addEventListener("mc:entry-finished", done, { once: true });
     const timer = window.setTimeout(done, fallbackMs);
     return () => {
@@ -396,7 +399,7 @@ function AnimatedRoutes() {
   // Home is eager + critical: never wrap it in framer's fade. A stalled
   // mount animation was leaving the page stuck at opacity:0 ("colored
   // background only" bug). Lite skips the wrapper entirely.
-  const isHome = location.pathname === "/";
+  const isHome = isHomeEntryPath(location.pathname);
   const lite = isMobile || reduceMotion || isHome;
 
   const routes = (
