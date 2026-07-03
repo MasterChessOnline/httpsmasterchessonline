@@ -41,6 +41,7 @@ export default function EntrySplash() {
       dismissedRef.current = true;
       try { sessionStorage.setItem(KEY, "done"); } catch { /* ignore */ }
       entryLog("Entry finished");
+      entryLog("Loading homepage...");
       try { window.dispatchEvent(new CustomEvent("mc:entry-finished")); } catch { /* ignore */ }
       setClosing(true);
       window.setTimeout(() => setShow(false), FADE_MS);
