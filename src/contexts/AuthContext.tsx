@@ -22,6 +22,24 @@ function withTimeout<T>(promise: PromiseLike<T>, ms = API_TIMEOUT_MS): Promise<T
   ]);
 }
 
+function getStoredSessionFast(): Session | null {
+  if (typeof window === "undefined") return null;
+  try {
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith("sb-") || !key.endsWith("-auth-token")) continue;
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      const session = parsed?.currentSession ?? parsed;
+      if (session?.access_token && session?.user) return session as Session;
+    }
+  } catch {
+    // Local auth cache is best-effort and must never block entry.
+  }
+  return null;
+}
+
 interface Profile {
   id: string;
   user_id: string;
@@ -69,9 +87,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { data } = await withTimeout(supabase.rpc("get_my_profile"));
       const row = Array.isArray(data) ? data[0] : data;
       setProfile((row ?? null) as Profile | null);
-      entryLog("Finished", { step: "PROFILE_LOADED" });
+      entryLog("Profile loaded", { step: "PROFILE_LOADED" });
     } catch (error) {
-      entryLog("ERROR_STATE", { step: "INIT_DATA", message: "profile skipped", error });
+      entryLog("Profile skipped", { step: "INIT_DATA", message: "profile skipped", error });
       setProfile(null);
     }
   }, []);
@@ -148,14 +166,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }, AUTH_TIMEOUT_MS);
 
-    const finishAuth = (label: string) => {
-      if (!alive || initialFinished) return;
-      initialFinished = true;
-      window.clearTimeout(authTimeout);
-      setLoading(false);
-      entryLog("AUTH_DONE", { source: label });
-    };
-
     const loadUserDataInBackground = (userId: string) => {
       window.setTimeout(() => {
         fetchProfile(userId);
@@ -163,6 +173,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           entryLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
         );
       }, 0);
+    };
+
+    const cachedSession = getStoredSessionFast();
+    if (cachedSession?.user) {
+      lastSessionKey = cachedSession.access_token || "cached-session";
+      setSession(cachedSession);
+      setLoading(false);
+      initialFinished = true;
+      window.clearTimeout(authTimeout);
+      entryLog("Auth OK", { source: "local-cache" });
+      loadUserDataInBackground(cachedSession.user.id);
+    }
+
+    const finishAuth = (label: string) => {
+      if (!alive || initialFinished) return;
+      initialFinished = true;
+      window.clearTimeout(authTimeout);
+      setLoading(false);
+      entryLog("AUTH_DONE", { source: label });
     };
 
     const applySession = (nextSession: Session | null, source: string) => {
