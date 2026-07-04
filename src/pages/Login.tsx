@@ -51,8 +51,8 @@ const Login = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
-  const authSuffix = redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
+  const redirectTo = searchParams.get("redirect") || "/homepage";
+  const authSuffix = redirectTo !== "/homepage" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
   const handleGoogleLogin = async () => {
     setError(null);
