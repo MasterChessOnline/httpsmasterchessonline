@@ -1,15 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 /**
- * Entry splash is an overlay only. It never waits for auth, profile, ratings,
- * notifications, or database calls. The homepage renders underneath instantly.
+ * Clean Entry v6.
+ *
+ * This component is deliberately dumb: no auth, no database, no profile, no
+ * session restore, no realtime subscriptions. It is only a visual overlay over
+ * the already-mounted homepage, so registered users can never be blocked here.
  */
-const SPLASH_MS = 3300;
-const FADE_MS = 450;
-const HOME_FORCE_MS = 5000;
-const KEY = "mc.entrySplash.v5.clean";
+const SPLASH_MS = 3000;
+const FADE_MS = 320;
+const FAILSAFE_MS = 5000;
+
+declare global {
+  interface Window {
+    __mcEntryReleased?: boolean;
+  }
+}
 
 function entryLog(label: string, payload?: unknown) {
   try {
@@ -22,74 +29,67 @@ function entryLog(label: string, payload?: unknown) {
 export default function EntrySplash() {
   const navigate = useNavigate();
   const location = useLocation();
-  const dismissedRef = useRef(false);
-  const [show, setShow] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      return sessionStorage.getItem(KEY) !== "done";
-    } catch {
-      return true;
-    }
-  });
+  const homeEntry = useMemo(
+    () => location.pathname === "/" || location.pathname === "/home" || location.pathname === "/homepage",
+    [location.pathname],
+  );
+  const finishedRef = useRef(false);
+  const [show, setShow] = useState(homeEntry);
   const [closing, setClosing] = useState(false);
 
   useEffect(() => {
-    if (!show) return;
-
-    const finish = () => {
-      if (dismissedRef.current) return;
-      dismissedRef.current = true;
-      try { sessionStorage.setItem(KEY, "done"); } catch { /* ignore */ }
-      entryLog("Entry finished");
-      entryLog("Loading homepage...");
+    if (!homeEntry) {
+      if (typeof window !== "undefined") window.__mcEntryReleased = true;
       try { window.dispatchEvent(new CustomEvent("mc:entry-finished")); } catch { /* ignore */ }
-      setClosing(true);
-      window.setTimeout(() => setShow(false), FADE_MS);
-    };
+      finishedRef.current = true;
+      setShow(false);
+      return;
+    }
 
-    dismissedRef.current = false;
+    finishedRef.current = false;
     setClosing(false);
-    entryLog("Entry started");
+    setShow(true);
+
+    entryLog("Entry started", { path: location.pathname });
     try { window.dispatchEvent(new CustomEvent("mc:entry-started")); } catch { /* ignore */ }
 
-    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(finish, reducedMotion ? 250 : SPLASH_MS);
-    return () => window.clearTimeout(timer);
-  }, [show]);
+    const release = (reason: "timer" | "failsafe") => {
+      if (finishedRef.current) return;
+      finishedRef.current = true;
+      window.__mcEntryReleased = true;
+      entryLog(reason === "failsafe" ? "Entry failsafe released" : "Entry finished");
+      try { window.dispatchEvent(new CustomEvent("mc:entry-finished")); } catch { /* ignore */ }
+      setClosing(true);
+      window.setTimeout(() => setShow(false), reason === "failsafe" ? 0 : FADE_MS);
+    };
 
-  useEffect(() => {
-    if (!["/", "/home", "/homepage"].includes(location.pathname)) return;
-    const force = window.setTimeout(() => {
-      const homeReady = document.querySelector('[data-entry-ready="home"]');
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const normalTimer = window.setTimeout(() => release("timer"), reducedMotion ? 250 : SPLASH_MS);
+    const failsafeTimer = window.setTimeout(() => {
+      const homeReady = !!document.querySelector('[data-entry-ready="home"]');
       if (!homeReady) {
-        entryLog("ERROR_STATE", { step: "HOME_FALLBACK", message: "Homepage not rendered after 5s; forcing /homepage" });
+        entryLog("ERROR_STATE", { step: "ENTRY_FAILSAFE", message: "Homepage not detected; forcing /homepage" });
         navigate("/homepage", { replace: true });
       }
-      dismissedRef.current = true;
-      try { sessionStorage.setItem(KEY, "done"); } catch { /* ignore */ }
-      try { window.dispatchEvent(new CustomEvent("mc:entry-finished")); } catch { /* ignore */ }
-      setShow(false);
-    }, HOME_FORCE_MS);
-    return () => window.clearTimeout(force);
-  }, [location.pathname, navigate]);
+      release("failsafe");
+    }, FAILSAFE_MS);
+
+    return () => {
+      window.clearTimeout(normalTimer);
+      window.clearTimeout(failsafeTimer);
+    };
+  }, [homeEntry, location.pathname, navigate]);
 
   if (!show) return null;
 
   return (
-    <motion.div
-      key="entry-splash"
-      initial={{ opacity: 1 }}
-      animate={{ opacity: closing ? 0 : 1 }}
-      transition={{ duration: FADE_MS / 1000, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-background"
-      style={{ pointerEvents: "none" }}
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-background transition-opacity duration-300 ease-out"
+      style={{ pointerEvents: "none", opacity: closing ? 0 : 1 }}
       aria-hidden="true"
     >
-      <motion.div
+      <div
         className="absolute inset-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
         style={{
           background:
             "radial-gradient(60% 60% at 50% 42%, hsl(var(--primary) / 0.24), transparent 68%), radial-gradient(100% 70% at 50% 100%, hsl(var(--accent) / 0.18), transparent 70%), linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)))",
@@ -98,68 +98,61 @@ export default function EntrySplash() {
 
       <div className="absolute inset-0 opacity-60">
         {Array.from({ length: 18 }).map((_, i) => (
-          <motion.span
+          <span
             key={i}
             className="absolute h-1 w-1 rounded-full bg-primary/65"
-            initial={{ x: `${(i * 53) % 100}%`, y: `${(i * 37) % 100}%`, opacity: 0 }}
-            animate={{ opacity: [0, 1, 0], y: [`${(i * 37) % 100}%`, `${((i * 37) % 100) - 12}%`] }}
-            transition={{ duration: 3 + (i % 4), repeat: Infinity, delay: i * 0.12 }}
+            style={{
+              left: `${(i * 53) % 100}%`,
+              top: `${(i * 37) % 100}%`,
+              animation: `mc-entry-drift ${3 + (i % 4)}s ease-in-out ${i * 0.12}s infinite`,
+            }}
           />
         ))}
       </div>
 
       <div className="relative flex flex-col items-center text-center px-6">
-        <motion.div
-          initial={{ scale: 0.7, opacity: 0, filter: "blur(8px)" }}
-          animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="relative"
-        >
+        <div className="relative animate-[mc-entry-pop_0.75s_cubic-bezier(0.22,1,0.36,1)_both]">
           <div
             className="absolute -inset-10 rounded-full"
             style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.45), transparent 65%)", filter: "blur(20px)" }}
           />
-          <motion.div
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-            className="relative h-24 w-24 rounded-2xl border border-primary/40 bg-primary/15 shadow-[0_0_60px_hsl(var(--primary)/0.35)] flex items-center justify-center"
+          <div
+            className="relative h-24 w-24 rounded-2xl border border-primary/40 bg-primary/15 shadow-[0_0_60px_hsl(var(--primary)/0.35)] flex items-center justify-center animate-[mc-entry-rotate_18s_linear_infinite]"
           >
             <span className="text-5xl font-black text-primary">♛</span>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
-          className="mt-8 text-3xl font-bold tracking-[0.35em] text-primary sm:text-4xl"
+        <h1
+          className="mt-8 text-3xl font-bold tracking-[0.35em] text-primary sm:text-4xl animate-[mc-entry-rise_0.65s_ease-out_0.45s_both]"
         >
           MASTERCHESS
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.0 }}
-          className="mt-3 text-[11px] uppercase tracking-[0.35em] text-primary/80"
+        <p
+          className="mt-3 text-[11px] uppercase tracking-[0.35em] text-primary/80 animate-[mc-entry-rise_0.65s_ease-out_0.85s_both]"
         >
           DB Chess Cup · Play · Compete
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.4, duration: 0.4 }}
-          className="mt-10 h-[2px] w-44 overflow-hidden rounded-full bg-primary/15"
+        <div
+          className="mt-10 h-[2px] w-44 overflow-hidden rounded-full bg-primary/15 animate-[mc-entry-fade_0.4s_ease-out_1.15s_both]"
         >
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: "100%" }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-            className="h-full w-1/2 bg-primary"
+          <div
+            className="h-full w-1/2 bg-primary animate-[mc-entry-bar_1.4s_ease-in-out_infinite]"
           />
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+
+      <style>{`
+        @keyframes mc-entry-pop { from { opacity: 0; transform: scale(0.72); filter: blur(8px); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
+        @keyframes mc-entry-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes mc-entry-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes mc-entry-rotate { to { transform: rotate(360deg); } }
+        @keyframes mc-entry-bar { from { transform: translateX(-110%); } to { transform: translateX(230%); } }
+        @keyframes mc-entry-drift { 0%,100% { opacity: 0; transform: translateY(0); } 45% { opacity: 1; transform: translateY(-14px); } }
+        @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; } }
+      `}</style>
+    </div>
   );
 }
