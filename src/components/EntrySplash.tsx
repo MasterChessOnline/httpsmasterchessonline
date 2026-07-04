@@ -39,8 +39,11 @@ export default function EntrySplash() {
 
   useEffect(() => {
     if (!homeEntry) {
-      if (typeof window !== "undefined") window.__mcEntryReleased = true;
-      try { window.dispatchEvent(new CustomEvent("mc:entry-finished")); } catch { /* ignore */ }
+      setShow(false);
+      return;
+    }
+
+    if (window.__mcEntryReleased) {
       finishedRef.current = true;
       setShow(false);
       return;
