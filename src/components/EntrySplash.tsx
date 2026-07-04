@@ -87,6 +87,7 @@ export default function EntrySplash() {
 
   return (
     <div
+      data-entry-splash="active"
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-background transition-opacity duration-300 ease-out"
       style={{ pointerEvents: "none", opacity: closing ? 0 : 1 }}
       aria-hidden="true"
