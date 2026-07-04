@@ -229,7 +229,6 @@ const Beta = lazy(() => import("./pages/Beta"));
 const Ranked = lazy(() => import("./pages/Ranked"));
 const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
-const ENTRY_SPLASH_KEY = "mc.entrySplash.v5.clean";
 
 function entryLog(label: string, payload?: unknown) {
   try {
@@ -245,11 +244,7 @@ function isHomeEntryPath(pathname: string) {
 
 function hasEntryFinished() {
   if (typeof window === "undefined") return true;
-  try {
-    return sessionStorage.getItem(ENTRY_SPLASH_KEY) === "done";
-  } catch {
-    return true;
-  }
+  return (window as any).__mcEntryReleased === true;
 }
 
 function useEntryReleased(isHome: boolean, fallbackMs: number) {
@@ -265,7 +260,7 @@ function useEntryReleased(isHome: boolean, fallbackMs: number) {
       return;
     }
     const done = () => {
-      try { sessionStorage.setItem(ENTRY_SPLASH_KEY, "done"); } catch { /* ignore */ }
+      (window as any).__mcEntryReleased = true;
       setReleased(true);
     };
     window.addEventListener("mc:entry-finished", done, { once: true });

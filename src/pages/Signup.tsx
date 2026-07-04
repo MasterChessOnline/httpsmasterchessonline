@@ -50,8 +50,8 @@ const Signup = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
-  const authSuffix = redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
+  const redirectTo = searchParams.get("redirect") || "/homepage";
+  const authSuffix = redirectTo !== "/homepage" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -101,14 +101,20 @@ const Signup = () => {
 
     const newUserId = data.user?.id;
     if (newUserId) {
-      await new Promise((r) => setTimeout(r, 400));
-      await supabase
-        .from("profiles")
-        .update({
-          rating: startingLevel.rating,
-          peak_rating: startingLevel.rating,
-        })
-        .eq("user_id", newUserId);
+      window.setTimeout(() => {
+        supabase
+          .from("profiles")
+          .update({
+            rating: startingLevel.rating,
+            peak_rating: startingLevel.rating,
+          })
+          .eq("user_id", newUserId)
+          .then(({ error }) => {
+            if (error) {
+              console.info("[MasterChess Entry] ERROR_STATE", { step: "SIGNUP_PROFILE_UPDATE", message: "profile update skipped", error });
+            }
+          });
+      }, 0);
     }
 
     track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key });
