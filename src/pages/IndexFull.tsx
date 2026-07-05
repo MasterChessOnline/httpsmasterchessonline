@@ -228,14 +228,16 @@ const Index = () => {
           )
         : Promise.resolve(null);
 
-      const leadersPromise = withHomeTimeout(
-        "HOME_LEADERBOARD",
-        supabase
-          .from("profiles")
-          .select("user_id, display_name, rating, games_won, games_played")
-          .order("rating", { ascending: false })
-          .limit(5),
-      );
+      const leadersPromise = user
+        ? withHomeTimeout(
+            "HOME_LEADERBOARD",
+            supabase
+              .from("profiles")
+              .select("user_id, display_name, rating, games_won, games_played")
+              .order("rating", { ascending: false })
+              .limit(5),
+          )
+        : Promise.resolve(null);
 
       const [recentResult, leadersResult] = await Promise.all([recentPromise, leadersPromise]);
       if (cancelled) return;
@@ -254,7 +256,12 @@ const Index = () => {
       }
 
       const leaders = leadersResult?.data;
-      if (leaders) setTopPlayers(leaders);
+      if (leaders) {
+        setTopPlayers(leaders);
+        console.info("[MasterChess Entry] Home background data loaded", { step: "HOME_LEADERBOARD" });
+      } else if (!user) {
+        console.info("[MasterChess Entry] Home background data skipped", { step: "HOME_LEADERBOARD", reason: "guest" });
+      }
     };
     fetchData();
     return () => { cancelled = true; };
