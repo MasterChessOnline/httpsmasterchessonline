@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Swords, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PulseEvent {
   id: string;
@@ -19,6 +20,7 @@ interface PulseEvent {
  * Strictly real data — no simulated events.
  */
 export default function ActivityPulse() {
+  const { user } = useAuth();
   const [events, setEvents] = useState<PulseEvent[]>([]);
   const [liveCount, setLiveCount] = useState(0);
 
@@ -61,6 +63,8 @@ export default function ActivityPulse() {
   };
 
   useEffect(() => {
+    if (!user) return;
+
     load();
     const channel = supabase
       .channel("activity-pulse")
@@ -75,7 +79,7 @@ export default function ActivityPulse() {
       supabase.removeChannel(channel);
       clearInterval(t);
     };
-  }, []);
+  }, [user?.id]);
 
   if (!events.length) return null;
 

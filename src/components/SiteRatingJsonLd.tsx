@@ -38,25 +38,13 @@ export default function SiteRatingJsonLd() {
           avg = Math.round((sum / all.length) * 10) / 10;
           count = all.length;
 
-          // Pull author display names for the most recent reviews with text
           const withText = all.filter((r) => r.comment && r.comment.trim().length > 0).slice(0, 20);
-          const ids = Array.from(new Set(withText.map((r) => r.user_id)));
-          let names = new Map<string, string>();
-          if (ids.length > 0) {
-            const { data: profs } = await supabase
-              .from("profiles")
-              .select("user_id, display_name")
-              .in("user_id", ids);
-            (profs ?? []).forEach((p: any) => {
-              if (p.display_name) names.set(p.user_id, p.display_name);
-            });
-          }
           reviews = withText.map((r) => ({
             rating: r.rating,
             comment: r.comment,
             created_at: r.created_at,
             title: r.title ?? null,
-            author: names.get(r.user_id) || "MasterChess Player",
+            author: "MasterChess Player",
           }));
         }
       } catch {

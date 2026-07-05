@@ -14,6 +14,14 @@ import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
+const prepareFreshEntry = () => {
+  try {
+    (window as any).__mcEntryReleased = false;
+  } catch {
+    // Entry reset must never block login.
+  }
+};
+
 const FloatingPiece = ({ piece, index }: { piece: string; index: number }) => (
   <motion.div
     className="absolute text-primary/[0.04] text-6xl select-none pointer-events-none"
@@ -80,6 +88,7 @@ const Login = () => {
       setError(error.message);
       setLoading(false);
     } else {
+      prepareFreshEntry();
       navigate(redirectTo);
     }
   };

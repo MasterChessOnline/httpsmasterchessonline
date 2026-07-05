@@ -170,13 +170,24 @@ const Navbar = () => {
 
   // Live status data — real counts from backend, refreshed gently
   useEffect(() => {
+    if (!user) return;
+
     let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let fallback: ReturnType<typeof setTimeout> | undefined;
+
+    const withTimeout = <T,>(promise: PromiseLike<T>, ms = 3500): Promise<T> =>
+      Promise.race([
+        Promise.resolve(promise),
+        new Promise<T>((_, reject) => window.setTimeout(() => reject(new Error(`timeout-${ms}ms`)), ms)),
+      ]);
+
     const fetchStats = async () => {
       try {
         const [games, queue, tournaments] = await Promise.all([
-          supabase.from("online_games").select("id", { count: "exact", head: true }).eq("status", "active"),
-          supabase.from("matchmaking_queue").select("user_id", { count: "exact", head: true }),
-          supabase.from("tournaments").select("id", { count: "exact", head: true }).in("status", ["registration", "active", "in_progress"]),
+          withTimeout(supabase.from("online_games").select("id", { count: "exact", head: true }).eq("status", "active")),
+          withTimeout(supabase.from("matchmaking_queue").select("user_id", { count: "exact", head: true })),
+          withTimeout(supabase.from("tournaments").select("id", { count: "exact", head: true }).in("status", ["registration", "active", "in_progress"])),
         ]);
         if (cancelled) return;
         const live = games.count ?? 0;
@@ -185,17 +196,30 @@ const Navbar = () => {
         // Online ≈ players in active games (×2) + matchmaking queue
         setOnlineCount(live * 2 + waiting);
         setActiveTournaments(tournaments.count ?? 0);
-      } catch {
-        /* silent — keep last known values */
+      } catch (error) {
+        console.info("[MasterChess Entry] Home background data skipped", { step: "NAV_LIVE_STATS", error });
       }
     };
-    fetchStats();
-    const interval = setInterval(fetchStats, 30000);
+
+    const start = () => {
+      if (cancelled || interval) return;
+      fetchStats();
+      interval = setInterval(fetchStats, 30000);
+    };
+
+    if ((window as any).__mcEntryReleased === true) start();
+    else {
+      window.addEventListener("mc:entry-finished", start, { once: true });
+      fallback = setTimeout(start, 5500);
+    }
+
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      window.removeEventListener("mc:entry-finished", start);
+      if (interval) clearInterval(interval);
+      if (fallback) clearTimeout(fallback);
     };
-  }, []);
+  }, [user?.id]);
 
   const handleMouseEnter = (key: string) => {
     if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);

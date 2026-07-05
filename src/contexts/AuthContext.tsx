@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const AUTH_TIMEOUT_MS = 1000;
 const API_TIMEOUT_MS = 5000;
+const ENTRY_RELEASE_WAIT_MS = 5500;
 
 function entryLog(label: string, payload?: unknown) {
   try {
@@ -38,6 +39,26 @@ function getStoredSessionFast(): Session | null {
     // Local auth cache is best-effort and must never block entry.
   }
   return null;
+}
+
+function runAfterEntryRelease(task: () => void) {
+  if (typeof window === "undefined") return;
+  const released = (window as any).__mcEntryReleased === true;
+  if (released) {
+    window.setTimeout(task, 0);
+    return;
+  }
+
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    window.removeEventListener("mc:entry-finished", start);
+    window.setTimeout(task, 0);
+  };
+
+  window.addEventListener("mc:entry-finished", start, { once: true });
+  window.setTimeout(start, ENTRY_RELEASE_WAIT_MS);
 }
 
 interface Profile {
@@ -159,7 +180,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let initialFinished = false;
     let lastSessionKey = "__unset__";
     entryLog("AUTH_START");
-    entryLog("Checking auth...");
+    entryLog("Auth restore started");
     const authTimeout = window.setTimeout(() => {
       if (!alive) return;
       entryLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth timeout; continuing" });
@@ -167,12 +188,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, AUTH_TIMEOUT_MS);
 
     const loadUserDataInBackground = (userId: string) => {
-      window.setTimeout(() => {
+      runAfterEntryRelease(() => {
+        entryLog("Background profile loading", { step: "INIT_DATA" });
         fetchProfile(userId);
         withTimeout(touchDailyStreak(userId), API_TIMEOUT_MS).catch((error) =>
           entryLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
         );
-      }, 0);
+      });
     };
 
     const cachedSession = getStoredSessionFast();
@@ -182,7 +204,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
       initialFinished = true;
       window.clearTimeout(authTimeout);
-      entryLog("Auth OK", { source: "local-cache" });
+      entryLog("Auth restore done", { source: "local-cache" });
       loadUserDataInBackground(cachedSession.user.id);
     }
 
@@ -191,7 +213,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       initialFinished = true;
       window.clearTimeout(authTimeout);
       setLoading(false);
-      entryLog("AUTH_DONE", { source: label });
+      entryLog("Auth restore done", { source: label });
     };
 
     const applySession = (nextSession: Session | null, source: string) => {
@@ -201,9 +223,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         lastSessionKey = nextKey;
         setSession(nextSession);
         if (nextSession?.user) {
-          entryLog("Auth OK", { source });
+          entryLog("Auth restore done", { source });
           loadUserDataInBackground(nextSession.user.id);
         } else {
+          entryLog("Auth restore skipped", { source });
           setProfile(null);
         }
       }

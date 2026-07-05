@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { X, Trophy } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Snapshot = {
   id: string;
@@ -28,6 +29,7 @@ function formatCountdown(diffMs: number) {
 }
 
 export default function BrakusRibbon() {
+  const { user } = useAuth();
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
@@ -40,30 +42,36 @@ export default function BrakusRibbon() {
   }, []);
 
   useEffect(() => {
+    if (!user) return;
+
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("tournaments")
-        .select("id, starts_at, max_players")
-        .ilike("name", "%Dragan Brakus%")
-        .order("starts_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (cancelled || !data) return;
-      const { count } = await supabase
-        .from("tournament_registrations")
-        .select("user_id", { count: "exact", head: true })
-        .eq("tournament_id", data.id);
-      if (cancelled) return;
-      setSnap({
-        id: data.id,
-        starts_at: data.starts_at,
-        registered: count ?? 0,
-        max_players: data.max_players || 500,
-      });
+      try {
+        const { data } = await supabase
+          .from("tournaments")
+          .select("id, starts_at, max_players")
+          .ilike("name", "%Dragan Brakus%")
+          .order("starts_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (cancelled || !data) return;
+        const { count } = await supabase
+          .from("tournament_registrations")
+          .select("user_id", { count: "exact", head: true })
+          .eq("tournament_id", data.id);
+        if (cancelled) return;
+        setSnap({
+          id: data.id,
+          starts_at: data.starts_at,
+          registered: count ?? 0,
+          max_players: data.max_players || 500,
+        });
+      } catch (error) {
+        console.info("[MasterChess Entry] Home background data skipped", { step: "BRAKUS_RIBBON", error });
+      }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     const i = setInterval(() => setNow(Date.now()), 60_000);
