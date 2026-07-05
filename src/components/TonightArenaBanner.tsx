@@ -8,6 +8,7 @@ import { Trophy, Clock, Share2, Check, Swords, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 type SignatureTournament = {
   id: string;
@@ -58,26 +59,33 @@ function formatRemaining(ms: number): { d: string; h: string; m: string; s: stri
 }
 
 export default function TonightArenaBanner() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [tournament, setTournament] = useState<SignatureTournament | null>(null);
   const [now, setNow] = useState<number>(() => Date.now());
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
+
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("tournaments")
-        .select("id, name, description, time_control_label, starts_at, arena_duration_minutes, signature_series, category")
-        .eq("is_signature", true)
-        .in("status", ["upcoming", "registering", "active"])
-        .order("starts_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-      if (!cancelled && data) setTournament(data as SignatureTournament);
+      try {
+        const { data } = await supabase
+          .from("tournaments")
+          .select("id, name, description, time_control_label, starts_at, arena_duration_minutes, signature_series, category")
+          .eq("is_signature", true)
+          .in("status", ["upcoming", "registering", "active"])
+          .order("starts_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (!cancelled && data) setTournament(data as SignatureTournament);
+      } catch (error) {
+        console.info("[MasterChess Entry] Home background data skipped", { step: "SIGNATURE_TOURNAMENT", error });
+      }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);

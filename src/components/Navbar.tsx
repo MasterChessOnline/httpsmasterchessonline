@@ -170,6 +170,8 @@ const Navbar = () => {
 
   // Live status data — real counts from backend, refreshed gently
   useEffect(() => {
+    if (!user) return;
+
     let cancelled = false;
     let interval: ReturnType<typeof setInterval> | undefined;
     let fallback: ReturnType<typeof setTimeout> | undefined;
@@ -217,7 +219,7 @@ const Navbar = () => {
       if (interval) clearInterval(interval);
       if (fallback) clearTimeout(fallback);
     };
-  }, []);
+  }, [user?.id]);
 
   const handleMouseEnter = (key: string) => {
     if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
