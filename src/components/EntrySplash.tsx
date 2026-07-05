@@ -2,14 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 /**
- * Clean Entry v6.
+ * Clean Entry v7.
  *
  * This component is deliberately dumb: no auth, no database, no profile, no
  * session restore, no realtime subscriptions. It is only a visual overlay over
  * the already-mounted homepage, so registered users can never be blocked here.
  */
-const SPLASH_MS = 3000;
-const FADE_MS = 320;
+const SPLASH_MS = 2800;
+const FADE_MS = 240;
 const FAILSAFE_MS = 5000;
 
 declare global {
@@ -26,19 +26,30 @@ function entryLog(label: string, payload?: unknown) {
   }
 }
 
+function isHomeEntryPath(pathname: string) {
+  return pathname === "/" || pathname === "/home" || pathname === "/homepage" || pathname === "/index";
+}
+
+function releaseEntryOnce(reason: "timer" | "failsafe" | "route") {
+  if (window.__mcEntryReleased) return false;
+  window.__mcEntryReleased = true;
+  entryLog(reason === "failsafe" ? "Entry failsafe released" : "Entry finished", { reason });
+  try { window.dispatchEvent(new CustomEvent("mc:entry-finished", { detail: { reason } })); } catch { /* ignore */ }
+  return true;
+}
+
 export default function EntrySplash() {
   const navigate = useNavigate();
   const location = useLocation();
-  const homeEntry = useMemo(
-    () => location.pathname === "/" || location.pathname === "/home" || location.pathname === "/homepage",
-    [location.pathname],
-  );
+  const homeEntry = useMemo(() => isHomeEntryPath(location.pathname), [location.pathname]);
   const finishedRef = useRef(false);
   const [show, setShow] = useState(homeEntry);
   const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     if (!homeEntry) {
+      if (!window.__mcEntryReleased) releaseEntryOnce("route");
+      finishedRef.current = true;
       setShow(false);
       return;
     }
@@ -59,9 +70,7 @@ export default function EntrySplash() {
     const release = (reason: "timer" | "failsafe") => {
       if (finishedRef.current) return;
       finishedRef.current = true;
-      window.__mcEntryReleased = true;
-      entryLog(reason === "failsafe" ? "Entry failsafe released" : "Entry finished");
-      try { window.dispatchEvent(new CustomEvent("mc:entry-finished")); } catch { /* ignore */ }
+      releaseEntryOnce(reason);
       setClosing(true);
       window.setTimeout(() => setShow(false), reason === "failsafe" ? 0 : FADE_MS);
     };

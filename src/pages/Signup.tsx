@@ -15,6 +15,14 @@ import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
+const prepareFreshEntry = () => {
+  try {
+    (window as any).__mcEntryReleased = false;
+  } catch {
+    // Entry reset must never block signup.
+  }
+};
+
 const FloatingPiece = ({ piece, index }: { piece: string; index: number }) => (
   <motion.div
     className="absolute text-primary/[0.04] text-6xl select-none pointer-events-none"
@@ -118,6 +126,7 @@ const Signup = () => {
     }
 
     track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key });
+    prepareFreshEntry();
     navigate(redirectTo);
   };
 

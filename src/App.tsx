@@ -239,7 +239,7 @@ function entryLog(label: string, payload?: unknown) {
 }
 
 function isHomeEntryPath(pathname: string) {
-  return pathname === "/" || pathname === "/home" || pathname === "/homepage";
+  return pathname === "/" || pathname === "/home" || pathname === "/homepage" || pathname === "/index";
 }
 
 function hasEntryFinished() {
@@ -277,7 +277,7 @@ function useEntryReleased(isHome: boolean, fallbackMs: number) {
 function RootDeferredOverlays() {
   const location = useLocation();
   const isHome = isHomeEntryPath(location.pathname);
-  const entryReleased = useEntryReleased(isHome, 3600);
+  const entryReleased = useEntryReleased(isHome, 5200);
   const [ready, setReady] = useState(!isHome);
 
   useEffect(() => {
@@ -320,7 +320,7 @@ function RootDeferredOverlays() {
 function EntryDeferredChrome() {
   const location = useLocation();
   const isHome = isHomeEntryPath(location.pathname);
-  const entryReleased = useEntryReleased(isHome, 3600);
+  const entryReleased = useEntryReleased(isHome, 5200);
   const [ready, setReady] = useState(!isHome);
 
   useEffect(() => {
@@ -357,6 +357,15 @@ function EntryDeferredChrome() {
   );
 }
 
+function EntryDeferredMobileNav() {
+  const location = useLocation();
+  const isHome = isHomeEntryPath(location.pathname);
+  const entryReleased = useEntryReleased(isHome, 5200);
+
+  if (isHome && !entryReleased) return null;
+  return <MobileBottomNav />;
+}
+
 function useRouteZone() {
   const location = useLocation();
   if (typeof document === "undefined") return;
@@ -380,7 +389,7 @@ function AnimatedRoutes() {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (location.pathname === "/") entryLog("HOME_RENDER");
+    if (isHomeEntryPath(location.pathname)) entryLog("HOME_RENDER", { path: location.pathname });
   }, [location.pathname]);
 
   // Skip route transition animation on phones — it causes layout thrash and
@@ -400,6 +409,7 @@ function AnimatedRoutes() {
   const routes = (
     <Routes location={location}>
           <Route path="/" element={<Index />} />
+          <Route path="/index" element={<Index />} />
           <Route path="/home" element={<Index />} />
           <Route path="/homepage" element={<Index />} />
           <Route path="/pitch" element={<Pitch />} />
@@ -665,7 +675,7 @@ const App = () => {
               <AnimatedRoutes />
             </div>
             <EntryDeferredChrome />
-            <MobileBottomNav />
+            <EntryDeferredMobileNav />
             <RootDeferredOverlays />
             <EntrySplash />
           </BrowserRouter>
