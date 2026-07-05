@@ -1,41 +1,46 @@
-Plan za P0 popravku: registrovani igrači ne smeju više nikad da ostanu zamrznuti na Entry ekranu.
+Plan: kompletno resetovanje Entry sistema da registrovani igrači nikad više ne ostanu zamrznuti.
 
-1. Zameniti ceo Entry sistem novim čistim flow-om
-   - Ukloniti postojeću logiku koja zavisi od auth/profile/sessionStorage stanja.
-   - Novi Entry će biti samo vizuelni overlay, bez API poziva, bez čekanja baze, bez blokiranja klikova.
-   - Homepage će biti mountovan odmah ispod Entry-ja od prvog rendera.
+1. Zameniti Entry potpuno novim, ultra-jednostavnim overlay-em
+   - `EntrySplash` će biti samo vizuelni sloj bez auth-a, baze, profila, coina, streak-a, invite-a ili bilo kakvog čekanja.
+   - Neće koristiti `sessionStorage` za odluku da li da pusti korisnika.
+   - Homepage ostaje mountovan odmah ispod Entry-ja.
+   - Overlay će imati `pointer-events: none`, tako da nikad ne blokira klikove.
 
-2. Napraviti tvrd timeout koji uvek pušta korisnika dalje
-   - Entry traje oko 3 sekunde.
-   - Posle 5 sekundi maksimalno se Entry nasilno uklanja, bez obzira na auth/data stanje.
-   - Ako ruta nije homepage posle timeout-a, automatski ide na `/homepage`.
+2. Uvesti tvrdu globalnu zaštitu od zamrzavanja
+   - Normalno trajanje Entry-ja: oko 2.5–3 sekunde.
+   - Maksimalno trajanje: 5 sekundi.
+   - Ako bilo šta zapne, Entry se nasilno skida i ruta ide na `/homepage`.
+   - Globalni event `mc:entry-finished` se šalje samo jednom.
 
-3. Popraviti registered-user startup
-   - Auth restore ne sme da blokira render.
-   - Session se učitava best-effort, a profile/streak/coins/invites se učitavaju posle Entry-ja u pozadini.
-   - Ako backend/auth kasni ili padne, korisnik ipak ulazi na homepage.
+3. Popraviti najverovatniji uzrok za registrovane igrače
+   - Neću dozvoliti da `AuthProvider`, profile fetch, streak update, leaderboard, recent games ili realtime subscribes blokiraju prvi prikaz homepage-a.
+   - Auth restore ostaje best-effort u pozadini.
+   - Ako backend/auth kasni, korisnik se ipak odmah pušta na homepage.
 
-4. Ugasiti sve full-screen preklopnike tokom Entry-ja
-   - `EntryQuickDashboard` se neće koristiti na entry path-u.
-   - Globalni overlay-i kao title unlock, streak takeover, invite listener, smart notifier, welcome/onboarding modali neće moći da se mountuju dok se Entry ne završi.
-   - Route loader ostaje mali non-blocking indikator, nikad full-screen.
+4. Privremeno ukloniti/suspendovati problematične overlay-e tokom Entry-ja
+   - `EntryQuickDashboard` se neće koristiti u startup flow-u.
+   - `TitleUnlockGate`, `GameInviteListener`, `StreakFlexController`, notifier-i i onboarding modali se mountuju tek posle Entry release-a.
+   - Ako Entry failsafe pusti korisnika, overlay-i i dalje čekaju idle/fallback, ali homepage je već klikabilan.
 
-5. Zaštita od redirect/render loop-a
-   - `/`, `/home`, `/homepage` ostaju ista homepage ruta.
-   - Entry neće ponovo pokretati redirect nazad na `/` ili login.
-   - Event `mc:entry-finished` će se emitovati samo jednom po load-u.
+5. Učiniti homepage sigurnim za prvi render
+   - Prvi ekran homepage-a mora da se prikaže bez čekanja na podatke registrovanog naloga.
+   - Svi home podaci se učitavaju u pozadini uz timeout i bez fatalnih grešaka.
+   - Ako query failuje, samo se preskoči taj blok, bez tamnog ekrana.
 
-6. Dodati jasne console logove za proveru
+6. Srediti login/signup redirect
+   - Posle login/signup ide direktno na `/homepage` ili validan `redirect`.
+   - Ne sme biti redirect loop-a između `/`, `/home`, `/homepage`, `/login`.
+
+7. Dodati jasne debug logove za proveru
    - `Entry started`
-   - `Auth restore started`
    - `Homepage mounted`
    - `Entry finished`
    - `Entry failsafe released`
-   - `Background profile skipped/loaded`
+   - `Auth restore started/done/skipped`
+   - `Home background data skipped/loaded`
 
-7. Test posle implementacije
-   - Guest load: Entry nestaje, homepage klikabilan.
-   - Simuliran logged-in session: Entry nestaje, homepage klikabilan.
-   - Direktno `/`, `/home`, `/homepage`.
-   - Logout/login koliko preview dozvoli.
-   - Provera da nema console error-a, redirect loop-a ili tamnog zamrznutog ekrana.
+8. Testiranje posle implementacije
+   - Guest load na `/`, `/home`, `/homepage`.
+   - Simuliran registrovan korisnik sa postojećom auth sesijom.
+   - Login pa povratak na homepage.
+   - Provera da Entry nestane za najviše 5 sekundi, homepage ostane klikabilan, nema tamnog/frozen ekrana i nema console error loop-a.
