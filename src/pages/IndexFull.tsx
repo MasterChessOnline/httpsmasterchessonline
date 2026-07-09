@@ -184,6 +184,7 @@ const Index = () => {
   const { user, profile } = useAuth();
   const { t } = useI18n();
   const { allowHeavy } = useDeviceCapability();
+  const [entryReleased, setEntryReleased] = useState(() => (window as any).__mcEntryReleased === true);
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
   const [winStreak, setWinStreak] = useState(0);
@@ -192,15 +193,32 @@ const Index = () => {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   // Parallax / scale only on capable devices. On mobile/low-end this caused
   // scroll lag because the hero image was constantly transformed.
-  const imgY = useTransform(scrollYProgress, [0, 1], allowHeavy ? ["0%", "25%"] : ["0%", "0%"]);
+  const heavyReady = entryReleased && allowHeavy;
+  const imgY = useTransform(scrollYProgress, [0, 1], heavyReady ? ["0%", "25%"] : ["0%", "0%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 1], allowHeavy ? [1, 0.95] : [1, 1]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], heavyReady ? [1, 0.95] : [1, 1]);
 
   useEffect(() => {
-    console.info("[MasterChess Entry] Homepage rendered");
+    console.info("[MasterChess Entry] Homepage mounted");
   }, []);
 
   useEffect(() => {
+    if ((window as any).__mcEntryReleased === true) {
+      setEntryReleased(true);
+      return;
+    }
+
+    const release = () => setEntryReleased(true);
+    window.addEventListener("mc:entry-finished", release, { once: true });
+    const fallback = window.setTimeout(release, 5250);
+    return () => {
+      window.removeEventListener("mc:entry-finished", release);
+      window.clearTimeout(fallback);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!entryReleased) return;
     let cancelled = false;
     const withHomeTimeout = async <T,>(label: string, promise: PromiseLike<T>): Promise<T | null> => {
       try {
@@ -265,7 +283,7 @@ const Index = () => {
     };
     fetchData();
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [entryReleased, user?.id]);
 
   const winRate =
     profile && profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
@@ -273,7 +291,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background relative" data-entry-ready="home">
       {/* Heavy animated bg: skip entirely on mobile/low-end to protect LCP & INP. */}
-      {allowHeavy && (
+      {heavyReady && (
         <React.Suspense fallback={null}>
           <ChessUniverseBackground />
         </React.Suspense>
@@ -308,7 +326,7 @@ const Index = () => {
           </motion.div>
           <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
           {/* Scan-line futuristic overlay — desktop only (pure decoration). */}
-          {allowHeavy && <div className="absolute inset-0 scan-line pointer-events-none" />}
+          {heavyReady && <div className="absolute inset-0 scan-line pointer-events-none" />}
 
           <motion.div
             className="container mx-auto max-w-4xl text-center relative z-10 pt-8"

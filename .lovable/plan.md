@@ -1,46 +1,37 @@
-Plan: kompletno resetovanje Entry sistema da registrovani igrači nikad više ne ostanu zamrznuti.
+Razlog zašto se i dalje zamrzava: Entry više nije jedini problem. Kada je igrač ulogovan, homepage odmah pokreće auth stanje + profile/streak + više homepage/nav upita + Framer Motion animacije. Entry overlay krene, ali ispod njega registrovani user aktivira teže efekte i backend pozive, pa glavna nit može da se zaguši i izgleda kao da se Entry zaledio. Takođe `Login`/`Signup` resetuju globalni Entry flag na `false`, što ponovo pali Entry baš u trenutku kada auth state i user data počnu da rade.
 
-1. Zameniti Entry potpuno novim, ultra-jednostavnim overlay-em
-   - `EntrySplash` će biti samo vizuelni sloj bez auth-a, baze, profila, coina, streak-a, invite-a ili bilo kakvog čekanja.
-   - Neće koristiti `sessionStorage` za odluku da li da pusti korisnika.
-   - Homepage ostaje mountovan odmah ispod Entry-ja.
-   - Overlay će imati `pointer-events: none`, tako da nikad ne blokira klikove.
+Plan popravke:
 
-2. Uvesti tvrdu globalnu zaštitu od zamrzavanja
-   - Normalno trajanje Entry-ja: oko 2.5–3 sekunde.
-   - Maksimalno trajanje: 5 sekundi.
-   - Ako bilo šta zapne, Entry se nasilno skida i ruta ide na `/homepage`.
-   - Globalni event `mc:entry-finished` se šalje samo jednom.
+1. Napraviti Entry kao potpuno izolovan sistem
+   - Entry ne sme da zavisi od login stanja, profila, baze, streak-a, coina, notifikacija, nav statsa ili homepage data.
+   - Entry će biti samo jednostavan CSS overlay bez Framer Motion-a i bez poziva ka backendu.
+   - Overlay ostaje `pointer-events: none`, ali više neće biti vezan za auth promene.
 
-3. Popraviti najverovatniji uzrok za registrovane igrače
-   - Neću dozvoliti da `AuthProvider`, profile fetch, streak update, leaderboard, recent games ili realtime subscribes blokiraju prvi prikaz homepage-a.
-   - Auth restore ostaje best-effort u pozadini.
-   - Ako backend/auth kasni, korisnik se ipak odmah pušta na homepage.
+2. Ukinuti resetovanje Entry-ja posle login/signup
+   - U `Login.tsx` i `Signup.tsx` ukloniti `prepareFreshEntry()` koji vraća `window.__mcEntryReleased = false`.
+   - Posle login/signup direktno ide `/homepage` bez forsiranja novog Entry ciklusa u sred auth restore-a.
+   - Ovo je najvažniji deo za registrovane igrače, jer trenutno baš posle login-a ponovo startuje Entry dok kreću svi user upiti.
 
-4. Privremeno ukloniti/suspendovati problematične overlay-e tokom Entry-ja
-   - `EntryQuickDashboard` se neće koristiti u startup flow-u.
-   - `TitleUnlockGate`, `GameInviteListener`, `StreakFlexController`, notifier-i i onboarding modali se mountuju tek posle Entry release-a.
-   - Ako Entry failsafe pusti korisnika, overlay-i i dalje čekaju idle/fallback, ali homepage je već klikabilan.
+3. Dodati pravi globalni hard-release pre React težih efekata
+   - Uvesti mali helper za Entry state: jednom kada je released, više se ne vraća na false u istoj sesiji.
+   - Na 5 sekundi maksimalno se nasilno skida overlay i šalje `mc:entry-finished`, bez obzira da li se homepage data učitala.
+   - Ako ruta nije home ruta, Entry odmah release.
 
-5. Učiniti homepage sigurnim za prvi render
-   - Prvi ekran homepage-a mora da se prikaže bez čekanja na podatke registrovanog naloga.
-   - Svi home podaci se učitavaju u pozadini uz timeout i bez fatalnih grešaka.
-   - Ako query failuje, samo se preskoči taj blok, bez tamnog ekrana.
+4. Odložiti sve registrovane-user upite dok Entry ne završi
+   - Homepage `recentGames`, leaderboard, win streak računanje i navbar live stats ne smeju da startuju dok Entry ne pusti korisnika.
+   - Za ulogovane igrače ti podaci će se učitati posle Entry release-a, uz timeout, bez blokiranja prvog ekrana.
 
-6. Srediti login/signup redirect
-   - Posle login/signup ide direktno na `/homepage` ili validan `redirect`.
-   - Ne sme biti redirect loop-a između `/`, `/home`, `/homepage`, `/login`.
+5. Isključiti teške homepage animacije tokom Entry-ja
+   - Na home ruti dok Entry traje: ne renderovati `ChessUniverseBackground`, parallax scroll transform, teške `motion` efekte i 3D slojeve.
+   - Posle Entry release-a mogu da se uključe samo ako uređaj dozvoljava.
 
-7. Dodati jasne debug logove za proveru
-   - `Entry started`
-   - `Homepage mounted`
-   - `Entry finished`
-   - `Entry failsafe released`
-   - `Auth restore started/done/skipped`
-   - `Home background data skipped/loaded`
+6. Dodati kill-switch protiv zamrznutog ekrana
+   - Ako browser detectuje da Entry overlay postoji duže od 5s, uklanja se iz DOM-a i ide `/homepage`.
+   - Ovo radi i ako React state update zakasni.
 
-8. Testiranje posle implementacije
-   - Guest load na `/`, `/home`, `/homepage`.
-   - Simuliran registrovan korisnik sa postojećom auth sesijom.
-   - Login pa povratak na homepage.
-   - Provera da Entry nestane za najviše 5 sekundi, homepage ostane klikabilan, nema tamnog/frozen ekrana i nema console error loop-a.
+7. Testirati kao registrovan igrač i gost
+   - Test 1: guest `/` → Entry nestaje, homepage klikabilan.
+   - Test 2: ulogovana sesija iz storage-a → Entry nestaje, homepage klikabilan, nema zamrzavanja.
+   - Test 3: login → `/homepage`, bez ponovnog zadržavanja na Entry ekranu.
+   - Test 4: logout/login → isti rezultat.
+   - Proveriti console da nema error loop-a i da se vide logovi: Entry started, Entry hard released, Homepage mounted.

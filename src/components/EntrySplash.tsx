@@ -8,8 +8,8 @@ import { useLocation, useNavigate } from "react-router-dom";
  * session restore, no realtime subscriptions. It is only a visual overlay over
  * the already-mounted homepage, so registered users can never be blocked here.
  */
-const SPLASH_MS = 2800;
-const FADE_MS = 240;
+const SPLASH_MS = 2200;
+const FADE_MS = 180;
 const FAILSAFE_MS = 5000;
 
 declare global {
@@ -33,9 +33,18 @@ function isHomeEntryPath(pathname: string) {
 function releaseEntryOnce(reason: "timer" | "failsafe" | "route") {
   if (window.__mcEntryReleased) return false;
   window.__mcEntryReleased = true;
-  entryLog(reason === "failsafe" ? "Entry failsafe released" : "Entry finished", { reason });
+  document.documentElement.setAttribute("data-entry-released", "true");
+  entryLog(reason === "failsafe" ? "Entry hard released" : "Entry finished", { reason });
   try { window.dispatchEvent(new CustomEvent("mc:entry-finished", { detail: { reason } })); } catch { /* ignore */ }
   return true;
+}
+
+function forceRemoveEntryNode() {
+  try {
+    document.querySelectorAll('[data-entry-splash="active"]').forEach((node) => node.remove());
+  } catch {
+    // DOM failsafe must never affect startup.
+  }
 }
 
 export default function EntrySplash() {
@@ -84,11 +93,17 @@ export default function EntrySplash() {
         navigate("/homepage", { replace: true });
       }
       release("failsafe");
+      forceRemoveEntryNode();
     }, FAILSAFE_MS);
+    const domKillTimer = window.setTimeout(() => {
+      if (!window.__mcEntryReleased) releaseEntryOnce("failsafe");
+      forceRemoveEntryNode();
+    }, FAILSAFE_MS + 250);
 
     return () => {
       window.clearTimeout(normalTimer);
       window.clearTimeout(failsafeTimer);
+      window.clearTimeout(domKillTimer);
     };
   }, [homeEntry, location.pathname, navigate]);
 
