@@ -124,6 +124,7 @@ const Navbar = () => {
   const location = useLocation();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
   const searchRef = useRef<HTMLInputElement>(null);
+  const [entryReleased, setEntryReleased] = useState(() => (window as any).__mcEntryReleased === true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -140,6 +141,21 @@ const Navbar = () => {
     setMobileOpen(false);
     setSearchOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if ((window as any).__mcEntryReleased === true) {
+      setEntryReleased(true);
+      return;
+    }
+
+    const release = () => setEntryReleased(true);
+    window.addEventListener("mc:entry-finished", release, { once: true });
+    const fallback = window.setTimeout(release, 5250);
+    return () => {
+      window.removeEventListener("mc:entry-finished", release);
+      window.clearTimeout(fallback);
+    };
+  }, []);
 
   // Escape closes mobile menu + body scroll lock when open
   useEffect(() => {
@@ -508,8 +524,8 @@ const Navbar = () => {
                 <div className="h-9 w-9 bg-muted/20 rounded-xl animate-pulse" />
               ) : user ? (
                 <>
-                  <CoinBalancePill />
-                  <StreakIndicator />
+                  {entryReleased && <CoinBalancePill />}
+                  {entryReleased && <StreakIndicator />}
                   <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden xl:flex" aria-label="Sign out">
                     <LogOut className="h-4 w-4" />
                   </Button>

@@ -64,9 +64,25 @@ export default function TonightArenaBanner() {
   const [tournament, setTournament] = useState<SignatureTournament | null>(null);
   const [now, setNow] = useState<number>(() => Date.now());
   const [copied, setCopied] = useState(false);
+  const [entryReleased, setEntryReleased] = useState(() => (window as any).__mcEntryReleased === true);
 
   useEffect(() => {
-    if (!user) return;
+    if ((window as any).__mcEntryReleased === true) {
+      setEntryReleased(true);
+      return;
+    }
+
+    const release = () => setEntryReleased(true);
+    window.addEventListener("mc:entry-finished", release, { once: true });
+    const fallback = window.setTimeout(release, 5250);
+    return () => {
+      window.removeEventListener("mc:entry-finished", release);
+      window.clearTimeout(fallback);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user || !entryReleased) return;
 
     let cancelled = false;
     (async () => {
@@ -85,7 +101,7 @@ export default function TonightArenaBanner() {
       }
     })();
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [entryReleased, user?.id]);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);
