@@ -6,8 +6,25 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function LivePlayerCounter() {
   const [count, setCount] = useState<number | null>(null);
+  const [entryReleased, setEntryReleased] = useState(() => (window as any).__mcEntryReleased === true);
 
   useEffect(() => {
+    if ((window as any).__mcEntryReleased === true) {
+      setEntryReleased(true);
+      return;
+    }
+
+    const release = () => setEntryReleased(true);
+    window.addEventListener("mc:entry-finished", release, { once: true });
+    const fallback = window.setTimeout(release, 5250);
+    return () => {
+      window.removeEventListener("mc:entry-finished", release);
+      window.clearTimeout(fallback);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!entryReleased) return;
     let cancelled = false;
 
     const fetchCount = async () => {
@@ -27,7 +44,7 @@ export default function LivePlayerCounter() {
     fetchCount();
     const id = setInterval(fetchCount, 30_000);
     return () => { cancelled = true; clearInterval(id); };
-  }, []);
+  }, [entryReleased]);
 
   // Hide entirely when we have no data or zero players — empty rooms hurt conversion.
   if (count === null || count === 0) return null;
