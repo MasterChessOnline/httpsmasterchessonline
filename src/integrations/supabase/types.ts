@@ -86,6 +86,13 @@ export type Database = {
             referencedRelation: "affiliates"
             referencedColumns: ["code"]
           },
+          {
+            foreignKeyName: "affiliate_clicks_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "affiliates_public"
+            referencedColumns: ["code"]
+          },
         ]
       }
       affiliates: {
@@ -4398,6 +4405,54 @@ export type Database = {
       }
     }
     Views: {
+      affiliates_public: {
+        Row: {
+          code: string | null
+          commission_coins_per_signup: number | null
+          commission_coins_per_tournament_join: number | null
+          created_at: string | null
+          is_active: boolean | null
+          owner_name: string | null
+          owner_user_id: string | null
+          partner_tier: string | null
+          total_clicks: number | null
+          total_coins_paid: number | null
+          total_joins: number | null
+          total_signups: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          code?: string | null
+          commission_coins_per_signup?: number | null
+          commission_coins_per_tournament_join?: number | null
+          created_at?: string | null
+          is_active?: boolean | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          partner_tier?: string | null
+          total_clicks?: number | null
+          total_coins_paid?: number | null
+          total_joins?: number | null
+          total_signups?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string | null
+          commission_coins_per_signup?: number | null
+          commission_coins_per_tournament_join?: number | null
+          created_at?: string | null
+          is_active?: boolean | null
+          owner_name?: string | null
+          owner_user_id?: string | null
+          partner_tier?: string | null
+          total_clicks?: number | null
+          total_coins_paid?: number | null
+          total_joins?: number | null
+          total_signups?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       city_leaderboard: {
         Row: {
           avg_rating: number | null
