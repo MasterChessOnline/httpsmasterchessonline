@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { resolveVoiceClip, isRealVoiceEnabled, type VoiceClipKey } from "@/lib/nikola-voice-clips";
+import { supabase } from "@/integrations/supabase/client";
 
 
 /**
