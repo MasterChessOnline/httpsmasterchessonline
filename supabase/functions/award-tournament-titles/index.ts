@@ -1,6 +1,7 @@
 // Awards titles + cosmetics to top finishers of a finished tournament.
 // Called by manage-tournament when status flips to 'finished', or manually by admin.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
