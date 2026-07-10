@@ -1,6 +1,7 @@
 // Posts MasterChess events to a Discord channel via webhook.
 // Requires secret DISCORD_WEBHOOK_URL. Optional DISCORD_TOURNAMENTS_WEBHOOK_URL for tournament-specific channel.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
