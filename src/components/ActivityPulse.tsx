@@ -23,7 +23,6 @@ export default function ActivityPulse() {
   const { user } = useAuth();
   const [events, setEvents] = useState<PulseEvent[]>([]);
   const [liveCount, setLiveCount] = useState(0);
-  const [entryReleased, setEntryReleased] = useState(() => (window as any).__mcEntryReleased === true);
 
   const load = async () => {
     const { data: games } = await supabase
@@ -64,22 +63,7 @@ export default function ActivityPulse() {
   };
 
   useEffect(() => {
-    if ((window as any).__mcEntryReleased === true) {
-      setEntryReleased(true);
-      return;
-    }
-
-    const release = () => setEntryReleased(true);
-    window.addEventListener("mc:entry-finished", release, { once: true });
-    const fallback = window.setTimeout(release, 5250);
-    return () => {
-      window.removeEventListener("mc:entry-finished", release);
-      window.clearTimeout(fallback);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!user || !entryReleased) return;
+    if (!user) return;
 
     load();
     const channel = supabase
@@ -95,7 +79,7 @@ export default function ActivityPulse() {
       supabase.removeChannel(channel);
       clearInterval(t);
     };
-  }, [entryReleased, user?.id]);
+  }, [user?.id]);
 
   if (!events.length) return null;
 

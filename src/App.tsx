@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import RouteLoader from "@/components/RouteLoader";
 import SiteRatingJsonLd from "@/components/SiteRatingJsonLd";
@@ -12,7 +12,6 @@ import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
-import EntrySplash from "@/components/EntrySplash";
 // Critical / eager route — original Home entry, no replacement shell.
 import Index from "./pages/IndexFull";
 import NotFound from "./pages/NotFound";
@@ -242,63 +241,9 @@ function isHomeEntryPath(pathname: string) {
   return pathname === "/" || pathname === "/home" || pathname === "/homepage" || pathname === "/index";
 }
 
-function hasEntryFinished() {
-  if (typeof window === "undefined") return true;
-  return (window as any).__mcEntryReleased === true;
-}
-
-function useEntryReleased(isHome: boolean, fallbackMs: number) {
-  const [released, setReleased] = useState(() => !isHome || hasEntryFinished());
-
-  useEffect(() => {
-    if (!isHome) {
-      setReleased(true);
-      return;
-    }
-    if (hasEntryFinished()) {
-      setReleased(true);
-      return;
-    }
-    const done = () => {
-      (window as any).__mcEntryReleased = true;
-      setReleased(true);
-    };
-    window.addEventListener("mc:entry-finished", done, { once: true });
-    const timer = window.setTimeout(done, fallbackMs);
-    return () => {
-      window.removeEventListener("mc:entry-finished", done);
-      window.clearTimeout(timer);
-    };
-  }, [fallbackMs, isHome]);
-
-  return released;
-}
-
 function RootDeferredOverlays() {
   const location = useLocation();
   const isHome = isHomeEntryPath(location.pathname);
-  const entryReleased = useEntryReleased(isHome, 5200);
-  const [ready, setReady] = useState(!isHome);
-
-  useEffect(() => {
-    if (isHome && !entryReleased) {
-      setReady(false);
-      return;
-    }
-    if (!isHome) {
-      setReady(true);
-      return;
-    }
-    const start = () => setReady(true);
-    if (typeof window.requestIdleCallback === "function") {
-      const idle = window.requestIdleCallback(start, { timeout: 1500 });
-      return () => window.cancelIdleCallback?.(idle);
-    }
-    const timer = globalThis.setTimeout(start, 900);
-    return () => globalThis.clearTimeout(timer);
-  }, [entryReleased, isHome]);
-
-  if (!ready) return null;
 
   return (
     <>
@@ -318,31 +263,6 @@ function RootDeferredOverlays() {
 }
 
 function EntryDeferredChrome() {
-  const location = useLocation();
-  const isHome = isHomeEntryPath(location.pathname);
-  const entryReleased = useEntryReleased(isHome, 5200);
-  const [ready, setReady] = useState(!isHome);
-
-  useEffect(() => {
-    if (isHome && !entryReleased) {
-      setReady(false);
-      return;
-    }
-    if (!isHome) {
-      setReady(true);
-      return;
-    }
-    const start = () => setReady(true);
-    if (typeof window.requestIdleCallback === "function") {
-      const idle = window.requestIdleCallback(start, { timeout: 1200 });
-      return () => window.cancelIdleCallback?.(idle);
-    }
-    const timer = globalThis.setTimeout(start, 700);
-    return () => globalThis.clearTimeout(timer);
-  }, [entryReleased, isHome]);
-
-  if (!ready) return null;
-
   return (
     <>
       <DepthLayers />
@@ -358,11 +278,6 @@ function EntryDeferredChrome() {
 }
 
 function EntryDeferredMobileNav() {
-  const location = useLocation();
-  const isHome = isHomeEntryPath(location.pathname);
-  const entryReleased = useEntryReleased(isHome, 5200);
-
-  if (isHome && !entryReleased) return null;
   return <MobileBottomNav />;
 }
 
@@ -677,7 +592,6 @@ const App = () => {
             <EntryDeferredChrome />
             <EntryDeferredMobileNav />
             <RootDeferredOverlays />
-            <EntrySplash />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

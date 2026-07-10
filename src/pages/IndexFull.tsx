@@ -184,7 +184,6 @@ const Index = () => {
   const { user, profile } = useAuth();
   const { t } = useI18n();
   const { allowHeavy } = useDeviceCapability();
-  const [entryReleased, setEntryReleased] = useState(() => (window as any).__mcEntryReleased === true);
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
   const [winStreak, setWinStreak] = useState(0);
@@ -193,7 +192,7 @@ const Index = () => {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   // Parallax / scale only on capable devices. On mobile/low-end this caused
   // scroll lag because the hero image was constantly transformed.
-  const heavyReady = entryReleased && allowHeavy;
+  const heavyReady = allowHeavy;
   const imgY = useTransform(scrollYProgress, [0, 1], heavyReady ? ["0%", "25%"] : ["0%", "0%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], heavyReady ? [1, 0.95] : [1, 1]);
@@ -203,22 +202,6 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    if ((window as any).__mcEntryReleased === true) {
-      setEntryReleased(true);
-      return;
-    }
-
-    const release = () => setEntryReleased(true);
-    window.addEventListener("mc:entry-finished", release, { once: true });
-    const fallback = window.setTimeout(release, 5250);
-    return () => {
-      window.removeEventListener("mc:entry-finished", release);
-      window.clearTimeout(fallback);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!entryReleased) return;
     let cancelled = false;
     const withHomeTimeout = async <T,>(label: string, promise: PromiseLike<T>): Promise<T | null> => {
       try {
@@ -283,7 +266,7 @@ const Index = () => {
     };
     fetchData();
     return () => { cancelled = true; };
-  }, [entryReleased, user?.id]);
+  }, [user?.id]);
 
   const winRate =
     profile && profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
