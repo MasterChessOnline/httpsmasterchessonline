@@ -27,6 +27,23 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
+  // Auth: require authenticated user; PII formats require admin/organizer.
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return text("Unauthorized", 401);
+  const userClient = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
+  );
+  const { data: authData } = await userClient.auth.getUser();
+  if (!authData?.user) return text("Unauthorized", 401);
+
+  // PII-heavy exports restricted to organizers/admins.
+  if (format !== "json") {
+    const { data: canExport } = await supabase.rpc("can_manage_tournaments", { _user_id: authData.user.id });
+    if (!canExport) return text("Forbidden", 403);
+  }
+
   const { data: t } = await supabase.from("tournaments").select("*").eq("id", tournament_id).single();
   if (!t) return text("Tournament not found", 404);
 
