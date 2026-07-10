@@ -55,7 +55,13 @@ Deno.serve(async (req) => {
 
   try {
     if (action === "create") {
-      // Any authenticated user can create a tournament (they become the creator).
+      const { data: canCreate } = await supabase.rpc("can_manage_tournaments", { _user_id: user.id });
+      if (!canCreate) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return await handleCreate(supabase, user.id, { name, category, format, total_rounds, max_players, time_control_label, time_control_seconds, time_control_increment, starts_in_minutes, arena_duration_minutes });
     }
     if (action === "join") {
@@ -80,6 +86,13 @@ Deno.serve(async (req) => {
       return await handleRemoveUnchecked(supabase, user.id, tournament_id);
     }
     if (action === "recalc_tiebreaks") {
+      const { data: canManage } = await supabase.rpc("can_manage_tournaments", { _user_id: user.id });
+      if (!canManage) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       await supabase.rpc("recalc_tournament_tiebreaks", { _tid: tournament_id });
       return jsonRes({ ok: true });
     }
