@@ -2,6 +2,7 @@
 // where impressions > 50 and CTR < 2%, and stores them as opportunities.
 // Cron-friendly. Requires LOVABLE_API_KEY + GOOGLE_SEARCH_CONSOLE_API_KEY.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

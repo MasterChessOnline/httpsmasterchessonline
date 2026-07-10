@@ -2,6 +2,7 @@
 // Pulls latest items from independent chess sources and inserts into news_posts.
 // Trigger manually or via pg_cron. Brand policy: no competitor brand names in UI.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
