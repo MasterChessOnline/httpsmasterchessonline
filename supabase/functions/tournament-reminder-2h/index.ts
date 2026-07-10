@@ -6,6 +6,7 @@
 
 import { corsHeaders } from "../_shared/cors.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 // The verified MasterChess sender once domain DNS is fixed. Until then Resend
