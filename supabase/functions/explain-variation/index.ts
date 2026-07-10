@@ -25,10 +25,30 @@ Deno.serve(async (req) => {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   const supaUrl = Deno.env.get("SUPABASE_URL");
   const supaKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!apiKey || !supaUrl || !supaKey) {
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!apiKey || !supaUrl || !supaKey || !anonKey) {
     return new Response(JSON.stringify({ error: "Server misconfigured" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  // Require authenticated user to prevent anonymous AI credit drain.
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  {
+    const userClient = createClient(supaUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data, error } = await userClient.auth.getUser();
+    if (error || !data?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   }
 
   let body: {

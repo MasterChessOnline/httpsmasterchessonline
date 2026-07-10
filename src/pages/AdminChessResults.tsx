@@ -24,8 +24,15 @@ export default function AdminChessResults() {
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
-  const isAdmin = (profile as any)?.is_admin === true;
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    (async () => {
+      const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      setIsAdmin(Boolean(data));
+    })();
+  }, [user]);
 
   useEffect(() => {
     if (!user || !isAdmin) return;
@@ -40,6 +47,7 @@ export default function AdminChessResults() {
   }, [user, isAdmin]);
 
   if (!user) return <Navigate to="/login" replace />;
+  if (isAdmin === null) return null;
   if (!isAdmin) return <Navigate to="/" replace />;
 
   const save = async (row: Row, url: string) => {

@@ -2,6 +2,7 @@
 // where impressions > 50 and CTR < 2%, and stores them as opportunities.
 // Cron-friendly. Requires LOVABLE_API_KEY + GOOGLE_SEARCH_CONSOLE_API_KEY.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,12 @@ const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  if (!isAuthorizedCronCaller(req)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
   try {
     const lov = Deno.env.get("LOVABLE_API_KEY");
     const gsc = Deno.env.get("GOOGLE_SEARCH_CONSOLE_API_KEY");
