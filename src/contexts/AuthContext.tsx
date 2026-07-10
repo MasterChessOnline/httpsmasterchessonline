@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 const AUTH_TIMEOUT_MS = 1000;
 const API_TIMEOUT_MS = 5000;
-const ENTRY_RELEASE_WAIT_MS = 5500;
 
 function entryLog(label: string, payload?: unknown) {
   try {
@@ -39,26 +38,6 @@ function getStoredSessionFast(): Session | null {
     // Local auth cache is best-effort and must never block entry.
   }
   return null;
-}
-
-function runAfterEntryRelease(task: () => void) {
-  if (typeof window === "undefined") return;
-  const released = (window as any).__mcEntryReleased === true;
-  if (released) {
-    window.setTimeout(task, 0);
-    return;
-  }
-
-  let started = false;
-  const start = () => {
-    if (started) return;
-    started = true;
-    window.removeEventListener("mc:entry-finished", start);
-    window.setTimeout(task, 0);
-  };
-
-  window.addEventListener("mc:entry-finished", start, { once: true });
-  window.setTimeout(start, ENTRY_RELEASE_WAIT_MS);
 }
 
 interface Profile {
@@ -188,7 +167,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, AUTH_TIMEOUT_MS);
 
     const loadUserDataInBackground = (userId: string) => {
-      runAfterEntryRelease(() => {
+      window.setTimeout(() => {
         entryLog("Background profile loading", { step: "INIT_DATA" });
         fetchProfile(userId);
         withTimeout(touchDailyStreak(userId), API_TIMEOUT_MS).catch((error) =>
