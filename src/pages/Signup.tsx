@@ -111,7 +111,7 @@ const Signup = () => {
           .eq("user_id", newUserId)
           .then(({ error }) => {
             if (error) {
-              console.info("[MasterChess Entry] ERROR_STATE", { step: "SIGNUP_PROFILE_UPDATE", message: "profile update skipped", error });
+              console.info("[MasterChess Startup] ERROR_STATE", { step: "SIGNUP_PROFILE_UPDATE", message: "profile update skipped", error });
             }
           });
       }, 0);

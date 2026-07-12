@@ -67,7 +67,7 @@ export default function BrakusRibbon() {
           max_players: data.max_players || 500,
         });
       } catch (error) {
-        console.info("[MasterChess Entry] Home background data skipped", { step: "BRAKUS_RIBBON", error });
+        console.info("[MasterChess Startup] Home background data skipped", { step: "BRAKUS_RIBBON", error });
       }
     })();
     return () => { cancelled = true; };

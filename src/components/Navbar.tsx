@@ -196,7 +196,7 @@ const Navbar = () => {
         setOnlineCount(live * 2 + waiting);
         setActiveTournaments(tournaments.count ?? 0);
       } catch (error) {
-        console.info("[MasterChess Entry] Home background data skipped", { step: "NAV_LIVE_STATS", error });
+        console.info("[MasterChess Startup] Home background data skipped", { step: "NAV_LIVE_STATS", error });
       }
     };
 

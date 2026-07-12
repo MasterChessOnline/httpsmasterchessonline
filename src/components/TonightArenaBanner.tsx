@@ -81,7 +81,7 @@ export default function TonightArenaBanner() {
           .maybeSingle();
         if (!cancelled && data) setTournament(data as SignatureTournament);
       } catch (error) {
-        console.info("[MasterChess Entry] Home background data skipped", { step: "SIGNATURE_TOURNAMENT", error });
+        console.info("[MasterChess Startup] Home background data skipped", { step: "SIGNATURE_TOURNAMENT", error });
       }
     })();
     return () => { cancelled = true; };

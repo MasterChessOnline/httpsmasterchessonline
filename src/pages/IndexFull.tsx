@@ -198,10 +198,6 @@ const Index = () => {
   const heroScale = useTransform(scrollYProgress, [0, 1], heavyReady ? [1, 0.95] : [1, 1]);
 
   useEffect(() => {
-    console.info("[MasterChess Entry] Homepage mounted");
-  }, []);
-
-  useEffect(() => {
     let cancelled = false;
     const withHomeTimeout = async <T,>(label: string, promise: PromiseLike<T>): Promise<T | null> => {
       try {
@@ -210,7 +206,7 @@ const Index = () => {
           new Promise<T>((_, reject) => window.setTimeout(() => reject(new Error("timeout-5000ms")), 5000)),
         ]);
       } catch (error) {
-        console.info("[MasterChess Entry] ERROR_STATE", { step: label, message: "home data skipped", error });
+        console.info("[MasterChess Startup] ERROR_STATE", { step: label, message: "home data skipped", error });
         return null;
       }
     };
@@ -259,9 +255,9 @@ const Index = () => {
       const leaders = leadersResult?.data;
       if (leaders) {
         setTopPlayers(leaders);
-        console.info("[MasterChess Entry] Home background data loaded", { step: "HOME_LEADERBOARD" });
+        console.info("[MasterChess Startup] Home background data loaded", { step: "HOME_LEADERBOARD" });
       } else if (!user) {
-        console.info("[MasterChess Entry] Home background data skipped", { step: "HOME_LEADERBOARD", reason: "guest" });
+        console.info("[MasterChess Startup] Home background data skipped", { step: "HOME_LEADERBOARD", reason: "guest" });
       }
     };
     fetchData();
@@ -272,7 +268,7 @@ const Index = () => {
     profile && profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background relative" data-entry-ready="home">
+    <div className="min-h-screen bg-background relative">
       {/* Heavy animated bg: skip entirely on mobile/low-end to protect LCP & INP. */}
       {heavyReady && (
         <React.Suspense fallback={null}>
