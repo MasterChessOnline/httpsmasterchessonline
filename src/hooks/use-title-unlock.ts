@@ -40,7 +40,7 @@ export function useTitleUnlock() {
         .eq("user_id", user.id)
         .then(({ error }) => {
           if (error) {
-            console.info("[MasterChess Entry] ERROR_STATE", { step: "TITLE_UNLOCK", message: "title persist skipped", error });
+            console.info("[MasterChess Startup] ERROR_STATE", { step: "TITLE_UNLOCK", message: "title persist skipped", error });
             return;
           }
           window.setTimeout(() => refreshProfile?.(), 0);

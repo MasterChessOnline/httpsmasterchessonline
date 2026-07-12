@@ -5,9 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 const AUTH_TIMEOUT_MS = 1000;
 const API_TIMEOUT_MS = 5000;
 
-function entryLog(label: string, payload?: unknown) {
+function startupLog(label: string, payload?: unknown) {
   try {
-    console.info(`[MasterChess Entry] ${label}`, payload ?? "");
+    console.info(`[MasterChess Startup] ${label}`, payload ?? "");
   } catch {
     // Logging must never affect startup.
   }
@@ -35,7 +35,7 @@ function getStoredSessionFast(): Session | null {
       if (session?.access_token && session?.user) return session as Session;
     }
   } catch {
-    // Local auth cache is best-effort and must never block entry.
+    // Local auth cache is best-effort and must never block startup.
   }
   return null;
 }
@@ -83,13 +83,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Sensitive columns (master_coins, login_streak, welcome_*, push_notifications_enabled, etc.)
     // are not exposed through PostgREST. Use SECURITY DEFINER RPC for the owner's full row.
     try {
-      entryLog("Loading profile...");
+      startupLog("Loading profile...");
       const { data } = await withTimeout(supabase.rpc("get_my_profile"));
       const row = Array.isArray(data) ? data[0] : data;
       setProfile((row ?? null) as Profile | null);
-      entryLog("Profile loaded", { step: "PROFILE_LOADED" });
+      startupLog("Profile loaded", { step: "PROFILE_LOADED" });
     } catch (error) {
-      entryLog("Profile skipped", { step: "INIT_DATA", message: "profile skipped", error });
+      startupLog("Profile skipped", { step: "INIT_DATA", message: "profile skipped", error });
       setProfile(null);
     }
   }, []);
@@ -158,20 +158,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let alive = true;
     let initialFinished = false;
     let lastSessionKey = "__unset__";
-    entryLog("AUTH_START");
-    entryLog("Auth restore started");
+    startupLog("AUTH_START");
+    startupLog("Auth restore started");
     const authTimeout = window.setTimeout(() => {
       if (!alive) return;
-      entryLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth timeout; continuing" });
+      startupLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth timeout; continuing" });
       setLoading(false);
     }, AUTH_TIMEOUT_MS);
 
     const loadUserDataInBackground = (userId: string) => {
       window.setTimeout(() => {
-        entryLog("Background profile loading", { step: "INIT_DATA" });
+        startupLog("Background profile loading", { step: "INIT_DATA" });
         fetchProfile(userId);
         withTimeout(touchDailyStreak(userId), API_TIMEOUT_MS).catch((error) =>
-          entryLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
+          startupLog("ERROR_STATE", { step: "INIT_DATA", message: "streak skipped", error }),
         );
       });
     };
@@ -183,7 +183,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
       initialFinished = true;
       window.clearTimeout(authTimeout);
-      entryLog("Auth restore done", { source: "local-cache" });
+      startupLog("Auth restore done", { source: "local-cache" });
       loadUserDataInBackground(cachedSession.user.id);
     }
 
@@ -192,7 +192,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       initialFinished = true;
       window.clearTimeout(authTimeout);
       setLoading(false);
-      entryLog("Auth restore done", { source: label });
+      startupLog("Auth restore done", { source: label });
     };
 
     const applySession = (nextSession: Session | null, source: string) => {
@@ -202,10 +202,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         lastSessionKey = nextKey;
         setSession(nextSession);
         if (nextSession?.user) {
-          entryLog("Auth restore done", { source });
+          startupLog("Auth restore done", { source });
           loadUserDataInBackground(nextSession.user.id);
         } else {
-          entryLog("Auth restore skipped", { source });
+          startupLog("Auth restore skipped", { source });
           setProfile(null);
         }
       }
@@ -221,7 +221,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     withTimeout(supabase.auth.getSession(), API_TIMEOUT_MS).then(({ data: { session } }) => {
       applySession(session, "get-session");
     }).catch((error) => {
-      entryLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth skipped", error });
+      startupLog("ERROR_STATE", { step: "INIT_AUTH", message: "auth skipped", error });
       finishAuth("get-session-error");
     });
 
