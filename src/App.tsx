@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import RouteLoader from "@/components/RouteLoader";
 import SiteRatingJsonLd from "@/components/SiteRatingJsonLd";
@@ -12,7 +12,7 @@ import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
-// Critical / eager route — original Home entry, no replacement shell.
+// Critical / eager route — direct Home render, no replacement shell.
 import Index from "./pages/IndexFull";
 import NotFound from "./pages/NotFound";
 const Play = lazy(() => import("./pages/Play"));
@@ -229,21 +229,13 @@ const Ranked = lazy(() => import("./pages/Ranked"));
 const ShareMoment = lazy(() => import("./pages/ShareMoment"));
 const queryClient = new QueryClient();
 
-function entryLog(label: string, payload?: unknown) {
-  try {
-    console.info(`[MasterChess Entry] ${label}`, payload ?? "");
-  } catch {
-    // Debug logging must never affect startup.
-  }
-}
-
-function isHomeEntryPath(pathname: string) {
+function isHomePath(pathname: string) {
   return pathname === "/" || pathname === "/home" || pathname === "/homepage" || pathname === "/index";
 }
 
 function RootDeferredOverlays() {
   const location = useLocation();
-  const isHome = isHomeEntryPath(location.pathname);
+  const isHome = isHomePath(location.pathname);
 
   return (
     <>
@@ -262,7 +254,7 @@ function RootDeferredOverlays() {
   );
 }
 
-function EntryDeferredChrome() {
+function AppChrome() {
   return (
     <>
       <DepthLayers />
@@ -277,7 +269,7 @@ function EntryDeferredChrome() {
   );
 }
 
-function EntryDeferredMobileNav() {
+function AppMobileNav() {
   return <MobileBottomNav />;
 }
 
@@ -299,14 +291,6 @@ function AnimatedRoutes() {
   const location = useLocation();
   useRouteZone();
 
-  useEffect(() => {
-    entryLog("ROUTE_CHECK", { path: location.pathname || "/" });
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (isHomeEntryPath(location.pathname)) entryLog("HOME_RENDER", { path: location.pathname });
-  }, [location.pathname]);
-
   // Skip route transition animation on phones — it causes layout thrash and
   // janky scroll on low-end devices. Desktop still gets the smooth fade.
   const isMobile =
@@ -318,7 +302,7 @@ function AnimatedRoutes() {
   // Home is eager + critical: never wrap it in framer's fade. A stalled
   // mount animation was leaving the page stuck at opacity:0 ("colored
   // background only" bug). Lite skips the wrapper entirely.
-  const isHome = isHomeEntryPath(location.pathname);
+  const isHome = isHomePath(location.pathname);
   const lite = isMobile || reduceMotion || isHome;
 
   const routes = (
@@ -573,10 +557,6 @@ function AnimatedRoutes() {
 }
 
 const App = () => {
-  useEffect(() => {
-    entryLog("APP_INIT_START");
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -589,8 +569,8 @@ const App = () => {
             <div className="pb-16 md:pb-0">
               <AnimatedRoutes />
             </div>
-            <EntryDeferredChrome />
-            <EntryDeferredMobileNav />
+            <AppChrome />
+            <AppMobileNav />
             <RootDeferredOverlays />
           </BrowserRouter>
         </TooltipProvider>

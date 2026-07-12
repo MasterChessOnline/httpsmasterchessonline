@@ -16,7 +16,7 @@ const quickLinks = [
 
 export default function Index() {
   return (
-    <div className="min-h-screen bg-background text-foreground" data-entry-ready="home">
+    <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="MasterChess — Play Free Online Chess"
         description="Play free online chess on MasterChess: instant games, bots, training and the DB Chess Cup tournament."

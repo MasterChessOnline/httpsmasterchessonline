@@ -8,7 +8,7 @@ function safeRun(task: () => void) {
   try {
     task();
   } catch {
-    // Non-critical bootstraps must never crash entry.
+    // Non-critical bootstraps must never crash startup.
   }
 }
 

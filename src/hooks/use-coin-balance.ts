@@ -32,7 +32,7 @@ export function useCoinBalance(): { balance: number | null; loading: boolean; re
         const row = Array.isArray(data) ? data[0] : data;
         if (!cancelled) setBalance(((row as any)?.master_coins ?? 0) as number);
       } catch (error) {
-        console.info("[MasterChess Entry] ERROR_STATE", { step: "COINS_LOAD", message: "coins skipped", error });
+        console.info("[MasterChess Startup] ERROR_STATE", { step: "COINS_LOAD", message: "coins skipped", error });
         if (!cancelled) setBalance(null);
       } finally {
         if (!cancelled) setLoading(false);

@@ -41,7 +41,7 @@ export default function StreakFlexController() {
         setStreak(data.win_streak ?? 0);
         setUsername(data.username);
       } catch (error) {
-        console.info("[MasterChess Entry] ERROR_STATE", { step: "STREAK_LOAD", message: "streak skipped", error });
+        console.info("[MasterChess Startup] ERROR_STATE", { step: "STREAK_LOAD", message: "streak skipped", error });
       }
     };
 
