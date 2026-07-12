@@ -1,26 +1,26 @@
 Plan:
 
-1. Potpuno ukloniti Entry splash overlay iz aplikacije
-   - Izbaciti `EntrySplash` render iz root aplikacije.
-   - Ukloniti import `EntrySplash` iz `App.tsx`.
-   - Ne prikazivati više nikakav full-screen Entry ekran na `/`, `/home`, `/homepage`, `/index`.
+1. Ukloniti preostali `EntryQuickDashboard`
+   - Izbaciti komponentu iz aplikacije ako je negde renderovana.
+   - Obrisati `src/components/EntryQuickDashboard.tsx` ako nema drugih legitimnih referenci.
+   - Time registrovani igrači više neće dobijati nikakav full-screen entry/dashboard overlay posle logina.
 
-2. Ukloniti sve čekanje na Entry release
-   - U `App.tsx` ukloniti/pojednostaviti `useEntryReleased`, `EntryDeferredChrome`, `EntryDeferredMobileNav`, i `RootDeferredOverlays` logiku koja čeka `mc:entry-finished`.
-   - Chrome, mobile nav i overlay komponente će se normalno mountovati bez Entry gate-a.
+2. Ukloniti Entry routing/logging iz `App.tsx`
+   - Ukloniti `entryLog`, `isHomeEntryPath`, `EntryDeferredChrome`, `EntryDeferredMobileNav` i sve `MasterChess Entry` startup logove.
+   - Navbar, mobile nav i ostali root elementi se mountuju odmah, bez entry provere i bez posebnog home-entry puta.
 
-3. Ukloniti Entry zavisnost sa homepage-a
-   - U `IndexFull.tsx` ukloniti `entryReleased` state i event listener za `mc:entry-finished`.
-   - Homepage data može da se učitava odmah, ali uz postojeće timeout zaštite da ne blokira UI.
-   - Heavy background ostaje kontrolisan samo preko `allowHeavy`, ne preko Entry stanja.
+3. Direktan homepage render
+   - `/`, `/home`, `/homepage`, `/index` vode direktno na homepage sadržaj.
+   - Nema intermediate splash-a, nema čekanja, nema `mc:entry-finished`, nema `__mcEntryReleased`, nema `data-entry-splash`.
 
-4. Ukloniti Entry čekanje iz auth flow-a
-   - U `AuthContext.tsx` ukloniti `runAfterEntryRelease` čekanje.
-   - Profil i streak se učitavaju u pozadini posle auth restore-a, bez blokiranja početnog ekrana.
+4. Ukloniti Entry tragove iz auth/profila
+   - U `AuthContext.tsx` preimenovati/ukloniti `entryLog` i `MasterChess Entry` poruke da auth više nema nikakvu Entry semantiku.
+   - Auth ostaje brz: cached session odmah prikazuje stranicu, profil/streak se učitavaju u pozadini i ne blokiraju UI.
 
-5. Ostaviti `EntrySplash.tsx` neupotrebljen ili obrisati ako nema više importova
-   - Ako nema referenci, ukloniti fajl da se Entry ne može slučajno vratiti kroz stari import.
+5. Očistiti neblokirajuće preostale reference
+   - Proveriti i ukloniti samo stvarne UI/startup Entry reference.
+   - Ne dirati normalne reči `entry` koje znače bazni zapis, fee, queue entry, opening entry itd.
 
-6. Provera
-   - Proveriti `/index`, `/homepage`, `/` kao guest i sa registrovanom sesijom.
-   - Cilj: nema blank/gradient ekrana, nema `data-entry-splash`, nema čekanja na `mc:entry-finished`, homepage je odmah interaktivan.
+6. Verifikacija
+   - Pokrenuti proveru kroz browser za `/index` i `/` sa trenutnom preview sesijom.
+   - Potvrditi da nema full-screen overlay-a, nema Entry teksta/atributa/eventa, homepage je odmah vidljiv i interaktivan za registrovane igrače.
