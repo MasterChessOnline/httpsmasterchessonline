@@ -190,9 +190,9 @@ const Index = () => {
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  // Parallax / scale only on capable devices. On mobile/low-end this caused
-  // scroll lag because the hero image was constantly transformed.
-  const heavyReady = allowHeavy;
+  // Parallax / heavy fixed backgrounds are disabled for signed-in users during
+  // Home startup: registered players must always get an interactive page first.
+  const heavyReady = allowHeavy && !user;
   const imgY = useTransform(scrollYProgress, [0, 1], heavyReady ? ["0%", "25%"] : ["0%", "0%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], heavyReady ? [1, 0.95] : [1, 1]);

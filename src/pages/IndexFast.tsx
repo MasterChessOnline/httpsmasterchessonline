@@ -1,8 +1,25 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Crown, Play, Trophy } from "lucide-react";
 
 const IndexFull = lazy(() => import("./IndexFull"));
+
+class HomeErrorBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.info("[MasterChess Startup] ERROR_STATE", { step: "HOME_FULL_RENDER", message: "fast shell kept visible", error });
+  }
+
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
 
 function FastHomeShell() {
   return (
@@ -86,8 +103,10 @@ export default function IndexFast() {
   if (!showFull) return <FastHomeShell />;
 
   return (
-    <Suspense fallback={<FastHomeShell />}>
-      <IndexFull />
-    </Suspense>
+    <HomeErrorBoundary fallback={<FastHomeShell />}>
+      <Suspense fallback={<FastHomeShell />}>
+        <IndexFull />
+      </Suspense>
+    </HomeErrorBoundary>
   );
 }
