@@ -1,10 +1,31 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Crown, Play, Trophy } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const IndexFull = lazy(() => import("./IndexFull"));
 
+class HomeErrorBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.info("[MasterChess Startup] ERROR_STATE", { step: "HOME_FULL_RENDER", message: "fast shell kept visible", error });
+  }
+
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
 function FastHomeShell() {
+  const { user } = useAuth();
+  const playHref = user ? "/play/online" : "/play-guest";
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="fixed inset-x-0 top-0 z-40 border-b border-border/40 bg-background/85 backdrop-blur">
@@ -16,7 +37,7 @@ function FastHomeShell() {
             <Link to="/dragan-brakus/register" className="hidden rounded-lg border border-primary/40 px-3 py-2 text-sm font-semibold text-primary sm:inline-flex">
               DB Cup
             </Link>
-            <Link to="/play-guest" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground">
+            <Link to={playHref} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground">
               <Play className="h-4 w-4" /> Play
             </Link>
           </div>
@@ -56,7 +77,7 @@ function FastHomeShell() {
               Play · Compete · Master
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link to="/play-guest" className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-4 font-display text-sm font-bold uppercase tracking-widest text-primary-foreground">
+              <Link to={playHref} className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-4 font-display text-sm font-bold uppercase tracking-widest text-primary-foreground">
                 <Play className="h-5 w-5" /> Play Online
               </Link>
               <Link to="/tournaments" className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-7 py-4 font-display text-sm font-bold uppercase tracking-widest">
@@ -71,9 +92,16 @@ function FastHomeShell() {
 }
 
 export default function IndexFast() {
+  const { user, loading } = useAuth();
   const [showFull, setShowFull] = useState(false);
 
   useEffect(() => {
+    if (loading) return;
+    if (user) {
+      setShowFull(false);
+      return;
+    }
+
     const start = () => setShowFull(true);
     if (typeof window.requestIdleCallback === "function") {
       const idle = window.requestIdleCallback(start, { timeout: 1800 });
@@ -81,13 +109,15 @@ export default function IndexFast() {
     }
     const timer = globalThis.setTimeout(start, 1200);
     return () => globalThis.clearTimeout(timer);
-  }, []);
+  }, [loading, user]);
 
   if (!showFull) return <FastHomeShell />;
 
   return (
-    <Suspense fallback={<FastHomeShell />}>
-      <IndexFull />
-    </Suspense>
+    <HomeErrorBoundary fallback={<FastHomeShell />}>
+      <Suspense fallback={<FastHomeShell />}>
+        <IndexFull />
+      </Suspense>
+    </HomeErrorBoundary>
   );
 }

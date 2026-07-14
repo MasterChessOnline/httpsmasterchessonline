@@ -12,8 +12,8 @@ import CursorGlow from "@/components/CursorGlow";
 import DepthLayers from "@/components/DepthLayers";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import BrakusRibbon from "@/components/BrakusRibbon";
-// Critical / eager route — direct Home render, no replacement shell.
-import Index from "./pages/IndexFull";
+// Critical / eager route — safe Home shell first, rich Home upgrades after idle.
+import Index from "./pages/IndexFast";
 import NotFound from "./pages/NotFound";
 const Play = lazy(() => import("./pages/Play"));
 const PlayOnline = lazy(() => import("./pages/PlayOnline"));
