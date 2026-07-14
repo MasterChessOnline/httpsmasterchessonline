@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -19,6 +19,7 @@ function withTimeout<T>(promise: PromiseLike<T>, ms = COIN_TIMEOUT_MS): Promise<
  */
 export function useCoinBalance(): { balance: number | null; loading: boolean; refresh: () => void } {
   const { user } = useAuth();
+  const channelInstanceId = useRef(Math.random().toString(36).slice(2));
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,17 +46,21 @@ export function useCoinBalance(): { balance: number | null; loading: boolean; re
 
     let channel: any = null;
     if (user) {
-      channel = supabase
-        .channel(`coins:${user.id}`)
-        .on(
-          "postgres_changes",
-          { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` },
-          (payload: any) => {
-            const next = payload?.new?.master_coins;
-            if (typeof next === "number") setBalance(next);
-          }
-        )
-        .subscribe();
+      try {
+        channel = supabase
+          .channel(`coins:${user.id}:${channelInstanceId.current}`)
+          .on(
+            "postgres_changes",
+            { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` },
+            (payload: any) => {
+              const next = payload?.new?.master_coins;
+              if (typeof next === "number") setBalance(next);
+            }
+          )
+          .subscribe();
+      } catch (error) {
+        console.info("[MasterChess Startup] ERROR_STATE", { step: "COINS_REALTIME", message: "coins realtime skipped", error });
+      }
     }
 
     return () => {
