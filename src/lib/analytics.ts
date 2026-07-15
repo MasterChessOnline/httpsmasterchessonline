@@ -41,22 +41,11 @@ export function bootstrapAnalytics(): void {
   if (bootstrapped || typeof window === "undefined") return;
   bootstrapped = true;
 
-  const GA4 = import.meta.env.VITE_GA4_ID as string | undefined;
   const META = import.meta.env.VITE_META_PIXEL_ID as string | undefined;
   const TIKTOK = import.meta.env.VITE_TIKTOK_PIXEL_ID as string | undefined;
 
+  // GA4 is loaded by <Analytics /> component (SPA page_view on route change).
   window.dataLayer = window.dataLayer || [];
-
-  // --- GA4 ---
-  if (GA4) {
-    inject(`https://www.googletagmanager.com/gtag/js?id=${GA4}`);
-    window.gtag = function gtag() {
-      // eslint-disable-next-line prefer-rest-params
-      window.dataLayer!.push(arguments as unknown as unknown[]);
-    };
-    window.gtag("js", new Date());
-    window.gtag("config", GA4, { send_page_view: true, anonymize_ip: true });
-  }
 
   // --- Meta Pixel ---
   if (META) {
