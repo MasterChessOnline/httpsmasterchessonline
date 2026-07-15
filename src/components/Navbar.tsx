@@ -536,7 +536,7 @@ const Navbar = () => {
 
 
       {/* Spacer (hidden on mobile — the top bar itself is hidden on < lg) */}
-      <div className={`app-navbar-spacer hidden lg:block transition-all duration-500 ${shrunk ? "h-14" : "h-[88px]"}`} />
+      <div className={`app-navbar-spacer hidden lg:block transition-all duration-500 ${shrunk ? "h-16" : "h-20"}`} />
 
 
       {/* Mobile full-screen overlay */}

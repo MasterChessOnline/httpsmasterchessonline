@@ -29,9 +29,9 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => {
     <div className="container mx-auto px-6 relative">
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <div>
-          <Link to="/" className="flex items-center gap-2 mb-3 group">
-            <Crown className="h-4 w-4 text-primary group-hover:rotate-12 transition-transform duration-300" style={{ filter: "drop-shadow(0 0 6px hsl(43 90% 55% / 0.3))" }} />
-            <span className="font-display text-sm font-bold text-foreground uppercase tracking-wider">
+          <Link to="/" className="flex items-center gap-2.5 mb-3 group">
+            <BrandLogo size="sm" shimmer={false} />
+            <span className="font-display text-base font-bold text-foreground uppercase tracking-wider">
               Master<span className="text-gradient-gold">Chess</span>
             </span>
           </Link>

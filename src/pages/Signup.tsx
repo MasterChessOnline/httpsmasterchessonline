@@ -146,15 +146,9 @@ const Signup = () => {
         <div className="erupt-card rounded-2xl backdrop-blur-2xl shadow-[0_20px_70px_-10px_rgba(0,0,0,0.6),0_0_60px_-20px_hsl(43_90%_55%/0.3)] p-8 sm:p-10">
           {/* Header */}
           <div className="text-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-2.5 mb-5">
-              <motion.div
-                className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20"
-                whileHover={{ rotate: 15, scale: 1.1 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Crown className="h-5 w-5 text-primary" />
-              </motion.div>
-              <span className="font-display text-xl font-bold text-foreground uppercase tracking-wider">
+            <Link to="/" className="inline-flex flex-col items-center gap-3 mb-5">
+              <BrandLogo size="lg" />
+              <span className="font-display text-2xl font-black text-foreground uppercase tracking-wider">
                 Master<span className="text-gradient-gold">Chess</span>
               </span>
             </Link>
