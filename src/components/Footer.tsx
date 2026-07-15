@@ -2,6 +2,7 @@ import React from "react";
 import { Crown, Instagram, Youtube, Share2, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import BrandLogo from "@/components/BrandLogo";
 import ShareSiteStrip from "@/components/ShareSiteStrip";
 import DonationProgressBar from "@/components/DonationProgressBar";
 
