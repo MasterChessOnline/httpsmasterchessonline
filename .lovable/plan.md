@@ -1,110 +1,141 @@
-## Plan: bigger polished logo + full marketing / ads playbook
+## Cilj: eksplozija populacije — sve VAN sajta (marketing, ne kod)
 
-### Part A — Logo polish (make it bigger + premium)
-
-The current navbar logo is 44–48 px inside a plain border. Fix:
-
-1. **Navbar logo (`src/components/Navbar.tsx`)**
-   - Grow to **56 px mobile / 64 px desktop** (was 44/48).
-   - Wrap in a "gold ring" plate: outer amber gradient border, inner black bevel, soft outer glow — matches the crown-square logo aesthetic.
-   - Add subtle idle animation: slow gold shimmer sweep every ~6 s + hover tilt (already there, keep).
-   - Increase the "MasterChess" wordmark size from `text-lg/2xl` to `text-xl/3xl` so the logo + wordmark feel balanced.
-   - Same treatment on mobile bar (currently a separate size class).
-
-2. **Footer** — swap Crown lucide → `<img src="/app-icon-192.png">` at 40 px with the same gold ring.
-
-3. **Auth pages** (`Login`, `Signup`, `AuthCallback` headers) — replace lucide crown with the new logo image, 72 px, centered.
-
-4. **CinematicIntro splash** — replace the animated lucide `<Crown>` with the actual logo image (140 px, same gold-glow aura).
-
-5. **Homepage hero badge** (`src/pages/Index.tsx`) — swap the 64 px crown-in-box for the real logo at 96 px with the gold-ring plate.
-
-6. **Loading spinners / route loader** — small 32 px logo replaces the plain `Loader2` where the brand crown is expected.
-
-7. Add a shared `<BrandLogo size="sm|md|lg|xl" />` component in `src/components/BrandLogo.tsx` so every future use points at one source (single place to restyle later).
-
-### Part B — Growth & marketing (huge idea pack)
-
-Split into 4 buckets. I'll write everything into `docs/GROWTH_TO_100_USERS.md` (already exists — extend it) and build the highest-ROI **in-app** hooks the ads will click into.
-
-**1. Google Ads (paid search + display)**
-- **Search campaigns** — target long-tail buyer intent, cheap CPC:
-  `play chess online free`, `chess vs bots free`, `chess tournament 2026`,
-  `free chess site no ads`, `chess for kids online`, `učenje šaha online` (SR),
-  `šah online besplatno`, `chess Serbia tournament`, `blitz turnir online`.
-- **Brand campaign** — bid on `masterchess`, `master chess live` (1¢ CPC, defends from competitors).
-- **Performance Max** for the DB Chess Cup — auto-formats across YouTube + Discover + Gmail.
-- **Landing page per ad group** — send `chess vs bots` traffic to `/beat/{botId}`, `tournament` traffic to `/dragan-brakus`, generic `play chess` to `/play-guest` (skip login → instant board).
-- **Conversion tracking** — fire GA4 event on `signup_completed`, `game_started`, `tournament_registered`. Add gtag stub to `index.html` (user needs to paste GA4 ID + Ads conversion ID).
-- **Budget**: start €5/day, scale winners.
-
-**2. Meta / Instagram / TikTok Ads**
-- **Reels-first creative**: 9:16 vertical, 15 s hook — "I built a chess site alone at 13" (uses Nikola's story = high CTR).
-- **Retargeting pixel** on the site → warm audience for people who played a guest game but didn't sign up.
-- **Lookalike audiences** from DB Cup registrants and top-rated players once you have 100+ conversions.
-- **Ad variants** (auto-generate share-card style creatives):
-  - "Beat this position or lose your rating" (interactive puzzle preview)
-  - "You vs a Grandmaster bot — 3+2 blitz. Free."
-  - "500 free coins for your first game."
-
-**3. Google Business Profile + Local SEO (Belgrade / Serbia)**
-- Verify GBP entry (docs already exist in `docs/GBP_*`).
-- Weekly GBP post (auto-scheduled via existing `publish-gbp-posts` edge function) — tournament recap, top-player of week, new lesson.
-- Add GBP category: "Chess club" + "Software company" + "E-sports team".
-- Photos: upload the new logo as profile pic, tournament screenshots, board photos, Nikola portrait.
-- Reviews playbook already in docs — trigger a signed-in-user modal after 3 wins: "Enjoying MasterChess? Leave a Google review" (deep link to GBP).
-- **Local citations** — submit to Serbian directories (Šahovski Savez Srbije, sportski portali, gradski katalozi).
-- **Google Maps pin** — physical/mailing address for verification (already documented).
-
-**4. Organic + Content + Community explosion**
-- **Reddit blitz** — one post per week to `/r/chess`, `/r/chessbeginners` (title format: "I built a free chess site — trying to hit 100 users, would love feedback"). Serbian: `/r/serbia`, `/r/beograd`.
-- **YouTube collab** — DailyChess_12 dedicated stream "Play me on MasterChess" — viewers who join get a "Streamer's Guest" badge.
-- **TikTok automation** — 3 short videos per week:
-  1. Speedrun of a bot demolition
-  2. "Top comment picks my next move" live game
-  3. Blunder-of-the-week from Community feed
-- **Referral loop** — inviter + invitee both get 250 coins + Founder Friend badge, `/r/{code}` link.
-- **Post-game share card** — one-tap PNG (final board + rating gain + username + URL) to WhatsApp/IG/X.
-- **DB Cup FOMO ticker** in nav — "🔴 DB Cup starts in 3d 4h · 42/500 registered".
-- **First-100 badge** — permanent "Founder 100" badge on profile for the first 100 accounts, publicly visible on leaderboard.
-- **Weekly leaderboard email** — cheap engagement loop; sent via existing email queue.
-- **Discord auto-role by rating tier** — bragging rights → sharing.
-- **PWA install prompt** — smart trigger after game 3 (already exists — surface it harder).
-- **Long-tail SEO pages**:
-  `/free-chess-online`, `/play-chess-with-friends`, `/chess-for-beginners`,
-  `/šah-online-besplatno`, `/chess-serbia`, `/chess-tournaments-2026`,
-  `/how-to-play-chess-online`. Each carries proper H1, FAQ JSON-LD, internal links.
-- **Semrush check** — run `keyword_research` on the top 5 SR/EN terms before writing the pages so we target the ones with real volume + low KDI (Semrush is an SEO data service the platform integrates with).
-- **Email capture** — "Get notified when DB Cup starts" popup for guests, plug into email queue.
-- **Nikola's story angle** — 13-year-old solo founder = press hook. Pitch to: Blic, Politika, Kurir, RTS (SR); Chess.com news desk; TechCrunch "young founder" desk; local gaming sites.
-
-**5. Referral / viral primitives (in-app builds this pass)**
-Building these now unlocks all of the above (ads have nowhere to convert to without them). Ship in this order:
-
-1. **`/r/{code}` referral link** — reads code from URL, stores in localStorage, applies on signup, triggers 250-coin grant via existing coin RPC. Needs a `referrals` table (already exists per project schema — reuse).
-2. **DB Cup countdown ticker** — thin bar under navbar showing live seconds to 2026-07-18T14:00Z + registered/max count.
-3. **"Founder 100" badge** — auto-award to first 100 confirmed accounts, show on profile + leaderboard.
-4. **Post-game share PNG** — generate via canvas, use existing InviteShareCard as template, add "Share to WhatsApp/X" buttons.
-5. **GA4 + Meta Pixel stubs** in `index.html` (behind env vars) so ads can start tracking on day one.
-
-### Technical section
-
-- `BrandLogo` React component: props `size`, `withRing`, `glow`; uses `/app-icon-192.png` (already the new crown logo).
-- Ring styling: `bg-gradient-to-br from-amber-300/80 via-amber-500/60 to-amber-800/80`, inner `bg-black/80`, `shadow-[0_0_40px_-8px_rgba(212,175,55,0.6)]`.
-- Referral: use existing `referrals` table (see supabase-tables), add trigger to grant coins on first inviteeconversion.
-- GA4: `<script async src="https://www.googletagmanager.com/gtag/js?id=${env}">` gated on `VITE_GA4_ID` env var.
-- Meta Pixel: gated on `VITE_META_PIXEL_ID` env var.
-
-### Verification
-
-- Playwright: load `/`, screenshot navbar — logo visibly 56/64 px with gold ring, wordmark balanced.
-- Load `/signup?r=TESTCODE` — check localStorage has the code, complete signup → confirm coins granted on both accounts.
-- Load `/dragan-brakus` — countdown ticks in real time, shows registered/max.
+Ti si u pravu: dodavanje sitnica na sajt neće doneti 100 korisnika. Ovo je plan **spoljnog marketinga + distribucije loga po celom internetu**. Sajt ostaje kakav jeste; ja pripremam **materijale, tekstove, kampanje i checkliste** koje ti (ili automatizacija) postavljate po platformama.
 
 ---
 
-**Confirm before I build:**
+### DEO A — Logo raspored po celom internetu (jedan brend svuda)
 
-(a) Ship **all of the "5 in-app builds"** now (logo polish + referral + countdown + Founder 100 + share PNG + analytics stubs), or subset?
-(b) Do you have a **GA4 measurement ID** and **Meta Pixel ID** ready, or should I add the stubs and you'll paste the IDs later?
-(c) Should I set up a **Semrush keyword research pass** for the Serbian + English long-tail landing pages so we target the terms with real search volume?
+Napraviću **"Brand Asset Kit"** folder (`docs/brand-kit/`) sa gotovim varijantama loga (1:1, 16:9 cover, 9:16 story, favicon, watermark) + PDF uputstvo gde ide šta:
+
+| Platforma | Šta ide | Format |
+|---|---|---|
+| Google Business Profile | profilna + cover | 1:1 + 16:9 |
+| YouTube (DailyChess_12) | avatar + banner + watermark | 800×800, 2560×1440 |
+| Instagram / TikTok / X / Facebook | avatar + IG Story highlight covers | 1:1 + 9:16 |
+| Reddit (user + subreddit ikonica) | avatar + banner | 256×256 + 1920×384 |
+| Discord server | server ikonica + banner + role ikonica | 512×512 |
+| Twitch (ako se koristi) | profil + offline banner | 1:1 + 16:9 |
+| LinkedIn (kompanija) | logo + cover | 400×400 + 1128×191 |
+| ProductHunt / IndieHackers / Hacker News | thumbnail | 240×240 |
+| WhatsApp Business | profilna + katalog | 1:1 |
+| Email potpis + newsletter header | inline PNG | 600px wide |
+| Wikipedia / Wikidata (Nikola profil) | logo licenciran CC-BY | SVG + PNG |
+| Chess.com / Lichess **NE** — brand policy | — | — |
+
+Automatski ću izgenerisati sve dimenzije iz jedne source slike koju si uploadovao.
+
+---
+
+### DEO B — Google Ads (plaćeno, najbrža konverzija)
+
+Napraviću `docs/ADS_GOOGLE_LAUNCH.md` sa **copy-paste kampanjama** — ti samo otvoriš Google Ads i lepiš:
+
+1. **Search — Engleski** (€5/dan): 7 ad grupa, 30+ ključnih reči, 15 headlines, 4 descriptions, sitelinks, callouts.
+2. **Search — Srpski** (€3/dan): `šah online besplatno`, `blitz turnir online`, `učenje šaha`, `DB Cup turnir`.
+3. **Performance Max — DB Cup** (€10/dan, do 18. jul): jedna kampanja, event-focused, sav asset feed spreman.
+4. **YouTube pre-roll** na chess kanalima (GothamChess, Levy Rozman, ChessNetwork, Anna Cramling audiences).
+5. **Brand defense** (€1/dan): bid na "masterchess" da ne izgubiš klik od konkurencije.
+
+Uključuje: tačne max CPC, negative keyword lista, conversion tracking uputstvo, dnevni budžet split, kada da ubiješ ad (CTR < 1.2%).
+
+---
+
+### DEO C — Meta / Instagram / TikTok Ads
+
+`docs/ADS_META_TIKTOK.md`:
+- **10 gotovih ad varijanti** (copy + hook + CTA) za Reels/TikTok 9:16
+- **Audience targeting matrix**: interest lista, retargeting piksel setup, lookalike strategija
+- **Nikola angle** (13-godišnji solo founder) — najjači hook, 3 verzije skripte za Reels/TikTok/YouTube Shorts
+- **Kreativni brief** za 20 short-form video ideja (speedrun bot demolition, "beat this position", "500 free coins" itd.)
+- **Testni budžet**: €3/dan × 3 kreative × 7 dana = €63 za validaciju
+
+---
+
+### DEO D — Reddit / Forumi (besplatno, visok ROI)
+
+`docs/REDDIT_BLITZ.md` — 30-dnevni kalendar postova, sa **gotovim naslovima i telom posta** za:
+- `/r/chess` (2.1M) — Nikola story, milestone posts, "would love feedback"
+- `/r/chessbeginners` (400K) — weekly puzzle post
+- `/r/serbia`, `/r/beograd` — SR turnir najava, "podržite domaći startup"
+- `/r/webdev`, `/r/SideProject`, `/r/InternetIsBeautiful` — tech build story
+- `/r/Entrepreneur`, `/r/startups` — solo founder priča
+- Chess.com forum, Lichess forum (BEZ linka na sajt, samo Nikola priča → profil → link)
+
+Uključuje: pravila svakog sub-a, kada postovati (dan/vreme za max upvote), kako odgovarati na komentare, šta NE raditi (spam ban).
+
+---
+
+### DEO E — Google Business Profile + Lokalni SEO
+
+`docs/GBP_LAUNCH_CHECKLIST.md`:
+- Verifikacija (video walkthrough — već imaš delimično)
+- **90 GBP postova pripremljenih unapred** (3 mesečno × 3 nedelje = automatski feed za `publish-gbp-posts` edge)
+- Reviews playbook: template poruka za prve 20 recenzija (WhatsApp/email prijateljima)
+- Lokalne citation submisije: 15 srpskih direktorijuma (šahovski savez, sport.rs, 011info, poslovi-oglasi, Bing Places, Apple Maps Connect)
+- Foto pack (30 fotografija): board, Nikola, turnir, screenshots
+
+---
+
+### DEO F — Press & PR (Nikola story = press magnet)
+
+`docs/PRESS_OUTREACH_KIT.md`:
+- **Press release** — dve verzije, EN + SR, spremne za slanje
+- **Media kit** ZIP: logo (sve varijante), Nikola visoke rezolucije fotke, screenshots, factsheet, quotes, boilerplate
+- **Kontakt lista sa email adresama**: Blic, Politika, Kurir, RTS, N1, Nova.rs, Telegraf, Vreme, NIN + Chess.com news, ChessBase, Chess24 + TechCrunch young founder desk, Hacker News (Show HN kada spreman)
+- **Email template** — personalizovan po novinaru, follow-up sekvenca (3 emaila kroz 2 nedelje)
+- **Podcast pitch** — 10 chess podcasts + srpskih tech/omladinskih podcastova gde Nikola može kao gost
+
+---
+
+### DEO G — YouTube / TikTok organski (DailyChess_12 kolaboracija)
+
+`docs/YOUTUBE_TIKTOK_PLAN.md`:
+- **30 skripti** za YouTube Shorts / TikTok / IG Reels (15s svaki), sortirano po hook snazi
+- **Streaming kalendar** DailyChess_12 → "Play me on MasterChess" event streams, viewer challenges
+- **Kolaboracija outreach** — lista od 40 mid-tier chess creator-a (10K–500K) sa email/DM template-om za saradnju
+- **Cross-promo** — kada Nikola pobedi/izgubi na sajtu, auto-clip za TikTok
+
+---
+
+### DEO H — Community "guerrilla" distribucija
+
+`docs/COMMUNITY_DISTRIBUTION.md`:
+- **50 chess Discord servera** — lista sa članstvom, pravilima, kako se predstaviti (bez spama)
+- **Facebook chess grupe** — 30 grupa (EN + SR + regionalne)
+- **WhatsApp / Viber** — template poruka za tvoje prijatelje/porodicu, "podelite u 3 grupe"
+- **Šahovski klubovi u Srbiji** — lista 40 klubova, email + telefon, template "besplatan online turnir za članove"
+- **Osnovne škole u Beogradu** — 20 škola sa šahovskim sekcijama, direktorki template
+- **Univerziteti** — Belgrade Chess Society, ETF, FON študentske organizacije
+
+---
+
+### DEO I — Analitika i praćenje (šta radi, šta ne)
+
+`docs/ANALYTICS_SETUP.md` — uputstvo (bez izmena koda) kako da:
+- Postaviš GA4 property + Google Ads linkovanje
+- Postaviš Meta Pixel + Conversions API
+- TikTok Pixel
+- UTM konvencija za svaki kanal (`utm_source=reddit&utm_campaign=nikola_story`)
+- Weekly KPI tabela (Google Sheet template): signups po izvoru, CAC po kanalu, DB Cup registracije
+
+---
+
+### DEO J — 30-dnevni execution kalendar
+
+`docs/30_DAY_EXECUTION_CALENDAR.md` — dan po dan, šta se objavljuje gde, ko šalje šta:
+
+- **Nedelja 1**: Brand kit deploy svuda, GBP live, prvi Reddit post, press release send (embargo do dana 5)
+- **Nedelja 2**: Google Ads live, prvi TikTok/Reels talas (10 videa), 5 podcast pitcheva
+- **Nedelja 3**: Meta Ads live, YouTube collab stream, drugi press talas
+- **Nedelja 4**: DB Cup finalni push, retargeting kampanje, wrap-up + KPI review
+
+---
+
+### Šta OVAJ plan NE menja na sajtu
+
+Nema komponentnih izmena, nema RLS-a, nema novih ruta. Samo `docs/brand-kit/` folder + `docs/*.md` marketing dokumenti + generisani asset fajlovi. Sajt ostaje isti — sav rad ide u distribuciju.
+
+---
+
+**Reci "kreni" i ja gradim sve gore navedeno u jednom pass-u.** Ili mi kaži koji DEO (A–J) da uradim prvi ako ne želiš sve odjednom. Preporuka redosleda po ROI: **A (logo raspored) → F (press kit, Nikola story) → D (Reddit blitz) → B (Google Ads) → E (GBP) → C (Meta) → ostalo**.
