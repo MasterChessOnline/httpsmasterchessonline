@@ -37,8 +37,8 @@ type Sponsor = {
 
 
 const EVENT_NAME = "Dragan Brakus Cup";
-const EVENT_START = "2026-07-05T17:00:00+02:00"; // 17:00 CEST / 15:00 UTC
-const EVENT_END = "2026-07-05T20:30:00+02:00";
+const EVENT_START = "2026-07-18T16:00:00+02:00"; // 16:00 CEST / 14:00 UTC
+const EVENT_END = "2026-07-18T19:30:00+02:00";
 const SITE = "https://masterchess.live";
 const URL = `${SITE}/dragan-brakus`;
 
@@ -207,7 +207,7 @@ export default function DraganBrakusCup() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="Dragan Brakus Cup — Official MasterChess Blitz Tournament"
-        description="Dragan Brakus Cup — 5 July 2026, 17:00 CEST. 9-round Swiss Blitz (3+2), up to 500 players, live pairings, FIDE-style tie-breaks, Chess-Results export."
+        description="Dragan Brakus Cup — 18 July 2026, 16:00 CEST. 9-round Swiss Blitz (3+2), up to 500 players, live pairings, FIDE-style tie-breaks, Chess-Results export."
         path="/dragan-brakus"
         type="website"
         jsonLd={jsonLd}
@@ -231,7 +231,7 @@ export default function DraganBrakusCup() {
           </p>
           <div className="mt-6 flex flex-wrap gap-2 text-sm">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Calendar className="h-4 w-4 text-yellow-400" /> 5 July 2026 · 17:00 CEST
+              <Calendar className="h-4 w-4 text-yellow-400" /> 18 July 2026 · 16:00 CEST
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
               <Clock className="h-4 w-4 text-yellow-400" /> Blitz 3+2
@@ -308,7 +308,7 @@ export default function DraganBrakusCup() {
           <div className="mt-4">
             <TournamentInvitePanel
               url={`${typeof window !== "undefined" ? window.location.origin : "https://masterchess.live"}/dragan-brakus?utm_source=share`}
-              title="DB Chess Cup — 5 July 2026"
+              title="DB Chess Cup — 18 July 2026"
               message="Join me in the DB Chess Cup on MasterChess."
             />
           </div>
@@ -586,7 +586,7 @@ export default function DraganBrakusCup() {
                 </a>
                 <a
                   className="rounded-md border border-yellow-500/40 px-3 py-2 hover:bg-yellow-500/10"
-                  href={`mailto:chess-results@swiss-manager.at?subject=${encodeURIComponent("Tournament announcement — DB Chess Cup (SRB)")}&body=${encodeURIComponent("Dear Chess-Results desk,\n\nPlease publish the attached tournament on Chess-Results Serbia.\nShort name: DB Chess Cup\nFull name: Dragan Brakus Cup\nFederation: SRB\nStart: 2026-07-05 17:00 CEST\nFormat: 9-round Swiss Blitz 3+2\nWebsite: https://masterchess.live/dragan-brakus\n\nFiles attached.\n\nThank you,\nMasterChess.live\nnikola@masterchess.live")}`}
+                  href={`mailto:chess-results@swiss-manager.at?subject=${encodeURIComponent("Tournament announcement — DB Chess Cup (SRB)")}&body=${encodeURIComponent("Dear Chess-Results desk,\n\nPlease publish the attached tournament on Chess-Results Serbia.\nShort name: DB Chess Cup\nFull name: Dragan Brakus Cup\nFederation: SRB\nStart: 2026-07-18 16:00 CEST\nFormat: 9-round Swiss Blitz 3+2\nWebsite: https://masterchess.live/dragan-brakus\n\nFiles attached.\n\nThank you,\nMasterChess.live\nnikola@masterchess.live")}`}
                 >
                   4. Open mail client →
                 </a>
