@@ -53,9 +53,8 @@ export function track(eventName: string, params: Record<string, unknown> = {}): 
   try {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: eventName, ...enriched });
-    if (typeof window.gtag === "function") {
-      window.gtag("event", eventName, enriched);
-    }
+    // Fan out to GA4 + Meta Pixel + TikTok Pixel (all no-op if not configured)
+    import("./analytics").then((m) => m.pixelTrack(eventName, enriched)).catch(() => {});
   } catch {
     /* ignore */
   }
