@@ -1,76 +1,110 @@
-## Plan: DB Cup date fix + new official logo everywhere + growth push to 100 users
+## Plan: bigger polished logo + full marketing / ads playbook
 
-### 1. DB Chess Cup — new date/time
-Change everywhere from `5 July 2026, 17:00 CEST` to **18 July 2026, 16:00 CEST** (UTC = 14:00Z).
+### Part A — Logo polish (make it bigger + premium)
 
-Files to update:
-- `src/components/BrakusHeroBanner.tsx` — `EVENT_AT`, `HIDE_AFTER`, all "5 July" / "17:00" copy
-- `src/components/BrakusRibbon.tsx` — date label already dynamic, but seed tournament date drives it; also update any hardcoded strings
-- `src/pages/Index.tsx` — hero card "5 July 2026 · 17:00 CEST"
-- `src/pages/IndexFull.tsx`, `IndexFast.tsx` — any DB Cup mentions
-- `src/components/TonightArenaBanner.tsx` — if referencing
-- DB tournament row: `UPDATE tournaments SET starts_at='2026-07-18T14:00:00Z' WHERE name ILIKE '%Dragan Brakus%'` (migration)
-- Docs: `docs/DRAGAN_BRAKUS_GBP_EVENT.md`, prize/GBP calendar files, sitemap news items
-- SEO: `index.html` og/meta if DB Cup is mentioned; `public/news-sitemap.xml`, `public/rss.xml`
+The current navbar logo is 44–48 px inside a plain border. Fix:
 
-### 2. New official logo (uploaded crown-in-rounded-square)
-Register upload as a Lovable asset once, then reuse:
-```
-lovable-assets create --file /mnt/user-uploads/image-51.png --filename masterchess-logo.png \
-  > src/assets/masterchess-logo.png.asset.json
-```
-Replace logo/icon references site-wide:
-- `src/components/Navbar.tsx` (currently Crown lucide icon) → `<img src={logo.url}>`
-- `src/components/Footer.tsx`
-- `src/components/CinematicIntro.tsx` (lucide Crown → logo image)
-- `src/pages/Index.tsx` hero crown badge
-- Any auth pages / Signup / Login header lucide-Crown swap
-- `index.html` — `<link rel="icon">`, `apple-touch-icon`, `og:image`, `twitter:image` all point to the new logo URL (absolute https from the asset CDN)
-- `public/manifest.json` — PWA icons 192/512 → new logo
-- `public/sw.js` — notification icon
-- `capacitor.config.ts` — app icon reference (note: real native icon regen still needs Android/iOS asset export, out of scope)
+1. **Navbar logo (`src/components/Navbar.tsx`)**
+   - Grow to **56 px mobile / 64 px desktop** (was 44/48).
+   - Wrap in a "gold ring" plate: outer amber gradient border, inner black bevel, soft outer glow — matches the crown-square logo aesthetic.
+   - Add subtle idle animation: slow gold shimmer sweep every ~6 s + hover tilt (already there, keep).
+   - Increase the "MasterChess" wordmark size from `text-lg/2xl` to `text-xl/3xl` so the logo + wordmark feel balanced.
+   - Same treatment on mobile bar (currently a separate size class).
 
-### 3. Marketing / growth ideas (target: 100 real users fast)
-I'll build these into the app during implementation, grouped by priority. Pick what you want in scope — I recommend all of Tier 1 now:
+2. **Footer** — swap Crown lucide → `<img src="/app-icon-192.png">` at 40 px with the same gold ring.
 
-**Tier 1 — ship this pass (highest ROI, low effort):**
-1. **Referral loop** — every user gets `/r/{code}`; inviter + invitee both get 250 coins + a "Founder Friend" badge. Live counter on profile.
-2. **Viral share card generator** — after every win, one-tap "Share result" produces a PNG (final position + rating gain + username + masterchess.live) for WhatsApp/IG/X.
-3. **DB Cup FOMO countdown** in hero + sticky ribbon (new date drives it) with "X players registered · Y spots left" pulled live.
-4. **Free-entry perks** — new signup gets 500 coins + 3 free bot puzzles unlocked (already partly present, surface it on Signup page).
-5. **Guest-to-user conversion** — after 1 guest game, soft-prompt "Save your rating — 1-tap signup" with Google OAuth.
+3. **Auth pages** (`Login`, `Signup`, `AuthCallback` headers) — replace lucide crown with the new logo image, 72 px, centered.
 
-**Tier 2 — next pass:**
-6. **Daily login streak** with escalating rewards (already exists — just promote on home).
-7. **"Challenge a friend" link** `/vs/{code}` shareable to WhatsApp — creates a private 1-tap match.
-8. **Weekly leaderboard** with public URL; top 3 pinned to home = social proof.
-9. **DB Cup registration wall of names** (public, indexed) — SEO magnet + ego share.
-10. **Auto-tweet/discord webhook** on: new tournament registration, new top-10 finish, big upsets — pipes activity into your channels.
+4. **CinematicIntro splash** — replace the animated lucide `<Crown>` with the actual logo image (140 px, same gold-glow aura).
 
-**Tier 3 — content/SEO (compounds over weeks):**
-11. Country landing pages (`/chess/serbia`, `/chess/germany`…) — already partly seeded via `sitemap-cities.xml`; add proper H1 + local player counter.
-12. "Beat the bot" landing per bot (`/beat/{botId}`) — already exists per memory; add Open Graph share card.
-13. Puzzle-of-the-day auto-post to X + Discord with FEN preview image.
-14. Blog posts targeting long-tail: "best free chess site 2026", "chess vs bots free", etc.
-15. YouTube — coordinate with DailyChess_12 for a "Play me live on MasterChess" video.
+5. **Homepage hero badge** (`src/pages/Index.tsx`) — swap the 64 px crown-in-box for the real logo at 96 px with the gold-ring plate.
 
-**Tier 4 — community flywheel:**
-16. Clan invite links + clan quests already exist; surface a "Create your clan" CTA on the home for new users.
-17. Discord OAuth already wired — auto-role by rating tier for bragging rights.
-18. Push notifications when a friend comes online (opt-in).
+6. **Loading spinners / route loader** — small 32 px logo replaces the plain `Loader2` where the brand crown is expected.
 
-### 4. Technical section (for reference)
-- New DB Cup datetime: JS `new Date("2026-07-18T14:00:00Z")` (16:00 CEST = UTC+2).
-- Logo asset: single JSON pointer imported wherever needed; no binary in repo.
-- Migration file for tournaments row update; RLS unaffected.
-- No schema changes required for Tier 1 marketing except referral: add `referrals(inviter_id, invitee_id, created_at, reward_granted)` with RLS + GRANTs; add `profiles.referral_code text unique`. Coin grants via existing coin RPC.
+7. Add a shared `<BrandLogo size="sm|md|lg|xl" />` component in `src/components/BrandLogo.tsx` so every future use points at one source (single place to restyle later).
 
-### 5. Verification
-- Playwright: load `/`, screenshot hero — confirm "18 July 2026 · 16:00 CEST" and new logo pixel visible.
-- Confirm favicon + PWA icon updated (hard-reload).
-- Register test user through `/r/{code}` and assert both wallets +250.
+### Part B — Growth & marketing (huge idea pack)
+
+Split into 4 buckets. I'll write everything into `docs/GROWTH_TO_100_USERS.md` (already exists — extend it) and build the highest-ROI **in-app** hooks the ads will click into.
+
+**1. Google Ads (paid search + display)**
+- **Search campaigns** — target long-tail buyer intent, cheap CPC:
+  `play chess online free`, `chess vs bots free`, `chess tournament 2026`,
+  `free chess site no ads`, `chess for kids online`, `učenje šaha online` (SR),
+  `šah online besplatno`, `chess Serbia tournament`, `blitz turnir online`.
+- **Brand campaign** — bid on `masterchess`, `master chess live` (1¢ CPC, defends from competitors).
+- **Performance Max** for the DB Chess Cup — auto-formats across YouTube + Discover + Gmail.
+- **Landing page per ad group** — send `chess vs bots` traffic to `/beat/{botId}`, `tournament` traffic to `/dragan-brakus`, generic `play chess` to `/play-guest` (skip login → instant board).
+- **Conversion tracking** — fire GA4 event on `signup_completed`, `game_started`, `tournament_registered`. Add gtag stub to `index.html` (user needs to paste GA4 ID + Ads conversion ID).
+- **Budget**: start €5/day, scale winners.
+
+**2. Meta / Instagram / TikTok Ads**
+- **Reels-first creative**: 9:16 vertical, 15 s hook — "I built a chess site alone at 13" (uses Nikola's story = high CTR).
+- **Retargeting pixel** on the site → warm audience for people who played a guest game but didn't sign up.
+- **Lookalike audiences** from DB Cup registrants and top-rated players once you have 100+ conversions.
+- **Ad variants** (auto-generate share-card style creatives):
+  - "Beat this position or lose your rating" (interactive puzzle preview)
+  - "You vs a Grandmaster bot — 3+2 blitz. Free."
+  - "500 free coins for your first game."
+
+**3. Google Business Profile + Local SEO (Belgrade / Serbia)**
+- Verify GBP entry (docs already exist in `docs/GBP_*`).
+- Weekly GBP post (auto-scheduled via existing `publish-gbp-posts` edge function) — tournament recap, top-player of week, new lesson.
+- Add GBP category: "Chess club" + "Software company" + "E-sports team".
+- Photos: upload the new logo as profile pic, tournament screenshots, board photos, Nikola portrait.
+- Reviews playbook already in docs — trigger a signed-in-user modal after 3 wins: "Enjoying MasterChess? Leave a Google review" (deep link to GBP).
+- **Local citations** — submit to Serbian directories (Šahovski Savez Srbije, sportski portali, gradski katalozi).
+- **Google Maps pin** — physical/mailing address for verification (already documented).
+
+**4. Organic + Content + Community explosion**
+- **Reddit blitz** — one post per week to `/r/chess`, `/r/chessbeginners` (title format: "I built a free chess site — trying to hit 100 users, would love feedback"). Serbian: `/r/serbia`, `/r/beograd`.
+- **YouTube collab** — DailyChess_12 dedicated stream "Play me on MasterChess" — viewers who join get a "Streamer's Guest" badge.
+- **TikTok automation** — 3 short videos per week:
+  1. Speedrun of a bot demolition
+  2. "Top comment picks my next move" live game
+  3. Blunder-of-the-week from Community feed
+- **Referral loop** — inviter + invitee both get 250 coins + Founder Friend badge, `/r/{code}` link.
+- **Post-game share card** — one-tap PNG (final board + rating gain + username + URL) to WhatsApp/IG/X.
+- **DB Cup FOMO ticker** in nav — "🔴 DB Cup starts in 3d 4h · 42/500 registered".
+- **First-100 badge** — permanent "Founder 100" badge on profile for the first 100 accounts, publicly visible on leaderboard.
+- **Weekly leaderboard email** — cheap engagement loop; sent via existing email queue.
+- **Discord auto-role by rating tier** — bragging rights → sharing.
+- **PWA install prompt** — smart trigger after game 3 (already exists — surface it harder).
+- **Long-tail SEO pages**:
+  `/free-chess-online`, `/play-chess-with-friends`, `/chess-for-beginners`,
+  `/šah-online-besplatno`, `/chess-serbia`, `/chess-tournaments-2026`,
+  `/how-to-play-chess-online`. Each carries proper H1, FAQ JSON-LD, internal links.
+- **Semrush check** — run `keyword_research` on the top 5 SR/EN terms before writing the pages so we target the ones with real volume + low KDI (Semrush is an SEO data service the platform integrates with).
+- **Email capture** — "Get notified when DB Cup starts" popup for guests, plug into email queue.
+- **Nikola's story angle** — 13-year-old solo founder = press hook. Pitch to: Blic, Politika, Kurir, RTS (SR); Chess.com news desk; TechCrunch "young founder" desk; local gaming sites.
+
+**5. Referral / viral primitives (in-app builds this pass)**
+Building these now unlocks all of the above (ads have nowhere to convert to without them). Ship in this order:
+
+1. **`/r/{code}` referral link** — reads code from URL, stores in localStorage, applies on signup, triggers 250-coin grant via existing coin RPC. Needs a `referrals` table (already exists per project schema — reuse).
+2. **DB Cup countdown ticker** — thin bar under navbar showing live seconds to 2026-07-18T14:00Z + registered/max count.
+3. **"Founder 100" badge** — auto-award to first 100 confirmed accounts, show on profile + leaderboard.
+4. **Post-game share PNG** — generate via canvas, use existing InviteShareCard as template, add "Share to WhatsApp/X" buttons.
+5. **GA4 + Meta Pixel stubs** in `index.html` (behind env vars) so ads can start tracking on day one.
+
+### Technical section
+
+- `BrandLogo` React component: props `size`, `withRing`, `glow`; uses `/app-icon-192.png` (already the new crown logo).
+- Ring styling: `bg-gradient-to-br from-amber-300/80 via-amber-500/60 to-amber-800/80`, inner `bg-black/80`, `shadow-[0_0_40px_-8px_rgba(212,175,55,0.6)]`.
+- Referral: use existing `referrals` table (see supabase-tables), add trigger to grant coins on first inviteeconversion.
+- GA4: `<script async src="https://www.googletagmanager.com/gtag/js?id=${env}">` gated on `VITE_GA4_ID` env var.
+- Meta Pixel: gated on `VITE_META_PIXEL_ID` env var.
+
+### Verification
+
+- Playwright: load `/`, screenshot navbar — logo visibly 56/64 px with gold ring, wordmark balanced.
+- Load `/signup?r=TESTCODE` — check localStorage has the code, complete signup → confirm coins granted on both accounts.
+- Load `/dragan-brakus` — countdown ticks in real time, shows registered/max.
 
 ---
-**Before I build:** confirm two things —
-(a) Ship **all of Tier 1** now, or subset?
-(b) Should the new logo also replace the animated hero crown/`CinematicIntro`, or keep the animated Crown there and only swap header/favicon/PWA?
+
+**Confirm before I build:**
+
+(a) Ship **all of the "5 in-app builds"** now (logo polish + referral + countdown + Founder 100 + share PNG + analytics stubs), or subset?
+(b) Do you have a **GA4 measurement ID** and **Meta Pixel ID** ready, or should I add the stubs and you'll paste the IDs later?
+(c) Should I set up a **Semrush keyword research pass** for the Serbian + English long-tail landing pages so we target the terms with real search volume?
