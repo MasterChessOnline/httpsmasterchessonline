@@ -12,6 +12,7 @@ import { track } from "@/lib/track";
 
 import AuthAura from "@/components/auth/AuthAura";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
+import BrandLogo from "@/components/BrandLogo";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
