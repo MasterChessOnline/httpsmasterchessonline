@@ -1,4 +1,5 @@
 import { LogOut, Trophy, Swords, GraduationCap, Crown, Brain, Play, Award, Star, ChevronDown, Menu, X, Search, Users, BookOpen, FileText, Target, Medal, Radio, Shield, Eye, Zap, Heart } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -237,23 +238,23 @@ const Navbar = () => {
         >
           <div
             className={`container mx-auto flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-5 transition-all duration-500 ${
-              shrunk ? "h-14" : "h-16"
+              shrunk ? "h-16" : "h-20"
             }`}
           >
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 sm:gap-3.5 group shrink-0 min-w-0" aria-label="MasterChess home">
-              <motion.img
-                src="/app-icon-192.png"
-                alt="MasterChess"
-                width={48}
-                height={48}
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border border-primary/30 group-hover:border-primary/50 group-hover:shadow-[0_0_28px_rgba(212,175,55,0.35)] transition-all duration-300 shrink-0 object-contain bg-black/60"
-                whileHover={{ rotate: 6, scale: 1.06 }}
-                transition={{ type: "spring", stiffness: 300 }}
+            <Link to="/" className="flex items-center gap-3 sm:gap-4 group shrink-0 min-w-0" aria-label="MasterChess home">
+              <BrandLogo
+                size={shrunk ? "md" : "lg"}
+                motionProps={{
+                  whileHover: { rotate: 6, scale: 1.05 },
+                  transition: { type: "spring", stiffness: 320, damping: 18 },
+                }}
               />
               <span
-                className="font-display font-bold tracking-wide text-foreground uppercase text-lg sm:text-2xl whitespace-nowrap shrink-0"
-                style={{ wordBreak: "keep-all", overflowWrap: "normal", whiteSpace: "nowrap" }}
+                className={`font-display font-black tracking-wide text-foreground uppercase whitespace-nowrap shrink-0 transition-all duration-300 ${
+                  shrunk ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl"
+                }`}
+                style={{ wordBreak: "keep-all", overflowWrap: "normal", whiteSpace: "nowrap", letterSpacing: "0.02em" }}
               >
                 Master<span className="text-gradient-gold">Chess</span>
               </span>
