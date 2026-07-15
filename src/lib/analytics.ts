@@ -10,9 +10,9 @@
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dataLayer?: any[];
+    dataLayer: any[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    gtag?: (...args: any[]) => void;
+    gtag: (...args: any[]) => void;
     fbq?: ((...args: unknown[]) => void) & { callMethod?: unknown; queue?: unknown[]; loaded?: boolean; version?: string; push?: unknown };
     _fbq?: unknown;
     ttq?: {
