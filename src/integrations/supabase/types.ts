@@ -598,6 +598,91 @@ export type Database = {
         }
         Relationships: []
       }
+      club_events: {
+        Row: {
+          club_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          event_type: string
+          id: string
+          location: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          event_type?: string
+          id?: string
+          location?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          event_type?: string
+          id?: string
+          location?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_events_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_gallery: {
+        Row: {
+          caption: string | null
+          club_id: string
+          created_at: string
+          id: string
+          image_url: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          caption?: string | null
+          club_id: string
+          created_at?: string
+          id?: string
+          image_url: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          caption?: string | null
+          club_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_gallery_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_members: {
         Row: {
           club_id: string
@@ -662,24 +747,73 @@ export type Database = {
           },
         ]
       }
+      club_news: {
+        Row: {
+          author_id: string | null
+          body: string
+          club_id: string
+          created_at: string
+          id: string
+          published_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          club_id: string
+          created_at?: string
+          id?: string
+          published_at?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          club_id?: string
+          created_at?: string
+          id?: string
+          published_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_news_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clubs: {
         Row: {
           avg_rating: number
           banner_color: string
           city: string | null
+          contact_email: string | null
           created_at: string
           description: string
+          founded_year: number | null
+          history: string | null
           icon: string
           id: string
           is_public: boolean
           lat: number | null
           lng: number | null
+          logo_url: string | null
           member_count: number
           name: string
           owner_id: string
+          partner_type: string | null
+          slug: string
           tag: string | null
           total_wins: number
           updated_at: string
+          verified: boolean
+          website_url: string | null
           weekly_reset_at: string
           weekly_wins: number
         }
@@ -687,19 +821,27 @@ export type Database = {
           avg_rating?: number
           banner_color?: string
           city?: string | null
+          contact_email?: string | null
           created_at?: string
           description?: string
+          founded_year?: number | null
+          history?: string | null
           icon?: string
           id?: string
           is_public?: boolean
           lat?: number | null
           lng?: number | null
+          logo_url?: string | null
           member_count?: number
           name: string
           owner_id: string
+          partner_type?: string | null
+          slug: string
           tag?: string | null
           total_wins?: number
           updated_at?: string
+          verified?: boolean
+          website_url?: string | null
           weekly_reset_at?: string
           weekly_wins?: number
         }
@@ -707,19 +849,27 @@ export type Database = {
           avg_rating?: number
           banner_color?: string
           city?: string | null
+          contact_email?: string | null
           created_at?: string
           description?: string
+          founded_year?: number | null
+          history?: string | null
           icon?: string
           id?: string
           is_public?: boolean
           lat?: number | null
           lng?: number | null
+          logo_url?: string | null
           member_count?: number
           name?: string
           owner_id?: string
+          partner_type?: string | null
+          slug?: string
           tag?: string | null
           total_wins?: number
           updated_at?: string
+          verified?: boolean
+          website_url?: string | null
           weekly_reset_at?: string
           weekly_wins?: number
         }
@@ -1988,6 +2138,80 @@ export type Database = {
           white_time?: number
         }
         Relationships: []
+      }
+      partner_applications: {
+        Row: {
+          city: string | null
+          club_id: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          decided_at: string | null
+          id: string
+          member_count: number | null
+          message: string | null
+          organization_name: string
+          partner_type: string
+          reviewer_id: string | null
+          reviewer_notes: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          website_url: string | null
+        }
+        Insert: {
+          city?: string | null
+          club_id?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          member_count?: number | null
+          message?: string | null
+          organization_name: string
+          partner_type: string
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          city?: string | null
+          club_id?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          member_count?: number | null
+          message?: string | null
+          organization_name?: string
+          partner_type?: string
+          reviewer_id?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_applications_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       player_badges: {
         Row: {
@@ -4980,6 +5204,7 @@ export type Database = {
       }
       server_now: { Args: never; Returns: string }
       settle_bets_for_game: { Args: { p_game_id: string }; Returns: Json }
+      slugify: { Args: { txt: string }; Returns: string }
       spin_wheel_legendary: { Args: never; Returns: Json }
       spin_wheel_paid: { Args: never; Returns: Json }
       start_online_game: {
@@ -5037,6 +5262,7 @@ export type Database = {
         Args: { _badge_key: string; _new_owner: string }
         Returns: undefined
       }
+      unaccent: { Args: { "": string }; Returns: string }
       update_elo_ratings: {
         Args: { p_black_id: string; p_result: string; p_white_id: string }
         Returns: undefined
