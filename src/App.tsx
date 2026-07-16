@@ -285,7 +285,7 @@ function useRouteZone() {
   if (p.startsWith("/play") || p === "/" || p.startsWith("/bot") || p.startsWith("/beat")) zone = "play";
   else if (p.startsWith("/learn") || p.startsWith("/lessons") || p.startsWith("/openings") || p.startsWith("/coach") || p.startsWith("/training") || p.startsWith("/puzzle") || p.startsWith("/daily-puzzle") || p.startsWith("/guides") || p.startsWith("/glossary")) zone = "learn";
   else if (p.startsWith("/tournament") || p.startsWith("/dragan-brakus") || p.startsWith("/leaderboard") || p.startsWith("/battle-royale") || p.startsWith("/team-battles")) zone = "tourney";
-  else if (p.startsWith("/community") || p.startsWith("/clubs") || p.startsWith("/friends") || p.startsWith("/live") || p.startsWith("/profile") || p.startsWith("/u/")) zone = "community";
+  else if (p.startsWith("/community") || p.startsWith("/clubs") || p.startsWith("/club/") || p.startsWith("/friends") || p.startsWith("/live") || p.startsWith("/profile") || p.startsWith("/u/")) zone = "community";
   else if (p.startsWith("/news") || p.startsWith("/blog") || p.startsWith("/press")) zone = "news";
   if (zone) document.documentElement.setAttribute("data-zone", zone);
   else document.documentElement.removeAttribute("data-zone");
