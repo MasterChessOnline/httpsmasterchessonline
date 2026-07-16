@@ -143,6 +143,10 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Clubs = lazy(() => import("./pages/Clubs"));
 const ClubDetail = lazy(() => import("./pages/ClubDetail"));
+const PublicClub = lazy(() => import("./pages/PublicClub"));
+const ClubIdRedirect = lazy(() => import("./pages/ClubIdRedirect"));
+const Partners = lazy(() => import("./pages/Partners"));
+const AdminPartners = lazy(() => import("./pages/AdminPartners"));
 const GameReview = lazy(() => import("./pages/GameReview"));
 const Spectate = lazy(() => import("./pages/Spectate"));
 const GuessTheMove = lazy(() => import("./pages/GuessTheMove"));
@@ -370,7 +374,11 @@ function AnimatedRoutes() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/clubs" element={<Clubs />} />
-          <Route path="/clubs/:id" element={<ClubDetail />} />
+          <Route path="/clubs/:id" element={<ClubIdRedirect />} />
+          <Route path="/club/:slug" element={<PublicClub />} />
+          <Route path="/clubs/legacy/:id" element={<ClubDetail />} />
+          <Route path="/partners" element={<Partners />} />
+          <Route path="/admin/partners" element={<AdminPartners />} />
           <Route path="/game-review" element={<GameReview />} />
           <Route path="/spectate" element={<Spectate />} />
           <Route path="/guess-the-move" element={<GuessTheMove />} />
