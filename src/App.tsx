@@ -143,6 +143,10 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Clubs = lazy(() => import("./pages/Clubs"));
 const ClubDetail = lazy(() => import("./pages/ClubDetail"));
+const PublicClub = lazy(() => import("./pages/PublicClub"));
+const ClubIdRedirect = lazy(() => import("./pages/ClubIdRedirect"));
+const Partners = lazy(() => import("./pages/Partners"));
+const AdminPartners = lazy(() => import("./pages/AdminPartners"));
 const GameReview = lazy(() => import("./pages/GameReview"));
 const Spectate = lazy(() => import("./pages/Spectate"));
 const GuessTheMove = lazy(() => import("./pages/GuessTheMove"));
@@ -281,7 +285,7 @@ function useRouteZone() {
   if (p.startsWith("/play") || p === "/" || p.startsWith("/bot") || p.startsWith("/beat")) zone = "play";
   else if (p.startsWith("/learn") || p.startsWith("/lessons") || p.startsWith("/openings") || p.startsWith("/coach") || p.startsWith("/training") || p.startsWith("/puzzle") || p.startsWith("/daily-puzzle") || p.startsWith("/guides") || p.startsWith("/glossary")) zone = "learn";
   else if (p.startsWith("/tournament") || p.startsWith("/dragan-brakus") || p.startsWith("/leaderboard") || p.startsWith("/battle-royale") || p.startsWith("/team-battles")) zone = "tourney";
-  else if (p.startsWith("/community") || p.startsWith("/clubs") || p.startsWith("/friends") || p.startsWith("/live") || p.startsWith("/profile") || p.startsWith("/u/")) zone = "community";
+  else if (p.startsWith("/community") || p.startsWith("/clubs") || p.startsWith("/club/") || p.startsWith("/friends") || p.startsWith("/live") || p.startsWith("/profile") || p.startsWith("/u/")) zone = "community";
   else if (p.startsWith("/news") || p.startsWith("/blog") || p.startsWith("/press")) zone = "news";
   if (zone) document.documentElement.setAttribute("data-zone", zone);
   else document.documentElement.removeAttribute("data-zone");
@@ -370,7 +374,11 @@ function AnimatedRoutes() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/clubs" element={<Clubs />} />
-          <Route path="/clubs/:id" element={<ClubDetail />} />
+          <Route path="/clubs/:id" element={<ClubIdRedirect />} />
+          <Route path="/club/:slug" element={<PublicClub />} />
+          <Route path="/clubs/legacy/:id" element={<ClubDetail />} />
+          <Route path="/partners" element={<Partners />} />
+          <Route path="/admin/partners" element={<AdminPartners />} />
           <Route path="/game-review" element={<GameReview />} />
           <Route path="/spectate" element={<Spectate />} />
           <Route path="/guess-the-move" element={<GuessTheMove />} />
