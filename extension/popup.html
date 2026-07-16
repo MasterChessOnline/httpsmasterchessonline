@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MasterChess Quick Play</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        width: 320px;
+        margin: 0;
+        padding: 18px 16px 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(160deg, #0b0b0d 0%, #1a1408 100%);
+        color: #f5f5f5;
+      }
+      header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+      .logo {
+        width: 32px; height: 32px; border-radius: 8px;
+        background: linear-gradient(135deg, #fbbf24, #d97706);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; font-weight: 900; color: #000;
+      }
+      h1 { margin: 0; font-size: 15px; letter-spacing: 0.02em; }
+      .tag { font-size: 11px; color: #a3a3a3; margin-top: 1px; }
+      .card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(251,191,36,0.18);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+      .stat { display:flex; justify-content:space-between; font-size:12px; color:#d4d4d4; margin:3px 0; }
+      .stat b { color:#fbbf24; }
+      button, a.btn {
+        display: block; width: 100%;
+        padding: 11px 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 8px;
+        text-align: center;
+        text-decoration: none;
+        transition: transform 0.1s;
+      }
+      button:active, a.btn:active { transform: scale(0.98); }
+      .primary { background: #fbbf24; color: #000; }
+      .primary:hover { background: #fcd34d; }
+      .ghost {
+        background: rgba(255,255,255,0.06);
+        color: #f5f5f5;
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+      .ghost:hover { background: rgba(255,255,255,0.12); }
+      footer { margin-top: 10px; font-size: 10px; color: #737373; text-align: center; }
+      footer a { color: #a3a3a3; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">♛</div>
+      <div>
+        <h1>MasterChess</h1>
+        <div class="tag">Quick Play · v1.0</div>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="stat"><span>Live now</span><b id="live-count">—</b></div>
+      <div class="stat"><span>Next tournament</span><b id="next-tourney">—</b></div>
+      <div class="stat"><span>Daily puzzle</span><b>ready</b></div>
+    </div>
+
+    <a class="btn primary" id="play-btn" href="https://masterchess.live/play-guest?utm_source=chrome_ext&utm_medium=popup" target="_blank" rel="noopener">▶ Play Instantly</a>
+    <a class="btn ghost" id="puzzle-btn" href="https://masterchess.live/puzzles?utm_source=chrome_ext&utm_medium=popup" target="_blank" rel="noopener">🧩 Daily Puzzle</a>
+    <a class="btn ghost" id="cup-btn" href="https://masterchess.live/dragan-brakus?utm_source=chrome_ext&utm_medium=popup" target="_blank" rel="noopener">🏆 DB Chess Cup — 23 Jul</a>
+
+    <footer>
+      <a href="https://masterchess.live?utm_source=chrome_ext" target="_blank" rel="noopener">masterchess.live</a>
+      · built by a 13-year-old
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
