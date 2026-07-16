@@ -168,6 +168,9 @@ const Guide = lazy(() => import("./pages/Guide"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const GlossaryTerm = lazy(() => import("./pages/GlossaryTerm"));
 const ShareStreak = lazy(() => import("./pages/ShareStreak"));
+const Feed = lazy(() => import("./pages/Feed"));
+const Rivals = lazy(() => import("./pages/Rivals"));
+const MatchStory = lazy(() => import("./pages/MatchStory"));
 const Tools = lazy(() => import("./pages/Tools"));
 const ToolDetail = lazy(() => import("./pages/ToolDetail"));
 const Chests = lazy(() => import("./pages/Chests"));
@@ -379,6 +382,9 @@ function AnimatedRoutes() {
           <Route path="/clubs/legacy/:id" element={<ClubDetail />} />
           <Route path="/partners" element={<Partners />} />
           <Route path="/admin/partners" element={<AdminPartners />} />
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/rivals" element={<Rivals />} />
+          <Route path="/game/:id/story" element={<MatchStory />} />
           <Route path="/game-review" element={<GameReview />} />
           <Route path="/spectate" element={<Spectate />} />
           <Route path="/guess-the-move" element={<GuessTheMove />} />
