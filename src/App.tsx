@@ -125,6 +125,7 @@ const DraganBrakusRegister = lazy(() => import("./pages/DraganBrakusRegister"));
 const InviteRedirect = lazy(() => import("./pages/InviteRedirect"));
 const WhyMasterChess = lazy(() => import("./pages/WhyMasterChess"));
 const AffiliateRedirect = lazy(() => import("./pages/AffiliateRedirect"));
+const SeoAutoPage = lazy(() => import("./pages/SeoAutoPage"));
 
 const StoryMode = lazy(() => import("./pages/StoryMode"));
 const OpeningTrainer = lazy(() => import("./pages/OpeningTrainer"));
@@ -494,6 +495,10 @@ function AnimatedRoutes() {
           <Route path="/founder" element={<NikolaSakotic />} />
           <Route path="/play-from/:city" element={<PlayFromCity />} />
           <Route path="/overlay/:username" element={<StreamerOverlay />} />
+          {/* AI-generated SEO content pages (public.seo_pages, unified template) */}
+          <Route path="/openings/:slug" element={<SeoAutoPage />} />
+          <Route path="/how-to-beat/:slug" element={<SeoAutoPage />} />
+          <Route path="/rating/:slug" element={<SeoAutoPage />} />
           {/* SEO long-tail landings (EN + SR), all served by SeoLandingRoute via path lookup */}
           <Route path="/chess-for-kids" element={<SeoLandingRoute />} />
           <Route path="/chess-for-beginners" element={<SeoLandingRoute />} />

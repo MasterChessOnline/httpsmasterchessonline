@@ -3017,6 +3017,69 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_pages: {
+        Row: {
+          body_md: string
+          faq: Json | null
+          generated_at: string
+          h1: string
+          id: string
+          indexed_at: string | null
+          jsonld: Json | null
+          keywords: string[] | null
+          kind: string
+          lang: string
+          meta_description: string
+          quality_score: number | null
+          related_slugs: string[] | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          body_md: string
+          faq?: Json | null
+          generated_at?: string
+          h1: string
+          id?: string
+          indexed_at?: string | null
+          jsonld?: Json | null
+          keywords?: string[] | null
+          kind: string
+          lang?: string
+          meta_description: string
+          quality_score?: number | null
+          related_slugs?: string[] | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          body_md?: string
+          faq?: Json | null
+          generated_at?: string
+          h1?: string
+          id?: string
+          indexed_at?: string | null
+          jsonld?: Json | null
+          keywords?: string[] | null
+          kind?: string
+          lang?: string
+          meta_description?: string
+          quality_score?: number | null
+          related_slugs?: string[] | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       seo_query_opportunities: {
         Row: {
           acted_on: boolean

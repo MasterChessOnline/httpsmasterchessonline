@@ -9,3 +9,7 @@ project_id = "kicabdwgdyabibioycbq"
     verify_jwt = false
   [functions.tournament-export]
     verify_jwt = false
+  [functions.sitemap-seo-pages]
+    verify_jwt = false
+  [functions.seo-content-generator]
+    verify_jwt = false

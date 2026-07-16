@@ -1,107 +1,165 @@
-# NAJBRUTALNIJA IDEJA: "Chess Roast" — MasterChess kao TikTok/Reels fabrika
+# MEGA PLAN: EKSPLOZIJA MASTERCHESS-a za 60 dana
 
-Ovo je jedina strategija koja može da eksplodira sajt za 60 dana **bez ijedne marketing pare**. Razlog: **korisnici postaju marketing tim.**
-
-## Realnost
-
-Ne možeš da pobediš chess.com na chess sadržaju. Ne možeš da pobediš lichess na "besplatno + open source". **Ali možeš da eksplodiraš na kanalima gde oni ne postoje: TikTok, Instagram Reels, YouTube Shorts.** Chess.com ima ~500K TikTok pratilaca ali ne pravi UGC (user-generated content) — samo prof clips. Lichess uopšte nema TikTok. **Ova rupa je milionska.**
-
-## Ideja: Chess Roast Engine
-
-Posle svake partije, korisnik dobija **automatski generisan 15-30 sekundni vertikalni video (9:16, TikTok format)** — savršen za direktan upload na TikTok/Reels/Shorts. Video sadrži:
-
-1. **Intro (2s)** — "Roasting [tvoje ime] — Rating [ELO]"
-2. **Highlight potez (8s)** — animirana tabla, tvoj najgori/najbolji potez sa engine eval swing-om, veliki brojevi "−4.7"
-3. **AI Roast tekst (10s)** — brutalan srpski/engleski tekst preko ekrana:
-   - "34. Qh5?? — ovaj potez je video Bogorodica i zaplakala"
-   - "Žrtvovao si damu... za šta tačno? Odgovori u komentarima"
-   - "Stockfish 17 je posle ove partije podneo ostavku"
-4. **Rezultat (3s)** — velika crvena "L" ili zlatna "W" kartica
-5. **Outro sa watermark (2s)** — "roasted by masterchess.live/roast/[gameId]"
-
-Svaki video **ima masterchess.live vodeni žig kroz ceo klip** + link kartica na kraju. Kad user postavi na TikTok, njegovi pratioci vide URL. **Jedan viralni video = 100K impresija = 500-2000 novih korisnika.**
-
-### Zašto radi (psihologija)
-
-- **Self-deprecating humor je najviralniji sadržaj na internetu 2024-2026.** Fantasy Football Roast Instagram ima 2M pratilaca radeći isto — samo sa fudbalom.
-- **Chess ima "meme-ability"** — blundera, žrtvovanja, mat-u-1-potezu = savršen content.
-- **User želi da podeli** kad je smešno na njegov račun. Kad je pobeda, hvali se. Win-win.
-- **AI brutalan tekst** je 1000x bolji od dosadnog "You lost". Chess.com govori "Nice try!" — mi kažemo "34. Qh5 je najgori potez u istoriji tvog naloga."
-
-## Distribucija — kako to zapaljivo eksploduje
-
-### 1. Auto-post to TikTok kroz saradnju (nedelja 1-2)
-- Nalog **@masterchess.roast** na TikTok/IG/YT Shorts
-- Svakih 4h automatski postaje najbolji roast od dana (top 10 by upvotes od korisnika)
-- 6 videa dnevno × 30 dana = 180 videa za mesec dana
-- **Statistika:** kanal koji postavlja 5+ vertikalnih videa dnevno sa niche topikom dostiže 10K pratilaca za 30 dana (dokazano na desetinama chess/gaming acc-ova)
-
-### 2. Reddit "arbitrage" (nedelja 1-3)
-- Postavljati najsmešnije roast-ove na r/AnarchyChess (1.4M korisnika), r/chess (800K), r/tocsen
-- Auto-crosspost bot koji čita naše najviralnije roast-ove i deli
-- r/AnarchyChess = zlato jer je 100% meme-based
-
-### 3. Discord bot `/roast @user` (nedelja 3-4)
-- Bilo koji Discord može dodati MasterChess bot
-- `/roast @user` — bot vuče poslednju partiju tog usera i baca roast u thread
-- Svaki server = 50-500 nas potencijalnih korisnika koji vide brand
-- Chess Discords ima 2000+ servera, direct-hit target audience
-
-### 4. Streamer package (nedelja 4-6)
-- Bilo koji streamer sa 100+ prati na Twitch/YT: **besplatan premium doživotno + custom overlay**
-- Overlay pokazuje: MasterChess rating, live board, roast reaction popup
-- 200 malih streamera × 20-500 gledalaca = 4K-100K impresija dnevno besplatno
-
-### 5. "Chess Wrapped" decembra
-- Kao Spotify Wrapped — svaki user dobija svoj godišnji recap: totalne partije, best win, worst blunder (roast), most-played opening, "chess personality" (Aggressor/Grinder/Blitz Demon)
-- Deljivi kartice svaki decembar → **jedan dan = 10K organic shares**
-- Chess.com kopira Spotify slabo; naš recap = savršen, personalizovan, viralan
-
-## Šta ja gradim u kodu
-
-**Sprint A (1-2 turn-a):**
-1. **Edge funkcija `generate-roast`** — Lovable AI (Gemini) prima PGN + Stockfish eval, vraća 3-5 brutalnih roast linija na srpskom/engleskom
-2. **Roast page `/roast/:gameId`** — public stranica sa roast textom, share dugmadi, embedded video player
-3. **Video generator (`generate-roast-video` edge)** — koristi FFmpeg WASM ili remotion-style API da složi 15s vertikalni MP4 sa tablom + tekstom + music. Prvi MVP: SVG animacija konvertovana u MP4 kroz vanjski API (Shotstack ili Creatomate — jeftin API, ~$0.05/video). Ili čisto client-side sa Canvas + MediaRecorder.
-4. **Auto-prompt posle partije** — modal "Vidi svoj Roast" sa preview + Download MP4 dugme
-
-**Sprint B (2-3 turn-a):**
-5. **Discord bot** — Deno edge funkcija, slash command `/roast`, `/challenge`
-6. **Chess Wrapped page** `/wrapped/:year` — per-user annual recap
-7. **Public roast leaderboard** `/roast/top` — najviralnije roast-ove nedelje, upvote/share sistem
-8. **TikTok/IG upload helper** — one-click "Preuzmi za TikTok" dugme sa optimizovanim MP4
-
-## Tehnički detalji
-
-- **Video generisanje**: preporučujem **Creatomate API** (~$25/mesec za 500 videa) ili **Shotstack** — JSON template → MP4. Alternativa: čisto client-side kroz `MediaRecorder` API + Canvas (besplatno ali sporije, ~10s per video na korisničkom uređaju).
-- **AI roast**: Lovable AI Gateway, model `google/gemini-2.5-flash` (jeftin, brz). Prompt: "You are a brutal chess commentator. Roast this player's worst move in 2-3 sentences of savage humor in [Serbian/English]."
-- **Nove tabele**: `roasts(id, game_id, user_id, roast_text, video_url, upvotes, shares, created_at)`, `roast_reactions(roast_id, user_id, type)` — sve sa RLS + GRANT
-- **Storage**: Supabase Storage bucket `roast-videos` (public read)
-- **Discord bot**: Deno edge funkcija sa Discord Interactions endpoint, verify signature; register komande kroz Discord Developer Portal
-- **Chess Wrapped**: cron job 1. decembra pre-računa sve statistike u `wrapped_recaps` tabelu
-
-## Metrike uspeha (60 dana)
-
-- **10K TikTok pratilaca** na @masterchess.roast
-- **1 viralni video** (>500K views)
-- **500+ user-uploaded roast-ova** na TikTok/IG sa masterchess.live watermark
-- **50+ Discord servera** doda bota
-- **20K+ novih posetilaca** iz social kanala (mesečno)
-- **5-10% conversion** iz social → registrovan nalog
-
-## Rizici i mitigacije
-
-- **Roast tekst previše uvredljiv** → dvostepeni system: default "playful roast", opciono "brutal mode" u settings
-- **Video generisanje skupo** → cache po game_id, generiši samo na klik, ne za svaku partiju
-- **Discord bot spam** → rate-limit per server, admin toggle
-- **TikTok algoritam nije predvidljiv** → testiraj 3 formata prve nedelje, dupliraj šta radi
+Cilj: **10.000–50.000 organskih poseta / mesec** i **3.000–15.000 novih registracija** bez ijednog dinara reklama.
+Metoda: masovna proizvodnja SEO sadržaja + agresivna distribucija po celom internetu (isto kako su Chess.com i Lichess uzeli long-tail 2015–2020).
 
 ---
 
-## Da li krećemo?
+## DEO 1 — AI CONTENT FARM (500+ stranica / nedeljno)
 
-Ovo je jedina ideja koja može da **10x sajta za 2 meseca bez marketing budžeta**. Sve ostalo (SEO landing stranice, referral, feed) su dopuna ovome, ne zamena.
+### 1.1 Šta zapravo pravim (novi tipovi stranica)
 
-**Reci "krećemo" i počinjem sa Sprint A: AI Roast engine + `/roast/:gameId` public page + video generator MVP (client-side Canvas verzija za brzi start).**
+Sve se generiše programski (edge function + AI Gateway) i piše u DB tabele; jedan React template servisira desetine hiljada URL-ova. Google indeksira svaki.
 
-Ili predloži druge smerove ako ovo nije to što tražiš.
+| Tip stranice | URL šablon | Broj | Primer |
+|---|---|---|---|
+| **Otvaranje-vs-otvaranje** | `/openings/:a-vs-:b` | ~800 | `sicilian-vs-french` |
+| **"Kako pobediti protiv X"** | `/how-to-beat/:opening` | ~200 | `how-to-beat-the-london-system` |
+| **Mat u N poteza** | `/mate-in/:n/:pattern` | ~300 | `mate-in-2-back-rank` |
+| **ELO milestone vodiči** | `/rating/:elo-guide` | ~600 | `1200-elo-chess-guide` |
+| **"Chess for X"** | `/chess-for/:audience` | ~150 | `chess-for-6-year-olds`, `chess-for-adults` |
+| **Grad + šah** | `/chess-in/:city` | ~400 | `chess-in-belgrade`, `chess-in-berlin` |
+| **Poznati igrači — dubinski profili** | `/players/:name/games`, `/players/:name/openings` | ~500 | `/players/magnus-carlsen/openings` |
+| **Poznate partije (razgrađene)** | `/famous-games/:slug` | ~300 | `kasparov-vs-topalov-1999` |
+| **Beat-bot landing** | `/beat/:botId` (proširiti sa 9 → 40 varijanti) | ~40 | `beat-nikola-1800` |
+| **Puzzle by theme** | `/puzzles/:theme` | ~120 | `pin-puzzles`, `fork-puzzles` |
+| **Glossary terms** | `/glossary/:term` | ~250 | `zugzwang`, `zwischenzug` |
+| **Rivalstvo generator** | `/vs/:playerA-vs-:playerB` | ~200 | istorijski dueli |
+
+**Ukupno ~3.870 novih stranica**, sve indeksibilne, sve real content (ne samo template).
+
+### 1.2 Kako AI piše sadržaj (bez smeća)
+
+- **Edge function `seo-content-generator`** (cron, radi po 100 stranica/dan) — Gemini 2.5 Flash
+- Svaka stranica ima: **JSON-LD Article/HowTo schema**, canonical, og:image (auto-generisan sa boardom pozicijom), 800-1500 reči, FAQ sekcija, "related pages" grid (interno linkovanje = SEO gold)
+- Tabela `seo_pages(slug, kind, title, meta_desc, body_md, jsonld, related_slugs, generated_at, quality_score)`
+- **Kontrola kvaliteta**: quality_score < 70 → regeneriši. Real chess podaci iz `masterclass-validated-lines` + Lichess Explorer API + `famousGames` data.
+- **Dvojezično**: SR + EN varijanta svakog URL-a (`/en/…` i `/sr/…`) = duplo indeksiranih stranica.
+
+### 1.3 Auto-sitemap + IndexNow ping
+
+- `scripts/generate-sitemap.ts` čita `seo_pages` tabelu → generiše 15 tematskih sitemap-ova (već postoje delimično)
+- Nakon svake AI batch runde: edge function pinguje **Google Indexing API, Bing IndexNow, Yandex IndexNow** za nove URL-ove
+- Auto news-sitemap za svaki novi članak
+
+### 1.4 Blog/News farma (svakodnevno)
+
+- **Cron edge function `daily-news-writer`** — svaki dan piše 3-5 članaka:
+  - "Chess news of the day" (RSS iz FIDE/ChessBase/TWIC već postoji → AI rewrite u original članak)
+  - "Opening of the week deep-dive"
+  - "Player spotlight"
+  - "Chess psychology / improvement tips"
+- Objavljuje se u `blog_posts` tabelu, ide u news sitemap, IndexNow ping
+- Za 60 dana = **180-300 novih original blog članaka** = ozbiljna Google News kandidatura
+
+---
+
+## DEO 2 — PROGRAMMATIC PR + DISTRIBUCIJA (50+ platformi)
+
+Ovo su sajtovi/servisi koji **pomažu platformama da rastu** — sve što je legalno automatizovati, automatizujem; ostalo pripremim gotovo za tvoj jedan-klik.
+
+### 2.1 Startup/product direktorijumi (jednokratni ali ogromni)
+
+Pravim **`/kit`** stranicu (press kit) + auto-generisane submission tekstove za:
+
+| Platforma | Pristup | Rezultat |
+|---|---|---|
+| Product Hunt | Ručno lansiranje (pripremam sve: assets, copy, hunter outreach lista) | 500-5000 poseta prvi dan |
+| BetaList | Auto submit form | 200-1000 signup |
+| Hacker News (Show HN) | Ručno + template | 1K-50K poseta ako uleti |
+| Indie Hackers | Auto post | 500-2000 poseta |
+| AlternativeTo | Auto submit ("alternativa za [competitor]") | dugoročni SEO traffic |
+| SaaSHub | Auto submit | dugoročni SEO |
+| ToolFinder / Startup Stash / Launching Next / SideProjectors / Uneed / Fazier / Peerlist / Startup Base | Batch submitter edge function | ~30 direktorijuma odjednom |
+| Google News Publisher Center | Priprema submission paketa | Ulazak u Google News → 10x traffic za blog |
+| Wikidata entry za "MasterChess" | Auto-generated Q-item | Semantic web signal |
+
+**Rezultat**: ~50 backlinkova iz autoritativnih domena za 1 nedelju = Domain Authority ↑↑↑.
+
+### 2.2 Reddit blitz (poluautomatski, siguran)
+
+- Edge function skenira r/chess, r/AnarchyChess, r/chessbeginners, r/ChessPuzzles svaki dan
+- Kad neko postavi pitanje na koje jedna od naših SEO stranica **direktno** odgovara → generiše **pristojni komentar-draft** i stavlja u admin queue (`/admin/reddit-queue`) — ti kliknes "post" iz svog Reddit accounta
+- 5 komentara/dan × 30 dana × ~500 poseta/komentar = **75.000 poseta/mesec**
+
+### 2.3 Chess forumi / Discord auto-outreach
+
+- Skript generiše **listu 200+ chess Discord servera + 50+ šahovskih foruma** (već imam u docs) + personalizovanu poruku za svaki
+- Push u tabelu `outreach_queue` sa deep-linkom za tvoj Discord bot da automatski postavi objavu (samo tamo gde je dozvoljeno)
+
+### 2.4 RSS + agregator distribucija
+
+- Emitujemo RSS/JSON feed-ove svih blog članaka, vesti, novih SEO stranica
+- Auto-ping ka: **Feedly, Inoreader, Feedspot, Blogarama, Alltop, ChessFeed, Google FeedBurner alternatives** (~20 agregatora)
+- Rezultat: automatski indeksovanje + syndication traffic
+
+### 2.5 Long-tail zapping (Google Search Console loop)
+
+- Već imamo GSC integraciju + `seo_query_opportunities` tabelu
+- **Novo**: cron function svakodnevno čita GSC queries gde smo pozicija 8-30 → automatski generiše novu, jaču, ciljanu SEO stranicu → IndexNow ping
+- Ovo je **self-improving SEO loop** (isto kako radi Programmatic SEO industry).
+
+### 2.6 Backlink-building bot
+
+- Auto-generiše guest-post ponude ka 100+ šahovskih blogova (iz naše `media_outreach` tabele)
+- Auto-generiše "Sources" članke — mi objavljujemo članak koji citira 20 chess autora → oni dobijaju notifikaciju → mnogi backlinkuju
+- Auto-submit ka **HARO / Qwoted / SourceBottle** za chess-related upite (novinari traže eksperte → mi šaljemo AI-generisane citate od tebe)
+
+### 2.7 Social auto-postavljanje
+
+Nova tabela `social_scheduler`. Za svaku novu SEO stranicu / blog članak / roast:
+- Auto-generiše post za X (Twitter), Threads, Facebook, LinkedIn
+- Auto-generiše TikTok/Reels script + Canvas video (već imamo Chess Roast Engine)
+- Guruje u queue, ti povežeš accounts sa Buffer/Publer API (ili ručno klik-post iz `/admin/social-queue`)
+
+---
+
+## DEO 3 — MERENJE I ITERACIJA
+
+Nova admin stranica **`/admin/growth`** sa dashboardom:
+- SEO stranice: koliko generisano, koliko indeksirano (GSC API), koliko donose klikova
+- Direktorijumi: status svakog submitovanja
+- Reddit / social queue: koliko na čekanju, koliko objavljeno, engagement
+- Konverzija: posete → signup po izvoru
+- **A/B test:** naslovi SEO stranica se auto-testiraju (GSC CTR)
+
+---
+
+## Tehnički detalji
+
+**Novo tabele:**
+- `seo_pages` (glavni content store)
+- `outreach_queue` (Reddit/forum/discord drafts)
+- `social_scheduler` (auto social posts)
+- `backlink_prospects` (guest-post targets + status)
+- `directory_submissions` (Product Hunt, BetaList, itd. tracker)
+
+**Novo edge functions (cron-drive):**
+- `seo-content-generator` (100/dan) — AI Gateway, Gemini 2.5 Flash
+- `daily-news-writer` (3-5/dan)
+- `seo-loop-optimizer` (čita GSC, pravi nove stranice za pozicije 8-30)
+- `directory-submitter` (batch API POST-ovi ka direktorijumima koji imaju public API)
+- `reddit-comment-scout` (skenira relevantne postove)
+- `indexnow-mass-ping` (posle svake batch runde)
+- `social-post-generator`
+
+**Novo frontend:**
+- `SeoContentPage.tsx` — jedan template renderuje sve tipove
+- `/admin/growth` dashboard
+- `/admin/reddit-queue`, `/admin/social-queue`, `/admin/outreach`
+- `/kit` — press kit stranica (assets, copy, screenshots)
+- `/api/rss/*.xml` — RSS endpoints per kategoriji
+
+**AI Gateway**: Gemini 2.5 Flash za bulk generisanje (jeftino), GPT-5.5 samo za flagship blog članke.
+
+---
+
+## Redosled izvršavanja (radim ovim redom u build modu)
+
+**Sprint 1** (odmah): `seo_pages` tabela + `SeoContentPage` template + `seo-content-generator` edge fn za 3 tipa stranice (openings-vs-openings, how-to-beat, ELO guides) → **prvih 500 stranica live za 24h**.
+**Sprint 2**: 8 preostalih tipova stranica + auto-sitemap + IndexNow mass ping → **3000+ stranica indeksibilno**.
+**Sprint 3**: `daily-news-writer` cron + Google News submission paket + `/kit` press stranica.
+**Sprint 4**: `directory-submitter` (auto submit ka 15 platformi koje imaju API) + priprema paketa za ručno lansiranje (Product Hunt, HN).
+**Sprint 5**: Reddit/social/outreach queue + `/admin/growth` dashboard + GSC self-improving loop.
+
+Odobri plan pa krećem sa Sprintom 1.
