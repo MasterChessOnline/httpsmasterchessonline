@@ -37,7 +37,7 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => {
             </span>
           </Link>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            The premium platform for chess players. Play, learn, compete.
+            More Than Chess. Build Your Legacy.
           </p>
           <div className="flex gap-3 mt-3">
             {socialLinks.map((s) => (
