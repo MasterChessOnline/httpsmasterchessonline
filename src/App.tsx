@@ -125,6 +125,7 @@ const DraganBrakusRegister = lazy(() => import("./pages/DraganBrakusRegister"));
 const InviteRedirect = lazy(() => import("./pages/InviteRedirect"));
 const WhyMasterChess = lazy(() => import("./pages/WhyMasterChess"));
 const AffiliateRedirect = lazy(() => import("./pages/AffiliateRedirect"));
+const SeoAutoPage = lazy(() => import("./pages/SeoAutoPage"));
 
 const StoryMode = lazy(() => import("./pages/StoryMode"));
 const OpeningTrainer = lazy(() => import("./pages/OpeningTrainer"));
