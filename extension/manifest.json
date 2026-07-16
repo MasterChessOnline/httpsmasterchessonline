@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "MasterChess Quick Play",
+  "version": "1.0.0",
+  "description": "One-click chess: daily puzzle, instant Play, and right-click FEN analysis on MasterChess.live.",
+  "author": "MasterChess (masterchess.live)",
+  "homepage_url": "https://masterchess.live",
+  "permissions": ["contextMenus", "storage", "notifications"],
+  "host_permissions": ["https://masterchess.live/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "MasterChess Quick Play",
+    "default_icon": {
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}
