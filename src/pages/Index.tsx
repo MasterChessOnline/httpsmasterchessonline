@@ -25,7 +25,9 @@ export default function Index() {
         type="website"
       />
       <Navbar />
+      <LiveActivityBar />
       <BrakusHeroBanner />
+
 
       <main className="relative overflow-hidden">
         <section className="relative px-4 pt-12 pb-16 sm:pt-20 sm:pb-24">
