@@ -2898,6 +2898,45 @@ export type Database = {
         }
         Relationships: []
       }
+      roasts: {
+        Row: {
+          created_at: string
+          game_id: string
+          id: string
+          language: string
+          mode: string
+          roast_text: string
+          shares: number
+          target_user_id: string | null
+          updated_at: string
+          upvotes: number
+        }
+        Insert: {
+          created_at?: string
+          game_id: string
+          id?: string
+          language?: string
+          mode?: string
+          roast_text: string
+          shares?: number
+          target_user_id?: string | null
+          updated_at?: string
+          upvotes?: number
+        }
+        Update: {
+          created_at?: string
+          game_id?: string
+          id?: string
+          language?: string
+          mode?: string
+          roast_text?: string
+          shares?: number
+          target_user_id?: string | null
+          updated_at?: string
+          upvotes?: number
+        }
+        Relationships: []
+      }
       season_results: {
         Row: {
           created_at: string
