@@ -13,7 +13,7 @@ export const LANG_NAMES: Record<Lang, { native: string; flag: string; label: str
 type Dict = Record<string, string>;
 
 const en: Dict = {
-  "hero.tagline": "Battle. Climb. Conquer.",
+  "hero.tagline": "More Than Chess. Build Your Legacy.",
   "hero.playOnline": "Play Online",
   "hero.vsBots": "vs Bots",
   "hero.signupCta": "Get Ready to Battle",
