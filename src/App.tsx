@@ -171,6 +171,7 @@ const ShareStreak = lazy(() => import("./pages/ShareStreak"));
 const Feed = lazy(() => import("./pages/Feed"));
 const Rivals = lazy(() => import("./pages/Rivals"));
 const MatchStory = lazy(() => import("./pages/MatchStory"));
+const Roast = lazy(() => import("./pages/Roast"));
 const Tools = lazy(() => import("./pages/Tools"));
 const ToolDetail = lazy(() => import("./pages/ToolDetail"));
 const Chests = lazy(() => import("./pages/Chests"));
