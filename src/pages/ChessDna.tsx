@@ -46,7 +46,7 @@ export default function ChessDna() {
         supabase.from("profiles").select("username").eq("id", targetId).maybeSingle(),
       ]);
       if (!alive) return;
-      setDna(d as Dna | null);
+      setDna((d as unknown as Dna) ?? null);
       setUsername((p?.username as string) || "Player");
       setLoading(false);
     })();

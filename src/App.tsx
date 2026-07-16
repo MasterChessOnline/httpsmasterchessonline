@@ -164,6 +164,9 @@ const AdminEmailStatus = lazy(() => import("./pages/AdminEmailStatus"));
 const SeoStatus = lazy(() => import("./pages/SeoStatus"));
 const AdminFullStats = lazy(() => import("./pages/AdminFullStats"));
 const EmbedBoard = lazy(() => import("./pages/EmbedBoard"));
+const Embed = lazy(() => import("./pages/Embed"));
+const EmbedPlay = lazy(() => import("./pages/EmbedPlay"));
+const ChessDna = lazy(() => import("./pages/ChessDna"));
 const Guides = lazy(() => import("./pages/Guides"));
 const Guide = lazy(() => import("./pages/Guide"));
 const Glossary = lazy(() => import("./pages/Glossary"));
@@ -463,6 +466,10 @@ function AnimatedRoutes() {
           <Route path="/beat-me/:handle" element={<BeatMe />} />
           <Route path="/beat-nikola" element={<BeatNikola />} />
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
+          <Route path="/embed" element={<Embed />} />
+          <Route path="/embed/play" element={<EmbedPlay />} />
+          <Route path="/dna" element={<ChessDna />} />
+          <Route path="/dna/:userId" element={<ChessDna />} />
           <Route path="/guides" element={<Guides />} />
           <Route path="/guide/:slug" element={<Guide />} />
           <Route path="/learn/glossary" element={<Glossary />} />
