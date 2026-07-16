@@ -36,7 +36,7 @@
 > I'm Nikola Sakotić, 13, from Belgrade. I built **MasterChess.live** from
 > scratch — engine, Swiss pairings, AI coach, the SEO/News stack, everything.
 >
-> On **30 June 2026 at 17:00 CEST** we run the **Dragan Brakus Cup**:
+> On **23 July 2026 at 16:00 CEST** we run the **Dragan Brakus Cup**:
 > 9-round Swiss blitz (3+2), up to 500 players, FIDE-style tiebreaks,
 > published on Chess-Results Serbia, anti-cheat live every round. Prizes are
 > in-platform (Master Coins + badges + cosmetics) — no cash, kid-safe.
