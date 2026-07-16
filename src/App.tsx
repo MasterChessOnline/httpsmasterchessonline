@@ -386,6 +386,7 @@ function AnimatedRoutes() {
           <Route path="/feed" element={<Feed />} />
           <Route path="/rivals" element={<Rivals />} />
           <Route path="/game/:id/story" element={<MatchStory />} />
+          <Route path="/roast/:gameId" element={<Roast />} />
           <Route path="/game-review" element={<GameReview />} />
           <Route path="/spectate" element={<Spectate />} />
           <Route path="/guess-the-move" element={<GuessTheMove />} />
