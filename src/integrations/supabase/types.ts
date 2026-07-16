@@ -1294,6 +1294,103 @@ export type Database = {
         }
         Relationships: []
       }
+      feed_comments: {
+        Row: {
+          body: string
+          created_at: string
+          feed_item_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          feed_item_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          feed_item_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_comments_feed_item_id_fkey"
+            columns: ["feed_item_id"]
+            isOneToOne: false
+            referencedRelation: "feed_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_items: {
+        Row: {
+          comment_count: number
+          created_at: string
+          id: string
+          kind: string
+          payload: Json
+          reaction_count: number
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          comment_count?: number
+          created_at?: string
+          id?: string
+          kind: string
+          payload?: Json
+          reaction_count?: number
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          comment_count?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          reaction_count?: number
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
+      feed_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          feed_item_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          feed_item_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          feed_item_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_reactions_feed_item_id_fkey"
+            columns: ["feed_item_id"]
+            isOneToOne: false
+            referencedRelation: "feed_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -2753,6 +2850,51 @@ export type Database = {
           status?: string
           user_agent?: string | null
           visitor_fingerprint?: string | null
+        }
+        Relationships: []
+      }
+      rivalries: {
+        Row: {
+          draws: number
+          id: string
+          last_played_at: string | null
+          last_result: string | null
+          streak_count: number
+          streak_holder_id: string | null
+          total_games: number
+          updated_at: string
+          user_a_id: string
+          user_b_id: string
+          wins_a: number
+          wins_b: number
+        }
+        Insert: {
+          draws?: number
+          id?: string
+          last_played_at?: string | null
+          last_result?: string | null
+          streak_count?: number
+          streak_holder_id?: string | null
+          total_games?: number
+          updated_at?: string
+          user_a_id: string
+          user_b_id: string
+          wins_a?: number
+          wins_b?: number
+        }
+        Update: {
+          draws?: number
+          id?: string
+          last_played_at?: string | null
+          last_result?: string | null
+          streak_count?: number
+          streak_holder_id?: string | null
+          total_games?: number
+          updated_at?: string
+          user_a_id?: string
+          user_b_id?: string
+          wins_a?: number
+          wins_b?: number
         }
         Relationships: []
       }

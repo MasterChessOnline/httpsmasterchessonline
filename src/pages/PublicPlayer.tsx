@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Seo from "@/components/Seo";
 import ShareBar from "@/components/ShareBar";
+import RivalryCard from "@/components/social/RivalryCard";
 import ChessCardView from "@/components/ChessCard";
 import RankBadge from "@/components/RankBadge";
 import { Card } from "@/components/ui/card";
@@ -524,7 +525,8 @@ export default function PublicPlayer() {
           </section>
         )}
 
-        <section className="container mx-auto max-w-5xl px-4 mt-6">
+        <section className="container mx-auto max-w-5xl px-4 mt-6 grid md:grid-cols-2 gap-4">
+          <RivalryCard profileUserId={profile.user_id} profileUsername={profile.username} />
           <Card className="p-5 border-border/40">
             <h2 className="font-display text-base font-bold text-foreground mb-3">Share this profile</h2>
             <ShareBar
