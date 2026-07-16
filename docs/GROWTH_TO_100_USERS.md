@@ -1,7 +1,7 @@
 # MasterChess — Growth & Marketing Playbook
 
 Goal: **go from ~0 → 100+ real active users**, then compound.
-Hero campaign: **DB Chess Cup, 18 July 2026, 16:00 CEST**.
+Hero campaign: **DB Chess Cup, 23 July 2026, 16:00 CEST**.
 Every idea below routes users toward the DB Cup or Quick Match.
 
 ---

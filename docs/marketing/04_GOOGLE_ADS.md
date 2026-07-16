@@ -134,7 +134,7 @@ Descriptions:
 **Asset groups**:
 - 5 slika (screenshots + Nikola portret + logo)
 - 5 headlines (koristi iz Search Ad Group 3)
-- 5 long headlines: `Join the DB Chess Cup — July 18, 2026 · Free Entry · Made by 13-Year-Old Solo Dev`
+- 5 long headlines: `Join the DB Chess Cup — July 23, 2026 · Free Entry · Made by 13-Year-Old Solo Dev`
 - 3 videa (15s Reels format — vidi `06_META_TIKTOK_ADS.md`)
 - Final URL: `/dragan-brakus`
 
