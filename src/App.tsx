@@ -471,6 +471,7 @@ function AnimatedRoutes() {
           <Route path="/embed/play" element={<EmbedPlay />} />
           <Route path="/dna" element={<ChessDna />} />
           <Route path="/dna/:userId" element={<ChessDna />} />
+          <Route path="/extension" element={<Extension />} />
           <Route path="/guides" element={<Guides />} />
           <Route path="/guide/:slug" element={<Guide />} />
           <Route path="/learn/glossary" element={<Glossary />} />
