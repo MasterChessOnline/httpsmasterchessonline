@@ -167,6 +167,7 @@ const EmbedBoard = lazy(() => import("./pages/EmbedBoard"));
 const Embed = lazy(() => import("./pages/Embed"));
 const EmbedPlay = lazy(() => import("./pages/EmbedPlay"));
 const ChessDna = lazy(() => import("./pages/ChessDna"));
+const Extension = lazy(() => import("./pages/Extension"));
 const Guides = lazy(() => import("./pages/Guides"));
 const Guide = lazy(() => import("./pages/Guide"));
 const Glossary = lazy(() => import("./pages/Glossary"));
