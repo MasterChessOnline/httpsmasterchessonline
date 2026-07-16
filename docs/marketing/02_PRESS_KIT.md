@@ -42,7 +42,7 @@ Belgrade, Serbia — [date]
 
 **A 13-year-old developer from Belgrade has launched MasterChess.live**, a free, ad-free online chess platform built to challenge established players like Chess.com and Lichess. Nikola [surname] designed, coded, and shipped the platform solo over the past year, working after school.
 
-The platform's flagship event, the **DB Chess Cup**, takes place **July 18, 2026 at 4 PM CEST** — Swiss-format, free entry, open to all skill levels. The Cup is named in memory of Dragan Brakus, an influential Serbian chess coach.
+The platform's flagship event, the **DB Chess Cup**, takes place **July 23, 2026 at 4 PM CEST** — Swiss-format, free entry, open to all skill levels. The Cup is named in memory of Dragan Brakus, an influential Serbian chess coach.
 
 *"I wanted a site where kids like me could play without ads and pop-ups. Chess.com is great, but expensive and crowded. MasterChess is my alternative,"* Nikola says.
 

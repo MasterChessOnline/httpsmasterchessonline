@@ -52,7 +52,7 @@ function FastHomeShell() {
                 <Trophy className="h-4 w-4" /> Featured tournament
               </div>
               <h2 className="mt-2 font-display text-3xl font-black leading-tight sm:text-5xl">DB Chess Cup</h2>
-              <p className="mt-1 text-sm font-semibold text-muted-foreground sm:text-base">18 July 2026 · 16:00 CEST · Register with FIDE ID or your name</p>
+              <p className="mt-1 text-sm font-semibold text-muted-foreground sm:text-base">23 July 2026 · 16:00 CEST · Register with FIDE ID or your name</p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link to="/dragan-brakus/register" className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground">

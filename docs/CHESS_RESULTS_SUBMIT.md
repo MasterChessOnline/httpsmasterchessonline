@@ -60,7 +60,7 @@ The landing page badge will flip from "Pending submission" to "Listed" and the
 | Full name      | Dragan Brakus Cup                              |
 | Federation     | SRB                                            |
 | City / Venue   | Belgrade — Online (masterchess.live)           |
-| Start          | 2026-06-30 17:00 CEST                          |
+| Start          | 2026-07-23 16:00 CEST                          |
 | Format         | 9-round Swiss Blitz                            |
 | Time control   | 3+2 (Blitz)                                    |
 | Rating type    | Unrated / Friendly (no FIDE rating change)     |

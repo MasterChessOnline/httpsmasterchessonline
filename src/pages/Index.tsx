@@ -2,6 +2,7 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
+import LiveActivityBar from "@/components/LiveActivityBar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -11,7 +12,7 @@ const quickLinks = [
   { to: "/play-guest", title: "Play instantly", text: "Start a chess game now — no waiting.", icon: Play },
   { to: "/play", title: "Play bots", text: "Train against MasterChess bots.", icon: Swords },
   { to: "/learn", title: "Learn chess", text: "Lessons, openings and puzzles.", icon: GraduationCap },
-  { to: "/dragan-brakus", title: "DB Chess Cup", text: "Official 18 July 2026 tournament.", icon: Trophy },
+  { to: "/dragan-brakus", title: "DB Chess Cup", text: "Official 23 July 2026 tournament.", icon: Trophy },
 ];
 
 export default function Index() {
@@ -24,7 +25,9 @@ export default function Index() {
         type="website"
       />
       <Navbar />
+      <LiveActivityBar />
       <BrakusHeroBanner />
+
 
       <main className="relative overflow-hidden">
         <section className="relative px-4 pt-12 pb-16 sm:pt-20 sm:pb-24">
@@ -92,7 +95,7 @@ export default function Index() {
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-300">
                   <Users className="h-4 w-4" /> Tournament registration is open
                 </div>
-                <h2 className="mt-2 text-2xl font-bold">DB Chess Cup · 18 July 2026 · 16:00 CEST</h2>
+                <h2 className="mt-2 text-2xl font-bold">DB Chess Cup · 23 July 2026 · 16:00 CEST</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Add your optional FIDE ID or just type your name. After registration you appear on the live standings list.
                 </p>
