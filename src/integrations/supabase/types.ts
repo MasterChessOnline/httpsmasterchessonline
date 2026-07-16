@@ -464,6 +464,45 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_cards: {
+        Row: {
+          created_at: string
+          fen: string | null
+          id: string
+          opponent_name: string | null
+          rating_change: number | null
+          result: string
+          share_code: string
+          title: string
+          user_id: string | null
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          fen?: string | null
+          id?: string
+          opponent_name?: string | null
+          rating_change?: number | null
+          result: string
+          share_code?: string
+          title: string
+          user_id?: string | null
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          fen?: string | null
+          id?: string
+          opponent_name?: string | null
+          rating_change?: number | null
+          result?: string
+          share_code?: string
+          title?: string
+          user_id?: string | null
+          view_count?: number
+        }
+        Relationships: []
+      }
       challenge_links: {
         Row: {
           claimed_by: string | null
@@ -516,6 +555,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      chess_dna_snapshots: {
+        Row: {
+          aggression_score: number
+          best_color: string | null
+          created_at: string
+          defense_score: number
+          endgame_score: number
+          favorite_openings: Json
+          games_analyzed: number
+          id: string
+          is_public: boolean
+          style_label: string
+          summary: string | null
+          tactics_score: number
+          updated_at: string
+          user_id: string
+          weakness: string | null
+        }
+        Insert: {
+          aggression_score?: number
+          best_color?: string | null
+          created_at?: string
+          defense_score?: number
+          endgame_score?: number
+          favorite_openings?: Json
+          games_analyzed?: number
+          id?: string
+          is_public?: boolean
+          style_label: string
+          summary?: string | null
+          tactics_score?: number
+          updated_at?: string
+          user_id: string
+          weakness?: string | null
+        }
+        Update: {
+          aggression_score?: number
+          best_color?: string | null
+          created_at?: string
+          defense_score?: number
+          endgame_score?: number
+          favorite_openings?: Json
+          games_analyzed?: number
+          id?: string
+          is_public?: boolean
+          style_label?: string
+          summary?: string | null
+          tactics_score?: number
+          updated_at?: string
+          user_id?: string
+          weakness?: string | null
+        }
+        Relationships: []
       }
       cities: {
         Row: {
@@ -1264,6 +1357,30 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      embed_widgets_analytics: {
+        Row: {
+          created_at: string
+          id: string
+          referrer: string | null
+          variant: string | null
+          widget_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          variant?: string | null
+          widget_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referrer?: string | null
+          variant?: string | null
+          widget_type?: string
         }
         Relationships: []
       }

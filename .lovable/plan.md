@@ -1,165 +1,125 @@
-# MEGA PLAN: EKSPLOZIJA MASTERCHESS-a za 60 dana
+# MasterChess — "Nešto potpuno novo" + Brutalni Growth Plan
 
-Cilj: **10.000–50.000 organskih poseta / mesec** i **3.000–15.000 novih registracija** bez ijednog dinara reklama.
-Metoda: masovna proizvodnja SEO sadržaja + agresivna distribucija po celom internetu (isto kako su Chess.com i Lichess uzeli long-tail 2015–2020).
-
----
-
-## DEO 1 — AI CONTENT FARM (500+ stranica / nedeljno)
-
-### 1.1 Šta zapravo pravim (novi tipovi stranica)
-
-Sve se generiše programski (edge function + AI Gateway) i piše u DB tabele; jedan React template servisira desetine hiljada URL-ova. Google indeksira svaki.
-
-| Tip stranice | URL šablon | Broj | Primer |
-|---|---|---|---|
-| **Otvaranje-vs-otvaranje** | `/openings/:a-vs-:b` | ~800 | `sicilian-vs-french` |
-| **"Kako pobediti protiv X"** | `/how-to-beat/:opening` | ~200 | `how-to-beat-the-london-system` |
-| **Mat u N poteza** | `/mate-in/:n/:pattern` | ~300 | `mate-in-2-back-rank` |
-| **ELO milestone vodiči** | `/rating/:elo-guide` | ~600 | `1200-elo-chess-guide` |
-| **"Chess for X"** | `/chess-for/:audience` | ~150 | `chess-for-6-year-olds`, `chess-for-adults` |
-| **Grad + šah** | `/chess-in/:city` | ~400 | `chess-in-belgrade`, `chess-in-berlin` |
-| **Poznati igrači — dubinski profili** | `/players/:name/games`, `/players/:name/openings` | ~500 | `/players/magnus-carlsen/openings` |
-| **Poznate partije (razgrađene)** | `/famous-games/:slug` | ~300 | `kasparov-vs-topalov-1999` |
-| **Beat-bot landing** | `/beat/:botId` (proširiti sa 9 → 40 varijanti) | ~40 | `beat-nikola-1800` |
-| **Puzzle by theme** | `/puzzles/:theme` | ~120 | `pin-puzzles`, `fork-puzzles` |
-| **Glossary terms** | `/glossary/:term` | ~250 | `zugzwang`, `zwischenzug` |
-| **Rivalstvo generator** | `/vs/:playerA-vs-:playerB` | ~200 | istorijski dueli |
-
-**Ukupno ~3.870 novih stranica**, sve indeksibilne, sve real content (ne samo template).
-
-### 1.2 Kako AI piše sadržaj (bez smeća)
-
-- **Edge function `seo-content-generator`** (cron, radi po 100 stranica/dan) — Gemini 2.5 Flash
-- Svaka stranica ima: **JSON-LD Article/HowTo schema**, canonical, og:image (auto-generisan sa boardom pozicijom), 800-1500 reči, FAQ sekcija, "related pages" grid (interno linkovanje = SEO gold)
-- Tabela `seo_pages(slug, kind, title, meta_desc, body_md, jsonld, related_slugs, generated_at, quality_score)`
-- **Kontrola kvaliteta**: quality_score < 70 → regeneriši. Real chess podaci iz `masterclass-validated-lines` + Lichess Explorer API + `famousGames` data.
-- **Dvojezično**: SR + EN varijanta svakog URL-a (`/en/…` i `/sr/…`) = duplo indeksiranih stranica.
-
-### 1.3 Auto-sitemap + IndexNow ping
-
-- `scripts/generate-sitemap.ts` čita `seo_pages` tabelu → generiše 15 tematskih sitemap-ova (već postoje delimično)
-- Nakon svake AI batch runde: edge function pinguje **Google Indexing API, Bing IndexNow, Yandex IndexNow** za nove URL-ove
-- Auto news-sitemap za svaki novi članak
-
-### 1.4 Blog/News farma (svakodnevno)
-
-- **Cron edge function `daily-news-writer`** — svaki dan piše 3-5 članaka:
-  - "Chess news of the day" (RSS iz FIDE/ChessBase/TWIC već postoji → AI rewrite u original članak)
-  - "Opening of the week deep-dive"
-  - "Player spotlight"
-  - "Chess psychology / improvement tips"
-- Objavljuje se u `blog_posts` tabelu, ide u news sitemap, IndexNow ping
-- Za 60 dana = **180-300 novih original blog članaka** = ozbiljna Google News kandidatura
+Cilj: MasterChess prestaje da bude "još jedan šah sajt" i postaje **kulturni fenomen za šahiste** — sa mehanikama kojih nema na Chess.com/Lichess-u i agresivnim distribucionim planom. Podeljeno u **4 talasa** koji se puštaju kroz sprintove.
 
 ---
 
-## DEO 2 — PROGRAMMATIC PR + DISTRIBUCIJA (50+ platformi)
+## TALAS 1 — 12 originalnih koncepata (product diferencijacija)
 
-Ovo su sajtovi/servisi koji **pomažu platformama da rastu** — sve što je legalno automatizovati, automatizujem; ostalo pripremim gotovo za tvoj jedan-klik.
+Nijedan ne postoji na Chess.com/Lichess-u. Svaki je share-worthy sam po sebi.
 
-### 2.1 Startup/product direktorijumi (jednokratni ali ogromni)
+1. **World Chess Map (Live Globe)** — 3D globus, tačke svetle kad se igra partija, klik na državu = najjači aktivni igrač + živi turniri. Embed widget za blogove.
+2. **Live Chess TV** — homepage bez logina prikazuje 3-4 najzanimljivije partije u toku (heuristika: rating, tenzija, vreme), auto-komentari.
+3. **Chess Time Machine** — "Ti si Kasparov 1985, potez 23. Šta igraš?" Poznate istorijske pozicije, poredi se sa originalom.
+4. **Global Club Wars** — sezonska liga klubova, weekly points, promocija/degradacija, live standings.
+5. **Hall of Fame** — auto-kurirane najbolje partije dana/nedelje/meseca (algoritam: brilliants + upset + drama).
+6. **Instant Tournament** — jedan klik → javni turnir za 10 min, deljivi link, auto-oglašen u lobiju.
+7. **Chess DNA** — nakon 20 partija dobiješ "DNA otisak": stil, boje, otvaranja, slabosti — kao Spotify Wrapped, share slika.
+8. **Rivalry Mode** — sistem automatski predlaže "nemesise" (slični rating, više partija), posebna tabela H2H sa dramom.
+9. **Predict-the-Move** — dok gledaš tuđu partiju pogađaš sledeći potez, dobijaš XP za pogotke (bez engine spoilera).
+10. **Blunder Museum** — javna galerija najgorih blundera nedelje (opt-in), reakcije, komentari — samoironija.
+11. **Chess Confessions** — anonimni feed ("Izgubio sam od 800 elo bota jer sam bio pijan"), like/comment, viralno.
+12. **Streamer Duel Nights** — zakazani eventi gde streameri (DailyChess_12 + gosti) igraju protiv publike sa lobby chatom.
 
-Pravim **`/kit`** stranicu (press kit) + auto-generisane submission tekstove za:
+## TALAS 2 — 12 "growth-native" koncepata (svaki je distribucioni kanal)
 
-| Platforma | Pristup | Rezultat |
-|---|---|---|
-| Product Hunt | Ručno lansiranje (pripremam sve: assets, copy, hunter outreach lista) | 500-5000 poseta prvi dan |
-| BetaList | Auto submit form | 200-1000 signup |
-| Hacker News (Show HN) | Ručno + template | 1K-50K poseta ako uleti |
-| Indie Hackers | Auto post | 500-2000 poseta |
-| AlternativeTo | Auto submit ("alternativa za [competitor]") | dugoročni SEO traffic |
-| SaaSHub | Auto submit | dugoročni SEO |
-| ToolFinder / Startup Stash / Launching Next / SideProjectors / Uneed / Fazier / Peerlist / Startup Base | Batch submitter edge function | ~30 direktorijuma odjednom |
-| Google News Publisher Center | Priprema submission paketa | Ulazak u Google News → 10x traffic za blog |
-| Wikidata entry za "MasterChess" | Auto-generated Q-item | Semantic web signal |
+Feature = ujedno i akvizicioni kanal.
 
-**Rezultat**: ~50 backlinkova iz autoritativnih domena za 1 nedelju = Domain Authority ↑↑↑.
+13. **Challenge Card Generator** — posle svake partije, jedan klik generiše 1080x1350 sliku (pozicija + rezultat + rating change + QR) — spremno za IG/X/TikTok. Watermark = link.
+14. **Embed Board Widget** — bloggeri/YouTuberi ubacuju `<iframe>` sa mini-boardom + "Play on MasterChess" CTA. Backlink farma.
+15. **/vs/{code} Viral Links** — igraj protiv prijatelja bez registracije, registracija se traži tek posle 3. partije.
+16. **Chess Meme Studio** — template-i za memove sa šahovskih pozicija, share direktno na Reddit/X.
+17. **Daily Puzzle Battle** — svi rešavaju isti puzzle u isto vreme (20:00), live leaderboard, retweet-friendly.
+18. **Coach Marketplace (free)** — bilo ko iznad 1800 može ponuditi 15min konsultacije, profil = SEO landing page.
+19. **Chess Bounties** — "Nagrada 500 coina onome ko me pobedi u Sicilijanci" — post na feed, prihvati, igraj.
+20. **Country Leaderboards** — top 100 po državi/gradu, SEO landing (`/leaderboard/serbia/belgrade`).
+21. **Opening Trend Reports** — nedeljni auto-report "Najpopularnija otvaranja ove nedelje" → objavljuje se kao blog + tweet.
+22. **Player Cards (Trading-card style)** — svaki profil ima kolekcionarsku kartu, kolekcioniraj karte igrača koje si pobedio.
+23. **Time-Attack League** — 60-sekundni matčevi, non-stop 24/7 queue, viralno na TikToku.
+24. **Chess Roulette** — spin → dobijaš random handicap (bez damе, obrnut sat, itd.), kratke smešne partije.
 
-### 2.2 Reddit blitz (poluautomatski, siguran)
+## TALAS 3 — 8 "retention/depth" koncepata
 
-- Edge function skenira r/chess, r/AnarchyChess, r/chessbeginners, r/ChessPuzzles svaki dan
-- Kad neko postavi pitanje na koje jedna od naših SEO stranica **direktno** odgovara → generiše **pristojni komentar-draft** i stavlja u admin queue (`/admin/reddit-queue`) — ti kliknes "post" iz svog Reddit accounta
-- 5 komentara/dan × 30 dana × ~500 poseta/komentar = **75.000 poseta/mesec**
+Da se ljudi VRAĆAJU svakog dana.
 
-### 2.3 Chess forumi / Discord auto-outreach
+25. **Season Storyline** — svaka sezona (3 meseca) ima priču/temu (npr. "Rat Škola"), progresija, sezonske nagrade.
+26. **Chess Journal** — auto-generisan lični dnevnik ("Danas si dobio 3 protiv Karo-Kana, tvoj win rate skočio na 62%").
+27. **Skill Tree Public** — javno stablo veština koje se otključavaju kroz igru (ne uči — dokazuje).
+28. **Mentor Chain** — ako te neko pozove i on te nauči → dobija % tvog XP zauvek (Ponzi na dobar način).
+29. **Weekly Boss Fight** — svake nedelje jedan custom bot sa jedinstvenim stilom, ko ga pobedi = badge na profilu.
+30. **Guild Chat Rooms** — trajne sobe po interesovanjima (Sicilijana lovers, endgame nerds), non-modaman.
+31. **Comeback Streaks** — ako gubiš 3 zaredom pa dobiješ 3 zaredom = "Phoenix" badge + XP bonus.
+32. **Silent Mode Tournaments** — turniri bez chat-a, bez rating prikaza — samo šah, za purists.
 
-- Skript generiše **listu 200+ chess Discord servera + 50+ šahovskih foruma** (već imam u docs) + personalizovanu poruku za svaki
-- Push u tabelu `outreach_queue` sa deep-linkom za tvoj Discord bot da automatski postavi objavu (samo tamo gde je dozvoljeno)
+## TALAS 4 — GROWTH & DISTRIBUCIJA (paralelno sa Talasima 1-3)
 
-### 2.4 RSS + agregator distribucija
+### A. Product Hunt Launch (jednokratna eksplozija)
+- **Priprema (2 nedelje pre):** teaser page `/ph-launch`, email lista, "Hunter" outreach (top 20 huntera u gaming/dev prostoru), gif demo (World Map + Live TV + Instant Tournament), 5 screenshotova, 60s video.
+- **Launch dan (utorak 00:01 PST):** koordinisani push preko Discord/Twitter/Reddit/email liste, DailyChess_12 YouTube shoutout, live "launch tournament" sa nagradama.
+- **Cilj:** Top 5 dana, 500+ upvotes, 50+ komentara.
 
-- Emitujemo RSS/JSON feed-ove svih blog članaka, vesti, novih SEO stranica
-- Auto-ping ka: **Feedly, Inoreader, Feedspot, Blogarama, Alltop, ChessFeed, Google FeedBurner alternatives** (~20 agregatora)
-- Rezultat: automatski indeksovanje + syndication traffic
+### B. Reddit Blitz (kontinuirano)
+- Edge function `reddit-comment-scout` (već planirana) proširena na 8 subreddita: r/chess, r/AnarchyChess, r/chessbeginners, r/ChessPuzzles, r/tournamentchess, r/SideProject, r/InternetIsBeautiful, r/webdev.
+- **Content angles:**
+  - r/AnarchyChess: memovi iz Meme Studio, Blunder Museum posts
+  - r/chess: Opening Trend Reports, Country Leaderboards za njihovu državu
+  - r/SideProject + r/InternetIsBeautiful: World Chess Map showcase
+  - r/webdev: "Kako smo napravili real-time šah sa Supabase Realtime" tech blog
+- Manual queue u `/admin/reddit-queue`, cilj **20 kvalitetnih postova/nedeljno**.
 
-### 2.5 Long-tail zapping (Google Search Console loop)
+### C. Backlink Farm (50+ direktorijuma)
+- `directory-submitter` edge function (već planirana) šalje na:
+  - **Startup:** BetaList, Product Hunt, Indie Hackers, SaaSHub, ToolFinder, Launching Next, Startup Stash, StartupBase, AlternativeTo, Slant.
+  - **Gaming/Chess-specific:** BoardGameGeek forum, ChessPub, chess subreddit wiki, r/chess sidebar submission, Chess Federation portali (FIDE nacionalni), lokalni klubovi.
+  - **Wiki:** Wikidata entry za "MasterChess", Wikipedia draft (posle 6 meseci trafika), OpenStreetMap za World Map data.
+  - **SEO/Tool direktorijumi:** G2, Capterra (free tier), SourceForge, Softpedia.
+  - **Aggregator feeds:** RSS na 20 chess/gaming aggregatora, IndexNow ping.
 
-- Već imamo GSC integraciju + `seo_query_opportunities` tabelu
-- **Novo**: cron function svakodnevno čita GSC queries gde smo pozicija 8-30 → automatski generiše novu, jaču, ciljanu SEO stranicu → IndexNow ping
-- Ovo je **self-improving SEO loop** (isto kako radi Programmatic SEO industry).
+### D. Content Marketing (kontinuirano — nadovezuje se na već pokrenuti SEO Content Farm)
+- **`daily-news-writer` edge function:** svakog dana auto-generiše news post o šahovskom svetu (turniri, GM partije, otvaranja u trendu) → objavljuje na `/news/{slug}` + submit na Google News.
+- **Weekly blog series:**
+  - "MasterChess Weekly Trends" (podaci iz naše platforme)
+  - "Anatomy of a Brilliant" (razlaga najbolju partiju nedelje)
+  - "Country Spotlight" (šah u datoj državi + poziv lokalnim igračima)
+- **YouTube:** DailyChess_12 dobija exclusive access na Weekly Boss Fight rezultate → sadržaj za video.
 
-### 2.6 Backlink-building bot
+### E. Social Loops (auto)
+- `social-post-generator` (već planirana) svakog dana pravi:
+  - X: 3 posta (najbolji potez dana, meme, stats update)
+  - IG: 1 reel iz Challenge Card highlights
+  - TikTok: Time-Attack montaža
+- Cross-post preko Buffer/Zapier (BYO webhook) ili manual queue.
 
-- Auto-generiše guest-post ponude ka 100+ šahovskih blogova (iz naše `media_outreach` tabele)
-- Auto-generiše "Sources" članke — mi objavljujemo članak koji citira 20 chess autora → oni dobijaju notifikaciju → mnogi backlinkuju
-- Auto-submit ka **HARO / Qwoted / SourceBottle** za chess-related upite (novinari traže eksperte → mi šaljemo AI-generisane citate od tebe)
-
-### 2.7 Social auto-postavljanje
-
-Nova tabela `social_scheduler`. Za svaku novu SEO stranicu / blog članak / roast:
-- Auto-generiše post za X (Twitter), Threads, Facebook, LinkedIn
-- Auto-generiše TikTok/Reels script + Canvas video (već imamo Chess Roast Engine)
-- Guruje u queue, ti povežeš accounts sa Buffer/Publer API (ili ručno klik-post iz `/admin/social-queue`)
-
----
-
-## DEO 3 — MERENJE I ITERACIJA
-
-Nova admin stranica **`/admin/growth`** sa dashboardom:
-- SEO stranice: koliko generisano, koliko indeksirano (GSC API), koliko donose klikova
-- Direktorijumi: status svakog submitovanja
-- Reddit / social queue: koliko na čekanju, koliko objavljeno, engagement
-- Konverzija: posete → signup po izvoru
-- **A/B test:** naslovi SEO stranica se auto-testiraju (GSC CTR)
-
----
-
-## Tehnički detalji
-
-**Novo tabele:**
-- `seo_pages` (glavni content store)
-- `outreach_queue` (Reddit/forum/discord drafts)
-- `social_scheduler` (auto social posts)
-- `backlink_prospects` (guest-post targets + status)
-- `directory_submissions` (Product Hunt, BetaList, itd. tracker)
-
-**Novo edge functions (cron-drive):**
-- `seo-content-generator` (100/dan) — AI Gateway, Gemini 2.5 Flash
-- `daily-news-writer` (3-5/dan)
-- `seo-loop-optimizer` (čita GSC, pravi nove stranice za pozicije 8-30)
-- `directory-submitter` (batch API POST-ovi ka direktorijumima koji imaju public API)
-- `reddit-comment-scout` (skenira relevantne postove)
-- `indexnow-mass-ping` (posle svake batch runde)
-- `social-post-generator`
-
-**Novo frontend:**
-- `SeoContentPage.tsx` — jedan template renderuje sve tipove
-- `/admin/growth` dashboard
-- `/admin/reddit-queue`, `/admin/social-queue`, `/admin/outreach`
-- `/kit` — press kit stranica (assets, copy, screenshots)
-- `/api/rss/*.xml` — RSS endpoints per kategoriji
-
-**AI Gateway**: Gemini 2.5 Flash za bulk generisanje (jeftino), GPT-5.5 samo za flagship blog članke.
+### F. Partnership Outreach
+- **Chess streameri:** 20 srednjih (10-100k subs) — free premium + revshare od donacija.
+- **Chess klubovi:** lokalni klubovi u Srbiji + Balkan → free Club Wars, oni promovišu među članovima.
+- **Škole:** free "school edition" (bez chat/social) za nastavnike → SEO landing `/for-schools`.
 
 ---
 
-## Redosled izvršavanja (radim ovim redom u build modu)
+## Redosled sprintova (posle trenutnog Sprint 2 SEO Content Farm)
 
-**Sprint 1** (odmah): `seo_pages` tabela + `SeoContentPage` template + `seo-content-generator` edge fn za 3 tipa stranice (openings-vs-openings, how-to-beat, ELO guides) → **prvih 500 stranica live za 24h**.
-**Sprint 2**: 8 preostalih tipova stranica + auto-sitemap + IndexNow mass ping → **3000+ stranica indeksibilno**.
-**Sprint 3**: `daily-news-writer` cron + Google News submission paket + `/kit` press stranica.
-**Sprint 4**: `directory-submitter` (auto submit ka 15 platformi koje imaju API) + priprema paketa za ručno lansiranje (Product Hunt, HN).
-**Sprint 5**: Reddit/social/outreach queue + `/admin/growth` dashboard + GSC self-improving loop.
+- **Sprint 3:** Challenge Card Generator (#13) + Embed Board Widget (#14) + Chess DNA (#7) — sve tri su viral loopovi sa najvišim ROI.
+- **Sprint 4:** World Chess Map (#1) + Live Chess TV (#2) — flagship "wow" featureovi za Product Hunt launch.
+- **Sprint 5:** Instant Tournament (#6) + Global Club Wars (#4) + Hall of Fame (#5) — retention/community core.
+- **Sprint 6:** Product Hunt launch prep + `directory-submitter` + `daily-news-writer` + Reddit content pipeline.
+- **Sprint 7:** Product Hunt launch dan + koordinisani Reddit/X/YouTube push.
+- **Sprint 8+:** Ostali koncepti iz Talasa 1-3 po prioritetu na osnovu launch podataka.
 
-Odobri plan pa krećem sa Sprintom 1.
+## Tehnički detalji (za developere)
+
+- **Nove tabele:** `world_map_presence` (heartbeat po državi), `hall_of_fame_entries`, `instant_tournaments`, `club_wars_seasons`, `club_wars_matches`, `chess_dna_snapshots`, `rivalries` (već postoji, proširiti), `predict_move_attempts`, `blunder_museum_submissions`, `confessions` (već postoji), `challenge_cards`, `embed_widgets_analytics`, `player_trading_cards`, `weekly_boss_defeats`, `guilds`, `season_storylines`.
+- **Nove edge funkcije:** `world-map-aggregator` (cron 30s), `live-tv-curator` (cron 60s), `hall-of-fame-selector` (cron daily), `instant-tournament-launcher`, `club-wars-scheduler`, `chess-dna-generator`, `challenge-card-renderer` (Satori/canvas → PNG), `daily-news-writer`, `directory-submitter`, `reddit-scout-v2`, `social-post-generator`.
+- **Frontend:** `/world` (3D globus preko `react-globe.gl`), `/live` (Live TV grid), `/hall-of-fame`, `/instant`, `/club-wars`, `/dna/:userId`, `/museum`, `/confessions` (već postoji), `/predict/:gameId`, embed HTML: `/embed/board?fen=...`.
+- **Vanjske biblioteke:** `react-globe.gl` (World Map), `satori` (card rendering), `resend` (news outreach), Reddit API (read-only za scout).
+
+## Šta ovaj plan NAMERNO ne radi
+
+- Ne redizajnira Home (user veto).
+- Ne dodaje AI u human-vs-human partije.
+- Ne linkuje i ne pominje Chess.com/Lichess-a u UI-u.
+- Ne pravi fake engagement, ghost igrače, ni bot-fill u matchmaking-u.
+
+---
+
+**Sledeći korak posle odobrenja:** kreni sa Sprint 3 (Challenge Card + Embed Widget + Chess DNA) jer su ta tri feature-a najbrža za implementaciju i odmah proizvode share-ovan sadržaj koji hrani Talas 4 growth kanale.
