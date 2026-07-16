@@ -106,6 +106,7 @@ const CommunityMap = lazy(() => import("./pages/CommunityMap"));
 const AdminSeoConsole = lazy(() => import("./pages/AdminSeoConsole"));
 const AdminGbpPosts = lazy(() => import("./pages/AdminGbpPosts"));
 const AdminGsc = lazy(() => import("./pages/AdminGsc"));
+const AdminGrowthHub = lazy(() => import("./pages/AdminGrowthHub"));
 const AdminMapsSetup = lazy(() => import("./pages/AdminMapsSetup"));
 const AdminChessResults = lazy(() => import("@/pages/AdminChessResults"));
 const PwaInstallBanner = lazy(() => import("./components/PwaInstallBanner"));
@@ -544,6 +545,7 @@ function AnimatedRoutes() {
           <Route path="/admin/seo-console" element={<AdminSeoConsole />} />
           <Route path="/admin/gbp-posts" element={<AdminGbpPosts />} />
           <Route path="/admin/gsc" element={<AdminGsc />} />
+          <Route path="/admin/growth-hub" element={<AdminGrowthHub />} />
           <Route path="/admin/maps-setup" element={<AdminMapsSetup />} />
           <Route path="/admin/chess-results" element={<AdminChessResults />} />
           <Route path="/chess/:slug" element={<ChessInCity />} />
