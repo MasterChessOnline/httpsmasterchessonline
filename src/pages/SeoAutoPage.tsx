@@ -47,10 +47,6 @@ export default function SeoAutoPage() {
       if (cancelled) return;
       setPage((data as any) ?? null);
       setLoading(false);
-      // fire-and-forget view counter
-      if (data) {
-        supabase.rpc("noop" as any).catch(() => {});
-      }
     })();
     return () => {
       cancelled = true;
