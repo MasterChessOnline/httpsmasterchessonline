@@ -66,15 +66,20 @@ export default function MatchStory() {
   }, [game, white, black]);
 
   const share = async () => {
-    const url = window.location.href;
+    // Use edge function URL so crawlers (WhatsApp/Discord/X) get rich preview
+    // with real player names + result. Humans get redirected to /game/:id/story.
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const shareUrl = projectId
+      ? `https://${projectId}.supabase.co/functions/v1/og-match-story?id=${id}`
+      : window.location.href;
     if (navigator.share) {
       try {
-        await navigator.share({ title: document.title, url });
+        await navigator.share({ title: document.title, url: shareUrl });
+        return;
       } catch {}
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success("Link kopiran");
     }
+    await navigator.clipboard.writeText(shareUrl);
+    toast.success("Link kopiran — podeli na WhatsApp/Discord za bogat preview");
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-neutral-400">Učitavanje…</div>;
