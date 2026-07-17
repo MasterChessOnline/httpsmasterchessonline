@@ -1,189 +1,91 @@
-## Cilj
-Završiti sve preostalo iz prethodnog plana + dodati Chrome ekstenziju, Yandex, i još kanala.
 
----
+# Plan — Kurir-style news, circular logo, marketing push
 
-## Sprint 1 — Yandex + IndexNow + Bing (SVE search engine-e pokriti)
+## 1. Kurir-style news article (Nikola + Niemann)
+Create a new news post styled like Serbian tabloid **Kurir**: shouty red/black headline, big lead photo, "ŠOK", "EKSKLUZIVNO" chips, short punchy paragraphs, quoted lines.
 
-- **Yandex Webmaster**: dodati `<meta name="yandex-verification">` u `index.html` (placeholder token) + `docs/YANDEX_SETUP.md` sa koracima
-- **Yandex Turbo Pages feed** (`/turbo.xml` — samo skelet, popunjava se news postovima)
-- **Bing verification**: dokument `docs/BING_SETUP.md` (import iz GSC, IndexNow već postoji ključ)
-- **IndexNow proširenje**: već ima `indexnow-ping` funkcija — dodati auto-ping svakog novog SEO fajla iz `seo_pages` tabele
-- **Seznam** (CZ), **Naver** (KR), **Baidu** (CN — ali blocked territories caveat): kratki docs
+- New file: `src/pages/news/NikolaVsNiemann.tsx` — route `/news/nikola-vs-niemann-belgrade`
+- Add entry to `src/lib/news.ts` so it shows in `/news` and news sitemap
+- Use existing photo `nikola-vs-niemann.jpg`
+- Content: real facts only — 13-year-old founder of MasterChess.live sat at Niemann–Nepomniachtchi board in Belgrade. No fabricated quotes attributed to Niemann.
+- Full SEO: `Seo` component, JSON-LD `NewsArticle`, OG image = the photo
+- Kurir visual language scoped to this article only (red banner, condensed bold display font, yellow highlights) — does NOT touch global theme
 
----
+## 2. Circular logo + "MasterChess" wordmark everywhere
+Rework `src/components/BrandLogo.tsx`:
+- Change outer container from `rounded-[22%]` to `rounded-full` (true circle)
+- Inner image mask also `rounded-full`, with `object-cover` + slight negative padding so the crown fully fits inside the circle (no gold frame clipping the crown)
+- Keep gold conic ring + glow, just circular
+- New prop `withWordmark?: boolean` → renders `<BrandLogo />` + `MasterChess` text beside it (gold gradient, tracking-tight, display font)
+- New wrapper `BrandLock` = logo + wordmark, single import
 
-## Sprint 2 — Chrome ekstenzija "MasterChess Quick Play"
+Then swap every logo usage across the site to the circular version with wordmark where a text logo is currently shown:
+- `Navbar`, `Footer`, `AuthLayout`, splash, PWA header, `DraganBrakusPress`, `NikolaSakotic` avatar rings, any hero badges
+- Replace `/favicon.png` and `/app-icon-192.png` with a circular-cropped version of the uploaded logo (via `imagegen--edit_image`, transparent background, circular crop) so browser tab + PWA install also show the circle
 
-Mala ekstenzija (V3) koja daje 3 stvari:
-1. **Popup** — dnevni puzzle + "Play Now" dugme koje otvara `/play-guest`
-2. **New Tab override** (opciono) — MasterChess kao početna stranica (mini board + live activity)
-3. **Right-click context menu** — "Analyze this FEN on MasterChess" (selektuješ FEN string, otvara `/analysis?fen=...`)
+## 3. Connector strategy — what to add & what to publish
 
-Fajlovi u `/dev-server/extension/`:
-- `manifest.json` (MV3, permissions: `activeTab`, `contextMenus`, `storage`)
-- `popup.html` + `popup.js` (fetches daily puzzle from public API)
-- `background.js` (context menu handler)
-- `newtab.html` (opciono override)
-- `icon-48.png`, `icon-128.png` (koristim postojeći `logo-crown.png`)
+**Already connected & used:** LinkedIn, Resend, Semrush, GSC, TikTok (needs scope reconnect), Google Maps.
 
-Pakuje se u `public/masterchess-extension.zip` (preko `nix run nixpkgs#zip`).
+**Add these connectors (high ROI for a chess site):**
+- **X (Twitter)** — chess Twitter is huge; auto-post daily puzzle + news
+- **Slack or Telegram** — community broadcast + admin alerts
+- **Notion** — content calendar for news/tournaments
+- **Google Sheets** — tournament registrations mirror + marketing tracker
+- **Reddit is not a Lovable connector** → keep as manual playbook (docs already exist)
 
-Landing stranica `/extension`:
-- Instrukcije za instalaciju (Load unpacked)
-- Download link (fetch+blob pattern jer preview blokira direct download)
-- Screenshot ekstenzije
-- CTA za Chrome Web Store submission
+**Skip / not worth it now:** Airtable (Sheets covers it), HubSpot (too heavy), Salesforce (irrelevant).
 
-**Chrome Web Store submission** — dokument `docs/CHROME_STORE_SUBMISSION.md` sa: developer account setup ($5 one-time), asset requirements (440×280 tile, 1280×800 screenshots, opis), review vremena (2-7 dana).
+**Auto-publishing schedule (edge function `marketing-broadcaster`, cron daily 09:00 CET):**
+| Channel | Content |
+|---|---|
+| LinkedIn | Daily puzzle image + link, weekly Nikola founder story |
+| TikTok (after `video.publish` reconnect) | 9:16 video: puzzle-of-the-day, "beat this bot in 10 moves", tournament highlights |
+| X/Twitter | Same puzzle post, thread on top GSC queries (50-move rule, en passant, Kasparov) |
+| Resend | Weekly newsletter to registered users — new tournament, top puzzle, news article |
+| Telegram/Slack | Tournament start countdown, live results |
 
----
+## 4. Paid ads on the internet — recommendation
+Yes, **small paid layer** on top of organic, focused only where chess players actually convert:
 
-## Sprint 3 — Jos linkova (backlink blitz — 100+ novih)
+- **Google Ads Search** — brand + long-tail: "play chess without ads", "free chess tournament online", "chess vs bot no signup". Budget €5–10/day, geo Serbia + English worldwide.
+- **Meta (IG/FB) Reels ads** — reuse TikTok 9:16 videos, target chess/gaming interests, €5/day
+- **Reddit Ads** — r/chess, r/chessbeginners, promoted post of the Niemann article. €3–5/day
+- **YouTube pre-roll** on chess channels — only after we have 3+ good 15s clips
+- **Do NOT** run TikTok ads until organic proves the hook works (cheaper to test organic first)
 
-Prošli doc imao 50 direktorijuma. Sada dodajem još 50+ **niche + regionalnih**:
+All ads route to a single landing `/play-guest` (already exists — instant play, no signup).
 
-**Chess-specific (30):**
-- Chess.com forums/community blog (može se linkovati)
-- ChessStack Overflow
-- ChessBase India news submit
-- Chess24 forum
-- New in Chess magazine tips
-- FIDE trainers association
-- Chess Federation web pages (Serbia, Croatia, BiH, SLO, MK, MNE) — direct email
-- ChessClub.com Discord list
-- ICC (Internet Chess Club) forums
-- Awesome Chess GitHub lists (5+)
-- Chess coding subreddits
-- Lichess forum (ne kao spam, kao "check out my project")
-- ChessTempo forum
-- ChessBomb submit
-- Chessgames.com submit
+## 5. Full marketing & promotion ideas (prioritized)
 
-**Dev/Tech (25):**
-- Awesome React, Awesome Vite, Awesome Supabase (GitHub lists)
-- Vercel showcase (nije Lovable, ali showcase)
-- Dev.to organizations tag
-- CodePen (post board demo)
-- Hashnode publication
-- Read.cv profile
-- Polywork
-- Peerlist (with launch)
-- Weekly newsletters submit (JavaScript Weekly, React Newsletter, Node Weekly)
-- Product Advisor
-- Uneed weekly launch
-- MicroLaunch
-- LaunchStack
-- Fazier
-- IndieHackers milestones (post each)
-- WIP.chat (indie hacker community)
-- Nomad List (as founder profile)
-- Reflio, PostHog case studies
+**Immediate (week 1):**
+1. Ship Kurir-style Niemann article → seed to r/chess, Serbian chess FB groups, Telegram
+2. Circular logo everywhere → brand consistency for social previews
+3. Generate 5 TikTok/Reels videos (puzzle solve, bot roast, Nikola founder story, Niemann photo reveal, tournament trailer) using `videogen--generate_video`
+4. Reconnect TikTok with `video.publish` scope → auto-post
 
-**Regional Serbian (15):**
-- eKapija
-- Naslovi.net
-- MondoTech
-- B92 Tehnologija tips
-- SEEbiz
-- Blic Tehno
-- Novosti IT
-- Politika Nauka
-- 021.rs Novi Sad
-- InfoStud
-- HelloWorld.rs
-- Preduzetnik.rs
-- Podnesi vest (Startup Ekosistem)
-- SEE Digital Summit submit
-- LinkedIn Serbian Startups group
+**Short-term (weeks 2–4):**
+5. `/news` daily post via `world-tournaments` edge function + a new `nikola-diary` function (founder blog)
+6. SEO landing pages for top GSC queries: `/learn/50-move-rule`, `/learn/en-passant`, `/games/kasparov-vs-karpov-1985`
+7. Weekly Resend newsletter to all registered users
+8. LinkedIn post series: "13yo builds chess platform" — 1 post per component (Stockfish, matchmaking, tournaments)
+9. Google Business Profile — post weekly updates, respond to reviews
 
-**Educational/School (15):**
-- Common Sense Education review submit
-- EdTech directories (edSurge, Educaplay)
-- Belgrade schools direct outreach template
-- ChessKid mention (kids audience)
-- Scholastic Chess US
-- ECU (European Chess Union) news
-- Rotary Club chess sponsorships
-- Public library digital resources submit
+**Ongoing:**
+10. Auto-post daily puzzle to LinkedIn + X + TikTok
+11. Referral program: `/vs/{code}` link gives inviter 100 coins per signup (already partially built)
+12. Partner with Serbian chess clubs — free tournament hosting in exchange for GBP reviews and backlinks
+13. Chess streamer outreach (DailyChess_12 already integrated) — sponsor 1 stream/month with tournament code
+14. Press outreach — send Kurir article + press kit to B92, Blic, Sportske, ChessBase, Chess24
 
-**AI/Tools directories (15):** TheresAnAIForThat, Toolify.ai, FuturePedia, AI Tools Club, AITool.report, InsanelyCoolTools, itd.
+## Technical notes
+- Kurir styling isolated with CSS scoped to article component (no globals modified)
+- `BrandLogo` changes preserve all existing props (`size`, `glow`, `shimmer`) — no breaking changes to 30+ call sites
+- Favicon replacement follows favicon knowledge (copy to `public/`, update `index.html`, delete old `.ico`)
+- `marketing-broadcaster` edge function reuses existing Resend, LinkedIn, TikTok gateway patterns with `verify_jwt = false` + service-role cron auth
 
-Sve u `docs/BACKLINKS_100_PLUS.md` sa checkbox tabelom.
-
----
-
-## Sprint 4 — Još ideja (30+ novih rasta/features)
-
-**Growth mehanike:**
-- **Refer-a-friend leaderboard** — najvise pozvanih u mesecu = zlatna značka + Cup wildcard
-- **Chess Streak Contests** — ko drži najduži streak nedeljno, npr. 7-day = 5000 coins
-- **Blogger Program** — daj free "Pro" badge svakom ko napravi blog post o MC
-- **Streamer Kit** — download page `/streamer-kit` sa overlay-om, logo pack, coin codes za viewere
-- **Wikipedia stub** — Nikola Sakotic entry draft (Wikidata prvo, pa jednom kad ima 3+ press coverage → Wikipedia)
-- **Podcast pitches** — 10 chess podcast lista sa email templates
-- **HARO / Qwoted** — daily journalist queries, odgovori kao "13yo chess founder"
-- **Guest posts** — pitch 5 chess blogova
-- **Chess Discord partnerships** — 20 velikih chess Discord servera, ponuda "co-hosted tournament"
-- **Schools outreach kit** — PDF pitch deck za škole
-- **Chess opening trend heatmap** — javna daily grafika, viralna na Twitter chess community
-- **"Guess the ELO" viral game** — pokaži partiju, gadaj ELO, share result
-- **Chess personality quiz** — 10 pitanja → aggressive/positional/tactical (share card)
-- **Weekly Twitter Space** — "MasterChess Talk" sa gostima
-- **YouTube automation** — Shorts iz best partija sedmice (koristi `og-match-story`)
-- **TikTok automation** — isti pipeline, drugi output
-- **Instagram carousel poster** — auto-generated iz `challenge_cards`
-- **Threads/Bluesky mirror** — cross-post svih Twitter objava
-- **Mastodon chess.social** — pisati tamo
-- **Discord bot** (već ima) — proširiti: `/challenge @user` = kreira MC challenge link
-
-**Retention/product ideje:**
-- **Onboarding tour** — 4 slajda za prve posetioce (Play, Puzzle, Cup, Community)
-- **Skeleton empty states** — nikad prazan ekran; uvek nešto ("odigraj puzzle dok čekaš")
-- **In-app "What's New" changelog** — pokazi svake nedelje
-- **Trophy case** na profilu — sve značke lepo prikazane
-- **Weekly "Player of the Week"** — spotlight jednog usera na Home + email
-- **Chess Roulette** — random handicap za smeh
-- **Speedrun modovi** — "Sicilian speedrun to 1500 ELO"
-- **Daily lesson email** (5 min lekcija)
-
-Sve u `docs/GROWTH_IDEAS_50_PLUS.md`.
-
----
-
-## Sprint 5 — Auto-cron za sve
-
-Cron edge functions (pg_cron + net.http_post):
-- `indexnow-daily` — svaki dan pinguje sve nove URL-ove iz `seo_pages`
-- `gsc-daily-report` — GSC top 20 upita → čuva u `seo_query_opportunities`
-- `gbp-weekly-post` — objavi post iz `gbp_posts` (već postoji funkcija, samo dodati cron)
-- `social-post-cron` — svaki dan iz `challenge_cards` random 3 = objava za X/Threads
-
----
-
-## Tehnički detalji
-
-**Novi fajlovi:**
-- `extension/manifest.json`, `extension/popup.html`, `extension/popup.js`, `extension/background.js`, `extension/icons/`
-- `src/pages/Extension.tsx` — landing sa download dugmetom
-- `public/masterchess-extension.zip` — pakovani ZIP
-- `docs/YANDEX_SETUP.md`, `docs/BING_SETUP.md`, `docs/CHROME_STORE_SUBMISSION.md`
-- `docs/BACKLINKS_100_PLUS.md`, `docs/GROWTH_IDEAS_50_PLUS.md`
-- `src/App.tsx` — dodati `/extension` rutu
-
-**Frontend izmene:**
-- `index.html` — dodati Yandex verification meta tag (placeholder)
-- Navbar → dodati "Extension" link u footer
-
-**Bez izmena:** Home dizajn (user veto), matchmaking, competitor brand policy.
-
----
-
-## Redosled izvršavanja
-1. Yandex + Bing setup (10 min)
-2. Chrome ekstenzija (build + pakovanje + `/extension` landing)
-3. 3 nova docs fajla (backlinks 100+, growth ideas 50+, Chrome store)
-4. Auto-cron edge funkcije za IndexNow/GSC/GBP
-5. Sitemap regeneracija (auto na build)
-
-Pitanje: da li se slažeš sa OVIM redom ili prvo želiš samo Chrome ekstenziju (pa ostalo posle)?
+## What I will NOT do
+- No fabricated quotes from Niemann or other public figures
+- No changing homepage design (per Core rule)
+- No competitor site names in UI (per Core rule)
+- No paid ads set up automatically — I'll prepare copy + creatives, you launch them from your ad accounts
