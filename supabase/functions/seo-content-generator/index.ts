@@ -144,6 +144,37 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Require admin JWT or internal cron/service-role bearer
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const isServiceRole = token === SERVICE_KEY;
+    const isCron = token === LOVABLE_API_KEY;
+    let isAdmin = false;
+    if (!isServiceRole && !isCron) {
+      const authClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      });
+      const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+      if (userErr || !userData?.user) {
+        return new Response(JSON.stringify({ error: "unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const svc = createClient(SUPABASE_URL, SERVICE_KEY);
+      const { data: adminCheck } = await svc.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
+      isAdmin = !!adminCheck;
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const body = await req.json().catch(() => ({}));
     const requestedKind: Kind | "all" = body.kind ?? "all";
     const count: number = Math.min(Math.max(body.count ?? 20, 1), 100);

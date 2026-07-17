@@ -11,6 +11,17 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Require authenticated caller
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (!token) return json({ error: "unauthorized" }, 401);
+    const authClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401);
+    const callerId = userData.user.id;
+
     const { gameId, language = "sr", mode = "playful", regenerate = false } = await req.json();
     if (!gameId || typeof gameId !== "string") {
       return json({ error: "gameId required" }, 400);
@@ -19,6 +30,21 @@ Deno.serve(async (req) => {
     if (!["playful", "brutal"].includes(mode)) return json({ error: "bad mode" }, 400);
 
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+
+    // Only allow regenerate if caller is a participant in the game or admin
+    if (regenerate) {
+      const { data: g } = await supabase
+        .from("online_games")
+        .select("white_player_id, black_player_id")
+        .eq("id", gameId)
+        .maybeSingle();
+      if (!g) return json({ error: "game not found" }, 404);
+      const isParticipant = g.white_player_id === callerId || g.black_player_id === callerId;
+      if (!isParticipant) {
+        const { data: adminCheck } = await supabase.rpc("has_role", { _user_id: callerId, _role: "admin" });
+        if (!adminCheck) return json({ error: "forbidden" }, 403);
+      }
+    }
 
     // Return cached unless regenerate
     if (!regenerate) {
