@@ -269,6 +269,8 @@ function RootDeferredOverlays() {
   );
 }
 
+const ChannelWelcomeBanner = lazy(() => import("@/components/ChannelWelcomeBanner"));
+
 function AppChrome() {
   return (
     <>
@@ -280,6 +282,7 @@ function AppChrome() {
       <BrakusRibbon />
       <StreakFlexController />
       <FloatingShareButton />
+      <Suspense fallback={null}><ChannelWelcomeBanner /></Suspense>
     </>
   );
 }
