@@ -10,8 +10,20 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Require authenticated caller and only allow self-regeneration
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (!token) return json({ error: "unauthorized" }, 401);
+    const authClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401);
+    const callerId = userData.user.id;
+
     const { userId, regenerate = false } = await req.json();
     if (!userId || typeof userId !== "string") return json({ error: "userId required" }, 400);
+    if (userId !== callerId) return json({ error: "forbidden" }, 403);
 
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
