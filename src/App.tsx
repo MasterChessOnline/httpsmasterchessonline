@@ -210,6 +210,7 @@ const NewsItem = lazy(() => import("./pages/NewsItem"));
 const NewsSubmit = lazy(() => import("./pages/NewsSubmit"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 const NikolaSakotic = lazy(() => import("./pages/NikolaSakotic"));
+const NikolaVsNiemann = lazy(() => import("./pages/NikolaVsNiemann"));
 
 
 // Eager components (used in every page chrome)
@@ -337,6 +338,7 @@ function AnimatedRoutes() {
           <Route path="/blog/:slug" element={<LearnArticle />} />
           <Route path="/news" element={<News />} />
           <Route path="/news/submit" element={<NewsSubmit />} />
+          <Route path="/news/nikola-vs-niemann-belgrade" element={<NikolaVsNiemann />} />
           <Route path="/news/:slug" element={<NewsItem />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/tournaments" element={<Tournaments />} />
