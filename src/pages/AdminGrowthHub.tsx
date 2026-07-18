@@ -55,14 +55,56 @@ export default function AdminGrowthHub() {
       <h1 className="text-3xl font-bold mb-2">Growth Hub</h1>
       <p className="text-muted-foreground mb-6">Every connector, every action, one panel.</p>
 
-      <Tabs defaultValue="semrush">
-        <TabsList className="grid grid-cols-5 w-full">
+      <Tabs defaultValue="automation">
+        <TabsList className="grid grid-cols-8 w-full">
+          <TabsTrigger value="automation">🤖 Auto</TabsTrigger>
+          <TabsTrigger value="mining">Query mining</TabsTrigger>
+          <TabsTrigger value="cities">City hubs</TabsTrigger>
           <TabsTrigger value="semrush">Semrush</TabsTrigger>
           <TabsTrigger value="gsc">GSC</TabsTrigger>
           <TabsTrigger value="resend">Resend</TabsTrigger>
           <TabsTrigger value="linkedin">LinkedIn</TabsTrigger>
           <TabsTrigger value="tiktok">TikTok</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="automation">
+          <Card className="p-4 space-y-3">
+            <div className="text-sm text-muted-foreground">One-click triggers for every growth loop. These also run on schedule via cron.</div>
+            <div className="flex flex-wrap gap-2">
+              <Btn id="auto-miner" onClick={() => call("gsc-query-miner", {})}>Run GSC miner</Btn>
+              <Btn id="auto-gen" onClick={() => call("gsc-auto-generate-pages", { limit: 10 })}>Auto-generate pages (10)</Btn>
+              <Btn id="auto-cities" onClick={() => call("chess-city-hub-generator", { limit: 20 })}>Refresh city hubs (20)</Btn>
+              <Btn id="auto-social" onClick={() => call("daily-social-publisher", {})}>Publish daily social</Btn>
+              <Btn id="auto-retention" onClick={() => call("retention-emailer", {})}>Send retention emails</Btn>
+              <Btn id="auto-semrush" onClick={() => call("semrush-weekly-intel", {})}>Semrush gap scan</Btn>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="mining">
+          <Card className="p-4 space-y-3">
+            <div className="text-sm text-muted-foreground">
+              Weekly GSC query mining. Opportunities feed the auto-generator; cannibalization needs manual review.
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Btn id="mine-run" onClick={() => call("gsc-query-miner", {})}>Run miner now</Btn>
+              <Btn id="mine-gen" onClick={() => call("gsc-auto-generate-pages", { limit: 25 })}>Generate 25 pages</Btn>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="cities">
+          <Card className="p-4 space-y-3">
+            <div className="text-sm text-muted-foreground">
+              Programmatic /chess-in/:city landings. Uses Google Maps Places API (New) to cache venues per city.
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Btn id="city-20" onClick={() => call("chess-city-hub-generator", { limit: 20 })}>Generate 20</Btn>
+              <Btn id="city-50" onClick={() => call("chess-city-hub-generator", { limit: 50 })}>Generate 50</Btn>
+              <Btn id="city-all" onClick={() => call("chess-city-hub-generator", { limit: 100 })}>Generate all (100)</Btn>
+            </div>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="semrush">
           <Card className="p-4 space-y-3">

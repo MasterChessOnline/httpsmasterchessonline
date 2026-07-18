@@ -646,6 +646,51 @@ export type Database = {
         }
         Relationships: []
       }
+      city_chess_hubs: {
+        Row: {
+          city_name: string
+          city_slug: string
+          country: string
+          created_at: string
+          last_refreshed_at: string | null
+          lat: number | null
+          lng: number | null
+          page_generated: boolean
+          place_count: number
+          places_cached: Json
+          region: string | null
+          updated_at: string
+        }
+        Insert: {
+          city_name: string
+          city_slug: string
+          country: string
+          created_at?: string
+          last_refreshed_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          page_generated?: boolean
+          place_count?: number
+          places_cached?: Json
+          region?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city_name?: string
+          city_slug?: string
+          country?: string
+          created_at?: string
+          last_refreshed_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          page_generated?: boolean
+          place_count?: number
+          places_cached?: Json
+          region?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clan_quests: {
         Row: {
           club_id: string
@@ -2427,6 +2472,33 @@ export type Database = {
           },
         ]
       }
+      pending_social_posts: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          platform: string
+          reason: string | null
+          sent_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload: Json
+          platform: string
+          reason?: string | null
+          sent_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          platform?: string
+          reason?: string | null
+          sent_at?: string | null
+        }
+        Relationships: []
+      }
       player_badges: {
         Row: {
           badge_key: string
@@ -3134,6 +3206,36 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_cannibalization: {
+        Row: {
+          detected_at: string
+          id: string
+          impressions: number
+          query: string
+          resolved_at: string | null
+          suggested_canonical: string | null
+          urls: Json
+        }
+        Insert: {
+          detected_at?: string
+          id?: string
+          impressions?: number
+          query: string
+          resolved_at?: string | null
+          suggested_canonical?: string | null
+          urls?: Json
+        }
+        Update: {
+          detected_at?: string
+          id?: string
+          impressions?: number
+          query?: string
+          resolved_at?: string | null
+          suggested_canonical?: string | null
+          urls?: Json
+        }
+        Relationships: []
+      }
       seo_pages: {
         Row: {
           body_md: string
@@ -3333,6 +3435,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      social_post_log: {
+        Row: {
+          content: string
+          engagement: Json
+          error: string | null
+          id: string
+          platform: string
+          post_id: string | null
+          posted_at: string
+          status: string
+          url: string | null
+        }
+        Insert: {
+          content: string
+          engagement?: Json
+          error?: string | null
+          id?: string
+          platform: string
+          post_id?: string | null
+          posted_at?: string
+          status?: string
+          url?: string | null
+        }
+        Update: {
+          content?: string
+          engagement?: Json
+          error?: string | null
+          id?: string
+          platform?: string
+          post_id?: string | null
+          posted_at?: string
+          status?: string
+          url?: string | null
+        }
+        Relationships: []
       }
       spectator_bets: {
         Row: {

@@ -5,12 +5,16 @@
 export function isAuthorizedCronCaller(req: Request): boolean {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const cronSecret = Deno.env.get("CRON_SECRET") ?? "";
+  const growthSecret = Deno.env.get("GROWTH_CRON_SECRET") ?? "";
 
   const auth = req.headers.get("Authorization") ?? "";
   if (serviceKey && auth === `Bearer ${serviceKey}`) return true;
 
   const headerSecret = req.headers.get("x-cron-secret") ?? "";
-  if (cronSecret && headerSecret && headerSecret === cronSecret) return true;
+  if (headerSecret) {
+    if (cronSecret && headerSecret === cronSecret) return true;
+    if (growthSecret && headerSecret === growthSecret) return true;
+  }
 
   return false;
 }
