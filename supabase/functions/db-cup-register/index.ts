@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       try {
         const r = await fetch(`${SUPABASE_URL}/functions/v1/fide-lookup?id=${rawFide}`, {
           headers: { apikey: ANON, Authorization: `Bearer ${ANON}` },
-          signal: AbortSignal.timeout(22000),
+          signal: AbortSignal.timeout(4800),
         });
         const j: any = await r.json().catch(() => ({}));
         if (r.ok && j?.name) verified = j;
@@ -152,6 +152,8 @@ Deno.serve(async (req) => {
         }
       } catch {
         if (t.fide_verification_mode === "required") return json({ error: "FIDE verification temporarily unavailable." }, 503);
+        const clientRating = Number(detailPatch.fide_blitz_rating || 0);
+        if (clientRating > 0) seedingRating = clientRating;
       }
     } else if (t.fide_verification_mode === "required") {
       return json({ error: "This tournament requires a verified FIDE ID." }, 400);
