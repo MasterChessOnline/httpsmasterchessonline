@@ -165,8 +165,13 @@ function extractBirthYear(html: string): number | null {
 }
 
 function parse(html: string, fideId: string) {
+  // Real profile pages contain the FIDE ID row + rating card; the FIDE 404
+  // fallback lands on a generic "Chess Players Arbiters Trainers Database"
+  // page — reject those so we don't seed garbage names.
+  if (!/profile-info-id/i.test(html) || !/profile-standart/i.test(html)) return null;
   const name = extractName(html);
   if (!name) return null;
+
   const federation = extractFederation(html);
   const title = extractTitle(html);
   const { standard, rapid, blitz } = extractRatings(html);
