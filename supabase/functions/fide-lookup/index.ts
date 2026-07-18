@@ -53,35 +53,81 @@ function extractName(html: string): string | null {
   return null;
 }
 
+// ISO-2 (lowercase) -> FIDE/IOC 3-letter federation code.
+const ISO2_TO_FED: Record<string, string> = {
+  no:"NOR", rs:"SRB", us:"USA", ru:"RUS", in:"IND", cn:"CHN", ua:"UKR", by:"BLR", pl:"POL",
+  de:"GER", fr:"FRA", es:"ESP", it:"ITA", hu:"HUN", nl:"NED", tr:"TUR", ar:"ARG", cu:"CUB",
+  gr:"GRE", pt:"POR", ie:"IRL", uk:"ENG", gb:"ENG", ro:"ROU", bg:"BUL", cz:"CZE", sk:"SVK",
+  si:"SLO", hr:"CRO", ba:"BIH", mk:"MKD", me:"MNE", al:"ALB", at:"AUT", ch:"SUI", be:"BEL",
+  se:"SWE", dk:"DEN", fi:"FIN", is:"ISL", ee:"EST", lv:"LAT", lt:"LTU", md:"MDA", ge:"GEO",
+  am:"ARM", az:"AZE", kz:"KAZ", uz:"UZB", tj:"TJK", kg:"KGZ", tm:"TKM", ir:"IRI", il:"ISR",
+  eg:"EGY", ma:"MAR", tn:"TUN", dz:"ALG", za:"RSA", ng:"NGR", au:"AUS", nz:"NZL", jp:"JPN",
+  kr:"KOR", vn:"VIE", th:"THA", ph:"PHI", id:"INA", my:"MAS", sg:"SGP", mn:"MGL", pk:"PAK",
+  bd:"BAN", lk:"SRI", np:"NEP", ca:"CAN", mx:"MEX", br:"BRA", ve:"VEN", pe:"PER", cl:"CHI",
+  co:"COL", ec:"ECU", uy:"URU", py:"PAR", bo:"BOL", cr:"CRC", pa:"PAN", do:"DOM", jm:"JAM",
+  tt:"TTO", ci:"CIV", ke:"KEN", zw:"ZIM", zm:"ZAM", cg:"CGO", tz:"TAN", ug:"UGA",
+};
+
+const TITLE_NAME_TO_CODE: Record<string, string> = {
+  "grandmaster":"GM","international master":"IM","fide master":"FM","candidate master":"CM",
+  "national master":"NM","woman grandmaster":"WGM","woman international master":"WIM",
+  "woman fide master":"WFM","woman candidate master":"WCM","woman national master":"WNM",
+  "arena grandmaster":"AGM","arena international master":"AIM","arena fide master":"AFM",
+  "arena candidate master":"ACM",
+};
+
 function extractFederation(html: string): string | null {
-  // link like /rating/NOR/ or href="?country=NOR"
-  const m1 = html.match(/\/rating\/([A-Z]{3})\//);
-  if (m1) return m1[1];
-  const m2 = html.match(/(?:country|federation)=([A-Z]{3})\b/i);
-  if (m2) return m2[1].toUpperCase();
-  const m3 = html.match(/\bflag[^>]*(?:title|alt)=["']([A-Z]{3})["']/i);
+  // 1) Flag image inside profile-info-country: <img src="/images/flags/no.svg">
+  const m1 = html.match(/profile-info-country[\s\S]{0,300}?\/flags\/([a-z]{2,3})\.(?:svg|png)/i);
+  if (m1) {
+    const iso = m1[1].toLowerCase();
+    if (iso.length === 3) return iso.toUpperCase();
+    if (ISO2_TO_FED[iso]) return ISO2_TO_FED[iso];
+  }
+  // 2) Text after flag inside profile-info-country
+  const m2 = html.match(/profile-info-country[\s\S]{0,500}?>\s*([A-Za-z][A-Za-z .'-]{2,40})\s*</i);
+  if (m2) {
+    const country = m2[1].trim().toLowerCase();
+    // reverse-lookup by common names
+    const REV: Record<string, string> = {
+      "norway":"NOR","serbia":"SRB","russia":"RUS","united states":"USA","usa":"USA",
+      "india":"IND","china":"CHN","ukraine":"UKR","poland":"POL","germany":"GER",
+      "france":"FRA","spain":"ESP","italy":"ITA","hungary":"HUN","netherlands":"NED",
+      "croatia":"CRO","bosnia and herzegovina":"BIH","montenegro":"MNE",
+      "north macedonia":"MKD","slovenia":"SLO","romania":"ROU","bulgaria":"BUL",
+      "greece":"GRE","turkey":"TUR","israel":"ISR","armenia":"ARM","azerbaijan":"AZE",
+      "georgia":"GEO","kazakhstan":"KAZ","uzbekistan":"UZB","england":"ENG",
+      "iran":"IRI","cuba":"CUB","brazil":"BRA","argentina":"ARG",
+    };
+    if (REV[country]) return REV[country];
+  }
+  // 3) Fallback: any /rating/XXX/ or ?country=XXX
+  const m3 = html.match(/\/rating\/([A-Z]{3})\//) || html.match(/(?:country|federation)=([A-Z]{3})\b/i);
   if (m3) return m3[1].toUpperCase();
-  // fallback: label "Federation" followed by 3-letter code in any tag
-  const m4 = html.match(/Federation[\s\S]{0,200}?\b([A-Z]{3})\b/);
-  if (m4) return m4[1];
   return null;
 }
 
 function extractTitle(html: string): string | null {
-  // Explicit "FIDE title" row
-  const m = html.match(/FIDE\s*title[\s\S]{0,200}?>\s*([A-Za-z]{1,5})\s*</i);
+  // profile-info-title block: <div class="profile-info-title "><p>Grandmaster</p>
+  const m = html.match(/profile-info-title[\s\S]{0,300}?<p[^>]*>\s*([^<]+?)\s*<\/p>/i);
   if (m?.[1]) {
-    const t = m[1].toUpperCase();
-    if (KNOWN_TITLES.has(t)) return t;
+    const raw = m[1].trim().toLowerCase();
+    if (raw && raw !== "none" && raw !== "-") {
+      if (TITLE_NAME_TO_CODE[raw]) return TITLE_NAME_TO_CODE[raw];
+      // If already a short code like "GM"
+      const upper = raw.toUpperCase();
+      if (KNOWN_TITLES.has(upper)) return upper;
+    }
   }
-  // Any known title token in the profile header block (skip in ratings table)
-  const head = html.slice(0, 8000);
-  for (const tt of KNOWN_TITLES) {
-    const re = new RegExp(`\\b${tt}\\b`);
-    if (re.test(head)) return tt;
+  // Fallback: explicit "FIDE title" row with code
+  const m2 = html.match(/FIDE\s*title[\s\S]{0,300}?>\s*([A-Za-z]{1,5})\s*</i);
+  if (m2?.[1]) {
+    const t = m2[1].toUpperCase();
+    if (KNOWN_TITLES.has(t)) return t;
   }
   return null;
 }
+
 
 function extractRatings(html: string): { standard: number | null; rapid: number | null; blitz: number | null } {
   // ratings.fide.com profile: divs with class="profile-standart|profile-rapid|profile-blitz"
