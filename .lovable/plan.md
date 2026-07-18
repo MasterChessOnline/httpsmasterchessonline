@@ -1,124 +1,60 @@
 
-# Full Growth Automation — "Do Everything" Sprint
+## Šta ćemo uraditi (i zašto)
 
-Cilj: pretvoriti svaki konektor u aktivnu akvizicionu ili retention mašinu koja radi 24/7 bez tvoje intervencije.
+Cilj (kao ChessStalker FIDE tab): ukucaš svoj **FIDE ID** i sajt odmah pokaže tvoje **pravo ime, titulu, državu i pravi FIDE blic rejting** — i taj rejting/ime idu direktno u **DB Cup standings** i u tvoj profil na sajtu.
 
----
+Plumbing već postoji na tri mesta:
+1. `/dragan-brakus/register` — poziva `fide-lookup` čim ukucaš ID.
+2. `/signup` — takođe poziva `fide-lookup` (dodato prošli put).
+3. `DraganBrakusLive` standings već čita `first_name`, `last_name`, `fide_title`, `federation`, `fide_blitz_rating` iz `tournament_registrations` i pravilno ih prikazuje.
 
-## 1. GSC Query Mining Loop (najveći ROI)
+**Provereno sad**: pozvao sam našu edge funkciju za Magnus Carlsena i vratila je `name: "International"` sa svim rejtinzima `null`. To znači da parser u `supabase/functions/fide-lookup/index.ts` više ne odgovara stvarnom HTML-u na `ratings.fide.com` (menjali su markup). Sve ostalo radi — samo je izvor podataka slep.
 
-**Šta radi:** Svakih 7 dana povlači GSC podatke i pravi 3 tipa akcija.
+## Fix (jedan fajl + verifikacija)
 
-- Edge function `gsc-query-miner` (weekly cron, nedeljom 03:00):
-  - Povuče top 500 queries iz `searchAnalytics/query` (28 dana).
-  - **Opportunity queue:** queries sa impressions >50 i position >10 → upisuje u već postojeću `seo_query_opportunities` tabelu.
-  - **CTR bandit:** queries sa position 3–10 i CTR <2% → flaguje `seo_pages` rowove za meta rewrite; AI regeneriše title/description.
-  - **Cannibalization detektor:** queries gde 2+ URL-a rankuju → upisuje u novu tabelu `seo_cannibalization` (query, urls[], suggested_canonical).
-- Edge function `gsc-auto-generate-pages`: za svaku opportunity čita brief i poziva postojeći `seo-content-generator` da napiše novu stranicu.
-- Admin UI: nova sekcija u `/admin/growth-hub` — "Query Mining" tab (opportunities lista, CTR kandidati, kanibalizacija).
+### 1) Rewrite `supabase/functions/fide-lookup/index.ts`
 
----
+Sadašnji regexi (`std\.?\s*rating…`, `<div[^>]*>(\d{3,4})`) su iz starog dizajna. Novi profil koristi drugačiju strukturu (tabela sa "Standard | Rapid | Blitz" i profilni blok sa imenom/federacijom/titulom).
 
-## 2. Google Maps "Chess in {city}" programske stranice
+Uraditi:
+- Skinuti `https://ratings.fide.com/profile/{id}` sa realnim UA i pratiti redirekte.
+- **Ime**: uzeti iz `<title>...</title>` (`"Prezime, Ime FIDE Chess Profile"`) — najpouzdaniji signal, uvek postoji; ako nema zareza uzeti prvi neprazan `<h1>`/`<h2>` čvor u profilnom bloku i preskočiti sekcije poput "International"/"Federation".
+- **Federacija**: iz linka `href="/rating/{FED}/"` ili iz `<img class="flag" ... title="SRB">` — ne oslanjati se na tekstualne labele.
+- **Titula**: iz reda "FIDE title" u tabeli osnovnih podataka; ako nema — `null`.
+- **Rejtinzi (Std/Rapid/Blitz)**: pronaći tabelu čiji redovi imaju kolone "std", "rapid", "blitz"; uzeti prvi (tekući) mesečni red. Fallback: skenirati sve `\b(\d{4})\b` iznose u sekciji "Ratings" u paru sa oznakama kolone.
+- **Godina rođenja**: iz reda "B-Year" ili iz `<title>` ako je prisutna.
 
-**Šta radi:** 100+ novih SEO landing stranica za long-tail "chess club near me" pretrage.
+Dodati **fallback izvore** (redom, dok jedan ne uspe):
+- `https://ratings.fide.com/profile/{id}` (glavno)
+- `https://ratings.fide.com/incl_profile.php?event={id}` (stari, ponekad još radi)
+- `https://app.fide.com/api/v1/client/players/{id}` (nezvanično; JSON — ako vrati 200 i ima `name`/`ratings`, prevesti u naš oblik)
 
-- Nova tabela `city_chess_hubs` (city_slug, city_name, country, lat, lng, places_cached_json, updated_at).
-- Edge function `chess-city-hub-generator`:
-  - Uzima listu 100 gradova (Balkan + EU + US top cities).
-  - Za svaki: Places API (New) `places:searchNearby` sa `includedTypes: ["chess_club"]` + fallback text search "chess club {city}".
-  - Cache-uje rezultate na 30 dana.
-- Nova ruta `/chess-in/:citySlug` (SeoAutoPage varijanta):
-  - Lista klubova sa Google review score-om, mapa embed, "play online now" CTA, top 3 tournament linkovi u regionu.
-- Dodaje `sitemap-cities.xml` i uključuje u sitemap index.
+Zadržati postojeći 6h cache i CORS. Dodati `?debug=1` opciju koja vraća sirov HTML u response (samo za admina) da bismo brzo dijagnostikovali sledeću promenu markup-a bez novog deploya.
 
----
+### 2) Ništa se ne dira u UI-ju
 
-## 3. Auto-social publishing (TikTok + LinkedIn)
+`/dragan-brakus/register`, `/signup` i `DraganBrakusLive` već rade ispravno kad `fide-lookup` vrati tačne podatke — nema izmene komponenti.
 
-**Šta radi:** Svaki dan bez tvoje intervencije objavi content.
+### 3) Verifikacija (radim odmah po deploy-u)
 
-- Edge function `daily-social-publisher` (cron, svaki dan 18:00):
-  - **LinkedIn:** povlači jedan interesantan dnevni data-point (najbolji comeback, najveći upset, top otvaranje dana) → generiše profesionalni LinkedIn tekstualni post → objavljuje preko postojećeg `linkedin-publish`.
-  - **TikTok:** ako TikTok scope dozvoljava publishing, poziva `tiktok-publish` sa danas-generisanim highlight klipom. Ako scope nedostaje, upisuje u `pending_social_posts` da se ručno pushne kad reconnect-uješ.
-- Nova tabela `social_post_log` (platform, post_id, content, url, posted_at, engagement_json).
+Curl-om iz sandbox-a proverim 3 poznata ID-a i potvrdim vidljivost u UI-u:
+- `1503014` Magnus Carlsen → očekivano `Carlsen, Magnus · NOR · GM · Blitz ~2890`
+- `14106503` (SRB primer) → očekivano ime + SRB + blitz
+- `2020009` Ju Wenjun (WGM) → titula + CHN + blitz
 
----
+Zatim otvorim `/dragan-brakus/register`, unesem `1503014`, kliknem Register i potvrdim da u `DraganBrakusLive` standings-u red pokazuje **pravo ime, GM oznaku, NOR i pravi blic rejting** (a ne 1200 default).
 
-## 4. Resend retention loop (3 kampanje)
+## Tehnički detalji
 
-- Edge function `retention-emailer` (cron dnevno 09:00):
-  - **Streak saver:** user čiji streak istice za <2h → email "your 12-day streak dies soon".
-  - **Rival climbing:** ako neko unutar ±25 ELO od tebe skoči za 20 ELO danas → email "your rival is catching up".
-  - **Reactivation drip:** 3/7/30 dana neaktivnosti → 3 različita template-a.
-- Poštuje postojeće `suppressed_emails` i `notification_preferences`.
-- Log u `email_send_log`.
+- Fajl koji menjamo: `supabase/functions/fide-lookup/index.ts` (parser + fallback fetch lanac).
+- Ne diramo bazu, ne diramo migracije, ne diramo `db-cup-register` (već ispravno konzumira polja `name/federation/title/blitz_rating/…`).
+- Ne diramo `DraganBrakusLive.tsx` (već prikazuje `fide_blitz_rating` sa emerald bojom i `fide_title` zlatnom).
+- Ne diramo `Signup.tsx` (već koristi isti `fide-lookup` odgovor).
 
----
+## Šta se NEĆE dešavati
 
-## 5. Semrush Weekly Intel Report
+- Neću praviti novi turnir, novu tabelu, ni migraciju.
+- Neću skidati/menjati FIDE brendiranje ili pravila; samo čitamo javne profile stranice.
+- Neću tražiti nijedan tajni ključ — sve je javni HTTP GET.
 
-- Edge function `semrush-weekly-intel` (cron, ponedeljak 08:00):
-  - Poziva `domain_organic` za `chess.com` i `lichess.org`, top 100 keywords.
-  - Diff protiv `masterchess.live` — keywords gde oni rankuju a mi ne.
-  - Upisuje u `seo_query_opportunities` sa source='semrush_gap'.
-  - Šalje sažetak email preko Resend-a tebi.
-
----
-
-## 6. Sve visible u `/admin/growth-hub`
-
-Nove tab-ove:
-- **Query Mining** — opportunities, CTR losers, cannibalization
-- **City Hubs** — regenerate button + list statusa
-- **Social Log** — poslednjih 30 auto-postova + engagement
-- **Retention** — današnji queue, jučerašnji send stats
-- **Semrush Gap** — nedeljni izveštaj + "generate page" dugme per keyword
-
----
-
-## Tehnički deo
-
-**Nove tabele (migracije):**
-- `seo_cannibalization` (query text, urls jsonb, suggested_canonical text, detected_at, resolved_at)
-- `city_chess_hubs` (city_slug pk, city_name, country, lat, lng, places_cached_json, updated_at)
-- `social_post_log` (id, platform, post_id, content, url, posted_at, engagement_json)
-- `pending_social_posts` (id, platform, payload jsonb, created_at, sent_at)
-
-Sve tabele: `GRANT` blok + RLS. Admin-only SELECT via `has_role(auth.uid(), 'admin')`. Service role full access.
-
-**Nove edge functions:**
-- `gsc-query-miner` (verify_jwt=true, admin-only invoke)
-- `gsc-auto-generate-pages` (service-role called)
-- `chess-city-hub-generator` (admin-only)
-- `daily-social-publisher` (cron)
-- `retention-emailer` (cron)
-- `semrush-weekly-intel` (cron)
-
-**Cron scheduling:** kroz `pg_cron` + `pg_net`, upisano preko insert tool-a (nije migracija jer sadrži project-specific URL/anon key).
-
-**Nova ruta:** `/chess-in/:citySlug` (React Router lazy load).
-
-**Novi sitemap:** `/sitemap-cities.xml` edge function, uključena u glavni sitemap index.
-
----
-
-## Šta NE dirasm
-
-- Homepage layout (user veto).
-- Postojeće edge functions — samo dodajem nove.
-- Auth/RLS na već ispravnim tabelama.
-- Brand policy (nema pominjanja competitor sajtova u UI-u; Semrush/GSC podaci samo u admin panelu).
-
----
-
-## Redosled izvršenja
-
-1. Migracije: 4 nove tabele + `pg_cron`/`pg_net` enable.
-2. Edge functions (6 nove, deploy-uju se automatski).
-3. Ruta `/chess-in/:citySlug` + SeoAutoPage integracija.
-4. Admin UI proširenje (5 novih tab-ova u `/admin/growth-hub`).
-5. Cron insert (preko insert tool-a, ne migracija).
-6. Prvi ručni trigger svih 6 novih funkcija radi verifikacije.
-
-Približna veličina: ~15 novih fajlova, ~4 nove tabele, ~6 novih cron jobova. Ovo je najveći growth sprint do sada.
+Kad odobriš, prelazim u build i menjam samo taj jedan fajl pa odmah verifikujem sa Magnusovim ID-om.
