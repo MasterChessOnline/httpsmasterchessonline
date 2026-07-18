@@ -172,18 +172,20 @@ Deno.serve(async (req) => {
     }
 
     if (debug) {
-      // Admin-only diagnostic — returns small HTML slice + parsed result.
-      const rx = (re: RegExp) => { const m = lastHtml.match(re); return m ? m[0].slice(0, 800) : null; };
+      const rx = (re: RegExp, len = 1500) => { const m = lastHtml.match(re); return m ? m[0].slice(0, len) : null; };
       return json({
         parsed,
         source_url: sourceUrl,
         html_length: lastHtml.length,
-        federation_slice: rx(/[\s\S]{0,120}(Federation|country|profile-info)[\s\S]{0,500}/i),
-        title_slice: rx(/[\s\S]{0,120}(FIDE\s*title|profile-title)[\s\S]{0,500}/i),
-        ratings_slice: rx(/[\s\S]{0,120}profile-standart[\s\S]{0,1200}/i),
-        flag_slice: rx(/[\s\S]{0,80}flag[\s\S]{0,300}/i),
+        info_block: rx(/profile-info[\s\S]{0,3000}/i, 3000),
+        federation_slice: rx(/Federation[\s\S]{0,500}/i),
+        title_slice: rx(/(FIDE\s*title|Title)[\s\S]{0,300}/i),
+        norway_hit: /\bNorway\b/i.test(lastHtml) ? "yes" : "no",
+        nor_hit: /\bNOR\b/.test(lastHtml) ? "yes" : "no",
+        gm_hit: /\bGrandmaster\b/i.test(lastHtml) ? "yes" : "no",
       });
     }
+
 
 
     if (!parsed) {
