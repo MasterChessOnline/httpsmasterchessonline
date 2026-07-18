@@ -314,6 +314,7 @@ export default function DraganBrakusRegister() {
                   <Field label="First name *" value={form.first_name} onChange={handle("first_name")} autoComplete="given-name" />
                   <Field label="Last name *" value={form.last_name} onChange={handle("last_name")} autoComplete="family-name" />
                   <Field label="Country * (3-letter code)" value={form.federation} onChange={handle("federation")} placeholder="SRB" maxLength={3} />
+                  <Field label="FIDE title (optional)" value={form.fide_title} onChange={handle("fide_title")} placeholder="GM / IM / FM / —" maxLength={3} />
                 </div>
 
                 <button
@@ -322,17 +323,17 @@ export default function DraganBrakusRegister() {
                   className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300 hover:text-amber-200"
                 >
                   {showMore ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                  More details (optional) — FIDE title, city, club, birth year
+                  More details (optional) — city, club, birth year
                 </button>
 
                 {showMore && (
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="FIDE title" value={form.fide_title} onChange={handle("fide_title")} placeholder="GM / IM / FM" maxLength={3} />
                     <Field label="City" value={form.city} onChange={handle("city")} />
                     <Field label="Club" value={form.club} onChange={handle("club")} />
                     <Field label="Birth year" value={form.birth_year} onChange={handle("birth_year")} inputMode="numeric" maxLength={4} />
                   </div>
                 )}
+
 
                 <div className="flex items-start gap-2 rounded-lg border border-sky-400/30 bg-sky-400/5 p-3 text-xs text-sky-100">
                   <Bell className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" />
