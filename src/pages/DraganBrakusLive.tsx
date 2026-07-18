@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Trophy, RefreshCw, Download, CheckCircle2, Mail, MailWarning } from "lucide-react";
 
 type Row = {
@@ -34,6 +35,7 @@ type Row = {
 export default function DraganBrakusLive() {
   const params = useParams();
   const [searchParams] = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const [tournamentId, setTournamentId] = useState<string | null>(null);
   const [t, setT] = useState<any>(null);
   const [rows, setRows] = useState<Row[]>([]);
@@ -154,7 +156,14 @@ export default function DraganBrakusLive() {
               </thead>
               <tbody>
                 {loading && <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">Loading…</td></tr>}
-                {!loading && rows.length === 0 && (
+                {!loading && rows.length === 0 && !user && !authLoading && (
+                  <tr>
+                    <td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">
+                      Sign in to view the participant list. <Link to={`/login?redirect=${encodeURIComponent("/dragan-brakus/live")}`} className="text-yellow-400 underline">Login</Link>
+                    </td>
+                  </tr>
+                )}
+                {!loading && rows.length === 0 && (user || authLoading) && (
                   <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">No players visible yet. <Link to="/dragan-brakus/register" className="text-yellow-400 underline">Register now</Link>.</td></tr>
                 )}
                 {rows.map((r, i) => {
