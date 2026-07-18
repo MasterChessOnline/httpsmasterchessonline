@@ -11,6 +11,10 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const ANON = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
+function firstText(value: unknown, max = 80) {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
+
 function htmlEmail(opts: { name: string; tournamentName: string; startsAt: string; inviteUrl: string }) {
   const dateStr = new Date(opts.startsAt).toLocaleString("en-GB", {
     timeZone: "Europe/Belgrade", dateStyle: "full", timeStyle: "short",
@@ -53,7 +57,7 @@ Deno.serve(async (req) => {
 
     const svc = createClient(SUPABASE_URL, SERVICE);
 
-    const allowedDetails = ["first_name", "last_name", "fide_id", "fide_title", "federation", "birth_year", "city", "club", "fide_blitz_rating"];
+    const allowedDetails = ["first_name", "last_name", "fide_id", "fide_title", "federation", "birth_year", "city", "fide_blitz_rating"];
     const detailPatch: Record<string, unknown> = {};
     if (player_details && typeof player_details === "object") {
       for (const key of allowedDetails) {
@@ -69,6 +73,12 @@ Deno.serve(async (req) => {
     if (tErr || !t) return json({ error: "Tournament not found" }, 404);
 
     // FIDE verification (anti-fraud: server-side lookup overrides client identity)
+    detailPatch.first_name = firstText(detailPatch.first_name);
+    detailPatch.last_name = firstText(detailPatch.last_name);
+    if (!detailPatch.first_name || !detailPatch.last_name) {
+      return json({ error: "First name and last name are required." }, 400);
+    }
+
     const rawFide = (detailPatch.fide_id as string | null | undefined)?.toString().trim() || "";
     let verified: any = null;
     if (rawFide) {
@@ -76,6 +86,7 @@ Deno.serve(async (req) => {
       try {
         const r = await fetch(`${SUPABASE_URL}/functions/v1/fide-lookup?id=${rawFide}`, {
           headers: { apikey: ANON, Authorization: `Bearer ${ANON}` },
+          signal: AbortSignal.timeout(22000),
         });
         const j: any = await r.json().catch(() => ({}));
         if (r.ok && j?.name) verified = j;
@@ -178,15 +189,17 @@ Deno.serve(async (req) => {
     }
 
     if (existing && Object.keys(detailPatch).length > 0) {
+      const existingPatch: Record<string, unknown> = { ...detailPatch };
+      if (seedingRating) existingPatch.rating_at_join = seedingRating;
       await svc
         .from("tournament_registrations")
-        .update(detailPatch)
+        .update(existingPatch)
         .eq("id", existing.id);
     }
 
     if (Object.keys(detailPatch).length > 0) {
       const profilePatch: Record<string, unknown> = {};
-      for (const key of ["first_name", "last_name", "fide_id", "fide_title", "federation", "birth_year", "club"]) {
+      for (const key of ["first_name", "last_name", "fide_id", "fide_title", "federation", "birth_year"]) {
         if (detailPatch[key] !== undefined) profilePatch[key] = detailPatch[key];
       }
       if (Object.keys(profilePatch).length > 0) {
@@ -223,7 +236,7 @@ Deno.serve(async (req) => {
       } catch {/* swallow email failure */}
     }
 
-    return json({ ok: true, already_registered: alreadyRegistered, registration_id: registrationId });
+    return json({ ok: true, already_registered: alreadyRegistered, registration_id: registrationId, fide_verified: Boolean(verified), rating_at_join: seedingRating ?? 1200 });
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }
