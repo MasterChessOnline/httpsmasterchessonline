@@ -5590,6 +5590,27 @@ export type Database = {
           username: string
         }[]
       }
+      get_public_tournament_standings: {
+        Args: { p_tournament_id?: string }
+        Returns: {
+          buchholz: number
+          buchholz_cut1: number
+          federation: string
+          fide_blitz_rating: number
+          fide_title: string
+          fide_verified: boolean
+          first_name: string
+          last_name: string
+          performance_rating: number
+          progressive_score: number
+          rank: number
+          rating_at_join: number
+          registration_id: string
+          score: number
+          tournament_id: string
+          wins: number
+        }[]
+      }
       get_today_missions: {
         Args: { p_date?: string }
         Returns: {
