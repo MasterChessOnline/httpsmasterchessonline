@@ -149,9 +149,11 @@ function extractRatings(html: string): { standard: number | null; rapid: number 
 
 
 function extractBirthYear(html: string): number | null {
-  const m = html.match(/B[-\s]?Year[\s\S]{0,120}?>\s*(\d{4})\s*</i)
-    || html.match(/Year\s+of\s+birth[\s\S]{0,120}?>\s*(\d{4})\s*</i)
+  const m = html.match(/profile-info-byear[\s\S]{0,60}?>\s*(\d{4})/i)
+    || html.match(/B[-\s]?Year[\s\S]{0,200}?>\s*(\d{4})\s*</i)
+    || html.match(/Year\s+of\s+birth[\s\S]{0,200}?>\s*(\d{4})\s*</i)
     || html.match(/Born\s*(?:in)?[\s\S]{0,40}?(\d{4})/i);
+
   if (m) {
     const y = Number(m[1]);
     if (y >= 1900 && y <= new Date().getFullYear()) return y;
