@@ -1,78 +1,150 @@
 // Public FIDE profile lookup by FIDE ID.
 // Returns { fide_id, name, federation, title, standard_rating, rapid_rating,
-// blitz_rating, birth_year, profile_url } parsed from the public ratings.fide.com
-// profile page. Used by tournament registration to auto-fill + verify identity.
+// blitz_rating, birth_year, profile_url }. Parses the current
+// ratings.fide.com profile page with multiple fallback strategies so it keeps
+// working when FIDE tweaks the markup.
 
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
-const UA = "Mozilla/5.0 (compatible; MasterChess.live/1.0; +https://masterchess.live)";
-const TTL_MS = 6 * 60 * 60 * 1000; // 6h cache (ratings refresh)
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+const TTL_MS = 6 * 60 * 60 * 1000;
 const cache = new Map<string, { at: number; data: unknown }>();
 
-function pick(html: string, re: RegExp): string | null {
-  const m = html.match(re);
-  return m && m[1] ? m[1].replace(/<[^>]+>/g, "").trim() : null;
-}
+const stripTags = (s: string) => s.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").trim();
 
 async function tryFetch(url: string): Promise<string | null> {
   try {
-    const r = await fetch(url, { headers: { "User-Agent": UA, "Accept": "text/html,*/*" } });
+    const r = await fetch(url, {
+      redirect: "follow",
+      headers: {
+        "User-Agent": UA,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
     if (!r.ok) return null;
     return await r.text();
   } catch { return null; }
 }
 
-function parseRating(html: string, label: RegExp): number | null {
-  const v = pick(html, label);
-  if (!v) return null;
-  const n = Number(v.replace(/[^\d]/g, ""));
-  return Number.isFinite(n) && n >= 800 && n <= 3500 ? n : null;
+const KNOWN_TITLES = new Set([
+  "GM","IM","FM","CM","NM","WGM","WIM","WFM","WCM","WNM","AGM","AIM","AFM","ACM","AWM"
+]);
+
+function extractName(html: string): string | null {
+  // 1) <title>Carlsen, Magnus FIDE Chess Profile</title>
+  const t = html.match(/<title>\s*([^<]*?)\s*(?:FIDE\s+Chess\s+Profile|\|)/i);
+  if (t?.[1]) {
+    const cand = t[1].replace(/\s+/g, " ").trim();
+    if (cand && !/^international$/i.test(cand) && cand.length > 1) return cand;
+  }
+  // 2) og:title / twitter:title meta
+  const og = html.match(/<meta[^>]+(?:property|name)=["'](?:og:title|twitter:title)["'][^>]+content=["']([^"']+)["']/i);
+  if (og?.[1]) {
+    const c = og[1].replace(/FIDE\s+Chess\s+Profile/i, "").replace(/\s+/g, " ").trim();
+    if (c && !/^international$/i.test(c)) return c;
+  }
+  // 3) profile header h1/h2 close to "Federation" label
+  const h = html.match(/<h1[^>]*>\s*([^<]{3,80})\s*<\/h1>/i) || html.match(/<h2[^>]*>\s*([^<]{3,80})\s*<\/h2>/i);
+  if (h?.[1]) {
+    const c = stripTags(h[1]);
+    if (c && !/^international$/i.test(c) && !/^federation$/i.test(c)) return c;
+  }
+  return null;
+}
+
+function extractFederation(html: string): string | null {
+  // link like /rating/NOR/ or href="?country=NOR"
+  const m1 = html.match(/\/rating\/([A-Z]{3})\//);
+  if (m1) return m1[1];
+  const m2 = html.match(/(?:country|federation)=([A-Z]{3})\b/i);
+  if (m2) return m2[1].toUpperCase();
+  const m3 = html.match(/\bflag[^>]*(?:title|alt)=["']([A-Z]{3})["']/i);
+  if (m3) return m3[1].toUpperCase();
+  // fallback: label "Federation" followed by 3-letter code in any tag
+  const m4 = html.match(/Federation[\s\S]{0,200}?\b([A-Z]{3})\b/);
+  if (m4) return m4[1];
+  return null;
+}
+
+function extractTitle(html: string): string | null {
+  // Explicit "FIDE title" row
+  const m = html.match(/FIDE\s*title[\s\S]{0,200}?>\s*([A-Za-z]{1,5})\s*</i);
+  if (m?.[1]) {
+    const t = m[1].toUpperCase();
+    if (KNOWN_TITLES.has(t)) return t;
+  }
+  // Any known title token in the profile header block (skip in ratings table)
+  const head = html.slice(0, 8000);
+  for (const tt of KNOWN_TITLES) {
+    const re = new RegExp(`\\b${tt}\\b`);
+    if (re.test(head)) return tt;
+  }
+  return null;
+}
+
+function extractRatings(html: string): { standard: number | null; rapid: number | null; blitz: number | null } {
+  // Strategy A: current profile shows three cards with labels "Standard", "Rapid", "Blitz"
+  // and the rating right next to it inside a nearby tag.
+  const grab = (label: string): number | null => {
+    const re = new RegExp(`>\\s*${label}\\s*<[\\s\\S]{0,400}?>\\s*(\\d{3,4})\\s*<`, "i");
+    const m = html.match(re);
+    if (m) {
+      const n = Number(m[1]);
+      if (n >= 800 && n <= 3600) return n;
+    }
+    // Alt: "std rating 2839"
+    const re2 = new RegExp(`${label}\\s*rating[\\s\\S]{0,80}?(\\d{3,4})`, "i");
+    const m2 = html.match(re2);
+    if (m2) {
+      const n = Number(m2[1]);
+      if (n >= 800 && n <= 3600) return n;
+    }
+    // Alt: card layout "<span>Standard</span>...<span class=rating>2839</span>"
+    const re3 = new RegExp(`${label}[\\s\\S]{0,600}?class=["'][^"']*rating[^"']*["'][^>]*>\\s*(\\d{3,4})`, "i");
+    const m3 = html.match(re3);
+    if (m3) {
+      const n = Number(m3[1]);
+      if (n >= 800 && n <= 3600) return n;
+    }
+    return null;
+  };
+  return {
+    standard: grab("Standard") ?? grab("Std"),
+    rapid: grab("Rapid"),
+    blitz: grab("Blitz"),
+  };
+}
+
+function extractBirthYear(html: string): number | null {
+  const m = html.match(/B[-\s]?Year[\s\S]{0,120}?>\s*(\d{4})\s*</i)
+    || html.match(/Year\s+of\s+birth[\s\S]{0,120}?>\s*(\d{4})\s*</i)
+    || html.match(/Born\s*(?:in)?[\s\S]{0,40}?(\d{4})/i);
+  if (m) {
+    const y = Number(m[1]);
+    if (y >= 1900 && y <= new Date().getFullYear()) return y;
+  }
+  return null;
 }
 
 function parse(html: string, fideId: string) {
-  const name =
-    pick(html, /<h2[^>]*>([^<]+)<\/h2>/i) ||
-    pick(html, /class=["']?profile-top-info__block__row__data["']?[^>]*>([^<]+)</i) ||
-    pick(html, /<title>([^<|]+?)\s*(?:FIDE|\|)/i);
-
-  const federation =
-    pick(html, /Federation[\s\S]{0,120}?<div[^>]*>([A-Z]{3})/i) ||
-    pick(html, /Federation<\/td>\s*<td[^>]*>\s*<[^>]+>\s*([A-Z]{3})/i) ||
-    pick(html, /flag[\s\S]{0,40}?title=["']([A-Z]{3})["']/i);
-
-  const title =
-    pick(html, /FIDE title[\s\S]{0,140}?<div[^>]*>([^<]+)<\/div>/i) ||
-    pick(html, /FIDE title<\/td>\s*<td[^>]*>([^<]+)</i);
-
-  const birthYear =
-    pick(html, /B-?Year[\s\S]{0,80}?<div[^>]*>(\d{4})<\/div>/i) ||
-    pick(html, /Year of birth[\s\S]{0,80}?(\d{4})/i);
-
-  const standard =
-    parseRating(html, /std\.?\s*rating[\s\S]{0,80}?<div[^>]*>(\d{3,4})/i) ||
-    parseRating(html, /standard[\s\S]{0,80}?<div[^>]*>(\d{3,4})/i) ||
-    parseRating(html, /SRtng[\s\S]{0,40}?(\d{3,4})/i);
-
-  const rapid =
-    parseRating(html, /rapid[\s\S]{0,80}?<div[^>]*>(\d{3,4})/i) ||
-    parseRating(html, /RRtng[\s\S]{0,40}?(\d{3,4})/i);
-
-  const blitz =
-    parseRating(html, /blitz[\s\S]{0,80}?<div[^>]*>(\d{3,4})/i) ||
-    parseRating(html, /BRtng[\s\S]{0,40}?(\d{3,4})/i);
-
+  const name = extractName(html);
   if (!name) return null;
+  const federation = extractFederation(html);
+  const title = extractTitle(html);
+  const { standard, rapid, blitz } = extractRatings(html);
+  const birth = extractBirthYear(html);
   return {
     fide_id: fideId,
     name,
-    federation: federation || null,
-    title: title && title.toLowerCase() !== "none" ? title : null,
+    federation: federation ? federation.toUpperCase() : null,
+    title,
     standard_rating: standard,
     rapid_rating: rapid,
     blitz_rating: blitz,
-    // legacy alias for older callers
+    // legacy alias
     rating: standard,
-    birth_year: birthYear ? Number(birthYear) : null,
+    birth_year: birth,
     profile_url: `https://ratings.fide.com/profile/${fideId}`,
   };
 }
@@ -84,51 +156,61 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const fideId = (url.searchParams.get("id") || "").trim();
     const fresh = url.searchParams.get("fresh") === "1";
+    const debug = url.searchParams.get("debug") === "1";
     if (!/^\d{4,10}$/.test(fideId)) {
-      return new Response(JSON.stringify({ error: "Invalid FIDE ID" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "Invalid FIDE ID" }, 400);
     }
 
-    if (!fresh) {
+    if (!fresh && !debug) {
       const cached = cache.get(fideId);
       if (cached && Date.now() - cached.at < TTL_MS) {
-        return new Response(JSON.stringify(cached.data), {
-          headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": "HIT" },
-        });
+        return json(cached.data, 200, { "X-Cache": "HIT" });
       }
     }
 
     const candidates = [
       `https://ratings.fide.com/profile/${fideId}`,
       `https://ratings.fide.com/profile/${fideId}/chart`,
-      `https://ratings.fide.com/card.phtml?event=${fideId}`,
     ];
 
     let parsed: ReturnType<typeof parse> = null;
+    let lastHtml = "";
+    let sourceUrl = "";
     for (const u of candidates) {
       const html = await tryFetch(u);
       if (!html) continue;
+      lastHtml = html;
+      sourceUrl = u;
       parsed = parse(html, fideId);
       if (parsed) break;
     }
 
-    if (!parsed) {
-      return new Response(JSON.stringify({ error: "FIDE ID not found. Please check the number and try again." }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (debug) {
+      // Admin-only diagnostic — returns small HTML slice + parsed result.
+      return json({
+        parsed,
+        source_url: sourceUrl,
+        html_length: lastHtml.length,
+        html_head: lastHtml.slice(0, 6000),
+        html_ratings_section:
+          (lastHtml.match(/[\s\S]{0,200}(Standard|Rapid|Blitz)[\s\S]{0,600}/i) || [""])[0],
       });
     }
 
+    if (!parsed) {
+      return json({ error: "FIDE ID not found. Please check the number and try again." }, 404);
+    }
+
     cache.set(fideId, { at: Date.now(), data: parsed });
-    return new Response(JSON.stringify(parsed), {
-      headers: { ...corsHeaders, "Content-Type": "application/json", "X-Cache": fresh ? "BYPASS" : "MISS" },
-    });
+    return json(parsed, 200, { "X-Cache": fresh ? "BYPASS" : "MISS" });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String((e as Error).message || e) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: String((e as Error).message || e) }, 500);
   }
 });
+
+function json(body: unknown, status = 200, extra: Record<string, string> = {}) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json", ...extra },
+  });
+}
