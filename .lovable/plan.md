@@ -1,97 +1,124 @@
-# Maximum Discovery Setup za masterchess.live
 
-Cilj: sve besplatne kanale otkrivanja koje Google/Bing/AI pretraga koriste, postavljeno do maksimuma. Bez plaćenih reklama — samo tehnički SEO + prijava na sve relevantne indekse.
+# Full Growth Automation — "Do Everything" Sprint
 
-## 1. Google Search Console — puna automatizacija
+Cilj: pretvoriti svaki konektor u aktivnu akvizicionu ili retention mašinu koja radi 24/7 bez tvoje intervencije.
 
-- **Verifikacija preko meta taga** (Site Verification API preko postojećeg `google_search_console` konektora): agent traži token, ubacuje `<meta name="google-site-verification">` u `index.html`, zove `verify`, dodaje `https://masterchess.live/` kao property.
-- **Submit svih sitemapa** (`sitemap.xml`, `sitemap-*.xml`, `news-sitemap.xml`, `rss.xml`) kroz `POST /webmasters/v3/sites/.../sitemaps/...` — jedan poziv po fajlu.
-- **URL Inspection panel** u `/admin`: koristi `urlInspection/index:inspect` da vidiš status ključnih strana (Home, `/play-guest`, `/puzzles`, `/news/nikola-vs-niemann-belgrade`, top landing stranice).
-- **Search Analytics widget** u istom admin panelu: top query-je iz GSC-a (poslednjih 28 dana) da vidiš pod kojim rečima ljudi već dolaze.
+---
 
-## 2. Bing + Yandex + DuckDuckGo + IndexNow
+## 1. GSC Query Mining Loop (najveći ROI)
 
-- **Bing Webmaster Tools**: verifikacija preko istog meta tag pattern-a (dodaje se drugi `<meta name="msvalidate.01">`); sitemap submit link.
-- **Yandex Webmaster**: `<meta name="yandex-verification">` tag.
-- **IndexNow protokol** (Bing + Yandex): generiše API ključ kao `public/{key}.txt`, edge function `notify-indexnow` koja na svaki novi `/news/*` ili sitemap update šalje URL na `api.indexnow.org` — trenutna indeksacija bez čekanja crawlera.
-- **DuckDuckGo** koristi Bing index — automatski pokriveno kad Bing zaindeksira.
+**Šta radi:** Svakih 7 dana povlači GSC podatke i pravi 3 tipa akcija.
 
-## 3. Structured data (schema.org) do maksimuma
+- Edge function `gsc-query-miner` (weekly cron, nedeljom 03:00):
+  - Povuče top 500 queries iz `searchAnalytics/query` (28 dana).
+  - **Opportunity queue:** queries sa impressions >50 i position >10 → upisuje u već postojeću `seo_query_opportunities` tabelu.
+  - **CTR bandit:** queries sa position 3–10 i CTR <2% → flaguje `seo_pages` rowove za meta rewrite; AI regeneriše title/description.
+  - **Cannibalization detektor:** queries gde 2+ URL-a rankuju → upisuje u novu tabelu `seo_cannibalization` (query, urls[], suggested_canonical).
+- Edge function `gsc-auto-generate-pages`: za svaku opportunity čita brief i poziva postojeći `seo-content-generator` da napiše novu stranicu.
+- Admin UI: nova sekcija u `/admin/growth-hub` — "Query Mining" tab (opportunities lista, CTR kandidati, kanibalizacija).
 
-Dodaje se JSON-LD po tipu stranice u postojećem `Seo` komponentu:
-- `Organization` + `WebSite` + `SearchAction` sitewide (već postoji, proširiti sa `sameAs` linkovima na TikTok/LinkedIn/X/YouTube/IG).
-- `SportsOrganization` za MasterChess brand.
-- `NewsArticle` (već na Niemann članku) — proširiti na sve `/news/*`.
-- `FAQPage` na Home i `/play-guest` (top pitanja iz GSC-a).
-- `BreadcrumbList` na svim non-home rutama.
-- `VideoObject` za YouTube embed-ove (DailyChess_12).
-- `Event` za turnire (`/tournaments/*`) sa startDate/location.
-- `Course` za `/openings` i `/learn/*` stranice.
-- `Person` schema za Nikoline stranice.
+---
 
-## 4. Google Maps + Google Business Profile
+## 2. Google Maps "Chess in {city}" programske stranice
 
-- **Google Business Profile** (besplatno): agent ne može da napravi nalog, ali priprema **komplet za tebe** — logo (već imamo), opis (SR/EN), kategorije ("Chess club", "Educational game"), radno vreme, telefon, adresa, 10 foto placeholder-a. Uputstvo korak-po-korak da ga aktiviraš.
-- **Maps embed** na novoj `/contact` stranici sa lokacijom Beograd (ili tvojom adresom ako želiš).
-- **LocalBusiness JSON-LD** sa geokoordinatama — Google Maps to čita direktno.
+**Šta radi:** 100+ novih SEO landing stranica za long-tail "chess club near me" pretrage.
 
-## 5. Social & AI discovery
+- Nova tabela `city_chess_hubs` (city_slug, city_name, country, lat, lng, places_cached_json, updated_at).
+- Edge function `chess-city-hub-generator`:
+  - Uzima listu 100 gradova (Balkan + EU + US top cities).
+  - Za svaki: Places API (New) `places:searchNearby` sa `includedTypes: ["chess_club"]` + fallback text search "chess club {city}".
+  - Cache-uje rezultate na 30 dana.
+- Nova ruta `/chess-in/:citySlug` (SeoAutoPage varijanta):
+  - Lista klubova sa Google review score-om, mapa embed, "play online now" CTA, top 3 tournament linkovi u regionu.
+- Dodaje `sitemap-cities.xml` i uključuje u sitemap index.
 
-- **`sameAs` array** u Organization JSON-LD → povezuje sve profile (TikTok, LinkedIn, X, YouTube, IG, GitHub) — Google Knowledge Panel signal.
-- **`llms.txt`** u `/public` — novi standard za ChatGPT/Claude/Perplexity indeksaciju sajta.
-- **`ai-plugin.json`** placeholder za buduću ChatGPT plugin integraciju.
-- **OpenGraph + Twitter Cards** provera na svakoj ruti (canonical + og:url self-reference).
-- **RSS feed** za `/news/*` (već postoji `rss.xml` — proširiti da uključuje nove članke automatski).
+---
 
-## 6. Tehnička higijena
+## 3. Auto-social publishing (TikTok + LinkedIn)
 
-- **`robots.txt`**: eksplicitno `Allow` za sve major bot-ove (Googlebot, Bingbot, DuckDuckBot, YandexBot, GPTBot, ClaudeBot, PerplexityBot, Applebot), plus `Sitemap:` direktive za sve sitemape.
-- **Canonical audit**: proći kroz sve rute, potvrditi self-referencing canonical.
-- **Sitemap index** (`sitemap_index.xml`) referencira sve pod-sitemape — već postoji, verifikovati.
-- **`security.txt`** u `/.well-known/` (mala stvar, ali Google to voli).
-- **`humans.txt`** — brand signal.
+**Šta radi:** Svaki dan bez tvoje intervencije objavi content.
 
-## 7. Admin dashboard za monitoring
+- Edge function `daily-social-publisher` (cron, svaki dan 18:00):
+  - **LinkedIn:** povlači jedan interesantan dnevni data-point (najbolji comeback, najveći upset, top otvaranje dana) → generiše profesionalni LinkedIn tekstualni post → objavljuje preko postojećeg `linkedin-publish`.
+  - **TikTok:** ako TikTok scope dozvoljava publishing, poziva `tiktok-publish` sa danas-generisanim highlight klipom. Ako scope nedostaje, upisuje u `pending_social_posts` da se ručno pushne kad reconnect-uješ.
+- Nova tabela `social_post_log` (platform, post_id, content, url, posted_at, engagement_json).
 
-Nova ruta `/admin/discovery` (samo za tebe, iza role check):
-- GSC top queries + impressions grafik
-- URL Inspection lookup polje
-- Sitemap status (poslednji fetch datum)
-- IndexNow log (koji URL-ovi su poslati)
-- Bing Webmaster status (link out)
+---
 
-## Tehnički detalji
+## 4. Resend retention loop (3 kampanje)
 
-**Nove/izmenjene datoteke:**
-- `index.html` — meta verifikacija tagovi (GSC, Bing, Yandex), prošireni OG
-- `public/robots.txt` — proširen bot allow-list
-- `public/llms.txt`, `public/humans.txt`, `public/.well-known/security.txt` — novi
-- `public/{indexnow-key}.txt` — novi
-- `src/components/Seo.tsx` — proširena schema podrška (FAQ, Breadcrumb, Video, Event, Course, LocalBusiness)
-- `src/pages/Contact.tsx` — nova stranica sa Maps embed + LocalBusiness JSON-LD
-- `src/pages/admin/Discovery.tsx` — novi admin dashboard
-- `supabase/functions/gsc-proxy/index.ts` — nova edge function (GSC API kroz konektor)
-- `supabase/functions/notify-indexnow/index.ts` — nova edge function (IndexNow ping)
-- `src/App.tsx` — dodate rute `/contact`, `/admin/discovery`
+- Edge function `retention-emailer` (cron dnevno 09:00):
+  - **Streak saver:** user čiji streak istice za <2h → email "your 12-day streak dies soon".
+  - **Rival climbing:** ako neko unutar ±25 ELO od tebe skoči za 20 ELO danas → email "your rival is catching up".
+  - **Reactivation drip:** 3/7/30 dana neaktivnosti → 3 različita template-a.
+- Poštuje postojeće `suppressed_emails` i `notification_preferences`.
+- Log u `email_send_log`.
 
-**Konektori:** koristi već povezani `google_search_console`. Ne treba novi konektor.
+---
 
-**Šta *neću* dirati:** homepage dizajn (tvoj veto), postojeći kod za igru/turnire, brand policy (bez konkurenata).
+## 5. Semrush Weekly Intel Report
 
-**Šta ti moraš ručno posle:**
-1. Napraviti Google Business Profile (agent priprema sve materijale)
-2. Napraviti Bing Webmaster Tools nalog (30 sekundi, meta tag već postavljen)
-3. Napraviti Yandex Webmaster nalog (isto)
-4. Uneti GA4 Measurement ID i TikTok/LinkedIn pixel ID-jeve u `index.html` (već pripremljeno)
+- Edge function `semrush-weekly-intel` (cron, ponedeljak 08:00):
+  - Poziva `domain_organic` za `chess.com` i `lichess.org`, top 100 keywords.
+  - Diff protiv `masterchess.live` — keywords gde oni rankuju a mi ne.
+  - Upisuje u `seo_query_opportunities` sa source='semrush_gap'.
+  - Šalje sažetak email preko Resend-a tebi.
 
-## Redosled implementacije
+---
 
-1. **Faza 1 (odmah, ~15 min):** meta verifikacija tagovi, robots.txt, llms.txt, humans.txt, security.txt, IndexNow ključ, proširen `sameAs`
-2. **Faza 2 (~20 min):** GSC auto-verifikacija + sitemap submit preko konektora, edge function `notify-indexnow`
-3. **Faza 3 (~30 min):** proširen `Seo` komponent (FAQ, Breadcrumb, Video, Event, Course), primena na ključne rute
-4. **Faza 4 (~20 min):** `/contact` stranica sa Maps + LocalBusiness schema
-5. **Faza 5 (~30 min):** `/admin/discovery` dashboard sa GSC podacima
+## 6. Sve visible u `/admin/growth-hub`
 
-**Ukupno: ~2h rada, sve free, maksimalno pokrivanje.**
+Nove tab-ove:
+- **Query Mining** — opportunities, CTR losers, cannibalization
+- **City Hubs** — regenerate button + list statusa
+- **Social Log** — poslednjih 30 auto-postova + engagement
+- **Retention** — današnji queue, jučerašnji send stats
+- **Semrush Gap** — nedeljni izveštaj + "generate page" dugme per keyword
 
-Da li da krenem sa svih 5 faza odjednom, ili prvo Faza 1+2 (najvažnije za Google) pa da vidimo rezultate?
+---
+
+## Tehnički deo
+
+**Nove tabele (migracije):**
+- `seo_cannibalization` (query text, urls jsonb, suggested_canonical text, detected_at, resolved_at)
+- `city_chess_hubs` (city_slug pk, city_name, country, lat, lng, places_cached_json, updated_at)
+- `social_post_log` (id, platform, post_id, content, url, posted_at, engagement_json)
+- `pending_social_posts` (id, platform, payload jsonb, created_at, sent_at)
+
+Sve tabele: `GRANT` blok + RLS. Admin-only SELECT via `has_role(auth.uid(), 'admin')`. Service role full access.
+
+**Nove edge functions:**
+- `gsc-query-miner` (verify_jwt=true, admin-only invoke)
+- `gsc-auto-generate-pages` (service-role called)
+- `chess-city-hub-generator` (admin-only)
+- `daily-social-publisher` (cron)
+- `retention-emailer` (cron)
+- `semrush-weekly-intel` (cron)
+
+**Cron scheduling:** kroz `pg_cron` + `pg_net`, upisano preko insert tool-a (nije migracija jer sadrži project-specific URL/anon key).
+
+**Nova ruta:** `/chess-in/:citySlug` (React Router lazy load).
+
+**Novi sitemap:** `/sitemap-cities.xml` edge function, uključena u glavni sitemap index.
+
+---
+
+## Šta NE dirasm
+
+- Homepage layout (user veto).
+- Postojeće edge functions — samo dodajem nove.
+- Auth/RLS na već ispravnim tabelama.
+- Brand policy (nema pominjanja competitor sajtova u UI-u; Semrush/GSC podaci samo u admin panelu).
+
+---
+
+## Redosled izvršenja
+
+1. Migracije: 4 nove tabele + `pg_cron`/`pg_net` enable.
+2. Edge functions (6 nove, deploy-uju se automatski).
+3. Ruta `/chess-in/:citySlug` + SeoAutoPage integracija.
+4. Admin UI proširenje (5 novih tab-ova u `/admin/growth-hub`).
+5. Cron insert (preko insert tool-a, ne migracija).
+6. Prvi ručni trigger svih 6 novih funkcija radi verifikacije.
+
+Približna veličina: ~15 novih fajlova, ~4 nove tabele, ~6 novih cron jobova. Ovo je najveći growth sprint do sada.

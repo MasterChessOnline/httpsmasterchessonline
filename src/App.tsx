@@ -127,6 +127,7 @@ const InviteRedirect = lazy(() => import("./pages/InviteRedirect"));
 const WhyMasterChess = lazy(() => import("./pages/WhyMasterChess"));
 const AffiliateRedirect = lazy(() => import("./pages/AffiliateRedirect"));
 const SeoAutoPage = lazy(() => import("./pages/SeoAutoPage"));
+const CityChessHub = lazy(() => import("./pages/CityChessHub"));
 
 const StoryMode = lazy(() => import("./pages/StoryMode"));
 const OpeningTrainer = lazy(() => import("./pages/OpeningTrainer"));
@@ -514,6 +515,7 @@ function AnimatedRoutes() {
           <Route path="/openings/:slug" element={<SeoAutoPage />} />
           <Route path="/how-to-beat/:slug" element={<SeoAutoPage />} />
           <Route path="/rating/:slug" element={<SeoAutoPage />} />
+          <Route path="/chess-in/:citySlug" element={<CityChessHub />} />
           {/* SEO long-tail landings (EN + SR), all served by SeoLandingRoute via path lookup */}
           <Route path="/chess-for-kids" element={<SeoLandingRoute />} />
           <Route path="/chess-for-beginners" element={<SeoLandingRoute />} />
