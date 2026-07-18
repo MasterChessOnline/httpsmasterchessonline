@@ -13,7 +13,7 @@ import { Trophy, RefreshCw, Download, CheckCircle2, Mail, MailWarning } from "lu
 
 type Row = {
   registration_id?: string;
-  user_id: string;
+  user_id?: string;
   rank?: number;
   score: number;
   buchholz: number;
