@@ -173,15 +173,18 @@ Deno.serve(async (req) => {
 
     if (debug) {
       // Admin-only diagnostic — returns small HTML slice + parsed result.
+      const rx = (re: RegExp) => { const m = lastHtml.match(re); return m ? m[0].slice(0, 800) : null; };
       return json({
         parsed,
         source_url: sourceUrl,
         html_length: lastHtml.length,
-        html_head: lastHtml.slice(0, 6000),
-        html_ratings_section:
-          (lastHtml.match(/[\s\S]{0,200}(Standard|Rapid|Blitz)[\s\S]{0,600}/i) || [""])[0],
+        federation_slice: rx(/[\s\S]{0,120}(Federation|country|profile-info)[\s\S]{0,500}/i),
+        title_slice: rx(/[\s\S]{0,120}(FIDE\s*title|profile-title)[\s\S]{0,500}/i),
+        ratings_slice: rx(/[\s\S]{0,120}profile-standart[\s\S]{0,1200}/i),
+        flag_slice: rx(/[\s\S]{0,80}flag[\s\S]{0,300}/i),
       });
     }
+
 
     if (!parsed) {
       return json({ error: "FIDE ID not found. Please check the number and try again." }, 404);
