@@ -236,10 +236,19 @@ export default function DraganBrakusRegister() {
         localStorage.removeItem(PENDING_KEY);
         sessionStorage.removeItem("db_cup_invite_code");
       } catch {}
-      toast({ title: "Registered ✓", description: "You are now on the DB Chess Cup standings list." });
+      const result = data as any;
+      toast({
+        title: result?.already_registered ? "Already registered ✓" : "Registered ✓",
+        description: result?.email_sent
+          ? "You are on the DB Chess Cup standings list and confirmation email was sent."
+          : "You are on the DB Chess Cup standings list. Email confirmation will be retried by the organizer if delivery is blocked.",
+      });
       // Best-effort: subscribe this device to push so reminders/pairings arrive automatically.
       try { if (push.supported && push.status !== "subscribed" && push.status !== "denied") await push.enable(); } catch {}
-      navigate("/dragan-brakus/live?registered=1");
+      const next = new URLSearchParams({ registered: "1" });
+      if (result?.registration_id) next.set("rid", result.registration_id);
+      next.set("email", result?.email_sent ? "sent" : "pending");
+      navigate(`/dragan-brakus/live?${next.toString()}`);
     } catch (e: any) {
       toast({ title: "Registration failed", description: e?.message || String(e), variant: "destructive" });
     } finally {

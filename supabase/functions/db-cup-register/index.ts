@@ -2,14 +2,16 @@
 //   1. Authenticates the caller (Supabase JWT in Authorization header)
 //   2. Inserts into tournament_registrations (idempotent)
 //   3. Redeems the optional invite code -> credits inviter +50 coins
-//   4. Sends an HTML confirmation email via Resend (best effort)
+//   4. Sends an HTML confirmation email via the connected email provider (best effort)
 import { corsHeaders } from "../_shared/cors.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const ANON = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const RESEND_GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 function firstText(value: unknown, max = 80) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
@@ -39,6 +41,41 @@ function htmlEmail(opts: { name: string; tournamentName: string; startsAt: strin
     <p style="font-size:12px;color:#666;margin-top:24px">MasterChess · masterchess.live</p>
   </div>
 </div></body></html>`;
+}
+
+async function sendConfirmationEmail(opts: { to: string; html: string; subject: string }) {
+  if (!RESEND_API_KEY || !LOVABLE_API_KEY) {
+    return { sent: false, error: "email_provider_not_configured" };
+  }
+
+  const attempts = [
+    "MasterChess <noreply@masterchess.live>",
+    "MasterChess <onboarding@resend.dev>",
+  ];
+
+  let lastError = "email_send_failed";
+  for (const from of attempts) {
+    try {
+      const response = await fetch(`${RESEND_GATEWAY_URL}/emails`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": RESEND_API_KEY,
+        },
+        body: JSON.stringify({ from, to: [opts.to], subject: opts.subject, html: opts.html }),
+      });
+
+      if (response.ok) return { sent: true, error: null };
+      lastError = await response.text().catch(() => `HTTP ${response.status}`);
+      console.error(`DB Cup confirmation email failed [${response.status}]: ${lastError}`);
+    } catch (e) {
+      lastError = (e as Error).message;
+      console.error("DB Cup confirmation email failed:", lastError);
+    }
+  }
+
+  return { sent: false, error: lastError };
 }
 
 Deno.serve(async (req) => {
@@ -214,7 +251,9 @@ Deno.serve(async (req) => {
 
     // Send confirmation email (idempotent)
     const needsEmail = !existing?.confirmation_sent_at;
-    if (needsEmail && RESEND_API_KEY && user.email) {
+    let emailSent = false;
+    let emailError: string | null = null;
+    if (needsEmail && user.email) {
       const inviteUrl = `https://masterchess.live/dragan-brakus`;
       const html = htmlEmail({
         name: (user.user_metadata?.full_name || user.user_metadata?.username || user.email.split("@")[0]) as string,
@@ -222,26 +261,32 @@ Deno.serve(async (req) => {
         startsAt: t.starts_at,
         inviteUrl,
       });
-      try {
-        const r = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
-          body: JSON.stringify({
-            from: "MasterChess <onboarding@resend.dev>",
-            to: [user.email],
-            subject: `You're in — ${t.name}`,
-            html,
-          }),
-        });
-        if (r.ok && registrationId) {
-          await svc.from("tournament_registrations")
-            .update({ confirmation_sent_at: new Date().toISOString() })
-            .eq("id", registrationId);
-        }
-      } catch {/* swallow email failure */}
+
+      const email = await sendConfirmationEmail({
+        to: user.email,
+        subject: `You're in — ${t.name}`,
+        html,
+      });
+      emailSent = email.sent;
+      emailError = email.error;
+      if (email.sent && registrationId) {
+        await svc.from("tournament_registrations")
+          .update({ confirmation_sent_at: new Date().toISOString() })
+          .eq("id", registrationId);
+      }
+    } else if (!user.email) {
+      emailError = "user_email_missing";
     }
 
-    return json({ ok: true, already_registered: alreadyRegistered, registration_id: registrationId, fide_verified: Boolean(verified), rating_at_join: seedingRating ?? 1200 });
+    return json({
+      ok: true,
+      already_registered: alreadyRegistered,
+      registration_id: registrationId,
+      fide_verified: Boolean(verified),
+      rating_at_join: seedingRating ?? 1200,
+      email_sent: emailSent,
+      email_error: emailError,
+    });
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }
