@@ -42,12 +42,17 @@ const FloatingPiece = ({ piece, index }: { piece: string; index: number }) => (
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fideId, setFideId] = useState("");
+  const [fideBusy, setFideBusy] = useState(false);
+  const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null }>(null);
+  const [fideErr, setFideErr] = useState<string | null>(null);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
+
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
