@@ -42,12 +42,17 @@ const FloatingPiece = ({ piece, index }: { piece: string; index: number }) => (
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fideId, setFideId] = useState("");
+  const [fideBusy, setFideBusy] = useState(false);
+  const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null }>(null);
+  const [fideErr, setFideErr] = useState<string | null>(null);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
+
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -68,18 +73,55 @@ const Signup = () => {
     }
   };
 
+  // Debounced FIDE lookup (optional field)
+  const fideDebounce = useState<{ t: number | null }>({ t: null })[0];
+  const lookupFide = async (fid: string) => {
+    setFideBusy(true); setFideErr(null);
+    try {
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fide-lookup?id=${fid}`;
+      const r = await fetch(url, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } });
+      const j: any = await r.json().catch(() => ({}));
+      if (!j?.name) { setFideFound(null); setFideErr(j?.error || "FIDE profile not found."); return; }
+      setFideFound({
+        name: j.name,
+        federation: j.federation,
+        title: j.title,
+        standard_rating: j.standard_rating ?? j.rating ?? null,
+        rapid_rating: j.rapid_rating ?? null,
+        blitz_rating: j.blitz_rating ?? null,
+      });
+    } catch (e: any) {
+      setFideFound(null); setFideErr(e?.message || "Lookup failed.");
+    } finally { setFideBusy(false); }
+  };
+  const onFideChange = (v: string) => {
+    const clean = v.replace(/\D/g, "").slice(0, 10);
+    setFideId(clean);
+    if (fideDebounce.t) window.clearTimeout(fideDebounce.t);
+    if (!/^\d{5,10}$/.test(clean)) { setFideFound(null); setFideErr(null); return; }
+    fideDebounce.t = window.setTimeout(() => lookupFide(clean), 450);
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Auto-derive display name from the local-part of the email so the form
-    // stays single-step. Users can edit it later in Settings.
-    const autoDisplay = (email.split("@")[0] || "Player")
-      .replace(/[^a-zA-Z0-9]/g, " ")
-      .trim()
-      .slice(0, 32) || "Player";
+    // If FIDE ID was entered, prefer the verified FIDE name as display name.
+    let firstName = "", lastName = "";
+    if (fideFound?.name) {
+      const raw = String(fideFound.name);
+      if (raw.includes(",")) { const [l, f] = raw.split(",").map(s => s.trim()); firstName = f || ""; lastName = l || ""; }
+      else { const parts = raw.trim().split(/\s+/); lastName = parts.pop() || ""; firstName = parts.join(" "); }
+    }
+    const autoDisplay = (fideFound?.name
+      ? `${firstName} ${lastName}`.trim()
+      : (email.split("@")[0] || "Player").replace(/[^a-zA-Z0-9]/g, " ").trim()
+    ).slice(0, 32) || "Player";
     const startingLevel = getStartingLevel(DEFAULT_STARTING_LEVEL_KEY);
+    // If FIDE-verified, seed rating from Blitz → Rapid → Standard.
+    const fideRating = fideFound?.blitz_rating || fideFound?.rapid_rating || fideFound?.standard_rating || null;
+    const seedRating = fideRating || startingLevel.rating;
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -88,7 +130,7 @@ const Signup = () => {
         data: {
           display_name: autoDisplay,
           starting_level: startingLevel.key,
-          starting_rating: startingLevel.rating,
+          starting_rating: seedRating,
         },
         emailRedirectTo: `${window.location.origin}${redirectTo}`,
       },
@@ -103,13 +145,22 @@ const Signup = () => {
     const newUserId = data.user?.id;
     if (newUserId) {
       window.setTimeout(() => {
+        const patch: any = {
+          rating: seedRating,
+          peak_rating: seedRating,
+        };
+        if (fideFound) {
+          patch.first_name = firstName || null;
+          patch.last_name = lastName || null;
+          patch.fide_id = fideId || null;
+          patch.fide_title = (fideFound.title || "").toUpperCase().slice(0, 3) || null;
+          patch.federation = (fideFound.federation || "").toUpperCase().slice(0, 3) || null;
+        }
         supabase
           .from("profiles")
-          .update({
-            rating: startingLevel.rating,
-            peak_rating: startingLevel.rating,
-          })
+          .update(patch)
           .eq("user_id", newUserId)
+
           .then(({ error }) => {
             if (error) {
               console.info("[MasterChess Startup] ERROR_STATE", { step: "SIGNUP_PROFILE_UPDATE", message: "profile update skipped", error });
@@ -118,9 +169,10 @@ const Signup = () => {
       }, 0);
     }
 
-    track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key });
+    track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key, fide_verified: !!fideFound });
     navigate(redirectTo);
   };
+
 
   const handleAppleLogin = async () => {
     setError(null);
@@ -246,6 +298,31 @@ const Signup = () => {
                   </button>
                 </div>
               </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="fide" className="text-xs font-medium text-muted-foreground">
+                  FIDE ID <span className="opacity-60">(optional — auto-fills your name & rating)</span>
+                </Label>
+                <Input
+                  id="fide"
+                  inputMode="numeric"
+                  placeholder="e.g. 14106503"
+                  value={fideId}
+                  onChange={(e) => onFideChange(e.target.value)}
+                  maxLength={10}
+                  className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
+                />
+                {fideBusy && <p className="text-[11px] text-muted-foreground">Checking FIDE…</p>}
+                {fideFound && (
+                  <p className="text-[11px] text-emerald-400">
+                    ✓ {fideFound.name}{fideFound.title ? ` · ${fideFound.title}` : ""}{fideFound.federation ? ` · ${fideFound.federation}` : ""}
+                    {fideFound.blitz_rating ? ` · Blitz ${fideFound.blitz_rating}` : fideFound.rapid_rating ? ` · Rapid ${fideFound.rapid_rating}` : fideFound.standard_rating ? ` · Std ${fideFound.standard_rating}` : ""}
+                  </p>
+                )}
+                {fideErr && !fideBusy && <p className="text-[11px] text-destructive/80">{fideErr}</p>}
+              </div>
+
+
 
               {error && (
                 <motion.p
