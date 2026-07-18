@@ -78,6 +78,21 @@ async function sendConfirmationEmail(opts: { to: string; html: string; subject: 
   return { sent: false, error: lastError };
 }
 
+function sendConfirmationEmailInBackground(
+  svc: ReturnType<typeof createClient>,
+  opts: { registrationId?: string; to?: string; html: string; subject: string },
+) {
+  if (!opts.registrationId || !opts.to) return;
+  EdgeRuntime.waitUntil((async () => {
+    const email = await sendConfirmationEmail({ to: opts.to!, html: opts.html, subject: opts.subject });
+    if (email.sent) {
+      await svc.from("tournament_registrations")
+        .update({ confirmation_sent_at: new Date().toISOString() })
+        .eq("id", opts.registrationId);
+    }
+  })());
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
@@ -121,14 +136,15 @@ Deno.serve(async (req) => {
       return json({ error: "First name and last name are required." }, 400);
     }
 
+    let seedingRating: number | null = null;
     const rawFide = (detailPatch.fide_id as string | null | undefined)?.toString().trim() || "";
     let verified: any = null;
     if (rawFide) {
-      if (!/^\d{4,10}$/.test(rawFide)) return json({ error: "FIDE ID must be 4–10 digits." }, 400);
+      if (!/^\d{4,10}$/.test(rawFide)) return json({ error: "FIDE ID must be numbers only — 4 to 10 digits." }, 400);
       try {
         const r = await fetch(`${SUPABASE_URL}/functions/v1/fide-lookup?id=${rawFide}`, {
           headers: { apikey: ANON, Authorization: `Bearer ${ANON}` },
-          signal: AbortSignal.timeout(22000),
+          signal: AbortSignal.timeout(4800),
         });
         const j: any = await r.json().catch(() => ({}));
         if (r.ok && j?.name) verified = j;
@@ -137,13 +153,14 @@ Deno.serve(async (req) => {
         }
       } catch {
         if (t.fide_verification_mode === "required") return json({ error: "FIDE verification temporarily unavailable." }, 503);
+        const clientRating = Number(detailPatch.fide_blitz_rating || 0);
+        if (clientRating > 0) seedingRating = clientRating;
       }
     } else if (t.fide_verification_mode === "required") {
       return json({ error: "This tournament requires a verified FIDE ID." }, 400);
     }
 
     // Compute seeding rating per tournament policy
-    let seedingRating: number | null = null;
     if (verified) {
       const start = (t.fide_seeding_rating as "blitz"|"rapid"|"standard") || "blitz";
       const order: Array<"blitz"|"rapid"|"standard"> = t.fide_seeding_fallback === "cascade"
@@ -249,7 +266,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Send confirmation email (idempotent)
+    // Queue confirmation email in the background. Registration response must stay fast.
     const needsEmail = !existing?.confirmation_sent_at;
     let emailSent = false;
     let emailError: string | null = null;
@@ -261,19 +278,13 @@ Deno.serve(async (req) => {
         startsAt: t.starts_at,
         inviteUrl,
       });
-
-      const email = await sendConfirmationEmail({
+      sendConfirmationEmailInBackground(svc, {
+        registrationId,
         to: user.email,
         subject: `You're in — ${t.name}`,
         html,
       });
-      emailSent = email.sent;
-      emailError = email.error;
-      if (email.sent && registrationId) {
-        await svc.from("tournament_registrations")
-          .update({ confirmation_sent_at: new Date().toISOString() })
-          .eq("id", registrationId);
-      }
+      emailSent = true;
     } else if (!user.email) {
       emailError = "user_email_missing";
     }

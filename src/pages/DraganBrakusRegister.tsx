@@ -75,7 +75,7 @@ export default function DraganBrakusRegister() {
   const lookupFide = async (idArg?: string) => {
     const fid = (idArg ?? form.fide_id).trim();
     if (!/^\d{4,10}$/.test(fid)) {
-      setFideError("FIDE ID must be 4–10 digits.");
+      setFideError("FIDE ID must be numbers only — 4 to 10 digits.");
       return;
     }
     setFideBusy(true);
@@ -190,7 +190,7 @@ export default function DraganBrakusRegister() {
   const validate = () => {
     if (!form.first_name.trim()) return "First name is required.";
     if (!form.last_name.trim()) return "Last name is required.";
-    if (form.fide_id && !/^\d{4,10}$/.test(form.fide_id.trim())) return "FIDE ID must be 4–10 digits.";
+    if (form.fide_id && !/^\d{4,10}$/.test(form.fide_id.trim())) return "FIDE ID must be numbers only — 4 to 10 digits.";
     if (form.birth_year && !/^\d{4}$/.test(form.birth_year.trim())) return "Birth year must be 4 digits.";
     return null;
   };
@@ -243,12 +243,12 @@ export default function DraganBrakusRegister() {
           ? "You are on the DB Chess Cup standings list and confirmation email was sent."
           : "You are on the DB Chess Cup standings list. Email confirmation will be retried by the organizer if delivery is blocked.",
       });
-      // Best-effort: subscribe this device to push so reminders/pairings arrive automatically.
-      try { if (push.supported && push.status !== "subscribed" && push.status !== "denied") await push.enable(); } catch {}
       const next = new URLSearchParams({ registered: "1" });
       if (result?.registration_id) next.set("rid", result.registration_id);
       next.set("email", result?.email_sent ? "sent" : "pending");
       navigate(`/dragan-brakus/live?${next.toString()}`);
+      // Best-effort only: never keep Register Now spinning while browser push permission opens or stalls.
+      try { if (push.supported && push.status !== "subscribed" && push.status !== "denied") void push.enable(); } catch {}
     } catch (e: any) {
       toast({ title: "Registration failed", description: e?.message || String(e), variant: "destructive" });
     } finally {
@@ -299,6 +299,7 @@ export default function DraganBrakusRegister() {
                       {!fideBusy && fideError && form.fide_id.length >= 5 && <AlertCircle className="h-4 w-4 text-orange-400" />}
                     </div>
                   </div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">FIDE ID must be numbers only. It is optional; first name and last name are enough to register.</p>
                   {fideFound && (
                     <div className="mt-3 rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-3 text-xs text-emerald-100">
                       <div className="mb-2 flex items-center gap-2">
@@ -365,7 +366,7 @@ export default function DraganBrakusRegister() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <Button type="submit" size="lg" disabled={busy} className="bg-amber-400 text-black hover:bg-amber-300">
                     {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
-                    {user ? "Register Now" : "Continue & Register"}
+                    {busy ? "Confirming…" : user ? "Register Now" : "Continue & Register"}
                   </Button>
                   <div className="flex gap-2">
                     {!user && (

@@ -69,13 +69,18 @@ export default function DraganBrakusLive() {
       regs = fallbackRows?.map((row: any) => ({ ...row, registration_id: row.id })) || [];
     }
 
-    const sorted = (regs || []).sort((a: any, b: any) =>
-      b.score - a.score ||
-      b.buchholz_cut1 - a.buchholz_cut1 ||
-      b.buchholz - a.buchholz ||
-      b.progressive_score - a.progressive_score ||
-      (b.fide_blitz_rating || b.rating_at_join || 0) - (a.fide_blitz_rating || a.rating_at_join || 0)
-    ) as Row[];
+    const sorted = (regs || []).sort((a: any, b: any) => {
+      const aRating = a.fide_blitz_rating || a.rating_at_join || 0;
+      const bRating = b.fide_blitz_rating || b.rating_at_join || 0;
+      const hasPlayed = [a.score, b.score, a.buchholz_cut1, b.buchholz_cut1, a.buchholz, b.buchholz, a.progressive_score, b.progressive_score]
+        .some((v) => Number(v || 0) > 0);
+      if (!hasPlayed) return bRating - aRating;
+      return b.score - a.score ||
+        b.buchholz_cut1 - a.buchholz_cut1 ||
+        b.buchholz - a.buchholz ||
+        b.progressive_score - a.progressive_score ||
+        bRating - aRating;
+    }) as Row[];
     setRows(sorted);
     setLoading(false);
   }
@@ -126,7 +131,7 @@ export default function DraganBrakusLive() {
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
                 <div>
-                  <p className="font-bold">You are registered for the DB Chess Cup.</p>
+                  <p className="font-bold">You are registered.</p>
                   <p className="text-sm text-emerald-100/80">Your name and Blitz rating are now on the standings list.</p>
                 </div>
               </div>
@@ -212,7 +217,7 @@ export default function DraganBrakusLive() {
         )}
 
         <p className="text-xs text-muted-foreground mt-6">
-          Tie-break order: Points → Buchholz Cut 1 → Buchholz → Progressive → Performance. Files are ready for Chess-Results Serbia / Swiss-Manager upload.
+          Before round 1 players are seeded by FIDE Blitz rating. After games start: Points → Buchholz Cut 1 → Buchholz → Progressive → Blitz rating.
         </p>
       </main>
       <Footer />
