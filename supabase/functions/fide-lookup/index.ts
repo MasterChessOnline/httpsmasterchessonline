@@ -84,37 +84,23 @@ function extractTitle(html: string): string | null {
 }
 
 function extractRatings(html: string): { standard: number | null; rapid: number | null; blitz: number | null } {
-  // Strategy A: current profile shows three cards with labels "Standard", "Rapid", "Blitz"
-  // and the rating right next to it inside a nearby tag.
-  const grab = (label: string): number | null => {
-    const re = new RegExp(`>\\s*${label}\\s*<[\\s\\S]{0,400}?>\\s*(\\d{3,4})\\s*<`, "i");
+  // ratings.fide.com profile: divs with class="profile-standart|profile-rapid|profile-blitz"
+  // containing <p>2823</p> as the current rating. Note FIDE's typo "standart".
+  const grabByClass = (cls: string): number | null => {
+    const re = new RegExp(`class=["'][^"']*${cls}[^"']*["'][^>]*>[\\s\\S]{0,400}?<p[^>]*>\\s*(\\d{3,4})\\s*<`, "i");
     const m = html.match(re);
     if (m) {
       const n = Number(m[1]);
       if (n >= 800 && n <= 3600) return n;
     }
-    // Alt: "std rating 2839"
-    const re2 = new RegExp(`${label}\\s*rating[\\s\\S]{0,80}?(\\d{3,4})`, "i");
-    const m2 = html.match(re2);
-    if (m2) {
-      const n = Number(m2[1]);
-      if (n >= 800 && n <= 3600) return n;
-    }
-    // Alt: card layout "<span>Standard</span>...<span class=rating>2839</span>"
-    const re3 = new RegExp(`${label}[\\s\\S]{0,600}?class=["'][^"']*rating[^"']*["'][^>]*>\\s*(\\d{3,4})`, "i");
-    const m3 = html.match(re3);
-    if (m3) {
-      const n = Number(m3[1]);
-      if (n >= 800 && n <= 3600) return n;
-    }
     return null;
   };
-  return {
-    standard: grab("Standard") ?? grab("Std"),
-    rapid: grab("Rapid"),
-    blitz: grab("Blitz"),
-  };
+  const std = grabByClass("profile-standart") ?? grabByClass("profile-standard");
+  const rap = grabByClass("profile-rapid");
+  const bli = grabByClass("profile-blitz");
+  return { standard: std, rapid: rap, blitz: bli };
 }
+
 
 function extractBirthYear(html: string): number | null {
   const m = html.match(/B[-\s]?Year[\s\S]{0,120}?>\s*(\d{4})\s*</i)
