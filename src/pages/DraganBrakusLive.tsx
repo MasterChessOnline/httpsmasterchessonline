@@ -1,7 +1,7 @@
 // /dragan-brakus/live — public live standings page.
 // Auto-refreshes every 15s, indexable, no login required.
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Seo from "@/components/Seo";
@@ -9,10 +9,12 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, RefreshCw, Download } from "lucide-react";
+import { Trophy, RefreshCw, Download, CheckCircle2, Mail, MailWarning } from "lucide-react";
 
 type Row = {
+  registration_id?: string;
   user_id: string;
+  rank?: number;
   score: number;
   buchholz: number;
   buchholz_cut1: number;
@@ -31,10 +33,14 @@ type Row = {
 
 export default function DraganBrakusLive() {
   const params = useParams();
+  const [searchParams] = useSearchParams();
   const [tournamentId, setTournamentId] = useState<string | null>(null);
   const [t, setT] = useState<any>(null);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const registered = searchParams.get("registered") === "1";
+  const emailState = searchParams.get("email");
+  const highlightRegistrationId = searchParams.get("rid");
 
   async function load() {
     let id = params.id || tournamentId;
@@ -49,15 +55,24 @@ export default function DraganBrakusLive() {
       const { data } = await supabase.from("tournaments").select("*").eq("id", id).single();
       setT(data);
     }
-    const { data: regs } = await supabase
-      .from("tournament_registrations")
-      .select("user_id, score, buchholz, buchholz_cut1, progressive_score, performance_rating, wins, first_name, last_name, federation, fide_title, rating_at_join, fide_verified, fide_blitz_rating")
-      .eq("tournament_id", id);
+    const { data: rpcRows, error: rpcError } = await (supabase as any)
+      .rpc("get_public_tournament_standings", { p_tournament_id: id });
+
+    let regs = rpcRows;
+    if (rpcError) {
+      const { data: fallbackRows } = await supabase
+        .from("tournament_registrations")
+        .select("id, user_id, score, buchholz, buchholz_cut1, progressive_score, performance_rating, wins, first_name, last_name, federation, fide_title, rating_at_join, fide_verified, fide_blitz_rating")
+        .eq("tournament_id", id);
+      regs = fallbackRows?.map((row: any) => ({ ...row, registration_id: row.id })) || [];
+    }
+
     const sorted = (regs || []).sort((a: any, b: any) =>
       b.score - a.score ||
       b.buchholz_cut1 - a.buchholz_cut1 ||
       b.buchholz - a.buchholz ||
-      b.progressive_score - a.progressive_score
+      b.progressive_score - a.progressive_score ||
+      (b.fide_blitz_rating || b.rating_at_join || 0) - (a.fide_blitz_rating || a.rating_at_join || 0)
     ) as Row[];
     setRows(sorted);
     setLoading(false);
@@ -103,6 +118,24 @@ export default function DraganBrakusLive() {
           </Button>
         </div>
 
+        {registered && (
+          <Card className="mb-5 border-emerald-400/30 bg-emerald-400/10 p-4 text-emerald-100">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+                <div>
+                  <p className="font-bold">You are registered for the DB Chess Cup.</p>
+                  <p className="text-sm text-emerald-100/80">Your name and Blitz rating are now on the standings list.</p>
+                </div>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-md border border-emerald-300/30 px-3 py-2 text-xs font-semibold">
+                {emailState === "sent" ? <Mail className="h-4 w-4" /> : <MailWarning className="h-4 w-4" />}
+                {emailState === "sent" ? "Confirmation email sent" : "Registered — email pending"}
+              </div>
+            </div>
+          </Card>
+        )}
+
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -122,13 +155,14 @@ export default function DraganBrakusLive() {
               <tbody>
                 {loading && <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">Loading…</td></tr>}
                 {!loading && rows.length === 0 && (
-                  <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">No players yet. Be the first to <Link to="/dragan-brakus" className="text-yellow-400 underline">register</Link>.</td></tr>
+                  <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">No players visible yet. <Link to="/dragan-brakus/register" className="text-yellow-400 underline">Register now</Link>.</td></tr>
                 )}
                 {rows.map((r, i) => {
                   const name = [r.last_name, r.first_name].filter(Boolean).join(", ") || "Player";
+                  const highlighted = Boolean(highlightRegistrationId && r.registration_id === highlightRegistrationId);
                   return (
-                    <tr key={r.user_id} className="border-t border-white/5 hover:bg-white/5">
-                      <td className="px-3 py-2 font-semibold">{i === 0 ? <Trophy className="h-4 w-4 text-yellow-400 inline" /> : i + 1}</td>
+                    <tr key={r.registration_id || r.user_id || i} className={`border-t border-white/5 hover:bg-white/5 ${highlighted ? "bg-emerald-400/10" : ""}`}>
+                      <td className="px-3 py-2 font-semibold">{i === 0 ? <Trophy className="h-4 w-4 text-yellow-400 inline" /> : (r.rank || i + 1)}</td>
                       <td className="px-3 py-2">
                         {r.fide_title && <span className="text-yellow-400 font-bold mr-1">{r.fide_title}</span>}
                         {name}
