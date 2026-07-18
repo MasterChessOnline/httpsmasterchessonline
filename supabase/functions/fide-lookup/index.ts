@@ -172,19 +172,20 @@ Deno.serve(async (req) => {
     }
 
     if (debug) {
-      const rx = (re: RegExp, len = 1500) => { const m = lastHtml.match(re); return m ? m[0].slice(0, len) : null; };
+      const cleaned = lastHtml.replace(/data:image[^"']+/g, "").replace(/<script[\s\S]*?<\/script>/gi, "");
+      const rx = (re: RegExp, len = 2500) => { const m = cleaned.match(re); return m ? m[0].slice(0, len) : null; };
       return json({
         parsed,
         source_url: sourceUrl,
         html_length: lastHtml.length,
-        info_block: rx(/profile-info[\s\S]{0,3000}/i, 3000),
-        federation_slice: rx(/Federation[\s\S]{0,500}/i),
-        title_slice: rx(/(FIDE\s*title|Title)[\s\S]{0,300}/i),
-        norway_hit: /\bNorway\b/i.test(lastHtml) ? "yes" : "no",
-        nor_hit: /\bNOR\b/.test(lastHtml) ? "yes" : "no",
-        gm_hit: /\bGrandmaster\b/i.test(lastHtml) ? "yes" : "no",
+        cleaned_length: cleaned.length,
+        after_photo: rx(/profile-games[\s\S]{0,4000}/i, 4000),
+        fed_slice: rx(/Federation[\s\S]{0,600}/i, 900),
+        title_slice: rx(/FIDE\s*title[\s\S]{0,600}/i, 900),
+        rank_slice: rx(/(World\s*Rank|Rank\s*All)[\s\S]{0,400}/i, 700),
       });
     }
+
 
 
 
