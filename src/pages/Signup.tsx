@@ -299,6 +299,31 @@ const Signup = () => {
                 </div>
               </div>
 
+              <div className="space-y-1.5">
+                <Label htmlFor="fide" className="text-xs font-medium text-muted-foreground">
+                  FIDE ID <span className="opacity-60">(optional — auto-fills your name & rating)</span>
+                </Label>
+                <Input
+                  id="fide"
+                  inputMode="numeric"
+                  placeholder="e.g. 14106503"
+                  value={fideId}
+                  onChange={(e) => onFideChange(e.target.value)}
+                  maxLength={10}
+                  className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
+                />
+                {fideBusy && <p className="text-[11px] text-muted-foreground">Checking FIDE…</p>}
+                {fideFound && (
+                  <p className="text-[11px] text-emerald-400">
+                    ✓ {fideFound.name}{fideFound.title ? ` · ${fideFound.title}` : ""}{fideFound.federation ? ` · ${fideFound.federation}` : ""}
+                    {fideFound.blitz_rating ? ` · Blitz ${fideFound.blitz_rating}` : fideFound.rapid_rating ? ` · Rapid ${fideFound.rapid_rating}` : fideFound.standard_rating ? ` · Std ${fideFound.standard_rating}` : ""}
+                  </p>
+                )}
+                {fideErr && !fideBusy && <p className="text-[11px] text-destructive/80">{fideErr}</p>}
+              </div>
+
+
+
               {error && (
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
