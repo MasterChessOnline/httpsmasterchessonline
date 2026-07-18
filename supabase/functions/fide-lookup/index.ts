@@ -109,16 +109,19 @@ function extractFederation(html: string): string | null {
 
 function extractTitle(html: string): string | null {
   // profile-info-title block: <div class="profile-info-title "><p>Grandmaster</p>
-  const m = html.match(/profile-info-title[\s\S]{0,300}?<p[^>]*>\s*([^<]+?)\s*<\/p>/i);
+  const m = html.match(/profile-info-title[\s\S]{0,300}?<p[^>]*>([\s\S]*?)<\/p>/i);
   if (m?.[1]) {
-    const raw = m[1].trim().toLowerCase();
-    if (raw && raw !== "none" && raw !== "-") {
-      if (TITLE_NAME_TO_CODE[raw]) return TITLE_NAME_TO_CODE[raw];
-      // If already a short code like "GM"
-      const upper = raw.toUpperCase();
-      if (KNOWN_TITLES.has(upper)) return upper;
+    // Split on <br> so "Grandmaster <br>Woman Grandmaster" → prefer GM over WGM
+    const parts = m[1].split(/<br\s*\/?>/i).map(s => s.replace(/<[^>]+>/g, "").trim().toLowerCase()).filter(Boolean);
+    for (const raw of parts) {
+      if (raw && raw !== "none" && raw !== "-") {
+        if (TITLE_NAME_TO_CODE[raw]) return TITLE_NAME_TO_CODE[raw];
+        const upper = raw.toUpperCase();
+        if (KNOWN_TITLES.has(upper)) return upper;
+      }
     }
   }
+
   // Fallback: explicit "FIDE title" row with code
   const m2 = html.match(/FIDE\s*title[\s\S]{0,300}?>\s*([A-Za-z]{1,5})\s*</i);
   if (m2?.[1]) {
