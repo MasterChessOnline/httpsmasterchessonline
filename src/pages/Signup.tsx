@@ -145,7 +145,7 @@ const Signup = () => {
     const newUserId = data.user?.id;
     if (newUserId) {
       window.setTimeout(() => {
-        const patch: Record<string, unknown> = {
+        const patch: any = {
           rating: seedRating,
           peak_rating: seedRating,
         };
@@ -160,6 +160,7 @@ const Signup = () => {
           .from("profiles")
           .update(patch)
           .eq("user_id", newUserId)
+
           .then(({ error }) => {
             if (error) {
               console.info("[MasterChess Startup] ERROR_STATE", { step: "SIGNUP_PROFILE_UPDATE", message: "profile update skipped", error });
