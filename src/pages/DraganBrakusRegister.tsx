@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { AlertCircle, Bell, CheckCircle2, ChevronDown, ChevronUp, Loader2, LogIn, Trophy, UserPlus, Zap } from "lucide-react";
+import { AlertCircle, Bell, CheckCircle2, ChevronDown, ChevronUp, Loader2, LogIn, UserPlus, Zap } from "lucide-react";
 import { usePushSubscription } from "@/hooks/use-push-subscription";
 
 type FormState = {
@@ -20,7 +20,6 @@ type FormState = {
   fide_id: string;
   federation: string;
   city: string;
-  club: string;
   fide_title: string;
   birth_year: string;
 };
@@ -32,7 +31,6 @@ const emptyForm: FormState = {
   fide_id: "",
   federation: "",
   city: "",
-  club: "",
   fide_title: "",
   birth_year: "",
 };
@@ -63,6 +61,7 @@ export default function DraganBrakusRegister() {
   const [busy, setBusy] = useState(false);
   const [fideBusy, setFideBusy] = useState(false);
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null; profile_url?: string }>(null);
+  const [fideConfirmed, setFideConfirmed] = useState(false);
   const [fideError, setFideError] = useState<string | null>(null);
 
   const [showMore, setShowMore] = useState(false);
@@ -82,7 +81,7 @@ export default function DraganBrakusRegister() {
     setFideBusy(true);
     setFideError(null);
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 3000);
+    const timer = window.setTimeout(() => controller.abort(), 18000);
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fide-lookup?id=${fid}`;
       const r = await fetch(url, {
@@ -92,6 +91,7 @@ export default function DraganBrakusRegister() {
       const json: any = await r.json().catch(() => ({}));
       if (!json?.name) {
         setFideFound(null);
+        setFideConfirmed(false);
         setFideError(json?.error || "FIDE profile not found. You can still type your name manually.");
         return;
       }
@@ -113,10 +113,12 @@ export default function DraganBrakusRegister() {
         blitz_rating: json.blitz_rating ?? null,
         profile_url: json.profile_url,
       });
+      setFideConfirmed(false);
 
     } catch (e: any) {
       setFideFound(null);
-      setFideError(e?.name === "AbortError" ? "FIDE lookup timed out. Type your name manually." : (e?.message || "Lookup failed."));
+      setFideConfirmed(false);
+      setFideError(e?.name === "AbortError" ? "FIDE lookup is slow. Register still works; retry or type your name manually." : (e?.message || "Lookup failed."));
     } finally {
       window.clearTimeout(timer);
       setFideBusy(false);
@@ -128,6 +130,7 @@ export default function DraganBrakusRegister() {
     const fid = form.fide_id.trim();
     if (!/^\d{5,10}$/.test(fid)) {
       setFideFound(null);
+      setFideConfirmed(false);
       setFideError(null);
       return;
     }
@@ -165,7 +168,7 @@ export default function DraganBrakusRegister() {
       const [{ data: profile }, { data: priv }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("federation, country, club, fide_id, fide_title, city")
+          .select("federation, country, fide_id, fide_title, city")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase.rpc("get_my_private_profile"),
@@ -177,7 +180,6 @@ export default function DraganBrakusRegister() {
         last_name: s.last_name || p?.last_name || "",
         federation: s.federation || (profile?.federation || profile?.country || "").toUpperCase(),
         city: s.city || profile?.city || "",
-        club: s.club || profile?.club || "",
         fide_id: s.fide_id || profile?.fide_id || "",
         fide_title: s.fide_title || profile?.fide_title || "",
         birth_year: s.birth_year || (p?.birth_year ? String(p.birth_year) : ""),
@@ -188,7 +190,6 @@ export default function DraganBrakusRegister() {
   const validate = () => {
     if (!form.first_name.trim()) return "First name is required.";
     if (!form.last_name.trim()) return "Last name is required.";
-    if (!form.federation.trim()) return "Country is required (3-letter code, e.g. SRB).";
     if (form.fide_id && !/^\d{4,10}$/.test(form.fide_id.trim())) return "FIDE ID must be 4–10 digits.";
     if (form.birth_year && !/^\d{4}$/.test(form.birth_year.trim())) return "Birth year must be 4 digits.";
     return null;
@@ -206,11 +207,6 @@ export default function DraganBrakusRegister() {
       navigate(`/login?redirect=${encodeURIComponent(cleanRedirect())}`);
       return;
     }
-    if (!tournament?.id) {
-      toast({ title: "Tournament not found", description: "Please try again in a moment.", variant: "destructive" });
-      return;
-    }
-
     setBusy(true);
     try {
       const params = new URLSearchParams(window.location.search);
@@ -223,14 +219,18 @@ export default function DraganBrakusRegister() {
         fide_id: form.fide_id.trim() || null,
         federation: form.federation.trim().toUpperCase().slice(0, 3) || null,
         city: form.city.trim() || null,
-        club: form.club.trim() || null,
         fide_title: form.fide_title.trim().toUpperCase().slice(0, 3) || null,
         birth_year: form.birth_year ? Number(form.birth_year) : null,
+        fide_blitz_rating: fideConfirmed ? (fideFound?.blitz_rating ?? null) : null,
       };
       const { data, error } = await supabase.functions.invoke("db-cup-register", {
-        body: { tournament_id: tournament.id, invite_code, player_details },
+        body: { tournament_id: tournament?.id ?? null, invite_code, player_details },
       });
-      if (error) throw error;
+      if (error) {
+        const ctx = (error as any).context;
+        const body = ctx?.json ? await ctx.json().catch(() => null) : null;
+        throw new Error(body?.error || error.message || "Registration failed");
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
       try {
         localStorage.removeItem(PENDING_KEY);
@@ -263,7 +263,7 @@ export default function DraganBrakusRegister() {
             <Badge className="mb-3 border-amber-300/40 bg-amber-400/20 text-amber-200">Registration open</Badge>
             <h1 className="text-3xl font-black sm:text-4xl">Register for {title}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              23 July 2026 · 16:00 CEST · FIDE ID optional. If you have FIDE ID, we auto-fill your public name; if not, type your name manually.
+              23 July 2026 · 16:00 CEST · Only first and last name are required. FIDE ID is optional and auto-fills your official Blitz rating.
             </p>
           </div>
 
@@ -302,18 +302,32 @@ export default function DraganBrakusRegister() {
                         {fideFound.blitz_rating ? <div><span className="opacity-70">Blitz:</span> <b>{fideFound.blitz_rating}</b></div> : null}
                         {fideFound.rapid_rating ? <div><span className="opacity-70">Rapid:</span> <b>{fideFound.rapid_rating}</b></div> : null}
                         {fideFound.standard_rating ? <div><span className="opacity-70">Standard:</span> <b>{fideFound.standard_rating}</b></div> : null}
-                        <div className="sm:col-span-2 text-[11px] opacity-70">Seeding rating will use your FIDE Blitz (fallback Rapid → Standard).</div>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] opacity-80">Is this you?</span>
+                        <Button type="button" size="sm" onClick={() => setFideConfirmed(true)} className="h-8 bg-emerald-500 text-black hover:bg-emerald-400">
+                          Yes, use this player
+                        </Button>
+                        <Button type="button" size="sm" variant="outline" onClick={() => { setFideFound(null); setFideConfirmed(false); setFideError(null); }}>
+                          Not me
+                        </Button>
+                        {fideConfirmed && <span className="text-[11px] font-bold text-emerald-200">Confirmed — Blitz rating will be used in standings.</span>}
                       </div>
                     </div>
                   )}
 
-                  {fideError && form.fide_id.length >= 5 && <p className="mt-2 text-xs text-orange-300">{fideError}</p>}
+                  {fideError && form.fide_id.length >= 5 && (
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-orange-300">
+                      <span>{fideError}</span>
+                      <Button type="button" size="sm" variant="outline" onClick={() => lookupFide()} className="h-7">Retry</Button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="First name *" value={form.first_name} onChange={handle("first_name")} autoComplete="given-name" />
                   <Field label="Last name *" value={form.last_name} onChange={handle("last_name")} autoComplete="family-name" />
-                  <Field label="Country * (3-letter code)" value={form.federation} onChange={handle("federation")} placeholder="SRB" maxLength={3} />
+                  <Field label="Country (optional, 3-letter code)" value={form.federation} onChange={handle("federation")} placeholder="SRB" maxLength={3} />
                   <Field label="FIDE title (optional)" value={form.fide_title} onChange={handle("fide_title")} placeholder="GM / IM / FM / —" maxLength={3} />
                 </div>
 
@@ -323,13 +337,12 @@ export default function DraganBrakusRegister() {
                   className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300 hover:text-amber-200"
                 >
                   {showMore ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                  More details (optional) — city, club, birth year
+                  More details (optional) — city, birth year
                 </button>
 
                 {showMore && (
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="City" value={form.city} onChange={handle("city")} />
-                    <Field label="Club" value={form.club} onChange={handle("club")} />
                     <Field label="Birth year" value={form.birth_year} onChange={handle("birth_year")} inputMode="numeric" maxLength={4} />
                   </div>
                 )}
@@ -341,7 +354,7 @@ export default function DraganBrakusRegister() {
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <Button type="submit" size="lg" disabled={busy || !tournament?.id} className="bg-amber-400 text-black hover:bg-amber-300">
+                  <Button type="submit" size="lg" disabled={busy} className="bg-amber-400 text-black hover:bg-amber-300">
                     {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
                     {user ? "Register Now" : "Continue & Register"}
                   </Button>
