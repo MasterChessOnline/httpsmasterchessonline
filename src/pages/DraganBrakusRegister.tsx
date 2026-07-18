@@ -207,11 +207,6 @@ export default function DraganBrakusRegister() {
       navigate(`/login?redirect=${encodeURIComponent(cleanRedirect())}`);
       return;
     }
-    if (!tournament?.id) {
-      toast({ title: "Tournament not found", description: "Please try again in a moment.", variant: "destructive" });
-      return;
-    }
-
     setBusy(true);
     try {
       const params = new URLSearchParams(window.location.search);
@@ -229,7 +224,7 @@ export default function DraganBrakusRegister() {
         fide_blitz_rating: fideConfirmed ? (fideFound?.blitz_rating ?? null) : null,
       };
       const { data, error } = await supabase.functions.invoke("db-cup-register", {
-        body: { tournament_id: tournament.id, invite_code, player_details },
+        body: { tournament_id: tournament?.id ?? null, invite_code, player_details },
       });
       if (error) {
         const ctx = (error as any).context;
@@ -359,7 +354,7 @@ export default function DraganBrakusRegister() {
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <Button type="submit" size="lg" disabled={busy || !tournament?.id} className="bg-amber-400 text-black hover:bg-amber-300">
+                  <Button type="submit" size="lg" disabled={busy} className="bg-amber-400 text-black hover:bg-amber-300">
                     {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
                     {user ? "Register Now" : "Continue & Register"}
                   </Button>

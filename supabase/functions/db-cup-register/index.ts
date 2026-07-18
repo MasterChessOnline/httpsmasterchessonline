@@ -53,7 +53,6 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: "Unauthorized" }, 401);
 
     const { tournament_id, invite_code, player_details } = await req.json();
-    if (!tournament_id || typeof tournament_id !== "string") return json({ error: "tournament_id required" }, 400);
 
     const svc = createClient(SUPABASE_URL, SERVICE);
 
@@ -66,11 +65,17 @@ Deno.serve(async (req) => {
     }
 
     // Load tournament
-    const { data: t, error: tErr } = await svc
+    let tournamentQuery = svc
       .from("tournaments")
-      .select("id, name, starts_at, max_players, fide_verification_mode, fide_seeding_rating, fide_seeding_fallback")
-      .eq("id", tournament_id).maybeSingle();
+      .select("id, name, starts_at, max_players, fide_verification_mode, fide_seeding_rating, fide_seeding_fallback");
+
+    tournamentQuery = tournament_id && typeof tournament_id === "string"
+      ? tournamentQuery.eq("id", tournament_id)
+      : tournamentQuery.or("name.ilike.%Dragan Brakus%,name.ilike.%DB Chess Cup%").order("starts_at", { ascending: false }).limit(1);
+
+    const { data: t, error: tErr } = await tournamentQuery.maybeSingle();
     if (tErr || !t) return json({ error: "Tournament not found" }, 404);
+    const tournamentId = t.id as string;
 
     // FIDE verification (anti-fraud: server-side lookup overrides client identity)
     detailPatch.first_name = firstText(detailPatch.first_name);
@@ -137,7 +142,7 @@ Deno.serve(async (req) => {
     const { count: regCount } = await svc
       .from("tournament_registrations")
       .select("user_id", { count: "exact", head: true })
-      .eq("tournament_id", tournament_id);
+      .eq("tournament_id", tournamentId);
     if ((regCount || 0) >= (t.max_players || 500)) return json({ error: "Tournament is full" }, 409);
 
     // FIDE-ID uniqueness within tournament
@@ -145,7 +150,7 @@ Deno.serve(async (req) => {
       const { data: dupe } = await svc
         .from("tournament_registrations")
         .select("id, user_id")
-        .eq("tournament_id", tournament_id).eq("fide_id", rawFide).maybeSingle();
+        .eq("tournament_id", tournamentId).eq("fide_id", rawFide).maybeSingle();
       if (dupe && dupe.user_id !== user.id) {
         return json({ error: "This FIDE ID is already registered for this tournament." }, 409);
       }
@@ -155,7 +160,7 @@ Deno.serve(async (req) => {
     const { data: existing } = await svc
       .from("tournament_registrations")
       .select("id, confirmation_sent_at")
-      .eq("tournament_id", tournament_id).eq("user_id", user.id).maybeSingle();
+      .eq("tournament_id", tournamentId).eq("user_id", user.id).maybeSingle();
 
     let registrationId = existing?.id as string | undefined;
     let alreadyRegistered = Boolean(existing);
@@ -164,7 +169,7 @@ Deno.serve(async (req) => {
       const { data: ins, error: insErr } = await svc
         .from("tournament_registrations")
         .insert({
-          tournament_id,
+          tournament_id: tournamentId,
           user_id: user.id,
           referrer_invite_code: invite_code || null,
           rating_at_join: seedingRating ?? 1200,
