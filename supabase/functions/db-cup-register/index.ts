@@ -136,6 +136,7 @@ Deno.serve(async (req) => {
       return json({ error: "First name and last name are required." }, 400);
     }
 
+    let seedingRating: number | null = null;
     const rawFide = (detailPatch.fide_id as string | null | undefined)?.toString().trim() || "";
     let verified: any = null;
     if (rawFide) {
@@ -160,7 +161,6 @@ Deno.serve(async (req) => {
     }
 
     // Compute seeding rating per tournament policy
-    let seedingRating: number | null = null;
     if (verified) {
       const start = (t.fide_seeding_rating as "blitz"|"rapid"|"standard") || "blitz";
       const order: Array<"blitz"|"rapid"|"standard"> = t.fide_seeding_fallback === "cascade"
