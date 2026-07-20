@@ -339,6 +339,24 @@ export default function DraganBrakusRegister() {
               </div>
             ) : (
               <form onSubmit={submit} className="space-y-5">
+                {user && myRegId && (
+                  <div className="flex flex-col gap-3 rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-sm text-emerald-100 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+                      <div>
+                        <p className="font-bold">You are already registered.</p>
+                        <p className="text-xs opacity-80">You can leave the tournament and register again if you need to fix your details.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button asChild size="sm" variant="outline"><Link to="/dragan-brakus/live">View standings</Link></Button>
+                      <Button type="button" size="sm" variant="destructive" onClick={leaveTournament} disabled={leaving}>
+                        {leaving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                        Leave tournament
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 {!user && (
                   <div className="rounded-xl border border-sky-400/30 bg-sky-400/10 p-4 text-sm text-sky-100">
                     Fill the form now. On submit, you will sign in/create an account so MasterChess can send tournament email and notifications.
