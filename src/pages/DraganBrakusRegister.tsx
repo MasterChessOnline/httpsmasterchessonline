@@ -72,6 +72,8 @@ export default function DraganBrakusRegister() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [publicRows, setPublicRows] = useState<PublicStandingRow[]>([]);
+  const [myRegId, setMyRegId] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState(false);
   const [fideBusy, setFideBusy] = useState(false);
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null; profile_url?: string }>(null);
   const [fideConfirmed, setFideConfirmed] = useState(false);
@@ -187,7 +189,7 @@ export default function DraganBrakusRegister() {
   }, []);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) { setMyRegId(null); return; }
     (async () => {
       const [{ data: profile }, { data: priv }] = await Promise.all([
         supabase
@@ -208,8 +210,38 @@ export default function DraganBrakusRegister() {
         fide_title: s.fide_title || profile?.fide_title || "",
         birth_year: s.birth_year || (p?.birth_year ? String(p.birth_year) : ""),
       }));
+
+      if (tournament?.id) {
+        const { data: myReg } = await supabase
+          .from("tournament_registrations")
+          .select("id")
+          .eq("tournament_id", tournament.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setMyRegId(myReg?.id || null);
+      }
     })();
-  }, [user?.id]);
+  }, [user?.id, tournament?.id]);
+
+  const leaveTournament = async () => {
+    if (!myRegId) return;
+    if (!confirm("Leave the tournament? You can register again afterwards.")) return;
+    setLeaving(true);
+    try {
+      const { error } = await supabase.from("tournament_registrations").delete().eq("id", myRegId);
+      if (error) throw error;
+      setMyRegId(null);
+      toast({ title: "You left the tournament", description: "You can register again anytime." });
+      // refresh public list
+      const { data: standings } = await (supabase as any)
+        .rpc("get_public_tournament_standings", { p_tournament_id: tournament?.id || null });
+      setPublicRows((standings || []).sort((a: any, b: any) => (b.fide_blitz_rating || b.rating_at_join || 0) - (a.fide_blitz_rating || a.rating_at_join || 0)));
+    } catch (e: any) {
+      toast({ title: "Could not leave", description: e?.message || String(e), variant: "destructive" });
+    } finally {
+      setLeaving(false);
+    }
+  };
 
   const validate = () => {
     if (!form.first_name.trim()) return "First name is required.";
@@ -307,6 +339,24 @@ export default function DraganBrakusRegister() {
               </div>
             ) : (
               <form onSubmit={submit} className="space-y-5">
+                {user && myRegId && (
+                  <div className="flex flex-col gap-3 rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-sm text-emerald-100 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+                      <div>
+                        <p className="font-bold">You are already registered.</p>
+                        <p className="text-xs opacity-80">You can leave the tournament and register again if you need to fix your details.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button asChild size="sm" variant="outline"><Link to="/dragan-brakus/live">View standings</Link></Button>
+                      <Button type="button" size="sm" variant="destructive" onClick={leaveTournament} disabled={leaving}>
+                        {leaving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+                        Leave tournament
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 {!user && (
                   <div className="rounded-xl border border-sky-400/30 bg-sky-400/10 p-4 text-sm text-sky-100">
                     Fill the form now. On submit, you will sign in/create an account so MasterChess can send tournament email and notifications.
