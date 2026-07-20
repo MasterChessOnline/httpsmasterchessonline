@@ -72,6 +72,8 @@ export default function DraganBrakusRegister() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [publicRows, setPublicRows] = useState<PublicStandingRow[]>([]);
+  const [myRegId, setMyRegId] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState(false);
   const [fideBusy, setFideBusy] = useState(false);
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null; profile_url?: string }>(null);
   const [fideConfirmed, setFideConfirmed] = useState(false);
