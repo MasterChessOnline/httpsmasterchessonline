@@ -137,10 +137,11 @@ Deno.serve(async (req) => {
     }
 
     let seedingRating: number | null = null;
-    const rawFide = (detailPatch.fide_id as string | null | undefined)?.toString().trim() || "";
+    const rawFide = ((detailPatch.fide_id as string | null | undefined)?.toString() || "").replace(/\D/g, "").trim();
     let verified: any = null;
     if (rawFide) {
       if (!/^\d{4,10}$/.test(rawFide)) return json({ error: "FIDE ID must be numbers only — 4 to 10 digits." }, 400);
+      detailPatch.fide_id = rawFide;
       try {
         const r = await fetch(`${SUPABASE_URL}/functions/v1/fide-lookup?id=${rawFide}`, {
           headers: { apikey: ANON, Authorization: `Bearer ${ANON}` },
@@ -174,6 +175,7 @@ Deno.serve(async (req) => {
 
     // Verified data is authoritative — overwrite client-supplied identity
     if (verified) {
+      detailPatch.fide_id = rawFide;
       const nm = String(verified.name);
       const parts = nm.includes(",") ? nm.split(",").map((s: string) => s.trim()) : null;
       const first = parts ? (parts[1] || "") : nm.split(/\s+/).slice(0, -1).join(" ");
@@ -230,7 +232,13 @@ Deno.serve(async (req) => {
           ...detailPatch,
         })
         .select("id").single();
-      if (insErr) return json({ error: insErr.message }, 400);
+      if (insErr) {
+        const message = insErr.message || "Registration failed";
+        if (message.includes("tournament_registrations_unique_fide")) {
+          return json({ error: "This FIDE ID is already registered for this tournament." }, 409);
+        }
+        return json({ error: message }, 400);
+      }
       registrationId = ins.id;
 
 
@@ -250,10 +258,17 @@ Deno.serve(async (req) => {
     if (existing && Object.keys(detailPatch).length > 0) {
       const existingPatch: Record<string, unknown> = { ...detailPatch };
       if (seedingRating) existingPatch.rating_at_join = seedingRating;
-      await svc
+      const { error: updErr } = await svc
         .from("tournament_registrations")
         .update(existingPatch)
         .eq("id", existing.id);
+      if (updErr) {
+        const message = updErr.message || "Registration update failed";
+        if (message.includes("tournament_registrations_unique_fide")) {
+          return json({ error: "This FIDE ID is already registered for this tournament." }, 409);
+        }
+        return json({ error: message }, 400);
+      }
     }
 
     if (Object.keys(detailPatch).length > 0) {

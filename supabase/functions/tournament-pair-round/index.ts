@@ -63,12 +63,12 @@ Deno.serve(async (req) => {
     if (!t) return json({ error: "Tournament not found" }, 404);
     if (!isAdmin && t.created_by !== userId) return json({ error: "Forbidden" }, 403);
 
-    const targetRound = Number(body.round) || (t.current_round || 0) + 1;
+    const targetRound = Number(body.round) || (t.status === "registering" ? 1 : (t.current_round || 0) + 1);
     if (targetRound > (t.total_rounds || 9)) return json({ error: "Round exceeds total_rounds" }, 400);
 
     const { data: regs } = await admin
       .from("tournament_registrations")
-      .select("user_id, score, rating_at_join, bye_rounds, withdrew_at")
+      .select("user_id, score, rating_at_join, fide_blitz_rating, bye_rounds, withdrew_at")
       .eq("tournament_id", tournament_id);
 
     const active = (regs || []).filter((r: any) => !r.withdrew_at);
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
 
     const players: Player[] = active.map((r: any) => ({
       user_id: r.user_id,
-      rating: r.rating_at_join || 1200,
+      rating: r.fide_blitz_rating || r.rating_at_join || 1200,
       score: Number(r.score) || 0,
       colors: [],
       opponents: new Set<string>(),
