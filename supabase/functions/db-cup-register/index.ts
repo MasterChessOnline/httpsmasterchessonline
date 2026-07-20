@@ -212,6 +212,22 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Name uniqueness within tournament (case-insensitive)
+    {
+      const fn = String(detailPatch.first_name).trim();
+      const ln = String(detailPatch.last_name).trim();
+      const { data: nameDupe } = await svc
+        .from("tournament_registrations")
+        .select("id, user_id")
+        .eq("tournament_id", tournamentId)
+        .ilike("first_name", fn)
+        .ilike("last_name", ln)
+        .maybeSingle();
+      if (nameDupe && nameDupe.user_id !== user.id) {
+        return json({ error: "A player with this first and last name is already registered. Please leave the tournament from the other account first." }, 409);
+      }
+    }
+
     // Already registered? -> idempotent success
     const { data: existing } = await svc
       .from("tournament_registrations")
