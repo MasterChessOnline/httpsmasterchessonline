@@ -453,28 +453,8 @@ const Navbar = () => {
                 <Search className="h-4 w-4" />
               </button>
 
-              {/* Donate button — ALWAYS visible (mobile + desktop) */}
-              <Link to="/supporter" aria-label="Donate to MasterChess" title="Support MasterChess">
-                <Button
-                  size="sm"
-                  className="h-9 px-2.5 sm:px-3 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black font-bold shadow-[0_0_18px_rgba(251,191,36,0.4)] hover:shadow-[0_0_26px_rgba(251,191,36,0.6)] transition-all"
-                >
-                  <Heart className="h-4 w-4 fill-current sm:mr-1.5" />
-                  <span className="hidden sm:inline">Donate</span>
-                </Button>
-              </Link>
+              {/* Donate + Rate moved to footer / /supporter to keep top nav uncluttered */}
 
-              {/* Rate MasterChess button — visible from sm up (icon-only on small, with text from md+) */}
-              <Link to="/rate-masterchess" aria-label="Rate MasterChess" title="Rate MasterChess">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-9 px-2.5 md:px-3 border-yellow-400/40 text-yellow-400 hover:bg-yellow-400/10 hover:text-yellow-300 font-semibold"
-                >
-                  <Star className="h-4 w-4 fill-current md:mr-1.5" />
-                  <span className="hidden md:inline">Rate</span>
-                </Button>
-              </Link>
 
               {/* Play Now button */}
               <Link to="/play" className="hidden lg:block">
