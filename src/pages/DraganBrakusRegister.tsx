@@ -24,6 +24,18 @@ type FormState = {
   birth_year: string;
 };
 
+type PublicStandingRow = {
+  registration_id?: string;
+  rank?: number;
+  first_name: string | null;
+  last_name: string | null;
+  federation: string | null;
+  fide_title: string | null;
+  rating_at_join: number;
+  fide_blitz_rating: number | null;
+  fide_verified: boolean | null;
+};
+
 const PENDING_KEY = "mc.dbcup.pendingRegistration";
 const emptyForm: FormState = {
   first_name: "",
@@ -59,6 +71,7 @@ export default function DraganBrakusRegister() {
   const [tournament, setTournament] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [publicRows, setPublicRows] = useState<PublicStandingRow[]>([]);
   const [fideBusy, setFideBusy] = useState(false);
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null; profile_url?: string }>(null);
   const [fideConfirmed, setFideConfirmed] = useState(false);
@@ -158,6 +171,16 @@ export default function DraganBrakusRegister() {
       if (!cancelled) {
         setTournament(data);
         setLoading(false);
+      }
+      const { data: standings } = await (supabase as any)
+        .rpc("get_public_tournament_standings", { p_tournament_id: data?.id || null });
+      if (!cancelled) {
+        const sorted = (standings || []).sort((a: PublicStandingRow, b: PublicStandingRow) => {
+          const ar = a.fide_blitz_rating || a.rating_at_join || 0;
+          const br = b.fide_blitz_rating || b.rating_at_join || 0;
+          return br - ar;
+        });
+        setPublicRows(sorted);
       }
     })();
     return () => { cancelled = true; };
@@ -381,6 +404,49 @@ export default function DraganBrakusRegister() {
                 </div>
               </form>
             )}
+          </div>
+        </Card>
+
+        <Card className="mt-6 overflow-hidden border-amber-300/25 bg-card/80">
+          <div className="flex flex-col gap-3 border-b border-amber-300/15 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <Badge className="mb-2 border-emerald-300/40 bg-emerald-400/15 text-emerald-200">Public list</Badge>
+              <h2 className="text-xl font-black">Registered players</h2>
+              <p className="text-xs text-muted-foreground">Everyone can see who is already registered before joining.</p>
+            </div>
+            <Button asChild variant="outline" size="sm"><Link to="/dragan-brakus/live">Full standings</Link></Button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-white/5 text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 text-left">#</th>
+                  <th className="px-3 py-2 text-left">Player</th>
+                  <th className="px-3 py-2 text-left">Fed</th>
+                  <th className="px-3 py-2 text-right">Blitz</th>
+                </tr>
+              </thead>
+              <tbody>
+                {publicRows.length === 0 && (
+                  <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">No players registered yet.</td></tr>
+                )}
+                {publicRows.slice(0, 12).map((r, i) => {
+                  const name = [r.last_name, r.first_name].filter(Boolean).join(", ") || "Player";
+                  return (
+                    <tr key={r.registration_id || i} className="border-t border-white/5">
+                      <td className="px-3 py-2 font-semibold">{i + 1}</td>
+                      <td className="px-3 py-2">
+                        {r.fide_title && <span className="mr-1 font-bold text-yellow-400">{r.fide_title}</span>}
+                        {name}
+                        {r.fide_verified && <span className="ml-1 text-emerald-300">✓</span>}
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground">{r.federation || "—"}</td>
+                      <td className="px-3 py-2 text-right font-semibold text-emerald-300">{r.fide_blitz_rating || r.rating_at_join || "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </Card>
       </main>
