@@ -46,22 +46,31 @@ export default function DraganBrakusLive() {
 
   async function load() {
     let id = params.id || tournamentId;
-    if (!id) {
-      const { data } = await supabase
-        .from("tournaments").select("*")
-        .ilike("name", "%Dragan Brakus%")
-        .order("starts_at", { ascending: false }).limit(1).maybeSingle();
-      if (!data) { setLoading(false); return; }
-      id = data.id; setT(data); setTournamentId(id);
-    } else if (!t) {
-      const { data } = await supabase.from("tournaments").select("*").eq("id", id).single();
-      setT(data);
+    const { data: tournamentData } = !id
+      ? await supabase
+          .from("tournaments").select("*")
+          .ilike("name", "%Dragan Brakus%")
+          .order("starts_at", { ascending: false }).limit(1).maybeSingle()
+      : !t
+        ? await supabase.from("tournaments").select("*").eq("id", id).maybeSingle()
+        : { data: null } as any;
+
+    if (tournamentData) {
+      id = tournamentData.id;
+      setT(tournamentData);
+      setTournamentId(tournamentData.id);
     }
+
     const { data: rpcRows, error: rpcError } = await (supabase as any)
-      .rpc("get_public_tournament_standings", { p_tournament_id: id });
+      .rpc("get_public_tournament_standings", { p_tournament_id: id || null });
 
     let regs = rpcRows;
-    if (rpcError) {
+    if (!id && rpcRows?.[0]?.tournament_id) {
+      id = rpcRows[0].tournament_id;
+      setTournamentId(id);
+    }
+
+    if (rpcError && id) {
       const { data: fallbackRows } = await supabase
         .from("tournament_registrations")
         .select("id, user_id, score, buchholz, buchholz_cut1, progressive_score, performance_rating, wins, first_name, last_name, federation, fide_title, rating_at_join, fide_verified, fide_blitz_rating")
@@ -161,14 +170,7 @@ export default function DraganBrakusLive() {
               </thead>
               <tbody>
                 {loading && <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">Loading…</td></tr>}
-                {!loading && rows.length === 0 && !user && !authLoading && (
-                  <tr>
-                    <td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">
-                      Sign in to view the participant list. <Link to={`/login?redirect=${encodeURIComponent("/dragan-brakus/live")}`} className="text-yellow-400 underline">Login</Link>
-                    </td>
-                  </tr>
-                )}
-                {!loading && rows.length === 0 && (user || authLoading) && (
+                {!loading && rows.length === 0 && (
                   <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">No players visible yet. <Link to="/dragan-brakus/register" className="text-yellow-400 underline">Register now</Link>.</td></tr>
                 )}
                 {rows.map((r, i) => {
