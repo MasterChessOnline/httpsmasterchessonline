@@ -69,6 +69,7 @@ export default function DraganBrakusRegister() {
 
   const handle = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = key === "fide_id" ? e.target.value.replace(/\D/g, "").slice(0, 10) : e.target.value;
+    if (key === "fide_id") setFideConfirmed(false);
     setForm((s) => ({ ...s, [key]: value }));
   };
 
@@ -299,7 +300,7 @@ export default function DraganBrakusRegister() {
                       {!fideBusy && fideError && form.fide_id.length >= 5 && <AlertCircle className="h-4 w-4 text-orange-400" />}
                     </div>
                   </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground">FIDE ID must be numbers only. It is optional; first name and last name are enough to register.</p>
+                  <p className="mt-2 text-[11px] text-muted-foreground">FIDE ID must be numbers only. It is optional, but one FIDE ID can be used only once in this tournament.</p>
                   {fideFound && (
                     <div className="mt-3 rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-3 text-xs text-emerald-100">
                       <div className="mb-2 flex items-center gap-2">

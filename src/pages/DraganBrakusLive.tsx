@@ -217,7 +217,7 @@ export default function DraganBrakusLive() {
         )}
 
         <p className="text-xs text-muted-foreground mt-6">
-          Before round 1 players are seeded by FIDE Blitz rating. After games start: Points → Buchholz Cut 1 → Buchholz → Progressive → Blitz rating.
+          Before round 1 players are seeded by FIDE Blitz rating. Pairings use Swiss top-half vs bottom-half inside each score group: 100 players → top 50 vs bottom 50; after every round, players with the same points are sorted by rating and paired the same way. Standings tie-breaks: Points → Buchholz Cut 1 → Buchholz → Progressive → Blitz rating.
         </p>
       </main>
       <Footer />
