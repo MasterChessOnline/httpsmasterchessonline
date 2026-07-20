@@ -189,7 +189,7 @@ export default function DraganBrakusRegister() {
   }, []);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) { setMyRegId(null); return; }
     (async () => {
       const [{ data: profile }, { data: priv }] = await Promise.all([
         supabase
@@ -210,8 +210,38 @@ export default function DraganBrakusRegister() {
         fide_title: s.fide_title || profile?.fide_title || "",
         birth_year: s.birth_year || (p?.birth_year ? String(p.birth_year) : ""),
       }));
+
+      if (tournament?.id) {
+        const { data: myReg } = await supabase
+          .from("tournament_registrations")
+          .select("id")
+          .eq("tournament_id", tournament.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setMyRegId(myReg?.id || null);
+      }
     })();
-  }, [user?.id]);
+  }, [user?.id, tournament?.id]);
+
+  const leaveTournament = async () => {
+    if (!myRegId) return;
+    if (!confirm("Leave the tournament? You can register again afterwards.")) return;
+    setLeaving(true);
+    try {
+      const { error } = await supabase.from("tournament_registrations").delete().eq("id", myRegId);
+      if (error) throw error;
+      setMyRegId(null);
+      toast({ title: "You left the tournament", description: "You can register again anytime." });
+      // refresh public list
+      const { data: standings } = await (supabase as any)
+        .rpc("get_public_tournament_standings", { p_tournament_id: tournament?.id || null });
+      setPublicRows((standings || []).sort((a: any, b: any) => (b.fide_blitz_rating || b.rating_at_join || 0) - (a.fide_blitz_rating || a.rating_at_join || 0)));
+    } catch (e: any) {
+      toast({ title: "Could not leave", description: e?.message || String(e), variant: "destructive" });
+    } finally {
+      setLeaving(false);
+    }
+  };
 
   const validate = () => {
     if (!form.first_name.trim()) return "First name is required.";
