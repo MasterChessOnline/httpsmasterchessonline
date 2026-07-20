@@ -253,6 +253,9 @@ Deno.serve(async (req) => {
         if (message.includes("tournament_registrations_unique_fide")) {
           return json({ error: "This FIDE ID is already registered for this tournament." }, 409);
         }
+        if (message.includes("tournament_registrations_unique_name")) {
+          return json({ error: "A player with this first and last name is already registered. Please leave the tournament from the other account first." }, 409);
+        }
         return json({ error: message }, 400);
       }
       registrationId = ins.id;
