@@ -1,60 +1,88 @@
+# DB Chess Cup — Reschedule + Auto-Cleanup + Growth Playbook
 
-## Šta ćemo uraditi (i zašto)
+## 1. Reschedule Dragan Brakus Cup
 
-Cilj (kao ChessStalker FIDE tab): ukucaš svoj **FIDE ID** i sajt odmah pokaže tvoje **pravo ime, titulu, državu i pravi FIDE blic rejting** — i taj rejting/ime idu direktno u **DB Cup standings** i u tvoj profil na sajtu.
+Update the seeded tournament row `Dragan Brakus Humanitarian Blitz`:
+- `starts_at` → **2026-08-10 16:00** (Europe/Belgrade → stored as UTC 14:00)
+- `registration_opens_at` → now (still open)
+- `status` → `registering`
+- Reset `current_round` to 0 if it drifted
 
-Plumbing već postoji na tri mesta:
-1. `/dragan-brakus/register` — poziva `fide-lookup` čim ukucaš ID.
-2. `/signup` — takođe poziva `fide-lookup` (dodato prošli put).
-3. `DraganBrakusLive` standings već čita `first_name`, `last_name`, `fide_title`, `federation`, `fide_blitz_rating` iz `tournament_registrations` i pravilno ih prikazuje.
+Also refresh any hardcoded date strings in copy:
+- `src/pages/DraganBrakusRegister.tsx` (hero date line)
+- `src/pages/DraganBrakusLive.tsx` (if any date mention)
+- `docs/DRAGAN_BRAKUS_GBP_EVENT.md` (marketing pack)
+- `public/sitemap-tournaments.xml` lastmod bump
 
-**Provereno sad**: pozvao sam našu edge funkciju za Magnus Carlsena i vratila je `name: "International"` sa svim rejtinzima `null`. To znači da parser u `supabase/functions/fide-lookup/index.ts` više ne odgovara stvarnom HTML-u na `ratings.fide.com` (menjali su markup). Sve ostalo radi — samo je izvor podataka slep.
+## 2. Auto-delete tournament if nobody joins
 
-## Fix (jedan fajl + verifikacija)
+New edge function `tournament-auto-cleanup` (scheduled via `pg_cron` every 5 min):
+- Finds tournaments where `starts_at <= now()` AND `status IN ('registering','upcoming')`
+- Counts `tournament_registrations` for each
+- If **0 registrations** → hard delete the row (cascade removes pairings, chat, prizes)
+- If ≥1 registration → transition to `active` and let existing pair-round cron take over
 
-### 1) Rewrite `supabase/functions/fide-lookup/index.ts`
+This makes the whole site self-clean: empty tournaments vanish, no dead links.
 
-Sadašnji regexi (`std\.?\s*rating…`, `<div[^>]*>(\d{3,4})`) su iz starog dizajna. Novi profil koristi drugačiju strukturu (tabela sa "Standard | Rapid | Blitz" i profilni blok sa imenom/federacijom/titulom).
+Also add a small UI safeguard on `/tournaments` list: hide rows where `status='completed' AND player_count=0` (belt-and-suspenders).
 
-Uraditi:
-- Skinuti `https://ratings.fide.com/profile/{id}` sa realnim UA i pratiti redirekte.
-- **Ime**: uzeti iz `<title>...</title>` (`"Prezime, Ime FIDE Chess Profile"`) — najpouzdaniji signal, uvek postoji; ako nema zareza uzeti prvi neprazan `<h1>`/`<h2>` čvor u profilnom bloku i preskočiti sekcije poput "International"/"Federation".
-- **Federacija**: iz linka `href="/rating/{FED}/"` ili iz `<img class="flag" ... title="SRB">` — ne oslanjati se na tekstualne labele.
-- **Titula**: iz reda "FIDE title" u tabeli osnovnih podataka; ako nema — `null`.
-- **Rejtinzi (Std/Rapid/Blitz)**: pronaći tabelu čiji redovi imaju kolone "std", "rapid", "blitz"; uzeti prvi (tekući) mesečni red. Fallback: skenirati sve `\b(\d{4})\b` iznose u sekciji "Ratings" u paru sa oznakama kolone.
-- **Godina rođenja**: iz reda "B-Year" ili iz `<title>` ako je prisutna.
+## 3. Growth playbook — what Lichess & Chess.com actually did
 
-Dodati **fallback izvore** (redom, dok jedan ne uspe):
-- `https://ratings.fide.com/profile/{id}` (glavno)
-- `https://ratings.fide.com/incl_profile.php?event={id}` (stari, ponekad još radi)
-- `https://app.fide.com/api/v1/client/players/{id}` (nezvanično; JSON — ako vrati 200 i ima `name`/`ratings`, prevesti u naš oblik)
+Written up as `docs/GROWTH_LICHESS_CHESSCOM_PLAYBOOK.md` and 3 concrete features to implement now:
 
-Zadržati postojeći 6h cache i CORS. Dodati `?debug=1` opciju koja vraća sirov HTML u response (samo za admina) da bismo brzo dijagnostikovali sledeću promenu markup-a bez novog deploya.
+### What worked for them
+- **Lichess**: 100% free + open source → HN/Reddit love; puzzle streak with daily leaderboard; TV channels (spectate top games live); studies (shareable analysis boards → massive backlinks); zero ads; API that bloggers embed.
+- **Chess.com**: Bot personalities with faces + voice; Daily Puzzle email; Chess.com News (own editorial arm, ranks in Google News); influencer deals (Hikaru, Botez); paid Google Ads on "play chess online"; account-required to view games → forces signup.
 
-### 2) Ništa se ne dira u UI-ju
+### 3 features to build now (pulled from that list)
 
-`/dragan-brakus/register`, `/signup` i `DraganBrakusLive` već rade ispravno kad `fide-lookup` vrati tačne podatke — nema izmene komponenti.
+**A. MasterChess TV (`/tv`)** — Lichess-style live channel  
+Auto-picks the highest-rated ongoing game every 15s and streams it with spectator count + chat. Zero-friction landing page (no login to watch). Massive session-time boost.
 
-### 3) Verifikacija (radim odmah po deploy-u)
+**B. Studies / Shareable Analysis Boards (`/study/:id`)**  
+User pastes PGN → gets a permanent shareable URL with embedded board, comments per move, and OG image. This is the #1 backlink magnet on Lichess — chess bloggers embed studies everywhere.
 
-Curl-om iz sandbox-a proverim 3 poznata ID-a i potvrdim vidljivost u UI-u:
-- `1503014` Magnus Carlsen → očekivano `Carlsen, Magnus · NOR · GM · Blitz ~2890`
-- `14106503` (SRB primer) → očekivano ime + SRB + blitz
-- `2020009` Ju Wenjun (WGM) → titula + CHN + blitz
+**C. Daily Puzzle Email + Streak** (already have `/puzzles`; add retention loop)  
+Cron sends one puzzle at 09:00 local time to opted-in users. Solving keeps streak alive. Chess.com's #1 D30 retention driver.
 
-Zatim otvorim `/dragan-brakus/register`, unesem `1503014`, kliknem Register i potvrdim da u `DraganBrakusLive` standings-u red pokazuje **pravo ime, GM oznaku, NOR i pravi blic rejting** (a ne 1200 default).
+### Marketing channel checklist (concrete, this week)
+1. **Product Hunt launch** — schedule for Tue Aug 12 (2 days after DB Cup) with tournament recap as proof.
+2. **Reddit** — r/chess "I built a free tournament platform, we just ran a humanitarian blitz for [cause]" (soft, story-first).
+3. **Hacker News** — Show HN: MasterChess TV (open the TV feature above).
+4. **Google Ads** — €5/day on "play chess free online serbia/balkans" (geo-fenced, cheap CPC).
+5. **YouTube Shorts** — auto-clip every DB Cup decisive game via existing `og-match-story` → post to DailyChess_12.
+6. **Wikipedia** — create Serbian-language stub for Dragan Brakus with cite to our tournament page.
+7. **GBP posts** — weekly, using `docs/GBP_WEEKLY_POSTS_CALENDAR.md`.
 
-## Tehnički detalji
+## Technical section
 
-- Fajl koji menjamo: `supabase/functions/fide-lookup/index.ts` (parser + fallback fetch lanac).
-- Ne diramo bazu, ne diramo migracije, ne diramo `db-cup-register` (već ispravno konzumira polja `name/federation/title/blitz_rating/…`).
-- Ne diramo `DraganBrakusLive.tsx` (već prikazuje `fide_blitz_rating` sa emerald bojom i `fide_title` zlatnom).
-- Ne diramo `Signup.tsx` (već koristi isti `fide-lookup` odgovor).
+```text
+Migration:
+  UPDATE tournaments
+    SET starts_at = '2026-08-10 14:00:00+00',
+        status   = 'registering',
+        current_round = 0
+    WHERE name = 'Dragan Brakus Humanitarian Blitz';
 
-## Šta se NEĆE dešavati
+Edge fn: supabase/functions/tournament-auto-cleanup/index.ts
+  - service-role client
+  - SELECT id FROM tournaments WHERE starts_at<=now() AND status IN ('registering','upcoming')
+  - for each: count registrations; if 0 → DELETE, else UPDATE status='active'
 
-- Neću praviti novi turnir, novu tabelu, ni migraciju.
-- Neću skidati/menjati FIDE brendiranje ili pravila; samo čitamo javne profile stranice.
-- Neću tražiti nijedan tajni ključ — sve je javni HTTP GET.
+Cron (via supabase--insert, not migration — contains project URL/anon):
+  select cron.schedule('tournament-auto-cleanup','*/5 * * * *', $$ net.http_post(...) $$);
 
-Kad odobriš, prelazim u build i menjam samo taj jedan fajl pa odmah verifikujem sa Magnusovim ID-om.
+New page: src/pages/MasterChessTV.tsx  (+ route /tv in App.tsx)
+New page: src/pages/Study.tsx + src/pages/StudyView.tsx  (+ /study, /study/:id)
+New table: public.studies (id, owner_id, title, pgn, comments jsonb, is_public, slug)
+  full GRANTs + RLS (public SELECT when is_public, owner full CRUD)
+
+Daily puzzle email: extend existing resend-campaign fn with a puzzle-of-the-day cron.
+```
+
+## Out of scope
+- Redesigning Home (per project memory veto).
+- Any competitor-brand mentions in UI (Lichess/Chess.com stay in internal docs only).
+- Adding fake/ghost players to make DB Cup look full.
+
+Approve to build.
