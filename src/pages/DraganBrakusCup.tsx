@@ -207,7 +207,7 @@ export default function DraganBrakusCup() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="Dragan Brakus Cup — Official MasterChess Blitz Tournament"
-        description="Dragan Brakus Cup — 23 July 2026, 16:00 CEST. 9-round Swiss Blitz (3+2), up to 500 players, live pairings, FIDE-style tie-breaks, Chess-Results export."
+        description="Dragan Brakus Cup — 10 August 2026, 16:00 CEST. 9-round Swiss Blitz (3+2), up to 500 players, live pairings, FIDE-style tie-breaks, Chess-Results export."
         path="/dragan-brakus"
         type="website"
         jsonLd={jsonLd}
@@ -231,7 +231,7 @@ export default function DraganBrakusCup() {
           </p>
           <div className="mt-6 flex flex-wrap gap-2 text-sm">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
-              <Calendar className="h-4 w-4 text-yellow-400" /> 23 July 2026 · 16:00 CEST
+              <Calendar className="h-4 w-4 text-yellow-400" /> 10 August 2026 · 16:00 CEST
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
               <Clock className="h-4 w-4 text-yellow-400" /> Blitz 3+2
@@ -308,7 +308,7 @@ export default function DraganBrakusCup() {
           <div className="mt-4">
             <TournamentInvitePanel
               url={`${typeof window !== "undefined" ? window.location.origin : "https://masterchess.live"}/dragan-brakus?utm_source=share`}
-              title="DB Chess Cup — 23 July 2026"
+              title="DB Chess Cup — 10 August 2026"
               message="Join me in the DB Chess Cup on MasterChess."
             />
           </div>
