@@ -11,8 +11,8 @@ URL: https://business.google.com/posts/
 
 **Title:** Dragan Brakus Cup — MasterChess Blitz
 
-**Start:** 23 July 2026, 16:00 (CET)
-**End:** 23 July 2026, 19:30 (CET)
+**Start:** 10 August 2026, 16:00 (CET)
+**End:** 10 August 2026, 19:30 (CET)
 
 **Cover photo:** `/og-image.jpg` (or a 1200x900 tournament banner)
 

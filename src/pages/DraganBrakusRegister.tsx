@@ -328,7 +328,7 @@ export default function DraganBrakusRegister() {
             <Badge className="mb-3 border-amber-300/40 bg-amber-400/20 text-amber-200">Registration open</Badge>
             <h1 className="text-3xl font-black sm:text-4xl">Register for {title}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              23 July 2026 · 16:00 CEST · Only first and last name are required. FIDE ID is optional and auto-fills your official Blitz rating.
+              10 August 2026 · 16:00 CEST · Only first and last name are required. FIDE ID is optional and auto-fills your official Blitz rating.
             </p>
           </div>
 
