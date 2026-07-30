@@ -80,12 +80,18 @@ export default function BotWars() {
             >
               <Card className="p-5 h-full flex flex-col border-primary/20 bg-card/70 backdrop-blur">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={bot.avatar}
-                    alt={`${bot.name} chess bot avatar`}
-                    loading="lazy"
-                    className="h-12 w-12 rounded-full object-cover border border-primary/30"
-                  />
+                  {bot.avatar.includes("/") ? (
+                    <img
+                      src={bot.avatar}
+                      alt={`${bot.name} chess bot avatar`}
+                      loading="lazy"
+                      className="h-12 w-12 rounded-full object-cover border border-primary/30 shrink-0"
+                    />
+                  ) : (
+                    <div className="h-12 w-12 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center text-2xl shrink-0">
+                      {bot.avatar}
+                    </div>
+                  )}
                   <div className="min-w-0">
                     <div className="font-bold truncate">
                       {bot.countryFlag} {bot.name}
