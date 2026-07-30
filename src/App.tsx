@@ -27,6 +27,11 @@ const IgBonus = lazy(() => import("./pages/IgBonus"));
 const StyleQuiz = lazy(() => import("./pages/StyleQuiz"));
 const BeatMe = lazy(() => import("./pages/BeatMe"));
 const BeatNikola = lazy(() => import("./pages/BeatNikola"));
+const Manifesto = lazy(() => import("./pages/Manifesto"));
+const StreamerApply = lazy(() => import("./pages/StreamerApply"));
+const SponsorTournament = lazy(() => import("./pages/SponsorTournament"));
+const BotWars = lazy(() => import("./pages/BotWars"));
+const Successors = lazy(() => import("./pages/Successors"));
 
 // Lazy-loaded routes — split into separate chunks to shrink initial bundle
 const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
