@@ -76,8 +76,10 @@ Deno.serve(async (req) => {
     // Manual invocations must come from an admin; the cron uses the service key.
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace("Bearer ", "").trim();
+    const cronSecret = Deno.env.get("NEWS_JACKER_CRON_SECRET");
+    const isCron = !!cronSecret && req.headers.get("x-cron-secret") === cronSecret;
     const isService = token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!isService) {
+    if (!isService && !isCron) {
       const anon = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_ANON_KEY")!,
