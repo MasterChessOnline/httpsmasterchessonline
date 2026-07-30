@@ -1,88 +1,89 @@
-# DB Chess Cup — Reschedule + Auto-Cleanup + Growth Playbook
+# Dynasty Playbook — Brutalnije od Chess.com
 
-## 1. Reschedule Dragan Brakus Cup
+Chess.com nije porastao slučajno. Kupili su konkurenciju, potpisali svakog većeg strimera pre nego što je bio slavan, i pretvorili šah u reality TV. Evo šta ćemo mi uraditi — istim tempom, ali agresivnije, jer smo mali i brzi.
 
-Update the seeded tournament row `Dragan Brakus Humanitarian Blitz`:
-- `starts_at` → **2026-08-10 16:00** (Europe/Belgrade → stored as UTC 14:00)
-- `registration_opens_at` → now (still open)
-- `status` → `registering`
-- Reset `current_round` to 0 if it drifted
+## Šta je Chess.com stvarno uradio (kratko)
 
-Also refresh any hardcoded date strings in copy:
-- `src/pages/DraganBrakusRegister.tsx` (hero date line)
-- `src/pages/DraganBrakusLive.tsx` (if any date mention)
-- `docs/DRAGAN_BRAKUS_GBP_EVENT.md` (marketing pack)
-- `public/sitemap-tournaments.xml` lastmod bump
+1. **Acquisitions** — kupili ChessKid, PlayMagnus, Aimchess, Chessable, iChess, ChessTempo. Progutali celu industriju.
+2. **PogChamps** — turnir NEšahista (Twitch strimera) 2020. Doveo je 2M+ novih naloga za 2 nedelje.
+3. **Hikaru & Botez ekskluziva** — potpisali sve pre nego što je Netflix pustio Queen's Gambit.
+4. **Bot personalities** — 60+ botova sa licem, glasom, memovima → svaki bot je svoj marketing kanal.
+5. **Speed Chess Championship** — sopstvena liga sa nagradnim fondom, prenosi se kao NBA.
+6. **Chess.com/news** — puna redakcija, dominira "chess news" u Google-u.
+7. **Freemium wall** — analiza, lekcije, više puzzle-a → paywall posle 3 dana. Konverzija 4-6%.
+8. **Fair Play + banovi slavnih** → svaki ban je viralna vest (Hans Niemann case je bio besplatan PR mesecima).
 
-## 2. Auto-delete tournament if nobody joins
+## 10 poteza brutalnijih od toga (za MasterChess)
 
-New edge function `tournament-auto-cleanup` (scheduled via `pg_cron` every 5 min):
-- Finds tournaments where `starts_at <= now()` AND `status IN ('registering','upcoming')`
-- Counts `tournament_registrations` for each
-- If **0 registrations** → hard delete the row (cascade removes pairings, chat, prizes)
-- If ≥1 registration → transition to `active` and let existing pair-round cron take over
+### 1. **Napravi PROTIVNIKA, ne konkurenta** — "Chess.com killed the small clubs" narativ
+Chess.com je gigant. Mali klubovi na Balkanu umiru. Mi smo Robin Hood.
+Landing page `/manifesto` sa video-om Nikole: *"They took chess from the streets. We're taking it back."* → svaka priča o nama počinje ovim.
 
-This makes the whole site self-clean: empty tournaments vanish, no dead links.
+### 2. **Nikola vs Svet** — javni izazov jednom GM-u dnevno
+Nikola (13) javno izaziva jednog poznatog igrača dnevno preko Twittera/YouTube-a. Čak i ako 1 od 30 odgovori, to je viralno. Ako niko ne odgovori, to je takođe priča: *"Nobody wants to play the 13-year-old"*.
+→ Automatizovano preko `linkedin-publish` + TikTok cron-a. Feature na sajtu: `/challenge-of-the-day`.
 
-Also add a small UI safeguard on `/tournaments` list: hide rows where `status='completed' AND player_count=0` (belt-and-suspenders).
+### 3. **Balkan Bounty** — €1000 za svakog ko pobedi Nikolu
+Realan cash prize (može biti donacija ili sponzorstvo). Landing `/beat-nikola` sa live leaderboard-om. Ovo je klik-magnet za regionalne medije. Cena po članku je 0€ — mediji sami pišu.
 
-## 3. Growth playbook — what Lichess & Chess.com actually did
+### 4. **StreamerHub 500** — potpiši 500 mikro-strimera pre nego što porastu
+Chess.com je potpisao 20 top strimera. Mi ćemo 500 mikro-strimera (500-5k pratilaca) sa affiliate kodom + revenue share. Svaki im donosi 5-20 signup-a mesečno = 5000+ mesečno besplatno.
+→ Postoji `partner_applications` tabela. Treba `/streamers/apply` javna stranica + auto-approve flow.
 
-Written up as `docs/GROWTH_LICHESS_CHESSCOM_PLAYBOOK.md` and 3 concrete features to implement now:
+### 5. **"Naslednici Fischer-a"** — reality serija na TikTok-u
+30-dnevni "reality" gde 8 mladih igrača (12-16) igra svaki dan, ispada 1 dnevno, poslednji uzima €500. Kamera prati emocije, ne poteze. Ovo je **PogChamps ali za decu i sa dramom** — jer deca su emotivnija i to je clip-food.
+→ Nova sekcija `/nasledinici` sa dnevnim epizodama, glasanje ko je "villain of the day".
 
-### What worked for them
-- **Lichess**: 100% free + open source → HN/Reddit love; puzzle streak with daily leaderboard; TV channels (spectate top games live); studies (shareable analysis boards → massive backlinks); zero ads; API that bloggers embed.
-- **Chess.com**: Bot personalities with faces + voice; Daily Puzzle email; Chess.com News (own editorial arm, ranks in Google News); influencer deals (Hikaru, Botez); paid Google Ads on "play chess online"; account-required to view games → forces signup.
+### 6. **Bot Wars** — bot personalities koji GOVORE tvojim jezikom
+Svaki bot sa balkanskim licem/imenom: *"Deda Mile 1200", "Baba Vera 1400", "Cika Miloš 1800"*. Svaki priča trash-talk na srpskom sa audio-clip-ovima. Chess.com botovi su generični Amerikanci. Naši su iz komšiluka.
+→ Proširiti `bot-profiles.ts` na 20 balkanskih likova + Nikola-voice sample-i.
 
-### 3 features to build now (pulled from that list)
+### 7. **Live Ban Wall** — javna anti-cheat transparentnost
+Kad banujemo cheat-era, javno objavimo (bez imena, sa rating-om i statistikom). Chess.com to krije. Mi to koristimo kao marketing: *"Danas smo banovali 47 cheat-era. Fair play matters."*
+→ `/fair-play` javna live stranica. Već imamo `tournament_anti_cheat_flags`.
 
-**A. MasterChess TV (`/tv`)** — Lichess-style live channel  
-Auto-picks the highest-rated ongoing game every 15s and streams it with spectator count + chat. Zero-friction landing page (no login to watch). Massive session-time boost.
+### 8. **Sponsored Tournaments as a Service** — bilo koja firma sponzoriše svoj turnir za €50
+Ne čekamo Chess.com da zove Coca-Colu. Local pekara može sponzorisati "Pekara X Blitz" za €50 i staviti svoj logo. Za pekaru je to reklama, za nas je to prihod + backlink.
+→ `/sponsor-a-tournament` self-serve forma + Stripe.
 
-**B. Studies / Shareable Analysis Boards (`/study/:id`)**  
-User pastes PGN → gets a permanent shareable URL with embedded board, comments per move, and OG image. This is the #1 backlink magnet on Lichess — chess bloggers embed studies everywhere.
+### 9. **Programska preuzimanja** — 500 lendinga za long-tail
+Već imamo `seo-content-generator`. Sledeći nivo:
+- `/vs/hikaru`, `/vs/magnus`, `/vs/hans` — "kako bi izgledao match" sa AI simulacijom
+- `/prep-for/{opening}` — 3-minutna priprema pred meč
+- `/rating/{500..2500}` — po jedna strana za svaki rating: šta znaš, šta učiš dalje
 
-**C. Daily Puzzle Email + Streak** (already have `/puzzles`; add retention loop)  
-Cron sends one puzzle at 09:00 local time to opted-in users. Solving keeps streak alive. Chess.com's #1 D30 retention driver.
+Chess.com ima ~50k stranica. Cilj: 5k za 30 dana.
 
-### Marketing channel checklist (concrete, this week)
-1. **Product Hunt launch** — schedule for Tue Aug 12 (2 days after DB Cup) with tournament recap as proof.
-2. **Reddit** — r/chess "I built a free tournament platform, we just ran a humanitarian blitz for [cause]" (soft, story-first).
-3. **Hacker News** — Show HN: MasterChess TV (open the TV feature above).
-4. **Google Ads** — €5/day on "play chess free online serbia/balkans" (geo-fenced, cheap CPC).
-5. **YouTube Shorts** — auto-clip every DB Cup decisive game via existing `og-match-story` → post to DailyChess_12.
-6. **Wikipedia** — create Serbian-language stub for Dragan Brakus with cite to our tournament page.
-7. **GBP posts** — weekly, using `docs/GBP_WEEKLY_POSTS_CALENDAR.md`.
+### 10. **News-jacking bot** — automatski članak čim se desi šahovska drama
+Cron: skenira šahovske vesti (RSS + Twitter). Čim se desi drama (ban, kontroverza, GM izjava) → za 5 minuta imamo članak sa svojim uglom. Ovo je *kako je Kurir postao Kurir* — brzina, ne kvalitet.
+→ Nova `news-jacker` edge funkcija + cron svakih 15 min.
 
-## Technical section
+## Šta bih napravio odmah (ovaj sprint)
 
-```text
-Migration:
-  UPDATE tournaments
-    SET starts_at = '2026-08-10 14:00:00+00',
-        status   = 'registering',
-        current_round = 0
-    WHERE name = 'Dragan Brakus Humanitarian Blitz';
+Ne mogu sve odjednom. Predlažem u ovom redu (svaka stavka je 1 build-turn):
 
-Edge fn: supabase/functions/tournament-auto-cleanup/index.ts
-  - service-role client
-  - SELECT id FROM tournaments WHERE starts_at<=now() AND status IN ('registering','upcoming')
-  - for each: count registrations; if 0 → DELETE, else UPDATE status='active'
+1. `/manifesto` + `/beat-nikola` landing sa live leaderboard-om (najveći PR-magnet).
+2. `/streamers/apply` self-serve partner flow (500 novih kanala u pipeline-u).
+3. Bot Wars — 20 balkanskih botova sa trash-talk clip-ovima.
+4. Sponsor-a-tournament self-serve forma.
+5. News-jacker cron.
+6. Nasledinici Fischer-a landing (turnir organizujemo posle DB Cup-a).
 
-Cron (via supabase--insert, not migration — contains project URL/anon):
-  select cron.schedule('tournament-auto-cleanup','*/5 * * * *', $$ net.http_post(...) $$);
+## Šta neću predložiti (i zašto)
 
-New page: src/pages/MasterChessTV.tsx  (+ route /tv in App.tsx)
-New page: src/pages/Study.tsx + src/pages/StudyView.tsx  (+ /study, /study/:id)
-New table: public.studies (id, owner_id, title, pgn, comments jsonb, is_public, slug)
-  full GRANTs + RLS (public SELECT when is_public, owner full CRUD)
+- **Kupovina konkurencije** — nemamo cash-flow Chess.com-a.
+- **Skupi influencer deal-ovi** — €10k-100k za jednog GM-a je van budžeta. Umesto toga → 500 mikro-strimera.
+- **Sopstvena TV liga** — bez publike prvo, prazna arena. Radimo za 6 meseci kad imamo bazu.
 
-Daily puzzle email: extend existing resend-campaign fn with a puzzle-of-the-day cron.
-```
+## Tehnički detalji
 
-## Out of scope
-- Redesigning Home (per project memory veto).
-- Any competitor-brand mentions in UI (Lichess/Chess.com stay in internal docs only).
-- Adding fake/ghost players to make DB Cup look full.
+- Sve nove stranice: statične + JSON-LD + auto-IndexNow ping (već imamo infra).
+- Sve nove edge funkcije: `verify_jwt = false` za javne, admin-only za CMS delove.
+- Nova tabela `public_challenges` za "Nikola vs Svet" dnevne izazove.
+- Nova tabela `streamer_partners` (ili proširiti `partner_applications`) sa affiliate tracking-om.
+- News-jacker koristi `LOVABLE_API_KEY` (Gemini) za generisanje ugla za 30s.
+- Sponsor-a-tournament preko postojećeg Stripe konektora → `tournament_sponsors` tabela već postoji.
 
-Approve to build.
+## Pitanje pre nego što krenem
+
+Da li da krenem sa **svih 6 iz "odmah" liste redom** (6 turnova), ili prvo samo **TOP 2 (Manifesto + Beat Nikola)** da vidimo reakciju pre ostalih?

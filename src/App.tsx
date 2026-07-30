@@ -27,6 +27,11 @@ const IgBonus = lazy(() => import("./pages/IgBonus"));
 const StyleQuiz = lazy(() => import("./pages/StyleQuiz"));
 const BeatMe = lazy(() => import("./pages/BeatMe"));
 const BeatNikola = lazy(() => import("./pages/BeatNikola"));
+const Manifesto = lazy(() => import("./pages/Manifesto"));
+const StreamerApply = lazy(() => import("./pages/StreamerApply"));
+const SponsorTournament = lazy(() => import("./pages/SponsorTournament"));
+const BotWars = lazy(() => import("./pages/BotWars"));
+const Successors = lazy(() => import("./pages/Successors"));
 
 // Lazy-loaded routes — split into separate chunks to shrink initial bundle
 const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
@@ -473,6 +478,13 @@ function AnimatedRoutes() {
           <Route path="/beat-me" element={<BeatMe />} />
           <Route path="/beat-me/:handle" element={<BeatMe />} />
           <Route path="/beat-nikola" element={<BeatNikola />} />
+          <Route path="/manifesto" element={<Manifesto />} />
+          <Route path="/streamers/apply" element={<StreamerApply />} />
+          <Route path="/creators" element={<Navigate to="/streamers/apply" replace />} />
+          <Route path="/sponsor-a-tournament" element={<SponsorTournament />} />
+          <Route path="/bot-wars" element={<BotWars />} />
+          <Route path="/successors" element={<Successors />} />
+          <Route path="/naslednici" element={<Navigate to="/successors" replace />} />
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
           <Route path="/embed" element={<Embed />} />
           <Route path="/embed/play" element={<EmbedPlay />} />
