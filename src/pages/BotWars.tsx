@@ -105,7 +105,7 @@ export default function BotWars() {
                 </div>
 
                 <Button asChild size="sm" className="mt-4 w-full">
-                  <Link to={`/play?bot=${bot.id}`}>Challenge {bot.name.split(" ")[0]}</Link>
+                  <Link to={`/bot/${bot.id}`}>Challenge {bot.name.split(" ")[0]}</Link>
                 </Button>
               </Card>
             </motion.div>
