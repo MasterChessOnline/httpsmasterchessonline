@@ -157,6 +157,8 @@ const Partners = lazy(() => import("./pages/Partners"));
 const AdminPartners = lazy(() => import("./pages/AdminPartners"));
 const GameReview = lazy(() => import("./pages/GameReview"));
 const Spectate = lazy(() => import("./pages/Spectate"));
+const Tv = lazy(() => import("./pages/Tv"));
+const Study = lazy(() => import("./pages/Study"));
 const GuessTheMove = lazy(() => import("./pages/GuessTheMove"));
 const PlayLikeGM = lazy(() => import("./pages/PlayLikeGM"));
 const Community = lazy(() => import("./pages/Community"));
@@ -406,6 +408,9 @@ function AnimatedRoutes() {
           <Route path="/roast/:gameId" element={<Roast />} />
           <Route path="/game-review" element={<GameReview />} />
           <Route path="/spectate" element={<Spectate />} />
+          <Route path="/tv" element={<Tv />} />
+          <Route path="/study" element={<Study />} />
+          <Route path="/study/:id" element={<Study />} />
           <Route path="/guess-the-move" element={<GuessTheMove />} />
           <Route path="/play-like-gm" element={<PlayLikeGM />} />
           <Route path="/community" element={<Community />} />
