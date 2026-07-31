@@ -80,7 +80,10 @@ You're receiving this because you opted in to Daily Puzzle emails.`;
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    if (!isAuthorizedCronCaller(req)) {
+    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    const cronOk = await isAuthorizedCronCaller(req, admin);
+    if (!cronOk) {
       const auth = req.headers.get("Authorization");
       if (!auth?.startsWith("Bearer ")) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -99,8 +102,6 @@ Deno.serve(async (req) => {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     // 1. Fetch today's puzzle
     const res = await fetch("https://lichess.org/api/puzzle/daily");
