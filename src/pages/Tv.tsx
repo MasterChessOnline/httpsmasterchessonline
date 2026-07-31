@@ -20,7 +20,6 @@ interface LiveGame {
   turn: string;
   created_at: string;
   fen: string;
-  last_move?: { from: string; to: string } | null;
 }
 
 interface PlayerName {
@@ -41,7 +40,7 @@ export default function Tv() {
   const fetchGames = async () => {
     const { data } = await supabase
       .from("online_games")
-      .select("id, white_player_id, black_player_id, time_control_label, turn, created_at, fen, last_move")
+      .select("id, white_player_id, black_player_id, time_control_label, turn, created_at, fen")
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(20);
@@ -167,7 +166,7 @@ export default function Tv() {
                     <StaticBoard
                       fen={game.fen}
                       flipped={false}
-                      lastMove={game.last_move}
+                      lastMove={null}
                       size="lg"
                     />
                   </div>
