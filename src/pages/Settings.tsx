@@ -177,6 +177,33 @@ const Settings = () => {
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (!user) { setLoadingDailyPuzzleEmail(false); return; }
+    supabase
+      .from("email_preferences")
+      .select("daily_puzzle")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setDailyPuzzleEmail(data?.daily_puzzle ?? false);
+        setLoadingDailyPuzzleEmail(false);
+      });
+  }, [user]);
+
+  const toggleDailyPuzzleEmail = async (value: boolean) => {
+    if (!user) { toast.error("Sign in to manage email preferences"); return; }
+    setDailyPuzzleEmail(value);
+    const { error } = await supabase
+      .from("email_preferences")
+      .upsert({ user_id: user.id, daily_puzzle: value }, { onConflict: "user_id" });
+    if (error) {
+      toast.error("Failed to update email preference");
+      setDailyPuzzleEmail(!value);
+    } else {
+      toast.success(value ? "Daily puzzle email enabled" : "Daily puzzle email disabled");
+    }
+  };
+
   const toggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
     setter(value); saveSetting(key, value); toast.success("Setting updated");
   };
