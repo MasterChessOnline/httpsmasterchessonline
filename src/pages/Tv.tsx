@@ -220,7 +220,7 @@ export default function Tv() {
 
                 <div className="space-y-3">
                   <div className="rounded-xl border border-border/50 bg-card/60 backdrop-blur-sm p-4">
-                    <h3 classLive Games</h3>
+                    <h3 className="font-display text-sm font-semibold text-foreground mb-2">Live Games</h3>
                     <p className="text-xs text-muted-foreground mb-3">
                       {liveGames.length} game{liveGames.length !== 1 ? "s" : ""} currently live
                     </p>
