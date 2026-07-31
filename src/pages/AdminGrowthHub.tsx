@@ -76,6 +76,7 @@ export default function AdminGrowthHub() {
               <Btn id="auto-cities" onClick={() => call("chess-city-hub-generator", { limit: 20 })}>Refresh city hubs (20)</Btn>
               <Btn id="auto-social" onClick={() => call("daily-social-publisher", {})}>Publish daily social</Btn>
               <Btn id="auto-retention" onClick={() => call("retention-emailer", {})}>Send retention emails</Btn>
+              <Btn id="auto-daily-puzzle" onClick={() => call("daily-puzzle-email", {})}>Send daily puzzle emails</Btn>
               <Btn id="auto-semrush" onClick={() => call("semrush-weekly-intel", {})}>Semrush gap scan</Btn>
             </div>
           </Card>
