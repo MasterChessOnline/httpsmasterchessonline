@@ -1,89 +1,91 @@
-# Dynasty Playbook — Brutalnije od Chess.com
+# Chess.com Playbook vs MasterChess — Audit + 30-Day Activation Plan
 
-Chess.com nije porastao slučajno. Kupili su konkurenciju, potpisali svakog većeg strimera pre nego što je bio slavan, i pretvorili šah u reality TV. Evo šta ćemo mi uraditi — istim tempom, ali agresivnije, jer smo mali i brzi.
+## Šta je Chess.com stvarno uradio da dostigne populaciju
 
-## Šta je Chess.com stvarno uradio (kratko)
+Chess.com nije porastao iz "boljeg UI-ja". Porastao je iz **kontrole ekosistema**:
 
-1. **Acquisitions** — kupili ChessKid, PlayMagnus, Aimchess, Chessable, iChess, ChessTempo. Progutali celu industriju.
-2. **PogChamps** — turnir NEšahista (Twitch strimera) 2020. Doveo je 2M+ novih naloga za 2 nedelje.
-3. **Hikaru & Botez ekskluziva** — potpisali sve pre nego što je Netflix pustio Queen's Gambit.
-4. **Bot personalities** — 60+ botova sa licem, glasom, memovima → svaki bot je svoj marketing kanal.
-5. **Speed Chess Championship** — sopstvena liga sa nagradnim fondom, prenosi se kao NBA.
-6. **Chess.com/news** — puna redakcija, dominira "chess news" u Google-u.
-7. **Freemium wall** — analiza, lekcije, više puzzle-a → paywall posle 3 dana. Konverzija 4-6%.
-8. **Fair Play + banovi slavnih** → svaki ban je viralna vest (Hans Niemann case je bio besplatan PR mesecima).
+### 1. SEO dominacija (Semrush podaci, US baza)
+- **257.868 organskih ključnih reči**, **~3.550.997 poseta/mesec** samo iz Google-a.
+- **Authority Score 81/100**, **23+ miliona backlinkova**, **61.736 referring domena**.
+- Najjači saobraćaj dolazi sa branda "chess" i "chess online" — to je godinama građeno kroz sadržaj, ne oglase.
+- **chess.com/news** ima punu redakciju i dominira "chess news" upitima.
 
-## 10 poteza brutalnijih od toga (za MasterChess)
+### 2. Akvizicije konkurencije
+- ChessKid, PlayMagnus, Aimchess, Chessable, iChess, ChessTempo — sve progutano.
+- Cilj: nema ozbiljnog konkurenta, svi korisnici na jednoj platformi.
 
-### 1. **Napravi PROTIVNIKA, ne konkurenta** — "Chess.com killed the small clubs" narativ
-Chess.com je gigant. Mali klubovi na Balkanu umiru. Mi smo Robin Hood.
-Landing page `/manifesto` sa video-om Nikole: *"They took chess from the streets. We're taking it back."* → svaka priča o nama počinje ovim.
+### 3. Influencer & streamer ekskluzive
+- Potpisali Hikaru, Botez, Levy **pre** Queen's Gambit buma.
+- PogChamps 2020 (turnir NE-šahista) doveo **2M+ novih naloga za 2 nedelje**.
+- Speed Chess Championship kao sopstvena NBA liga.
 
-### 2. **Nikola vs Svet** — javni izazov jednom GM-u dnevno
-Nikola (13) javno izaziva jednog poznatog igrača dnevno preko Twittera/YouTube-a. Čak i ako 1 od 30 odgovori, to je viralno. Ako niko ne odgovori, to je takođe priča: *"Nobody wants to play the 13-year-old"*.
-→ Automatizovano preko `linkedin-publish` + TikTok cron-a. Feature na sajtu: `/challenge-of-the-day`.
+### 4. Bot personalities kao marketing kanali
+- 60+ botova sa licem, glasom, memovima.
+- Svaki bot je zaseban razlog da neko dođe na sajt.
 
-### 3. **Balkan Bounty** — €1000 za svakog ko pobedi Nikolu
-Realan cash prize (može biti donacija ili sponzorstvo). Landing `/beat-nikola` sa live leaderboard-om. Ovo je klik-magnet za regionalne medije. Cena po članku je 0€ — mediji sami pišu.
+### 5. Freemium zid + dnevni habit
+- Analiza, lekcije, više puzzle-a → paywall posle 3 dana.
+- **Daily Puzzle email** je po njihovim rečima najjača retencija poluga.
+- Konverzija 4-6%.
 
-### 4. **StreamerHub 500** — potpiši 500 mikro-strimera pre nego što porastu
-Chess.com je potpisao 20 top strimera. Mi ćemo 500 mikro-strimera (500-5k pratilaca) sa affiliate kodom + revenue share. Svaki im donosi 5-20 signup-a mesečno = 5000+ mesečno besplatno.
-→ Postoji `partner_applications` tabela. Treba `/streamers/apply` javna stranica + auto-approve flow.
+### 6. Viralni PR kroz fair-play
+- Banovi poznatih igrača (Hans Niemann slučaj) = besplatan PR mesecima.
+- Svaki veliki skandal u šahu = saobraćaj na Chess.com.
 
-### 5. **"Naslednici Fischer-a"** — reality serija na TikTok-u
-30-dnevni "reality" gde 8 mladih igrača (12-16) igra svaki dan, ispada 1 dnevno, poslednji uzima €500. Kamera prati emocije, ne poteze. Ovo je **PogChamps ali za decu i sa dramom** — jer deca su emotivnija i to je clip-food.
-→ Nova sekcija `/nasledinici` sa dnevnim epizodama, glasanje ko je "villain of the day".
+## Da li je MasterChess 100% spreman za pik rasta — NE
 
-### 6. **Bot Wars** — bot personalities koji GOVORE tvojim jezikom
-Svaki bot sa balkanskim licem/imenom: *"Deda Mile 1200", "Baba Vera 1400", "Cika Miloš 1800"*. Svaki priča trash-talk na srpskom sa audio-clip-ovima. Chess.com botovi su generični Amerikanci. Naši su iz komšiluka.
-→ Proširiti `bot-profiles.ts` na 20 balkanskih likova + Nikola-voice sample-i.
+Sajt ima **odličnu infrastrukturu**, ali nije "pik-ready". Procena spremnosti:
 
-### 7. **Live Ban Wall** — javna anti-cheat transparentnost
-Kad banujemo cheat-era, javno objavimo (bez imena, sa rating-om i statistikom). Chess.com to krije. Mi to koristimo kao marketing: *"Danas smo banovali 47 cheat-era. Fair play matters."*
-→ `/fair-play` javna live stranica. Već imamo `tournament_anti_cheat_flags`.
+| Oblast | Status | Šta fali |
+|---|---|---|
+| **Igra / matchmaking / botovi** | 85% | Radi, 26 botova, online igranje, turniri. |
+| **SEO stranice / sitemaps** | 75% | 186 ruta, 19 sitemapova, SEO generator postoji. |
+| **Viralni mehanizmi** | 60% | Roast, share cards, Chess DNA postoje — ali nisu aktivno gurani. |
+| **Retencija / email / push** | 50% | Resend konektor postoji, ali nema aktivnog daily puzzle email-a ni retargetinga. |
+| **TV / Study (Lichess/Chess.com killer feature)** | 20% | **Nema `/tv` ni `/study/:id` rute** — ovo je najveći promašaj. |
+| **Plaćeni oglasi (Google/Meta/TikTok)** | 10% | GA4/Meta/TikTok pikseli su žičani, ali env varijable verovatno nisu postavljene. |
+| **Google Business Profile / Maps** | 15% | Admin panel postoji, ali GBP nije verifikovan. |
+| **Sadržaj / društvene mreže** | 30% | News-jacker, LinkedIn, TikTok konektori postoje — ali nema redovne produkcije. |
+| **Partneri / streameri / klubovi** | 25% | Forme postoje (`/streamers/apply`, `/sponsor-a-tournament`), ali nema outreach-a. |
 
-### 8. **Sponsored Tournaments as a Service** — bilo koja firma sponzoriše svoj turnir za €50
-Ne čekamo Chess.com da zove Coca-Colu. Local pekara može sponzorisati "Pekara X Blitz" za €50 i staviti svoj logo. Za pekaru je to reklama, za nas je to prihod + backlink.
-→ `/sponsor-a-tournament` self-serve forma + Stripe.
+**Ukupna procena spremnosti: ~55%**. Sajt može da primi rast, ali će veliki deo posetilaca otići bez navike ako pokrenemo masivnu kampanju pre nego što se popune rupe.
 
-### 9. **Programska preuzimanja** — 500 lendinga za long-tail
-Već imamo `seo-content-generator`. Sledeći nivo:
-- `/vs/hikaru`, `/vs/magnus`, `/vs/hans` — "kako bi izgledao match" sa AI simulacijom
-- `/prep-for/{opening}` — 3-minutna priprema pred meč
-- `/rating/{500..2500}` — po jedna strana za svaki rating: šta znaš, šta učiš dalje
+## 30-dnevni plan aktivacije — šta prvo
 
-Chess.com ima ~50k stranica. Cilj: 5k za 30 dana.
+Cilj: dovesti sajt sa 55% na 90% spremnosti, pa onda upaliti masinu.
 
-### 10. **News-jacking bot** — automatski članak čim se desi šahovska drama
-Cron: skenira šahovske vesti (RSS + Twitter). Čim se desi drama (ban, kontroverza, GM izjava) → za 5 minuta imamo članak sa svojim uglom. Ovo je *kako je Kurir postao Kurir* — brzina, ne kvalitet.
-→ Nova `news-jacker` edge funkcija + cron svakih 15 min.
+### Nedelja 1 — Produkt rupe koje ubijaju retenciju
+1. **MasterChess TV (`/tv`)** — auto-rotate najjače live partije svakih 15s + spectator chat. Ovo je Lichess TV kopija koja drži ljude na tabu satima.
+2. **Studies (`/study/:id`)** — paste PGN → shareable board sa komentarima po potezima. Najjači backlink magnet u šahu.
+3. **Daily Puzzle Email + Streak** — Resend cron u 09:00 UTC+1, daily leaderboard na `/puzzles`.
+4. **Fix `/tv` i `/study` rute u `App.tsx`** — trenutno ne postoje.
 
-## Šta bih napravio odmah (ovaj sprint)
+### Nedelja 2 — Analitika i konverzija
+5. **Postavi GA4, Meta Pixel, TikTok Pixel** — dodaj env varijable i proveri da li se događaji šalju.
+6. **Aktiviraj GBP verifikaciju** — video walkthrough dashboard-a, 20 fotki, prvi event post za DB Cup.
+7. **Pokreni Google Ads test** — €5/dan na "besplatan šah online", "šah turnir online" za RS/HR/BA/MK/SI.
+8. **Postavi Meta/TikTok retargeting pixel** pre nego što krene organski saobraćaj.
 
-Ne mogu sve odjednom. Predlažem u ovom redu (svaka stavka je 1 build-turn):
+### Nedelja 3 — Sadržaj i viralnost
+9. **Aktiviraj News-Jacker** — cron svakih 15 min, ali sa ljudskim pregledom pre objave (ne želiš loš sadržaj na sajtu).
+10. **Produkcija 30 TikTok/Reels/Shorts** — batch snimanje, 2 videa dnevno, UTM linkovi.
+11. **Reddit blitz** — 8 postova na r/chess, r/SideProject, r/serbia, r/chessbeginners itd.
+12. **Press kit + medijski outreach** — Nikola priča, Blic/Politika/RTS/Startit/Netokracija.
 
-1. `/manifesto` + `/beat-nikola` landing sa live leaderboard-om (najveći PR-magnet).
-2. `/streamers/apply` self-serve partner flow (500 novih kanala u pipeline-u).
-3. Bot Wars — 20 balkanskih botova sa trash-talk clip-ovima.
-4. Sponsor-a-tournament self-serve forma.
-5. News-jacker cron.
-6. Nasledinici Fischer-a landing (turnir organizujemo posle DB Cup-a).
+### Nedelja 4 — Partnerski rast
+13. **StreamerHub 500** — DM/email 500 mikro-strimera, `/streamers/apply` link.
+14. **Šahovski klubovi i škole** — 100 klubova × ~50 članova potencijal.
+15. **Sponsor-a-tournament self-serve** — lokalne firme za €50, backlink + prihod.
+16. **Product Hunt launch** — Aug 12 ili odmah posle DB Cup-a.
 
-## Šta neću predložiti (i zašto)
+## Šta NE radimo (jer nema smisla sada)
 
-- **Kupovina konkurencije** — nemamo cash-flow Chess.com-a.
-- **Skupi influencer deal-ovi** — €10k-100k za jednog GM-a je van budžeta. Umesto toga → 500 mikro-strimera.
-- **Sopstvena TV liga** — bez publike prvo, prazna arena. Radimo za 6 meseci kad imamo bazu.
-
-## Tehnički detalji
-
-- Sve nove stranice: statične + JSON-LD + auto-IndexNow ping (već imamo infra).
-- Sve nove edge funkcije: `verify_jwt = false` za javne, admin-only za CMS delove.
-- Nova tabela `public_challenges` za "Nikola vs Svet" dnevne izazove.
-- Nova tabela `streamer_partners` (ili proširiti `partner_applications`) sa affiliate tracking-om.
-- News-jacker koristi `LOVABLE_API_KEY` (Gemini) za generisanje ugla za 30s.
-- Sponsor-a-tournament preko postojećeg Stripe konektora → `tournament_sponsors` tabela već postoji.
+- Kupovina konkurencije — nema cash-flowa.
+- Skupi influencer deal-ovi (€10k-100k za GM-a) — umesto toga 500 mikro-strimera.
+- Sopstvena TV liga — bez publike prvo, prazna arena.
 
 ## Pitanje pre nego što krenem
 
-Da li da krenem sa **svih 6 iz "odmah" liste redom** (6 turnova), ili prvo samo **TOP 2 (Manifesto + Beat Nikola)** da vidimo reakciju pre ostalih?
+Da li da krenem sa **Nedeljom 1 (TV + Study + Daily Email)** da popunimo najveće rupe u retenciji, ili želiš prvo da **upalim marketing odmah** (Reddit + TikTok + Ads) pa da popravljamo sajt dok saobraćaj dolazi?
+
+Preporuka: **Nedelja 1 prvo**. Bolje je 100 posetilaca koji ostanu nego 10.000 koji odu.
