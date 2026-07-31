@@ -165,6 +165,9 @@ const Settings = () => {
   });
   const [coverTracks, setCoverTracks] = useState<boolean>(settings.coverTracks ?? false);
   const [quietHour, setQuietHour] = useState<boolean>(settings.quietHour ?? false);
+  // Email preferences
+  const [dailyPuzzleEmail, setDailyPuzzleEmail] = useState<boolean>(false);
+  const [loadingDailyPuzzleEmail, setLoadingDailyPuzzleEmail] = useState<boolean>(true);
 
   useEffect(() => {
     if (profile) {
@@ -173,6 +176,33 @@ const Settings = () => {
       setAvatarUrl((profile as any).avatar_url || null);
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (!user) { setLoadingDailyPuzzleEmail(false); return; }
+    supabase
+      .from("email_preferences")
+      .select("daily_puzzle")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setDailyPuzzleEmail(data?.daily_puzzle ?? false);
+        setLoadingDailyPuzzleEmail(false);
+      });
+  }, [user]);
+
+  const toggleDailyPuzzleEmail = async (value: boolean) => {
+    if (!user) { toast.error("Sign in to manage email preferences"); return; }
+    setDailyPuzzleEmail(value);
+    const { error } = await supabase
+      .from("email_preferences")
+      .upsert({ user_id: user.id, daily_puzzle: value }, { onConflict: "user_id" });
+    if (error) {
+      toast.error("Failed to update email preference");
+      setDailyPuzzleEmail(!value);
+    } else {
+      toast.success(value ? "Daily puzzle email enabled" : "Daily puzzle email disabled");
+    }
+  };
 
   const toggle = (key: string, value: boolean, setter: (v: boolean) => void) => {
     setter(value); saveSetting(key, value); toast.success("Setting updated");
@@ -932,6 +962,17 @@ const Settings = () => {
                   <Switch checked={item.value} onCheckedChange={v => toggle(item.key, v, item.setter)} />
                 </div>
               ))}
+              <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Daily puzzle email</p>
+                  <p className="text-xs text-muted-foreground">Get today's Lichess puzzle by email at 09:00</p>
+                </div>
+                <Switch
+                  checked={dailyPuzzleEmail}
+                  disabled={loadingDailyPuzzleEmail || !user}
+                  onCheckedChange={toggleDailyPuzzleEmail}
+                />
+              </div>
             </div>
           </div>
         );

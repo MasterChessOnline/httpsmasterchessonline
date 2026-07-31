@@ -62,6 +62,8 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => {
               { label: "Play Online", href: "/play/online" },
               { label: "Play vs AI", href: "/play" },
               { label: "Tournaments", href: "/tournaments" },
+              { label: "MasterChess TV", href: "/tv" },
+              { label: "Spectate", href: "/spectate" },
             ],
           },
           {
@@ -70,6 +72,8 @@ const Footer = React.forwardRef<HTMLElement>((_props, ref) => {
               { label: "Training", href: "/learn" },
               { label: "Master Courses", href: "/learn" },
               { label: "Analysis", href: "/analysis" },
+              { label: "Study Boards", href: "/study" },
+              { label: "Daily Puzzle", href: "/puzzles" },
             ],
           },
           {
