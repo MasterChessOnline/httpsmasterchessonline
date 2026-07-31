@@ -962,6 +962,17 @@ const Settings = () => {
                   <Switch checked={item.value} onCheckedChange={v => toggle(item.key, v, item.setter)} />
                 </div>
               ))}
+              <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Daily puzzle email</p>
+                  <p className="text-xs text-muted-foreground">Get today's Lichess puzzle by email at 09:00</p>
+                </div>
+                <Switch
+                  checked={dailyPuzzleEmail}
+                  disabled={loadingDailyPuzzleEmail || !user}
+                  onCheckedChange={toggleDailyPuzzleEmail}
+                />
+              </div>
             </div>
           </div>
         );
