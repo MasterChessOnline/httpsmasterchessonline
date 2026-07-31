@@ -165,6 +165,9 @@ const Settings = () => {
   });
   const [coverTracks, setCoverTracks] = useState<boolean>(settings.coverTracks ?? false);
   const [quietHour, setQuietHour] = useState<boolean>(settings.quietHour ?? false);
+  // Email preferences
+  const [dailyPuzzleEmail, setDailyPuzzleEmail] = useState<boolean>(false);
+  const [loadingDailyPuzzleEmail, setLoadingDailyPuzzleEmail] = useState<boolean>(true);
 
   useEffect(() => {
     if (profile) {
