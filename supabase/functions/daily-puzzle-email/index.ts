@@ -1,13 +1,25 @@
 // Daily puzzle email — sends today's Lichess puzzle to users who opted in.
-// Cron: daily at 09:00 UTC+1 (07:00 UTC) during winter, 08:00 UTC in summer.
+// Cron: daily at 09:00 UTC+1 (08:00 UTC in summer).
 // Users must explicitly opt in via public.email_preferences.daily_puzzle = true.
+// Auth: x-cron-secret header must match the value stored in vault.secrets (name='daily_puzzle_cron_secret').
 import { corsHeaders } from "../_shared/cors.ts";
-import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 
 const SITE_NAME = "MasterChess";
 const SENDER_DOMAIN = "notify.masterchess.com";
 const FROM_DOMAIN = "notify.masterchess.com";
+const CRON_SECRET_NAME = "daily_puzzle_cron_secret";
+
+async function isAuthorizedCronCaller(req: Request, admin: any): Promise<boolean> {
+  const headerSecret = req.headers.get("x-cron-secret") ?? "";
+  if (!headerSecret) return false;
+  const { data } = await admin
+    .from("secrets")
+    .select("decrypted_secret")
+    .eq("name", CRON_SECRET_NAME)
+    .maybeSingle();
+  return data?.decrypted_secret === headerSecret;
+}
 
 interface LichessDailyPuzzle {
   game: { id: string; pgn: string; players: Array<{ name: string; rating: number }> };
