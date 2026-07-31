@@ -13,12 +13,27 @@ const CRON_SECRET_NAME = "daily_puzzle_cron_secret";
 async function isAuthorizedCronCaller(req: Request, admin: any): Promise<boolean> {
   const headerSecret = req.headers.get("x-cron-secret") ?? "";
   if (!headerSecret) return false;
-  const { data } = await admin
-    .from("secrets")
-    .select("decrypted_secret")
-    .eq("name", CRON_SECRET_NAME)
-    .maybeSingle();
-  return data?.decrypted_secret === headerSecret;
+
+  // 1. Check env-based shared secrets (used by external cron services)
+  const envSecrets = [
+    Deno.env.get("CRON_SECRET"),
+    Deno.env.get("GROWTH_CRON_SECRET"),
+  ];
+  if (envSecrets.includes(headerSecret)) return true;
+
+  // 2. Check vault-based secret (used by pg_cron if configured)
+  try {
+    const { data } = await admin
+      .from("secrets")
+      .select("decrypted_secret")
+      .eq("name", CRON_SECRET_NAME)
+      .maybeSingle();
+    if (data?.decrypted_secret === headerSecret) return true;
+  } catch {
+    // vault may not be accessible; fall through
+  }
+
+  return false;
 }
 
 interface LichessDailyPuzzle {
