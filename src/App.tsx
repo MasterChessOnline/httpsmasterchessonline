@@ -32,6 +32,8 @@ const StreamerApply = lazy(() => import("./pages/StreamerApply"));
 const SponsorTournament = lazy(() => import("./pages/SponsorTournament"));
 const BotWars = lazy(() => import("./pages/BotWars"));
 const Successors = lazy(() => import("./pages/Successors"));
+const Roadmap = lazy(() => import("./pages/Roadmap"));
+const DiscordHub = lazy(() => import("./pages/DiscordHub"));
 
 // Lazy-loaded routes — split into separate chunks to shrink initial bundle
 const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
@@ -224,6 +226,7 @@ const NikolaVsNiemann = lazy(() => import("./pages/NikolaVsNiemann"));
 // Eager components (used in every page chrome)
 import AntiTiltWatcher from "@/components/AntiTiltWatcher";
 import FloatingShareButton from "@/components/FloatingShareButton";
+import FloatingPlayNow from "@/components/FloatingPlayNow";
 import StreakFlexController from "@/components/StreakFlexController";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
@@ -290,6 +293,7 @@ function AppChrome() {
       <BrakusRibbon />
       <StreakFlexController />
       <FloatingShareButton />
+      <FloatingPlayNow />
       <Suspense fallback={null}><ChannelWelcomeBanner /></Suspense>
     </>
   );
@@ -490,6 +494,9 @@ function AnimatedRoutes() {
           <Route path="/bot-wars" element={<BotWars />} />
           <Route path="/successors" element={<Successors />} />
           <Route path="/naslednici" element={<Navigate to="/successors" replace />} />
+          <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/changelog" element={<Navigate to="/roadmap" replace />} />
+          <Route path="/discord" element={<DiscordHub />} />
           <Route path="/embed/board/:gameId" element={<EmbedBoard />} />
           <Route path="/embed" element={<Embed />} />
           <Route path="/embed/play" element={<EmbedPlay />} />

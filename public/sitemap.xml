@@ -557,4 +557,14 @@
     <priority>0.7</priority>
     <image:image><image:loc>https://masterchess.live/og-image.jpg</image:loc><image:title>Go Viral with MasterChess</image:title><image:caption>Challenge friends and share MasterChess on social media.</image:caption></image:image>
   </url>
+  <url>
+    <loc>https://masterchess.live/roadmap</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://masterchess.live/discord</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>
