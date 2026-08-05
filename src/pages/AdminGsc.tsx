@@ -33,11 +33,27 @@ interface GscReport {
   top_pages?: GscRow[];
 }
 
+interface OppReport {
+  error?: string;
+  period?: { start: string; end: string };
+  striking_distance?: {
+    query: string; page: string; impressions: number; clicks: number; ctr: number; position: number;
+  }[];
+  low_ctr_pages?: {
+    page: string; impressions: number; clicks: number; ctr: number; position: number;
+  }[];
+  sitemap_health?: {
+    path: string; errors: number; warnings: number; submitted: number; indexed: number; isPending: boolean;
+  }[];
+}
+
 export default function AdminGsc() {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [data, setData] = useState<GscReport | null>(null);
+  const [opps, setOpps] = useState<OppReport | null>(null);
   const [loading, setLoading] = useState(false);
+  const [oppLoading, setOppLoading] = useState(false);
   const [pinging, setPinging] = useState(false);
 
   useEffect(() => {
