@@ -1,5 +1,7 @@
 // Semrush multi-action intel: user limits, domain overview, backlinks, keyword research, competitors
 import { corsHeaders } from "../_shared/cors.ts";
+import { isAdminCaller } from "../_shared/admin-auth.ts";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/semrush";
 
@@ -24,6 +26,11 @@ async function sem(path: string, params: Record<string, string>) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    if (!isAuthorizedCronCaller(req) && !(await isAdminCaller(req))) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const { action = "overview", domain = "masterchess.live", database = "us", phrase, target } = await req.json().catch(() => ({}));
     const out: Record<string, unknown> = { action };
 

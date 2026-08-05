@@ -1,5 +1,7 @@
 // LinkedIn: fetch member profile + publish UGC text/article post
 import { corsHeaders } from "../_shared/cors.ts";
+import { isAdminCaller } from "../_shared/admin-auth.ts";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/linkedin";
 
@@ -13,6 +15,11 @@ function auth() {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    if (!isAuthorizedCronCaller(req) && !(await isAdminCaller(req))) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const { action = "profile", text, articleUrl, articleTitle } = await req.json().catch(() => ({}));
     const headers = auth();
 

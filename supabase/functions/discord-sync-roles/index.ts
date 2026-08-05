@@ -2,6 +2,8 @@
 // Cron-friendly. Requires: DISCORD_BOT_TOKEN, DISCORD_GUILD_ID,
 // DISCORD_ROLE_PAWN, _KNIGHT, _BISHOP, _ROOK, _QUEEN, _KING, _GRANDMASTER.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
+import { isAdminCaller } from "../_shared/admin-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,6 +26,11 @@ function pickTier(p: { rating: number | null; games_won: number | null; rank?: n
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    if (!isAuthorizedCronCaller(req) && !(await isAdminCaller(req))) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const token = Deno.env.get("DISCORD_BOT_TOKEN");
     const guild = Deno.env.get("DISCORD_GUILD_ID");
     if (!token || !guild) {
