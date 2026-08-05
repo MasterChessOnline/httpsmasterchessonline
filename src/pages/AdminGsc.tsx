@@ -79,6 +79,19 @@ export default function AdminGsc() {
     }
   };
 
+  const loadOpps = async () => {
+    setOppLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("gsc-opportunities");
+      if (error) throw error;
+      setOpps(data as OppReport);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Opportunity report failed");
+    } finally {
+      setOppLoading(false);
+    }
+  };
+
   const pingIndexNow = async () => {
     setPinging(true);
     try {
@@ -95,7 +108,10 @@ export default function AdminGsc() {
   };
 
   useEffect(() => {
-    if (isAdmin) load();
+    if (isAdmin) {
+      load();
+      loadOpps();
+    }
   }, [isAdmin]);
 
   if (isAdmin === false) {
