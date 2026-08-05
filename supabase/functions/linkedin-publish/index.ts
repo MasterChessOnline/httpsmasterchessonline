@@ -1,5 +1,7 @@
 // LinkedIn: fetch member profile + publish UGC text/article post
 import { corsHeaders } from "../_shared/cors.ts";
+import { isAdminCaller } from "../_shared/admin-auth.ts";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/linkedin";
 
