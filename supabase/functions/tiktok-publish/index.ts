@@ -1,5 +1,7 @@
 // TikTok: profile info, creator info, list videos, init video publish (PULL_FROM_URL)
 import { corsHeaders } from "../_shared/cors.ts";
+import { isAdminCaller } from "../_shared/admin-auth.ts";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/tiktok";
 
