@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { buildFaqSchema, buildBreadcrumbSchema } from "@/lib/jsonld-builders";
 import NotFound from "./NotFound";
 
 interface SeoPage {
