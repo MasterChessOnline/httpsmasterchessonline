@@ -33,11 +33,27 @@ interface GscReport {
   top_pages?: GscRow[];
 }
 
+interface OppReport {
+  error?: string;
+  period?: { start: string; end: string };
+  striking_distance?: {
+    query: string; page: string; impressions: number; clicks: number; ctr: number; position: number;
+  }[];
+  low_ctr_pages?: {
+    page: string; impressions: number; clicks: number; ctr: number; position: number;
+  }[];
+  sitemap_health?: {
+    path: string; errors: number; warnings: number; submitted: number; indexed: number; isPending: boolean;
+  }[];
+}
+
 export default function AdminGsc() {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [data, setData] = useState<GscReport | null>(null);
+  const [opps, setOpps] = useState<OppReport | null>(null);
   const [loading, setLoading] = useState(false);
+  const [oppLoading, setOppLoading] = useState(false);
   const [pinging, setPinging] = useState(false);
 
   useEffect(() => {
@@ -63,6 +79,19 @@ export default function AdminGsc() {
     }
   };
 
+  const loadOpps = async () => {
+    setOppLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("gsc-opportunities");
+      if (error) throw error;
+      setOpps(data as OppReport);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Opportunity report failed");
+    } finally {
+      setOppLoading(false);
+    }
+  };
+
   const pingIndexNow = async () => {
     setPinging(true);
     try {
@@ -79,7 +108,10 @@ export default function AdminGsc() {
   };
 
   useEffect(() => {
-    if (isAdmin) load();
+    if (isAdmin) {
+      load();
+      loadOpps();
+    }
   }, [isAdmin]);
 
   if (isAdmin === false) {
@@ -246,6 +278,141 @@ export default function AdminGsc() {
             </div>
           </Card>
         </div>
+
+        <div className="flex items-center justify-between mt-10 mb-4 flex-wrap gap-3">
+          <h2 className="text-2xl font-bold">Opportunities</h2>
+          <Button onClick={loadOpps} disabled={oppLoading} variant="outline" size="sm">
+            <RefreshCw className={`w-4 h-4 mr-2 ${oppLoading ? "animate-spin" : ""}`} />
+            {oppLoading ? "Mining…" : "Re-run report"}
+          </Button>
+        </div>
+
+        {opps?.error && (
+          <Card className="p-4 mb-6 border-red-500/50 bg-red-500/10">
+            <p className="text-sm text-red-400">{opps.error}</p>
+          </Card>
+        )}
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          <Card className="p-4">
+            <h3 className="font-bold mb-1">Striking distance (pos. 5–20)</h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Queries already close to page one. Strengthening these pages is the fastest win.
+            </p>
+            <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs text-muted-foreground uppercase">
+                  <tr>
+                    <th className="pb-2">Query → page</th>
+                    <th className="pb-2 text-right">Impr.</th>
+                    <th className="pb-2 text-right">Pos.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(opps?.striking_distance ?? []).map((r, i) => (
+                    <tr key={i} className="border-t border-border/30">
+                      <td className="py-1.5 max-w-[260px]">
+                        <span className="block truncate">{r.query}</span>
+                        <span className="block truncate text-xs text-muted-foreground">{r.page}</span>
+                      </td>
+                      <td className="py-1.5 text-right font-mono">{r.impressions}</td>
+                      <td className="py-1.5 text-right font-mono text-amber-400">
+                        {r.position.toFixed(1)}
+                      </td>
+                    </tr>
+                  ))}
+                  {!opps?.striking_distance?.length && (
+                    <tr>
+                      <td colSpan={3} className="text-center text-muted-foreground py-6">
+                        {oppLoading ? "Loading…" : "No reported data"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <h3 className="font-bold mb-1">Low-CTR pages (CTR &lt; 2%)</h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Seen a lot but rarely clicked — rewrite the title and description first.
+            </p>
+            <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs text-muted-foreground uppercase">
+                  <tr>
+                    <th className="pb-2">Page</th>
+                    <th className="pb-2 text-right">Impr.</th>
+                    <th className="pb-2 text-right">CTR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(opps?.low_ctr_pages ?? []).map((r, i) => (
+                    <tr key={i} className="border-t border-border/30">
+                      <td className="py-1.5 truncate max-w-[260px]">{r.page}</td>
+                      <td className="py-1.5 text-right font-mono">{r.impressions}</td>
+                      <td className="py-1.5 text-right font-mono text-red-400">
+                        {(r.ctr * 100).toFixed(2)}%
+                      </td>
+                    </tr>
+                  ))}
+                  {!opps?.low_ctr_pages?.length && (
+                    <tr>
+                      <td colSpan={3} className="text-center text-muted-foreground py-6">
+                        {oppLoading ? "Loading…" : "No reported data"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+
+        <Card className="p-4 mt-6">
+          <h3 className="font-bold mb-1">Sitemap health</h3>
+          <p className="text-xs text-muted-foreground mb-3">
+            Error and warning values are counts reported by Google, not causes.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs text-muted-foreground uppercase">
+                <tr>
+                  <th className="pb-2">Sitemap</th>
+                  <th className="pb-2 text-right">Submitted</th>
+                  <th className="pb-2 text-right">Indexed</th>
+                  <th className="pb-2 text-right">Errors</th>
+                  <th className="pb-2 text-right">Warnings</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(opps?.sitemap_health ?? []).map((s, i) => (
+                  <tr key={i} className="border-t border-border/30">
+                    <td className="py-1.5 truncate max-w-[280px]">
+                      {s.path} {s.isPending && <Badge variant="outline" className="ml-2">pending</Badge>}
+                    </td>
+                    <td className="py-1.5 text-right font-mono">{s.submitted}</td>
+                    <td className="py-1.5 text-right font-mono">{s.indexed}</td>
+                    <td className={`py-1.5 text-right font-mono ${s.errors ? "text-red-400" : ""}`}>
+                      {s.errors}
+                    </td>
+                    <td className={`py-1.5 text-right font-mono ${s.warnings ? "text-amber-400" : ""}`}>
+                      {s.warnings}
+                    </td>
+                  </tr>
+                ))}
+                {!opps?.sitemap_health?.length && (
+                  <tr>
+                    <td colSpan={5} className="text-center text-muted-foreground py-6">
+                      {oppLoading ? "Loading…" : "No reported data"}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
         <Card className="p-4 mt-6">
           <h2 className="font-bold mb-2">About IndexNow</h2>

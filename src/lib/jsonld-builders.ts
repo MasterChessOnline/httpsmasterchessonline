@@ -148,3 +148,61 @@ export function buildCourseSchema(c: {
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
 }
+
+export function buildFaqSchema(faq: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+}
+
+export function buildHowToSchema(h: {
+  name: string;
+  description: string;
+  url: string;
+  steps: { name: string; text: string }[];
+  totalTime?: string; // ISO 8601, e.g. PT15M
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: h.name,
+    description: h.description,
+    url: h.url,
+    totalTime: h.totalTime ?? "PT15M",
+    step: h.steps.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+    })),
+  };
+}
+
+export function buildLocalBusinessSchema(opts?: {
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+  url?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": ["SportsOrganization", "Organization"],
+    name: "MasterChess",
+    url: opts?.url ?? SITE,
+    logo: `${SITE}/og-image.jpg`,
+    sport: "Chess",
+    areaServed: opts?.city ?? "Worldwide",
+    geo: opts?.latitude && opts?.longitude
+      ? { "@type": "GeoCoordinates", latitude: opts.latitude, longitude: opts.longitude }
+      : undefined,
+    sameAs: [
+      "https://www.youtube.com/@DailyChess_12",
+    ],
+  };
+}

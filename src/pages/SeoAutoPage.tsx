@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { buildFaqSchema, buildBreadcrumbSchema } from "@/lib/jsonld-builders";
 import NotFound from "./NotFound";
 
 interface SeoPage {
@@ -65,7 +66,24 @@ export default function SeoAutoPage() {
   if (!page) return <NotFound />;
 
   const canonical = `${BASE}/${page.slug}`;
-  const jsonldArray = Array.isArray(page.jsonld) ? page.jsonld : page.jsonld ? [page.jsonld] : [];
+  const baseJsonld = Array.isArray(page.jsonld) ? page.jsonld : page.jsonld ? [page.jsonld] : [];
+  const kindLabel = page.kind.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const kindHub = `/${page.slug.split("/")[0]}`;
+  const hasFaqSchema = baseJsonld.some((j: any) => j?.["@type"] === "FAQPage");
+  const hasCrumbSchema = baseJsonld.some((j: any) => j?.["@type"] === "BreadcrumbList");
+  const jsonldArray = [
+    ...baseJsonld,
+    ...(!hasFaqSchema && page.faq && page.faq.length > 0 ? [buildFaqSchema(page.faq)] : []),
+    ...(!hasCrumbSchema
+      ? [
+          buildBreadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: kindLabel, path: kindHub },
+            { name: page.h1, path: `/${page.slug}` },
+          ]),
+        ]
+      : []),
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -89,10 +107,12 @@ export default function SeoAutoPage() {
       <Navbar />
 
       <main className="container mx-auto px-4 py-10 max-w-4xl">
-        <nav className="text-xs text-muted-foreground mb-4">
+        <nav className="text-xs text-muted-foreground mb-4" aria-label="Breadcrumb">
           <Link to="/" className="hover:text-amber-400">Home</Link>
           <span className="mx-2">/</span>
-          <span className="capitalize">{page.kind.replace(/-/g, " ")}</span>
+          <Link to={kindHub} className="hover:text-amber-400">{kindLabel}</Link>
+          <span className="mx-2">/</span>
+          <span className="text-amber-200/70 line-clamp-1">{page.h1}</span>
         </nav>
 
         <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-br from-amber-300 via-amber-100 to-amber-300 bg-clip-text text-transparent">
