@@ -66,7 +66,24 @@ export default function SeoAutoPage() {
   if (!page) return <NotFound />;
 
   const canonical = `${BASE}/${page.slug}`;
-  const jsonldArray = Array.isArray(page.jsonld) ? page.jsonld : page.jsonld ? [page.jsonld] : [];
+  const baseJsonld = Array.isArray(page.jsonld) ? page.jsonld : page.jsonld ? [page.jsonld] : [];
+  const kindLabel = page.kind.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const kindHub = `/${page.slug.split("/")[0]}`;
+  const hasFaqSchema = baseJsonld.some((j: any) => j?.["@type"] === "FAQPage");
+  const hasCrumbSchema = baseJsonld.some((j: any) => j?.["@type"] === "BreadcrumbList");
+  const jsonldArray = [
+    ...baseJsonld,
+    ...(!hasFaqSchema && page.faq && page.faq.length > 0 ? [buildFaqSchema(page.faq)] : []),
+    ...(!hasCrumbSchema
+      ? [
+          buildBreadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: kindLabel, path: kindHub },
+            { name: page.h1, path: `/${page.slug}` },
+          ]),
+        ]
+      : []),
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
