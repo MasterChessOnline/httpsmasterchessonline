@@ -1,5 +1,7 @@
 // GSC full audit: sitemaps, top queries, top pages, coverage summary — one call
 import { corsHeaders } from "../_shared/cors.ts";
+import { isAdminCaller } from "../_shared/admin-auth.ts";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google-search-console";
 const SITE = "https://masterchess.live/";
