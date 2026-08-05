@@ -2,6 +2,8 @@
 // Cron-friendly. Requires: DISCORD_BOT_TOKEN, DISCORD_GUILD_ID,
 // DISCORD_ROLE_PAWN, _KNIGHT, _BISHOP, _ROOK, _QUEEN, _KING, _GRANDMASTER.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAuthorizedCronCaller } from "../_shared/cron-auth.ts";
+import { isAdminCaller } from "../_shared/admin-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
