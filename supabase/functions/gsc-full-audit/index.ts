@@ -16,6 +16,11 @@ function auth() {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    if (!isAuthorizedCronCaller(req) && !(await isAdminCaller(req))) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const headers = auth();
     const site = encodeURIComponent(SITE);
     const today = new Date().toISOString().slice(0, 10);
