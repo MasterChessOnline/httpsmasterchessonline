@@ -189,6 +189,12 @@ export default function PlayGuest() {
     setSavedEmail(true);
   };
 
+  const guestShareText =
+    outcome === "win"
+      ? `I just beat ${GUEST_BOT.name} on MasterChess ♟️ Can you? No signup, just play: ${GUEST_SHARE_URL}`
+      : `Playing chess on MasterChess ♟️ No signup, no ads — try to beat ${GUEST_BOT.name}: ${GUEST_SHARE_URL}`;
+
+
 
   const moveCount = useMemo(() => Math.ceil(game.history().length / 2), [game, fen]);
 
