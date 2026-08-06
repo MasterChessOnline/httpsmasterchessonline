@@ -3,10 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chess, Square } from "chess.js";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Sparkles, Trophy, RotateCcw, LogIn } from "lucide-react";
+import { Crown, Sparkles, Trophy, RotateCcw, LogIn, Mail, Loader2 } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { BOARD_CONTAINER_CLASS } from "@/lib/board-sizing";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
 import { BOT_PROFILES } from "@/lib/bots/profiles";
 import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
 import { playChessSound } from "@/lib/chess-sounds";
