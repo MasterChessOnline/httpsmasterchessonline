@@ -86,6 +86,19 @@ const PlayOnline = () => {
 
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
+  // True once the queue has been empty for a while — we then show real
+  // alternatives (invite link, bots, puzzles) instead of an endless spinner.
+  const [queueStalled, setQueueStalled] = useState(false);
+
+  useEffect(() => {
+    if (onlineStatus !== "searching") {
+      setQueueStalled(false);
+      return;
+    }
+    const t = window.setTimeout(() => setQueueStalled(true), 25000);
+    return () => window.clearTimeout(t);
+  }, [onlineStatus]);
+
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
   const [timeControlIdx, setTimeControlIdx] = useState(initialTcIdx);
