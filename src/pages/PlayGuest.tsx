@@ -294,7 +294,38 @@ export default function PlayGuest() {
                 </div>
               </div>
 
+              {/* Lowest-friction capture: keep the result without an account */}
+              {savedEmail ? (
+                <p className="text-xs text-primary font-semibold">
+                  Saved — we'll email your result and the daily puzzle.
+                </p>
+              ) : (
+                <form onSubmit={saveResultByEmail} className="space-y-2 text-left">
+                  <label htmlFor="guest-save-email" className="text-[11px] text-muted-foreground">
+                    Or just save this result by email — no password needed
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="guest-save-email"
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      maxLength={255}
+                      placeholder="you@email.com"
+                      value={emailValue}
+                      onChange={(e) => setEmailValue(e.target.value)}
+                      required
+                      className="h-10"
+                    />
+                    <Button type="submit" variant="secondary" className="h-10 shrink-0" disabled={savingEmail}>
+                      {savingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </form>
+              )}
+
               <div className="space-y-2.5">
+
                 <Button
                   className="w-full h-11 bg-white text-gray-900 hover:bg-white/90 font-medium"
                   onClick={handleGoogle}
