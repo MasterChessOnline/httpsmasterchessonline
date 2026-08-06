@@ -4,6 +4,8 @@ import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star, 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import SharePositionCard from "@/components/SharePositionCard";
+import PushWinNudge from "@/components/PushWinNudge";
+
 
 export interface MatchResultData {
   outcome: "win" | "loss" | "draw";
