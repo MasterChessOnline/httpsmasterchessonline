@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chess, Square } from "chess.js";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Sparkles, Trophy, RotateCcw, LogIn, Mail, Loader2 } from "lucide-react";
+import { Crown, Sparkles, Trophy, RotateCcw, LogIn, Mail, Loader2, MessageCircle, Send, Share2 } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { BOARD_CONTAINER_CLASS } from "@/lib/board-sizing";
 import { Button } from "@/components/ui/button";
@@ -16,9 +16,14 @@ import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { celebrate } from "@/lib/celebrate";
+import { share } from "@/lib/share";
 
 // Easy bot — friendly first experience
 const GUEST_BOT = BOT_PROFILES.find((b) => b.id === "pawn-pablo") ?? BOT_PROFILES[1];
+
+// Shared entry point for invited friends — instant play, no signup wall.
+const GUEST_SHARE_URL = "https://masterchess.live/play-guest?utm_source=guest_share&utm_medium=social";
+
 
 type Phase = "playing" | "ended";
 
@@ -184,6 +189,12 @@ export default function PlayGuest() {
     setSavedEmail(true);
   };
 
+  const guestShareText =
+    outcome === "win"
+      ? `I just beat ${GUEST_BOT.name} on MasterChess ♟️ Can you? No signup, just play: ${GUEST_SHARE_URL}`
+      : `Playing chess on MasterChess ♟️ No signup, no ads — try to beat ${GUEST_BOT.name}: ${GUEST_SHARE_URL}`;
+
+
 
   const moveCount = useMemo(() => Math.ceil(game.history().length / 2), [game, fen]);
 
@@ -322,6 +333,41 @@ export default function PlayGuest() {
                   </div>
                 </div>
               </div>
+
+              {/* Viral loop: guests are our biggest traffic source — let them
+                  pull a friend in with one tap, no account required. */}
+              <div className="rounded-xl border border-border/60 bg-card/50 p-3 space-y-2">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Dare a friend
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(guestShareText)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-colors"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                  </a>
+                  <a
+                    href={`https://t.me/share/url?url=${encodeURIComponent(GUEST_SHARE_URL)}&text=${encodeURIComponent(guestShareText)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-semibold transition-colors"
+                  >
+                    <Send className="h-3.5 w-3.5" /> Telegram
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => share({ title: "MasterChess", text: guestShareText, url: GUEST_SHARE_URL })}
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-muted/40 hover:bg-muted/60 border border-border/60 text-foreground text-xs font-semibold transition-colors"
+                  >
+                    <Share2 className="h-3.5 w-3.5" /> Share
+                  </button>
+                </div>
+              </div>
+
+
 
               {/* Lowest-friction capture: keep the result without an account */}
               {savedEmail ? (
