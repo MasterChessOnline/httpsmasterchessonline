@@ -47,7 +47,11 @@ export default function PlayGuest() {
   const [outcome, setOutcome] = useState<"win" | "loss" | "draw" | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailValue, setEmailValue] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [savedEmail, setSavedEmail] = useState(false);
   const botMoveTimer = useRef<number | null>(null);
+
 
   const refresh = useCallback((g: Chess) => {
     setFen(g.fen());
