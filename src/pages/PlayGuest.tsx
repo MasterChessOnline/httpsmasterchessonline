@@ -158,6 +158,29 @@ export default function PlayGuest() {
 
   const handleEmailSignup = () => navigate("/signup");
 
+  const saveResultByEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const value = emailValue.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value) || value.length > 255) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setSavingEmail(true);
+    setError(null);
+    const { error: insertError } = await supabase.from("contact_messages").insert({
+      name: "Guest player",
+      email: value,
+      message: `Guest game result: ${outcome ?? "unknown"} vs ${GUEST_BOT.name} (play-guest)`,
+    });
+    setSavingEmail(false);
+    if (insertError) {
+      setError("Could not save right now. Please try again.");
+      return;
+    }
+    setSavedEmail(true);
+  };
+
+
   const moveCount = useMemo(() => Math.ceil(game.history().length / 2), [game, fen]);
 
   return (
