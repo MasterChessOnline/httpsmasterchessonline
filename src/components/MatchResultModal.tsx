@@ -246,7 +246,10 @@ export default function MatchResultModal({ open, data, onClose, onRematch, onRev
                 );
               })()}
 
+              <PushWinNudge />
+
               {/* Actions */}
+
               <div className="mt-6 flex flex-col gap-2 sm:flex-row">
                 {onRematch && (
                   <Button onClick={onRematch} className="flex-1 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold hover:brightness-110">
