@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chess, Square } from "chess.js";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Sparkles, Trophy, RotateCcw, LogIn, Mail, Loader2 } from "lucide-react";
+import { Crown, Sparkles, Trophy, RotateCcw, LogIn, Mail, Loader2, MessageCircle, Send, Share2 } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { BOARD_CONTAINER_CLASS } from "@/lib/board-sizing";
 import { Button } from "@/components/ui/button";
