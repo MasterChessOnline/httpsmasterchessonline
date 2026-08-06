@@ -3,10 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chess, Square } from "chess.js";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Sparkles, Trophy, RotateCcw, LogIn } from "lucide-react";
+import { Crown, Sparkles, Trophy, RotateCcw, LogIn, Mail, Loader2 } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
 import { BOARD_CONTAINER_CLASS } from "@/lib/board-sizing";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
 import { BOT_PROFILES } from "@/lib/bots/profiles";
 import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
 import { playChessSound } from "@/lib/chess-sounds";
@@ -45,7 +47,11 @@ export default function PlayGuest() {
   const [outcome, setOutcome] = useState<"win" | "loss" | "draw" | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailValue, setEmailValue] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [savedEmail, setSavedEmail] = useState(false);
   const botMoveTimer = useRef<number | null>(null);
+
 
   const refresh = useCallback((g: Chess) => {
     setFen(g.fen());
@@ -155,6 +161,29 @@ export default function PlayGuest() {
   };
 
   const handleEmailSignup = () => navigate("/signup");
+
+  const saveResultByEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const value = emailValue.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value) || value.length > 255) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setSavingEmail(true);
+    setError(null);
+    const { error: insertError } = await supabase.from("contact_messages").insert({
+      name: "Guest player",
+      email: value,
+      message: `Guest game result: ${outcome ?? "unknown"} vs ${GUEST_BOT.name} (play-guest)`,
+    });
+    setSavingEmail(false);
+    if (insertError) {
+      setError("Could not save right now. Please try again.");
+      return;
+    }
+    setSavedEmail(true);
+  };
+
 
   const moveCount = useMemo(() => Math.ceil(game.history().length / 2), [game, fen]);
 
@@ -294,7 +323,38 @@ export default function PlayGuest() {
                 </div>
               </div>
 
+              {/* Lowest-friction capture: keep the result without an account */}
+              {savedEmail ? (
+                <p className="text-xs text-primary font-semibold">
+                  Saved — we'll email your result and the daily puzzle.
+                </p>
+              ) : (
+                <form onSubmit={saveResultByEmail} className="space-y-2 text-left">
+                  <label htmlFor="guest-save-email" className="text-[11px] text-muted-foreground">
+                    Or just save this result by email — no password needed
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="guest-save-email"
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      maxLength={255}
+                      placeholder="you@email.com"
+                      value={emailValue}
+                      onChange={(e) => setEmailValue(e.target.value)}
+                      required
+                      className="h-10"
+                    />
+                    <Button type="submit" variant="secondary" className="h-10 shrink-0" disabled={savingEmail}>
+                      {savingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </form>
+              )}
+
               <div className="space-y-2.5">
+
                 <Button
                   className="w-full h-11 bg-white text-gray-900 hover:bg-white/90 font-medium"
                   onClick={handleGoogle}

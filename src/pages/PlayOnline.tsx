@@ -30,6 +30,8 @@ import VoiceChatPanel from "@/components/VoiceChatPanel";
 import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
 import CountryFlag from "@/components/CountryFlag";
+import EmptyLobbyActions from "@/components/EmptyLobbyActions";
+
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -86,6 +88,19 @@ const PlayOnline = () => {
 
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
+  // True once the queue has been empty for a while — we then show real
+  // alternatives (invite link, bots, puzzles) instead of an endless spinner.
+  const [queueStalled, setQueueStalled] = useState(false);
+
+  useEffect(() => {
+    if (onlineStatus !== "searching") {
+      setQueueStalled(false);
+      return;
+    }
+    const t = window.setTimeout(() => setQueueStalled(true), 25000);
+    return () => window.clearTimeout(t);
+  }, [onlineStatus]);
+
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
   const [timeControlIdx, setTimeControlIdx] = useState(initialTcIdx);
@@ -841,7 +856,14 @@ const PlayOnline = () => {
                 </div>
                 <p className="text-xs text-muted-foreground">Looking for a player near your rating</p>
                 <Button variant="outline" onClick={cancelSearch} className="w-full">Cancel Search</Button>
+                {queueStalled && (
+                  <EmptyLobbyActions
+                    title="Nobody is in the queue right now"
+                    subtitle="You stay in the queue — meanwhile invite a friend or train, and we'll pair you the moment someone joins."
+                  />
+                )}
               </motion.div>
+
             ) : (
               <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
                 <Wifi className="mr-2 h-5 w-5" /> Find Opponent
