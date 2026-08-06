@@ -854,7 +854,14 @@ const PlayOnline = () => {
                 </div>
                 <p className="text-xs text-muted-foreground">Looking for a player near your rating</p>
                 <Button variant="outline" onClick={cancelSearch} className="w-full">Cancel Search</Button>
+                {queueStalled && (
+                  <EmptyLobbyActions
+                    title="Nobody is in the queue right now"
+                    subtitle="You stay in the queue — meanwhile invite a friend or train, and we'll pair you the moment someone joins."
+                  />
+                )}
               </motion.div>
+
             ) : (
               <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
                 <Wifi className="mr-2 h-5 w-5" /> Find Opponent
