@@ -16,9 +16,14 @@ import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { celebrate } from "@/lib/celebrate";
+import { share } from "@/lib/share";
 
 // Easy bot — friendly first experience
 const GUEST_BOT = BOT_PROFILES.find((b) => b.id === "pawn-pablo") ?? BOT_PROFILES[1];
+
+// Shared entry point for invited friends — instant play, no signup wall.
+const GUEST_SHARE_URL = "https://masterchess.live/play-guest?utm_source=guest_share&utm_medium=social";
+
 
 type Phase = "playing" | "ended";
 
