@@ -323,6 +323,41 @@ export default function PlayGuest() {
                 </div>
               </div>
 
+              {/* Viral loop: guests are our biggest traffic source — let them
+                  pull a friend in with one tap, no account required. */}
+              <div className="rounded-xl border border-border/60 bg-card/50 p-3 space-y-2">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Dare a friend
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(guestShareText)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-colors"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                  </a>
+                  <a
+                    href={`https://t.me/share/url?url=${encodeURIComponent(GUEST_SHARE_URL)}&text=${encodeURIComponent(guestShareText)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-semibold transition-colors"
+                  >
+                    <Send className="h-3.5 w-3.5" /> Telegram
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => share({ title: "MasterChess", text: guestShareText, url: GUEST_SHARE_URL })}
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-muted/40 hover:bg-muted/60 border border-border/60 text-foreground text-xs font-semibold transition-colors"
+                  >
+                    <Share2 className="h-3.5 w-3.5" /> Share
+                  </button>
+                </div>
+              </div>
+
+
+
               {/* Lowest-friction capture: keep the result without an account */}
               {savedEmail ? (
                 <p className="text-xs text-primary font-semibold">
