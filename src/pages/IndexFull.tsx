@@ -313,10 +313,15 @@ const Index = () => {
           >
             <AnimatedLogoHero tagline={t("hero.tagline")} />
 
+            {/* 1 ▸ ONE-SENTENCE "WHY THIS SITE" — must be readable in 5 seconds */}
+            <p className="mx-auto mt-5 max-w-2xl text-sm sm:text-lg text-muted-foreground">
+              Real chess against real people — no engine help, no ads, no subscription.
+              One tap and you are already playing.
+            </p>
 
-            {/* 2 ▸ PRIMARY PLAY CTAs — two clear buttons, breathing room */}
+            {/* 2 ▸ ONE primary CTA + one secondary — no competing buttons */}
             <motion.div
-              className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
+              className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 0.6 }}
@@ -329,23 +334,45 @@ const Index = () => {
                     className="ripple-btn w-full sm:w-auto h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
                   >
                     <Play className="h-5 w-5 mr-2 fill-current" />
-                    {user ? t("hero.playOnline") : "Play Online"}
+                    {user ? t("hero.playOnline") : "Play Now"}
                   </Button>
                 </motion.div>
               </Link>
-              <Link to="/play" className="w-full sm:w-auto">
+              <Link to={user ? "/play" : "/signup"} className="w-full sm:w-auto">
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
                     variant="outline"
                     className="ripple-btn w-full sm:w-auto h-14 px-10 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
                   >
-                    <Swords className="h-5 w-5 mr-2" />
-                    vs Bots
+                    {user ? (
+                      <>
+                        <Swords className="h-5 w-5 mr-2" />
+                        vs Bots
+                      </>
+                    ) : (
+                      <>
+                        <Crown className="h-5 w-5 mr-2" />
+                        Create free account
+                      </>
+                    )}
                   </Button>
                 </motion.div>
               </Link>
             </motion.div>
+
+            {/* 2b ▸ Real proof numbers + quiet secondary links */}
+            <HomeProofRow />
+            {!user && (
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <Link to="/play" className="hover:text-primary">Play vs bots</Link>
+                <span className="opacity-30">·</span>
+                <Link to="/learn" className="hover:text-primary">Learn chess</Link>
+                <span className="opacity-30">·</span>
+                <Link to="/puzzles" className="hover:text-primary">Daily puzzle</Link>
+              </div>
+            )}
+
 
             {/* 3 ▸ INSTALL APP — secondary, on its own row, subtle */}
             <motion.div
