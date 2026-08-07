@@ -44,32 +44,37 @@ export default function Index() {
               <span className="text-foreground">Chess</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base sm:text-xl text-muted-foreground">
-              Fast entry. Real chess. Play online, train with bots, and join the DB Chess Cup.
+              Real chess against real people — no engine help, no ads, no subscription. One tap and
+              you are already playing.
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button asChild size="lg" className="h-14 w-full max-w-xs bg-amber-400 text-black hover:bg-amber-300 sm:w-auto">
+              <Button
+                asChild
+                size="lg"
+                className="h-14 w-full max-w-sm bg-amber-400 text-base font-bold text-black hover:bg-amber-300 sm:w-auto sm:px-10"
+              >
                 <Link to="/play-guest">
-                  <Play className="mr-2 h-5 w-5 fill-current" /> Play Online
+                  <Play className="mr-2 h-5 w-5 fill-current" /> Play Now — no signup
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-14 w-full max-w-xs sm:w-auto">
-                <Link to="/play">
-                  <Swords className="mr-2 h-5 w-5" /> vs Bots
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="secondary" className="h-14 w-full max-w-xs sm:w-auto">
-                <Link to="/dragan-brakus/register">
-                  <Trophy className="mr-2 h-5 w-5" /> Register DB Cup
+              <Button asChild size="lg" variant="outline" className="h-14 w-full max-w-sm sm:w-auto">
+                <Link to="/signup">
+                  <Crown className="mr-2 h-5 w-5" /> Create free account
                 </Link>
               </Button>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">No blocking splash</span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Mobile fast</span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Offline-safe entry</span>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              <Link to="/play" className="hover:text-amber-300">Play vs bots</Link>
+              <span className="opacity-30">·</span>
+              <Link to="/dragan-brakus/register" className="hover:text-amber-300">Register DB Cup</Link>
+              <span className="opacity-30">·</span>
+              <Link to="/learn" className="hover:text-amber-300">Learn chess</Link>
             </div>
+
+            <HomeProofRow />
+
           </div>
         </section>
 
