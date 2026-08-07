@@ -59,7 +59,7 @@ const Signup = () => {
   // Land straight in a playable board after signup instead of a static page.
   const redirectTo = searchParams.get("redirect") || "/play";
 
-  const authSuffix = redirectTo !== "/homepage" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
+  const authSuffix = searchParams.get("redirect") ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
   const handleGoogleLogin = async () => {
     setError(null);
