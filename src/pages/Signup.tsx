@@ -47,6 +47,8 @@ const Signup = () => {
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null }>(null);
   const [fideErr, setFideErr] = useState<string | null>(null);
   const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showFide, setShowFide] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,8 +58,10 @@ const Signup = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/homepage";
-  const authSuffix = redirectTo !== "/homepage" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
+  // Land straight in a playable board after signup instead of a static page.
+  const redirectTo = searchParams.get("redirect") || "/play";
+
+  const authSuffix = searchParams.get("redirect") ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -299,28 +303,39 @@ const Signup = () => {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="fide" className="text-xs font-medium text-muted-foreground">
-                  FIDE ID <span className="opacity-60">(optional — auto-fills your name & rating)</span>
-                </Label>
-                <Input
-                  id="fide"
-                  inputMode="numeric"
-                  placeholder="e.g. 14106503"
-                  value={fideId}
-                  onChange={(e) => onFideChange(e.target.value)}
-                  maxLength={10}
-                  className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
-                />
-                {fideBusy && <p className="text-[11px] text-muted-foreground">Checking FIDE…</p>}
-                {fideFound && (
-                  <p className="text-[11px] text-emerald-400">
-                    ✓ {fideFound.name}{fideFound.title ? ` · ${fideFound.title}` : ""}{fideFound.federation ? ` · ${fideFound.federation}` : ""}
-                    {fideFound.blitz_rating ? ` · Blitz ${fideFound.blitz_rating}` : fideFound.rapid_rating ? ` · Rapid ${fideFound.rapid_rating}` : fideFound.standard_rating ? ` · Std ${fideFound.standard_rating}` : ""}
-                  </p>
-                )}
-                {fideErr && !fideBusy && <p className="text-[11px] text-destructive/80">{fideErr}</p>}
-              </div>
+              {!showFide ? (
+                <button
+                  type="button"
+                  onClick={() => setShowFide(true)}
+                  className="text-[11px] text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Have a FIDE ID? Add it to import your rating (optional)
+                </button>
+              ) : (
+                <div className="space-y-1.5">
+                  <Label htmlFor="fide" className="text-xs font-medium text-muted-foreground">
+                    FIDE ID <span className="opacity-60">(optional — auto-fills your name & rating)</span>
+                  </Label>
+                  <Input
+                    id="fide"
+                    inputMode="numeric"
+                    placeholder="e.g. 14106503"
+                    value={fideId}
+                    onChange={(e) => onFideChange(e.target.value)}
+                    maxLength={10}
+                    className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
+                  />
+                  {fideBusy && <p className="text-[11px] text-muted-foreground">Checking FIDE…</p>}
+                  {fideFound && (
+                    <p className="text-[11px] text-emerald-400">
+                      ✓ {fideFound.name}{fideFound.title ? ` · ${fideFound.title}` : ""}{fideFound.federation ? ` · ${fideFound.federation}` : ""}
+                      {fideFound.blitz_rating ? ` · Blitz ${fideFound.blitz_rating}` : fideFound.rapid_rating ? ` · Rapid ${fideFound.rapid_rating}` : fideFound.standard_rating ? ` · Std ${fideFound.standard_rating}` : ""}
+                    </p>
+                  )}
+                  {fideErr && !fideBusy && <p className="text-[11px] text-destructive/80">{fideErr}</p>}
+                </div>
+              )}
+
 
 
 
