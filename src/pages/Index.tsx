@@ -2,6 +2,8 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
+import HomeProofRow from "@/components/HomeProofRow";
+
 import LiveActivityBar from "@/components/LiveActivityBar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

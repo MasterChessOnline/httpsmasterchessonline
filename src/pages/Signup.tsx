@@ -56,7 +56,9 @@ const Signup = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/homepage";
+  // Land straight in a playable board after signup instead of a static page.
+  const redirectTo = searchParams.get("redirect") || "/play";
+
   const authSuffix = redirectTo !== "/homepage" ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
   const handleGoogleLogin = async () => {
