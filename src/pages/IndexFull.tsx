@@ -64,6 +64,7 @@ import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
+import InstantHeroBoard from "@/components/InstantHeroBoard";
 
 import LazyMount from "@/components/LazyMount";
 import TonightArenaBanner from "@/components/TonightArenaBanner";
@@ -289,6 +290,9 @@ const Index = () => {
       <BrakusHeroBanner />
 
       <main>
+        {/* ── INSTANT PLAY: live board is the first thing a visitor sees ── */}
+        <InstantHeroBoard />
+
         {/* ── HERO with parallax + 4D depth ── */}
         <div ref={heroRef} className="relative pt-16 sm:pt-24 pb-16 px-4 overflow-hidden min-h-[45vh]">
           <motion.div className="absolute inset-0" style={{ y: imgY, scale: heroScale }}>

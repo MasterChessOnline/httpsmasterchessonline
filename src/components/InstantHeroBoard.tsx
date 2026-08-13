@@ -20,8 +20,6 @@ import { celebrate } from "@/lib/celebrate";
 
 const HERO_BOT = BOT_PROFILES.find((b) => b.id === "pawn-pablo") ?? BOT_PROFILES[1];
 
-const SHARE_URL = "https://masterchess.live/?utm_source=instant_board&utm_medium=social";
-
 const STREAK_KEY = "mc_guest_streak";
 const STREAK_DAY_KEY = "mc_guest_streak_day";
 const LAST_RESULT_KEY = "mc_guest_last_result";
