@@ -10,7 +10,6 @@ import { BOT_PROFILES } from "@/lib/bots/profiles";
 import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
 import { playChessSound } from "@/lib/chess-sounds";
 import { celebrate } from "@/lib/celebrate";
-import { share } from "@/lib/share";
 
 /**
  * INSTANT HERO BOARD — the first thing a visitor sees on the homepage.
@@ -211,11 +210,6 @@ export default function InstantHeroBoard() {
 
   const moveNumber = useMemo(() => Math.ceil(game.history().length / 2), [game, fen]);
 
-  const shareText =
-    outcome === "win"
-      ? `I just beat ${HERO_BOT.name} on MasterChess ♟️ Your turn — the board plays instantly, no signup: ${SHARE_URL}`
-      : `Playing chess on MasterChess ♟️ The board on the homepage starts instantly, no signup: ${SHARE_URL}`;
-
   return (
     <section className="relative z-10 px-4 pt-6 pb-2" aria-label="Play chess instantly">
       <div className="container mx-auto max-w-3xl">
@@ -332,15 +326,6 @@ export default function InstantHeroBoard() {
         moves={moveNumber}
         timeControl="Instant"
       />
-
-      {/* Fallback native/clipboard share for browsers without canvas download UX. */}
-      <button
-        type="button"
-        className="sr-only"
-        onClick={() => share({ title: "MasterChess", text: shareText, url: SHARE_URL })}
-      >
-        Share link
-      </button>
 
       <script
         type="application/ld+json"
