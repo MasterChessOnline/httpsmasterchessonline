@@ -13,6 +13,7 @@ import { track } from "@/lib/track";
 import AuthAura from "@/components/auth/AuthAura";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 import BrandLogo from "@/components/BrandLogo";
+import Seo from "@/components/Seo";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -188,6 +189,24 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden py-10">
+      <Seo
+        title="Create Free Account — MasterChess"
+        description="Create your free MasterChess account in seconds. Play chess online vs real players and bots, save your rating, join tournaments. No ads, no subscription."
+        path="/signup"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Create Free Account",
+          url: "https://masterchess.live/signup",
+          description: "Sign up free for MasterChess and start playing chess online instantly.",
+          isPartOf: { "@type": "WebSite", name: "MasterChess", url: "https://masterchess.live/" },
+          potentialAction: {
+            "@type": "RegisterAction",
+            name: "Create Free Account",
+            target: "https://masterchess.live/signup",
+          },
+        }}
+      />
       <AuthAura />
       {CHESS_PIECES.map((piece, i) => (
         <FloatingPiece key={i} piece={piece} index={i} />
