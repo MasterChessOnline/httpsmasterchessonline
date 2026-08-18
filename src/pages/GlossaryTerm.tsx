@@ -88,15 +88,15 @@ export default function GlossaryTerm() {
             </div>
           )}
 
-          <div className="mt-10 p-5 rounded-xl border border-primary/20 bg-primary/5 text-center">
-            <p className="text-sm text-muted-foreground mb-3">Practice {term.term.toLowerCase()} in real games</p>
-            <Link
-              to="/play/online"
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold uppercase text-sm tracking-wider hover:bg-primary/90 transition-all"
-            >
-              Play Now
-            </Link>
-          </div>
+          <SeoFaqBlock items={faq} title={`${term.term} — FAQ`} />
+
+          <SeoNextSteps
+            steps={[
+              { to: `/learn/glossary/${nextTerm.slug}`, label: `Next term: ${nextTerm.term}`, note: nextTerm.short.slice(0, 70) },
+              { to: "/learn/checkmate-patterns", label: "Learn the checkmate patterns", note: "Interactive boards for every mate." },
+            ]}
+          />
+
         </motion.article>
       </main>
     </div>
