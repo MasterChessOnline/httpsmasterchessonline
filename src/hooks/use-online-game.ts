@@ -390,6 +390,65 @@ export function useOnlineGame() {
     recoverGame();
   }, [user, subscribeToGame]);
 
+  // Try to claim an opponent that is already sitting in the queue and start a
+  // game with them. The claim is the DELETE ... RETURNING on the opponent's
+  // queue row: only the client whose delete actually returns a row owns that
+  // opponent, so two players who joined the queue at the same instant can both
+  // run this loop without creating two games (previously they could both find
+  // an empty queue, both insert a row, and then wait for each other forever).
+  const tryPairFromQueue = useCallback(async (
+    tc: { label: string; seconds: number; increment: number },
+  ): Promise<OnlineGame | null | "error"> => {
+    if (!user) return null;
+
+    const { data: queueEntries } = await supabase
+      .from("matchmaking_queue")
+      .select("*")
+      .eq("time_control_label", tc.label)
+      .neq("user_id", user.id)
+      .order("created_at", { ascending: true })
+      .limit(5);
+
+    if (!queueEntries || queueEntries.length === 0) return null;
+
+    for (const opponent of queueEntries) {
+      // Atomic claim — if another client already took this row, `claimed` is empty.
+      const { data: claimed } = await supabase
+        .from("matchmaking_queue")
+        .delete()
+        .eq("id", opponent.id)
+        .select("id");
+      if (!claimed || claimed.length === 0) continue;
+
+      // Claimer always plays white (white moves first).
+      const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
+        p_white_id: user.id,
+        p_black_id: opponent.user_id,
+        p_white_time: tc.seconds || 600,
+        p_black_time: tc.seconds || 600,
+        p_time_control_label: tc.label,
+        p_increment: tc.increment,
+      });
+      const newGame = startRes && (startRes as any).ok === true
+        ? ((startRes as any).game as OnlineGame)
+        : null;
+      if (newGame) return newGame;
+
+      const reason = (startRes as any)?.error;
+      if (reason === "black_busy") continue; // opponent got matched elsewhere — try next
+      if (reason === "white_busy") {
+        setError("You already have an active game. Resume it before starting a new one.");
+        return "error";
+      }
+      if (startErr) {
+        setError("Failed to create game");
+        return "error";
+      }
+    }
+    return null;
+  }, [user]);
+
+
   const searchMatch = useCallback(async (timeControlIdx: number) => {
     if (!user || !profile) return;
     setError(null);
@@ -415,52 +474,18 @@ export function useOnlineGame() {
     // (Server already cleaned queue rows in assert_can_queue, but keep this for safety.)
     await supabase.from("matchmaking_queue").delete().eq("user_id", user.id);
 
-    // Look for an opponent in queue
-    const { data: queueEntries } = await supabase
-      .from("matchmaking_queue")
-      .select("*")
-      .eq("time_control_label", tc.label)
-      .neq("user_id", user.id)
-      .order("created_at", { ascending: true })
-      .limit(1);
-
-    if (queueEntries && queueEntries.length > 0) {
-      const opponent = queueEntries[0];
-      // Remove opponent from queue
-      await supabase.from("matchmaking_queue").delete().eq("id", opponent.id);
-
-      // User always plays white (white moves first).
-      const iAmWhite = true;
-      const whiteId = iAmWhite ? user.id : opponent.user_id;
-      const blackId = iAmWhite ? opponent.user_id : user.id;
-
-      // Atomic creation with 1-game-per-user enforcement.
-      const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
-        p_white_id: whiteId,
-        p_black_id: blackId,
-        p_white_time: tc.seconds || 600,
-        p_black_time: tc.seconds || 600,
-        p_time_control_label: tc.label,
-        p_increment: tc.increment,
-      });
-      const startOk = startRes && (startRes as any).ok === true;
-      const newGame = startOk ? ((startRes as any).game as OnlineGame) : null;
-      if (startErr || !newGame) {
-        const reason = (startRes as any)?.error;
-        if (reason === "white_busy" || reason === "black_busy") {
-          setError("One of the players is already in another game.");
-        } else {
-          setError("Failed to create game");
-        }
-        setStatus("idle");
-        return;
-      }
-
+    const paired = await tryPairFromQueue(tc);
+    if (paired === "error") {
+      setStatus("idle");
+      return;
+    }
+    if (paired) {
       eloUpdatedRef.current = false; endingRef.current = false;
-      setGame(newGame as OnlineGame);
+      setGame(paired);
       setStatus("playing");
-      subscribeToGame(newGame.id);
+      subscribeToGame(paired.id);
     } else {
+
       // Join queue and wait
       const { data: entry, error: queueError } = await supabase
         .from("matchmaking_queue")
@@ -508,7 +533,24 @@ export function useOnlineGame() {
 
       channelRef.current = queueChannel;
 
-      // Also poll for game creation as backup
+      // Backup poll: (a) did someone start a game with me, and (b) is there
+      // now an opponent waiting in the queue that I can claim myself?
+      const enterGame = async (found: OnlineGame) => {
+        clearInterval(pollInterval);
+        eloUpdatedRef.current = false; endingRef.current = false;
+        setGame(found);
+        setStatus("playing");
+        subscribeToGame(found.id);
+        if (channelRef.current) {
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
+        if (queueEntryId.current) {
+          await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
+          queueEntryId.current = null;
+        }
+      };
+
       const pollInterval = setInterval(async () => {
         const { data: games } = await supabase
           .from("online_games")
@@ -519,23 +561,17 @@ export function useOnlineGame() {
           .limit(1);
 
         if (games && games.length > 0) {
-          clearInterval(pollInterval);
-          const foundGame = games[0] as OnlineGame;
-          eloUpdatedRef.current = false; endingRef.current = false;
-          setGame(foundGame);
-          setStatus("playing");
-          subscribeToGame(foundGame.id);
+          await enterGame(games[0] as OnlineGame);
+          return;
+        }
 
-          if (channelRef.current) {
-            supabase.removeChannel(channelRef.current);
-            channelRef.current = null;
-          }
-          if (queueEntryId.current) {
-            await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
-            queueEntryId.current = null;
-          }
+        // Nobody paired me yet — try to pair myself with anyone waiting.
+        const selfPaired = await tryPairFromQueue(tc);
+        if (selfPaired && selfPaired !== "error") {
+          await enterGame(selfPaired);
         }
       }, 2000);
+
 
       // Store poll ref for cleanup
       const origCleanup = channelRef.current;
@@ -545,7 +581,7 @@ export function useOnlineGame() {
       if (origPoll) clearInterval(origPoll);
       pollRef.current = pollInterval;
     }
-  }, [user, profile, subscribeToGame]);
+  }, [user, profile, subscribeToGame, tryPairFromQueue]);
 
   const cancelSearch = useCallback(async () => {
     if (queueEntryId.current) {
