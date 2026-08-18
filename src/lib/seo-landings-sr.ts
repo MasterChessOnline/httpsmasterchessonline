@@ -306,28 +306,41 @@ export const SR_LANDINGS: Record<string, SeoLandingConfig> = {
   "sah-protiv-kompjutera-besplatno": {
     path: "/sr/sah-protiv-kompjutera-besplatno",
     lang: "sr",
-    title: "Šah protiv kompjutera besplatno — 9 nivoa | MasterChess",
-    description: "Igraj šah protiv kompjutera potpuno besplatno. 9 nivoa od 400 do 2000 ELO. Bez instalacije, bez reklama, radi u pretraživaču.",
-    eyebrow: "Besplatno · 9 nivoa",
-    h1: "Šah protiv kompjutera — besplatno, bez instalacije",
-    intro: "Devet AI šahovskih botova, raspon 400-2000 ELO, svaki sa unikatnim stilom. Direktno u pretraživaču — bez aplikacije, bez registracije.",
-    primaryCta: { label: "Igraj odmah", href: "/play" },
-    secondaryCta: { label: "Igraj online", href: "/play/online" },
+    // Naslov i opis pisani po tačnim upitima iz Search Console-a
+    // („besplatan šah protiv kompjutera", „bez registracije") — stara verzija
+    // je imala 130 prikaza i 1 klik.
+    title: "Besplatan šah protiv kompjutera — igraj odmah, bez registracije",
+    description: "Igraj besplatan šah protiv kompjutera bez registracije i bez reklama. Prvi potez pokreće partiju — 9 nivoa od 400 do 2000 ELO, direktno u pretraživaču, na telefonu i računaru.",
+    eyebrow: "Bez registracije · 9 nivoa",
+    h1: "Besplatan šah protiv kompjutera — bez registracije",
+    intro: "Odigraj partiju za 5 sekundi: klikni „Igraj odmah", odaberi nivo i prvi potez pokreće igru. Devet botova od 400 do 2000 ELO, bez instalacije, bez reklama, bez naloga.",
+    primaryCta: { label: "Igraj odmah besplatno", href: "/play-guest" },
+    secondaryCta: { label: "Svi botovi (400–2000)", href: "/play" },
     bullets: [
-      "Potpuno besplatno — bez limita partija",
+      "Bez registracije — prvi potez pokreće partiju",
+      "Potpuno besplatno, bez limita partija",
       "9 različitih botova sa karakterom",
       "Stockfish engine pozadi",
       "Bez reklama, bez praćenja",
-      "Radi offline kad je strana učitana",
-      "Coaching mod i revija partija uključeni",
+      "Radi na telefonu i računaru, bez instalacije",
     ],
     sections: [
       { heading: "Kako da izabereš pravi nivo", body: "Početnik (do 1000 ELO): kreni od Marcusa (400). Amater (1000-1400): Sofia ili Viktor. Klupski igrač (1400-1800): Elena ili Magnus-bot. Iznad 1800: gornji botovi vežbaće te taktički." },
       { heading: "Šta dobiješ posle partije", body: "Reviju po potezima sa ručnom analizom (bez engine cheat-a), ELO simulaciju, i konkretne savete za svaki bot — gde tipično blunduje, koja otvaranja ne voli." },
     ],
+    faq: [
+      { q: "Da li je šah protiv kompjutera besplatan?", a: "Da, potpuno. Nema pretplate, nema limita partija i nema reklama. Ne treba ti nalog da odigraš partiju." },
+      { q: "Moram li da se registrujem?", a: "Ne. Klikni „Igraj odmah" i partija počinje na prvi potez. Nalog praviš samo ako želiš da sačuvaš rejting, seriju pobeda i istoriju partija." },
+      { q: "Koliko nivoa ima kompjuter?", a: "Devet botova u rasponu od 400 do 2000 ELO, svaki sa drugačijim stilom igre — od početničkih grešaka do taktički oštre igre." },
+      { q: "Da li radi na telefonu?", a: "Radi u svakom modernom pretraživaču na telefonu, tabletu i računaru. Nema instalacije aplikacije." },
+      { q: "Da li mogu da igram protiv pravih ljudi?", a: "Da — pored partija protiv kompjutera možeš igrati online protiv pravih igrača i učestvovati na turnirima." },
+    ],
     internalLinks: [
       { label: "Šah online", href: "/sr/sah-online" },
       { label: "Šah za početnike", href: "/sr/sah-za-pocetnike" },
+      { label: "Šah bez registracije", href: "/sr/sah-bez-registracije" },
+      { label: "Šah u Banjoj Luci", href: "/play-from/banja-luka" },
+      { label: "Napravi besplatan nalog", href: "/signup" },
     ],
   },
 
