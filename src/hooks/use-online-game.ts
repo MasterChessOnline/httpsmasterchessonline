@@ -415,52 +415,18 @@ export function useOnlineGame() {
     // (Server already cleaned queue rows in assert_can_queue, but keep this for safety.)
     await supabase.from("matchmaking_queue").delete().eq("user_id", user.id);
 
-    // Look for an opponent in queue
-    const { data: queueEntries } = await supabase
-      .from("matchmaking_queue")
-      .select("*")
-      .eq("time_control_label", tc.label)
-      .neq("user_id", user.id)
-      .order("created_at", { ascending: true })
-      .limit(1);
-
-    if (queueEntries && queueEntries.length > 0) {
-      const opponent = queueEntries[0];
-      // Remove opponent from queue
-      await supabase.from("matchmaking_queue").delete().eq("id", opponent.id);
-
-      // User always plays white (white moves first).
-      const iAmWhite = true;
-      const whiteId = iAmWhite ? user.id : opponent.user_id;
-      const blackId = iAmWhite ? opponent.user_id : user.id;
-
-      // Atomic creation with 1-game-per-user enforcement.
-      const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
-        p_white_id: whiteId,
-        p_black_id: blackId,
-        p_white_time: tc.seconds || 600,
-        p_black_time: tc.seconds || 600,
-        p_time_control_label: tc.label,
-        p_increment: tc.increment,
-      });
-      const startOk = startRes && (startRes as any).ok === true;
-      const newGame = startOk ? ((startRes as any).game as OnlineGame) : null;
-      if (startErr || !newGame) {
-        const reason = (startRes as any)?.error;
-        if (reason === "white_busy" || reason === "black_busy") {
-          setError("One of the players is already in another game.");
-        } else {
-          setError("Failed to create game");
-        }
-        setStatus("idle");
-        return;
-      }
-
+    const paired = await tryPairFromQueue(tc);
+    if (paired === "error") {
+      setStatus("idle");
+      return;
+    }
+    if (paired) {
       eloUpdatedRef.current = false; endingRef.current = false;
-      setGame(newGame as OnlineGame);
+      setGame(paired);
       setStatus("playing");
-      subscribeToGame(newGame.id);
+      subscribeToGame(paired.id);
     } else {
+
       // Join queue and wait
       const { data: entry, error: queueError } = await supabase
         .from("matchmaking_queue")
