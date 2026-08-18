@@ -55,6 +55,7 @@ export default function CheckmatePatternDetail() {
               { "@type": "ListItem", position: 3, name: m.name },
             ],
           },
+          buildFaqSchema(faq),
         ]}
       />
       <Navbar />
