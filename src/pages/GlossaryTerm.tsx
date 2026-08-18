@@ -4,15 +4,22 @@ import { ChevronLeft, BookOpen } from "lucide-react";
 import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import { getTermBySlug, GLOSSARY } from "@/data/chessGlossary";
+import SeoFaqBlock from "@/components/seo/SeoFaqBlock";
+import SeoNextSteps from "@/components/seo/SeoNextSteps";
+import { glossaryFaq } from "@/lib/content-faq";
+import { buildFaqSchema } from "@/lib/jsonld-builders";
 
 export default function GlossaryTerm() {
   const { slug = "" } = useParams();
   const term = getTermBySlug(slug);
   if (!term) return <Navigate to="/learn/glossary" replace />;
 
+  const faq = glossaryFaq(term);
+  const nextTerm = GLOSSARY[(GLOSSARY.findIndex(t => t.slug === term.slug) + 1) % GLOSSARY.length];
   const related = (term.related || [])
     .map(s => GLOSSARY.find(t => t.slug === s))
     .filter(Boolean);
+
 
   return (
     <div className="min-h-screen bg-background">
