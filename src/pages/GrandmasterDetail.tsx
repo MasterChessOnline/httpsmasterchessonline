@@ -5,14 +5,22 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import { getGrandmaster, GRANDMASTERS } from "@/data/grandmasters";
 import { getFamousGame } from "@/data/famousGames";
+import PositionStudyBoard from "@/components/seo/PositionStudyBoard";
+import SeoFaqBlock from "@/components/seo/SeoFaqBlock";
+import SeoNextSteps from "@/components/seo/SeoNextSteps";
+import { grandmasterFaq } from "@/lib/content-faq";
+import { buildFaqSchema } from "@/lib/jsonld-builders";
 
 export default function GrandmasterDetail() {
   const { slug = "" } = useParams();
   const g = getGrandmaster(slug);
   if (!g) return <Navigate to="/players" replace />;
 
+  const faq = grandmasterFaq(g);
   const game = g.bestGameSlug ? getFamousGame(g.bestGameSlug) : null;
   const related = GRANDMASTERS.filter((x) => x.slug !== g.slug).slice(0, 4);
+  const nextGm = GRANDMASTERS[(GRANDMASTERS.findIndex((x) => x.slug === g.slug) + 1) % GRANDMASTERS.length];
+
 
   return (
     <div className="min-h-screen bg-background">
