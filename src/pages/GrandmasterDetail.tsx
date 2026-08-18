@@ -89,7 +89,24 @@ export default function GrandmasterDetail() {
             </Link>
           )}
 
-          <h2 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3">More grandmasters</h2>
+          {game && (
+            <PositionStudyBoard
+              pgn={game.pgn}
+              label={`${game.title} — replay ${g.name}'s masterpiece`}
+              className="mb-8"
+            />
+          )}
+
+          <SeoFaqBlock items={faq} title={`${g.name} — FAQ`} />
+
+          <SeoNextSteps
+            steps={[
+              { to: `/players/${nextGm.slug}`, label: `Next: ${nextGm.name}`, note: `${nextGm.country} · ${nextGm.peakRating} peak` },
+              { to: "/famous-games", label: "Browse legendary games", note: "Replay them move by move." },
+            ]}
+          />
+
+          <h2 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3 mt-10">More grandmasters</h2>
           <div className="flex flex-wrap gap-2">
             {related.map((r) => (
               <Link key={r.slug} to={`/players/${r.slug}`}
@@ -98,6 +115,7 @@ export default function GrandmasterDetail() {
               </Link>
             ))}
           </div>
+
         </motion.article>
       </main>
     </div>
