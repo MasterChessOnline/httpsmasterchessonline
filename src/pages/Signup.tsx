@@ -67,6 +67,18 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
+  const [outage, setOutage] = useState(false);
+  // What this guest earned while playing without an account.
+  const guestLine = useMemo(() => guestValueLine(getGuestProgress()), []);
+
+  useEffect(() => {
+    // Funnel step: the signup offer was actually seen.
+    markSignupSeen();
+    // A queued email from an earlier outage: prefill so the retry is one tap.
+    const pending = getPendingSignup();
+    if (pending?.email) setEmail((prev) => prev || pending.email);
+  }, []);
+
 
 
   const navigate = useNavigate();
