@@ -79,16 +79,11 @@ export default function CheckmatePatternDetail() {
           <p className="text-lg text-foreground/90 mb-6 font-medium">{m.short}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-            <div className="rounded-xl border border-border/30 glass-4d overflow-hidden">
-              <img
-                src={boardImg}
-                alt={`${m.name} example position — ${m.short}`}
-                width={400}
-                height={400}
-                loading="lazy"
-                className="w-full aspect-square object-contain bg-muted/10"
-              />
-            </div>
+            <PositionStudyBoard
+              fen={m.fen}
+              moves={m.moves}
+              label={`${m.name} — example position`}
+            />
             <div className="rounded-xl border border-border/30 glass-4d p-5 flex flex-col">
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Forced sequence</p>
               <p className="font-mono text-sm text-foreground/90 mb-4 leading-relaxed">{m.moves}</p>
@@ -108,9 +103,18 @@ export default function CheckmatePatternDetail() {
             </Link>
           </div>
 
+          <SeoFaqBlock items={faq} title={`${m.name} — FAQ`} />
+
+          <SeoNextSteps
+            steps={[
+              { to: `/learn/checkmate-patterns/${nextPattern.slug}`, label: `Next pattern: ${nextPattern.name}`, note: nextPattern.short.slice(0, 70) },
+              { to: "/puzzles", label: "Solve today's puzzle", note: "One new tactic every day." },
+            ]}
+          />
+
           {related.length > 0 && (
             <>
-              <h2 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3">Related patterns</h2>
+              <h2 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3 mt-10">Related patterns</h2>
               <div className="flex flex-wrap gap-2">
                 {related.map(r => (
                   <Link key={r.slug} to={`/learn/checkmate-patterns/${r.slug}`}
@@ -121,6 +125,7 @@ export default function CheckmatePatternDetail() {
               </div>
             </>
           )}
+
         </motion.article>
       </main>
     </div>
