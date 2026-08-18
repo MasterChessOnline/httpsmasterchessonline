@@ -444,6 +444,13 @@ export function useOnlineGame() {
 
 
 
+  const clearSeek = useCallback(async () => {
+    if (!seekId.current) return;
+    const id = seekId.current;
+    seekId.current = null;
+    try { await (supabase as any).from("open_challenges").delete().eq("id", id); } catch { /* ignore */ }
+  }, []);
+
   const searchMatch = useCallback(async (timeControlIdx: number) => {
     if (!user || !profile) return;
     setError(null);
@@ -597,14 +604,7 @@ export function useOnlineGame() {
       if (origPoll) clearInterval(origPoll);
       pollRef.current = pollInterval;
     }
-  }, [user, profile, subscribeToGame, tryPairFromQueue]);
-
-  const clearSeek = useCallback(async () => {
-    if (!seekId.current) return;
-    const id = seekId.current;
-    seekId.current = null;
-    try { await (supabase as any).from("open_challenges").delete().eq("id", id); } catch { /* ignore */ }
-  }, []);
+  }, [user, profile, subscribeToGame, tryPairFromQueue, clearSeek]);
 
   const cancelSearch = useCallback(async () => {
     if (queueEntryId.current) {
