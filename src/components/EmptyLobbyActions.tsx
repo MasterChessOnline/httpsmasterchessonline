@@ -48,10 +48,27 @@ export default function EmptyLobbyActions({
       });
       if (error) throw error;
       const link = `${window.location.origin}/vs/${code}`;
+      // Prefer the native share sheet on mobile — one tap into WhatsApp/Viber/IG
+      // is the single strongest way this link actually travels.
+      const shareData = {
+        title: "Play me on MasterChess",
+        text: "I challenge you to a chess game — click and play, no signup needed:",
+        url: link,
+      };
+      if (typeof navigator !== "undefined" && navigator.share) {
+        try {
+          await navigator.share(shareData);
+          toast({ title: "Challenge sent", description: "First friend to open the link plays you." });
+          return;
+        } catch {
+          // user dismissed the sheet — fall through to clipboard
+        }
+      }
       await navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast({ title: "Challenge link copied", description: "Share it — first friend to open it plays you." });
+
     } catch (e: any) {
       toast({ title: "Couldn't create link", description: e?.message ?? "Try again.", variant: "destructive" });
     } finally {
