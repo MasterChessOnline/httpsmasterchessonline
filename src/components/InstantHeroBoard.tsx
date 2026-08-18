@@ -258,7 +258,12 @@ export default function InstantHeroBoard() {
 
           <div className="mt-4 flex items-center justify-between gap-3 text-xs sm:text-sm">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-lg shrink-0">{HERO_BOT.avatar}</span>
+              <BotAvatar
+                avatar={HERO_BOT.avatar}
+                alt={HERO_BOT.name}
+                className="h-8 w-8 shrink-0 ring-1 ring-primary/40"
+                emojiClassName="text-lg shrink-0"
+              />
               <span className="font-semibold text-foreground truncate">{HERO_BOT.name}</span>
               <span className="text-muted-foreground shrink-0">{HERO_BOT.rating}</span>
             </div>
