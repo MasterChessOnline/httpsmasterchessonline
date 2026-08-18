@@ -648,12 +648,25 @@ const PlayOnline = () => {
   // ── REMATCH ──
   // Either player can offer; when the opponent accepts, the accepter creates the
   // new online_games row (swapping colors so it's fair) and broadcasts its id.
+  // Offers are ALSO persisted in `rematch_offers` so they survive a refresh —
+  // chat-only signalling used to lose the offer whenever a player reloaded.
   const offerRematch = async () => {
     if (!user || !onlineGame || rematchOfferedByMe) return;
     setRematchOfferedByMe(true);
-    await supabase.from("game_messages").insert({
-      game_id: onlineGame.id, user_id: user.id, message: "__rematch_offer__",
-    });
+    const opponent = onlineGame.white_player_id === user.id
+      ? onlineGame.black_player_id
+      : onlineGame.white_player_id;
+    await Promise.all([
+      supabase.from("game_messages").insert({
+        game_id: onlineGame.id, user_id: user.id, message: "__rematch_offer__",
+      }),
+      (supabase as any).from("rematch_offers").upsert({
+        source_game_id: onlineGame.id,
+        from_user_id: user.id,
+        to_user_id: opponent,
+        status: "pending",
+      }, { onConflict: "source_game_id,from_user_id" }),
+    ]);
     toast({ title: "Rematch offered", description: "Waiting for opponent…" });
   };
 
@@ -686,10 +699,17 @@ const PlayOnline = () => {
       });
       return;
     }
-    // Tell the opponent which game id to join
-    await supabase.from("game_messages").insert({
-      game_id: onlineGame.id, user_id: user.id, message: `__rematch_start__:${created.id}`,
-    });
+    // Tell the opponent which game id to join — via chat (instant) and via the
+    // offer row (survives their refresh).
+    await Promise.all([
+      supabase.from("game_messages").insert({
+        game_id: onlineGame.id, user_id: user.id, message: `__rematch_start__:${created.id}`,
+      }),
+      (supabase as any).from("rematch_offers")
+        .update({ status: "accepted", new_game_id: created.id })
+        .eq("source_game_id", onlineGame.id)
+        .eq("to_user_id", user.id),
+    ]);
     setRematchOfferedByOpponent(false);
     navigate(`/play/online?game=${created.id}`, { replace: true });
     window.dispatchEvent(new CustomEvent("online-game-load", { detail: created.id }));
@@ -697,11 +717,18 @@ const PlayOnline = () => {
 
   const declineRematch = async () => {
     if (!user || !onlineGame || !rematchOfferedByOpponent) return;
-    await supabase.from("game_messages").insert({
-      game_id: onlineGame.id, user_id: user.id, message: "__rematch_decline__",
-    });
+    await Promise.all([
+      supabase.from("game_messages").insert({
+        game_id: onlineGame.id, user_id: user.id, message: "__rematch_decline__",
+      }),
+      (supabase as any).from("rematch_offers")
+        .update({ status: "declined" })
+        .eq("source_game_id", onlineGame.id)
+        .eq("to_user_id", user.id),
+    ]);
     setRematchOfferedByOpponent(false);
   };
+
 
   const activeClockColor = isGameOver || !gameStarted ? null : game.turn();
   const lastMove = onlineGame?.last_move_from && onlineGame?.last_move_to
