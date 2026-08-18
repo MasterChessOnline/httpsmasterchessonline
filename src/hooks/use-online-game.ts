@@ -533,7 +533,24 @@ export function useOnlineGame() {
 
       channelRef.current = queueChannel;
 
-      // Also poll for game creation as backup
+      // Backup poll: (a) did someone start a game with me, and (b) is there
+      // now an opponent waiting in the queue that I can claim myself?
+      const enterGame = async (found: OnlineGame) => {
+        clearInterval(pollInterval);
+        eloUpdatedRef.current = false; endingRef.current = false;
+        setGame(found);
+        setStatus("playing");
+        subscribeToGame(found.id);
+        if (channelRef.current) {
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
+        if (queueEntryId.current) {
+          await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
+          queueEntryId.current = null;
+        }
+      };
+
       const pollInterval = setInterval(async () => {
         const { data: games } = await supabase
           .from("online_games")
@@ -544,23 +561,17 @@ export function useOnlineGame() {
           .limit(1);
 
         if (games && games.length > 0) {
-          clearInterval(pollInterval);
-          const foundGame = games[0] as OnlineGame;
-          eloUpdatedRef.current = false; endingRef.current = false;
-          setGame(foundGame);
-          setStatus("playing");
-          subscribeToGame(foundGame.id);
+          await enterGame(games[0] as OnlineGame);
+          return;
+        }
 
-          if (channelRef.current) {
-            supabase.removeChannel(channelRef.current);
-            channelRef.current = null;
-          }
-          if (queueEntryId.current) {
-            await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
-            queueEntryId.current = null;
-          }
+        // Nobody paired me yet — try to pair myself with anyone waiting.
+        const selfPaired = await tryPairFromQueue(tc);
+        if (selfPaired && selfPaired !== "error") {
+          await enterGame(selfPaired);
         }
       }, 2000);
+
 
       // Store poll ref for cleanup
       const origCleanup = channelRef.current;
