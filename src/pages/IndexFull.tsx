@@ -279,9 +279,9 @@ const Index = () => {
         </React.Suspense>
       )}
       <Seo
-        title={"MasterChess — Play Free Online Chess · Multiplayer, Bots & Tournaments"}
+        title={"Play Free Chess Online — No Signup, No Ads | MasterChess"}
         description={
-          "Play free online chess on MasterChess: live multiplayer, 9 AI bots (400–2000 ELO), daily tournaments, Battle Royale, opening trainer & Stockfish analysis. Play instantly — no signup needed."
+          "Play chess free online right now — one move starts the game, no signup and no ads. Beat 9 bots (400–2000 ELO), play live multiplayer, join daily tournaments. Besplatan šah bez registracije."
         }
         path="/"
         type="website"
