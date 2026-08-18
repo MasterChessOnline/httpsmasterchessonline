@@ -401,29 +401,20 @@ export function useOnlineGame() {
   ): Promise<OnlineGame | null | "error"> => {
     if (!user) return null;
 
-    const { data: queueEntries } = await supabase
-      .from("matchmaking_queue")
-      .select("*")
-      .eq("time_control_label", tc.label)
-      .neq("user_id", user.id)
-      .order("created_at", { ascending: true })
-      .limit(5);
-
-    if (!queueEntries || queueEntries.length === 0) return null;
-
-    for (const opponent of queueEntries) {
-      // Atomic claim — if another client already took this row, `claimed` is empty.
-      const { data: claimed } = await supabase
-        .from("matchmaking_queue")
-        .delete()
-        .eq("id", opponent.id)
-        .select("id");
-      if (!claimed || claimed.length === 0) continue;
+    // Try up to 5 times: each attempt atomically claims ONE waiting opponent
+    // server-side (RLS forbids deleting another user's queue row from the client).
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const { data: claimRes } = await supabase.rpc("claim_queue_opponent" as any, {
+        p_time_control_label: tc.label,
+      });
+      const claim = claimRes as any;
+      if (!claim || claim.ok !== true) return null; // nobody waiting
+      const opponentId = claim.opponent_id as string;
 
       // Claimer always plays white (white moves first).
       const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
         p_white_id: user.id,
-        p_black_id: opponent.user_id,
+        p_black_id: opponentId,
         p_white_time: tc.seconds || 600,
         p_black_time: tc.seconds || 600,
         p_time_control_label: tc.label,
@@ -447,6 +438,7 @@ export function useOnlineGame() {
     }
     return null;
   }, [user]);
+
 
 
   const searchMatch = useCallback(async (timeControlIdx: number) => {

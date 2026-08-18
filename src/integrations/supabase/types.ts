@@ -5376,6 +5376,10 @@ export type Database = {
       claim_daily_mission: { Args: { p_key: string }; Returns: Json }
       claim_daily_reward: { Args: never; Returns: Json }
       claim_daily_spin: { Args: never; Returns: Json }
+      claim_queue_opponent: {
+        Args: { p_time_control_label: string }
+        Returns: Json
+      }
       claim_referral_first_games: { Args: never; Returns: Json }
       claim_referral_signup: { Args: { p_ref_code: string }; Returns: Json }
       claim_weekly_spin: { Args: never; Returns: Json }
