@@ -296,6 +296,7 @@ function AppChrome() {
       <FloatingShareButton />
       <FloatingPlayNow />
       <GuestSignupBar />
+      <BackendStatusBanner />
       <Suspense fallback={null}><ChannelWelcomeBanner /></Suspense>
     </>
   );
