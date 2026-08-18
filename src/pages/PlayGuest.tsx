@@ -107,7 +107,17 @@ export default function PlayGuest() {
         refresh(g);
       }, wait);
     } catch {
+      // Stability guard: never freeze the board — play a legal move instead.
+      const legal = g.moves();
+      if (legal.length) {
+        const move = g.move(legal[Math.floor(Math.random() * legal.length)]);
+        if (move) {
+          setLastMove({ from: move.from, to: move.to });
+          playChessSound(move.captured ? "capture" : "move");
+        }
+      }
       setBotThinking(false);
+      refresh(g);
     }
   }, [refresh]);
 
