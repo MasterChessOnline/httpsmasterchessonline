@@ -455,6 +455,15 @@ const Signup = () => {
           </p>
         </div>
       </motion.div>
+
+      {/* Same promise as the homepage — the reason to finish the form. */}
+      <div className="relative z-10 w-full">
+        <WhyMasterChess className="mt-10" />
+        <div className="mx-auto max-w-3xl px-4">
+          <SeoFaqBlock items={SIGNUP_FAQ} title="Before you sign up" />
+        </div>
+      </div>
+
       <GoogleCountryNameModal
         open={googleModalOpen}
         onClose={() => setGoogleModalOpen(false)}
