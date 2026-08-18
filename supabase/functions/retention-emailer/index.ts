@@ -146,6 +146,75 @@ Deno.serve(async (req) => {
       }
     }
 
+    // --- 3. Onboarding drip: welcome (day 0) + first-game nudge (day 1)
+    // New accounts are the leakiest part of the funnel: people register and never
+    // play a single game. These two mails exist purely to get game #1 played.
+    const onboardSteps = [
+      {
+        key: "welcome",
+        minH: 0,
+        maxH: 26,
+        subject: "Welcome to MasterChess — your board is ready",
+        body: "Your account is live. Two taps and you're playing a real opponent: pick a time control, and the lobby matches you. Want a warm-up first? Play a bot — it's instant.",
+        cta: "Play your first game",
+        url: "https://masterchess.live/lobby?src=welcome",
+      },
+      {
+        key: "first-game",
+        minH: 26,
+        maxH: 50,
+        subject: "You haven't played your first game yet",
+        body: "Your rating is sitting at the starting line. One 5-minute blitz game is all it takes to get a real number next to your name.",
+        cta: "Open the lobby",
+        url: "https://masterchess.live/lobby?src=first-game-nudge",
+      },
+    ];
+
+    for (const step of onboardSteps) {
+      const from = new Date(Date.now() - step.maxH * 3600 * 1000).toISOString();
+      const to = new Date(Date.now() - step.minH * 3600 * 1000).toISOString();
+      const { data: fresh } = await admin
+        .from("profiles")
+        .select("id, user_id, display_name, games_played, created_at")
+        .gte("created_at", from)
+        .lte("created_at", to)
+        .limit(300);
+
+      for (const p of fresh ?? []) {
+        // The day-1 nudge is only for people who still have zero games.
+        if (step.key === "first-game" && (p.games_played ?? 0) > 0) { stats.skipped++; continue; }
+        const uid = (p as any).user_id || p.id;
+        const { data: user } = await admin.auth.admin.getUserById(uid).catch(() => ({ data: null } as any));
+        const email = user?.user?.email;
+        if (!email || suppressedSet.has(email.toLowerCase())) { stats.skipped++; continue; }
+
+        const messageId = `onboard-${step.key}-${uid}`;
+        const { count } = await admin.from("email_send_log")
+          .select("id", { count: "exact", head: true })
+          .eq("message_id", messageId);
+        if ((count ?? 0) > 0) { stats.skipped++; continue; }
+
+        const res = await sendEmail(
+          email,
+          step.subject,
+          tpl(step.subject, step.body, step.cta, step.url),
+          `onboard-${step.key}`,
+        );
+        await admin.from("email_send_log").insert({
+          message_id: messageId,
+          template_name: `onboard-${step.key}`,
+          recipient_email: email,
+          status: res.ok ? "sent" : "failed",
+          error_message: res.error ?? null,
+        });
+        if (res.ok) (stats as any)[`onboard_${step.key.replace("-", "_")}`] =
+          ((stats as any)[`onboard_${step.key.replace("-", "_")}`] ?? 0) + 1;
+        else stats.failed++;
+      }
+    }
+
+
+
     return new Response(JSON.stringify({ ok: true, stats }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
