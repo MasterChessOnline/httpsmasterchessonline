@@ -581,7 +581,7 @@ export function useOnlineGame() {
       if (origPoll) clearInterval(origPoll);
       pollRef.current = pollInterval;
     }
-  }, [user, profile, subscribeToGame]);
+  }, [user, profile, subscribeToGame, tryPairFromQueue]);
 
   const cancelSearch = useCallback(async () => {
     if (queueEntryId.current) {
