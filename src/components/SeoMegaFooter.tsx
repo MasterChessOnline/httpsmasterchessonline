@@ -72,12 +72,27 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    // Ovi gradovi već rangiraju visoko na Google-u ali su bili bez internih
+    // linkova (siročići) — odavde ih crawler nalazi sa svake landing strane.
+    title: "Cities",
+    links: [
+      { label: "Chess in Banja Luka", href: "/play-from/banja-luka" },
+      { label: "Chess in Belgrade", href: "/play-from/belgrade" },
+      { label: "Chess in Sarajevo", href: "/play-from/sarajevo" },
+      { label: "Chess in Novi Sad", href: "/play-from/novi-sad" },
+      { label: "Chess in Zagreb", href: "/play-from/zagreb" },
+      { label: "Chess in Podgorica", href: "/play-from/podgorica" },
+      { label: "All cities", href: "/chess-map" },
+    ],
+  },
+  {
     title: "Regions (Srpski)",
     links: [
       { label: "Šah online", href: "/sr/sah-online" },
       { label: "Šah protiv prijatelja", href: "/sr/sah-protiv-prijatelja" },
       { label: "Šah bez registracije", href: "/sr/sah-bez-registracije" },
       { label: "Šah protiv kompjutera", href: "/sr/sah-protiv-kompjutera" },
+      { label: "Besplatan šah protiv kompjutera", href: "/sr/sah-protiv-kompjutera-besplatno" },
       { label: "Šah za početnike", href: "/sr/sah-za-pocetnike" },
       { label: "Pravila šaha", href: "/sr/sah-pravila" },
       { label: "Šahovska otvaranja", href: "/sr/sah-otvaranja" },
