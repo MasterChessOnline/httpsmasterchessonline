@@ -19,9 +19,11 @@ import { celebrate } from "@/lib/celebrate";
  * in this order: save the result (free account), share it, play again.
  */
 
-// The homepage free game is played against Nikola Šakotić — the founder's bot.
+// The homepage free game is played against the weakest bot on the site, so a
+// first-time visitor can actually win their very first game.
 const HERO_BOT =
-  BOT_PROFILES.find((b) => b.id === "nikola-sakotic") ?? BOT_PROFILES[0];
+  BOT_PROFILES.find((b) => b.id === "newbie-nina") ??
+  [...BOT_PROFILES].sort((a, b) => a.rating - b.rating)[0];
 
 const STREAK_KEY = "mc_guest_streak";
 const STREAK_DAY_KEY = "mc_guest_streak_day";
