@@ -479,6 +479,16 @@ const Index = () => {
           {/* ─── Trust strip — credibility in the first 3 seconds ─── */}
           <HomeTrustStrip />
 
+          {/* Long-form "why this site" answer — below the fold, so the first
+              screen stays board-first while the full case is still on the page. */}
+          <React.Suspense fallback={<div className="h-[320px]" />}>
+            <LazyMount minHeight={320}>
+              <WhyMasterChess />
+            </LazyMount>
+          </React.Suspense>
+
+
+
 
           {/* ─── Daily Spin Wheel — reward hook. Account-only: a guest who has
                not played yet should not meet a rewards wheel before a board. ─── */}
