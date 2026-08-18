@@ -65,6 +65,8 @@ import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
+import DailyHookCard from "@/components/DailyHookCard";
+
 
 import LazyMount from "@/components/LazyMount";
 import TonightArenaBanner from "@/components/TonightArenaBanner";
@@ -292,6 +294,10 @@ const Index = () => {
       <main>
         {/* ── INSTANT PLAY: live board is the first thing a visitor sees ── */}
         <InstantHeroBoard />
+
+        {/* ── RETENTION HOOK: daily streak + one mission, works for guests ── */}
+        <DailyHookCard className="mt-6" />
+
 
         {/* ── HERO with parallax + 4D depth ── */}
         <div ref={heroRef} className="relative pt-16 sm:pt-24 pb-16 px-4 overflow-hidden min-h-[45vh]">
