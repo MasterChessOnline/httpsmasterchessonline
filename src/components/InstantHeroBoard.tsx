@@ -335,23 +335,25 @@ export default function InstantHeroBoard({
             </div>
           ) : (
             <>
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <Link to="/signup" className="w-full">
-                  <Button className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Crown className="h-4 w-4 mr-2" />
-                    Create free account
-                  </Button>
-                </Link>
-                <Link to="/play-guest" className="w-full">
-                  <Button variant="outline" className="w-full h-12 rounded-xl border-primary/30">
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Free game — full screen
-                  </Button>
-                </Link>
-              </div>
+              {!adMode && (
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <Link to="/signup" className="w-full">
+                    <Button className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+                      <Crown className="h-4 w-4 mr-2" />
+                      Create free account
+                    </Button>
+                  </Link>
+                  <Link to="/play-guest" className="w-full">
+                    <Button variant="outline" className="w-full h-12 rounded-xl border-primary/30">
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Free game — full screen
+                    </Button>
+                  </Link>
+                </div>
+              )}
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" /> No signup, no ads
+                  <Sparkles className="h-3.5 w-3.5 text-primary" /> Free · no signup · no ads
                 </span>
                 {phase === "playing" && (
                   <button onClick={resetGame} className="hover:text-primary underline-offset-2 hover:underline">
