@@ -94,9 +94,10 @@ export default function EmptyLobbyActions({
     },
     {
       icon: Target,
-      label: "Train while you wait",
-      desc: "Solve the daily puzzle or play a bot — keep your rating sharp.",
-      to: "/puzzles",
+      label: "Play a bot right now",
+      desc: "Instant game against a bot (clearly marked as a bot) while you wait.",
+      to: "/play-guest",
+
       accent: "from-emerald-500/20 to-teal-500/10 border-emerald-500/30",
     },
   ];
