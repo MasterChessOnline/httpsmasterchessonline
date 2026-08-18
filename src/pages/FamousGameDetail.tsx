@@ -45,6 +45,7 @@ export default function FamousGameDetail() {
               { "@type": "ListItem", position: 2, name: g.title },
             ],
           },
+          buildFaqSchema(faq),
         ]}
       />
       <Navbar />
