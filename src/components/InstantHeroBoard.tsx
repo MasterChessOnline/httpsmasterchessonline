@@ -242,10 +242,16 @@ export default function InstantHeroBoard({
       <div className="container mx-auto max-w-3xl">
         <div className="rounded-3xl border border-primary/25 bg-card/60 backdrop-blur-xl p-4 sm:p-6 shadow-[0_0_60px_hsl(43_90%_55%/0.12)]">
           <div className="text-center">
-            <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
-              Play free online chess — <span className="text-gradient-gold">no registration</span>
-            </h1>
-            <h2 className="mt-2 text-sm sm:text-base text-muted-foreground">
+            {headingLevel === "h1" ? (
+              <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
+                Play free online chess — <span className="text-gradient-gold">no registration</span>
+              </h1>
+            ) : (
+              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                Play free online chess — <span className="text-gradient-gold">no registration</span>
+              </h2>
+            )}
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               {phase === "idle"
                 ? "Make a move on the board below — your game starts instantly."
                 : phase === "playing"
@@ -255,7 +261,7 @@ export default function InstantHeroBoard({
                     : outcome === "loss"
                       ? "Close one. Try again — the board is ready."
                       : "Drawn game. Run it back?"}
-            </h2>
+            </p>
           </div>
 
           <AnimatePresence>
