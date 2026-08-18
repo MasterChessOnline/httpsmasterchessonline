@@ -231,19 +231,31 @@ const Signup = () => {
         title="Create Free Account — MasterChess"
         description="Create your free MasterChess account in seconds. Play chess online vs real players and bots, save your rating, join tournaments. No ads, no subscription."
         path="/signup"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: "Create Free Account",
-          url: "https://masterchess.live/signup",
-          description: "Sign up free for MasterChess and start playing chess online instantly.",
-          isPartOf: { "@type": "WebSite", name: "MasterChess", url: "https://masterchess.live/" },
-          potentialAction: {
-            "@type": "RegisterAction",
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
             name: "Create Free Account",
-            target: "https://masterchess.live/signup",
+            url: "https://masterchess.live/signup",
+            description: "Sign up free for MasterChess and start playing chess online instantly.",
+            isPartOf: { "@type": "WebSite", name: "MasterChess", url: "https://masterchess.live/" },
+            potentialAction: {
+              "@type": "RegisterAction",
+              name: "Create Free Account",
+              target: "https://masterchess.live/signup",
+            },
           },
-        }}
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: SIGNUP_FAQ.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          },
+        ]}
+
       />
       <AuthAura />
       {CHESS_PIECES.map((piece, i) => (
