@@ -48,6 +48,7 @@ export default function GrandmasterDetail() {
               { "@type": "ListItem", position: 2, name: g.name },
             ],
           },
+          buildFaqSchema(faq),
         ]}
       />
       <Navbar />
