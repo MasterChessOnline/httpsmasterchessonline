@@ -846,6 +846,8 @@ const PlayOnline = () => {
               </div>
             </div>
 
+            <PrimeTimeBanner />
+
             {onlineError && <p className="text-sm text-destructive text-center">{onlineError}</p>}
 
             {onlineStatus === "searching" ? (
