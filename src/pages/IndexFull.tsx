@@ -480,12 +480,16 @@ const Index = () => {
           <HomeTrustStrip />
 
 
-          {/* ─── Daily Spin Wheel — reward hook ─── */}
-          <React.Suspense fallback={<div className="h-[280px]" />}>
-            <LazyMount minHeight={280}>
-              <HomeSpinWheelSection />
-            </LazyMount>
-          </React.Suspense>
+          {/* ─── Daily Spin Wheel — reward hook. Account-only: a guest who has
+               not played yet should not meet a rewards wheel before a board. ─── */}
+          {user && (
+            <React.Suspense fallback={<div className="h-[280px]" />}>
+              <LazyMount minHeight={280}>
+                <HomeSpinWheelSection />
+              </LazyMount>
+            </React.Suspense>
+          )}
+
 
           {/* Daily Challenge — the single daily ritual on home */}
           <section id="daily-missions" className="scroll-mt-24 space-y-4">
