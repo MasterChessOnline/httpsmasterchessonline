@@ -23,7 +23,7 @@ const REASONS = [
   },
 ];
 
-export default function WhyMasterChess({ className = "" }: { className?: string }) {
+export default function WhyMasterChessCompact({ className = "" }: { className?: string }) {
   return (
     <section className={`mx-auto max-w-3xl px-4 ${className}`} aria-label="Why MasterChess">
       <h2 className="text-center font-display text-lg sm:text-xl font-bold text-foreground">

@@ -66,7 +66,7 @@ import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
-import WhyMasterChess from "@/components/WhyMasterChess";
+import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import { getGuestProgress } from "@/lib/guestProgress";
 
 
@@ -309,7 +309,7 @@ const Index = () => {
         {user || guestPlayed ? (
           <DailyHookCard className="mt-6" />
         ) : (
-          <WhyMasterChess className="mt-6" />
+          <WhyMasterChessCompact className="mt-6" />
         )}
 
 

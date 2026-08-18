@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
-import WhyMasterChess from "@/components/WhyMasterChess";
+import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
@@ -130,7 +130,7 @@ export default function IgLanding() {
         </motion.div>
 
         {/* Same three reasons as the homepage — answers "why this site" after the game. */}
-        <WhyMasterChess className="pb-6" />
+        <WhyMasterChessCompact className="pb-6" />
       </main>
 
 

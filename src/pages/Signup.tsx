@@ -14,7 +14,7 @@ import AuthAura from "@/components/auth/AuthAura";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 import BrandLogo from "@/components/BrandLogo";
 import Seo from "@/components/Seo";
-import WhyMasterChess from "@/components/WhyMasterChess";
+import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import SeoFaqBlock from "@/components/seo/SeoFaqBlock";
 import { SIGNUP_FAQ } from "@/lib/seo-faq";
 
@@ -474,7 +474,7 @@ const Signup = () => {
 
       {/* Same promise as the homepage — the reason to finish the form. */}
       <div className="relative z-10 w-full">
-        <WhyMasterChess className="mt-10" />
+        <WhyMasterChessCompact className="mt-10" />
         <div className="mx-auto max-w-3xl px-4">
           <SeoFaqBlock items={SIGNUP_FAQ} title="Before you sign up" />
         </div>
