@@ -5,14 +5,22 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import { getGrandmaster, GRANDMASTERS } from "@/data/grandmasters";
 import { getFamousGame } from "@/data/famousGames";
+import PositionStudyBoard from "@/components/seo/PositionStudyBoard";
+import SeoFaqBlock from "@/components/seo/SeoFaqBlock";
+import SeoNextSteps from "@/components/seo/SeoNextSteps";
+import { grandmasterFaq } from "@/lib/content-faq";
+import { buildFaqSchema } from "@/lib/jsonld-builders";
 
 export default function GrandmasterDetail() {
   const { slug = "" } = useParams();
   const g = getGrandmaster(slug);
   if (!g) return <Navigate to="/players" replace />;
 
+  const faq = grandmasterFaq(g);
   const game = g.bestGameSlug ? getFamousGame(g.bestGameSlug) : null;
   const related = GRANDMASTERS.filter((x) => x.slug !== g.slug).slice(0, 4);
+  const nextGm = GRANDMASTERS[(GRANDMASTERS.findIndex((x) => x.slug === g.slug) + 1) % GRANDMASTERS.length];
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -40,6 +48,7 @@ export default function GrandmasterDetail() {
               { "@type": "ListItem", position: 2, name: g.name },
             ],
           },
+          buildFaqSchema(faq),
         ]}
       />
       <Navbar />
@@ -80,7 +89,24 @@ export default function GrandmasterDetail() {
             </Link>
           )}
 
-          <h2 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3">More grandmasters</h2>
+          {game && (
+            <PositionStudyBoard
+              pgn={game.pgn}
+              label={`${game.title} — replay ${g.name}'s masterpiece`}
+              className="mb-8"
+            />
+          )}
+
+          <SeoFaqBlock items={faq} title={`${g.name} — FAQ`} />
+
+          <SeoNextSteps
+            steps={[
+              { to: `/players/${nextGm.slug}`, label: `Next: ${nextGm.name}`, note: `${nextGm.country} · ${nextGm.peakRating} peak` },
+              { to: "/famous-games", label: "Browse legendary games", note: "Replay them move by move." },
+            ]}
+          />
+
+          <h2 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3 mt-10">More grandmasters</h2>
           <div className="flex flex-wrap gap-2">
             {related.map((r) => (
               <Link key={r.slug} to={`/players/${r.slug}`}
@@ -89,6 +115,7 @@ export default function GrandmasterDetail() {
               </Link>
             ))}
           </div>
+
         </motion.article>
       </main>
     </div>

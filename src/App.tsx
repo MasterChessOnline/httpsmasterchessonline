@@ -229,6 +229,7 @@ import FloatingShareButton from "@/components/FloatingShareButton";
 import FloatingPlayNow from "@/components/FloatingPlayNow";
 import GuestSignupBar from "@/components/GuestSignupBar";
 import BackendStatusBanner from "@/components/BackendStatusBanner";
+import PendingSignupResume from "@/components/PendingSignupResume";
 import StreakFlexController from "@/components/StreakFlexController";
 import TitleUnlockGate from "@/components/TitleUnlockGate";
 import GameInviteListener from "@/components/GameInviteListener";
@@ -298,6 +299,7 @@ function AppChrome() {
       <FloatingPlayNow />
       <GuestSignupBar />
       <BackendStatusBanner />
+      <PendingSignupResume />
       <Suspense fallback={null}><ChannelWelcomeBanner /></Suspense>
     </>
   );
