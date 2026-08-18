@@ -92,7 +92,7 @@ export default function WatchGame() {
       <Seo
         title={`${names.white} vs ${names.black} — Live Chess | MasterChess`}
         description={`Follow ${names.white} vs ${names.black} live, move by move. Free chess spectating, no account needed.`}
-        canonical={`https://masterchess.live/watch/${id || ""}`}
+        path={`/watch/${id || ""}`}
       />
       <Navbar />
 

@@ -154,7 +154,7 @@ export default function Lobby() {
       <Seo
         title="Chess Lobby — Open Challenges | MasterChess"
         description="See every player waiting for a game right now and accept an open challenge with one tap. Free online chess, no download."
-        canonical="https://masterchess.live/lobby"
+        path="/lobby"
       />
       <Navbar />
 

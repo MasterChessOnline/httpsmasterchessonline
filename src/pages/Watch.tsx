@@ -68,7 +68,7 @@ export default function Watch() {
       <Seo
         title="Watch Live Chess Games Free | MasterChess"
         description="Watch chess games in progress right now, move by move, with no account and no download. Live boards from real players."
-        canonical="https://masterchess.live/watch"
+        path="/watch"
       />
       <Navbar />
 
