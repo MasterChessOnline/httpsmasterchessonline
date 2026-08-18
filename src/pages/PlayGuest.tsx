@@ -19,7 +19,10 @@ import { celebrate } from "@/lib/celebrate";
 import { share } from "@/lib/share";
 
 // Easy bot — friendly first experience
-const GUEST_BOT = BOT_PROFILES.find((b) => b.id === "pawn-pablo") ?? BOT_PROFILES[1];
+// Weakest bot on the site — the guest should win their first game.
+const GUEST_BOT =
+  BOT_PROFILES.find((b) => b.id === "newbie-nina") ??
+  [...BOT_PROFILES].sort((a, b) => a.rating - b.rating)[0];
 
 // Shared entry point for invited friends — instant play, no signup wall.
 const GUEST_SHARE_URL = "https://masterchess.live/play-guest?utm_source=guest_share&utm_medium=social";
@@ -104,7 +107,17 @@ export default function PlayGuest() {
         refresh(g);
       }, wait);
     } catch {
+      // Stability guard: never freeze the board — play a legal move instead.
+      const legal = g.moves();
+      if (legal.length) {
+        const move = g.move(legal[Math.floor(Math.random() * legal.length)]);
+        if (move) {
+          setLastMove({ from: move.from, to: move.to });
+          playChessSound(move.captured ? "capture" : "move");
+        }
+      }
       setBotThinking(false);
+      refresh(g);
     }
   }, [refresh]);
 

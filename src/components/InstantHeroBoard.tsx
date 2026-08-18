@@ -19,9 +19,11 @@ import { celebrate } from "@/lib/celebrate";
  * in this order: save the result (free account), share it, play again.
  */
 
-// The homepage free game is played against Nikola Šakotić — the founder's bot.
+// The homepage free game is played against the weakest bot on the site, so a
+// first-time visitor can actually win their very first game.
 const HERO_BOT =
-  BOT_PROFILES.find((b) => b.id === "nikola-sakotic") ?? BOT_PROFILES[0];
+  BOT_PROFILES.find((b) => b.id === "newbie-nina") ??
+  [...BOT_PROFILES].sort((a, b) => a.rating - b.rating)[0];
 
 const STREAK_KEY = "mc_guest_streak";
 const STREAK_DAY_KEY = "mc_guest_streak_day";
@@ -56,7 +58,20 @@ function bumpStreak(): number {
   }
 }
 
-export default function InstantHeroBoard() {
+interface InstantHeroBoardProps {
+  /**
+   * Ad-traffic mode (used by /ig): show only the board until the first game
+   * ends — no "create account" call to action competing with the game.
+   */
+  adMode?: boolean;
+  /** Render the headline as an h2 (when the page already owns the h1). */
+  headingLevel?: "h1" | "h2";
+}
+
+export default function InstantHeroBoard({
+  adMode = false,
+  headingLevel = "h1",
+}: InstantHeroBoardProps = {}) {
   const [game, setGame] = useState(() => new Chess());
   const [fen, setFen] = useState(game.fen());
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
@@ -227,10 +242,16 @@ export default function InstantHeroBoard() {
       <div className="container mx-auto max-w-3xl">
         <div className="rounded-3xl border border-primary/25 bg-card/60 backdrop-blur-xl p-4 sm:p-6 shadow-[0_0_60px_hsl(43_90%_55%/0.12)]">
           <div className="text-center">
-            <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
-              Play free online chess — <span className="text-gradient-gold">no registration</span>
-            </h1>
-            <h2 className="mt-2 text-sm sm:text-base text-muted-foreground">
+            {headingLevel === "h1" ? (
+              <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
+                Play free online chess — <span className="text-gradient-gold">no registration</span>
+              </h1>
+            ) : (
+              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                Play free online chess — <span className="text-gradient-gold">no registration</span>
+              </h2>
+            )}
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               {phase === "idle"
                 ? "Make a move on the board below — your game starts instantly."
                 : phase === "playing"
@@ -240,7 +261,7 @@ export default function InstantHeroBoard() {
                     : outcome === "loss"
                       ? "Close one. Try again — the board is ready."
                       : "Drawn game. Run it back?"}
-            </h2>
+            </p>
           </div>
 
           <AnimatePresence>
@@ -314,23 +335,25 @@ export default function InstantHeroBoard() {
             </div>
           ) : (
             <>
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <Link to="/signup" className="w-full">
-                  <Button className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Crown className="h-4 w-4 mr-2" />
-                    Create free account
-                  </Button>
-                </Link>
-                <Link to="/play-guest" className="w-full">
-                  <Button variant="outline" className="w-full h-12 rounded-xl border-primary/30">
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Free game — full screen
-                  </Button>
-                </Link>
-              </div>
+              {!adMode && (
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <Link to="/signup" className="w-full">
+                    <Button className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+                      <Crown className="h-4 w-4 mr-2" />
+                      Create free account
+                    </Button>
+                  </Link>
+                  <Link to="/play-guest" className="w-full">
+                    <Button variant="outline" className="w-full h-12 rounded-xl border-primary/30">
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Free game — full screen
+                    </Button>
+                  </Link>
+                </div>
+              )}
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" /> No signup, no ads
+                  <Sparkles className="h-3.5 w-3.5 text-primary" /> Free · no signup · no ads
                 </span>
                 {phase === "playing" && (
                   <button onClick={resetGame} className="hover:text-primary underline-offset-2 hover:underline">
