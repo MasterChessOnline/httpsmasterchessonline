@@ -31,6 +31,8 @@ import { detectOpening } from "@/lib/openings-detector";
 import { BookOpen, Sparkles } from "lucide-react";
 import CountryFlag from "@/components/CountryFlag";
 import EmptyLobbyActions from "@/components/EmptyLobbyActions";
+import PrimeTimeBanner from "@/components/PrimeTimeBanner";
+
 
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -845,6 +847,8 @@ const PlayOnline = () => {
                 <p className="text-xs text-muted-foreground">Rating: {profile?.rating || 1200} ELO</p>
               </div>
             </div>
+
+            <PrimeTimeBanner />
 
             {onlineError && <p className="text-sm text-destructive text-center">{onlineError}</p>}
 

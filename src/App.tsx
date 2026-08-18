@@ -489,6 +489,9 @@ function AnimatedRoutes() {
           <Route path="/ig" element={<IgLanding />} />
           <Route path="/ig-bonus" element={<IgBonus />} />
           <Route path="/start" element={<IgLanding />} />
+          {/* Paid-ad landing variants: same instant-game flow, separate UTM/creative slots */}
+          <Route path="/ads/:variant" element={<IgLanding />} />
+
           <Route path="/quiz" element={<StyleQuiz />} />
           <Route path="/beat-me" element={<BeatMe />} />
           <Route path="/beat-me/:handle" element={<BeatMe />} />
