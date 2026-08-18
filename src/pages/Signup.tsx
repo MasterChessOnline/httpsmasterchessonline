@@ -175,6 +175,8 @@ const Signup = () => {
     }
 
     track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key, fide_verified: !!fideFound });
+    clearPendingSignup();
+    clearGuestProgress();
     navigate(redirectTo);
   };
 
