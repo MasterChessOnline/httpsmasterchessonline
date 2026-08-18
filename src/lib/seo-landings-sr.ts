@@ -307,13 +307,13 @@ export const SR_LANDINGS: Record<string, SeoLandingConfig> = {
     path: "/sr/sah-protiv-kompjutera-besplatno",
     lang: "sr",
     // Naslov i opis pisani po tačnim upitima iz Search Console-a
-    // („besplatan šah protiv kompjutera", „bez registracije") — stara verzija
+    // („besplatan šah protiv kompjutera“, „bez registracije“) — stara verzija
     // je imala 130 prikaza i 1 klik.
     title: "Besplatan šah protiv kompjutera — igraj odmah, bez registracije",
     description: "Igraj besplatan šah protiv kompjutera bez registracije i bez reklama. Prvi potez pokreće partiju — 9 nivoa od 400 do 2000 ELO, direktno u pretraživaču, na telefonu i računaru.",
     eyebrow: "Bez registracije · 9 nivoa",
     h1: "Besplatan šah protiv kompjutera — bez registracije",
-    intro: "Odigraj partiju za 5 sekundi: klikni „Igraj odmah", odaberi nivo i prvi potez pokreće igru. Devet botova od 400 do 2000 ELO, bez instalacije, bez reklama, bez naloga.",
+    intro: "Odigraj partiju za 5 sekundi: klikni „Igraj odmah“, odaberi nivo i prvi potez pokreće igru. Devet botova od 400 do 2000 ELO, bez instalacije, bez reklama, bez naloga.",
     primaryCta: { label: "Igraj odmah besplatno", href: "/play-guest" },
     secondaryCta: { label: "Svi botovi (400–2000)", href: "/play" },
     bullets: [
@@ -330,7 +330,7 @@ export const SR_LANDINGS: Record<string, SeoLandingConfig> = {
     ],
     faq: [
       { q: "Da li je šah protiv kompjutera besplatan?", a: "Da, potpuno. Nema pretplate, nema limita partija i nema reklama. Ne treba ti nalog da odigraš partiju." },
-      { q: "Moram li da se registrujem?", a: "Ne. Klikni „Igraj odmah" i partija počinje na prvi potez. Nalog praviš samo ako želiš da sačuvaš rejting, seriju pobeda i istoriju partija." },
+      { q: "Moram li da se registrujem?", a: "Ne. Klikni „Igraj odmah“ i partija počinje na prvi potez. Nalog praviš samo ako želiš da sačuvaš rejting, seriju pobeda i istoriju partija." },
       { q: "Koliko nivoa ima kompjuter?", a: "Devet botova u rasponu od 400 do 2000 ELO, svaki sa drugačijim stilom igre — od početničkih grešaka do taktički oštre igre." },
       { q: "Da li radi na telefonu?", a: "Radi u svakom modernom pretraživaču na telefonu, tabletu i računaru. Nema instalacije aplikacije." },
       { q: "Da li mogu da igram protiv pravih ljudi?", a: "Da — pored partija protiv kompjutera možeš igrati online protiv pravih igrača i učestvovati na turnirima." },
