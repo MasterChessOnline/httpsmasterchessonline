@@ -5,6 +5,11 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { getMateBySlug, MATE_PATTERNS } from "@/data/matePatterns";
+import PositionStudyBoard from "@/components/seo/PositionStudyBoard";
+import SeoFaqBlock from "@/components/seo/SeoFaqBlock";
+import SeoNextSteps from "@/components/seo/SeoNextSteps";
+import { mateFaq } from "@/lib/content-faq";
+import { buildFaqSchema } from "@/lib/jsonld-builders";
 
 export default function CheckmatePatternDetail() {
   const { slug = "" } = useParams();
@@ -13,8 +18,11 @@ export default function CheckmatePatternDetail() {
 
   // Use brand OG image (no external chess image services).
   const boardImg = "https://masterchess.live/og-image.jpg";
+  const faq = mateFaq(m);
 
   const related = MATE_PATTERNS.filter(p => p.slug !== m.slug && p.difficulty === m.difficulty).slice(0, 3);
+  const nextPattern = MATE_PATTERNS[(MATE_PATTERNS.findIndex(p => p.slug === m.slug) + 1) % MATE_PATTERNS.length];
+
 
   return (
     <div className="min-h-screen bg-background">
