@@ -44,6 +44,8 @@ const NAV_SECTIONS: NavSection[] = [
     accentRgb: "77,163,255",
     items: [
       { label: "Quick Match", href: "/play/online", icon: Zap, desc: "Find an opponent instantly", highlight: true },
+      { label: "Lobby", href: "/lobby", icon: Users, desc: "Open challenges — accept and play", highlight: true },
+      { label: "Watch Live", href: "/watch", icon: Eye, desc: "Follow games in progress" },
       { label: "Play vs Bot", href: "/play", icon: Brain, desc: "Train against 9 bots" },
       { label: "Play as Guest", href: "/play-guest", icon: Play, desc: "No signup required" },
       { label: "Puzzles", href: "/puzzles", icon: Target, desc: "Daily tactics" },

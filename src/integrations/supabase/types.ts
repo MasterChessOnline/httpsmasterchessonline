@@ -2422,6 +2422,54 @@ export type Database = {
         }
         Relationships: []
       }
+      open_challenges: {
+        Row: {
+          base_seconds: number
+          color_pref: string
+          created_at: string
+          creator_id: string
+          creator_name: string | null
+          creator_rating: number
+          expires_at: string
+          game_id: string | null
+          id: string
+          increment: number
+          is_rated: boolean
+          status: string
+          time_control_label: string
+        }
+        Insert: {
+          base_seconds?: number
+          color_pref?: string
+          created_at?: string
+          creator_id: string
+          creator_name?: string | null
+          creator_rating?: number
+          expires_at?: string
+          game_id?: string | null
+          id?: string
+          increment?: number
+          is_rated?: boolean
+          status?: string
+          time_control_label?: string
+        }
+        Update: {
+          base_seconds?: number
+          color_pref?: string
+          created_at?: string
+          creator_id?: string
+          creator_name?: string | null
+          creator_rating?: number
+          expires_at?: string
+          game_id?: string | null
+          id?: string
+          increment?: number
+          is_rated?: boolean
+          status?: string
+          time_control_label?: string
+        }
+        Relationships: []
+      }
       partner_applications: {
         Row: {
           city: string | null
@@ -3063,6 +3111,36 @@ export type Database = {
           status?: string
           user_agent?: string | null
           visitor_fingerprint?: string | null
+        }
+        Relationships: []
+      }
+      rematch_offers: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          id: string
+          new_game_id: string | null
+          source_game_id: string
+          status: string
+          to_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          id?: string
+          new_game_id?: string | null
+          source_game_id: string
+          status?: string
+          to_user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          new_game_id?: string | null
+          source_game_id?: string
+          status?: string
+          to_user_id?: string
         }
         Relationships: []
       }
@@ -5311,6 +5389,7 @@ export type Database = {
       _clear_current_game: { Args: { p_game_id: string }; Returns: undefined }
       _mc_claim_first_win_today: { Args: { p_user: string }; Returns: boolean }
       abort_online_game: { Args: { p_game_id: string }; Returns: Json }
+      accept_open_challenge: { Args: { _challenge_id: string }; Returns: Json }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       assert_can_queue: { Args: never; Returns: Json }
       award_bot_game_coins:
@@ -5436,6 +5515,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      expire_online_games: { Args: never; Returns: Json }
       finalize_online_game: {
         Args: { p_end_reason: string; p_game_id: string; p_result: string }
         Returns: Json

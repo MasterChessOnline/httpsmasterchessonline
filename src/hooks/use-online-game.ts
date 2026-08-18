@@ -49,6 +49,9 @@ export function useOnlineGame() {
   const [ratingResult, setRatingResult] = useState<RatingCalcResult | null>(null);
   const [connection, setConnection] = useState<ConnectionState>("connecting");
   const queueEntryId = useRef<string | null>(null);
+  // Id of the public "seek" row mirrored into the lobby while searching, so
+  // players browsing /lobby can accept instead of both sides waiting blind.
+  const seekId = useRef<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const gameChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const eloUpdatedRef = useRef(false);
@@ -441,6 +444,13 @@ export function useOnlineGame() {
 
 
 
+  const clearSeek = useCallback(async () => {
+    if (!seekId.current) return;
+    const id = seekId.current;
+    seekId.current = null;
+    try { await (supabase as any).from("open_challenges").delete().eq("id", id); } catch { /* ignore */ }
+  }, []);
+
   const searchMatch = useCallback(async (timeControlIdx: number) => {
     if (!user || !profile) return;
     setError(null);
@@ -497,6 +507,25 @@ export function useOnlineGame() {
 
       queueEntryId.current = entry.id;
 
+      // Mirror the search into the public lobby (best-effort — never blocks play).
+      try {
+        const { data: seek } = await (supabase as any)
+          .from("open_challenges")
+          .insert({
+            creator_id: user.id,
+            creator_name: (profile as any)?.display_name || (profile as any)?.username || "Player",
+            creator_rating: profile.rating ?? 1200,
+            time_control_label: tc.label,
+            base_seconds: tc.seconds || 300,
+            increment: tc.increment,
+            is_rated: true,
+            color_pref: "random",
+          })
+          .select("id")
+          .single();
+        seekId.current = seek?.id ?? null;
+      } catch { /* lobby mirror is optional */ }
+
       // Listen for game creation involving this user
       const queueChannel = supabase
         .channel(`matchmaking-${user.id}-${Date.now()}`)
@@ -519,6 +548,7 @@ export function useOnlineGame() {
               await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
               queueEntryId.current = null;
             }
+            await clearSeek();
           }
         })
         .subscribe();
@@ -541,6 +571,7 @@ export function useOnlineGame() {
           await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
           queueEntryId.current = null;
         }
+        await clearSeek();
       };
 
       const pollInterval = setInterval(async () => {
@@ -573,16 +604,17 @@ export function useOnlineGame() {
       if (origPoll) clearInterval(origPoll);
       pollRef.current = pollInterval;
     }
-  }, [user, profile, subscribeToGame, tryPairFromQueue]);
+  }, [user, profile, subscribeToGame, tryPairFromQueue, clearSeek]);
 
   const cancelSearch = useCallback(async () => {
     if (queueEntryId.current) {
       await supabase.from("matchmaking_queue").delete().eq("id", queueEntryId.current);
       queueEntryId.current = null;
     }
+    await clearSeek();
     cleanupChannels();
     setStatus("idle");
-  }, [cleanupChannels]);
+  }, [cleanupChannels, clearSeek]);
 
   const makeMove = useCallback(async (
     fenBefore: string, fen: string, san: string, from: string, to: string, turn: string, whiteTime: number, blackTime: number,

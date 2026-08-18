@@ -17,6 +17,9 @@ import Index from "./pages/IndexFull";
 import NotFound from "./pages/NotFound";
 const Play = lazy(() => import("./pages/Play"));
 const PlayOnline = lazy(() => import("./pages/PlayOnline"));
+const Lobby = lazy(() => import("./pages/Lobby"));
+const Watch = lazy(() => import("./pages/Watch"));
+const WatchGame = lazy(() => import("./pages/WatchGame"));
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -351,6 +354,9 @@ function AnimatedRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/play" element={<Play />} />
           <Route path="/play/online" element={<PlayOnline />} />
+          <Route path="/lobby" element={<Lobby />} />
+          <Route path="/watch" element={<Watch />} />
+          <Route path="/watch/:id" element={<WatchGame />} />
           <Route path="/play/titles" element={<Titles />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/learn/:slug" element={<LearnArticle />} />
