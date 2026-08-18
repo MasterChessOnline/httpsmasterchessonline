@@ -40,13 +40,23 @@ export default function IgLanding() {
 
   useEffect(() => {
     captureAttribution();
-    // Paid landing page must stay out of the search index.
-    const meta = document.createElement("meta");
-    meta.name = "robots";
-    meta.content = "noindex, nofollow";
-    document.head.appendChild(meta);
+    // Paid landing page must stay out of the search index: override every
+    // robots tag the shared SEO layer already emitted, then restore on exit.
+    const tags = Array.from(
+      document.head.querySelectorAll<HTMLMetaElement>('meta[name="robots"]'),
+    );
+    const previous = tags.map((t) => t.content);
+    tags.forEach((t) => (t.content = "noindex, nofollow"));
+    let added: HTMLMetaElement | null = null;
+    if (!tags.length) {
+      added = document.createElement("meta");
+      added.name = "robots";
+      added.content = "noindex, nofollow";
+      document.head.appendChild(added);
+    }
     return () => {
-      meta.remove();
+      tags.forEach((t, i) => (t.content = previous[i]));
+      added?.remove();
     };
   }, []);
 
