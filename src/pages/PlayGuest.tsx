@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { celebrate } from "@/lib/celebrate";
 import { share } from "@/lib/share";
+import { recordGuestResult } from "@/lib/guestProgress";
 
 // Easy bot — friendly first experience
 // Weakest bot on the site — the guest should win their first game.
