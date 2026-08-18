@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Crown, Flame, RotateCcw, Share2, Sparkles } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
 import ShareWinCard from "@/components/ShareWinCard";
+import BotAvatar from "@/components/BotAvatar";
 import { Button } from "@/components/ui/button";
 import { BOT_PROFILES } from "@/lib/bots/profiles";
 import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
