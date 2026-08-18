@@ -58,7 +58,20 @@ function bumpStreak(): number {
   }
 }
 
-export default function InstantHeroBoard() {
+interface InstantHeroBoardProps {
+  /**
+   * Ad-traffic mode (used by /ig): show only the board until the first game
+   * ends — no "create account" call to action competing with the game.
+   */
+  adMode?: boolean;
+  /** Render the headline as an h2 (when the page already owns the h1). */
+  headingLevel?: "h1" | "h2";
+}
+
+export default function InstantHeroBoard({
+  adMode = false,
+  headingLevel = "h1",
+}: InstantHeroBoardProps = {}) {
   const [game, setGame] = useState(() => new Chess());
   const [fen, setFen] = useState(game.fen());
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
