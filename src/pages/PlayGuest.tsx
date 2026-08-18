@@ -72,7 +72,7 @@ export default function PlayGuest() {
       if (result === "win") celebrate("big");
       // Durable guest record (wins, streak, guest rating) used by /signup to
       // show exactly what the visitor would lose by leaving.
-      recordGuestResult(result, BOT.name);
+      recordGuestResult(result, GUEST_BOT?.name);
       // Track finished guest games so other UI (exit-intent, post-win nudges)
       // can stop blocking first-time visitors and only trigger after real play.
       try {
