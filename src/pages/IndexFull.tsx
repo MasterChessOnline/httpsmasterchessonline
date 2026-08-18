@@ -66,6 +66,9 @@ import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
+import WhyMasterChess from "@/components/WhyMasterChess";
+import { getGuestProgress } from "@/lib/guestProgress";
+
 
 
 import LazyMount from "@/components/LazyMount";
