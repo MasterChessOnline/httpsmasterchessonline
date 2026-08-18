@@ -222,7 +222,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden py-10">
+    <div className="min-h-screen relative flex flex-col items-center justify-center overflow-hidden py-10">
       <Seo
         title="Create Free Account — MasterChess"
         description="Create your free MasterChess account in seconds. Play chess online vs real players and bots, save your rating, join tournaments. No ads, no subscription."
