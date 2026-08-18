@@ -1,0 +1,5 @@
+DELETE FROM public.game_messages WHERE game_id IN (SELECT id FROM public.online_games WHERE white_player_id IN (SELECT id FROM auth.users WHERE email LIKE '%@mc-test.dev') OR black_player_id IN (SELECT id FROM auth.users WHERE email LIKE '%@mc-test.dev'));
+DELETE FROM public.online_game_moves WHERE game_id IN (SELECT id FROM public.online_games WHERE white_player_id IN (SELECT id FROM auth.users WHERE email LIKE '%@mc-test.dev') OR black_player_id IN (SELECT id FROM auth.users WHERE email LIKE '%@mc-test.dev'));
+DELETE FROM public.online_games WHERE white_player_id IN (SELECT id FROM auth.users WHERE email LIKE '%@mc-test.dev') OR black_player_id IN (SELECT id FROM auth.users WHERE email LIKE '%@mc-test.dev');
+DELETE FROM public.matchmaking_queue WHERE user_id IN (SELECT id FROM auth.users WHERE email LIKE '%@mc-test.dev');
+DELETE FROM auth.users WHERE email LIKE '%@mc-test.dev';
