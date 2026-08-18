@@ -14,6 +14,10 @@ import AuthAura from "@/components/auth/AuthAura";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 import BrandLogo from "@/components/BrandLogo";
 import Seo from "@/components/Seo";
+import WhyMasterChess from "@/components/WhyMasterChess";
+import SeoFaqBlock from "@/components/seo/SeoFaqBlock";
+import { SIGNUP_FAQ } from "@/lib/seo-faq";
+
 import {
   getGuestProgress,
   guestValueLine,
