@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
+import WhyMasterChess from "@/components/WhyMasterChess";
+
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
 
