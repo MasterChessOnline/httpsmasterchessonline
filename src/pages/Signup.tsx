@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -14,6 +14,18 @@ import AuthAura from "@/components/auth/AuthAura";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 import BrandLogo from "@/components/BrandLogo";
 import Seo from "@/components/Seo";
+import {
+  getGuestProgress,
+  guestValueLine,
+  markSignupSeen,
+  clearGuestProgress,
+} from "@/lib/guestProgress";
+import {
+  isBackendOutage,
+  queuePendingSignup,
+  clearPendingSignup,
+  getPendingSignup,
+} from "@/lib/backendHealth";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -55,6 +67,18 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
+  const [outage, setOutage] = useState(false);
+  // What this guest earned while playing without an account.
+  const guestLine = useMemo(() => guestValueLine(getGuestProgress()), []);
+
+  useEffect(() => {
+    // Funnel step: the signup offer was actually seen.
+    markSignupSeen();
+    // A queued email from an earlier outage: prefill so the retry is one tap.
+    const pending = getPendingSignup();
+    if (pending?.email) setEmail((prev) => prev || pending.email);
+  }, []);
+
 
 
   const navigate = useNavigate();
@@ -142,7 +166,15 @@ const Signup = () => {
     });
 
     if (error) {
-      setError(error.message);
+      // Distinguish "you typed something wrong" from "our backend is down":
+      // in the second case keep the email so nothing is lost.
+      if (isBackendOutage(error.message)) {
+        queuePendingSignup({ email });
+        setOutage(true);
+        setError(null);
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
       return;
     }
@@ -175,6 +207,8 @@ const Signup = () => {
     }
 
     track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key, fide_verified: !!fideFound });
+    clearPendingSignup();
+    clearGuestProgress();
     navigate(redirectTo);
   };
 
@@ -231,6 +265,26 @@ const Signup = () => {
             <h1 className="font-display text-2xl font-bold text-foreground">Welcome to MasterChess</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">Your next grandmaster move starts here</p>
           </div>
+
+          {/* What the guest actually loses by not signing up — concrete, from
+              the games they already played in this browser. */}
+          {guestLine && (
+            <div className="mb-6 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-center">
+              <p className="text-xs uppercase tracking-widest text-primary/90">Unsaved progress</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">{guestLine}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Create your free account to keep it — it disappears if you leave.
+              </p>
+            </div>
+          )}
+
+          {outage && (
+            <div className="mb-6 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-center text-xs text-foreground">
+              Our servers are briefly unavailable. Your email is saved and we'll finish this
+              signup automatically — meanwhile you can keep playing.{" "}
+              <Link to="/play-guest" className="underline text-primary">Play now</Link>
+            </div>
+          )}
 
           {/* Social buttons */}
           <div className="space-y-2.5 mb-6">

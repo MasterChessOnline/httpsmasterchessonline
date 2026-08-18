@@ -11,6 +11,7 @@ import { BOT_PROFILES } from "@/lib/bots/profiles";
 import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
 import { playChessSound } from "@/lib/chess-sounds";
 import { celebrate } from "@/lib/celebrate";
+import { recordGuestResult } from "@/lib/guestProgress";
 
 /**
  * INSTANT HERO BOARD — the first thing a visitor sees on the homepage.
@@ -122,6 +123,8 @@ export default function InstantHeroBoard({
       celebrate("big");
       setStreak(bumpStreak());
     }
+    // Durable guest record for the signup screen's "unsaved progress" line.
+    recordGuestResult(result, HERO_BOT?.name);
     try {
       const prev = Number(localStorage.getItem("mc_guest_games_played") || "0");
       localStorage.setItem("mc_guest_games_played", String(prev + 1));

@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { celebrate } from "@/lib/celebrate";
 import { share } from "@/lib/share";
+import { recordGuestResult } from "@/lib/guestProgress";
 
 // Easy bot — friendly first experience
 // Weakest bot on the site — the guest should win their first game.
@@ -70,6 +71,9 @@ export default function PlayGuest() {
       setPhase("ended");
       playChessSound(result === "win" ? "victory" : "gameOver");
       if (result === "win") celebrate("big");
+      // Durable guest record (wins, streak, guest rating) used by /signup to
+      // show exactly what the visitor would lose by leaving.
+      recordGuestResult(result, GUEST_BOT?.name);
       // Track finished guest games so other UI (exit-intent, post-win nudges)
       // can stop blocking first-time visitors and only trigger after real play.
       try {
