@@ -105,7 +105,7 @@ export default function SeoMegaFooter() {
   return (
     <footer className="mt-16 border-t border-border/40 pt-10 pb-12 px-4 bg-background/60">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-8">
           {GROUPS.map((g) => (
             <div key={g.title}>
               <h3 className="font-display text-xs uppercase tracking-widest text-amber-300/90 mb-3">
