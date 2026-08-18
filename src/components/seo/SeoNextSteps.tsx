@@ -7,7 +7,7 @@
  */
 import { Link } from "react-router-dom";
 import { ArrowRight, Swords, UserPlus } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface NextStep {
   to: string;
