@@ -383,6 +383,44 @@ const PlayOnline = () => {
     return () => { supabase.removeChannel(channel); };
   }, [onlineGame?.id, onlineStatus, user?.id, drawOfferedByMe, rematchOfferedByMe, isGameOver, navigate]);
 
+  // Rematch recovery: chat signalling is instant but dies on refresh, so the
+  // durable `rematch_offers` row is re-read on mount and watched for the moment
+  // the opponent accepts (they create the new game and write its id here).
+  useEffect(() => {
+    if (!onlineGame || !user?.id || (onlineStatus !== "playing" && onlineStatus !== "finished")) return;
+    let cancelled = false;
+
+    const sync = async () => {
+      const { data } = await (supabase as any)
+        .from("rematch_offers")
+        .select("from_user_id, to_user_id, status, new_game_id")
+        .eq("source_game_id", onlineGame.id);
+      if (cancelled) return;
+      for (const row of (data as any[]) || []) {
+        if (row.status === "accepted" && row.new_game_id && row.from_user_id === user.id) {
+          setRematchOfferedByMe(false);
+          navigate(`/play/online?game=${row.new_game_id}`, { replace: true });
+          window.dispatchEvent(new CustomEvent("online-game-load", { detail: row.new_game_id }));
+          return;
+        }
+        if (row.status === "pending" && row.to_user_id === user.id) setRematchOfferedByOpponent(true);
+        if (row.status === "pending" && row.from_user_id === user.id) setRematchOfferedByMe(true);
+      }
+    };
+    sync();
+
+    const ch = supabase
+      .channel(`rematch-${onlineGame.id}-${user.id}`)
+      .on("postgres_changes", {
+        event: "*", schema: "public", table: "rematch_offers",
+        filter: `source_game_id=eq.${onlineGame.id}`,
+      }, () => sync())
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(ch); };
+  }, [onlineGame?.id, onlineStatus, user?.id, navigate]);
+
+
+
   // Presence tracking — detect opponent disconnect.
   // The local clock keeps ticking the active player's time even if they're
   // offline, so when it hits 0 the existing timeout flow auto-forfeits them.
