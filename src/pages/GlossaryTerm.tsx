@@ -46,6 +46,7 @@ export default function GlossaryTerm() {
               { "@type": "ListItem", position: 3, name: term.term },
             ],
           },
+          buildFaqSchema(faq),
         ]}
       />
       <Navbar />
