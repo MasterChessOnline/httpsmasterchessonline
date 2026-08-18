@@ -157,7 +157,18 @@ export default function InstantHeroBoard() {
           refresh(g);
         }, wait);
       } catch {
+        // Stability guard: never leave the homepage board frozen — if the
+        // engine fails or times out, play a legal move so the game continues.
+        const legal = g.moves();
+        if (legal.length) {
+          const move = g.move(legal[Math.floor(Math.random() * legal.length)]);
+          if (move) {
+            setLastMove({ from: move.from, to: move.to });
+            playChessSound(move.captured ? "capture" : "move");
+          }
+        }
         setBotThinking(false);
+        refresh(g);
       }
     },
     [refresh],
