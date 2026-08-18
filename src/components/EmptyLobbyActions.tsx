@@ -3,7 +3,7 @@
 // No fake players, no ghost activity — just real actions the user can take.
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Swords, Share2, Target, Copy, Check } from "lucide-react";
+import { Swords, Share2, Target, Copy, Check, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -93,6 +93,13 @@ export default function EmptyLobbyActions({
       ActiveIcon: copied ? Check : Share2,
     },
     {
+      icon: Users,
+      label: "See who's waiting",
+      desc: "Open challenges from real players — accept one and you're playing.",
+      to: "/lobby",
+      accent: "from-primary/20 to-amber-500/10 border-primary/30",
+    },
+    {
       icon: Target,
       label: "Play a bot right now",
       desc: "Instant game against a bot (clearly marked as a bot) while you wait.",
@@ -113,7 +120,7 @@ export default function EmptyLobbyActions({
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
-      <div className="grid sm:grid-cols-3 gap-3">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {actions.map((a, i) => {
           const Icon = (a as any).ActiveIcon ?? a.icon;
           const inner = (
