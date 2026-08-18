@@ -11,6 +11,7 @@ import { BOT_PROFILES } from "@/lib/bots/profiles";
 import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
 import { playChessSound } from "@/lib/chess-sounds";
 import { celebrate } from "@/lib/celebrate";
+import { recordGuestResult } from "@/lib/guestProgress";
 
 /**
  * INSTANT HERO BOARD — the first thing a visitor sees on the homepage.
