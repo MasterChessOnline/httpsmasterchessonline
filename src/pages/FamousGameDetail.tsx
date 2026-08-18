@@ -65,6 +65,11 @@ export default function FamousGameDetail() {
           </h1>
           <p className="text-lg text-foreground/90 mb-1 font-medium">{g.white} vs {g.black}</p>
           <p className="text-sm text-muted-foreground mb-6">{g.opening}{g.eco ? ` · ECO ${g.eco}` : ""} · Result <span className="font-mono text-foreground">{g.result}</span></p>
+          <PositionStudyBoard
+            pgn={g.pgn}
+            label={`${g.white} vs ${g.black}, ${g.year} — replay`}
+            className="mb-6"
+          />
 
           <div className="rounded-xl border border-border/30 glass-4d p-5 sm:p-6 mb-6">
             <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">The story</p>
@@ -85,7 +90,16 @@ export default function FamousGameDetail() {
             </Link>
           </div>
 
-          <h2 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3">More legendary games</h2>
+          <SeoFaqBlock items={faq} title={`${g.title} — FAQ`} />
+
+          <SeoNextSteps
+            steps={[
+              { to: `/famous-games/${nextGame.slug}`, label: `Next game: ${nextGame.title}`, note: `${nextGame.white} vs ${nextGame.black}, ${nextGame.year}` },
+              { to: `/openings`, label: `Learn the ${g.opening.split(",")[0]}`, note: "Opening explorer with move trees." },
+            ]}
+          />
+
+          <h2 className="font-display text-sm uppercase tracking-widest text-muted-foreground mb-3 mt-10">More legendary games</h2>
           <div className="flex flex-wrap gap-2">
             {related.map((r) => (
               <Link key={r.slug} to={`/famous-games/${r.slug}`}
@@ -94,6 +108,7 @@ export default function FamousGameDetail() {
               </Link>
             ))}
           </div>
+
         </motion.article>
       </main>
     </div>
