@@ -390,6 +390,65 @@ export function useOnlineGame() {
     recoverGame();
   }, [user, subscribeToGame]);
 
+  // Try to claim an opponent that is already sitting in the queue and start a
+  // game with them. The claim is the DELETE ... RETURNING on the opponent's
+  // queue row: only the client whose delete actually returns a row owns that
+  // opponent, so two players who joined the queue at the same instant can both
+  // run this loop without creating two games (previously they could both find
+  // an empty queue, both insert a row, and then wait for each other forever).
+  const tryPairFromQueue = useCallback(async (
+    tc: { label: string; seconds: number; increment: number },
+  ): Promise<OnlineGame | null | "error"> => {
+    if (!user) return null;
+
+    const { data: queueEntries } = await supabase
+      .from("matchmaking_queue")
+      .select("*")
+      .eq("time_control_label", tc.label)
+      .neq("user_id", user.id)
+      .order("created_at", { ascending: true })
+      .limit(5);
+
+    if (!queueEntries || queueEntries.length === 0) return null;
+
+    for (const opponent of queueEntries) {
+      // Atomic claim — if another client already took this row, `claimed` is empty.
+      const { data: claimed } = await supabase
+        .from("matchmaking_queue")
+        .delete()
+        .eq("id", opponent.id)
+        .select("id");
+      if (!claimed || claimed.length === 0) continue;
+
+      // Claimer always plays white (white moves first).
+      const { data: startRes, error: startErr } = await supabase.rpc("start_online_game" as any, {
+        p_white_id: user.id,
+        p_black_id: opponent.user_id,
+        p_white_time: tc.seconds || 600,
+        p_black_time: tc.seconds || 600,
+        p_time_control_label: tc.label,
+        p_increment: tc.increment,
+      });
+      const newGame = startRes && (startRes as any).ok === true
+        ? ((startRes as any).game as OnlineGame)
+        : null;
+      if (newGame) return newGame;
+
+      const reason = (startRes as any)?.error;
+      if (reason === "black_busy") continue; // opponent got matched elsewhere — try next
+      if (reason === "white_busy") {
+        setError("You already have an active game. Resume it before starting a new one.");
+        return "error";
+      }
+      if (startErr) {
+        setError("Failed to create game");
+        return "error";
+      }
+    }
+    return null;
+  }, [user]);
+
+
   const searchMatch = useCallback(async (timeControlIdx: number) => {
     if (!user || !profile) return;
     setError(null);
