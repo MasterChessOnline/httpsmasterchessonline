@@ -232,6 +232,26 @@ const Signup = () => {
             <p className="mt-1.5 text-sm text-muted-foreground">Your next grandmaster move starts here</p>
           </div>
 
+          {/* What the guest actually loses by not signing up — concrete, from
+              the games they already played in this browser. */}
+          {guestLine && (
+            <div className="mb-6 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-center">
+              <p className="text-xs uppercase tracking-widest text-primary/90">Unsaved progress</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">{guestLine}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Create your free account to keep it — it disappears if you leave.
+              </p>
+            </div>
+          )}
+
+          {outage && (
+            <div className="mb-6 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-center text-xs text-foreground">
+              Our servers are briefly unavailable. Your email is saved and we'll finish this
+              signup automatically — meanwhile you can keep playing.{" "}
+              <Link to="/play-guest" className="underline text-primary">Play now</Link>
+            </div>
+          )}
+
           {/* Social buttons */}
           <div className="space-y-2.5 mb-6">
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
