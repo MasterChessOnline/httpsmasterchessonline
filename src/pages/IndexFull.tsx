@@ -192,6 +192,10 @@ const Index = () => {
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
   const [winStreak, setWinStreak] = useState(0);
+  // Guests only get the streak card after their first move — before that the
+  // first screen stays a board + one reason to stay.
+  const [guestPlayed] = useState(() => getGuestProgress().games > 0);
+
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
