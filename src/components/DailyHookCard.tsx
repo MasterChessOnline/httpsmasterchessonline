@@ -3,7 +3,7 @@
 // is what brings them back, and the streak is what signup then protects.
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Flame, Gift, Target, Sparkles } from "lucide-react";
+import { Flame, Gift, Target, Sparkles, Clock } from "lucide-react";
 import { getGuestProgress } from "@/lib/guestProgress";
 
 const KEY = "mc_daily_checkin";
