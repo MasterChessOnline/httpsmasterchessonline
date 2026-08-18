@@ -5,13 +5,21 @@ import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { getFamousGame, FAMOUS_GAMES } from "@/data/famousGames";
+import PositionStudyBoard from "@/components/seo/PositionStudyBoard";
+import SeoFaqBlock from "@/components/seo/SeoFaqBlock";
+import SeoNextSteps from "@/components/seo/SeoNextSteps";
+import { famousGameFaq } from "@/lib/content-faq";
+import { buildFaqSchema } from "@/lib/jsonld-builders";
 
 export default function FamousGameDetail() {
   const { slug = "" } = useParams();
   const g = getFamousGame(slug);
   if (!g) return <Navigate to="/famous-games" replace />;
 
+  const faq = famousGameFaq(g);
   const related = FAMOUS_GAMES.filter((x) => x.slug !== g.slug).slice(0, 4);
+  const nextGame = FAMOUS_GAMES[(FAMOUS_GAMES.findIndex((x) => x.slug === g.slug) + 1) % FAMOUS_GAMES.length];
+
 
   return (
     <div className="min-h-screen bg-background">
