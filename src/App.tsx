@@ -299,6 +299,7 @@ function AppChrome() {
       <FloatingPlayNow />
       <GuestSignupBar />
       <BackendStatusBanner />
+      <PendingSignupResume />
       <Suspense fallback={null}><ChannelWelcomeBanner /></Suspense>
     </>
   );
