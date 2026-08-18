@@ -14,6 +14,18 @@ import AuthAura from "@/components/auth/AuthAura";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 import BrandLogo from "@/components/BrandLogo";
 import Seo from "@/components/Seo";
+import {
+  getGuestProgress,
+  guestValueLine,
+  markSignupSeen,
+  clearGuestProgress,
+} from "@/lib/guestProgress";
+import {
+  isBackendOutage,
+  queuePendingSignup,
+  clearPendingSignup,
+  getPendingSignup,
+} from "@/lib/backendHealth";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
