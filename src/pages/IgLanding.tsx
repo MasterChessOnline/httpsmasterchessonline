@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
+import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
+
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
 
@@ -126,7 +128,11 @@ export default function IgLanding() {
             Free forever · your rating, streak and history are saved
           </p>
         </motion.div>
+
+        {/* Same three reasons as the homepage — answers "why this site" after the game. */}
+        <WhyMasterChessCompact className="pb-6" />
       </main>
+
 
       <footer className="text-center text-[10px] text-muted-foreground pb-4">
         @dailychess_12 · masterchess.live

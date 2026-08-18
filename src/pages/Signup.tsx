@@ -14,6 +14,10 @@ import AuthAura from "@/components/auth/AuthAura";
 import GoogleCountryNameModal from "@/components/auth/GoogleCountryNameModal";
 import BrandLogo from "@/components/BrandLogo";
 import Seo from "@/components/Seo";
+import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
+import SeoFaqBlock from "@/components/seo/SeoFaqBlock";
+import { SIGNUP_FAQ } from "@/lib/seo-faq";
+
 import {
   getGuestProgress,
   guestValueLine,
@@ -222,24 +226,36 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden py-10">
+    <div className="min-h-screen relative flex flex-col items-center justify-center overflow-hidden py-10">
       <Seo
         title="Create Free Account — MasterChess"
         description="Create your free MasterChess account in seconds. Play chess online vs real players and bots, save your rating, join tournaments. No ads, no subscription."
         path="/signup"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: "Create Free Account",
-          url: "https://masterchess.live/signup",
-          description: "Sign up free for MasterChess and start playing chess online instantly.",
-          isPartOf: { "@type": "WebSite", name: "MasterChess", url: "https://masterchess.live/" },
-          potentialAction: {
-            "@type": "RegisterAction",
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
             name: "Create Free Account",
-            target: "https://masterchess.live/signup",
+            url: "https://masterchess.live/signup",
+            description: "Sign up free for MasterChess and start playing chess online instantly.",
+            isPartOf: { "@type": "WebSite", name: "MasterChess", url: "https://masterchess.live/" },
+            potentialAction: {
+              "@type": "RegisterAction",
+              name: "Create Free Account",
+              target: "https://masterchess.live/signup",
+            },
           },
-        }}
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: SIGNUP_FAQ.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          },
+        ]}
+
       />
       <AuthAura />
       {CHESS_PIECES.map((piece, i) => (
@@ -455,6 +471,15 @@ const Signup = () => {
           </p>
         </div>
       </motion.div>
+
+      {/* Same promise as the homepage — the reason to finish the form. */}
+      <div className="relative z-10 w-full">
+        <WhyMasterChessCompact className="mt-10" />
+        <div className="mx-auto max-w-3xl px-4">
+          <SeoFaqBlock items={SIGNUP_FAQ} title="Before you sign up" />
+        </div>
+      </div>
+
       <GoogleCountryNameModal
         open={googleModalOpen}
         onClose={() => setGoogleModalOpen(false)}

@@ -66,6 +66,9 @@ import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
+import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
+import { getGuestProgress } from "@/lib/guestProgress";
+
 
 
 import LazyMount from "@/components/LazyMount";
@@ -192,6 +195,10 @@ const Index = () => {
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
   const [winStreak, setWinStreak] = useState(0);
+  // Guests only get the streak card after their first move — before that the
+  // first screen stays a board + one reason to stay.
+  const [guestPlayed] = useState(() => getGuestProgress().games > 0);
+
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -295,8 +302,16 @@ const Index = () => {
         {/* ── INSTANT PLAY: live board is the first thing a visitor sees ── */}
         <InstantHeroBoard />
 
-        {/* ── RETENTION HOOK: daily streak + one mission, works for guests ── */}
-        <DailyHookCard className="mt-6" />
+        {/* ── RETENTION HOOK ──
+            For a first-time guest the streak card is noise *before* the first
+            move, so it only appears once they actually played (or are signed in).
+            A brand-new guest instead gets the one-screen "why this site" answer. */}
+        {user || guestPlayed ? (
+          <DailyHookCard className="mt-6" />
+        ) : (
+          <WhyMasterChessCompact className="mt-6" />
+        )}
+
 
 
         {/* ── HERO with parallax + 4D depth ── */}
@@ -464,13 +479,27 @@ const Index = () => {
           {/* ─── Trust strip — credibility in the first 3 seconds ─── */}
           <HomeTrustStrip />
 
-
-          {/* ─── Daily Spin Wheel — reward hook ─── */}
-          <React.Suspense fallback={<div className="h-[280px]" />}>
-            <LazyMount minHeight={280}>
-              <HomeSpinWheelSection />
+          {/* Long-form "why this site" answer — below the fold, so the first
+              screen stays board-first while the full case is still on the page. */}
+          <React.Suspense fallback={<div className="h-[320px]" />}>
+            <LazyMount minHeight={320}>
+              <WhyMasterChess />
             </LazyMount>
           </React.Suspense>
+
+
+
+
+          {/* ─── Daily Spin Wheel — reward hook. Account-only: a guest who has
+               not played yet should not meet a rewards wheel before a board. ─── */}
+          {user && (
+            <React.Suspense fallback={<div className="h-[280px]" />}>
+              <LazyMount minHeight={280}>
+                <HomeSpinWheelSection />
+              </LazyMount>
+            </React.Suspense>
+          )}
+
 
           {/* Daily Challenge — the single daily ritual on home */}
           <section id="daily-missions" className="scroll-mt-24 space-y-4">

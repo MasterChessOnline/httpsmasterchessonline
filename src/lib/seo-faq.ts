@@ -39,3 +39,23 @@ export const HOME_FAQ: FaqItem[] = [
     a: "Yes. The bot opponents (9 personalities from 400 to 2000 ELO) run locally in your browser using Stockfish, so you can keep playing even with no internet once the page is loaded.",
   },
 ];
+
+/** Shown on /signup — objections a visitor has right before creating an account. */
+export const SIGNUP_FAQ: FaqItem[] = [
+  {
+    q: "Is the account really free?",
+    a: "Yes. Creating an account is free and stays free — no card, no trial, no premium tier that unlocks features later.",
+  },
+  {
+    q: "What do I get that guests don't?",
+    a: "A permanent ELO rating, saved game history and analysis, friends and challenge links, tournament entry, daily streak rewards and your profile page.",
+  },
+  {
+    q: "Do I have to confirm my email?",
+    a: "No. Your account works immediately after signing up, so you can go straight from the form into a game.",
+  },
+  {
+    q: "Is my email used for anything else?",
+    a: "Only for your account and optional game notifications. No ads, no selling data, and you can turn off every email in Settings.",
+  },
+];

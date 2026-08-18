@@ -810,7 +810,7 @@ const PlayOnline = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
-        <Seo title={"Play Chess Online — Real Players, Real Time | MasterChess"} description={"Match against human players in real time. Bullet, Blitz, Rapid and Classical with ELO matchmaking."} path="/play/online" type="website" />
+        <Seo title={"Play Chess Online Free vs Real Players — No Download | MasterChess"} description={"Play chess online free against real people in seconds — Bullet, Blitz, Rapid and Classical with ELO matchmaking. No download, no ads, no engine help in human games."} path="/play/online" type="website" />
         <Navbar />
         <main className="container mx-auto px-6 pt-24 pb-16 text-center">
           <Wifi className="h-16 w-16 text-primary mx-auto mb-4" />

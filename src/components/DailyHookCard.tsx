@@ -3,7 +3,7 @@
 // is what brings them back, and the streak is what signup then protects.
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Flame, Gift, Target, Sparkles } from "lucide-react";
+import { Flame, Gift, Target, Sparkles, Clock } from "lucide-react";
 import { getGuestProgress } from "@/lib/guestProgress";
 
 const KEY = "mc_daily_checkin";
@@ -63,6 +63,15 @@ export default function DailyHookCard({ className = "" }: { className?: string }
   const day = Math.max(1, state.streak);
   const dots = Array.from({ length: 7 }, (_, i) => i < ((day - 1) % 7) + 1);
 
+  // Concrete milestone so the dots mean something. Day 3 unlocks a harder bot,
+  // day 7 pays out a badge + coins.
+  const milestone =
+    day < 3
+      ? { at: 3, text: `Day 3 unlocks a new bot — ${3 - day} day${3 - day === 1 ? "" : "s"} to go` }
+      : day < 7
+        ? { at: 7, text: `Day 7 pays out a badge + 500 coins — ${7 - day} day${7 - day === 1 ? "" : "s"} to go` }
+        : { at: 7, text: "Week complete — badge + 500 coins unlocked. Keep the chain going." };
+
   return (
     <section className={`mx-auto max-w-3xl px-4 ${className}`}>
       <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/80 to-card p-4 sm:p-5">
@@ -92,9 +101,19 @@ export default function DailyHookCard({ className = "" }: { className?: string }
             />
           ))}
           <span className="ml-1 inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-            <Gift className="h-3 w-3 text-primary" /> day 7
+            <Gift className="h-3 w-3 text-primary" /> day {milestone.at}
           </span>
         </div>
+
+        <p className="mt-2 text-[11px] font-semibold text-primary/90">{milestone.text}</p>
+
+        {/* Prime time — one shared hour makes the lobby feel alive */}
+        <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <Clock className="h-3 w-3 text-primary" />
+          Prime time is <strong className="font-semibold text-foreground">20:00</strong> — most
+          opponents are online then.
+        </p>
+
 
         <div className="mt-4 rounded-xl border border-border/50 bg-background/50 p-3">
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary">
