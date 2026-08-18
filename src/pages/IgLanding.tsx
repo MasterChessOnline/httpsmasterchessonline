@@ -126,7 +126,11 @@ export default function IgLanding() {
             Free forever · your rating, streak and history are saved
           </p>
         </motion.div>
+
+        {/* Same three reasons as the homepage — answers "why this site" after the game. */}
+        <WhyMasterChess className="pb-6" />
       </main>
+
 
       <footer className="text-center text-[10px] text-muted-foreground pb-4">
         @dailychess_12 · masterchess.live
