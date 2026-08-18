@@ -142,7 +142,15 @@ const Signup = () => {
     });
 
     if (error) {
-      setError(error.message);
+      // Distinguish "you typed something wrong" from "our backend is down":
+      // in the second case keep the email so nothing is lost.
+      if (isBackendOutage(error.message)) {
+        queuePendingSignup({ email });
+        setOutage(true);
+        setError(null);
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
       return;
     }
