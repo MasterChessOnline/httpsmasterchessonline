@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Crown, Flame, RotateCcw, Share2, Sparkles } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
 import ShareWinCard from "@/components/ShareWinCard";
+import BotAvatar from "@/components/BotAvatar";
 import { Button } from "@/components/ui/button";
 import { BOT_PROFILES } from "@/lib/bots/profiles";
 import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
@@ -18,7 +19,9 @@ import { celebrate } from "@/lib/celebrate";
  * in this order: save the result (free account), share it, play again.
  */
 
-const HERO_BOT = BOT_PROFILES.find((b) => b.id === "pawn-pablo") ?? BOT_PROFILES[1];
+// The homepage free game is played against Nikola Šakotić — the founder's bot.
+const HERO_BOT =
+  BOT_PROFILES.find((b) => b.id === "nikola-sakotic") ?? BOT_PROFILES[0];
 
 const STREAK_KEY = "mc_guest_streak";
 const STREAK_DAY_KEY = "mc_guest_streak_day";
@@ -155,7 +158,18 @@ export default function InstantHeroBoard() {
           refresh(g);
         }, wait);
       } catch {
+        // Stability guard: never leave the homepage board frozen — if the
+        // engine fails or times out, play a legal move so the game continues.
+        const legal = g.moves();
+        if (legal.length) {
+          const move = g.move(legal[Math.floor(Math.random() * legal.length)]);
+          if (move) {
+            setLastMove({ from: move.from, to: move.to });
+            playChessSound(move.captured ? "capture" : "move");
+          }
+        }
         setBotThinking(false);
+        refresh(g);
       }
     },
     [refresh],
@@ -245,7 +259,12 @@ export default function InstantHeroBoard() {
 
           <div className="mt-4 flex items-center justify-between gap-3 text-xs sm:text-sm">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-lg shrink-0">{HERO_BOT.avatar}</span>
+              <BotAvatar
+                avatar={HERO_BOT.avatar}
+                alt={HERO_BOT.name}
+                className="h-8 w-8 shrink-0 ring-1 ring-primary/40"
+                emojiClassName="text-lg shrink-0"
+              />
               <span className="font-semibold text-foreground truncate">{HERO_BOT.name}</span>
               <span className="text-muted-foreground shrink-0">{HERO_BOT.rating}</span>
             </div>
@@ -294,23 +313,32 @@ export default function InstantHeroBoard() {
               </Button>
             </div>
           ) : (
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> No signup, no ads
-              </span>
-              <Link to="/play-guest" className="hover:text-primary">
-                Full screen
-              </Link>
-              <span className="opacity-30">·</span>
-              <Link to="/signup" className="hover:text-primary">
-                Create free account
-              </Link>
-              {phase === "playing" && (
-                <button onClick={resetGame} className="hover:text-primary underline-offset-2 hover:underline">
-                  Restart
-                </button>
-              )}
-            </div>
+            <>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <Link to="/signup" className="w-full">
+                  <Button className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Crown className="h-4 w-4 mr-2" />
+                    Create free account
+                  </Button>
+                </Link>
+                <Link to="/play-guest" className="w-full">
+                  <Button variant="outline" className="w-full h-12 rounded-xl border-primary/30">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Free game — full screen
+                  </Button>
+                </Link>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" /> No signup, no ads
+                </span>
+                {phase === "playing" && (
+                  <button onClick={resetGame} className="hover:text-primary underline-offset-2 hover:underline">
+                    Restart
+                  </button>
+                )}
+              </div>
+            </>
           )}
         </div>
       </div>
