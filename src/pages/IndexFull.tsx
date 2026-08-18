@@ -295,8 +295,16 @@ const Index = () => {
         {/* ── INSTANT PLAY: live board is the first thing a visitor sees ── */}
         <InstantHeroBoard />
 
-        {/* ── RETENTION HOOK: daily streak + one mission, works for guests ── */}
-        <DailyHookCard className="mt-6" />
+        {/* ── RETENTION HOOK ──
+            For a first-time guest the streak card is noise *before* the first
+            move, so it only appears once they actually played (or are signed in).
+            A brand-new guest instead gets the one-screen "why this site" answer. */}
+        {user || guestPlayed ? (
+          <DailyHookCard className="mt-6" />
+        ) : (
+          <WhyMasterChess className="mt-6" />
+        )}
+
 
 
         {/* ── HERO with parallax + 4D depth ── */}
