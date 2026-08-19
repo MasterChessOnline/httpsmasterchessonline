@@ -268,7 +268,9 @@ const Settings = () => {
 
   const handleSignOut = async () => { await signOut(); navigate("/"); };
 
-  if (!user) { navigate("/login"); return null; }
+  // Navigating during render triggers a React setState-in-render warning, so
+  // render a redirect element instead.
+  if (!user) return <Navigate to="/login" replace />;
 
   const renderSection = () => {
     switch (section) {
