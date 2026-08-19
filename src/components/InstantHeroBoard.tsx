@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chess, Square } from "chess.js";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Flame, RotateCcw, Share2, Sparkles } from "lucide-react";
+import { Crown, Flame, Maximize2, Minimize2, RotateCcw, Share2, Sparkles, X } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
 import ShareWinCard from "@/components/ShareWinCard";
 import BotAvatar from "@/components/BotAvatar";
@@ -12,6 +12,7 @@ import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
 import { playChessSound } from "@/lib/chess-sounds";
 import { celebrate } from "@/lib/celebrate";
 import { recordGuestResult } from "@/lib/guestProgress";
+
 
 /**
  * INSTANT HERO BOARD — the first thing a visitor sees on the homepage.
