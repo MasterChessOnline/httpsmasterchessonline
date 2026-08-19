@@ -60,11 +60,14 @@ function captureLandingSource(variant?: string) {
 
 export default function IgLanding() {
   const { variant } = useParams<{ variant?: string }>();
+  const { user } = useAuth();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [coach, setCoach] = useState(false);
   // Once a visitor says they cannot play, the board keeps the hint line up.
   const [beginnerMode, setBeginnerMode] = useState(false);
   const [detected, setDetected] = useState<TrafficSource>("direct");
+  // Hard gate: the first game is free, then an account is required to continue.
+  const [gate, setGate] = useState(false);
 
   useEffect(() => {
     setDetected(detectTrafficSource().source);
