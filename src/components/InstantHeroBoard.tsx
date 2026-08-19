@@ -285,9 +285,36 @@ export default function InstantHeroBoard({
   const moveNumber = useMemo(() => Math.ceil(game.history().length / 2), [game, fen]);
 
   return (
-    <section className="relative z-10 px-4 pt-6 pb-2" aria-label="Play chess instantly">
-      <div className="container mx-auto max-w-3xl">
-        <div className="rounded-3xl border border-primary/25 bg-card/60 backdrop-blur-xl p-4 sm:p-6 shadow-[0_0_60px_hsl(43_90%_55%/0.12)]">
+    <section
+      className={
+        immersive
+          ? "fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-background px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          : "relative z-10 px-4 pt-6 pb-2"
+      }
+      aria-label="Play chess instantly"
+    >
+      <div className={immersive ? "mx-auto w-full max-w-2xl" : "container mx-auto max-w-3xl"}>
+        <div
+          className={
+            immersive
+              ? "rounded-2xl border border-primary/20 bg-card/40 p-2 sm:p-4"
+              : "rounded-3xl border border-primary/25 bg-card/60 backdrop-blur-xl p-4 sm:p-6 shadow-[0_0_60px_hsl(43_90%_55%/0.12)]"
+          }
+        >
+          {immersive && (
+            <div className="mb-2 flex items-center justify-end">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={exitImmersive}
+                className="h-9 rounded-lg text-muted-foreground"
+                aria-label="Exit full screen"
+              >
+                <Minimize2 className="h-4 w-4 mr-1" /> Exit full screen
+              </Button>
+            </div>
+          )}
+
           <div className="text-center">
             {headingLevel === "h1" ? (
               <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
