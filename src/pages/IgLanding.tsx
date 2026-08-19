@@ -60,9 +60,12 @@ export default function IgLanding() {
   const [coach, setCoach] = useState(false);
   // Once a visitor says they cannot play, the board keeps the hint line up.
   const [beginnerMode, setBeginnerMode] = useState(false);
+  const [detected, setDetected] = useState<TrafficSource>("direct");
 
   useEffect(() => {
+    setDetected(detectTrafficSource().source);
     captureLandingSource(variant);
+
     // Paid landing page must stay out of the search index: override every
     // robots tag the shared SEO layer already emitted, then restore on exit.
     const tags = Array.from(
