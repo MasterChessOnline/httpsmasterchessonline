@@ -66,7 +66,7 @@ export default function AnimatedLogoHero({
       </motion.div>
 
       {/* The massive wordmark */}
-      <motion.h1
+      <Heading
         className="relative font-display font-black tracking-tight uppercase mx-auto text-center
                    text-[clamp(2.75rem,11vw,7.5rem)] leading-[0.92]
                    [text-shadow:0_0_50px_hsl(var(--primary)/0.25),0_0_120px_hsl(var(--primary)/0.15)]"
@@ -105,7 +105,7 @@ export default function AnimatedLogoHero({
           animate={{ x: "120%" }}
           transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
         />
-      </motion.h1>
+      </Heading>
 
       {tagline && (
         <motion.p
