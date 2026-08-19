@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { getLandingVariant, playNowHref } from "@/lib/landingVariants";
 import { track } from "@/lib/track";
 
@@ -50,7 +50,7 @@ export default function HeroPlayNow({ className = "" }: { className?: string }) 
             {variant.primaryCta}
           </Link>
           <Link
-            to="/features"
+            to="/play"
             onClick={() => track("explore_click", { surface: "home-hero", variant: variant.key })}
             className="text-xs font-semibold tracking-wide text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
           >
