@@ -409,14 +409,29 @@ export default function InstantHeroBoard({
             />
           </div>
 
+          {beginner && phase !== "ended" && (
+            <p className="mt-3 text-center text-xs sm:text-sm text-primary">
+              Tap one of your pieces at the bottom — every square it can move to lights up.
+            </p>
+          )}
+
           {phase === "ended" ? (
-            <AdRewardCta
-              outcome={outcome}
-              onPlayAgain={resetGame}
-              onShare={() => setShareOpen(true)}
-              surface={adMode ? "ad-landing" : "home-hero"}
-            />
+            renderPostGame ? (
+              renderPostGame({
+                outcome,
+                playAgain: resetGame,
+                share: () => setShareOpen(true),
+              })
+            ) : (
+              <AdRewardCta
+                outcome={outcome}
+                onPlayAgain={resetGame}
+                onShare={() => setShareOpen(true)}
+                surface={adMode ? "ad-landing" : "home-hero"}
+              />
+            )
           ) : (
+
             <>
               {!adMode && (
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
