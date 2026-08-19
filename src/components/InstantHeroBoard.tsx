@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Crown, Flame, Maximize2, Minimize2, RotateCcw, Share2, Sparkles } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
+import AdRewardCta from "@/components/AdRewardCta";
 import ShareWinCard from "@/components/ShareWinCard";
 import BotAvatar from "@/components/BotAvatar";
 import { Button } from "@/components/ui/button";
