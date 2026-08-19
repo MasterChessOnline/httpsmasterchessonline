@@ -60,7 +60,18 @@ export default function ChannelWelcomeBanner() {
     setChannel(null);
   };
 
-  if (!channel) return null;
+  // Paid-traffic landing pages already greet the visitor and start a game on
+  // the first screen. A fixed banner there covers the headline and its CTA
+  // would pull the visitor off the page they were sent to, so stay hidden.
+  const path = location.pathname;
+  const isLanding =
+    path === "/ig" ||
+    path === "/start" ||
+    path === "/first-game" ||
+    path === "/play-guest" ||
+    path.startsWith("/ads/");
+
+  if (!channel || isLanding) return null;
   const c = CHANNEL_COPY[channel];
 
   return (
