@@ -10,6 +10,8 @@ import BeginnerCoachSheet from "@/components/BeginnerCoachSheet";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
 import { captureAttribution, track } from "@/lib/track";
+import { detectTrafficSource, type TrafficSource } from "@/lib/trafficSource";
+
 
 /**
  * PAID-TRAFFIC LANDING (/ig, /start, /ads/:variant)
