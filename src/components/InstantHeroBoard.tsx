@@ -86,6 +86,49 @@ export default function InstantHeroBoard({
   const [shareOpen, setShareOpen] = useState(false);
   const [returning, setReturning] = useState<string | null>(null);
   const botTimer = useRef<number | null>(null);
+  const [immersive, setImmersive] = useState(false);
+
+  // Full screen keeps the SAME game — we only change how it is presented.
+  const enterImmersive = useCallback(async () => {
+    setImmersive(true);
+    try {
+      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    } catch {
+      /* iOS Safari has no Fullscreen API — the overlay alone is enough. */
+    }
+  }, []);
+
+  const exitImmersive = useCallback(async () => {
+    setImmersive(false);
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Native fullscreen exit (Android back gesture / Esc) must close the overlay too.
+  useEffect(() => {
+    const onFs = () => {
+      if (!document.fullscreenElement) setImmersive(false);
+    };
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
+
+  // While immersive, hide the site chrome (navbar / bottom nav / footer) so the
+  // board really owns the phone screen and nothing overlaps it.
+  useEffect(() => {
+    if (!immersive) return;
+    document.body.setAttribute("data-game-active", "true");
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.removeAttribute("data-game-active");
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [immersive]);
+
 
   // Returning guest: remind them of their streak / last game.
   useEffect(() => {
