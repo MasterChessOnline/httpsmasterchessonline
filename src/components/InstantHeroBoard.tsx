@@ -394,26 +394,12 @@ export default function InstantHeroBoard({
           </div>
 
           {phase === "ended" ? (
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <Link to="/signup" className="w-full">
-                <Button className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Crown className="h-4 w-4 mr-2" />
-                  Save this result
-                </Button>
-              </Link>
-              <Button
-                variant="outline"
-                className="w-full h-12 rounded-xl border-primary/30"
-                onClick={() => setShareOpen(true)}
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-              <Button variant="ghost" className="w-full h-12 rounded-xl" onClick={resetGame}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Play again
-              </Button>
-            </div>
+            <AdRewardCta
+              outcome={outcome}
+              onPlayAgain={resetGame}
+              onShare={() => setShareOpen(true)}
+              surface={adMode ? "ad-landing" : "home-hero"}
+            />
           ) : (
             <>
               {!adMode && (
