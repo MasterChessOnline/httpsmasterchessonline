@@ -304,7 +304,7 @@ const Index = () => {
         <HeroPlayNow />
 
         {/* ── INSTANT PLAY: live board right under the CTA ── */}
-        <InstantHeroBoard />
+        <InstantHeroBoard headingLevel="h2" />
 
         {/* ── RETENTION HOOK ──
             For a first-time guest the streak card is noise *before* the first
@@ -342,7 +342,7 @@ const Index = () => {
             className="container mx-auto max-w-4xl text-center relative z-10 pt-8"
             style={{ opacity: heroOpacity }}
           >
-            <AnimatedLogoHero tagline={t("hero.tagline")} />
+            <AnimatedLogoHero as="h2" tagline={t("hero.tagline")} />
 
             {/* 1 ▸ ONE-SENTENCE "WHY THIS SITE" — must be readable in 5 seconds */}
             <p className="mx-auto mt-5 max-w-2xl text-sm sm:text-lg text-muted-foreground">
