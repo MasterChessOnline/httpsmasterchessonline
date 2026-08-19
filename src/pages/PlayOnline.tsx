@@ -942,7 +942,7 @@ const PlayOnline = () => {
                   <Button variant="outline" className="w-full" disabled>
                     Keep searching
                   </Button>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/invite")}>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/challenge")}>
                     Play with a friend
                   </Button>
                 </div>
