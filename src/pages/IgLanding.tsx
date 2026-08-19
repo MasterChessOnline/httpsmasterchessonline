@@ -117,8 +117,28 @@ export default function IgLanding() {
       </header>
 
       <main className="flex-1">
+        {/* Instagram-optimised promise: one line, one CTA, then the board. */}
+        <section className="px-5 pt-4 pb-2 text-center">
+          <h1 className="font-display text-2xl sm:text-3xl font-black leading-tight tracking-tight">
+            Your next chess game is waiting.
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Play live. Improve your rating. Challenge your friends.
+          </p>
+          <a
+            href="#board"
+            onClick={() => track("play_now_click", { surface: "ad-landing", variant: variant || "ig" })}
+            className="mt-4 inline-block w-full sm:w-auto sm:min-w-[260px] rounded-2xl bg-primary px-8 py-3.5 font-display text-lg font-black tracking-wide text-primary-foreground shadow-glow"
+          >
+            PLAY FREE
+          </a>
+          <p className="mt-2 text-[11px] text-muted-foreground">No payment required.</p>
+        </section>
+
         {/* The board is the hero: live from the first paint, weakest bot. */}
-        <InstantHeroBoard adMode />
+        <div id="board">
+          <InstantHeroBoard adMode />
+        </div>
 
         <motion.div
           initial={{ opacity: 0 }}

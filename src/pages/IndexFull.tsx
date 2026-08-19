@@ -65,6 +65,7 @@ import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
+import HeroPlayNow from "@/components/HeroPlayNow";
 import DailyHookCard from "@/components/DailyHookCard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import { getGuestProgress } from "@/lib/guestProgress";
@@ -299,7 +300,10 @@ const Index = () => {
       <BrakusHeroBanner />
 
       <main>
-        {/* ── INSTANT PLAY: live board is the first thing a visitor sees ── */}
+        {/* ── FIRST SCREEN: what this is + one dominant PLAY NOW ── */}
+        <HeroPlayNow />
+
+        {/* ── INSTANT PLAY: live board right under the CTA ── */}
         <InstantHeroBoard />
 
         {/* ── RETENTION HOOK ──

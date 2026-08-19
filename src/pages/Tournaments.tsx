@@ -282,7 +282,6 @@ const Tournaments = () => {
             <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-2 flex-wrap">
               <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{t.time_control_label}</span>
               <span className="flex items-center gap-1"><Swords className="h-3 w-3" />{t.total_rounds} rounds</span>
-              <span className="flex items-center gap-1"><Users className="h-3 w-3" />{t.player_count || 0}/{t.max_players}</span>
               <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(t.starts_at)}</span>
               {t.status === "active" && (
                 <span className="flex items-center gap-1 text-primary font-medium"><Zap className="h-3 w-3" />Round {t.current_round}/{t.total_rounds}</span>
@@ -299,7 +298,7 @@ const Tournaments = () => {
               <div className="flex flex-col items-end gap-1">
                 <Button size="sm" onClick={() => handleJoinTournament(t.id)} disabled={cannotJoin}>
                   {isJoiningThis ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
-                  {isFull ? "Full" : hasActiveTournament ? "In Tournament" : "Join"}
+                  {isFull ? "Full" : hasActiveTournament ? "In Tournament" : "Join Tournament"}
                 </Button>
                 {hasActiveTournament && (
                   <span className="text-[10px] text-muted-foreground">Leave current first</span>
@@ -323,13 +322,6 @@ const Tournaments = () => {
             )}
           </div>
         </div>
-        {(t.player_count || 0) > 0 && (
-          <div className="mt-3">
-            <div className="w-full h-1 bg-muted rounded-full">
-              <div className="h-full bg-primary/60 rounded-full transition-all" style={{ width: `${((t.player_count || 0) / t.max_players) * 100}%` }} />
-            </div>
-          </div>
-        )}
       </article>
     );
   };

@@ -53,8 +53,9 @@ export default function LiveSocialProof({ compact = false }: { compact?: boolean
   if (!stats || (stats.online === 0 && stats.gamesToday === 0)) return null;
 
   const messages: string[] = [];
-  if (stats.online > 0) messages.push(`${stats.online} player${stats.online === 1 ? "" : "s"} online now`);
-  if (stats.gamesToday > 0) messages.push(`${stats.gamesToday} game${stats.gamesToday === 1 ? "" : "s"} played today`);
+  // Never publish player or game counts — only that games are being played.
+  if (stats.online > 0) messages.push("Live games running right now");
+  if (stats.gamesToday > 0) messages.push("Games played today");
   if (messages.length === 0) return null;
 
   const current = messages[idx % messages.length];

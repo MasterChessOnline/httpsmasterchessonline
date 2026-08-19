@@ -68,11 +68,10 @@ export default function LiveActivityBar() {
 
   const countdown = fmtCountdown(stats.nextTournamentAt);
   const items = [
+    // Player/game counts are private by product rule — they live in the admin
+    // dashboard only. Public surfaces show availability, never community size.
     stats.liveGames != null && stats.liveGames > 0
-      ? { icon: Activity, label: `${stats.liveGames} live game${stats.liveGames === 1 ? "" : "s"}`, tone: "text-emerald-300" }
-      : null,
-    stats.onlinePlayers != null && stats.onlinePlayers > 0
-      ? { icon: Users, label: `${stats.onlinePlayers} online now`, tone: "text-sky-300" }
+      ? { icon: Activity, label: "Live games in progress", tone: "text-emerald-300" }
       : null,
     countdown
       ? { icon: Trophy, label: `Next tournament ${countdown}`, tone: "text-amber-300" }
