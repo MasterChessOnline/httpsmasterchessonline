@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chess, Square } from "chess.js";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crown, Flame, RotateCcw, Share2, Sparkles } from "lucide-react";
+import { Crown, Flame, Maximize2, Minimize2, RotateCcw, Share2, Sparkles } from "lucide-react";
 import ChessBoard from "@/components/chess/ChessBoard";
 import ShareWinCard from "@/components/ShareWinCard";
 import BotAvatar from "@/components/BotAvatar";
@@ -12,6 +12,7 @@ import { getBotMove, getBotThinkMs } from "@/lib/bots/bot-engine";
 import { playChessSound } from "@/lib/chess-sounds";
 import { celebrate } from "@/lib/celebrate";
 import { recordGuestResult } from "@/lib/guestProgress";
+
 
 /**
  * INSTANT HERO BOARD — the first thing a visitor sees on the homepage.
@@ -85,6 +86,49 @@ export default function InstantHeroBoard({
   const [shareOpen, setShareOpen] = useState(false);
   const [returning, setReturning] = useState<string | null>(null);
   const botTimer = useRef<number | null>(null);
+  const [immersive, setImmersive] = useState(false);
+
+  // Full screen keeps the SAME game — we only change how it is presented.
+  const enterImmersive = useCallback(async () => {
+    setImmersive(true);
+    try {
+      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    } catch {
+      /* iOS Safari has no Fullscreen API — the overlay alone is enough. */
+    }
+  }, []);
+
+  const exitImmersive = useCallback(async () => {
+    setImmersive(false);
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Native fullscreen exit (Android back gesture / Esc) must close the overlay too.
+  useEffect(() => {
+    const onFs = () => {
+      if (!document.fullscreenElement) setImmersive(false);
+    };
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
+
+  // While immersive, hide the site chrome (navbar / bottom nav / footer) so the
+  // board really owns the phone screen and nothing overlaps it.
+  useEffect(() => {
+    if (!immersive) return;
+    document.body.setAttribute("data-game-active", "true");
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.removeAttribute("data-game-active");
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [immersive]);
+
 
   // Returning guest: remind them of their streak / last game.
   useEffect(() => {
@@ -241,11 +285,38 @@ export default function InstantHeroBoard({
   const moveNumber = useMemo(() => Math.ceil(game.history().length / 2), [game, fen]);
 
   return (
-    <section className="relative z-10 px-4 pt-6 pb-2" aria-label="Play chess instantly">
-      <div className="container mx-auto max-w-3xl">
-        <div className="rounded-3xl border border-primary/25 bg-card/60 backdrop-blur-xl p-4 sm:p-6 shadow-[0_0_60px_hsl(43_90%_55%/0.12)]">
+    <section
+      className={
+        immersive
+          ? "fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-background px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          : "relative z-10 px-4 pt-6 pb-2"
+      }
+      aria-label="Play chess instantly"
+    >
+      <div className={immersive ? "mx-auto w-full max-w-2xl" : "container mx-auto max-w-3xl"}>
+        <div
+          className={
+            immersive
+              ? "rounded-2xl border border-primary/20 bg-card/40 p-2 sm:p-4"
+              : "rounded-3xl border border-primary/25 bg-card/60 backdrop-blur-xl p-4 sm:p-6 shadow-[0_0_60px_hsl(43_90%_55%/0.12)]"
+          }
+        >
+          {immersive && (adMode || phase === "ended") && (
+            <div className="mb-2 flex items-center justify-end">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={exitImmersive}
+                className="h-9 rounded-lg text-muted-foreground"
+                aria-label="Exit full screen"
+              >
+                <Minimize2 className="h-4 w-4 mr-1" /> Exit full screen
+              </Button>
+            </div>
+          )}
+
           <div className="text-center">
-            {headingLevel === "h1" ? (
+            {immersive ? null : headingLevel === "h1" ? (
               <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
                 Play free online chess — <span className="text-gradient-gold">no registration</span>
               </h1>
@@ -254,6 +325,7 @@ export default function InstantHeroBoard({
                 Play free online chess — <span className="text-gradient-gold">no registration</span>
               </h2>
             )}
+
             <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               {phase === "idle"
                 ? "Make a move on the board below — your game starts instantly."
@@ -302,7 +374,13 @@ export default function InstantHeroBoard({
             </div>
           </div>
 
-          <div className="mt-3 w-full mx-auto max-w-[min(100vw-3rem,520px)]">
+          <div
+            className={
+              immersive
+                ? "mt-2 w-full mx-auto max-w-[min(100vw-1rem,calc(100svh-13rem),640px)]"
+                : "mt-3 w-full mx-auto max-w-[min(100vw-3rem,520px)]"
+            }
+          >
             <ChessBoard
               game={game}
               flipped={false}
@@ -346,12 +424,23 @@ export default function InstantHeroBoard({
                       Create free account
                     </Button>
                   </Link>
-                  <Link to="/play-guest" className="w-full">
-                    <Button variant="outline" className="w-full h-12 rounded-xl border-primary/30">
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Free game — full screen
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 rounded-xl border-primary/30"
+                    onClick={immersive ? exitImmersive : enterImmersive}
+                  >
+                    {immersive ? (
+                      <>
+                        <Minimize2 className="h-4 w-4 mr-2" />
+                        Exit full screen
+                      </>
+                    ) : (
+                      <>
+                        <Maximize2 className="h-4 w-4 mr-2" />
+                        Free game — full screen
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-muted-foreground">
