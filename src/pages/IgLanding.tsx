@@ -172,10 +172,31 @@ export default function IgLanding() {
           </button>
         </section>
 
-        {/* The board is the hero: live from the first paint, weakest bot. */}
+        {/* The board is the hero: live from the first paint, weakest bot.
+            The visitor plays one full game for free; after that the gate asks
+            for a free account before another move can be played. */}
         <div id="board">
-          <InstantHeroBoard adMode headingLevel="h2" beginner={beginnerMode} />
+          <InstantHeroBoard
+            adMode
+            headingLevel="h2"
+            beginner={beginnerMode}
+            onProgress={({ plies, ended }) => {
+              if (user || gate) return;
+              // Gate at the end of the first game, or once a long game shows
+              // the visitor is clearly engaged (12 moves each).
+              if (ended || plies >= 24) {
+                track("signup_gate_shown", {
+                  surface: "ad-landing",
+                  variant: variant || "ig",
+                  ad_source: detected,
+                  trigger: ended ? "game_end" : "deep_game",
+                });
+                setGate(true);
+              }
+            }}
+          />
         </div>
+
 
 
         <motion.div
