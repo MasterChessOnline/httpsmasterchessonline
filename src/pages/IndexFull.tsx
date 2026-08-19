@@ -65,6 +65,7 @@ import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
+import HeroPlayNow from "@/components/HeroPlayNow";
 import DailyHookCard from "@/components/DailyHookCard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import { getGuestProgress } from "@/lib/guestProgress";
