@@ -695,6 +695,13 @@ const PlayOnline = () => {
     }
   };
 
+  // PLAY AGAIN — never bounce a finished player back to the homepage: clear the
+  // board and immediately queue for a fresh opponent in the same time control.
+  const playAgain = () => {
+    resetAll();
+    setTimeout(() => searchMatch(timeControlIdx), 0);
+  };
+
   // ── REMATCH ──
   // Either player can offer; when the opponent accepts, the accepter creates the
   // new online_games row (swapping colors so it's fair) and broadcasts its id.
@@ -1343,9 +1350,20 @@ const PlayOnline = () => {
                     {rematchOfferedByMe ? "Rematch offered…" : "Rematch"}
                   </Button>
                 )}
-                <Button className="w-full" onClick={resetAll}>
-                  <RotateCcw className="h-4 w-4 mr-2" /> New Game
+                <Button className="w-full h-12 text-base font-bold" onClick={playAgain}>
+                  <Zap className="h-4 w-4 mr-2" /> Play Again
                 </Button>
+                <Button variant="outline" className="w-full" onClick={resetAll}>
+                  <RotateCcw className="h-4 w-4 mr-2" /> New Opponent
+                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/challenge">Invite Friend</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/profile">View Profile</Link>
+                  </Button>
+                </div>
                 {onlineGame?.id && (
                   <Button asChild variant="outline" className="w-full border-primary/40 hover:bg-primary/5">
                     <Link to={`/analysis?game=${onlineGame.id}`}>
@@ -1354,9 +1372,6 @@ const PlayOnline = () => {
                     </Link>
                   </Button>
                 )}
-                <Button asChild variant="ghost" className="w-full text-muted-foreground hover:text-foreground">
-                  <Link to="/">Back to Home</Link>
-                </Button>
               </div>
             )}
 
