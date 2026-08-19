@@ -316,7 +316,7 @@ export default function InstantHeroBoard({
           )}
 
           <div className="text-center">
-            {headingLevel === "h1" ? (
+            {immersive ? null : headingLevel === "h1" ? (
               <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
                 Play free online chess — <span className="text-gradient-gold">no registration</span>
               </h1>
@@ -325,6 +325,7 @@ export default function InstantHeroBoard({
                 Play free online chess — <span className="text-gradient-gold">no registration</span>
               </h2>
             )}
+
             <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               {phase === "idle"
                 ? "Make a move on the board below — your game starts instantly."
