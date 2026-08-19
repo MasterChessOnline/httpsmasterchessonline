@@ -240,6 +240,15 @@ export default function IgLanding() {
         }}
       />
 
+      {/* Forced account step for paid social traffic — no dismiss on purpose. */}
+      <SignupGate
+        open={gate}
+        surface="ad-landing"
+        reason="You played your free game. Create a free account to keep playing, save your rating and unlock online opponents."
+      />
+
+
+
       {/* pb-24 keeps the post-game offer clear of the fixed mobile tab bar. */}
       <footer className="text-center text-[10px] text-muted-foreground pb-24 sm:pb-4">
         @dailychess_12 · masterchess.live
