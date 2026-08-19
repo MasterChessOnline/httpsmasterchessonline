@@ -54,10 +54,11 @@ function captureLandingSource(variant?: string) {
 
 
 export default function IgLanding() {
+  const { variant } = useParams<{ variant?: string }>();
   const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
-    captureAttribution();
+    captureLandingSource(variant);
     // Paid landing page must stay out of the search index: override every
     // robots tag the shared SEO layer already emitted, then restore on exit.
     const tags = Array.from(
