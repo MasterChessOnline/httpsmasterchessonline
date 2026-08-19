@@ -88,9 +88,11 @@ const Signup = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // Land straight in a playable board after signup instead of a static page.
-  // Never send a brand-new player to a generic dashboard — go straight to
-  // live matchmaking, which auto-starts the search for their first opponent.
-  const redirectTo = searchParams.get("redirect") || "/play/online?auto=1";
+  // Ad traffic (and anyone who has not played yet) gets one warm-up game
+  // against the weakest bot first — an empty live queue is what a first-time
+  // player reads as "dead site". Everyone else goes to live matchmaking.
+  const redirectTo =
+    searchParams.get("redirect") || (isAdSession() ? FIRST_GAME_PATH : "/play/online?auto=1");
 
   const authSuffix = searchParams.get("redirect") ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
