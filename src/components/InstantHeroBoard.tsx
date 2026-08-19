@@ -69,12 +69,27 @@ interface InstantHeroBoardProps {
   adMode?: boolean;
   /** Render the headline as an h2 (when the page already owns the h1). */
   headingLevel?: "h1" | "h2";
+  /**
+   * Replaces the "create free account" post-game offer. Used by /first-game,
+   * where the visitor already has an account and the next step is a live game.
+   * Receives the outcome plus a play-again handler.
+   */
+  renderPostGame?: (args: {
+    outcome: Outcome | null;
+    playAgain: () => void;
+    share: () => void;
+  }) => React.ReactNode;
+  /** Beginner mode: an extra line telling first-timers how to move a piece. */
+  beginner?: boolean;
 }
 
 export default function InstantHeroBoard({
   adMode = false,
   headingLevel = "h1",
+  renderPostGame,
+  beginner = false,
 }: InstantHeroBoardProps = {}) {
+
   const [game, setGame] = useState(() => new Chess());
   const [fen, setFen] = useState(game.fen());
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
