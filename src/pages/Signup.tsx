@@ -88,7 +88,9 @@ const Signup = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // Land straight in a playable board after signup instead of a static page.
-  const redirectTo = searchParams.get("redirect") || "/play";
+  // Never send a brand-new player to a generic dashboard — go straight to
+  // live matchmaking, which auto-starts the search for their first opponent.
+  const redirectTo = searchParams.get("redirect") || "/play/online?auto=1";
 
   const authSuffix = searchParams.get("redirect") ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
