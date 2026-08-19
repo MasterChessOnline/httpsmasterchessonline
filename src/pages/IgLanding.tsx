@@ -6,9 +6,11 @@ import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import BeginnerCoachSheet from "@/components/BeginnerCoachSheet";
+import SignupGate from "@/components/SignupGate";
 
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
+import { useAuth } from "@/contexts/AuthContext";
 import { captureAttribution, track } from "@/lib/track";
 import { detectTrafficSource, type TrafficSource } from "@/lib/trafficSource";
 
