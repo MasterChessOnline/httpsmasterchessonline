@@ -103,6 +103,11 @@ const PlayOnline = () => {
     return () => window.clearTimeout(t);
   }, [onlineStatus]);
 
+  // ?auto=1 → the visitor already pressed PLAY NOW (or just registered), so we
+  // start the search for them instead of asking for one more click.
+  const autoSearch = searchParams.get("auto") === "1";
+  const autoFiredRef = useRef(false);
+
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [timeoutWinner, setTimeoutWinner] = useState<string | null>(null);
   const [timeControlIdx, setTimeControlIdx] = useState(initialTcIdx);
@@ -657,6 +662,13 @@ const PlayOnline = () => {
     }).finally(() => setIsResigning(false));
   }, [isResigning, isGameOver, onlineStatus, resign, toast]);
 
+  useEffect(() => {
+    if (!autoSearch || autoFiredRef.current) return;
+    if (authLoading || !user || onlineStatus !== "idle") return;
+    autoFiredRef.current = true;
+    searchMatch(timeControlIdx);
+  }, [autoSearch, authLoading, user, onlineStatus, timeControlIdx, searchMatch]);
+
   const resetAll = () => {
     resetOnline();
     gameRef.current = new Chess();
@@ -921,22 +933,42 @@ const PlayOnline = () => {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center space-y-4 py-4">
                 <div className="flex items-center justify-center gap-2 text-primary">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="font-medium">Searching for opponent…</span>
+                  <span className="font-medium">
+                    {queueStalled ? "Still searching for your opponent…" : "Finding your opponent…"}
+                  </span>
                 </div>
-                <p className="text-xs text-muted-foreground">Looking for a player near your rating</p>
-                <Button variant="outline" onClick={cancelSearch} className="w-full">Cancel Search</Button>
+                <p className="text-xs text-muted-foreground">Matching by your rating and time control</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="w-full" disabled>
+                    Keep searching
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/invite")}>
+                    Play with a friend
+                  </Button>
+                </div>
+                <button onClick={cancelSearch} className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4">
+                  Cancel search
+                </button>
                 {queueStalled && (
                   <EmptyLobbyActions
-                    title="Nobody is in the queue right now"
-                    subtitle="You stay in the queue — meanwhile invite a friend or train, and we'll pair you the moment someone joins."
+                    title="Your opponent is on the way"
+                    subtitle="You stay in the queue — invite a friend or train meanwhile, and we'll pair you the moment someone joins."
                   />
                 )}
               </motion.div>
 
             ) : (
-              <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
-                <Wifi className="mr-2 h-5 w-5" /> Find Opponent
-              </Button>
+              <div className="space-y-2">
+                {(profile?.games_played ?? 0) === 0 && (
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-center">
+                    <p className="font-display text-base font-bold">Welcome to MasterChess ♟</p>
+                    <p className="text-xs text-muted-foreground mt-1">Let's find your first opponent.</p>
+                  </div>
+                )}
+                <Button className="w-full" size="lg" onClick={() => searchMatch(timeControlIdx)}>
+                  <Wifi className="mr-2 h-5 w-5" /> Find Opponent
+                </Button>
+              </div>
             )}
 
             {/* Spectate link */}
