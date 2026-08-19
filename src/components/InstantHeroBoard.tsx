@@ -374,7 +374,13 @@ export default function InstantHeroBoard({
             </div>
           </div>
 
-          <div className="mt-3 w-full mx-auto max-w-[min(100vw-3rem,520px)]">
+          <div
+            className={
+              immersive
+                ? "mt-2 w-full mx-auto max-w-[min(100vw-1rem,calc(100svh-13rem),640px)]"
+                : "mt-3 w-full mx-auto max-w-[min(100vw-3rem,520px)]"
+            }
+          >
             <ChessBoard
               game={game}
               flipped={false}
