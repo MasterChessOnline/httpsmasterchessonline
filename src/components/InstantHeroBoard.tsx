@@ -205,12 +205,14 @@ export default function InstantHeroBoard({
     } catch {
       /* ignore quota */
     }
+    progressRef.current?.({ plies: g.history().length, ended: true, outcome: result });
   }, []);
 
   const refresh = useCallback(
     (g: Chess) => {
       setFen(g.fen());
       if (g.isGameOver()) finish(g);
+      else progressRef.current?.({ plies: g.history().length, ended: false, outcome: null });
     },
     [finish],
   );
