@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -268,7 +268,9 @@ const Settings = () => {
 
   const handleSignOut = async () => { await signOut(); navigate("/"); };
 
-  if (!user) { navigate("/login"); return null; }
+  // Navigating during render triggers a React setState-in-render warning, so
+  // render a redirect element instead.
+  if (!user) return <Navigate to="/login" replace />;
 
   const renderSection = () => {
     switch (section) {

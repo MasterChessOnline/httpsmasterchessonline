@@ -197,7 +197,8 @@ export default function IgLanding() {
         }}
       />
 
-      <footer className="text-center text-[10px] text-muted-foreground pb-4">
+      {/* pb-24 keeps the post-game offer clear of the fixed mobile tab bar. */}
+      <footer className="text-center text-[10px] text-muted-foreground pb-24 sm:pb-4">
         @dailychess_12 · masterchess.live
       </footer>
     </div>

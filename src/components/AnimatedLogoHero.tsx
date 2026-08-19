@@ -9,7 +9,15 @@ const PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
  * - Floating chess-piece particles
  * - GPU-only transforms (translate/scale/opacity) for 60fps on mobile
  */
-export default function AnimatedLogoHero({ tagline }: { tagline?: string }) {
+export default function AnimatedLogoHero({
+  tagline,
+  as = "h1",
+}: {
+  tagline?: string;
+  /** Heading level — pages that already own an h1 should pass "h2" (one h1 per page). */
+  as?: "h1" | "h2" | "p";
+}) {
+  const Heading = motion[as] as typeof motion.h1;
   return (
     <div className="relative w-full">
       {/* floating chess pieces — absolute, pointer-events-none */}
@@ -58,7 +66,7 @@ export default function AnimatedLogoHero({ tagline }: { tagline?: string }) {
       </motion.div>
 
       {/* The massive wordmark */}
-      <motion.h1
+      <Heading
         className="relative font-display font-black tracking-tight uppercase mx-auto text-center
                    text-[clamp(2.75rem,11vw,7.5rem)] leading-[0.92]
                    [text-shadow:0_0_50px_hsl(var(--primary)/0.25),0_0_120px_hsl(var(--primary)/0.15)]"
@@ -97,7 +105,7 @@ export default function AnimatedLogoHero({ tagline }: { tagline?: string }) {
           animate={{ x: "120%" }}
           transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
         />
-      </motion.h1>
+      </Heading>
 
       {tagline && (
         <motion.p
