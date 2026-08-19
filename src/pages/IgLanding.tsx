@@ -5,6 +5,7 @@ import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
+import BeginnerCoachSheet from "@/components/BeginnerCoachSheet";
 
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
@@ -56,6 +57,9 @@ function captureLandingSource(variant?: string) {
 export default function IgLanding() {
   const { variant } = useParams<{ variant?: string }>();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [coach, setCoach] = useState(false);
+  // Once a visitor says they cannot play, the board keeps the hint line up.
+  const [beginnerMode, setBeginnerMode] = useState(false);
 
   useEffect(() => {
     captureLandingSource(variant);
@@ -182,6 +186,16 @@ export default function IgLanding() {
         <WhyMasterChessCompact className="pb-6" />
       </main>
 
+
+      <BeginnerCoachSheet
+        open={coach}
+        onOpenChange={setCoach}
+        surface="ad-landing"
+        onStart={() => {
+          setBeginnerMode(true);
+          document.getElementById("board")?.scrollIntoView({ behavior: "smooth" });
+        }}
+      />
 
       <footer className="text-center text-[10px] text-muted-foreground pb-4">
         @dailychess_12 · masterchess.live
