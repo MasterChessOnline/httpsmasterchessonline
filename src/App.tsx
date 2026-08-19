@@ -288,6 +288,7 @@ function RootDeferredOverlays() {
 }
 
 const ChannelWelcomeBanner = lazy(() => import("@/components/ChannelWelcomeBanner"));
+const SocialTrafficRouter = lazy(() => import("@/components/SocialTrafficRouter"));
 
 function AppChrome() {
   return (
@@ -304,7 +305,9 @@ function AppChrome() {
       <GuestSignupBar />
       <BackendStatusBanner />
       <PendingSignupResume />
+      <Suspense fallback={null}><SocialTrafficRouter /></Suspense>
       <Suspense fallback={null}><ChannelWelcomeBanner /></Suspense>
+
     </>
   );
 }
