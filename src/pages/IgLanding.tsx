@@ -6,9 +6,11 @@ import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import BeginnerCoachSheet from "@/components/BeginnerCoachSheet";
+import SignupGate from "@/components/SignupGate";
 
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
+import { useAuth } from "@/contexts/AuthContext";
 import { captureAttribution, track } from "@/lib/track";
 import { detectTrafficSource, type TrafficSource } from "@/lib/trafficSource";
 
@@ -58,11 +60,14 @@ function captureLandingSource(variant?: string) {
 
 export default function IgLanding() {
   const { variant } = useParams<{ variant?: string }>();
+  const { user } = useAuth();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [coach, setCoach] = useState(false);
   // Once a visitor says they cannot play, the board keeps the hint line up.
   const [beginnerMode, setBeginnerMode] = useState(false);
   const [detected, setDetected] = useState<TrafficSource>("direct");
+  // Hard gate: the first game is free, then an account is required to continue.
+  const [gate, setGate] = useState(false);
 
   useEffect(() => {
     setDetected(detectTrafficSource().source);
@@ -167,10 +172,31 @@ export default function IgLanding() {
           </button>
         </section>
 
-        {/* The board is the hero: live from the first paint, weakest bot. */}
+        {/* The board is the hero: live from the first paint, weakest bot.
+            The visitor plays one full game for free; after that the gate asks
+            for a free account before another move can be played. */}
         <div id="board">
-          <InstantHeroBoard adMode headingLevel="h2" beginner={beginnerMode} />
+          <InstantHeroBoard
+            adMode
+            headingLevel="h2"
+            beginner={beginnerMode}
+            onProgress={({ plies, ended }) => {
+              if (user || gate) return;
+              // Gate at the end of the first game, or once a long game shows
+              // the visitor is clearly engaged (12 moves each).
+              if (ended || plies >= 24) {
+                track("signup_gate_shown", {
+                  surface: "ad-landing",
+                  variant: variant || "ig",
+                  ad_source: detected,
+                  trigger: ended ? "game_end" : "deep_game",
+                });
+                setGate(true);
+              }
+            }}
+          />
         </div>
+
 
 
         <motion.div
@@ -213,6 +239,15 @@ export default function IgLanding() {
           document.getElementById("board")?.scrollIntoView({ behavior: "smooth" });
         }}
       />
+
+      {/* Forced account step for paid social traffic — no dismiss on purpose. */}
+      <SignupGate
+        open={gate}
+        surface="ad-landing"
+        reason="You played your free game. Create a free account to keep playing, save your rating and unlock online opponents."
+      />
+
+
 
       {/* pb-24 keeps the post-game offer clear of the fixed mobile tab bar. */}
       <footer className="text-center text-[10px] text-muted-foreground pb-24 sm:pb-4">

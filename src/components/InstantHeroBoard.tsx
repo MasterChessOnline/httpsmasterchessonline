@@ -81,6 +81,11 @@ interface InstantHeroBoardProps {
   }) => React.ReactNode;
   /** Beginner mode: an extra line telling first-timers how to move a piece. */
   beginner?: boolean;
+  /**
+   * Progress reporter for paid landings: fires after every player/bot move and
+   * when the game ends, so the page can gate the funnel on a free account.
+   */
+  onProgress?: (info: { plies: number; ended: boolean; outcome: Outcome | null }) => void;
 }
 
 export default function InstantHeroBoard({
@@ -88,6 +93,7 @@ export default function InstantHeroBoard({
   headingLevel = "h1",
   renderPostGame,
   beginner = false,
+  onProgress,
 }: InstantHeroBoardProps = {}) {
 
   const [game, setGame] = useState(() => new Chess());
@@ -103,6 +109,11 @@ export default function InstantHeroBoard({
   const [returning, setReturning] = useState<string | null>(null);
   const botTimer = useRef<number | null>(null);
   const [immersive, setImmersive] = useState(false);
+
+  // Keeps the reporter stable so move handlers never re-create on each render.
+  const progressRef = useRef(onProgress);
+  progressRef.current = onProgress;
+
 
   // Full screen keeps the SAME game — we only change how it is presented.
   const enterImmersive = useCallback(async () => {
@@ -199,12 +210,14 @@ export default function InstantHeroBoard({
     } catch {
       /* ignore quota */
     }
+    progressRef.current?.({ plies: g.history().length, ended: true, outcome: result });
   }, []);
 
   const refresh = useCallback(
     (g: Chess) => {
       setFen(g.fen());
       if (g.isGameOver()) finish(g);
+      else progressRef.current?.({ plies: g.history().length, ended: false, outcome: null });
     },
     [finish],
   );
