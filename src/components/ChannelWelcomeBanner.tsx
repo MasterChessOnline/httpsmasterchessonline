@@ -63,13 +63,18 @@ export default function ChannelWelcomeBanner() {
   // Paid-traffic landing pages already greet the visitor and start a game on
   // the first screen. A fixed banner there covers the headline and its CTA
   // would pull the visitor off the page they were sent to, so stay hidden.
+  // Auth pages are hidden too: a "play now — no signup" banner on top of the
+  // signup form is the funnel arguing with itself.
   const path = location.pathname;
   const isLanding =
     path === "/ig" ||
     path === "/start" ||
     path === "/first-game" ||
     path === "/play-guest" ||
+    path === "/signup" ||
+    path === "/login" ||
     path.startsWith("/ads/");
+
 
   if (!channel || isLanding) return null;
   const c = CHANNEL_COPY[channel];
