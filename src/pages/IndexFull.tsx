@@ -299,7 +299,10 @@ const Index = () => {
       <BrakusHeroBanner />
 
       <main>
-        {/* ── INSTANT PLAY: live board is the first thing a visitor sees ── */}
+        {/* ── FIRST SCREEN: what this is + one dominant PLAY NOW ── */}
+        <HeroPlayNow />
+
+        {/* ── INSTANT PLAY: live board right under the CTA ── */}
         <InstantHeroBoard />
 
         {/* ── RETENTION HOOK ──
