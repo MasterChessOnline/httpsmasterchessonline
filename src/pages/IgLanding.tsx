@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
@@ -8,9 +8,10 @@ import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
+import { captureAttribution, track } from "@/lib/track";
 
 /**
- * INSTAGRAM AD LANDING (/ig)
+ * PAID-TRAFFIC LANDING (/ig, /start, /ads/:variant)
  * Board first, everything else later. Ad traffic lands on a live chess board
  * against the weakest bot — the game starts on the visitor's first move.
  * The "create free account" offer only appears after the first game finishes
@@ -20,28 +21,44 @@ import { lovable } from "@/integrations/lovable/index";
 
 const ATTRIBUTION_KEY = "mc_attribution";
 
-function captureAttribution() {
+/** Route variant → the channel we assume when the ad URL carries no utm_source. */
+function channelFromVariant(variant?: string): string {
+  if (!variant) return "ig";
+  const v = variant.toLowerCase();
+  if (v.includes("tiktok") || v.startsWith("tt")) return "tiktok";
+  if (v.includes("google") || v.startsWith("g")) return "google";
+  if (v.includes("fb") || v.includes("facebook") || v.includes("meta")) return "facebook";
+  return v;
+}
+
+function captureLandingSource(variant?: string) {
   try {
     const params = new URLSearchParams(window.location.search);
+    const source = params.get("utm_source") || channelFromVariant(variant);
     const data: Record<string, string> = {
-      source: params.get("utm_source") || "ig",
-      campaign: params.get("utm_campaign") || "",
+      source,
+      campaign: params.get("utm_campaign") || variant || "",
       content: params.get("utm_content") || "",
       ref: params.get("ref") || "",
       landed_at: new Date().toISOString(),
     };
     localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(data));
     localStorage.setItem("mc_ig_session", "1");
+    // Shared UTM store (used by signup + funnel reporting).
+    captureAttribution();
+    track("ad_landing_view", { surface: "ad-landing", ad_source: source, variant: variant || "ig" });
   } catch {
     /* private mode — attribution is best-effort */
   }
 }
 
+
 export default function IgLanding() {
+  const { variant } = useParams<{ variant?: string }>();
   const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
-    captureAttribution();
+    captureLandingSource(variant);
     // Paid landing page must stay out of the search index: override every
     // robots tag the shared SEO layer already emitted, then restore on exit.
     const tags = Array.from(
