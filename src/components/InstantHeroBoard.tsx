@@ -301,7 +301,7 @@ export default function InstantHeroBoard({
               : "rounded-3xl border border-primary/25 bg-card/60 backdrop-blur-xl p-4 sm:p-6 shadow-[0_0_60px_hsl(43_90%_55%/0.12)]"
           }
         >
-          {immersive && (
+          {immersive && (adMode || phase === "ended") && (
             <div className="mb-2 flex items-center justify-end">
               <Button
                 size="sm"
