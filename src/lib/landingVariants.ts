@@ -80,10 +80,26 @@ export function getLandingVariant(): LandingVariant {
 /** Where PLAY NOW goes: straight to live matchmaking, signup only if needed. */
 export const MATCHMAKING_PATH = "/play/online?auto=1";
 
+/**
+ * Where a brand-new account lands: one warm-up game against the weakest bot,
+ * with the live-opponent button on the post-game screen. Dropping a first-time
+ * player straight into an empty matchmaking queue reads as a dead site.
+ */
+export const FIRST_GAME_PATH = "/first-game";
+
 export function playNowHref(isSignedIn: boolean): string {
   return isSignedIn
     ? MATCHMAKING_PATH
-    : `/signup?redirect=${encodeURIComponent(MATCHMAKING_PATH)}`;
+    : `/signup?redirect=${encodeURIComponent(FIRST_GAME_PATH)}`;
+}
+
+/** True when this visitor arrived through a paid ad landing page. */
+export function isAdSession(): boolean {
+  try {
+    return localStorage.getItem("mc_ig_session") === "1";
+  } catch {
+    return false;
+  }
 }
 
 /** True when the visit came from an Instagram campaign link. */

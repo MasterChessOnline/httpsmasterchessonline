@@ -5,6 +5,7 @@ import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
+import BeginnerCoachSheet from "@/components/BeginnerCoachSheet";
 
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
@@ -56,6 +57,9 @@ function captureLandingSource(variant?: string) {
 export default function IgLanding() {
   const { variant } = useParams<{ variant?: string }>();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [coach, setCoach] = useState(false);
+  // Once a visitor says they cannot play, the board keeps the hint line up.
+  const [beginnerMode, setBeginnerMode] = useState(false);
 
   useEffect(() => {
     captureLandingSource(variant);
@@ -117,13 +121,15 @@ export default function IgLanding() {
       </header>
 
       <main className="flex-1">
-        {/* Instagram-optimised promise: one line, one CTA, then the board. */}
+        {/* Instagram-optimised promise: one line, one CTA, then the board.
+            No live matchmaking here — a first-time visitor plays the weakest
+            bot, and the account is offered once that game is over. */}
         <section className="px-5 pt-4 pb-2 text-center">
           <h1 className="font-display text-2xl sm:text-3xl font-black leading-tight tracking-tight">
-            Your next chess game is waiting.
+            One tap and you're playing chess.
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Play live. Improve your rating. Challenge your friends.
+            Start against a friendly beginner bot. No account, no waiting for an opponent.
           </p>
           <a
             href="#board"
@@ -133,12 +139,22 @@ export default function IgLanding() {
             PLAY FREE
           </a>
           <p className="mt-2 text-[11px] text-muted-foreground">No payment required.</p>
+          <button
+            onClick={() => {
+              track("beginner_primer_open", { surface: "ad-landing", variant: variant || "ig" });
+              setCoach(true);
+            }}
+            className="mt-3 block w-full text-xs text-primary underline underline-offset-4"
+          >
+            I don't know how to play — teach me in 60 seconds
+          </button>
         </section>
 
         {/* The board is the hero: live from the first paint, weakest bot. */}
         <div id="board">
-          <InstantHeroBoard adMode />
+          <InstantHeroBoard adMode headingLevel="h2" beginner={beginnerMode} />
         </div>
+
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -170,6 +186,16 @@ export default function IgLanding() {
         <WhyMasterChessCompact className="pb-6" />
       </main>
 
+
+      <BeginnerCoachSheet
+        open={coach}
+        onOpenChange={setCoach}
+        surface="ad-landing"
+        onStart={() => {
+          setBeginnerMode(true);
+          document.getElementById("board")?.scrollIntoView({ behavior: "smooth" });
+        }}
+      />
 
       <footer className="text-center text-[10px] text-muted-foreground pb-4">
         @dailychess_12 · masterchess.live

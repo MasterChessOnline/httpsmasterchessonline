@@ -9,9 +9,11 @@ interface SeoProps {
   image?: string;
   type?: "website" | "article";
   jsonLd?: Record<string, any> | Record<string, any>[];
+  /** Keep the page out of the search index (paid-traffic / post-signup pages). */
+  noindex?: boolean;
 }
 
-export default function Seo({ title, description, path, image, type = "website", jsonLd }: SeoProps) {
+export default function Seo({ title, description, path, image, type = "website", jsonLd, noindex = false }: SeoProps) {
   const url = `${SITE}${path}`;
   const img = image || `${SITE}/og-image.jpg`;
   const ldArr = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
@@ -37,7 +39,10 @@ export default function Seo({ title, description, path, image, type = "website",
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={img} />
       <meta name="twitter:image:alt" content={title} />
-      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+      <meta
+        name="robots"
+        content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1"}
+      />
       {/* Single-language site (English). One hreflang + x-default keeps signal honest;
           fake regional alternates trip Google's spam filters. */}
       <link rel="alternate" hrefLang="en" href={url} />

@@ -69,12 +69,27 @@ interface InstantHeroBoardProps {
   adMode?: boolean;
   /** Render the headline as an h2 (when the page already owns the h1). */
   headingLevel?: "h1" | "h2";
+  /**
+   * Replaces the "create free account" post-game offer. Used by /first-game,
+   * where the visitor already has an account and the next step is a live game.
+   * Receives the outcome plus a play-again handler.
+   */
+  renderPostGame?: (args: {
+    outcome: Outcome | null;
+    playAgain: () => void;
+    share: () => void;
+  }) => React.ReactNode;
+  /** Beginner mode: an extra line telling first-timers how to move a piece. */
+  beginner?: boolean;
 }
 
 export default function InstantHeroBoard({
   adMode = false,
   headingLevel = "h1",
+  renderPostGame,
+  beginner = false,
 }: InstantHeroBoardProps = {}) {
+
   const [game, setGame] = useState(() => new Chess());
   const [fen, setFen] = useState(game.fen());
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
@@ -394,14 +409,29 @@ export default function InstantHeroBoard({
             />
           </div>
 
+          {beginner && phase !== "ended" && (
+            <p className="mt-3 text-center text-xs sm:text-sm text-primary">
+              Tap one of your pieces at the bottom — every square it can move to lights up.
+            </p>
+          )}
+
           {phase === "ended" ? (
-            <AdRewardCta
-              outcome={outcome}
-              onPlayAgain={resetGame}
-              onShare={() => setShareOpen(true)}
-              surface={adMode ? "ad-landing" : "home-hero"}
-            />
+            renderPostGame ? (
+              renderPostGame({
+                outcome,
+                playAgain: resetGame,
+                share: () => setShareOpen(true),
+              })
+            ) : (
+              <AdRewardCta
+                outcome={outcome}
+                onPlayAgain={resetGame}
+                onShare={() => setShareOpen(true)}
+                surface={adMode ? "ad-landing" : "home-hero"}
+              />
+            )
           ) : (
+
             <>
               {!adMode && (
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
