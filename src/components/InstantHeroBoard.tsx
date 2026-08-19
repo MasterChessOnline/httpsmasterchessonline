@@ -81,6 +81,11 @@ interface InstantHeroBoardProps {
   }) => React.ReactNode;
   /** Beginner mode: an extra line telling first-timers how to move a piece. */
   beginner?: boolean;
+  /**
+   * Progress reporter for paid landings: fires after every player/bot move and
+   * when the game ends, so the page can gate the funnel on a free account.
+   */
+  onProgress?: (info: { plies: number; ended: boolean; outcome: Outcome | null }) => void;
 }
 
 export default function InstantHeroBoard({
@@ -88,6 +93,7 @@ export default function InstantHeroBoard({
   headingLevel = "h1",
   renderPostGame,
   beginner = false,
+  onProgress,
 }: InstantHeroBoardProps = {}) {
 
   const [game, setGame] = useState(() => new Chess());
