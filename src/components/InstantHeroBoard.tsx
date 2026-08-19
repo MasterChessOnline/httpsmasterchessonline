@@ -110,6 +110,11 @@ export default function InstantHeroBoard({
   const botTimer = useRef<number | null>(null);
   const [immersive, setImmersive] = useState(false);
 
+  // Keeps the reporter stable so move handlers never re-create on each render.
+  const progressRef = useRef(onProgress);
+  progressRef.current = onProgress;
+
+
   // Full screen keeps the SAME game — we only change how it is presented.
   const enterImmersive = useCallback(async () => {
     setImmersive(true);
