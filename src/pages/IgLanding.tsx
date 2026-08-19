@@ -10,6 +10,8 @@ import BeginnerCoachSheet from "@/components/BeginnerCoachSheet";
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
 import { captureAttribution, track } from "@/lib/track";
+import { detectTrafficSource, type TrafficSource } from "@/lib/trafficSource";
+
 
 /**
  * PAID-TRAFFIC LANDING (/ig, /start, /ads/:variant)
@@ -60,9 +62,12 @@ export default function IgLanding() {
   const [coach, setCoach] = useState(false);
   // Once a visitor says they cannot play, the board keeps the hint line up.
   const [beginnerMode, setBeginnerMode] = useState(false);
+  const [detected, setDetected] = useState<TrafficSource>("direct");
 
   useEffect(() => {
+    setDetected(detectTrafficSource().source);
     captureLandingSource(variant);
+
     // Paid landing page must stay out of the search index: override every
     // robots tag the shared SEO layer already emitted, then restore on exit.
     const tags = Array.from(
@@ -125,12 +130,24 @@ export default function IgLanding() {
             No live matchmaking here — a first-time visitor plays the weakest
             bot, and the account is offered once that game is over. */}
         <section className="px-5 pt-4 pb-2 text-center">
+          {/* Proof that the source was detected — an Instagram visitor sees their
+              own channel named back at them, which lifts trust on first paint. */}
+          {detected === "instagram" || detected === "facebook" ? (
+            <p
+              data-testid="source-badge"
+              className="mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary"
+            >
+              <Sparkles className="h-3 w-3" />
+              Welcome from {detected === "instagram" ? "Instagram" : "Facebook"} · @dailychess_12
+            </p>
+          ) : null}
           <h1 className="font-display text-2xl sm:text-3xl font-black leading-tight tracking-tight">
             One tap and you're playing chess.
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Start against a friendly beginner bot. No account, no waiting for an opponent.
           </p>
+
           <a
             href="#board"
             onClick={() => track("play_now_click", { surface: "ad-landing", variant: variant || "ig" })}
