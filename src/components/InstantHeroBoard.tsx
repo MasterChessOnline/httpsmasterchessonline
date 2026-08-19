@@ -424,12 +424,23 @@ export default function InstantHeroBoard({
                       Create free account
                     </Button>
                   </Link>
-                  <Link to="/play-guest" className="w-full">
-                    <Button variant="outline" className="w-full h-12 rounded-xl border-primary/30">
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Free game — full screen
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 rounded-xl border-primary/30"
+                    onClick={immersive ? exitImmersive : enterImmersive}
+                  >
+                    {immersive ? (
+                      <>
+                        <Minimize2 className="h-4 w-4 mr-2" />
+                        Exit full screen
+                      </>
+                    ) : (
+                      <>
+                        <Maximize2 className="h-4 w-4 mr-2" />
+                        Free game — full screen
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-muted-foreground">
