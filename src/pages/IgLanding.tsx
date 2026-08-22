@@ -271,7 +271,7 @@ export default function IgLanding() {
       <SignupGate
         open={gate}
         surface="ad-landing"
-        reason="You played your free game. Create a free account to keep playing, save your rating and unlock online opponents."
+        reason="You played your free game. Create a free account to keep playing, save your rating and start your daily streak — coins every day you come back."
       />
 
 
