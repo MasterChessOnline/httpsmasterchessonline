@@ -27,15 +27,26 @@ export default function SignupGate({
   reason = "Your game is saved to your free account — rating, streak and history.",
 }: SignupGateProps) {
   const [loading, setLoading] = useState(false);
+  const [accountName, setAccountName] = useState("");
+  const [nameErr, setNameErr] = useState(false);
+  const nameOk = accountName.trim().length >= 3;
 
   const handleGoogle = async () => {
+    if (!nameOk) { setNameErr(true); return; }
     setLoading(true);
     track("signup_gate_google", { surface });
+    try {
+      localStorage.setItem(
+        "mc:pending-profile",
+        JSON.stringify({ display_name: accountName.trim(), country: "" }),
+      );
+    } catch {/* ignore */}
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: `${window.location.origin}/first-game`,
     });
     if (result.error) setLoading(false);
   };
+
 
   return (
     <AnimatePresence>
