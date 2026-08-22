@@ -60,6 +60,9 @@ const FloatingPiece = ({ piece, index }: { piece: string; index: number }) => (
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Account name is required for BOTH paths (Google + email).
+  const [accountName, setAccountName] = useState("");
+  const [nameTouched, setNameTouched] = useState(false);
   const [fideId, setFideId] = useState("");
   const [fideBusy, setFideBusy] = useState(false);
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null }>(null);
@@ -73,8 +76,11 @@ const Signup = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
   const [outage, setOutage] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
   // What this guest earned while playing without an account.
   const guestLine = useMemo(() => guestValueLine(getGuestProgress()), []);
+  const nameOk = accountName.trim().length >= 3;
+
 
   useEffect(() => {
     // Funnel step: the signup offer was actually seen.
@@ -99,9 +105,19 @@ const Signup = () => {
 
   const handleGoogleLogin = async () => {
     setError(null);
+    setNameTouched(true);
+    // Account name first, Google second — the name is what shows up in games.
+    if (!nameOk) {
+      setError("Choose your account name first (at least 3 characters).");
+      return;
+    }
     setGoogleLoading(true);
-    // 1-click Google: skip country/name modal (killed conversion).
-    // Defaults are applied; user can edit anything in Settings.
+    try {
+      localStorage.setItem(
+        "mc:pending-profile",
+        JSON.stringify({ display_name: accountName.trim(), country: "" }),
+      );
+    } catch {/* ignore */}
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin + redirectTo,
     });
@@ -110,6 +126,7 @@ const Signup = () => {
       setGoogleLoading(false);
     }
   };
+
 
   // Debounced FIDE lookup (optional field)
   const fideDebounce = useState<{ t: number | null }>({ t: null })[0];
@@ -143,19 +160,22 @@ const Signup = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNameTouched(true);
+    if (!nameOk) {
+      setError("Choose your account name (at least 3 characters).");
+      return;
+    }
     setLoading(true);
 
-    // If FIDE ID was entered, prefer the verified FIDE name as display name.
+    // If FIDE ID was entered, keep the verified name as real name fields,
+    // but the account name the player typed always wins as display name.
     let firstName = "", lastName = "";
     if (fideFound?.name) {
       const raw = String(fideFound.name);
       if (raw.includes(",")) { const [l, f] = raw.split(",").map(s => s.trim()); firstName = f || ""; lastName = l || ""; }
       else { const parts = raw.trim().split(/\s+/); lastName = parts.pop() || ""; firstName = parts.join(" "); }
     }
-    const autoDisplay = (fideFound?.name
-      ? `${firstName} ${lastName}`.trim()
-      : (email.split("@")[0] || "Player").replace(/[^a-zA-Z0-9]/g, " ").trim()
-    ).slice(0, 32) || "Player";
+    const autoDisplay = accountName.trim().slice(0, 32);
     const startingLevel = getStartingLevel(DEFAULT_STARTING_LEVEL_KEY);
     // If FIDE-verified, seed rating from Blitz → Rapid → Standard.
     const fideRating = fideFound?.blitz_rating || fideFound?.rapid_rating || fideFound?.standard_rating || null;
@@ -192,6 +212,7 @@ const Signup = () => {
     if (newUserId) {
       window.setTimeout(() => {
         const patch: any = {
+          display_name: autoDisplay,
           rating: seedRating,
           peak_rating: seedRating,
         };
@@ -215,16 +236,46 @@ const Signup = () => {
       }, 0);
     }
 
+    // Registration notification to the player's own inbox.
+    // Fire-and-forget: never block entering the app on the mail provider.
+    if (data.session) {
+      supabase.functions
+        .invoke("send-welcome-email", { body: { display_name: autoDisplay } })
+        .then(({ error }) => {
+          if (error) console.info("[MasterChess] welcome email skipped", error);
+        });
+    }
+
     track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key, fide_verified: !!fideFound });
     clearPendingSignup();
     clearGuestProgress();
+
+    if (!data.session) {
+      // Email confirmation is on: don't pretend they're logged in.
+      setSentTo(email);
+      setLoading(false);
+      return;
+    }
     navigate(redirectTo);
   };
 
 
+
   const handleAppleLogin = async () => {
     setError(null);
+    setNameTouched(true);
+    if (!nameOk) {
+      setError("Choose your account name first (at least 3 characters).");
+      return;
+    }
+    try {
+      localStorage.setItem(
+        "mc:pending-profile",
+        JSON.stringify({ display_name: accountName.trim(), country: "" }),
+      );
+    } catch {/* ignore */}
     const result = await lovable.auth.signInWithOAuth("apple", {
+
       redirect_uri: window.location.origin,
     });
     if (result.error) setError(result.error.message);
@@ -307,8 +358,47 @@ const Signup = () => {
             </div>
           )}
 
+          {sentTo ? (
+            <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-5 text-center">
+              <p className="text-sm font-semibold text-foreground">Check your inbox</p>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                We sent a confirmation email to <span className="text-foreground">{sentTo}</span>.
+                Open it to activate your account, then log in.
+              </p>
+              <Button asChild variant="outline" className="mt-4 h-10 w-full border-primary/30">
+                <Link to={`/login${authSuffix}`}>Go to login</Link>
+              </Button>
+            </div>
+          ) : (
+          <>
+          {/* Account name — required BEFORE Google or email. It is the name
+              other players see on the board and leaderboard. */}
+          <div className="mb-5 space-y-1.5">
+            <Label htmlFor="account-name" className="text-xs font-medium text-muted-foreground">
+              Account name <span className="text-primary">*</span>
+            </Label>
+            <Input
+              id="account-name"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value.slice(0, 32))}
+              onBlur={() => setNameTouched(true)}
+              placeholder="e.g. GrandmasterX"
+              maxLength={32}
+              autoComplete="nickname"
+              className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
+            />
+            {nameTouched && !nameOk ? (
+              <p className="text-[11px] text-destructive/90">Pick a name with at least 3 characters.</p>
+            ) : (
+              <p className="text-[11px] text-muted-foreground">
+                This is the name other players see. Required before continuing with Google or email.
+              </p>
+            )}
+          </div>
+
           {/* Social buttons */}
           <div className="space-y-2.5 mb-6">
+
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 variant="outline"
@@ -463,10 +553,13 @@ const Signup = () => {
               </motion.div>
 
               <p className="text-[11px] text-center text-muted-foreground">
-                We'll generate a display name from your email — you can change it later in Settings.
+                We'll send a confirmation email to <span className="text-foreground">{email || "your inbox"}</span> as soon as your account is created.
               </p>
             </form>
           )}
+          </>
+          )}
+
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{" "}

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Crown, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { lovable } from "@/integrations/lovable/index";
 import { track } from "@/lib/track";
 
@@ -27,15 +28,26 @@ export default function SignupGate({
   reason = "Your game is saved to your free account — rating, streak and history.",
 }: SignupGateProps) {
   const [loading, setLoading] = useState(false);
+  const [accountName, setAccountName] = useState("");
+  const [nameErr, setNameErr] = useState(false);
+  const nameOk = accountName.trim().length >= 3;
 
   const handleGoogle = async () => {
+    if (!nameOk) { setNameErr(true); return; }
     setLoading(true);
     track("signup_gate_google", { surface });
+    try {
+      localStorage.setItem(
+        "mc:pending-profile",
+        JSON.stringify({ display_name: accountName.trim(), country: "" }),
+      );
+    } catch {/* ignore */}
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: `${window.location.origin}/first-game`,
     });
     if (result.error) setLoading(false);
   };
+
 
   return (
     <AnimatePresence>
@@ -62,7 +74,25 @@ export default function SignupGate({
             </h2>
             <p className="mt-2 text-center text-xs text-muted-foreground">{reason}</p>
 
-            <div className="mt-5 space-y-2.5">
+            {/* Account name first — Google only after it's filled in. */}
+            <div className="mt-4">
+              <Input
+                value={accountName}
+                onChange={(e) => { setAccountName(e.target.value.slice(0, 32)); setNameErr(false); }}
+                placeholder="Your account name"
+                maxLength={32}
+                aria-label="Account name"
+                className="h-11 bg-muted/30"
+              />
+              {nameErr ? (
+                <p className="mt-1 text-[11px] text-destructive/90">Enter a name with at least 3 characters.</p>
+              ) : (
+                <p className="mt-1 text-[11px] text-muted-foreground">The name other players will see.</p>
+              )}
+            </div>
+
+            <div className="mt-4 space-y-2.5">
+
               <Button
                 onClick={handleGoogle}
                 disabled={loading}

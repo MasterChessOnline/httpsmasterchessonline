@@ -40,12 +40,16 @@ export default function AuthGate() {
     if (!pending) return;
     (async () => {
       try {
-        await supabase.from("profiles")
-          .update({ display_name: pending.display_name, country: pending.country })
-          .eq("user_id", user.id);
+        const patch: { display_name?: string; country?: string } = {};
+        if (pending.display_name) patch.display_name = pending.display_name;
+        if (pending.country) patch.country = pending.country;
+        if (Object.keys(patch).length) {
+          await supabase.from("profiles").update(patch).eq("user_id", user.id);
+        }
       } catch {/* ignore */}
       clearPendingProfile();
     })();
+
   }, [user]);
 
   useEffect(() => {
