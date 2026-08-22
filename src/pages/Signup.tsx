@@ -160,19 +160,22 @@ const Signup = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNameTouched(true);
+    if (!nameOk) {
+      setError("Choose your account name (at least 3 characters).");
+      return;
+    }
     setLoading(true);
 
-    // If FIDE ID was entered, prefer the verified FIDE name as display name.
+    // If FIDE ID was entered, keep the verified name as real name fields,
+    // but the account name the player typed always wins as display name.
     let firstName = "", lastName = "";
     if (fideFound?.name) {
       const raw = String(fideFound.name);
       if (raw.includes(",")) { const [l, f] = raw.split(",").map(s => s.trim()); firstName = f || ""; lastName = l || ""; }
       else { const parts = raw.trim().split(/\s+/); lastName = parts.pop() || ""; firstName = parts.join(" "); }
     }
-    const autoDisplay = (fideFound?.name
-      ? `${firstName} ${lastName}`.trim()
-      : (email.split("@")[0] || "Player").replace(/[^a-zA-Z0-9]/g, " ").trim()
-    ).slice(0, 32) || "Player";
+    const autoDisplay = accountName.trim().slice(0, 32);
     const startingLevel = getStartingLevel(DEFAULT_STARTING_LEVEL_KEY);
     // If FIDE-verified, seed rating from Blitz → Rapid → Standard.
     const fideRating = fideFound?.blitz_rating || fideFound?.rapid_rating || fideFound?.standard_rating || null;
@@ -209,6 +212,7 @@ const Signup = () => {
     if (newUserId) {
       window.setTimeout(() => {
         const patch: any = {
+          display_name: autoDisplay,
           rating: seedRating,
           peak_rating: seedRating,
         };
@@ -232,11 +236,29 @@ const Signup = () => {
       }, 0);
     }
 
+    // Registration notification to the player's own inbox.
+    // Fire-and-forget: never block entering the app on the mail provider.
+    if (data.session) {
+      supabase.functions
+        .invoke("send-welcome-email", { body: { display_name: autoDisplay } })
+        .then(({ error }) => {
+          if (error) console.info("[MasterChess] welcome email skipped", error);
+        });
+    }
+
     track("sign_up", { method: "email", user_id: newUserId, starting_level: startingLevel.key, fide_verified: !!fideFound });
     clearPendingSignup();
     clearGuestProgress();
+
+    if (!data.session) {
+      // Email confirmation is on: don't pretend they're logged in.
+      setSentTo(email);
+      setLoading(false);
+      return;
+    }
     navigate(redirectTo);
   };
+
 
 
   const handleAppleLogin = async () => {
