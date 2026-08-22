@@ -3,6 +3,7 @@ import { useGameMode } from "@/hooks/use-game-mode";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
+import CreateAccountBanner from "@/components/CreateAccountBanner";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake, Zap, Eye, MonitorOff } from "lucide-react";
