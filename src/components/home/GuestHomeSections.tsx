@@ -67,9 +67,9 @@ function SignupButton({ where, label = "Create Free Account" }: { where: string;
 
 export default function GuestHomeSections({ topPlayers }: { topPlayers: TopPlayer[] }) {
   const shopItems = FEATURED_SHOP
-    .map((key) => SHOP_ITEMS.find((i) => `${i.type}:${i.key}` === key || i.key === key.split(":")[1]))
-    .filter(Boolean)
-    .slice(0, 4) as any[];
+    .map((key) => SHOP_ITEMS.find((i) => i.key === key))
+    .filter((i): i is (typeof SHOP_ITEMS)[number] => Boolean(i))
+    .slice(0, 4);
 
   return (
     <div className="container mx-auto max-w-4xl px-4 pb-20 space-y-16">
@@ -144,7 +144,7 @@ export default function GuestHomeSections({ topPlayers }: { topPlayers: TopPlaye
             <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
               {shopItems.map((item) => (
                 <div key={item.key} className="rounded-xl border border-border/25 bg-background/40 p-3 text-center">
-                  <div className="text-2xl">{item.emoji ?? "♟️"}</div>
+                  <div className="text-2xl">{item.preview}</div>
                   <div className="mt-1 truncate text-[11px] font-semibold text-foreground">{item.name}</div>
                   <div className="text-[10px] text-primary">{item.price} coins</div>
                 </div>
