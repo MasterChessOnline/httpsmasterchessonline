@@ -263,7 +263,19 @@ const Signup = () => {
 
   const handleAppleLogin = async () => {
     setError(null);
+    setNameTouched(true);
+    if (!nameOk) {
+      setError("Choose your account name first (at least 3 characters).");
+      return;
+    }
+    try {
+      localStorage.setItem(
+        "mc:pending-profile",
+        JSON.stringify({ display_name: accountName.trim(), country: "" }),
+      );
+    } catch {/* ignore */}
     const result = await lovable.auth.signInWithOAuth("apple", {
+
       redirect_uri: window.location.origin,
     });
     if (result.error) setError(result.error.message);
