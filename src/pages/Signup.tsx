@@ -60,6 +60,9 @@ const FloatingPiece = ({ piece, index }: { piece: string; index: number }) => (
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Account name is required for BOTH paths (Google + email).
+  const [accountName, setAccountName] = useState("");
+  const [nameTouched, setNameTouched] = useState(false);
   const [fideId, setFideId] = useState("");
   const [fideBusy, setFideBusy] = useState(false);
   const [fideFound, setFideFound] = useState<null | { name: string; federation?: string | null; title?: string | null; standard_rating?: number | null; rapid_rating?: number | null; blitz_rating?: number | null }>(null);
@@ -73,8 +76,11 @@ const Signup = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
   const [outage, setOutage] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
   // What this guest earned while playing without an account.
   const guestLine = useMemo(() => guestValueLine(getGuestProgress()), []);
+  const nameOk = accountName.trim().length >= 3;
+
 
   useEffect(() => {
     // Funnel step: the signup offer was actually seen.
