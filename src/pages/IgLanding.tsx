@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import BeginnerCoachSheet from "@/components/BeginnerCoachSheet";
 import SignupGate from "@/components/SignupGate";
+import IgIntroReel, { hasSeenIgIntro } from "@/components/IgIntroReel";
 
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/contexts/AuthContext";
 import { captureAttribution, track } from "@/lib/track";
 import { detectTrafficSource, type TrafficSource } from "@/lib/trafficSource";
+
 
 
 /**
