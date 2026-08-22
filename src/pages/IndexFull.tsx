@@ -397,21 +397,6 @@ const Index = () => {
                 </motion.div>
               </div>
 
-              {/* Mini self-playing board — instantly explains what the site is,
-                  without swallowing the whole first screen. Guests only. */}
-              {!user && (
-                <motion.div
-                  className="hidden sm:block"
-                  initial={{ opacity: 0, scale: 0.94 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.45, duration: 0.7 }}
-                >
-                  <p className="mb-3 text-center font-display text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                    Play chess online
-                  </p>
-                  <MiniAnimatedBoard />
-                </motion.div>
-              )}
             </div>
 
             {user && (
