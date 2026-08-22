@@ -73,7 +73,25 @@ export default function SignupGate({
             </h2>
             <p className="mt-2 text-center text-xs text-muted-foreground">{reason}</p>
 
-            <div className="mt-5 space-y-2.5">
+            {/* Account name first — Google only after it's filled in. */}
+            <div className="mt-4">
+              <Input
+                value={accountName}
+                onChange={(e) => { setAccountName(e.target.value.slice(0, 32)); setNameErr(false); }}
+                placeholder="Your account name"
+                maxLength={32}
+                aria-label="Account name"
+                className="h-11 bg-muted/30"
+              />
+              {nameErr ? (
+                <p className="mt-1 text-[11px] text-destructive/90">Enter a name with at least 3 characters.</p>
+              ) : (
+                <p className="mt-1 text-[11px] text-muted-foreground">The name other players will see.</p>
+              )}
+            </div>
+
+            <div className="mt-4 space-y-2.5">
+
               <Button
                 onClick={handleGoogle}
                 disabled={loading}
