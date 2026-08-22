@@ -321,7 +321,7 @@ const Index = () => {
           {heavyReady && <div className="absolute inset-0 scan-line pointer-events-none" />}
 
           <div className={`container mx-auto relative z-10 ${user ? "max-w-4xl text-center" : "max-w-5xl"}`}>
-            <div className={user ? "" : "grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]"}>
+            <div className={user ? "" : "grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_320px]"}>
               <div className={user ? "" : "text-center lg:text-left"}>
                 {/* One title, one tagline, one sentence. */}
                 <AnimatedLogoHero as="h1" />
