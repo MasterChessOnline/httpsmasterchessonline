@@ -39,7 +39,7 @@ export default function StickyJoinBar() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: "spring", stiffness: 280, damping: 28 }}
-          className="fixed bottom-3 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:bottom-5 z-50 max-w-md mx-auto"
+          className="fixed bottom-20 left-3 right-[4.5rem] sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:bottom-5 z-50 max-w-md mx-auto"
         >
           <div className="relative rounded-2xl border border-primary/40 bg-background/95 backdrop-blur-xl shadow-glow-lg px-3 py-2.5 flex items-center gap-2.5">
             <div className="h-9 w-9 shrink-0 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">

@@ -70,6 +70,12 @@ interface InstantHeroBoardProps {
   /** Render the headline as an h2 (when the page already owns the h1). */
   headingLevel?: "h1" | "h2";
   /**
+   * Drop the block's own headline. Used on Home, where the page hero already
+   * says "play free, no signup" — repeating it above the board is clutter.
+   */
+  hideHeading?: boolean;
+
+  /**
    * Replaces the "create free account" post-game offer. Used by /first-game,
    * where the visitor already has an account and the next step is a live game.
    * Receives the outcome plus a play-again handler.
@@ -91,6 +97,8 @@ interface InstantHeroBoardProps {
 export default function InstantHeroBoard({
   adMode = false,
   headingLevel = "h1",
+  hideHeading = false,
+
   renderPostGame,
   beginner = false,
   onProgress,
@@ -318,7 +326,7 @@ export default function InstantHeroBoard({
       className={
         immersive
           ? "fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-background px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
-          : "relative z-10 px-4 pt-6 pb-2"
+          : "relative z-10 px-4 pt-4 pb-8"
       }
       aria-label="Play chess instantly"
     >
@@ -345,7 +353,7 @@ export default function InstantHeroBoard({
           )}
 
           <div className="text-center">
-            {immersive ? null : headingLevel === "h1" ? (
+            {immersive || hideHeading ? null : headingLevel === "h1" ? (
               <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
                 Play free online chess — <span className="text-gradient-gold">no registration</span>
               </h1>
@@ -355,7 +363,7 @@ export default function InstantHeroBoard({
               </h2>
             )}
 
-            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+            <p className={`text-sm sm:text-base text-muted-foreground ${hideHeading ? "" : "mt-2"}`}>
               {phase === "idle"
                 ? "Make a move on the board below — your game starts instantly."
                 : phase === "playing"

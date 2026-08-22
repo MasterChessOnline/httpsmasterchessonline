@@ -6,7 +6,11 @@ import { Swords } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const HIDDEN_PREFIXES = [
+  // Home now carries a live board above the fold, so a floating "play" pill
+  // would only cover it (and repeat a CTA that is already on screen).
+  "/",
   "/play",
+
   "/game",
   "/online",
   "/analysis",

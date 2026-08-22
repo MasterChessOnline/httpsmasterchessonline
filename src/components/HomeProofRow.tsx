@@ -1,44 +1,17 @@
-// Real social proof for the homepage hero: registered players, games played and
-// live game count. Every number comes from the database — no placeholders, no
-// invented activity. Renders nothing until real numbers are available.
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import LivePlayerCounter from "@/components/LivePlayerCounter";
-
-type Counts = { players: number; games: number };
-
+// Quiet trust row for the homepage hero.
+//
+// Deliberately NO registered-player / games-played counters: on a young site
+// small real numbers ("97 registered players") read as "empty site" and cost
+// more signups than they win. Fake numbers are never an option either, so the
+// row only carries claims that stay true at any size.
 export default function HomeProofRow() {
-  const [counts, setCounts] = useState<Counts | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [players, games] = await Promise.all([
-          supabase.from("profiles").select("user_id", { count: "exact", head: true }),
-          supabase.from("online_games").select("id", { count: "exact", head: true }),
-        ]);
-        if (cancelled) return;
-        setCounts({ players: players.count ?? 0, games: games.count ?? 0 });
-      } catch {
-        if (!cancelled) setCounts(null);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
   const pill = "rounded-full border border-white/10 bg-white/5 px-3 py-1";
 
   return (
-    <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
-      <LivePlayerCounter />
-      {counts && counts.players > 0 && (
-        <span className={pill}>{counts.players.toLocaleString()} registered players</span>
-      )}
-      {counts && counts.games > 0 && (
-        <span className={pill}>{counts.games.toLocaleString()} games played</span>
-      )}
+    <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+      <span className={pill}>No signup needed</span>
       <span className={pill}>No ads · No subscription</span>
+      <span className={pill}>Free forever</span>
     </div>
   );
 }
