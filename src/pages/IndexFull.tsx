@@ -303,8 +303,9 @@ const Index = () => {
         {/* ── FIRST SCREEN: what this is + one dominant PLAY NOW ── */}
         <HeroPlayNow />
 
-        {/* ── INSTANT PLAY: live board right under the CTA ── */}
-        <InstantHeroBoard headingLevel="h2" />
+        {/* ── INSTANT PLAY: live board right under the CTA.
+              No headline here — the hero above already says it. ── */}
+        <InstantHeroBoard headingLevel="h2" hideHeading />
 
         {/* ── RETENTION HOOK ──
             For a first-time guest the streak card is noise *before* the first
@@ -315,6 +316,7 @@ const Index = () => {
         ) : (
           <WhyMasterChessCompact className="mt-6" />
         )}
+
 
 
 
