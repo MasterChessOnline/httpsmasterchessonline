@@ -70,6 +70,12 @@ interface InstantHeroBoardProps {
   /** Render the headline as an h2 (when the page already owns the h1). */
   headingLevel?: "h1" | "h2";
   /**
+   * Drop the block's own headline. Used on Home, where the page hero already
+   * says "play free, no signup" — repeating it above the board is clutter.
+   */
+  hideHeading?: boolean;
+
+  /**
    * Replaces the "create free account" post-game offer. Used by /first-game,
    * where the visitor already has an account and the next step is a live game.
    * Receives the outcome plus a play-again handler.
