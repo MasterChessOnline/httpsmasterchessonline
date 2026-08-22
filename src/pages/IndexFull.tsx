@@ -320,162 +320,50 @@ const Index = () => {
 
 
 
-        {/* ── HERO with parallax + 4D depth ── */}
-        <div ref={heroRef} className="relative pt-16 sm:pt-24 pb-16 px-4 overflow-hidden min-h-[45vh]">
-          <motion.div className="absolute inset-0" style={{ y: imgY, scale: heroScale }}>
-            <img
-              src={heroImage}
-              alt="Chess board"
-              width={1920}
-              height={1080}
-              className="absolute inset-0 w-full h-[120%] object-cover"
-              style={{ filter: "brightness(0.28) saturate(0.85)" }}
-              loading="eager"
-              decoding="async"
-              // React requires lowercase DOM attribute; uppercase prop name triggers a warning.
-              {...({ fetchpriority: "high" } as any)}
-            />
-          </motion.div>
-          <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
-          {/* Scan-line futuristic overlay — desktop only (pure decoration). */}
-          {heavyReady && <div className="absolute inset-0 scan-line pointer-events-none" />}
-
-          <motion.div
-            className="container mx-auto max-w-4xl text-center relative z-10 pt-8"
-            style={{ opacity: heroOpacity }}
-          >
-            <AnimatedLogoHero as="h2" tagline={t("hero.tagline")} />
-
-            {/* 1 ▸ ONE-SENTENCE "WHY THIS SITE" — must be readable in 5 seconds */}
-            <p className="mx-auto mt-5 max-w-2xl text-sm sm:text-lg text-muted-foreground">
-              Real chess against real people — no engine help, no ads, no subscription.
-              One tap and you are already playing.
-            </p>
-
-            {/* 2 ▸ ONE primary CTA + one secondary — no competing buttons */}
-            <motion.div
-              className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35, duration: 0.6 }}
+        {/* ── SECOND STEP: challenge the creator + install.
+              The old full-screen parallax hero lived here and repeated the same
+              headline, CTA pair and proof row a third time — removed so the
+              first screen is: one headline, one board, one reason to stay. ── */}
+        <section ref={heroRef} className="px-4 pt-10 pb-4">
+          <div className="mx-auto max-w-xl space-y-5">
+            <Link
+              to="/beat-nikola"
+              className="group flex items-center gap-3 sm:gap-4 rounded-2xl border border-primary/30 bg-card/60 p-3 sm:p-4 transition-all hover:border-primary/60"
             >
-              {/* Guests → instant /play-guest (no signup wall). Logged-in users → real online matchmaking. */}
-              <Link to={user ? "/play/online" : "/play-guest"} className="w-full sm:w-auto">
-                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-                  <Button
-                    size="lg"
-                    className="ripple-btn w-full sm:w-auto h-14 px-10 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg hover:shadow-[0_0_60px_hsl(43_90%_55%/0.5)] transition-all duration-300"
-                  >
-                    <Play className="h-5 w-5 mr-2 fill-current" />
-                    {user ? t("hero.playOnline") : "Play Now"}
-                  </Button>
-                </motion.div>
-              </Link>
-              <Link to={user ? "/play" : "/signup"} className="w-full sm:w-auto">
-                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="ripple-btn w-full sm:w-auto h-14 px-10 text-base border-border/40 hover:bg-muted/20 hover:border-primary/30 rounded-xl transition-all duration-300"
-                  >
-                    {user ? (
-                      <>
-                        <Swords className="h-5 w-5 mr-2" />
-                        vs Bots
-                      </>
-                    ) : (
-                      <>
-                        <Crown className="h-5 w-5 mr-2" />
-                        Create free account
-                      </>
-                    )}
-                  </Button>
-                </motion.div>
-              </Link>
-            </motion.div>
-
-            {/* 2b ▸ Real proof numbers + quiet secondary links */}
-            <HomeProofRow />
-            {!user && (
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                <Link to="/play" className="hover:text-primary">Play vs bots</Link>
-                <span className="opacity-30">·</span>
-                <Link to="/learn" className="hover:text-primary">Learn chess</Link>
-                <span className="opacity-30">·</span>
-                <Link to="/puzzles" className="hover:text-primary">Daily puzzle</Link>
+              <img
+                src={nikolaAvatar}
+                alt="Nikola Šakotić — creator of MasterChess, 3500 rated"
+                width={64}
+                height={64}
+                loading="lazy"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-primary/50 shrink-0"
+              />
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-primary flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm overflow-hidden shrink-0 ring-1 ring-foreground/10">
+                    <img src={serbiaFlag.url} alt="Serbia" className="w-full h-full object-cover" />
+                  </span>
+                  Nikola Sakotić · Creator · 3500
+                </p>
+                <h2 className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
+                  Play against the MasterChess creator himself
+                </h2>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                  I built this entire site. Think you can beat me?
+                </p>
               </div>
-            )}
+              <span className="hidden sm:inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold px-4 py-2 shrink-0 group-hover:scale-105 transition-transform">
+                Challenge me →
+              </span>
+            </Link>
 
-
-            {/* 3 ▸ INSTALL APP — secondary, on its own row, subtle */}
-            <motion.div
-              className="mt-5 flex justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-            >
+            <div className="flex flex-wrap items-center justify-center gap-3">
               <InstallAppButton variant="hero" />
-            </motion.div>
-
-            {/* 4 ▸ HUMAN SIGNAL — handwritten note */}
-            <div className="mt-8 flex justify-center items-center gap-2 text-primary/70">
-              <ScribbleArrow className="hidden sm:block text-primary/50" />
-              <MarginNote rotate={-2} className="text-base sm:text-lg">
-                real chess, real people — no bots pretending to be human
-              </MarginNote>
-            </div>
-
-            {/* 5 ▸ NIKOLA CHALLENGE — own section, generous spacing */}
-            <motion.div
-              className="mt-10 sm:mt-12 mx-auto max-w-xl"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-            >
-              <Link
-                to="/beat-nikola"
-                className="group flex items-center gap-3 sm:gap-4 rounded-2xl border border-primary/40 bg-gradient-to-r from-amber-500/10 via-background/70 to-amber-500/10 p-3 sm:p-4 shadow-[0_0_30px_-10px_hsl(var(--primary)/0.5)] hover:border-primary/70 hover:shadow-[0_0_40px_-6px_hsl(var(--primary)/0.7)] transition-all"
-              >
-                <img
-                  src={nikolaAvatar}
-                  alt="Nikola Šakotić — creator of MasterChess, 3500 rated"
-                  width={64}
-                  height={64}
-                  loading="lazy"
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-primary/50 shadow-lg shrink-0"
-                />
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-primary flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-sm overflow-hidden shrink-0 shadow-sm ring-1 ring-foreground/10">
-                      <img src={serbiaFlag.url} alt="Serbia" className="w-full h-full object-cover" />
-                    </span>
-                    Nikola Sakotić · Creator · 3500
-                  </p>
-                  <h3 className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
-                    Play against the MasterChess creator himself
-                  </h3>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                    I built this entire site. Think you can beat me?
-                  </p>
-                </div>
-                <span className="hidden sm:inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold px-4 py-2 shadow-md group-hover:scale-105 transition-transform shrink-0">
-                  Challenge me →
-                </span>
-              </Link>
-            </motion.div>
-
-            {/* 6 ▸ LIVE STATUS — bottom of hero, light touch */}
-            <motion.div
-              className="mt-8 flex justify-center items-center gap-3 flex-wrap"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.75 }}
-            >
-              <LivePlayerCounter />
               {winStreak >= 3 && <WinStreakFlame streak={winStreak} />}
-            </motion.div>
-          </motion.div>
-        </div>
+            </div>
+          </div>
+        </section>
+
 
         {/* ── MAIN CONTENT ── */}
         <div className="container mx-auto px-4 pb-24 space-y-12 max-w-5xl relative z-10">
