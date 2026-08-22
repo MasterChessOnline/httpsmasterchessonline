@@ -40,7 +40,7 @@ export default function AuthGate() {
     if (!pending) return;
     (async () => {
       try {
-        const patch: Record<string, string> = {};
+        const patch: { display_name?: string; country?: string } = {};
         if (pending.display_name) patch.display_name = pending.display_name;
         if (pending.country) patch.country = pending.country;
         if (Object.keys(patch).length) {
