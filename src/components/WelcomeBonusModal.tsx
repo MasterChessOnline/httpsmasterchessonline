@@ -112,11 +112,14 @@ export default function WelcomeBonusModal() {
               </Link>
             </div>
 
+            {/* A brand-new account should land on a board, not a dashboard. */}
             <Button
-              onClick={dismiss}
-              className="mt-6 w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold hover:from-amber-400 hover:to-yellow-300"
+              asChild
+              className="mt-6 w-full h-12 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-display font-bold uppercase tracking-widest hover:from-amber-400 hover:to-yellow-300"
             >
-              <Coins className="w-4 h-4 mr-2" /> Collect & Enter MasterChess
+              <Link to="/play/online?auto=1" onClick={dismiss}>
+                <Coins className="w-4 h-4 mr-2" /> Collect & Play Online
+              </Link>
             </Button>
           </motion.div>
         </motion.div>
