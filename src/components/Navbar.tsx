@@ -1,4 +1,4 @@
-import { LogOut, Trophy, Swords, GraduationCap, Crown, Brain, Play, Award, Star, ChevronDown, Menu, X, Search, Users, BookOpen, FileText, Target, Medal, Radio, Shield, Eye, Zap, Heart } from "lucide-react";
+import { LogOut, Trophy, Swords, GraduationCap, Crown, Brain, Play, Award, Star, ChevronDown, Menu, X, Search, Users, BookOpen, FileText, Target, Medal, Radio, Shield, Eye, Zap, Heart, Instagram } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
