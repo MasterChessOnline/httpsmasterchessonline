@@ -110,11 +110,31 @@ export default function IgLanding() {
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden bg-gradient-to-b from-background via-background to-background/90 flex flex-col">
+      <AnimatePresence>
+        {intro && (
+          <IgIntroReel
+            key="ig-intro"
+            surface="ad-landing"
+            onDone={() => setIntro(false)}
+            onPlay={() => {
+              setIntro(false);
+              requestAnimationFrame(() =>
+                document.getElementById("board")?.scrollIntoView({ behavior: "smooth" }),
+              );
+            }}
+            onSignup={() => {
+              setIntro(false);
+              navigate("/signup?src=ig-intro");
+            }}
+          />
+        )}
+      </AnimatePresence>
       <Seo
         path="/ig"
         title="Play Chess Free — One Move and You're Playing | MasterChess"
         description="Tap a piece and your free chess game starts instantly. No signup, no ads. Create a free account after your first win to save your rating."
       />
+
 
       {/* Atmospheric glow */}
       <div className="pointer-events-none absolute inset-0 -z-10">
