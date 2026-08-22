@@ -300,8 +300,64 @@ const Index = () => {
       <BrakusHeroBanner />
 
       <main>
-        {/* ── FIRST SCREEN: what this is + one dominant PLAY NOW ── */}
-        <HeroPlayNow />
+        {/* ── FIRST SCREEN — the cinematic MasterChess title over the board
+              backdrop. This is the site's identity shot, so it stays; what was
+              removed is the *duplication* under it (second headline, second CTA
+              pair, player/game counters). One title, one PLAY NOW, then the
+              live board immediately below. ── */}
+        <div ref={heroRef} className="relative pt-10 sm:pt-16 pb-8 px-4 overflow-hidden">
+          <motion.div className="absolute inset-0" style={{ y: imgY, scale: heroScale }}>
+            <img
+              src={heroImage}
+              alt="Chess board"
+              width={1920}
+              height={1080}
+              className="absolute inset-0 w-full h-[120%] object-cover"
+              style={{ filter: "brightness(0.28) saturate(0.85)" }}
+              loading="eager"
+              decoding="async"
+              {...({ fetchpriority: "high" } as any)}
+            />
+          </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
+          {heavyReady && <div className="absolute inset-0 scan-line pointer-events-none" />}
+
+          <div className="container mx-auto max-w-4xl text-center relative z-10">
+            <AnimatedLogoHero as="h1" tagline={t("hero.tagline")} />
+
+            <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-lg text-muted-foreground">
+              Real chess against real people — no engine help, no ads, no subscription.
+              One tap and you are already playing.
+            </p>
+
+            {/* ONE dominant CTA. The board right below is the second path in. */}
+            <motion.div
+              className="mt-7 flex justify-center"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
+              <Link to={user ? "/play/online" : "/play-guest"} className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  className="ripple-btn w-full sm:w-auto h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg transition-all duration-300"
+                >
+                  <Play className="h-5 w-5 mr-2 fill-current" />
+                  {user ? t("hero.playOnline") : "Play Now"}
+                </Button>
+              </Link>
+            </motion.div>
+
+            <HomeProofRow />
+
+            <div className="mt-6 flex justify-center items-center gap-2 text-primary/70">
+              <ScribbleArrow className="hidden sm:block text-primary/50" />
+              <MarginNote rotate={-2} className="text-base sm:text-lg">
+                real chess, real people — no bots pretending to be human
+              </MarginNote>
+            </div>
+          </div>
+        </div>
 
         {/* ── INSTANT PLAY: live board right under the CTA.
               No headline here — the hero above already says it. ── */}
@@ -309,22 +365,16 @@ const Index = () => {
 
         {/* ── RETENTION HOOK ──
             For a first-time guest the streak card is noise *before* the first
-            move, so it only appears once they actually played (or are signed in).
-            A brand-new guest instead gets the one-screen "why this site" answer. */}
+            move, so it only appears once they actually played (or are signed in). */}
         {user || guestPlayed ? (
           <DailyHookCard className="mt-6" />
         ) : (
           <WhyMasterChessCompact className="mt-6" />
         )}
 
+        {/* ── SECOND STEP: challenge the creator + install. ── */}
+        <section className="px-4 pt-10 pb-4">
 
-
-
-        {/* ── SECOND STEP: challenge the creator + install.
-              The old full-screen parallax hero lived here and repeated the same
-              headline, CTA pair and proof row a third time — removed so the
-              first screen is: one headline, one board, one reason to stay. ── */}
-        <section ref={heroRef} className="px-4 pt-10 pb-4">
           <div className="mx-auto max-w-xl space-y-5">
             <Link
               to="/beat-nikola"
