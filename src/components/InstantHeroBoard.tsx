@@ -97,6 +97,8 @@ interface InstantHeroBoardProps {
 export default function InstantHeroBoard({
   adMode = false,
   headingLevel = "h1",
+  hideHeading = false,
+
   renderPostGame,
   beginner = false,
   onProgress,
