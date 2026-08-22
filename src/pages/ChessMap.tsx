@@ -169,7 +169,7 @@ export default function ChessMap() {
   return (
     <div className="min-h-screen bg-[#0b0b0d] text-white">
       <Helmet>
-        <title>Chess World Map — Live Players from {cities.length || 130}+ Cities | MasterChess</title>
+        <title>{`Chess World Map — Live Players from ${cities.length || 130}+ Cities | MasterChess`}</title>
         <meta
           name="description"
           content="Explore the MasterChess world map. See live chess players from cities across the Balkans, Europe, Asia, and the Americas. Click any city to join local players."
