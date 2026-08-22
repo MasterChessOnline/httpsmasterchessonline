@@ -66,7 +66,6 @@ import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
-import MiniAnimatedBoard from "@/components/home/MiniAnimatedBoard";
 import GuestHomeSections from "@/components/home/GuestHomeSections";
 import { getGuestProgress } from "@/lib/guestProgress";
 
@@ -320,22 +319,22 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
           {heavyReady && <div className="absolute inset-0 scan-line pointer-events-none" />}
 
-          <div className={`container mx-auto relative z-10 ${user ? "max-w-4xl text-center" : "max-w-5xl"}`}>
-            <div className={user ? "" : "grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_320px]"}>
-              <div className={user ? "" : "text-center lg:text-left"}>
+          <div className="container mx-auto relative z-10 max-w-4xl text-center">
+            <div>
+              <div>
                 {/* One title, one tagline, one sentence. */}
                 <AnimatedLogoHero as="h1" />
 
                 <p className="mt-3 font-display text-base sm:text-2xl font-bold uppercase tracking-[0.14em] text-primary">
                   Play. Compete. Become a Master.
                 </p>
-                <p className={`mt-3 max-w-2xl text-sm sm:text-lg text-muted-foreground ${user ? "mx-auto" : "mx-auto lg:mx-0"}`}>
+                <p className={`mt-3 max-w-2xl text-sm sm:text-lg text-muted-foreground mx-auto`}>
                   The free chess platform built for players who want to improve, compete and have fun.
                 </p>
 
                 {/* One dominant CTA — the account. Everything else is a quiet link. */}
                 <motion.div
-                  className={`mt-7 flex flex-col items-center gap-3 ${user ? "" : "lg:items-start"}`}
+                  className={"mt-7 flex flex-col items-center gap-3"}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
@@ -372,7 +371,7 @@ const Index = () => {
                       </Link>
 
                       {/* What you get — one line, three promises. */}
-                      <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:justify-start">
+                      <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground ">
                         <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> 500 free coins</span>
                         <span className="opacity-30">•</span>
                         <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> Free to join</span>
@@ -380,7 +379,7 @@ const Index = () => {
                         <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> Play online</span>
                       </p>
 
-                      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground lg:justify-start">
+                      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground ">
                         <span>
                           Already have an account?{" "}
                           <Link to="/login" className="font-semibold text-foreground hover:underline">
@@ -397,21 +396,6 @@ const Index = () => {
                 </motion.div>
               </div>
 
-              {/* Mini self-playing board — instantly explains what the site is,
-                  without swallowing the whole first screen. Guests only. */}
-              {!user && (
-                <motion.div
-                  className="hidden sm:block"
-                  initial={{ opacity: 0, scale: 0.94 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.45, duration: 0.7 }}
-                >
-                  <p className="mb-3 text-center font-display text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                    Play chess online
-                  </p>
-                  <MiniAnimatedBoard />
-                </motion.div>
-              )}
             </div>
 
             {user && (
