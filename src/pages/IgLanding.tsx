@@ -63,6 +63,7 @@ function captureLandingSource(variant?: string) {
 export default function IgLanding() {
   const { variant } = useParams<{ variant?: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [coach, setCoach] = useState(false);
   // Once a visitor says they cannot play, the board keeps the hint line up.
@@ -70,10 +71,14 @@ export default function IgLanding() {
   const [detected, setDetected] = useState<TrafficSource>("direct");
   // Hard gate: the first game is free, then an account is required to continue.
   const [gate, setGate] = useState(false);
+  // Story-style intro plays first for every new session of ad traffic.
+  const [intro, setIntro] = useState(false);
 
   useEffect(() => {
     setDetected(detectTrafficSource().source);
     captureLandingSource(variant);
+    if (!user && !hasSeenIgIntro()) setIntro(true);
+
 
     // Paid landing page must stay out of the search index: override every
     // robots tag the shared SEO layer already emitted, then restore on exit.
