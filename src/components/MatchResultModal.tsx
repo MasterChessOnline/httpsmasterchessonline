@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coins, TrendingUp, TrendingDown, Trophy, Handshake, X, Sparkles, Star, Share2, Copy, Check, MessageCircle, Send, Twitter, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import SharePositionCard from "@/components/SharePositionCard";
 import PushWinNudge from "@/components/PushWinNudge";
+import { markGameFinished } from "@/lib/funnel";
+import { useEffect } from "react";
 
 
 export interface MatchResultData {
@@ -32,6 +35,15 @@ export default function MatchResultModal({ open, data, onClose, onRematch, onRev
   const { profile } = useAuth() as any;
   const [copied, setCopied] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
+
+  // A finished game is the activation event that matters; first + second game
+  // are reported from here so bot, guest and online games all count.
+  useEffect(() => {
+    if (open && data) {
+      markGameFinished({ outcome: data.outcome, opponent: data.opponentLabel ?? "unknown" });
+    }
+  }, [open, data?.outcome, data?.opponentLabel]);
+
   if (!data) return null;
   const titleMap = {
     win: { text: "Victory!", icon: <Trophy className="w-8 h-8" />, color: "from-amber-400 to-yellow-200", glow: "shadow-[0_0_80px_hsl(43,95%,60%,0.5)]" },
@@ -252,20 +264,32 @@ export default function MatchResultModal({ open, data, onClose, onRematch, onRev
 
               {/* Actions */}
 
-              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+              {/* PLAY AGAIN is the one dominant button — the second game is the
+                  metric that decides whether a new player stays. */}
+              <div className="mt-6 space-y-2">
                 {onRematch && (
-                  <Button onClick={onRematch} className="flex-1 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold hover:brightness-110">
-                    Rematch
+                  <Button
+                    onClick={onRematch}
+                    className="w-full h-13 py-4 text-base font-display font-bold uppercase tracking-widest bg-gradient-to-r from-amber-500 to-yellow-400 text-black hover:brightness-110"
+                  >
+                    Play Again
                   </Button>
                 )}
-                {onReview && (
-                  <Button onClick={onReview} variant="outline" className="flex-1 border-amber-500/40 text-amber-200 hover:bg-amber-500/10">
-                    Review
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {onReview && (
+                    <Button onClick={onReview} variant="outline" className="flex-1 border-amber-500/40 text-amber-200 hover:bg-amber-500/10">
+                      View Game
+                    </Button>
+                  )}
+                  <Button asChild variant="outline" className="flex-1 border-zinc-700 text-zinc-300 hover:bg-white/5">
+                    <Link to={profile ? "/profile" : "/signup"} onClick={onClose}>
+                      {profile ? "Go to Profile" : "Create Free Account"}
+                    </Link>
                   </Button>
-                )}
-                <Button onClick={onClose} variant="ghost" className="flex-1 text-zinc-400 hover:text-white">
-                  Close
-                </Button>
+                  <Button onClick={onClose} variant="ghost" className="flex-1 text-zinc-400 hover:text-white">
+                    Close
+                  </Button>
+                </div>
               </div>
             </div>
           </motion.div>

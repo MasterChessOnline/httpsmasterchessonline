@@ -3,6 +3,7 @@ import { useGameMode } from "@/hooks/use-game-mode";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Chess, Square } from "chess.js";
 import Navbar from "@/components/Navbar";
+import CreateAccountBanner from "@/components/CreateAccountBanner";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Wifi, Flag, Timer, Loader2, Send, Users, Swords, RotateCcw, Handshake, Zap, Eye, MonitorOff } from "lucide-react";
@@ -831,12 +832,30 @@ const PlayOnline = () => {
       <div className="min-h-screen bg-background">
         <Seo title={"Play Chess Online Free vs Real Players — No Download | MasterChess"} description={"Play chess online free against real people in seconds — Bullet, Blitz, Rapid and Classical with ELO matchmaking. No download, no ads, no engine help in human games."} path="/play/online" type="website" />
         <Navbar />
-        <main className="container mx-auto px-6 pt-24 pb-16 text-center">
-          <Wifi className="h-16 w-16 text-primary mx-auto mb-4" />
+        <main className="container mx-auto max-w-2xl px-4 pt-24 pb-16 text-center">
+          <Wifi className="h-14 w-14 text-primary mx-auto mb-4" />
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">Play Online</h1>
-          <p className="text-muted-foreground mb-6">Log in to play against other players online.</p>
-          <Button onClick={() => navigate("/login")}>Log In to Play</Button>
+          <p className="text-muted-foreground mb-6">
+            Online games are rated, so they need an account — it takes a few seconds and
+            you start with 500 coins.
+          </p>
+          {/* Signing up is the action here; logging in is the small link. */}
+          <CreateAccountBanner
+            surface="play_online_gate"
+            headline="Create free account to play"
+            className="text-left"
+          />
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+            <button onClick={() => navigate("/login")} className="font-semibold text-foreground hover:underline">
+              Already have an account? Log in
+            </button>
+            <span className="opacity-30">·</span>
+            <button onClick={() => navigate("/play")} className="font-semibold text-primary hover:underline">
+              Play a bot right now
+            </button>
+          </div>
         </main>
+
         <Footer />
       </div>
     );

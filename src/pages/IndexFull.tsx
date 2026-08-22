@@ -34,6 +34,7 @@ import {
   VolumeX,
   Sparkles,
   LogIn,
+  Check,
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
@@ -42,6 +43,7 @@ import posterImage from "@/assets/masterchess-poster.jpg";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
+import { trackSignupCta } from "@/lib/funnel";
 
 import ParallaxCard from "@/components/ParallaxCard";
 // Heavy animated background — desktop only, lazy-loaded to keep mobile bundle/CPU light.
@@ -62,7 +64,6 @@ import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
-import HomeProofRow from "@/components/HomeProofRow";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
@@ -325,31 +326,76 @@ const Index = () => {
                 logo duplicated the sentence below it, so it is gone. */}
             <AnimatedLogoHero as="h1" />
 
-            <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-lg text-muted-foreground">
-              Real chess against real people — no engine help, no ads, no subscription.
-              One tap and you are already playing.
+            {/* Ad traffic has ~2 seconds to understand the offer: what it is,
+                what it costs, what you get. */}
+            <p className="mx-auto mt-3 font-display text-base sm:text-2xl font-bold uppercase tracking-[0.14em] text-primary">
+              Play Chess. Compete. Become a Master.
+            </p>
+            <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-lg text-muted-foreground">
+              Free online chess for players, clubs and tournaments — real people, no engine
+              help, no paywall.
             </p>
 
-
-            {/* ONE dominant CTA. The board right below is the second path in. */}
+            {/* One dominant CTA. For a guest it is the account (that is what an
+                ad click is worth); the live board right below is the no-signup
+                path in. */}
             <motion.div
-              className="mt-7 flex justify-center"
+              className="mt-7 flex flex-col items-center gap-3"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              <Link to={user ? "/play/online" : "/play-guest"} className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="ripple-btn w-full sm:w-auto h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg transition-all duration-300"
-                >
-                  <Play className="h-5 w-5 mr-2 fill-current" />
-                  {user ? t("hero.playOnline") : "Play Now"}
-                </Button>
-              </Link>
+              {user ? (
+                <Link to="/play/online" className="w-full sm:w-auto">
+                  <Button
+                    size="lg"
+                    className="ripple-btn w-full sm:w-auto h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg transition-all duration-300"
+                  >
+                    <Play className="h-5 w-5 mr-2 fill-current" />
+                    {t("hero.playOnline")}
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/signup"
+                    className="w-full sm:w-auto"
+                    onClick={() => trackSignupCta("home_hero")}
+                  >
+                    <Button
+                      size="lg"
+                      className="ripple-btn w-full sm:w-auto h-14 px-10 text-base font-display uppercase tracking-widest bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl shadow-[0_0_60px_-12px_hsl(150_80%_45%/0.9)] transition-all duration-300"
+                    >
+                      <Crown className="h-5 w-5 mr-2" />
+                      Create Free Account
+                    </Button>
+                  </Link>
+                  <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground">
+                    <Link to="/play-guest" className="font-semibold text-primary hover:underline">
+                      Or play now without an account
+                    </Link>
+                    <span className="opacity-30">·</span>
+                    <span>
+                      Already have an account?{" "}
+                      <Link to="/login" className="font-semibold text-foreground hover:underline">
+                        Log in
+                      </Link>
+                    </span>
+                  </div>
+                </>
+              )}
             </motion.div>
 
-            <HomeProofRow />
+            {/* What you get — four short promises, nothing else. */}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {["100% Free", "No Paywall", "Play Online", "Earn Coins"].map((b) => (
+                <span key={b} className="inline-flex items-center gap-1.5">
+                  <Check className="h-3.5 w-3.5 text-emerald-400" /> {b}
+                </span>
+              ))}
+            </div>
+
+
 
             <div className="mt-6 flex justify-center items-center gap-2 text-primary/70">
               <ScribbleArrow className="hidden sm:block text-primary/50" />

@@ -53,6 +53,8 @@ afterFirstPaint(async () => {
   safeRun(sounds.bootstrapSoundPack);
   safeRun(a11y.bootstrapA11y);
   safeRun(track.captureAttribution);
+  // Funnel: records the visit day so a next-day return is measurable.
+  import("./lib/funnel").then((m) => safeRun(m.markVisit)).catch(() => {});
   safeRun(analytics.bootstrapAnalytics);
 
   if ("serviceWorker" in navigator) {
