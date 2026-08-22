@@ -326,7 +326,7 @@ export default function InstantHeroBoard({
       className={
         immersive
           ? "fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-background px-2 pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
-          : "relative z-10 px-4 pt-6 pb-2"
+          : "relative z-10 px-4 pt-4 pb-8"
       }
       aria-label="Play chess instantly"
     >
