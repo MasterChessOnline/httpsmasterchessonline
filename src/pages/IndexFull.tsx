@@ -43,7 +43,7 @@ import posterImage from "@/assets/masterchess-poster.jpg";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
-import { trackSignupCta, markVisit } from "@/lib/funnel";
+import { trackSignupCta } from "@/lib/funnel";
 
 import ParallaxCard from "@/components/ParallaxCard";
 // Heavy animated background — desktop only, lazy-loaded to keep mobile bundle/CPU light.
