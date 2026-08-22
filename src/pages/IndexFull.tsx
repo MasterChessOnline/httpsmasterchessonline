@@ -321,103 +321,125 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
           {heavyReady && <div className="absolute inset-0 scan-line pointer-events-none" />}
 
-          <div className="container mx-auto max-w-4xl text-center relative z-10">
-            {/* One title, one subtitle. The old uppercase tagline under the
-                logo duplicated the sentence below it, so it is gone. */}
-            <AnimatedLogoHero as="h1" />
+          <div className={`container mx-auto relative z-10 ${user ? "max-w-4xl text-center" : "max-w-5xl"}`}>
+            <div className={user ? "" : "grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]"}>
+              <div className={user ? "" : "text-center lg:text-left"}>
+                {/* One title, one tagline, one sentence. */}
+                <AnimatedLogoHero as="h1" />
 
-            {/* Ad traffic has ~2 seconds to understand the offer: what it is,
-                what it costs, what you get. */}
-            <p className="mx-auto mt-3 font-display text-base sm:text-2xl font-bold uppercase tracking-[0.14em] text-primary">
-              Play Chess. Compete. Become a Master.
-            </p>
-            <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-lg text-muted-foreground">
-              Free online chess for players, clubs and tournaments — real people, no engine
-              help, no paywall.
-            </p>
+                <p className="mt-3 font-display text-base sm:text-2xl font-bold uppercase tracking-[0.14em] text-primary">
+                  Play. Compete. Become a Master.
+                </p>
+                <p className={`mt-3 max-w-2xl text-sm sm:text-lg text-muted-foreground ${user ? "mx-auto" : "mx-auto lg:mx-0"}`}>
+                  The free chess platform built for players who want to improve, compete and have fun.
+                </p>
 
-            {/* One dominant CTA. For a guest it is the account (that is what an
-                ad click is worth); the live board right below is the no-signup
-                path in. */}
-            <motion.div
-              className="mt-7 flex flex-col items-center gap-3"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              {user ? (
-                <Link to="/play/online" className="w-full sm:w-auto">
-                  <Button
-                    size="lg"
-                    className="ripple-btn w-full sm:w-auto h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg transition-all duration-300"
-                  >
-                    <Play className="h-5 w-5 mr-2 fill-current" />
-                    {t("hero.playOnline")}
-                  </Button>
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/signup"
-                    className="w-full sm:w-auto"
-                    onClick={() => trackSignupCta("home_hero")}
-                  >
-                    <Button
-                      size="lg"
-                      className="ripple-btn w-full sm:w-auto h-14 px-10 text-base font-display uppercase tracking-widest bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl shadow-[0_0_60px_-12px_hsl(150_80%_45%/0.9)] transition-all duration-300"
-                    >
-                      <Crown className="h-5 w-5 mr-2" />
-                      Create Free Account
-                    </Button>
-                  </Link>
-                  <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground">
-                    <Link to="/play-guest" className="font-semibold text-primary hover:underline">
-                      Or play now without an account
+                {/* One dominant CTA — the account. Everything else is a quiet link. */}
+                <motion.div
+                  className={`mt-7 flex flex-col items-center gap-3 ${user ? "" : "lg:items-start"}`}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                >
+                  {user ? (
+                    <Link to="/play/online" className="w-full sm:w-auto">
+                      <Button
+                        size="lg"
+                        className="ripple-btn w-full sm:w-auto h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg transition-all duration-300"
+                      >
+                        <Play className="h-5 w-5 mr-2 fill-current" />
+                        {t("hero.playOnline")}
+                      </Button>
                     </Link>
-                    <span className="opacity-30">·</span>
-                    <span>
-                      Already have an account?{" "}
-                      <Link to="/login" className="font-semibold text-foreground hover:underline">
-                        Log in
+                  ) : (
+                    <>
+                      <Link
+                        to="/signup"
+                        className="w-full sm:w-auto"
+                        onClick={() => trackSignupCta("home_hero")}
+                      >
+                        <motion.div
+                          animate={{ scale: [1, 1.02, 1] }}
+                          transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <Button
+                            size="lg"
+                            className="ripple-btn w-full sm:w-auto h-16 px-12 text-base sm:text-lg font-display uppercase tracking-widest bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl shadow-[0_0_70px_-14px_hsl(150_80%_45%/0.95)] transition-all duration-300"
+                          >
+                            <Crown className="h-5 w-5 mr-2" />
+                            Create Free Account
+                          </Button>
+                        </motion.div>
                       </Link>
-                    </span>
-                  </div>
-                </>
+
+                      {/* What you get — one line, three promises. */}
+                      <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground lg:justify-start">
+                        <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> 500 free coins</span>
+                        <span className="opacity-30">•</span>
+                        <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> Free to join</span>
+                        <span className="opacity-30">•</span>
+                        <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> Play online</span>
+                      </p>
+
+                      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground lg:justify-start">
+                        <span>
+                          Already have an account?{" "}
+                          <Link to="/login" className="font-semibold text-foreground hover:underline">
+                            Log in
+                          </Link>
+                        </span>
+                        <span className="opacity-30">·</span>
+                        <Link to="/play-guest" className="hover:text-primary">
+                          Or try a game first
+                        </Link>
+                      </div>
+                    </>
+                  )}
+                </motion.div>
+              </div>
+
+              {/* Mini self-playing board — instantly explains what the site is,
+                  without swallowing the whole first screen. Guests only. */}
+              {!user && (
+                <motion.div
+                  className="hidden sm:block"
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.45, duration: 0.7 }}
+                >
+                  <p className="mb-3 text-center font-display text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    Play chess online
+                  </p>
+                  <MiniAnimatedBoard />
+                </motion.div>
               )}
-            </motion.div>
-
-            {/* What you get — four short promises, nothing else. */}
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {["100% Free", "No Paywall", "Play Online", "Earn Coins"].map((b) => (
-                <span key={b} className="inline-flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 text-emerald-400" /> {b}
-                </span>
-              ))}
             </div>
 
-
-
-            <div className="mt-6 flex justify-center items-center gap-2 text-primary/70">
-              <ScribbleArrow className="hidden sm:block text-primary/50" />
-              <MarginNote rotate={-2} className="text-base sm:text-lg">
-                real chess, real people — no bots pretending to be human
-              </MarginNote>
-            </div>
+            {user && (
+              <div className="mt-6 flex justify-center items-center gap-2 text-primary/70">
+                <ScribbleArrow className="hidden sm:block text-primary/50" />
+                <MarginNote rotate={-2} className="text-base sm:text-lg">
+                  real chess, real people — no bots pretending to be human
+                </MarginNote>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* ── INSTANT PLAY: live board right under the CTA.
-              No headline here — the hero above already says it. ── */}
+        {/* ── INSTANT PLAY: a real board right under the CTA, so a curious
+              visitor can start without an account. ── */}
         <InstantHeroBoard headingLevel="h2" hideHeading />
 
-        {/* ── RETENTION HOOK ──
-            For a first-time guest the streak card is noise *before* the first
-            move, so it only appears once they actually played (or are signed in). */}
-        {user || guestPlayed ? (
-          <DailyHookCard className="mt-6" />
-        ) : (
-          <WhyMasterChessCompact className="mt-6" />
+        {/* ── RETENTION HOOK ── */}
+        {user || guestPlayed ? <DailyHookCard className="mt-6" /> : null}
+
+        {/* ── GUESTS: five short sections, all pointing at one action. ── */}
+        {!user && (
+          <div className="mt-14">
+            <GuestHomeSections topPlayers={topPlayers} />
+          </div>
         )}
+
 
         {/* ── SECOND STEP: challenge the creator + install. ── */}
         <section className="px-4 pt-10 pb-4">
