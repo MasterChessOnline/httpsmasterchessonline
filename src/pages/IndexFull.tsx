@@ -66,7 +66,8 @@ import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
-import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
+import MiniAnimatedBoard from "@/components/home/MiniAnimatedBoard";
+import GuestHomeSections from "@/components/home/GuestHomeSections";
 import { getGuestProgress } from "@/lib/guestProgress";
 
 
@@ -237,16 +238,14 @@ const Index = () => {
           )
         : Promise.resolve(null);
 
-      const leadersPromise = user
-        ? withHomeTimeout(
+      const leadersPromise = withHomeTimeout(
             "HOME_LEADERBOARD",
             supabase
               .from("profiles")
               .select("user_id, display_name, rating, games_won, games_played")
               .order("rating", { ascending: false })
               .limit(5),
-          )
-        : Promise.resolve(null);
+          );
 
       const [recentResult, leadersResult] = await Promise.all([recentPromise, leadersPromise]);
       if (cancelled) return;
@@ -441,8 +440,10 @@ const Index = () => {
         )}
 
 
-        {/* ── SECOND STEP: challenge the creator + install. ── */}
-        <section className="px-4 pt-10 pb-4">
+        {/* ── SECOND STEP: challenge the creator + install. Members only —
+              a brand-new visitor gets the lean guest flow above instead. ── */}
+        {user && (
+        <><section className="px-4 pt-10 pb-4">
 
           <div className="mx-auto max-w-xl space-y-5">
             <Link
@@ -860,15 +861,21 @@ const Index = () => {
         </div>
 
 
+        </>
+        )}
+
         {/* Share MasterChess — site-wide share card */}
+        {user && (
         <section className="px-4 pb-16">
           <div className="max-w-2xl mx-auto">
             <InviteFriendsCard variant="share" />
           </div>
         </section>
 
+        )}
+
         {/* Supporter / tip CTA — keeps the project ad-free */}
-        <SupporterCTA />
+        {user && <SupporterCTA />}
 
         {/* FAQ — bottom of home, adds FAQPage rich snippet to Google */}
         <HomeFaqSection />
