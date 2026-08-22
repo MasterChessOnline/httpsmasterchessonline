@@ -105,9 +105,19 @@ const Signup = () => {
 
   const handleGoogleLogin = async () => {
     setError(null);
+    setNameTouched(true);
+    // Account name first, Google second — the name is what shows up in games.
+    if (!nameOk) {
+      setError("Choose your account name first (at least 3 characters).");
+      return;
+    }
     setGoogleLoading(true);
-    // 1-click Google: skip country/name modal (killed conversion).
-    // Defaults are applied; user can edit anything in Settings.
+    try {
+      localStorage.setItem(
+        "mc:pending-profile",
+        JSON.stringify({ display_name: accountName.trim(), country: "" }),
+      );
+    } catch {/* ignore */}
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin + redirectTo,
     });
@@ -116,6 +126,7 @@ const Signup = () => {
       setGoogleLoading(false);
     }
   };
+
 
   // Debounced FIDE lookup (optional field)
   const fideDebounce = useState<{ t: number | null }>({ t: null })[0];
