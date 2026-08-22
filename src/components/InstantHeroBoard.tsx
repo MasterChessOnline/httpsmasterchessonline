@@ -353,7 +353,7 @@ export default function InstantHeroBoard({
           )}
 
           <div className="text-center">
-            {immersive ? null : headingLevel === "h1" ? (
+            {immersive || hideHeading ? null : headingLevel === "h1" ? (
               <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
                 Play free online chess — <span className="text-gradient-gold">no registration</span>
               </h1>
