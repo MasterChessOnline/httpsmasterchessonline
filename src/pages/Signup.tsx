@@ -346,8 +346,47 @@ const Signup = () => {
             </div>
           )}
 
+          {sentTo ? (
+            <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-5 text-center">
+              <p className="text-sm font-semibold text-foreground">Check your inbox</p>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                We sent a confirmation email to <span className="text-foreground">{sentTo}</span>.
+                Open it to activate your account, then log in.
+              </p>
+              <Button asChild variant="outline" className="mt-4 h-10 w-full border-primary/30">
+                <Link to={`/login${authSuffix}`}>Go to login</Link>
+              </Button>
+            </div>
+          ) : (
+          <>
+          {/* Account name — required BEFORE Google or email. It is the name
+              other players see on the board and leaderboard. */}
+          <div className="mb-5 space-y-1.5">
+            <Label htmlFor="account-name" className="text-xs font-medium text-muted-foreground">
+              Account name <span className="text-primary">*</span>
+            </Label>
+            <Input
+              id="account-name"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value.slice(0, 32))}
+              onBlur={() => setNameTouched(true)}
+              placeholder="e.g. GrandmasterX"
+              maxLength={32}
+              autoComplete="nickname"
+              className="h-11 bg-muted/30 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all"
+            />
+            {nameTouched && !nameOk ? (
+              <p className="text-[11px] text-destructive/90">Pick a name with at least 3 characters.</p>
+            ) : (
+              <p className="text-[11px] text-muted-foreground">
+                This is the name other players see. Required before continuing with Google or email.
+              </p>
+            )}
+          </div>
+
           {/* Social buttons */}
           <div className="space-y-2.5 mb-6">
+
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 variant="outline"
