@@ -363,7 +363,7 @@ export default function InstantHeroBoard({
               </h2>
             )}
 
-            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+            <p className={`text-sm sm:text-base text-muted-foreground ${hideHeading ? "" : "mt-2"}`}>
               {phase === "idle"
                 ? "Make a move on the board below — your game starts instantly."
                 : phase === "playing"
