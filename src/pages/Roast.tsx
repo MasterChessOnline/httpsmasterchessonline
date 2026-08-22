@@ -137,7 +137,7 @@ export default function Roast() {
   return (
     <div className="min-h-screen bg-black text-neutral-100">
       <Helmet>
-        <title>{title} — MasterChess Roast</title>
+        <title>{`${title} — MasterChess Roast`}</title>
         <meta name="description" content={parsed?.roast_lines?.[0] ?? "Brutalno komentarisana šahovska partija."} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={parsed?.roast_lines?.[0] ?? "MasterChess Roast"} />

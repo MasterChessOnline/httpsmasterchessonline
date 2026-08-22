@@ -107,7 +107,7 @@ export default function AdminTournament() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet><title>Admin · {t.name}</title></Helmet>
+      <Helmet><title>{`Admin · ${t.name}`}</title></Helmet>
 
       <header className="border-b border-amber-500/15 bg-gradient-to-r from-amber-500/5 to-transparent">
         <div className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between flex-wrap gap-3">
