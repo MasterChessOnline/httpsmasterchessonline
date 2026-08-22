@@ -396,7 +396,6 @@ const Index = () => {
               ))}
             </div>
 
-            <HomeProofRow />
 
 
             <div className="mt-6 flex justify-center items-center gap-2 text-primary/70">
