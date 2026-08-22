@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import BeginnerCoachSheet from "@/components/BeginnerCoachSheet";
 import SignupGate from "@/components/SignupGate";
+import IgIntroReel, { hasSeenIgIntro } from "@/components/IgIntroReel";
 
 import { Button } from "@/components/ui/button";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/contexts/AuthContext";
 import { captureAttribution, track } from "@/lib/track";
 import { detectTrafficSource, type TrafficSource } from "@/lib/trafficSource";
+
 
 
 /**
@@ -61,6 +63,7 @@ function captureLandingSource(variant?: string) {
 export default function IgLanding() {
   const { variant } = useParams<{ variant?: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [coach, setCoach] = useState(false);
   // Once a visitor says they cannot play, the board keeps the hint line up.
@@ -68,10 +71,14 @@ export default function IgLanding() {
   const [detected, setDetected] = useState<TrafficSource>("direct");
   // Hard gate: the first game is free, then an account is required to continue.
   const [gate, setGate] = useState(false);
+  // Story-style intro plays first for every new session of ad traffic.
+  const [intro, setIntro] = useState(false);
 
   useEffect(() => {
     setDetected(detectTrafficSource().source);
     captureLandingSource(variant);
+    if (!user && !hasSeenIgIntro()) setIntro(true);
+
 
     // Paid landing page must stay out of the search index: override every
     // robots tag the shared SEO layer already emitted, then restore on exit.
@@ -103,11 +110,31 @@ export default function IgLanding() {
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden bg-gradient-to-b from-background via-background to-background/90 flex flex-col">
+      <AnimatePresence>
+        {intro && (
+          <IgIntroReel
+            key="ig-intro"
+            surface="ad-landing"
+            onDone={() => setIntro(false)}
+            onPlay={() => {
+              setIntro(false);
+              requestAnimationFrame(() =>
+                document.getElementById("board")?.scrollIntoView({ behavior: "smooth" }),
+              );
+            }}
+            onSignup={() => {
+              setIntro(false);
+              navigate("/signup?src=ig-intro");
+            }}
+          />
+        )}
+      </AnimatePresence>
       <Seo
         path="/ig"
         title="Play Chess Free — One Move and You're Playing | MasterChess"
         description="Tap a piece and your free chess game starts instantly. No signup, no ads. Create a free account after your first win to save your rating."
       />
+
 
       {/* Atmospheric glow */}
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -244,7 +271,7 @@ export default function IgLanding() {
       <SignupGate
         open={gate}
         surface="ad-landing"
-        reason="You played your free game. Create a free account to keep playing, save your rating and unlock online opponents."
+        reason="You played your free game. Create a free account to keep playing, save your rating and start your daily streak — coins every day you come back."
       />
 
 
