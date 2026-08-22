@@ -55,7 +55,6 @@ import ShopHomeStrip from "@/components/ShopHomeStrip";
 import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
-import LivePlayerCounter from "@/components/LivePlayerCounter";
 import InstallAppButton from "@/components/InstallAppButton";
 
 import FounderNote from "@/components/landing/FounderNote";
@@ -65,7 +64,6 @@ import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
-import HeroPlayNow from "@/components/HeroPlayNow";
 import DailyHookCard from "@/components/DailyHookCard";
 import WhyMasterChessCompact from "@/components/WhyMasterChessCompact";
 import { getGuestProgress } from "@/lib/guestProgress";
