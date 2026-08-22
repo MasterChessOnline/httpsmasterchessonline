@@ -1,4 +1,4 @@
-import { LogOut, Trophy, Swords, GraduationCap, Crown, Brain, Play, Award, Star, ChevronDown, Menu, X, Search, Users, BookOpen, FileText, Target, Medal, Radio, Shield, Eye, Zap, Heart } from "lucide-react";
+import { LogOut, Trophy, Swords, GraduationCap, Crown, Brain, Play, Award, Star, ChevronDown, Menu, X, Search, Users, BookOpen, FileText, Target, Medal, Radio, Shield, Eye, Zap, Heart, Instagram } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -454,6 +454,19 @@ const Navbar = () => {
               >
                 <Search className="h-4 w-4" />
               </button>
+
+              {/* Official Instagram profile — reachable from every page */}
+              <a
+                href="https://www.instagram.com/masterchess.live"
+                target="_blank"
+                rel="me noopener noreferrer"
+                className="hidden lg:flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-pink-400 hover:bg-muted/20 transition-all duration-200 shrink-0"
+                aria-label="MasterChess on Instagram"
+                title="Follow @masterchess.live on Instagram"
+              >
+                <Instagram className="h-4 w-4" />
+              </a>
+
 
               {/* Donate + Rate moved to footer / /supporter to keep top nav uncluttered */}
 

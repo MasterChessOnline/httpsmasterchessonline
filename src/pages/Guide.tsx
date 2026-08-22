@@ -13,7 +13,7 @@ export default function Guide() {
   return (
     <>
       <Helmet>
-        <title>{guide.title} | MasterChess Guide</title>
+        <title>{`${guide.title} | MasterChess Guide`}</title>
         <meta name="description" content={guide.description} />
         <link rel="canonical" href={url} />
         <meta property="og:title" content={guide.title} />

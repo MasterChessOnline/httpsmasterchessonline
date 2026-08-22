@@ -321,12 +321,15 @@ const Index = () => {
           {heavyReady && <div className="absolute inset-0 scan-line pointer-events-none" />}
 
           <div className="container mx-auto max-w-4xl text-center relative z-10">
-            <AnimatedLogoHero as="h1" tagline={t("hero.tagline")} />
+            {/* One title, one subtitle. The old uppercase tagline under the
+                logo duplicated the sentence below it, so it is gone. */}
+            <AnimatedLogoHero as="h1" />
 
             <p className="mx-auto mt-4 max-w-2xl text-sm sm:text-lg text-muted-foreground">
               Real chess against real people — no engine help, no ads, no subscription.
               One tap and you are already playing.
             </p>
+
 
             {/* ONE dominant CTA. The board right below is the second path in. */}
             <motion.div
