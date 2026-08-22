@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { getShopPreview } from "@/lib/shop-previews";
 import BoardSwatch from "@/components/previews/BoardSwatch";
 import PieceSetPreview from "@/components/previews/PieceSetPreview";
+import CreateAccountBanner from "@/components/CreateAccountBanner";
 
 export default function Shop() {
   const { user, profile, refreshProfile } = useAuth();
@@ -85,6 +86,12 @@ export default function Shop() {
             </div>
           </div>
         </div>
+
+        <CreateAccountBanner
+          surface="shop"
+          headline="Create free account to get 500 coins"
+          className="mb-6"
+        />
 
         {/* Categories */}
         <div className="mb-6 -mx-4 px-4 overflow-x-auto">
