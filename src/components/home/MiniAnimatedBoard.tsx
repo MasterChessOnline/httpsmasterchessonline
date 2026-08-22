@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Chess } from "chess.js";
 import { motion } from "framer-motion";
-import { usePieceArtwork } from "@/lib/piece-glyphs";
+import { getPieceArtwork } from "@/lib/piece-glyphs";
 
 // Morphy — Opera Game (short, pretty, ends in a mate).
 const MOVES = [
@@ -22,7 +22,7 @@ const MOVES = [
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 function Square({ piece, light }: { piece: string | null; light: boolean }) {
-  const art = usePieceArtwork(piece ?? "");
+  const art = piece ? getPieceArtwork(piece) : null;
   return (
     <div
       className={`relative flex items-center justify-center ${
