@@ -502,10 +502,13 @@ const Signup = () => {
               </motion.div>
 
               <p className="text-[11px] text-center text-muted-foreground">
-                We'll generate a display name from your email — you can change it later in Settings.
+                We'll send a confirmation email to <span className="text-foreground">{email || "your inbox"}</span> as soon as your account is created.
               </p>
             </form>
           )}
+          </>
+          )}
+
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{" "}
