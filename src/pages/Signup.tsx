@@ -30,7 +30,6 @@ import {
   clearPendingSignup,
   getPendingSignup,
 } from "@/lib/backendHealth";
-import { FIRST_GAME_PATH, isAdSession } from "@/lib/landingVariants";
 
 const CHESS_PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
