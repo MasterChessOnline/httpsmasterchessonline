@@ -736,6 +736,45 @@ export type Database = {
         }
         Relationships: []
       }
+      client_errors: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          release: string | null
+          route: string | null
+          session_id: string | null
+          stack: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message: string
+          release?: string | null
+          route?: string | null
+          session_id?: string | null
+          stack?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          release?: string | null
+          route?: string | null
+          session_id?: string | null
+          stack?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       club_events: {
         Row: {
           club_id: string
@@ -1453,6 +1492,30 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_flags: {
+        Row: {
+          description: string | null
+          enabled: boolean
+          key: string
+          rollout: number
+          updated_at: string
+        }
+        Insert: {
+          description?: string | null
+          enabled?: boolean
+          key: string
+          rollout?: number
+          updated_at?: string
+        }
+        Update: {
+          description?: string | null
+          enabled?: boolean
+          key?: string
+          rollout?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       feature_votes: {
         Row: {
           comment: string | null
@@ -1619,6 +1682,39 @@ export type Database = {
           id?: string
           status?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      funnel_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          props: Json
+          route: string | null
+          session_id: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          props?: Json
+          route?: string | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          props?: Json
+          route?: string | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -5213,6 +5309,36 @@ export type Database = {
         }
         Relationships: []
       }
+      web_vitals: {
+        Row: {
+          created_at: string
+          device: string | null
+          id: string
+          metric: string
+          route: string | null
+          session_id: string | null
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          id?: string
+          metric: string
+          route?: string | null
+          session_id?: string | null
+          value: number
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          id?: string
+          metric?: string
+          route?: string | null
+          session_id?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
       weekly_spin_claims: {
         Row: {
           coins_awarded: number
@@ -5619,6 +5745,14 @@ export type Database = {
         }[]
       }
       get_donation_progress: { Args: never; Returns: Json }
+      get_funnel_summary: {
+        Args: { _days?: number }
+        Returns: {
+          event: string
+          sessions: number
+          total: number
+        }[]
+      }
       get_my_private_profile: {
         Args: never
         Returns: {
@@ -5779,6 +5913,15 @@ export type Database = {
           target_value: number
           title: string
           xp_reward: number
+        }[]
+      }
+      get_vitals_summary: {
+        Args: { _days?: number }
+        Returns: {
+          metric: string
+          p50: number
+          p75: number
+          samples: number
         }[]
       }
       has_premium_pass: {

@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { TIME_CONTROLS } from "@/components/ChessClock";
 import { calculateRatingChange, logOnlineRatingChange, type RatingCalcResult } from "@/lib/rating-system";
 import { bumpMissionProgress } from "@/hooks/use-daily-missions";
+import { reportFunnel } from "@/lib/monitoring";
 
 export type OnlineGameStatus = "idle" | "searching" | "playing" | "finished";
 
@@ -426,7 +427,11 @@ export function useOnlineGame() {
       const newGame = startRes && (startRes as any).ok === true
         ? ((startRes as any).game as OnlineGame)
         : null;
-      if (newGame) return newGame;
+      if (newGame) {
+        void reportFunnel("match_found", { time_control: tc.label, via: "claim" });
+        void reportFunnel("game_start", { time_control: tc.label });
+        return newGame;
+      }
 
       const reason = (startRes as any)?.error;
       if (reason === "black_busy") continue; // opponent got matched elsewhere — try next
@@ -506,6 +511,7 @@ export function useOnlineGame() {
       }
 
       queueEntryId.current = entry.id;
+      void reportFunnel("queue_join", { time_control: tc.label });
 
       // Mirror the search into the public lobby (best-effort — never blocks play).
       try {
@@ -537,6 +543,8 @@ export function useOnlineGame() {
           const newGame = payload.new as OnlineGame;
           if (newGame.white_player_id === user.id || newGame.black_player_id === user.id) {
             eloUpdatedRef.current = false; endingRef.current = false;
+            void reportFunnel("match_found", { time_control: tc.label, via: "realtime" });
+            void reportFunnel("game_start", { time_control: tc.label });
             setGame(newGame);
             setStatus("playing");
             subscribeToGame(newGame.id);
