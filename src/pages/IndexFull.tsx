@@ -289,7 +289,9 @@ const Index = () => {
         type="website"
       />
       <Navbar />
+      <NewUserIntro />
       <BrakusHeroBanner />
+
 
       <main>
         {/* ── FIRST SCREEN — the cinematic MasterChess title over the board
