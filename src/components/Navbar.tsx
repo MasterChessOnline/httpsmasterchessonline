@@ -62,7 +62,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Lessons", href: "/learn", icon: Crown, desc: "Structured learning path", highlight: true },
       { label: "AI Coach", href: "/coach", icon: Brain, desc: "Ask anything, review games" },
       { label: "Openings", href: "/openings", icon: BookOpen, desc: "Explore & drill openings" },
-      { label: "Opening Guides", href: "/opening-guides", icon: FileText, desc: "576 guides: traps, plans, answers" },
+      { label: "Opening Guides", href: "/opening-guides", icon: FileText, desc: "960 guides: traps, plans, answers" },
       { label: "Game Review", href: "/analysis", icon: FileText, desc: "Analyze your games" },
       { label: "Lesson Library", href: "/lessons", icon: GraduationCap, desc: "Deep dives by Nikola" },
     ],
