@@ -1,14 +1,6 @@
 import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import HomeFaqSection from "@/components/HomeFaqSection";
-import SupporterCTA from "@/components/SupporterCTA";
-import DiscoverStrip from "@/components/DiscoverStrip";
-import SiteRating from "@/components/SiteRating";
-import ReviewsCta from "@/components/ReviewsCta";
-import DailyKingBanner from "@/components/DailyKingBanner";
-import SeasonBanner from "@/components/SeasonBanner";
-import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
