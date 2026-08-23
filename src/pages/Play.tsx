@@ -3,7 +3,7 @@ import { useGameMode } from "@/hooks/use-game-mode";
 import BotAvatar from "@/components/BotAvatar";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Chess, Square } from "chess.js";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChessBoard from "@/components/chess/ChessBoard";
@@ -579,6 +579,19 @@ const Play = () => {
     setWhiteTime(TIME_CONTROLS[timeControlIdx].seconds);
     setBlackTime(TIME_CONTROLS[timeControlIdx].seconds);
   };
+
+  // `/play?bot=<id>` → start that bot immediately (used by bot profiles and by
+  // the "warm up against a bot" offer on an empty matchmaking queue).
+  const botParamFiredRef = useRef(false);
+  useEffect(() => {
+    if (botParamFiredRef.current) return;
+    const id = searchParams.get("bot");
+    if (!id) return;
+    const bot = BOT_PROFILES.find((b) => b.id === id);
+    if (!bot) return;
+    botParamFiredRef.current = true;
+    startMatchmaking(bot);
+  }, [searchParams]);
 
   // Pick up "Play from position" handoff from Opening Trainer (one-shot).
   useEffect(() => {
