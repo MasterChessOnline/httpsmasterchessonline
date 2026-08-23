@@ -38,6 +38,8 @@ import { bumpMissionProgress } from "@/hooks/use-daily-missions";
 import RatingChange from "@/components/RatingChange";
 import TitleBadge from "@/components/TitleBadge";
 import StreakBadge from "@/components/StreakBadge";
+import ComeBackTomorrowCard from "@/components/ComeBackTomorrowCard";
+import { trackRetention } from "@/lib/funnel";
 import BadgeUnlockToast from "@/components/BadgeUnlockToast";
 import BeatNikolaShareCard from "@/components/BeatNikolaShareCard";
 import ChallengeLinkCreator from "@/components/ChallengeLinkCreator";
@@ -1462,13 +1464,20 @@ const Play = () => {
             {isGameOver && (
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <Button onClick={() => startMatchmaking(currentBot)} className="flex-1 gap-1">
+                  <Button
+                    onClick={() => {
+                      trackRetention("rematch_click", { surface: "bot_game_over" });
+                      startMatchmaking(currentBot);
+                    }}
+                    className="flex-1 gap-1"
+                  >
                     <Swords className="w-4 h-4" /> Rematch
                   </Button>
                   <Button onClick={goToLobby} variant="outline" className="flex-1">
                     New Opponent
                   </Button>
                 </div>
+                <ComeBackTomorrowCard />
                 {pgn && (
                   <Button asChild variant="outline" className="w-full border-primary/40 hover:bg-primary/5">
                     <Link to={`/analysis?pgn=${encodeURIComponent(pgn)}`}>
