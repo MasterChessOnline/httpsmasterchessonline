@@ -412,7 +412,9 @@ const Index = () => {
 
         {/* ── INSTANT PLAY: a real board right under the CTA, so a curious
               visitor can start without an account. ── */}
-        <InstantHeroBoard headingLevel="h2" hideHeading />
+        <React.Suspense fallback={<div className="mx-auto h-[360px] max-w-md" />}>
+          <InstantHeroBoard headingLevel="h2" hideHeading />
+        </React.Suspense>
 
         {/* ── RETENTION HOOK ── */}
         {/* One fixed hour a day where the queue is guaranteed to have people —
@@ -420,13 +422,15 @@ const Index = () => {
         <div className="mt-6 max-w-2xl mx-auto px-4">
           <PrimeTimeBanner />
         </div>
-        {user || guestPlayed ? <DailyHookCard className="mt-6" /> : null}
+        {user || guestPlayed ? (
+          <React.Suspense fallback={null}><DailyHookCard className="mt-6" /></React.Suspense>
+        ) : null}
 
 
         {/* ── GUESTS: five short sections, all pointing at one action. ── */}
         {!user && (
           <div className="mt-14">
-            <GuestHomeSections topPlayers={topPlayers} />
+            <React.Suspense fallback={null}><GuestHomeSections topPlayers={topPlayers} /></React.Suspense>
           </div>
         )}
 
@@ -510,14 +514,14 @@ const Index = () => {
           <section id="daily-missions" className="scroll-mt-24 space-y-4">
             <SectionHeader title="Daily Challenge" icon={Target}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <LazyMount minHeight={180}><DailyPuzzleWidget /></LazyMount>
-                <LazyMount minHeight={180}><DailyMissions compact /></LazyMount>
+                <LazyMount minHeight={180}><React.Suspense fallback={null}><DailyPuzzleWidget /></React.Suspense></LazyMount>
+                <LazyMount minHeight={180}><React.Suspense fallback={null}><DailyMissions compact /></React.Suspense></LazyMount>
               </div>
             </SectionHeader>
           </section>
 
           {/* Daily King — single recognition banner */}
-          <LazyMount minHeight={120}><DailyKingBanner /></LazyMount>
+          <LazyMount minHeight={120}><React.Suspense fallback={null}><DailyKingBanner /></React.Suspense></LazyMount>
 
           {/* ─── QUICK MATCH — Arcade-style time control launcher ─── */}
           <SectionHeader title="Quick Match" icon={Zap} action={<ActivityPulse />}>
@@ -859,20 +863,20 @@ const Index = () => {
         {user && (
         <section className="px-4 pb-16">
           <div className="max-w-2xl mx-auto">
-            <InviteFriendsCard variant="share" />
+            <LazyMount minHeight={200}><React.Suspense fallback={null}><InviteFriendsCard variant="share" /></React.Suspense></LazyMount>
           </div>
         </section>
 
         )}
 
         {/* Supporter / tip CTA — keeps the project ad-free */}
-        {user && <SupporterCTA />}
+        {user && <LazyMount minHeight={160}><React.Suspense fallback={null}><SupporterCTA /></React.Suspense></LazyMount>}
 
         {/* FAQ — bottom of home, adds FAQPage rich snippet to Google */}
-        <HomeFaqSection />
+        <LazyMount minHeight={320}><React.Suspense fallback={null}><HomeFaqSection /></React.Suspense></LazyMount>
       </main>
 
-      <Footer />
+      <LazyMount minHeight={280}><React.Suspense fallback={null}><Footer /></React.Suspense></LazyMount>
 
       <React.Suspense fallback={null}>
         <StickyJoinBar />
