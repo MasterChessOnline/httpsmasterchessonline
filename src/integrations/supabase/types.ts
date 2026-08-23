@@ -5925,6 +5925,7 @@ export type Database = {
           samples: number
         }[]
       }
+      has_premium_access: { Args: { _user_id: string }; Returns: boolean }
       has_premium_pass: {
         Args: { _season: string; _user: string }
         Returns: boolean
