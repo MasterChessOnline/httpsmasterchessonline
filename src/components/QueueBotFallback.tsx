@@ -68,7 +68,7 @@ export default function QueueBotFallback({
             className="flex items-center justify-between gap-2 rounded-xl border border-border/60 bg-background/60 px-3 py-2 transition-colors hover:border-primary/50 hover:bg-primary/5"
           >
             <span className="flex min-w-0 items-center gap-2">
-              <span className="text-base leading-none">{b.avatar ?? "🤖"}</span>
+              <span className="text-base leading-none">{b.avatar && !b.avatar.includes("/") ? b.avatar : "🤖"}</span>
               <span className="truncate text-sm font-medium">{b.name}</span>
               <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
                 bot
