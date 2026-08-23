@@ -5506,6 +5506,7 @@ export type Database = {
       claim_weekly_spin: { Args: never; Returns: Json }
       claim_welcome_reward: { Args: never; Returns: Json }
       cleanup_stale_game: { Args: { p_user_id: string }; Returns: string }
+      cleanup_stale_online_games: { Args: never; Returns: Json }
       commit_online_move: {
         Args: {
           p_black_time: number
