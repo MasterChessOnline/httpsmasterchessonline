@@ -332,6 +332,150 @@ export const MATRIX_INTENTS: MatrixIntent[] = [
       { q: `Can I import this line into a study?`, a: `Yes — the move list on this page is standard algebraic notation, readable by any chess software.` },
     ],
   },
+  {
+    slug: "cheat-sheet",
+    label: "Cheat sheet",
+    angle: "one-page summary to memorise",
+    title: (n) => `${n} Cheat Sheet — One Page Summary`,
+    description: (n, m) =>
+      `${n} cheat sheet: the move order ${m}, the plan, the key squares and the three moves that lose. Everything on one page.`,
+    h1: (n) => `${n} cheat sheet`,
+    sections: (o) => [
+      { heading: "The 20-second version", body: `${o.startingMoves || "Main line on the board below"} — ${o.eco}, a ${o.category} line rated ${o.difficulty}. ${o.description}` },
+      { heading: "Remember these, forget the rest", body: `If you only keep four things from this opening, keep these.`, list: firstIdeas(o, 4) },
+      { heading: "Three ways players lose it", body: `Moving the queen out early, delaying castling past move ten, and trading a developed piece for an undeveloped one. All three lose more ${o.name} games than any theoretical novelty.` },
+    ],
+    faqs: (o) => [
+      { q: `What is the fastest way to learn the ${o.name}?`, a: `Learn the move order and the single main plan, then play ten games with it. Reading more theory before that is wasted time.` },
+      { q: `Can I print this cheat sheet?`, a: `Yes — the page is plain text and a board; printing keeps the move order and the plan list.` },
+    ],
+  },
+  {
+    slug: "pawn-structure",
+    label: "Pawn structure",
+    angle: "the structure and what it dictates",
+    title: (n) => `${n} Pawn Structure — Plans It Creates`,
+    description: (n, m) =>
+      `The ${n} pawn structure (${m}): which files open, where to attack, and which pieces become good or bad in it.`,
+    h1: (n) => `${n} pawn structure`,
+    sections: (o) => [
+      { heading: "The structure decides everything else", body: `Pieces come and go, pawns stay. In the ${o.name} the pawn skeleton tells you which side of the board is yours and which piece belongs on which square.`, list: firstIdeas(o, 4) },
+      { heading: "Attack where your pawns point", body: `Your pawn chain points at the side you should attack. That single rule replaces most of the ${o.eco} theory at club level.` },
+      { heading: "Good pieces, bad pieces", body: `A bishop blocked by your own pawn chain is not a bad piece if you can open the file it looks down. Before trading it, ask whether a pawn move can free it — in the ${o.name} it usually can.` },
+    ],
+    faqs: (o) => [
+      { q: `What pawn structure comes out of the ${o.name}?`, a: `${o.description}` },
+      { q: `Should I break in the centre or on the wing?`, a: `Break where you have more space. Central breaks are for when your opponent commits to a wing attack.` },
+    ],
+  },
+  {
+    slug: "middlegame-plans",
+    label: "Middlegame plans",
+    angle: "what to do after the theory ends",
+    title: (n) => `${n} Middlegame Plans — After the Theory`,
+    description: (n, m) =>
+      `What to play after the ${n} (${m}): the standard middlegame plans, the piece placement, and how these positions are actually won.`,
+    h1: (n) => `${n} middlegame plans`,
+    sections: (o) => [
+      { heading: "Theory ends around move eight", body: `Almost nobody loses a ${o.name} game in the opening. Games are lost on move fifteen, when a player has no plan and starts shuffling pieces.` },
+      { heading: "The plans that repeat every game", body: `These are the plans that come out of this structure again and again.`, list: firstIdeas(o, 5) },
+      { heading: "Choosing between two plans", body: `Count which side of the board you have more pieces aimed at, and play there. If it is even, improve your worst-placed piece — a free move is better than a random plan.` },
+    ],
+    faqs: (o) => [
+      { q: `What do I play after the ${o.name} opening moves?`, a: `Finish development, then pick the plan the pawn structure points to. The list above covers the plans that occur in almost every game of this line.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "common-mistakes",
+    label: "Common mistakes",
+    angle: "the mistakes that lose these games",
+    title: (n) => `${n} Common Mistakes — And the Fixes`,
+    description: (n, m) =>
+      `The mistakes that lose ${n} games (${m}): what club players do wrong, why it loses, and the concrete fix for each one.`,
+    h1: (n) => `${n} — the mistakes that lose games`,
+    sections: (o) => [
+      { heading: "Mistake one: playing moves, not plans", body: `Knowing ${o.startingMoves || "the main line"} is worthless without knowing why. Fix: after every opening move, name the plan out loud before you touch the next piece.`, list: firstIdeas(o, 3) },
+      { heading: "Mistake two: reacting to threats only", body: `In the ${o.name} the side that keeps making its own threats wins. Fix: before answering a threat, check whether a bigger threat of your own solves it.` },
+      { heading: "Mistake three: memorising instead of reviewing", body: `Reviewing three of your own losses in this opening teaches more than thirty pages of ${o.eco} theory. Fix: replay your last loss and stop at the first move you cannot explain.` },
+    ],
+    faqs: (o) => [
+      { q: `Why do I keep losing with the ${o.name}?`, a: `Almost always for one of the three reasons above — not because the opening is wrong for you. Review one lost game and the pattern shows immediately.` },
+      { q: `Is the ${o.name} a bad opening for club level?`, a: `No. Rated ${o.difficulty}, it is fully playable at any level as long as you follow the plan rather than the move list.` },
+    ],
+  },
+  {
+    slug: "for-blitz",
+    label: "For blitz",
+    angle: "playing it fast online",
+    title: (n) => `${n} in Blitz — Fast, Practical Lines`,
+    description: (n, m) =>
+      `The ${n} (${m}) in blitz and bullet: what to play on instinct, which lines cost too much time, and how to win on the clock.`,
+    h1: (n) => `${n} in blitz`,
+    sections: (o) => [
+      { heading: "Blitz rewards structure, not theory", body: `In a 3+0 game you get about four seconds per move. The ${o.name} works in blitz because the same structure appears every time — you recognise instead of calculate.`, list: firstIdeas(o, 4) },
+      { heading: "Lines to avoid when the clock is short", body: `Skip anything that needs a long forced sequence. If a line demands six accurate moves in a row, keep it for rapid and play the solid setup in blitz.` },
+      { heading: "Winning on the clock, honestly", body: `Play the moves you know fast, and spend your saved time at the first unfamiliar position. Most blitz games are decided by who thinks in the right moment, not who thinks less.` },
+    ],
+    faqs: (o) => [
+      { q: `Is the ${o.name} good for blitz?`, a: `Yes, once the move order is automatic. Repeating one opening across many blitz games is the cheapest rating gain available.` },
+      { q: `Which time control should I practise it in?`, a: `Learn it in 10+0, then move it into 3+0 once you stop thinking about the first eight moves.` },
+    ],
+  },
+  {
+    slug: "for-kids",
+    label: "For kids",
+    angle: "explained simply for young players",
+    title: (n) => `${n} for Kids — Simple Explanation`,
+    description: (n, m) =>
+      `The ${n} (${m}) explained simply for kids and new players: short sentences, one plan, and a board to try it on straight away.`,
+    h1: (n) => `${n} for kids and new players`,
+    sections: (o) => [
+      { heading: "What this opening does", body: `${o.description} That is the whole idea — everything else is detail.` },
+      { heading: "Four easy rules", body: `Follow these four and the opening plays itself.`, list: firstIdeas(o, 4) },
+      { heading: "Try it on the board", body: `Click through the moves above, then play a free game against a friendly bot and use the same first moves. Getting it wrong on the board is part of learning it.` },
+    ],
+    faqs: (o) => [
+      { q: `Is the ${o.name} suitable for children?`, a: `Yes — the move order is short and the plan is easy to say in one sentence, which is exactly what young players need.` },
+      { q: `What age can start learning openings?`, a: `As soon as a player knows how the pieces move and what checkmate is. Openings are just the first plan of the game.` },
+    ],
+  },
+  {
+    slug: "aggressive-lines",
+    label: "Aggressive lines",
+    angle: "sharp, attacking variations",
+    title: (n) => `Aggressive ${n} Lines — Attacking Setups`,
+    description: (n, m) =>
+      `The sharpest ${n} lines (${m}): attacking setups, sacrifices that work, and how to keep the initiative from move one.`,
+    h1: (n) => `Aggressive lines in the ${n}`,
+    sections: (o) => [
+      { heading: "Where the sharpness comes from", body: `Attacks in the ${o.name} are not random — they come from the same structural tension every game. Find that tension and the aggressive lines make sense.`, list: firstIdeas(o, 4) },
+      { heading: "Sacrifices worth making", body: `A pawn for two tempi and an open file is a good deal. A piece for "an attack" without a concrete follow-up is how attacking players lose rating.` },
+      { heading: "Keeping the initiative", body: `Every move must create a new problem. The moment you make a neutral move in a sharp ${o.eco} line, the extra material on the other side starts counting.` },
+    ],
+    faqs: (o) => [
+      { q: `What is the most aggressive line in the ${o.name}?`, a: `The lines that break in the centre early — they open files before the opponent castles, which is where the attack comes from.` },
+      { q: `Is aggressive play good at club level?`, a: `Very. Most club opponents defend worse than they attack, so pressure wins more games than accuracy does.` },
+    ],
+  },
+  {
+    slug: "famous-games",
+    label: "Famous games",
+    angle: "how strong players handled it",
+    title: (n) => `${n} in Master Games — What to Copy`,
+    description: (n, m) =>
+      `How strong players handle the ${n} (${m}): the recurring ideas from master practice and which of them belong in your own games.`,
+    h1: (n) => `The ${n} in master practice`,
+    sections: (o) => [
+      { heading: "What masters do differently here", body: `The move order is the same as yours. The difference is that a master decides the plan before the opening ends, and never spends a move without one.`, list: firstIdeas(o, 4) },
+      { heading: "What to copy and what to skip", body: `Copy the piece placement and the timing of the central break. Skip the deep ${o.eco} preparation — it only matters against opponents who also prepare.` },
+      { heading: "Study it the useful way", body: `Take one game in this opening, cover the moves, and guess each one. You learn more from twenty guessed moves than from a hundred watched ones.` },
+    ],
+    faqs: (o) => [
+      { q: `Which players use the ${o.name}?`, a: `It appears regularly in ${o.category} practice at every level, from club play to elite tournaments — the plans scale, only the preparation depth changes.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
 ];
 
 export const MATRIX_INTENT_SLUGS = MATRIX_INTENTS.map((i) => i.slug);
