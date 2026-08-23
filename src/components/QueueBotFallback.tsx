@@ -10,16 +10,15 @@ import { motion } from "framer-motion";
 import { Bot, ChevronRight } from "lucide-react";
 import { useFeatureFlag } from "@/lib/flags";
 import { trackRetention } from "@/lib/funnel";
-import { ONLINE_BOTS } from "@/lib/online-bots-data";
+import { BOT_PROFILES } from "@/lib/bots/profiles";
 
 /** Three honest warm-up levels: easy / medium / hard. */
+const WARMUP_IDS = ["newbie-nina", "tactic-tanvi", "counter-kira"];
+
 function pickBots() {
-  const sorted = [...ONLINE_BOTS].sort((a, b) => a.rating - b.rating);
-  if (sorted.length === 0) return [];
-  const at = (frac: number) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * frac))];
-  const picks = [sorted[0], at(0.4), at(0.75)];
-  const seen = new Set<string>();
-  return picks.filter((b) => b && !seen.has(b.id) && seen.add(b.id));
+  return WARMUP_IDS.map((id) => BOT_PROFILES.find((b) => b.id === id)).filter(
+    (b): b is (typeof BOT_PROFILES)[number] => !!b,
+  );
 }
 
 export default function QueueBotFallback({
@@ -57,7 +56,7 @@ export default function QueueBotFallback({
         {bots.map((b, i) => (
           <Link
             key={b.id}
-            to={`/bot/${b.id}`}
+            to={`/play?bot=${b.id}`}
             onClick={() =>
               trackRetention("bot_fallback_start", {
                 bot_id: b.id,
@@ -69,7 +68,7 @@ export default function QueueBotFallback({
             className="flex items-center justify-between gap-2 rounded-xl border border-border/60 bg-background/60 px-3 py-2 transition-colors hover:border-primary/50 hover:bg-primary/5"
           >
             <span className="flex min-w-0 items-center gap-2">
-              <span className="text-base leading-none">{b.flag}</span>
+              <span className="text-base leading-none">{b.avatar && !b.avatar.includes("/") ? b.avatar : "🤖"}</span>
               <span className="truncate text-sm font-medium">{b.name}</span>
               <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
                 bot
