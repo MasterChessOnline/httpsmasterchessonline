@@ -16,22 +16,17 @@ export default function SiteStatsNote({ className = "" }: { className?: string }
 
     const load = async () => {
       try {
-        const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-        const [p, g] = await Promise.all([
-          supabase.from("profiles").select("id", { count: "exact", head: true }),
-          supabase
-            .from("online_games")
-            .select("id", { count: "exact", head: true })
-            .eq("status", "active")
-            .gte("created_at", since),
-        ]);
-        if (cancelled) return;
-        setPlayers(p.count ?? 0);
-        setLive(g.count ?? 0);
+        // One public aggregate call — works for anonymous visitors and never
+        // exposes any row-level data.
+        const { data } = await (supabase.rpc as any)("get_open_stats");
+        if (cancelled || !data) return;
+        setPlayers(Number(data.players_total ?? 0));
+        setLive(Number(data.live_games_now ?? 0));
       } catch {
         /* stay hidden */
       }
     };
+
 
     load();
     const id = window.setInterval(load, 60_000);
