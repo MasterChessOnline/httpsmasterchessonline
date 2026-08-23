@@ -42,9 +42,10 @@ export default function SiteStatsNote({ className = "" }: { className?: string }
   if (players === null) return null;
 
   return (
-    <div
-      className={`inline-flex items-center gap-3 rounded-full border border-border/50 bg-card/50 px-3 py-1.5 text-[11px] text-muted-foreground ${className}`}
-      aria-label="MasterChess community stats"
+    <Link
+      to="/open"
+      className={`inline-flex items-center gap-3 rounded-full border border-border/50 bg-card/50 px-3 py-1.5 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground ${className}`}
+      aria-label="MasterChess community stats — see our open numbers"
     >
       <span className="inline-flex items-center gap-1.5">
         <Users className="h-3.5 w-3.5 text-primary" />
@@ -55,6 +56,8 @@ export default function SiteStatsNote({ className = "" }: { className?: string }
         <Swords className="h-3.5 w-3.5 text-primary" />
         <span className="font-semibold text-foreground">{live ?? 0}</span> live games
       </span>
-    </div>
+      <span className="hidden sm:inline opacity-60">· open numbers</span>
+    </Link>
   );
 }
+
