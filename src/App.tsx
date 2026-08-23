@@ -385,7 +385,9 @@ function AnimatedRoutes() {
           <Route path="/play/online" element={<PlayOnline />} />
           <Route path="/lobby" element={<Lobby />} />
           <Route path="/watch" element={<Watch />} />
+          <Route path="/watch/:id" element={<WatchGame />} />
           <Route path="/open" element={<Open />} />
+
 
           <Route path="/play/titles" element={<Titles />} />
           <Route path="/learn" element={<Learn />} />
