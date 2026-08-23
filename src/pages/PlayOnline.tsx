@@ -953,6 +953,9 @@ const PlayOnline = () => {
 
             <PrimeTimeBanner />
 
+            <QueueBeacon waiting={onlineStatus === "searching"} />
+
+
             {onlineError && <p className="text-sm text-destructive text-center">{onlineError}</p>}
 
             {onlineStatus === "searching" ? (
