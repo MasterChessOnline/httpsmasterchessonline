@@ -1,14 +1,6 @@
 import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import HomeFaqSection from "@/components/HomeFaqSection";
-import SupporterCTA from "@/components/SupporterCTA";
-import DiscoverStrip from "@/components/DiscoverStrip";
-import SiteRating from "@/components/SiteRating";
-import ReviewsCta from "@/components/ReviewsCta";
-import DailyKingBanner from "@/components/DailyKingBanner";
-import SeasonBanner from "@/components/SeasonBanner";
-import InviteFriendsCard from "@/components/friends/InviteFriendsCard";
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,7 +31,6 @@ import {
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
-import posterImage from "@/assets/masterchess-poster.jpg";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
@@ -48,25 +39,15 @@ import { trackSignupCta } from "@/lib/funnel";
 import ParallaxCard from "@/components/ParallaxCard";
 // Heavy animated background — desktop only, lazy-loaded to keep mobile bundle/CPU light.
 const ChessUniverseBackground = React.lazy(() => import("@/components/ChessUniverseBackground"));
-import DailyMissions from "@/components/DailyMissions";
-import DailyMysteryBox from "@/components/DailyMysteryBox";
-import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
-import DailyRewards7Strip from "@/components/DailyRewards7Strip";
-import ShopHomeStrip from "@/components/ShopHomeStrip";
 
-import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
 import InstallAppButton from "@/components/InstallAppButton";
 
-import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
-import InstantHeroBoard from "@/components/InstantHeroBoard";
-import DailyHookCard from "@/components/DailyHookCard";
-import GuestHomeSections from "@/components/home/GuestHomeSections";
 import SiteStatsNote from "@/components/SiteStatsNote";
 import PrimeTimeBanner from "@/components/PrimeTimeBanner";
 
@@ -78,22 +59,28 @@ import { getGuestProgress } from "@/lib/guestProgress";
 import LazyMount from "@/components/LazyMount";
 import TonightArenaBanner from "@/components/TonightArenaBanner";
 import WinStreakFlame from "@/components/WinStreakFlame";
-import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
-import SocialFollowStrip from "@/components/SocialFollowStrip";
 
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
 // and stabilize first paint on mobile.
 const HomeSpinWheelSection = React.lazy(() => import("@/components/HomeSpinWheelSection"));
-const LiveActivityFeed = React.lazy(() => import("@/components/LiveActivityFeed"));
 const WhyMasterChess = React.lazy(() => import("@/components/landing/WhyMasterChess"));
-const WhyInvest = React.lazy(() => import("@/components/landing/WhyInvest"));
-const TestimonialsCarousel = React.lazy(() => import("@/components/landing/TestimonialsCarousel"));
-const ProofStrip = React.lazy(() => import("@/components/landing/ProofStrip"));
-const Manifesto = React.lazy(() => import("@/components/landing/Manifesto"));
-const WallOfReasons = React.lazy(() => import("@/components/landing/WallOfReasons"));
 const StickyJoinBar = React.lazy(() => import("@/components/landing/StickyJoinBar"));
+
+// The board and every section under the first screen load as their own chunks:
+// the entry bundle stays small, which is what mobile first paint actually feels.
+const InstantHeroBoard = React.lazy(() => import("@/components/InstantHeroBoard"));
+const DailyHookCard = React.lazy(() => import("@/components/DailyHookCard"));
+const GuestHomeSections = React.lazy(() => import("@/components/home/GuestHomeSections"));
+const DailyPuzzleWidget = React.lazy(() => import("@/components/DailyPuzzleWidget"));
+const DailyMissions = React.lazy(() => import("@/components/DailyMissions"));
+const DailyKingBanner = React.lazy(() => import("@/components/DailyKingBanner"));
+const InviteFriendsCard = React.lazy(() => import("@/components/friends/InviteFriendsCard"));
+const SupporterCTA = React.lazy(() => import("@/components/SupporterCTA"));
+const HomeFaqSection = React.lazy(() => import("@/components/HomeFaqSection"));
+const Footer = React.lazy(() => import("@/components/Footer"));
+
 
 interface RecentGame {
   id: string;
@@ -425,7 +412,9 @@ const Index = () => {
 
         {/* ── INSTANT PLAY: a real board right under the CTA, so a curious
               visitor can start without an account. ── */}
-        <InstantHeroBoard headingLevel="h2" hideHeading />
+        <React.Suspense fallback={<div className="mx-auto h-[360px] max-w-md" />}>
+          <InstantHeroBoard headingLevel="h2" hideHeading />
+        </React.Suspense>
 
         {/* ── RETENTION HOOK ── */}
         {/* One fixed hour a day where the queue is guaranteed to have people —
@@ -433,13 +422,15 @@ const Index = () => {
         <div className="mt-6 max-w-2xl mx-auto px-4">
           <PrimeTimeBanner />
         </div>
-        {user || guestPlayed ? <DailyHookCard className="mt-6" /> : null}
+        {user || guestPlayed ? (
+          <React.Suspense fallback={null}><DailyHookCard className="mt-6" /></React.Suspense>
+        ) : null}
 
 
         {/* ── GUESTS: five short sections, all pointing at one action. ── */}
         {!user && (
           <div className="mt-14">
-            <GuestHomeSections topPlayers={topPlayers} />
+            <React.Suspense fallback={null}><GuestHomeSections topPlayers={topPlayers} /></React.Suspense>
           </div>
         )}
 
@@ -523,14 +514,14 @@ const Index = () => {
           <section id="daily-missions" className="scroll-mt-24 space-y-4">
             <SectionHeader title="Daily Challenge" icon={Target}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <LazyMount minHeight={180}><DailyPuzzleWidget /></LazyMount>
-                <LazyMount minHeight={180}><DailyMissions compact /></LazyMount>
+                <LazyMount minHeight={180}><React.Suspense fallback={null}><DailyPuzzleWidget /></React.Suspense></LazyMount>
+                <LazyMount minHeight={180}><React.Suspense fallback={null}><DailyMissions compact /></React.Suspense></LazyMount>
               </div>
             </SectionHeader>
           </section>
 
           {/* Daily King — single recognition banner */}
-          <LazyMount minHeight={120}><DailyKingBanner /></LazyMount>
+          <LazyMount minHeight={120}><React.Suspense fallback={null}><DailyKingBanner /></React.Suspense></LazyMount>
 
           {/* ─── QUICK MATCH — Arcade-style time control launcher ─── */}
           <SectionHeader title="Quick Match" icon={Zap} action={<ActivityPulse />}>
@@ -872,20 +863,20 @@ const Index = () => {
         {user && (
         <section className="px-4 pb-16">
           <div className="max-w-2xl mx-auto">
-            <InviteFriendsCard variant="share" />
+            <LazyMount minHeight={200}><React.Suspense fallback={null}><InviteFriendsCard variant="share" /></React.Suspense></LazyMount>
           </div>
         </section>
 
         )}
 
         {/* Supporter / tip CTA — keeps the project ad-free */}
-        {user && <SupporterCTA />}
+        {user && <LazyMount minHeight={160}><React.Suspense fallback={null}><SupporterCTA /></React.Suspense></LazyMount>}
 
         {/* FAQ — bottom of home, adds FAQPage rich snippet to Google */}
-        <HomeFaqSection />
+        <LazyMount minHeight={320}><React.Suspense fallback={null}><HomeFaqSection /></React.Suspense></LazyMount>
       </main>
 
-      <Footer />
+      <LazyMount minHeight={280}><React.Suspense fallback={null}><Footer /></React.Suspense></LazyMount>
 
       <React.Suspense fallback={null}>
         <StickyJoinBar />

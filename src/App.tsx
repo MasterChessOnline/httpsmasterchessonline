@@ -7,11 +7,27 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Suspense, lazy } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import RouteLoader from "@/components/RouteLoader";
-import SiteRatingJsonLd from "@/components/SiteRatingJsonLd";
-import CursorGlow from "@/components/CursorGlow";
-import DepthLayers from "@/components/DepthLayers";
-import MobileBottomNav from "@/components/MobileBottomNav";
-import BrakusRibbon from "@/components/BrakusRibbon";
+
+// App chrome is not part of the first paint — each piece loads as its own
+// chunk so the entry bundle stays small on phones.
+const CursorGlow = lazy(() => import("@/components/CursorGlow"));
+const DepthLayers = lazy(() => import("@/components/DepthLayers"));
+const MobileBottomNav = lazy(() => import("@/components/MobileBottomNav"));
+const BrakusRibbon = lazy(() => import("@/components/BrakusRibbon"));
+const AntiTiltWatcher = lazy(() => import("@/components/AntiTiltWatcher"));
+const FloatingShareButton = lazy(() => import("@/components/FloatingShareButton"));
+const FloatingPlayNow = lazy(() => import("@/components/FloatingPlayNow"));
+const GuestSignupBar = lazy(() => import("@/components/GuestSignupBar"));
+const BackendStatusBanner = lazy(() => import("@/components/BackendStatusBanner"));
+const PendingSignupResume = lazy(() => import("@/components/PendingSignupResume"));
+const StreakFlexController = lazy(() => import("@/components/StreakFlexController"));
+const TitleUnlockGate = lazy(() => import("@/components/TitleUnlockGate"));
+const GameInviteListener = lazy(() => import("@/components/GameInviteListener"));
+const Analytics = lazy(() => import("@/components/Analytics"));
+const OfflineBanner = lazy(() => import("@/components/OfflineBanner"));
+const DonationMilestoneBodyAttr = lazy(() => import("@/components/DonationMilestoneBodyAttr"));
+const SiteRatingJsonLd = lazy(() => import("@/components/SiteRatingJsonLd"));
+const ReferralTracker = lazy(() => import("@/hooks/useReferralTracker"));
 // Critical / eager route — safe Home shell first, rich Home upgrades after idle.
 import Index from "./pages/IndexFull";
 import NotFound from "./pages/NotFound";
@@ -230,19 +246,6 @@ const NikolaVsNiemann = lazy(() => import("./pages/NikolaVsNiemann"));
 
 
 // Eager components (used in every page chrome)
-import AntiTiltWatcher from "@/components/AntiTiltWatcher";
-import FloatingShareButton from "@/components/FloatingShareButton";
-import FloatingPlayNow from "@/components/FloatingPlayNow";
-import GuestSignupBar from "@/components/GuestSignupBar";
-import BackendStatusBanner from "@/components/BackendStatusBanner";
-import PendingSignupResume from "@/components/PendingSignupResume";
-import StreakFlexController from "@/components/StreakFlexController";
-import TitleUnlockGate from "@/components/TitleUnlockGate";
-import GameInviteListener from "@/components/GameInviteListener";
-import Analytics from "@/components/Analytics";
-import OfflineBanner from "@/components/OfflineBanner";
-import ReferralTracker from "@/hooks/useReferralTracker";
-import DonationMilestoneBodyAttr from "@/components/DonationMilestoneBodyAttr";
 
 
 // Non-critical overlays — lazy-loaded so they don't block first paint.
@@ -309,8 +312,8 @@ function AppChrome() {
   if (isHome && isMobile) {
     return (
       <>
-        <BackendStatusBanner />
-        <PendingSignupResume />
+        <Suspense fallback={null}><BackendStatusBanner /></Suspense>
+        <Suspense fallback={null}><PendingSignupResume /></Suspense>
         <Suspense fallback={null}><SocialTrafficRouter /></Suspense>
       </>
     );
@@ -318,18 +321,18 @@ function AppChrome() {
 
   return (
     <>
-      <DepthLayers />
-      <CursorGlow />
-      <AntiTiltWatcher />
-      <TitleUnlockGate />
-      <GameInviteListener />
-      <BrakusRibbon />
-      <StreakFlexController />
-      <FloatingShareButton />
-      <FloatingPlayNow />
-      <GuestSignupBar />
-      <BackendStatusBanner />
-      <PendingSignupResume />
+      <Suspense fallback={null}><DepthLayers /></Suspense>
+      <Suspense fallback={null}><CursorGlow /></Suspense>
+      <Suspense fallback={null}><AntiTiltWatcher /></Suspense>
+      <Suspense fallback={null}><TitleUnlockGate /></Suspense>
+      <Suspense fallback={null}><GameInviteListener /></Suspense>
+      <Suspense fallback={null}><BrakusRibbon /></Suspense>
+      <Suspense fallback={null}><StreakFlexController /></Suspense>
+      <Suspense fallback={null}><FloatingShareButton /></Suspense>
+      <Suspense fallback={null}><FloatingPlayNow /></Suspense>
+      <Suspense fallback={null}><GuestSignupBar /></Suspense>
+      <Suspense fallback={null}><BackendStatusBanner /></Suspense>
+      <Suspense fallback={null}><PendingSignupResume /></Suspense>
       <Suspense fallback={null}><SocialTrafficRouter /></Suspense>
       <Suspense fallback={null}><ChannelWelcomeBanner /></Suspense>
 
@@ -338,7 +341,7 @@ function AppChrome() {
 }
 
 function AppMobileNav() {
-  return <MobileBottomNav />;
+  return <Suspense fallback={null}><MobileBottomNav /></Suspense>;
 }
 
 function useRouteZone() {
@@ -659,9 +662,9 @@ function AnimatedRoutes() {
 
   return (
     <>
-      <Analytics />
-      <ReferralTracker />
-      <DonationMilestoneBodyAttr />
+      <Suspense fallback={null}><Analytics /></Suspense>
+      <Suspense fallback={null}><ReferralTracker /></Suspense>
+      <Suspense fallback={null}><DonationMilestoneBodyAttr /></Suspense>
       {routeContent}
     </>
   );
@@ -672,11 +675,11 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <OfflineBanner />
+          <Suspense fallback={null}><OfflineBanner /></Suspense>
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <SiteRatingJsonLd />
+            <Suspense fallback={null}><SiteRatingJsonLd /></Suspense>
             <div className="pb-16 md:pb-0">
               <AnimatedRoutes />
             </div>
