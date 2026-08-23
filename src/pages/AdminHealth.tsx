@@ -47,6 +47,9 @@ const FUNNEL_ORDER = [
   "game_finished",
   "second_game",
   "rematch",
+  "rematch_click",
+  "bot_fallback_start",
+  "reminder_optin",
   "day_1_return",
 ];
 
