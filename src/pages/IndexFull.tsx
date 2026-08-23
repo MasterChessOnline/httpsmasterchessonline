@@ -68,6 +68,8 @@ import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
 import GuestHomeSections from "@/components/home/GuestHomeSections";
 import SiteStatsNote from "@/components/SiteStatsNote";
+import PrimeTimeBanner from "@/components/PrimeTimeBanner";
+
 
 import { getGuestProgress } from "@/lib/guestProgress";
 
