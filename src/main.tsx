@@ -63,6 +63,13 @@ afterFirstPaint(async () => {
   // Funnel: records the visit day so a next-day return is measurable.
   import("./lib/funnel").then((m) => safeRun(m.markVisit)).catch(() => {});
   safeRun(analytics.bootstrapAnalytics);
+  // Monitoring (errors + real-user Core Web Vitals) — plan sections 23/24.
+  import("./lib/monitoring")
+    .then((m) => {
+      safeRun(m.bootstrapMonitoring);
+      void m.reportFunnel("page_view");
+    })
+    .catch(() => {});
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations?.()
