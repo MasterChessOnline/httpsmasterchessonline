@@ -96,7 +96,7 @@ export default function ComeBackTomorrowCard({ className = "" }: { className?: s
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         {nextReward
-          ? `Play one game tomorrow to reach day ${nextReward.day} — ${nextReward.label ?? "streak reward"}.`
+          ? `Play one game tomorrow toward day ${nextReward.days} — ${nextReward.icon} ${nextReward.title} (+${nextReward.xp} XP).`
           : "Play one game a day to keep your streak alive."}
       </p>
 

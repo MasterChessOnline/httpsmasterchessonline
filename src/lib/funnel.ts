@@ -91,3 +91,12 @@ export function lastSignupSurface(): string | null {
     return null;
   }
 }
+
+/**
+ * Retention-side events (plan P1): bot warm-up while queueing, reminder opt-ins,
+ * rematch clicks. Same pipeline as the activation funnel, so `/admin/health`
+ * shows them next to signup → first game.
+ */
+export function trackRetention(name: string, params: Record<string, unknown> = {}): void {
+  emit(name, { ...params, games_total: gamesPlayed() });
+}
