@@ -67,6 +67,8 @@ import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
 import GuestHomeSections from "@/components/home/GuestHomeSections";
+import SiteStatsNote from "@/components/SiteStatsNote";
+
 import { getGuestProgress } from "@/lib/guestProgress";
 
 
