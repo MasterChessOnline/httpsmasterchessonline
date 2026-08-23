@@ -300,6 +300,7 @@ function RootDeferredOverlays() {
 
 const ChannelWelcomeBanner = lazy(() => import("@/components/ChannelWelcomeBanner"));
 const SocialTrafficRouter = lazy(() => import("@/components/SocialTrafficRouter"));
+const LiveGameResumeBar = lazy(() => import("@/components/LiveGameResumeBar"));
 
 function AppChrome() {
   const location = useLocation();
@@ -315,6 +316,7 @@ function AppChrome() {
         <Suspense fallback={null}><BackendStatusBanner /></Suspense>
         <Suspense fallback={null}><PendingSignupResume /></Suspense>
         <Suspense fallback={null}><SocialTrafficRouter /></Suspense>
+        <Suspense fallback={null}><LiveGameResumeBar /></Suspense>
       </>
     );
   }
@@ -335,6 +337,7 @@ function AppChrome() {
       <Suspense fallback={null}><PendingSignupResume /></Suspense>
       <Suspense fallback={null}><SocialTrafficRouter /></Suspense>
       <Suspense fallback={null}><ChannelWelcomeBanner /></Suspense>
+      <Suspense fallback={null}><LiveGameResumeBar /></Suspense>
 
     </>
   );
