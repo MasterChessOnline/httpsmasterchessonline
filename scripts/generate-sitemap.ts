@@ -17,6 +17,7 @@ import { SEO_CITIES } from "../src/lib/seo-cities";
 import { SR_LANDINGS } from "../src/lib/seo-landings-sr";
 import { EN_LANDINGS } from "../src/lib/seo-landings-en";
 import { AGE_GUIDES } from "../src/data/ageGuides";
+import { listMatrixPaths } from "../src/lib/seo-matrix";
 
 const BASE_URL = "https://masterchess.live";
 
@@ -473,6 +474,13 @@ writeFileSync(resolve("public/sitemap-chess-for.xml"), buildUrlset(ageGuideEntri
 writeFileSync(resolve("public/sitemap-news.xml"), buildUrlset(newsEntries));
 writeFileSync(resolve("public/news-sitemap.xml"), newsSitemapXml);
 writeFileSync(resolve("public/rss.xml"), rssXml);
+// Opening x intent long-tail matrix
+const matrixEntries: SitemapEntry[] = [
+  { path: "/opening-guides", changefreq: "weekly", priority: "0.8" },
+  ...listMatrixPaths().map((path) => ({ path, changefreq: "monthly" as const, priority: "0.6" })),
+];
+writeFileSync(resolve("public/sitemap-opening-guides.xml"), buildUrlset(matrixEntries));
+
 writeFileSync(resolve("public/sitemap-images.xml"), buildUrlset(imageEntries, true));
 
 const indexXml = [
@@ -494,10 +502,11 @@ const indexXml = [
   `  <sitemap><loc>${BASE_URL}/sitemap-chess-for.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-news.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/news-sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/sitemap-opening-guides.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `  <sitemap><loc>${BASE_URL}/sitemap-images.xml</loc><lastmod>${today}</lastmod></sitemap>`,
   `</sitemapindex>`,
 ].join("\n");
 writeFileSync(resolve("public/sitemap_index.xml"), indexXml);
 
-console.log(`✓ static (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + tools (${toolsEntries.length}) + mates (${mateEntries.length}) + elo (${eloEntries.length}) + games (${famousGameEntries.length}) + players (${playerEntries.length}) + news (${NEWS_ARTICLES.length}) + images (${imageEntries.length})`);
+console.log(`✓ static (${staticEntries.length}) + openings (${openingEntries.length}) + bots (${botEntries.length}) + glossary (${glossaryEntries.length}) + tools (${toolsEntries.length}) + mates (${mateEntries.length}) + elo (${eloEntries.length}) + games (${famousGameEntries.length}) + players (${playerEntries.length}) + news (${NEWS_ARTICLES.length}) + images (${imageEntries.length}) + opening-guides (${matrixEntries.length})`);
 
