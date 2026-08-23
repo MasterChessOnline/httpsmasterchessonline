@@ -2470,6 +2470,27 @@ export type Database = {
         }
         Relationships: []
       }
+      opponent_alert_optins: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          last_alerted_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          last_alerted_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          last_alerted_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       partner_applications: {
         Row: {
           city: string | null
@@ -2673,6 +2694,27 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prime_time_rsvp: {
+        Row: {
+          created_at: string
+          id: string
+          play_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          play_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          play_date?: string
           user_id?: string
         }
         Relationships: []
@@ -5664,6 +5706,7 @@ export type Database = {
           fide_id: string
         }[]
       }
+      get_open_stats: { Args: never; Returns: Json }
       get_or_create_clan_quest: {
         Args: { p_club_id: string }
         Returns: {
@@ -5779,6 +5822,7 @@ export type Database = {
         }
         Returns: Json
       }
+      prime_time_rsvp_count: { Args: { _day?: string }; Returns: number }
       public_confessions: {
         Args: { p_limit?: number }
         Returns: {

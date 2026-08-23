@@ -68,6 +68,8 @@ import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
 import GuestHomeSections from "@/components/home/GuestHomeSections";
 import SiteStatsNote from "@/components/SiteStatsNote";
+import PrimeTimeBanner from "@/components/PrimeTimeBanner";
+
 
 import { getGuestProgress } from "@/lib/guestProgress";
 
@@ -426,7 +428,13 @@ const Index = () => {
         <InstantHeroBoard headingLevel="h2" hideHeading />
 
         {/* ── RETENTION HOOK ── */}
+        {/* One fixed hour a day where the queue is guaranteed to have people —
+            the single strongest answer to "I clicked play and nobody was there". */}
+        <div className="mt-6 max-w-2xl mx-auto px-4">
+          <PrimeTimeBanner />
+        </div>
         {user || guestPlayed ? <DailyHookCard className="mt-6" /> : null}
+
 
         {/* ── GUESTS: five short sections, all pointing at one action. ── */}
         {!user && (

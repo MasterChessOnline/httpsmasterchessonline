@@ -8,6 +8,13 @@
     <image:image><image:loc>https://masterchess.live/og-image.jpg</image:loc><image:title>MasterChess — Play Chess Online Free</image:title><image:caption>Free online chess platform with AI coach, tournaments, and lessons.</image:caption></image:image>
   </url>
   <url>
+    <loc>https://masterchess.live/open</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+
     <loc>https://masterchess.live/built-by-a-kid</loc>
     <lastmod>2026-08-23</lastmod>
     <changefreq>monthly</changefreq>
