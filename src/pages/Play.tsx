@@ -582,6 +582,7 @@ const Play = () => {
 
   // `/play?bot=<id>` → start that bot immediately (used by bot profiles and by
   // the "warm up against a bot" offer on an empty matchmaking queue).
+  const [searchParams] = useSearchParams();
   const botParamFiredRef = useRef(false);
   useEffect(() => {
     if (botParamFiredRef.current) return;
