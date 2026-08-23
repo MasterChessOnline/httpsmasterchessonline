@@ -575,7 +575,12 @@ export function useOnlineGame() {
       };
 
       const pollInterval = setInterval(async () => {
+        // Tell the server this tab is still waiting, so the opponent's claim
+        // never pairs against a ghost row left behind by a closed tab.
+        void supabase.rpc("queue_heartbeat" as any).then(() => {}, () => {});
+
         const { data: games } = await supabase
+
           .from("online_games")
           .select("*")
           .eq("status", "active")

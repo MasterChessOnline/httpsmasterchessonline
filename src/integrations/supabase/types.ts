@@ -2000,6 +2000,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_seen: string
           rating: number
           time_control_label: string
           user_id: string
@@ -2007,6 +2008,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          last_seen?: string
           rating?: number
           time_control_label?: string
           user_id: string
@@ -2014,6 +2016,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          last_seen?: string
           rating?: number
           time_control_label?: string
           user_id?: string
@@ -5506,6 +5509,7 @@ export type Database = {
       claim_weekly_spin: { Args: never; Returns: Json }
       claim_welcome_reward: { Args: never; Returns: Json }
       cleanup_stale_game: { Args: { p_user_id: string }; Returns: string }
+      cleanup_stale_online_games: { Args: never; Returns: Json }
       commit_online_move: {
         Args: {
           p_black_time: number
@@ -5836,6 +5840,7 @@ export type Database = {
         Args: { p_item_key: string; p_item_type: string; p_price: number }
         Returns: Json
       }
+      queue_heartbeat: { Args: never; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
