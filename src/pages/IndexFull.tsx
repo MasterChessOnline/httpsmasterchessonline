@@ -31,7 +31,6 @@ import {
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
-import posterImage from "@/assets/masterchess-poster.jpg";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
 import { Instagram } from "lucide-react";
@@ -40,25 +39,15 @@ import { trackSignupCta } from "@/lib/funnel";
 import ParallaxCard from "@/components/ParallaxCard";
 // Heavy animated background — desktop only, lazy-loaded to keep mobile bundle/CPU light.
 const ChessUniverseBackground = React.lazy(() => import("@/components/ChessUniverseBackground"));
-import DailyMissions from "@/components/DailyMissions";
-import DailyMysteryBox from "@/components/DailyMysteryBox";
-import DailyPuzzleWidget from "@/components/DailyPuzzleWidget";
-import DailyRewards7Strip from "@/components/DailyRewards7Strip";
-import ShopHomeStrip from "@/components/ShopHomeStrip";
 
-import TrustStrip from "@/components/TrustStrip";
 import ActivityPulse from "@/components/ActivityPulse";
 import { useI18n } from "@/i18n/I18nProvider";
 import InstallAppButton from "@/components/InstallAppButton";
 
-import FounderNote from "@/components/landing/FounderNote";
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
-import InstantHeroBoard from "@/components/InstantHeroBoard";
-import DailyHookCard from "@/components/DailyHookCard";
-import GuestHomeSections from "@/components/home/GuestHomeSections";
 import SiteStatsNote from "@/components/SiteStatsNote";
 import PrimeTimeBanner from "@/components/PrimeTimeBanner";
 
@@ -70,22 +59,28 @@ import { getGuestProgress } from "@/lib/guestProgress";
 import LazyMount from "@/components/LazyMount";
 import TonightArenaBanner from "@/components/TonightArenaBanner";
 import WinStreakFlame from "@/components/WinStreakFlame";
-import BeatNikolaTeaser from "@/components/BeatNikolaTeaser";
 import { useDeviceCapability } from "@/hooks/use-device-capability";
-import SocialFollowStrip from "@/components/SocialFollowStrip";
 
 
 // Below-the-fold heavy sections — code-split to shrink initial JS bundle
 // and stabilize first paint on mobile.
 const HomeSpinWheelSection = React.lazy(() => import("@/components/HomeSpinWheelSection"));
-const LiveActivityFeed = React.lazy(() => import("@/components/LiveActivityFeed"));
 const WhyMasterChess = React.lazy(() => import("@/components/landing/WhyMasterChess"));
-const WhyInvest = React.lazy(() => import("@/components/landing/WhyInvest"));
-const TestimonialsCarousel = React.lazy(() => import("@/components/landing/TestimonialsCarousel"));
-const ProofStrip = React.lazy(() => import("@/components/landing/ProofStrip"));
-const Manifesto = React.lazy(() => import("@/components/landing/Manifesto"));
-const WallOfReasons = React.lazy(() => import("@/components/landing/WallOfReasons"));
 const StickyJoinBar = React.lazy(() => import("@/components/landing/StickyJoinBar"));
+
+// The board and every section under the first screen load as their own chunks:
+// the entry bundle stays small, which is what mobile first paint actually feels.
+const InstantHeroBoard = React.lazy(() => import("@/components/InstantHeroBoard"));
+const DailyHookCard = React.lazy(() => import("@/components/DailyHookCard"));
+const GuestHomeSections = React.lazy(() => import("@/components/home/GuestHomeSections"));
+const DailyPuzzleWidget = React.lazy(() => import("@/components/DailyPuzzleWidget"));
+const DailyMissions = React.lazy(() => import("@/components/DailyMissions"));
+const DailyKingBanner = React.lazy(() => import("@/components/DailyKingBanner"));
+const InviteFriendsCard = React.lazy(() => import("@/components/friends/InviteFriendsCard"));
+const SupporterCTA = React.lazy(() => import("@/components/SupporterCTA"));
+const HomeFaqSection = React.lazy(() => import("@/components/HomeFaqSection"));
+const Footer = React.lazy(() => import("@/components/Footer"));
+
 
 interface RecentGame {
   id: string;
