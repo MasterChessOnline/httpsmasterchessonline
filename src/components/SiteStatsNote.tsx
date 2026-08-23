@@ -3,7 +3,9 @@
 // Deliberately tiny and off to the side so a small number never dominates the hero.
 import { useEffect, useState } from "react";
 import { Users, Swords } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+
 
 export default function SiteStatsNote({ className = "" }: { className?: string }) {
   const [players, setPlayers] = useState<number | null>(null);
