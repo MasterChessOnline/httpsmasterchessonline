@@ -79,17 +79,16 @@ const Achievements = () => {
           default: break;
         }
         if (qualifies) {
-          const { error } = await supabase.from("user_achievements").insert({ user_id: user.id, achievement_id: ach.id });
-          if (!error) {
+          // Granted server-side: the RPC re-verifies the requirement, so an
+          // unearned achievement can never be inserted from the client.
+          const { data: granted, error } = await supabase.rpc("claim_achievement", {
+            _achievement_id: ach.id,
+          });
+          if (!error && granted) {
             setEarned((prev) => new Set([...prev, ach.id]));
             if (ach.reward_type === "collectible" && ach.reward_value) {
               const collectible = COLLECTIBLES.find((c) => c.key === ach.reward_value);
               if (collectible && !collectibles.has(ach.reward_value)) {
-                await supabase.from("user_collectibles").insert({
-                  user_id: user.id,
-                  collectible_type: collectible.type,
-                  collectible_key: ach.reward_value,
-                });
                 setCollectibles((prev) => new Set([...prev, ach.reward_value!]));
               }
             }

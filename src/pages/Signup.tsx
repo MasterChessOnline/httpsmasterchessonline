@@ -209,12 +209,12 @@ const Signup = () => {
     }
 
     const newUserId = data.user?.id;
-    if (newUserId) {
+    if (newUserId && data.session) {
+      // Runs only with a live session (otherwise row-level security rejects it),
+      // and never touches rating/stat columns — those are seeded server-side.
       window.setTimeout(() => {
         const patch: any = {
           display_name: autoDisplay,
-          rating: seedRating,
-          peak_rating: seedRating,
         };
         if (fideFound) {
           patch.first_name = firstName || null;

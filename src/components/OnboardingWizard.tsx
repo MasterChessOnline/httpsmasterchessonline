@@ -31,6 +31,9 @@ export default function OnboardingWizard() {
 
   useEffect(() => {
     if (!user) return;
+    // Never interrupt an active board — the first game must stay playable.
+    const path = window.location.pathname;
+    if (path.startsWith("/play") || path.startsWith("/game") || path.startsWith("/ig")) return;
     (async () => {
       const { data } = await supabase
         .from("profiles")
@@ -43,6 +46,7 @@ export default function OnboardingWizard() {
       }
     })();
   }, [user]);
+
 
   const finish = async (inviteAction?: "invite" | "skip") => {
     if (!user) return;
