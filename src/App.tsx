@@ -162,6 +162,8 @@ const StoryMode = lazy(() => import("./pages/StoryMode"));
 const OpeningTrainer = lazy(() => import("./pages/OpeningTrainer"));
 const OpeningExplorer = lazy(() => import("./pages/OpeningExplorer"));
 const OpeningLanding = lazy(() => import("./pages/OpeningLanding"));
+const OpeningIntentPage = lazy(() => import("./pages/OpeningIntentPage"));
+const OpeningGuidesIndex = lazy(() => import("./pages/OpeningGuidesIndex"));
 const MasterGameView = lazy(() => import("./pages/MasterGameView"));
 const GameHistory = lazy(() => import("./pages/GameHistory"));
 const Analysis = lazy(() => import("./pages/Analysis"));
@@ -438,6 +440,8 @@ function AnimatedRoutes() {
           <Route path="/story" element={<StoryMode />} />
           <Route path="/openings" element={<OpeningTrainer />} />
           <Route path="/openings/:slug" element={<OpeningLanding />} />
+          <Route path="/openings/:slug/:intent" element={<OpeningIntentPage />} />
+          <Route path="/opening-guides" element={<OpeningGuidesIndex />} />
           <Route path="/opening-explorer" element={<OpeningExplorer />} />
           <Route path="/master-game/:id" element={<MasterGameView />} />
           <Route path="/history" element={<GameHistory />} />
