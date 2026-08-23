@@ -7,6 +7,13 @@
 // pixels all receive the same funnel events.
 
 import { track } from "@/lib/track";
+import { reportFunnel } from "@/lib/monitoring";
+
+/** Sends the step to GA/GTM *and* to our own database (plan section 54). */
+function emit(name: string, params: Record<string, unknown> = {}): void {
+  track(name, params);
+  void reportFunnel(name, params);
+}
 
 const GAMES_KEY = "mc_funnel_games";
 const LAST_DAY_KEY = "mc_funnel_last_day";
@@ -40,9 +47,9 @@ export function markGameFinished(meta: Record<string, unknown> = {}): number {
   } catch {
     /* ignore */
   }
-  track("game_finished", { ...meta, games_total: next });
-  if (next === 1) track("first_game", meta);
-  if (next === 2) track("second_game", meta);
+  emit("game_finished", { ...meta, games_total: next });
+  if (next === 1) emit("first_game", meta);
+  if (next === 2) emit("second_game", meta);
   return next;
 }
 
@@ -55,7 +62,7 @@ export function markVisit(): void {
       const gapDays = Math.round(
         (Date.parse(now) - Date.parse(last)) / 86_400_000,
       );
-      track(gapDays === 1 ? "day_1_return" : "return_visit", {
+      emit(gapDays === 1 ? "day_1_return" : "return_visit", {
         gap_days: gapDays,
         games_total: gamesPlayed(),
       });
@@ -73,7 +80,7 @@ export function trackSignupCta(surface: string): void {
   } catch {
     /* ignore */
   }
-  track("signup_cta_click", { surface, games_total: gamesPlayed() });
+  emit("signup_cta_click", { surface, games_total: gamesPlayed() });
 }
 
 /** The surface that sent the player to /signup, for signup attribution. */
