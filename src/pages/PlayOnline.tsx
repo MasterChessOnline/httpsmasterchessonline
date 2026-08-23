@@ -34,6 +34,9 @@ import CountryFlag from "@/components/CountryFlag";
 import EmptyLobbyActions from "@/components/EmptyLobbyActions";
 import PrimeTimeBanner from "@/components/PrimeTimeBanner";
 import QueueBeacon from "@/components/QueueBeacon";
+import QueueBotFallback from "@/components/QueueBotFallback";
+import ComeBackTomorrowCard from "@/components/ComeBackTomorrowCard";
+import { trackRetention } from "@/lib/funnel";
 
 
 
@@ -96,14 +99,22 @@ const PlayOnline = () => {
   // True once the queue has been empty for a while — we then show real
   // alternatives (invite link, bots, puzzles) instead of an endless spinner.
   const [queueStalled, setQueueStalled] = useState(false);
+  // Seconds spent in the current queue — drives the honest bot warm-up offer.
+  const [queueWaited, setQueueWaited] = useState(0);
 
   useEffect(() => {
     if (onlineStatus !== "searching") {
       setQueueStalled(false);
+      setQueueWaited(0);
       return;
     }
     const t = window.setTimeout(() => setQueueStalled(true), 25000);
-    return () => window.clearTimeout(t);
+    const started = Date.now();
+    const tick = window.setInterval(() => setQueueWaited(Math.round((Date.now() - started) / 1000)), 1000);
+    return () => {
+      window.clearTimeout(t);
+      window.clearInterval(tick);
+    };
   }, [onlineStatus]);
 
   // ?auto=1 → the visitor already pressed PLAY NOW (or just registered), so we
@@ -980,6 +991,7 @@ const PlayOnline = () => {
                 <button onClick={cancelSearch} className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4">
                   Cancel search
                 </button>
+                {queueStalled && <QueueBotFallback waitedSeconds={queueWaited} />}
                 {queueStalled && (
                   <EmptyLobbyActions
                     title="Your opponent is on the way"
@@ -1367,13 +1379,17 @@ const PlayOnline = () => {
                   <Button
                     variant="outline"
                     className="w-full border-primary/50 hover:bg-primary/10"
-                    onClick={offerRematch}
+                    onClick={() => {
+                      trackRetention("rematch_click", { surface: "online_game_over" });
+                      offerRematch();
+                    }}
                     disabled={rematchOfferedByMe || rematchInProgress}
                   >
                     <Swords className="h-4 w-4 mr-2 text-primary" />
                     {rematchOfferedByMe ? "Rematch offered…" : "Rematch"}
                   </Button>
                 )}
+                <ComeBackTomorrowCard />
                 <Button className="w-full h-12 text-base font-bold" onClick={playAgain}>
                   <Zap className="h-4 w-4 mr-2" /> Play Again
                 </Button>
