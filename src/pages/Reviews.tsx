@@ -51,7 +51,7 @@ interface ProfileLite {
   display_name: string | null;
   avatar_url: string | null;
   rating?: number | null;
-  total_games?: number | null;
+  games_played?: number | null;
 }
 interface ReactionRow {
   review_id: string;
@@ -70,7 +70,7 @@ const REACTIONS = [
 
 function isVerified(p?: ProfileLite | null) {
   if (!p) return false;
-  return (p.total_games ?? 0) >= 50 || (p.rating ?? 0) >= 1400;
+  return (p.games_played ?? 0) >= 50 || (p.rating ?? 0) >= 1400;
 }
 
 export default function Reviews() {
@@ -110,7 +110,7 @@ export default function Reviews() {
     if (ids.length) {
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id,display_name,avatar_url,rating,total_games")
+        .select("user_id,display_name,avatar_url,rating,games_played")
         .in("user_id", ids);
       const map: Record<string, ProfileLite> = {};
       (profs ?? []).forEach((p: any) => (map[p.user_id] = p));

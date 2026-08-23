@@ -5619,6 +5619,7 @@ export type Database = {
       }
       buy_premium_pass: { Args: never; Returns: Json }
       can_manage_tournaments: { Args: { _user_id: string }; Returns: boolean }
+      claim_achievement: { Args: { _achievement_id: string }; Returns: boolean }
       claim_afk_win: { Args: { p_game_id: string }; Returns: Json }
       claim_battle_pass_tier:
         | { Args: { _tier: number }; Returns: Json }
@@ -5940,8 +5941,16 @@ export type Database = {
         Args: { _club: string; _user: string }
         Returns: boolean
       }
+      is_registered_for_tournament: {
+        Args: { _tournament_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_tournament_admin: {
         Args: { _tid: string; _user: string }
+        Returns: boolean
+      }
+      is_tournament_creator: {
+        Args: { _tournament_id: string; _user_id: string }
         Returns: boolean
       }
       join_battle_royale: { Args: never; Returns: Json }
