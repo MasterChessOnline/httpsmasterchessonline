@@ -67,6 +67,8 @@ import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import InstantHeroBoard from "@/components/InstantHeroBoard";
 import DailyHookCard from "@/components/DailyHookCard";
 import GuestHomeSections from "@/components/home/GuestHomeSections";
+import SiteStatsNote from "@/components/SiteStatsNote";
+
 import { getGuestProgress } from "@/lib/guestProgress";
 
 
@@ -410,7 +412,13 @@ const Index = () => {
                 </MarginNote>
               </div>
             )}
+
+            {/* Small honest community counter, off to the side. */}
+            <div className="mt-6 flex justify-center sm:justify-end">
+              <SiteStatsNote />
+            </div>
           </div>
+
         </div>
 
         {/* ── INSTANT PLAY: a real board right under the CTA, so a curious
