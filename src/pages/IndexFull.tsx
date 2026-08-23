@@ -410,7 +410,13 @@ const Index = () => {
                 </MarginNote>
               </div>
             )}
+
+            {/* Small honest community counter, off to the side. */}
+            <div className="mt-6 flex justify-center sm:justify-end">
+              <SiteStatsNote />
+            </div>
           </div>
+
         </div>
 
         {/* ── INSTANT PLAY: a real board right under the CTA, so a curious
