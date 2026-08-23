@@ -270,6 +270,12 @@ function RootDeferredOverlays() {
   const location = useLocation();
   const isHome = isHomePath(location.pathname);
 
+  // Home is the highest-traffic mobile entry. None of these background
+  // notifiers are needed before a visitor has entered the product, and each
+  // one creates its own effects/listeners/chunk request. Keep the entry screen
+  // quiet and interactive; the overlays remain available everywhere else.
+  if (isHome) return null;
+
   return (
     <>
       <Suspense fallback={null}><NotificationPrompt /></Suspense>
@@ -278,10 +284,10 @@ function RootDeferredOverlays() {
       <Suspense fallback={null}><AppBadgeSync /></Suspense>
       <Suspense fallback={null}><RewardFXLayer /></Suspense>
       <Suspense fallback={null}><MatchResultLayer /></Suspense>
-      {!isHome && <Suspense fallback={null}><WelcomeBonusModal /></Suspense>}
-      {!isHome && <Suspense fallback={null}><ExitIntentModal /></Suspense>}
-      {!isHome && <Suspense fallback={null}><OnboardingWizard /></Suspense>}
-      {!isHome && <Suspense fallback={null}><WeeklyRecapModal /></Suspense>}
+      <Suspense fallback={null}><WelcomeBonusModal /></Suspense>
+      <Suspense fallback={null}><ExitIntentModal /></Suspense>
+      <Suspense fallback={null}><OnboardingWizard /></Suspense>
+      <Suspense fallback={null}><WeeklyRecapModal /></Suspense>
       <Suspense fallback={null}><PwaInstallBanner /></Suspense>
     </>
   );
@@ -291,6 +297,23 @@ const ChannelWelcomeBanner = lazy(() => import("@/components/ChannelWelcomeBanne
 const SocialTrafficRouter = lazy(() => import("@/components/SocialTrafficRouter"));
 
 function AppChrome() {
+  const location = useLocation();
+  const isHome = isHomePath(location.pathname);
+  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
+
+  // The homepage owns its own navigation and conversion UI. On phones, avoid
+  // mounting the decorative/global controller stack behind it; these listeners
+  // and fixed layers were a major source of input and scroll lag.
+  if (isHome && isMobile) {
+    return (
+      <>
+        <BackendStatusBanner />
+        <PendingSignupResume />
+        <Suspense fallback={null}><SocialTrafficRouter /></Suspense>
+      </>
+    );
+  }
+
   return (
     <>
       <DepthLayers />

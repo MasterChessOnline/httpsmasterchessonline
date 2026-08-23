@@ -237,14 +237,18 @@ const Index = () => {
           )
         : Promise.resolve(null);
 
-      const leadersPromise = withHomeTimeout(
+      // The guest homepage no longer blocks first interaction on leaderboard
+      // data. Members still receive it for their dashboard section.
+      const leadersPromise = user
+        ? withHomeTimeout(
             "HOME_LEADERBOARD",
             supabase
               .from("profiles")
               .select("user_id, display_name, rating, games_won, games_played")
               .order("rating", { ascending: false })
               .limit(5),
-          );
+          )
+        : Promise.resolve(null);
 
       const [recentResult, leadersResult] = await Promise.all([recentPromise, leadersPromise]);
       if (cancelled) return;
@@ -356,9 +360,9 @@ const Index = () => {
                         className="w-full sm:w-auto"
                         onClick={() => trackSignupCta("home_hero")}
                       >
-                        <motion.div
-                          animate={{ scale: [1, 1.02, 1] }}
-                          transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                        <motion.div className="home-primary-cta"
+                          animate={allowHeavy ? { scale: [1, 1.02, 1] } : undefined}
+                          transition={allowHeavy ? { duration: 2.8, repeat: Infinity, ease: "easeInOut" } : undefined}
                         >
                           <Button
                             size="lg"

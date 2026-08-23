@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Crown } from "lucide-react";
+import { useDeviceCapability } from "@/hooks/use-device-capability";
 
 const PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -17,15 +18,16 @@ export default function AnimatedLogoHero({
   /** Heading level — pages that already own an h1 should pass "h2" (one h1 per page). */
   as?: "h1" | "h2" | "p";
 }) {
+  const { allowHeavy } = useDeviceCapability();
   const Heading = motion[as] as typeof motion.h1;
   return (
-    <div className="relative w-full">
+      <div className="home-animated-logo relative w-full">
       {/* floating chess pieces — absolute, pointer-events-none */}
       <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
-        {PIECES.map((p, i) => (
+        {allowHeavy && PIECES.map((p, i) => (
           <motion.span
             key={i}
-            className="absolute select-none text-primary/15 font-display"
+            className="home-logo-particle absolute select-none text-primary/15 font-display"
             style={{
               left: `${(i * 17 + 6) % 100}%`,
               top: `${(i * 23) % 90}%`,
@@ -77,7 +79,7 @@ export default function AnimatedLogoHero({
       >
         <span className="relative inline-block">
           <span
-            className="bg-clip-text text-transparent"
+            className="home-logo-sweep bg-clip-text text-transparent"
             style={{
               backgroundImage:
                 "linear-gradient(100deg, #fde68a 0%, #f0b429 35%, #fff3b0 55%, #b87333 85%, #fde68a 100%)",
@@ -92,9 +94,9 @@ export default function AnimatedLogoHero({
         </span>
 
         {/* sweep highlight bar */}
-        <motion.span
+        {allowHeavy && <motion.span
           aria-hidden
-          className="pointer-events-none absolute inset-0 block"
+          className="home-logo-highlight pointer-events-none absolute inset-0 block"
           style={{
             background:
               "linear-gradient(110deg, transparent 35%, hsl(43 95% 70% / 0.35) 50%, transparent 65%)",
@@ -104,7 +106,7 @@ export default function AnimatedLogoHero({
           initial={{ x: "-120%" }}
           animate={{ x: "120%" }}
           transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
-        />
+        />}
       </Heading>
 
       {tagline && (
