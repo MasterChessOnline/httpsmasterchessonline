@@ -33,6 +33,8 @@ import { BookOpen, Sparkles } from "lucide-react";
 import CountryFlag from "@/components/CountryFlag";
 import EmptyLobbyActions from "@/components/EmptyLobbyActions";
 import PrimeTimeBanner from "@/components/PrimeTimeBanner";
+import QueueBeacon from "@/components/QueueBeacon";
+
 
 
 
