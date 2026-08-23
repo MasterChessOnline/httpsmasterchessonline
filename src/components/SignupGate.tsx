@@ -43,7 +43,7 @@ export default function SignupGate({
       );
     } catch {/* ignore */}
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/first-game`,
+      redirect_uri: `${window.location.origin}/?welcome=1`,
     });
     if (result.error) setLoading(false);
   };

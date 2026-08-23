@@ -46,6 +46,8 @@ import InstallAppButton from "@/components/InstallAppButton";
 
 import { MarginNote, ScribbleArrow } from "@/components/landing/HumanMargin";
 import AnimatedLogoHero from "@/components/AnimatedLogoHero";
+import NewUserIntro from "@/components/NewUserIntro";
+
 import HomeTrustStrip from "@/components/HomeTrustStrip";
 import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import SiteStatsNote from "@/components/SiteStatsNote";
@@ -289,7 +291,9 @@ const Index = () => {
         type="website"
       />
       <Navbar />
+      <NewUserIntro />
       <BrakusHeroBanner />
+
 
       <main>
         {/* ── FIRST SCREEN — the cinematic MasterChess title over the board
