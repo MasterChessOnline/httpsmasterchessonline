@@ -18,6 +18,8 @@ import NotFound from "./pages/NotFound";
 const Play = lazy(() => import("./pages/Play"));
 const PlayOnline = lazy(() => import("./pages/PlayOnline"));
 const Lobby = lazy(() => import("./pages/Lobby"));
+const Open = lazy(() => import("./pages/Open"));
+
 const Watch = lazy(() => import("./pages/Watch"));
 const WatchGame = lazy(() => import("./pages/WatchGame"));
 const Login = lazy(() => import("./pages/Login"));
