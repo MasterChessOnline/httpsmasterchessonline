@@ -1329,6 +1329,30 @@ main > div {
   }
 }
 
+/* Mobile fast path: preserve the cinematic composition without continuously
+   repainting full-screen gradients, grain, logo particles and CTA glows. */
+@media (max-width: 768px) {
+  :root[data-site-theme="live"] body::before,
+  :root[data-site-theme="live"] body::after {
+    display: none;
+  }
+
+  .home-logo-particle,
+  .home-logo-highlight {
+    display: none !important;
+  }
+
+  .home-logo-sweep,
+  .home-primary-cta {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .home-animated-logo [style*="will-change"] {
+    will-change: auto !important;
+  }
+}
+
 
 /* ────────────────────────────────────────────────────────────────────────────
    Donation milestone cosmetics — site-wide celebratory layer.
