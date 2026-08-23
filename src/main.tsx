@@ -40,18 +40,25 @@ const afterFirstPaint = (cb: () => void) => {
 };
 
 afterFirstPaint(async () => {
-  const [themes, boardThemes, sounds, a11y, track, analytics] = await Promise.all([
+  // Avoid one large parse/execute spike immediately after first paint on a
+  // phone. Visual settings come first; telemetry and audio can follow once the
+  // main thread has yielded.
+  const [themes, boardThemes, a11y] = await Promise.all([
     import("./lib/site-themes"),
     import("./lib/board-themes"),
-    import("./lib/chess-sounds"),
     import("./lib/accessibility"),
-    import("./lib/track"),
-    import("./lib/analytics"),
   ]);
   safeRun(themes.bootstrapSiteTheme);
   safeRun(boardThemes.bootstrapVisualSettings);
-  safeRun(sounds.bootstrapSoundPack);
   safeRun(a11y.bootstrapA11y);
+
+  await new Promise<void>((resolve) => window.setTimeout(resolve, 350));
+  const [sounds, track, analytics] = await Promise.all([
+    import("./lib/chess-sounds"),
+    import("./lib/track"),
+    import("./lib/analytics"),
+  ]);
+  safeRun(sounds.bootstrapSoundPack);
   safeRun(track.captureAttribution);
   // Funnel: records the visit day so a next-day return is measurable.
   import("./lib/funnel").then((m) => safeRun(m.markVisit)).catch(() => {});

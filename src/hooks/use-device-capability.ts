@@ -47,8 +47,11 @@ function detect(): Capability {
   if (cores <= 4 || memory <= 4) tier = "medium";
   if (cores <= 2 || memory <= 2 || isMobile) tier = isMobile && cores >= 6 ? "medium" : "low";
 
-  const allowHeavy = !reduceMotion && tier !== "low";
-  const allow3D = !reduceMotion && tier === "high";
+  // Touch phones should always use the fast path. A modern phone may report
+  // 6–8 cores, but fixed gradients, blur and continuous animation still fight
+  // scrolling and chess-board input for the same small GPU budget.
+  const allowHeavy = !isMobile && !reduceMotion && tier !== "low";
+  const allow3D = !isMobile && !reduceMotion && tier === "high";
 
   return { tier, reduceMotion, isMobile, allowHeavy, allow3D };
 }

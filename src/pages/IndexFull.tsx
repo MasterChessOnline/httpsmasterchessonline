@@ -361,8 +361,8 @@ const Index = () => {
                         onClick={() => trackSignupCta("home_hero")}
                       >
                         <motion.div className="home-primary-cta"
-                          animate={{ scale: [1, 1.02, 1] }}
-                          transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                          animate={allowHeavy ? { scale: [1, 1.02, 1] } : undefined}
+                          transition={allowHeavy ? { duration: 2.8, repeat: Infinity, ease: "easeInOut" } : undefined}
                         >
                           <Button
                             size="lg"

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Crown } from "lucide-react";
+import { useDeviceCapability } from "@/hooks/use-device-capability";
 
 const PIECES = ["♔", "♕", "♖", "♗", "♘", "♙"];
 
@@ -17,12 +18,13 @@ export default function AnimatedLogoHero({
   /** Heading level — pages that already own an h1 should pass "h2" (one h1 per page). */
   as?: "h1" | "h2" | "p";
 }) {
+  const { allowHeavy } = useDeviceCapability();
   const Heading = motion[as] as typeof motion.h1;
   return (
       <div className="home-animated-logo relative w-full">
       {/* floating chess pieces — absolute, pointer-events-none */}
       <div aria-hidden className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
-        {PIECES.map((p, i) => (
+        {allowHeavy && PIECES.map((p, i) => (
           <motion.span
             key={i}
             className="home-logo-particle absolute select-none text-primary/15 font-display"
@@ -92,7 +94,7 @@ export default function AnimatedLogoHero({
         </span>
 
         {/* sweep highlight bar */}
-        <motion.span
+        {allowHeavy && <motion.span
           aria-hidden
           className="home-logo-highlight pointer-events-none absolute inset-0 block"
           style={{
@@ -104,7 +106,7 @@ export default function AnimatedLogoHero({
           initial={{ x: "-120%" }}
           animate={{ x: "120%" }}
           transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
-        />
+        />}
       </Heading>
 
       {tagline && (
