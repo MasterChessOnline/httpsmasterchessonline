@@ -174,7 +174,7 @@ export default function PlayGuest() {
     setError(null);
     setGoogleLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/dashboard",
+      redirect_uri: window.location.origin + "/?welcome=1",
     });
     if (result.error) {
       setError(result.error.message);
