@@ -1,4 +1,4 @@
-import { Crown, GraduationCap, Trophy, Puzzle, Swords, User } from "lucide-react";
+import { Crown, GraduationCap, Trophy, Swords, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useRef } from "react";
@@ -8,7 +8,7 @@ const BASE_ITEMS = [
   { icon: GraduationCap, label: "Learn", href: "/learn" },
   { icon: Trophy, label: "Compete", href: "/tournaments" },
 ];
-const GUEST_LAST = { icon: Puzzle, label: "Puzzles", href: "/puzzles" };
+const GUEST_LAST = { icon: User, label: "Profile", href: "/profile" };
 const USER_LAST = { icon: User, label: "Profile", href: "/profile" };
 
 
