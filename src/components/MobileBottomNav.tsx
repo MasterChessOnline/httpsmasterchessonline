@@ -62,42 +62,21 @@ const MobileBottomNav = () => {
         data-nav-item
         aria-label={item.label}
         aria-current={active ? "page" : undefined}
-        className={`relative flex flex-col items-center justify-center gap-1 h-full min-h-11 ${focusRing}`}
+        className={`relative flex w-full flex-col items-center justify-center gap-1 py-2 ${focusRing}`}
       >
         {active && (
-          <>
-            <motion.span
-              layoutId="mobile-nav-indicator"
-              className="absolute top-0 h-[2px] w-10 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.85)]"
-              transition={{ type: "spring", stiffness: 380, damping: 30 }}
-              aria-hidden="true"
-            />
-            <motion.span
-              aria-hidden="true"
-              className="absolute inset-x-3 inset-y-1 rounded-xl pointer-events-none"
-              animate={{ opacity: [0.25, 0.6, 0.25] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              style={{
-                background:
-                  "radial-gradient(closest-side, hsl(var(--primary) / 0.22), transparent 70%)",
-              }}
-            />
-          </>
-        )}
-        <motion.span
-          aria-hidden="true"
-          animate={active ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-          transition={{ duration: 1.8, repeat: active ? Infinity : 0, ease: "easeInOut" }}
-          className="inline-flex"
-        >
-          <item.icon
-            className={`h-5 w-5 transition-colors ${
-              active ? "text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.75)]" : "text-muted-foreground"
-            }`}
+          <span
+            aria-hidden="true"
+            className="absolute top-0 h-[2px] w-8 rounded-full bg-primary"
           />
-        </motion.span>
+        )}
+        <item.icon
+          className={`h-5 w-5 shrink-0 transition-colors ${
+            active ? "text-primary" : "text-muted-foreground"
+          }`}
+        />
         <span
-          className={`text-[10px] font-medium leading-none transition-colors ${
+          className={`w-full truncate px-0.5 text-center text-[10px] font-medium leading-none transition-colors ${
             active ? "text-primary" : "text-muted-foreground"
           }`}
         >
@@ -120,66 +99,40 @@ const MobileBottomNav = () => {
         className="pointer-events-none absolute -top-6 left-0 right-0 h-6 bg-gradient-to-t from-[hsl(220,15%,5%)] to-transparent"
       />
 
-      {/* Floating profile shortcut — top-left */}
-      {user && (
-        <Link
-          to={`/profile/${user.id}`}
-          aria-label="Open your profile"
-          className="pointer-events-auto absolute -top-9 left-4 z-10 h-9 w-9 rounded-full bg-[hsl(220,15%,10%)]/95 border border-primary/40 flex items-center justify-center shadow-[0_4px_14px_rgba(0,0,0,0.5)] backdrop-blur"
-        >
-          <User className="h-4 w-4 text-primary" />
-        </Link>
-      )}
-
-      {/* Floating coin balance pill — always visible to logged-in users */}
-      {user && (
-        <div className="pointer-events-auto absolute -top-9 right-4 z-10">
-          <CoinBalancePill />
-        </div>
-      )}
-
-      <div className="relative mx-3 mb-4 rounded-2xl border border-border/40 bg-[hsl(220,15%,7%)]/95 backdrop-blur-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.5),inset_0_1px_0_hsl(var(--primary)/0.08)]">
+      <div className="relative w-full overflow-hidden border-t border-border/50 bg-[hsl(220,15%,7%)]/97 backdrop-blur-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.55)]">
         <ul
           role="list"
-          className="grid grid-cols-5 items-end h-16 px-1 m-0 p-0 list-none"
+          className="m-0 grid list-none grid-cols-5 items-stretch p-0"
         >
           {left.map((item) => (
-            <li key={item.label} className="contents">
+            <li key={item.label} className="flex min-w-0">
               {renderItem(item)}
             </li>
           ))}
 
-          {/* Center Play CTA — elevated */}
-          <li className="relative flex items-start justify-center">
+          {/* Center Play CTA — stays inside the bar */}
+          <li className="flex min-w-0 items-center justify-center">
             <Link
               to="/play"
               data-nav-item
               aria-label="Play a new game"
               aria-current={isActive("/play") ? "page" : undefined}
-              className={`group absolute -top-14 flex flex-col items-center min-h-11 min-w-11 ${focusRing}`}
+              className={`flex w-full flex-col items-center justify-center gap-1 py-1.5 ${focusRing}`}
             >
-              <motion.div
-                whileTap={{ scale: 0.92 }}
-                aria-hidden="true"
-                className="relative h-14 w-14 rounded-full bg-gradient-to-br from-primary to-[hsl(45,90%,45%)] flex items-center justify-center shadow-[0_8px_24px_-4px_hsl(var(--primary)/0.6),0_0_0_4px_hsl(220,15%,7%)]"
-              >
-                <span className="absolute inset-0 rounded-full bg-primary/40 blur-xl opacity-70 group-active:opacity-100 transition-opacity" />
-                <Swords
-                  className="relative h-6 w-6 text-[hsl(220,15%,7%)]"
-                  strokeWidth={2.5}
-                />
-              </motion.div>
               <span
                 aria-hidden="true"
-                className="mt-1 text-[10px] font-bold uppercase tracking-wider text-primary"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[hsl(45,90%,45%)] shadow-[0_4px_14px_-2px_hsl(var(--primary)/0.6)]"
               >
+                <Swords className="h-5 w-5 text-[hsl(220,15%,7%)]" strokeWidth={2.5} />
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-primary leading-none">
                 Play
               </span>
             </Link>
           </li>
 
           {right.map((item) => (
-            <li key={item.label} className="contents">
+            <li key={item.label} className="flex min-w-0">
               {renderItem(item)}
             </li>
           ))}
@@ -187,6 +140,7 @@ const MobileBottomNav = () => {
       </div>
     </nav>
   );
+
 };
 
 export default MobileBottomNav;
