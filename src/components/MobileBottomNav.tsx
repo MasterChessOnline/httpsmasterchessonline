@@ -48,10 +48,12 @@ const MobileBottomNav = () => {
     return () => root.removeEventListener("keydown", onKey);
   }, []);
 
-  const left = NAV_ITEMS.slice(0, 2);
-  const right = NAV_ITEMS.slice(2);
+  const navItems = [...BASE_ITEMS, user ? USER_LAST : GUEST_LAST];
+  const left = navItems.slice(0, 2);
+  const right = navItems.slice(2);
 
-  const renderItem = (item: (typeof NAV_ITEMS)[number]) => {
+  const renderItem = (item: (typeof navItems)[number]) => {
+
     const active = isActive(item.href);
     const href =
       item.href === "/profile" && user ? `/profile/${user.id}` : item.href;
