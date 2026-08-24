@@ -1,14 +1,16 @@
-import { Crown, GraduationCap, Trophy, Swords, Radio } from "lucide-react";
+import { Crown, GraduationCap, Trophy, Radio, Swords, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useRef } from "react";
 
-const NAV_ITEMS = [
+const BASE_ITEMS = [
   { icon: Crown, label: "Home", href: "/" },
   { icon: GraduationCap, label: "Learn", href: "/learn" },
   { icon: Trophy, label: "Compete", href: "/tournaments" },
-  { icon: Radio, label: "News", href: "/news" },
 ];
+const GUEST_LAST = { icon: Radio, label: "News", href: "/news" };
+const USER_LAST = { icon: User, label: "Profile", href: "/profile" };
+
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(220,15%,7%)] rounded-xl";
