@@ -30,6 +30,8 @@ import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistory
 import RankFrame from "@/components/profile/RankFrame";
 import PresenceDot from "@/components/profile/PresenceDot";
 import MainOpeningChip from "@/components/profile/MainOpeningChip";
+import FollowStats from "@/components/profile/FollowStats";
+import DiscoverPlayers from "@/components/profile/DiscoverPlayers";
 
 interface ProfileData {
   id: string;
@@ -338,6 +340,8 @@ const Profile = () => {
               </div>
             </div>
 
+            <FollowStats userId={profileData.user_id} viewerId={user?.id ?? null} />
+
             {/* Bio (supports emojis & free expression) */}
             {profileData.bio && profileData.bio.trim().length > 0 && (
               <div className="mt-4 rounded-xl border border-border/50 bg-muted/10 p-3">
@@ -406,6 +410,8 @@ const Profile = () => {
               </div>
             )}
           </motion.div>
+
+          <DiscoverPlayers viewerId={user?.id ?? null} />
 
           {/* Chess Card CTA */}
           <Link to={isOwnProfile ? "/chess-card" : `/chess-card?compare=${userId}`} className="block">
