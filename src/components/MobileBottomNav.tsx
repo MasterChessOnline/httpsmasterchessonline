@@ -97,7 +97,7 @@ const MobileBottomNav = () => {
         className="pointer-events-none absolute -top-6 left-0 right-0 h-6 bg-gradient-to-t from-[hsl(220,15%,5%)] to-transparent"
       />
 
-      <div className="relative w-full overflow-hidden border-t border-border/50 bg-[hsl(220,15%,7%)]/97 backdrop-blur-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.55)]">
+      <div className="relative w-full overflow-hidden border-t border-border/50 bg-[hsl(220,15%,6%)] backdrop-blur-2xl shadow-[0_-8px_30px_rgba(0,0,0,0.55)]">
         <ul
           role="list"
           className="m-0 grid list-none grid-cols-5 items-stretch p-0"
