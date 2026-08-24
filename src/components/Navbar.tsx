@@ -497,11 +497,29 @@ const Navbar = () => {
                 <>
                   <CoinBalancePill />
                   <StreakIndicator />
+                  <Link
+                    to={`/profile/${user.id}`}
+                    className="flex items-center gap-2 h-9 pl-1 pr-3 rounded-full border border-primary/30 bg-primary/10 hover:bg-primary/20 transition-colors"
+                    aria-label="My profile"
+                    title="My profile & stats"
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary text-xs font-bold overflow-hidden">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        (profile?.display_name || profile?.username || user.email || "?").charAt(0).toUpperCase()
+                      )}
+                    </span>
+                    <span className="hidden xl:block max-w-[110px] truncate text-xs font-semibold text-foreground">
+                      {profile?.display_name || profile?.username || "My profile"}
+                    </span>
+                  </Link>
                   <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden xl:flex" aria-label="Sign out">
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </>
               ) : (
+
                 <div className="hidden lg:flex items-center gap-2">
                   <Link to="/login">
                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm h-9 px-4">Sign In</Button>
