@@ -849,6 +849,30 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Full-bleed guard: page content must always fill the viewport width.
+   Any accidental horizontal overflow is clipped instead of shrinking the
+   layout and leaving an empty black band on the right (mobile). */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+  }
+}
+
+#root > * {
+  max-width: 100%;
+}
+
+
 /* Smooth all interactive elements */
 a, button, input, select, textarea {
   transition-property: color, background-color, border-color, box-shadow, opacity, transform;
