@@ -476,7 +476,186 @@ export const MATRIX_INTENTS: MatrixIntent[] = [
       ...o.baseFaqs.slice(0, 1),
     ],
   },
+  {
+    slug: "for-beginners",
+    label: "For beginners",
+    angle: "first-time explanations",
+    title: (n) => `${n} for Beginners — Simple Explanation`,
+    description: (n, m) =>
+      `The ${n} explained for beginners: what ${m} does in plain words, the three rules to follow, and a free board to try it right now.`,
+    h1: (n) => `${n} for complete beginners`,
+    sections: (o) => [
+      { heading: "In one sentence", body: `The ${o.name} (${o.eco}) is an opening where ${o.description.toLowerCase()}` },
+      { heading: "Three rules that are enough at first", body: `You do not need theory to play it well at club level. Follow these and you will be fine:`, list: firstIdeas(o, 3) },
+      { heading: "Try it against a bot first", body: `Play the position on the board below, then take it into a real game against a low-rated bot before you use it against a human.` },
+    ],
+    faqs: (o) => [
+      { q: `Is the ${o.name} good for beginners?`, a: `Yes — the moves are natural and the plans are easy to remember, which is exactly what a beginner needs from an opening.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "in-blitz",
+    label: "In blitz",
+    angle: "fast time controls",
+    title: (n) => `${n} in Blitz — Fast, Practical Plans`,
+    description: (n, m) =>
+      `How the ${n} (${m}) behaves in blitz and bullet: which moves are automatic, where people lose on time, and the traps that score fastest.`,
+    h1: (n) => `The ${n} in blitz`,
+    sections: (o) => [
+      { heading: "Why it works with a short clock", body: `In blitz you win with familiar patterns, not calculation. The ${o.name} gives you the same structures every game, so your first ten moves cost seconds.` },
+      { heading: "The automatic moves", body: `Learn these as reflexes and save your clock for the middlegame:`, list: firstIdeas(o, 4) },
+      { heading: "Where blitz games are lost", body: `Almost always by drifting after the opening. Decide the plan while the moves are still automatic.` },
+    ],
+    faqs: (o) => [
+      { q: `Is the ${o.name} good in blitz?`, a: `Yes. The move order is short and the plans repeat, which is exactly what you want when you have three minutes.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "best-response",
+    label: "Best response",
+    angle: "what to answer with",
+    title: (n) => `Best Response to the ${n}`,
+    description: (n, m) =>
+      `The most practical answers to the ${n} (${m}): solid setups, sharp punishments, and how to choose between them.`,
+    h1: (n) => `The best response to the ${n}`,
+    sections: (o) => [
+      { heading: "The solid answer", body: `Meet the ${o.name} by completing development and refusing to weaken your structure. Solid play beats preparation because your opponent's theory stops mattering.` },
+      { heading: "The sharp answer", body: `If you want the initiative, strike at the centre early and accept the imbalance. This is where knowing ${o.eco} pays off.`, list: firstIdeas(o, 3) },
+      { heading: "How to choose", body: `Choose by opponent: solid against stronger players, sharp against opponents who play fast and superficially.` },
+    ],
+    faqs: (o) => [
+      { q: `What is the best answer to the ${o.name}?`, a: `There is no single refutation — the practical answers are a solid developing setup or an early central strike, both shown on this page.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "middlegame-plans",
+    label: "Middlegame plans",
+    angle: "what to do after the opening",
+    title: (n) => `${n} Middlegame Plans — What to Do Next`,
+    description: (n, m) =>
+      `What to actually play after the ${n} (${m}): pawn breaks, piece routes, and the plan for each typical structure.`,
+    h1: (n) => `Middlegame plans in the ${n}`,
+    sections: (o) => [
+      { heading: "The structure decides the plan", body: `After the ${o.name} you get recurring pawn structures. Read the structure, then pick the break that fits it.`, list: firstIdeas(o, 4) },
+      { heading: "Piece routes worth memorising", body: `Most of the work is putting pieces on their best squares. In this opening those squares repeat game after game.` },
+      { heading: "When to trade", body: `Trade when it removes your opponent's active piece or opens the file you already control — never just to simplify.` },
+    ],
+    faqs: (o) => [
+      { q: `What is the plan after the ${o.name}?`, a: `Play the pawn break that matches your structure and route your worst piece to its best square — the two ideas cover most positions.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "endgames",
+    label: "Endgames",
+    angle: "typical endings",
+    title: (n) => `${n} Endgames — The Endings It Leads To`,
+    description: (n, m) =>
+      `The endgames that come out of the ${n} (${m}): which pawn structures you inherit, and the technique that converts them.`,
+    h1: (n) => `Typical endgames from the ${n}`,
+    sections: (o) => [
+      { heading: "What you inherit", body: `Openings choose your endgames. The ${o.name} (${o.eco}) tends to leave the same structures, so learning two or three endings covers most of your games.` },
+      { heading: "The technique that matters", body: `Activate the king, push the pawn majority, and keep the rook behind your passed pawn. Simple rules win these positions.`, list: firstIdeas(o, 3) },
+    ],
+    faqs: (o) => [
+      { q: `Which endgames come from the ${o.name}?`, a: `Mostly the endings dictated by its typical pawn structure — learn those few and you convert far more of your good positions.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "as-white",
+    label: "As white",
+    angle: "playing it with white",
+    title: (n) => `How to Play the ${n} as White`,
+    description: (n, m) =>
+      `The ${n} from white's side (${m}): move order, the plan, and the mistakes that cost white the initiative.`,
+    h1: (n) => `The ${n} as white`,
+    sections: (o) => [
+      { heading: "White's move order", body: `Start with ${o.startingMoves || "the main line on the board below"} and keep the extra tempo doing something useful.` },
+      { heading: "White's plan", body: o.description, list: firstIdeas(o, 4) },
+      { heading: "How white goes wrong", body: `By grabbing space without support. Every advance should be backed by a piece that already has a job.` },
+    ],
+    faqs: (o) => [
+      { q: `Is the ${o.name} good for white?`, a: `It gives white a clear plan from move one, which is worth more in practical play than any small theoretical edge.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "as-black",
+    label: "As black",
+    angle: "playing it with black",
+    title: (n) => `How to Play the ${n} as Black`,
+    description: (n, m) =>
+      `The ${n} from black's side (${m}): equalising ideas, counterattacks, and the practical setup that is easiest to remember.`,
+    h1: (n) => `The ${n} as black`,
+    sections: (o) => [
+      { heading: "Black's job", body: `Black wants a safe king and one active idea. In the ${o.name} that idea is usually the central or flank counter-strike.`, list: firstIdeas(o, 3) },
+      { heading: "The easiest setup to remember", body: o.description },
+      { heading: "The moment to counterattack", body: `Counter when white's pieces are committed. Waiting one move too long is the most common mistake here.` },
+    ],
+    faqs: (o) => [
+      { q: `Can black equalise in the ${o.name}?`, a: `Yes — with accurate development and a timely counter-strike, black gets a fully playable game.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "practice-online",
+    label: "Practice online",
+    angle: "where to train it",
+    title: (n) => `Practice the ${n} Online — Free Board & Bots`,
+    description: (n, m) =>
+      `Train the ${n} (${m}) for free: play the moves on an interactive board, then test them against bots from 400 to 3500 rating.`,
+    h1: (n) => `Practice the ${n} online`,
+    sections: (o) => [
+      { heading: "Train it in three steps", body: `Play the moves, then repeat them against a bot, then use it in a live game. Nothing sticks until step three.`, list: firstIdeas(o, 3) },
+      { heading: "Which bot to use", body: `Start 200 points below your rating so you can focus on the plan, then move up until the ${o.name} still feels automatic under pressure.` },
+    ],
+    faqs: (o) => [
+      { q: `Where can I practise the ${o.name} for free?`, a: `On this page — the board is interactive, and you can carry the position straight into a free game against a bot or a live opponent.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "cheat-sheet",
+    label: "Cheat sheet",
+    angle: "quick reference",
+    title: (n) => `${n} Cheat Sheet — Moves, Plans, Traps`,
+    description: (n, m) =>
+      `A one-page ${n} cheat sheet: the move order ${m}, the main plans, the traps to know, and the mistakes to avoid.`,
+    h1: (n) => `${n} cheat sheet`,
+    sections: (o) => [
+      { heading: "Move order", body: `${o.startingMoves || "See the board below"} — ${o.eco}, ${o.difficulty} level, ${o.category}.` },
+      { heading: "Plans in five lines", body: `Everything that matters, short enough to remember before a game:`, list: firstIdeas(o, 5) },
+      { heading: "Avoid these", body: `Moving the same piece twice without reason, delaying castling, and pushing pawns you cannot support.` },
+    ],
+    faqs: (o) => [
+      { q: `What should I remember about the ${o.name}?`, a: `The move order, one pawn break, and one piece route. That is enough to play it well up to club level.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
+  {
+    slug: "explained",
+    label: "Explained",
+    angle: "plain-language explanation",
+    title: (n) => `${n} Explained — Why the Moves Make Sense`,
+    description: (n, m) =>
+      `The ${n} (${m}) explained in plain language: the idea behind every move, why it is played, and what happens if you ignore it.`,
+    h1: (n) => `The ${n}, explained`,
+    sections: (o) => [
+      { heading: "The idea", body: o.description },
+      { heading: "Why each move is there", body: `Every move in the ${o.name} pays for itself — space, a developed piece, or control of a key square.`, list: firstIdeas(o, 4) },
+      { heading: "What happens if you ignore it", body: `Skip the plan and the opening collapses into a random middlegame, which is where most rating points are lost.` },
+    ],
+    faqs: (o) => [
+      { q: `Why is the ${o.name} played?`, a: `Because it converts the first moves into something concrete: development, central control, and a plan that carries into the middlegame.` },
+      ...o.baseFaqs.slice(0, 1),
+    ],
+  },
 ];
+
 
 export const MATRIX_INTENT_SLUGS = MATRIX_INTENTS.map((i) => i.slug);
 
