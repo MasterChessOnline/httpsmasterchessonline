@@ -48,11 +48,15 @@ export default function SiteStatsNote({ className = "" }: { className?: string }
         <Users className="h-3.5 w-3.5 text-primary" />
         <span className="font-semibold text-foreground">{players.toLocaleString()}</span> registered
       </span>
-      <span className="opacity-30">·</span>
-      <span className="inline-flex items-center gap-1.5">
-        <Swords className="h-3.5 w-3.5 text-primary" />
-        <span className="font-semibold text-foreground">{live ?? 0}</span> live games
-      </span>
+      {live !== null && live > 0 && (
+        <>
+          <span className="opacity-30">·</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Swords className="h-3.5 w-3.5 text-primary" />
+            <span className="font-semibold text-foreground">{live}</span> live games
+          </span>
+        </>
+      )}
       <span className="hidden sm:inline opacity-60">· open numbers</span>
     </Link>
   );
