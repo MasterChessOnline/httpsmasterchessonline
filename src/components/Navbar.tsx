@@ -583,6 +583,33 @@ const Navbar = () => {
 
             <div className="max-w-lg mx-auto space-y-3 px-4 pt-4">
 
+              {user && (
+                <Link
+                  to={`/profile/${user.id}`}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/10 px-4 py-3.5"
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/20 text-primary font-bold overflow-hidden">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      (profile?.display_name || profile?.username || user.email || "?").charAt(0).toUpperCase()
+                    )}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-bold text-foreground">
+                      {profile?.display_name || profile?.username || "My account"}
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      My profile · rating {profile?.rating ?? "—"} · {profile?.games_played ?? 0} games
+                    </span>
+                  </span>
+                  <ChevronDown aria-hidden="true" className="h-4 w-4 -rotate-90 text-primary/60" />
+                </Link>
+              )}
+
+
+
               {NAV_SECTIONS.map((section) => {
                 const accentColor = `hsl(${section.accent})`;
                 return (
