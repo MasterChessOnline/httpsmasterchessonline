@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 const PHOTO_WITH_GM = "/__l5e/assets-v1/2a6e1880-e177-4cbe-b12c-834b642345c7/nikola-with-gm.jpg";
 const PHOTO_NIEMANN = "/__l5e/assets-v1/14dae1b4-8366-483a-85ee-cdfb7e456207/nikola-vs-niemann.jpg";
 const PHOTO_STREAMER = "/__l5e/assets-v1/f35f47e4-9616-48fc-b29e-95e8a18ef06e/nikola-with-streamer.jpg";
+const PHOTO_TROPHY_VOUCHER = "/__l5e/assets-v1/5c74401c-dacf-4d13-adec-4cc0cbd62713/nikola-trophy-voucher.jpg";
+const PHOTO_AWARD_CEREMONY = "/__l5e/assets-v1/6e1c8120-886a-4cf3-8c81-62b6218b1675/nikola-award-ceremony.jpg";
 
 const NIKOLA_PERSON_LD = {
   "@context": "https://schema.org",
