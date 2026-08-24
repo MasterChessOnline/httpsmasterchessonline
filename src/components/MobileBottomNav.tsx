@@ -1,9 +1,7 @@
-import { Crown, GraduationCap, Trophy, User, Swords, Radio } from "lucide-react";
+import { Crown, GraduationCap, Trophy, Swords, Radio } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
-import CoinBalancePill from "@/components/CoinBalancePill";
 
 const NAV_ITEMS = [
   { icon: Crown, label: "Home", href: "/" },
