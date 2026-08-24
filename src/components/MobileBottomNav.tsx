@@ -1,14 +1,16 @@
-import { Crown, GraduationCap, Trophy, Swords, Radio } from "lucide-react";
+import { Crown, GraduationCap, Trophy, Radio, Swords, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useRef } from "react";
 
-const NAV_ITEMS = [
+const BASE_ITEMS = [
   { icon: Crown, label: "Home", href: "/" },
   { icon: GraduationCap, label: "Learn", href: "/learn" },
   { icon: Trophy, label: "Compete", href: "/tournaments" },
-  { icon: Radio, label: "News", href: "/news" },
 ];
+const GUEST_LAST = { icon: Radio, label: "News", href: "/news" };
+const USER_LAST = { icon: User, label: "Profile", href: "/profile" };
+
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(220,15%,7%)] rounded-xl";
@@ -46,10 +48,12 @@ const MobileBottomNav = () => {
     return () => root.removeEventListener("keydown", onKey);
   }, []);
 
-  const left = NAV_ITEMS.slice(0, 2);
-  const right = NAV_ITEMS.slice(2);
+  const navItems = [...BASE_ITEMS, user ? USER_LAST : GUEST_LAST];
+  const left = navItems.slice(0, 2);
+  const right = navItems.slice(2);
 
-  const renderItem = (item: (typeof NAV_ITEMS)[number]) => {
+  const renderItem = (item: (typeof navItems)[number]) => {
+
     const active = isActive(item.href);
     const href =
       item.href === "/profile" && user ? `/profile/${user.id}` : item.href;
