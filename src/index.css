@@ -860,6 +860,14 @@ a, button, input, select, textarea {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Keep page content clear of the fixed mobile bottom nav */
+@media (max-width: 767px) {
+  body:not([data-game-active="true"]) {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+
 .tap-highlight-none {
   -webkit-tap-highlight-color: transparent;
 }
