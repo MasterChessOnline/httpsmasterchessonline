@@ -154,6 +154,7 @@ export default function IgLanding() {
 
           <InstantHeroBoard
             adMode
+            hideHeading
             headingLevel="h2"
             beginner={beginnerMode}
             onProgress={({ plies, ended }) => {
