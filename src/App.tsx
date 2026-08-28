@@ -366,8 +366,13 @@ function AppChrome() {
 }
 
 function AppMobileNav() {
+  const location = useLocation();
+  // The tab bar stole a third of the first screen on ad landings — and every
+  // tab was an exit from the funnel. Not mounted there.
+  if (isAdLandingPath(location.pathname)) return null;
   return <Suspense fallback={null}><MobileBottomNav /></Suspense>;
 }
+
 
 function useRouteZone() {
   const location = useLocation();
