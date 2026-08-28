@@ -322,6 +322,13 @@ function AppChrome() {
   const isHome = isHomePath(location.pathname);
   const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
 
+  // Paid ad landings: nothing but the page itself. The board is the ad's promise.
+  if (isAdLandingPath(location.pathname)) {
+    return <Suspense fallback={null}><PendingSignupResume /></Suspense>;
+  }
+
+
+
   // The homepage owns its own navigation and conversion UI. On phones, avoid
   // mounting the decorative/global controller stack behind it; these listeners
   // and fixed layers were a major source of input and scroll lag.
