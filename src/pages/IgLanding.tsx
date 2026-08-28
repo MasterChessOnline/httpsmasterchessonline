@@ -173,14 +173,23 @@ export default function IgLanding() {
           />
         </div>
 
-
+        <button
+          onClick={() => {
+            track("beginner_primer_open", { surface: "ad-landing", variant: variant || "ig" });
+            setCoach(true);
+          }}
+          className="mx-auto mt-2 block w-full text-xs text-primary underline underline-offset-4"
+        >
+          I don't know how to play — teach me in 60 seconds
+        </button>
 
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
-          className="px-6 pb-8 max-w-md mx-auto w-full space-y-3"
+          className="px-6 pt-6 pb-8 max-w-md mx-auto w-full space-y-3"
         >
+
           <Button
             onClick={handleGoogle}
             disabled={googleLoading}
