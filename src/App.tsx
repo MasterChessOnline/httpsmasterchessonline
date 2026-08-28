@@ -274,6 +274,17 @@ function isHomePath(pathname: string) {
   return pathname === "/" || pathname === "/home" || pathname === "/homepage" || pathname === "/index";
 }
 
+/**
+ * PAID-AD LANDING PATHS
+ * Ad traffic arrives on a slow mobile connection inside the Instagram in-app
+ * browser. Every fixed bar, notifier and decorative layer delays the one thing
+ * the ad promised: a playable board. These routes therefore mount NO global
+ * chrome at all — no bottom tab bar, no guest bars, no notifiers.
+ */
+function isAdLandingPath(pathname: string) {
+  return pathname === "/ig" || pathname === "/start" || pathname.startsWith("/ads/");
+}
+
 function RootDeferredOverlays() {
   const location = useLocation();
   const isHome = isHomePath(location.pathname);
@@ -282,7 +293,8 @@ function RootDeferredOverlays() {
   // notifiers are needed before a visitor has entered the product, and each
   // one creates its own effects/listeners/chunk request. Keep the entry screen
   // quiet and interactive; the overlays remain available everywhere else.
-  if (isHome) return null;
+  if (isHome || isAdLandingPath(location.pathname)) return null;
+
 
   return (
     <>
@@ -309,6 +321,13 @@ function AppChrome() {
   const location = useLocation();
   const isHome = isHomePath(location.pathname);
   const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
+
+  // Paid ad landings: nothing but the page itself. The board is the ad's promise.
+  if (isAdLandingPath(location.pathname)) {
+    return <Suspense fallback={null}><PendingSignupResume /></Suspense>;
+  }
+
+
 
   // The homepage owns its own navigation and conversion UI. On phones, avoid
   // mounting the decorative/global controller stack behind it; these listeners
@@ -347,8 +366,13 @@ function AppChrome() {
 }
 
 function AppMobileNav() {
+  const location = useLocation();
+  // The tab bar stole a third of the first screen on ad landings — and every
+  // tab was an exit from the funnel. Not mounted there.
+  if (isAdLandingPath(location.pathname)) return null;
   return <Suspense fallback={null}><MobileBottomNav /></Suspense>;
 }
+
 
 function useRouteZone() {
   const location = useLocation();
