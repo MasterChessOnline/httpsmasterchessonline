@@ -274,6 +274,17 @@ function isHomePath(pathname: string) {
   return pathname === "/" || pathname === "/home" || pathname === "/homepage" || pathname === "/index";
 }
 
+/**
+ * PAID-AD LANDING PATHS
+ * Ad traffic arrives on a slow mobile connection inside the Instagram in-app
+ * browser. Every fixed bar, notifier and decorative layer delays the one thing
+ * the ad promised: a playable board. These routes therefore mount NO global
+ * chrome at all — no bottom tab bar, no guest bars, no notifiers.
+ */
+function isAdLandingPath(pathname: string) {
+  return pathname === "/ig" || pathname === "/start" || pathname.startsWith("/ads/");
+}
+
 function RootDeferredOverlays() {
   const location = useLocation();
   const isHome = isHomePath(location.pathname);
@@ -282,7 +293,8 @@ function RootDeferredOverlays() {
   // notifiers are needed before a visitor has entered the product, and each
   // one creates its own effects/listeners/chunk request. Keep the entry screen
   // quiet and interactive; the overlays remain available everywhere else.
-  if (isHome) return null;
+  if (isHome || isAdLandingPath(location.pathname)) return null;
+
 
   return (
     <>
