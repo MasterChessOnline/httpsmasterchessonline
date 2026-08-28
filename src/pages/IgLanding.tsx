@@ -113,19 +113,16 @@ export default function IgLanding() {
       />
 
 
-      {/* Atmospheric glow */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 h-[420px] w-[420px] rounded-full bg-primary/20 blur-[120px]" />
-        <div className="absolute bottom-[-15%] right-[-10%] h-[300px] w-[300px] rounded-full bg-primary/10 blur-[100px]" />
-      </div>
+      {/* No blur layers here: a 120px blur on a 420px circle costs a full
+          repaint on the cheap Android phones this page is bought for. */}
 
       {/* Minimal brand row — no navigation that could steal the first move */}
-      <header className="px-5 pt-4 flex items-center justify-between">
+      <header className="px-4 pt-2 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <span className="h-8 w-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
-            <Crown className="h-4 w-4 text-primary" />
+          <span className="h-7 w-7 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
+            <Crown className="h-3.5 w-3.5 text-primary" />
           </span>
-          <span className="font-display text-base font-bold tracking-wide">
+          <span className="font-display text-sm font-bold tracking-wide">
             Master<span className="text-gradient-gold">Chess</span>
           </span>
         </Link>
@@ -135,51 +132,26 @@ export default function IgLanding() {
       </header>
 
       <main className="flex-1">
-        {/* Instagram-optimised promise: one line, one CTA, then the board.
-            No live matchmaking here — a first-time visitor plays the weakest
-            bot, and the account is offered once that game is over. */}
-        <section className="px-5 pt-4 pb-2 text-center">
-          {/* Proof that the source was detected — an Instagram visitor sees their
-              own channel named back at them, which lifts trust on first paint. */}
-          {detected === "instagram" || detected === "facebook" ? (
-            <p
-              data-testid="source-badge"
-              className="mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary"
-            >
-              <Sparkles className="h-3 w-3" />
-              Welcome from {detected === "instagram" ? "Instagram" : "Facebook"} · @dailychess_12
-            </p>
-          ) : null}
-          <h1 className="font-display text-2xl sm:text-3xl font-black leading-tight tracking-tight">
-            One tap and you're playing chess.
+        {/* One line, then the board. There is no "PLAY FREE" button any more:
+            the button was a second tap between the ad's promise and the game,
+            and it pushed the board below the fold on a 390x800 phone. */}
+        <section className="px-4 pt-2 pb-1 text-center">
+          <h1 className="font-display text-lg font-black leading-tight tracking-tight">
+            Free chess · your move
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Start against a friendly beginner bot. No account, no waiting for an opponent.
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            {detected === "instagram" || detected === "facebook" ? (
+              <span data-testid="source-badge">Welcome from Instagram · </span>
+            ) : null}
+            Tap a piece to start. No account needed.
           </p>
-
-          <a
-            href="#board"
-            onClick={() => track("play_now_click", { surface: "ad-landing", variant: variant || "ig" })}
-            className="mt-4 inline-block w-full sm:w-auto sm:min-w-[260px] rounded-2xl bg-primary px-8 py-3.5 font-display text-lg font-black tracking-wide text-primary-foreground shadow-glow"
-          >
-            PLAY FREE
-          </a>
-          <p className="mt-2 text-[11px] text-muted-foreground">No payment required.</p>
-          <button
-            onClick={() => {
-              track("beginner_primer_open", { surface: "ad-landing", variant: variant || "ig" });
-              setCoach(true);
-            }}
-            className="mt-3 block w-full text-xs text-primary underline underline-offset-4"
-          >
-            I don't know how to play — teach me in 60 seconds
-          </button>
         </section>
 
         {/* The board is the hero: live from the first paint, weakest bot.
             The visitor plays one full game for free; after that the gate asks
             for a free account before another move can be played. */}
         <div id="board">
+
           <InstantHeroBoard
             adMode
             headingLevel="h2"
