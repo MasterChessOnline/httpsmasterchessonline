@@ -332,7 +332,45 @@
     <script>
       (function () {
         var p = location.pathname;
-        if (!(p === "/ig" || p === "/start" || p.indexOf("/ads/") === 0)) return;
+        var isAd = p === "/ig" || p === "/start" || p.indexOf("/ads/") === 0;
+
+        // SOCIAL ENTRY, DECIDED BEFORE REACT BOOTS
+        // Most paid clicks land on "/" (Instagram bio links and ad links get
+        // shortened by hand), and the React-side router only redirected after
+        // the whole home page had loaded — long after a 3-second visit ended.
+        // Detect the social click here, in the first frame, and rewrite the URL
+        // to the ad funnel with no extra network round trip.
+        if (!isAd && p === "/") {
+          try {
+            var qs = new URLSearchParams(location.search);
+            var raw = (qs.get("utm_source") || qs.get("ref") || "").toLowerCase();
+            var ref = "";
+            try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
+            var ua = navigator.userAgent || "";
+            var social = "";
+            if (/instagram|^ig$/.test(raw) || /instagram/i.test(ref) || /Instagram/i.test(ua)) social = "instagram";
+            else if (/tiktok|^tt$/.test(raw) || /tiktok/i.test(ref)) social = "tiktok";
+            else if (/facebook|meta|^fb$/.test(raw) || /facebook/i.test(ref) || /FBAN|FBAV|FB_IAB/i.test(ua)) social = "facebook";
+
+            var signedIn = false;
+            for (var i = 0; i < localStorage.length; i++) {
+              var k = localStorage.key(i);
+              if (k && k.indexOf("sb-") === 0 && k.indexOf("-auth-token") > 0) signedIn = true;
+            }
+
+            if (social && !signedIn && sessionStorage.getItem("mc_social_routed") !== "1") {
+              sessionStorage.setItem("mc_social_routed", "1");
+              if (!qs.get("utm_source")) qs.set("utm_source", social);
+              qs.set("detected", "inline");
+              history.replaceState(null, "", "/ig?" + qs.toString());
+              isAd = true;
+            }
+          } catch (e) {
+            /* private mode — keep the normal home page */
+          }
+        }
+
+        if (!isAd) return;
         var light = "#e9d7ae", dark = "#8a6a3c", sq = "";
         for (var r = 0; r < 8; r++) {
           for (var c = 0; c < 8; c++) {
@@ -350,6 +388,7 @@
           "</div>";
       })();
     </script>
+
     <script type="module" src="/src/main.tsx"></script>
 
   </body>
