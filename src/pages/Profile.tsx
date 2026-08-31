@@ -526,12 +526,12 @@ const Profile = () => {
             <div className="mb-3 flex items-center justify-between gap-2">
               <h3 className="font-display text-sm font-semibold text-foreground">Recent Games</h3>
               {isOwnProfile && (
-                <Link
+                <RouterLink
                   to="/history"
                   className="text-[11px] font-semibold uppercase tracking-wider text-primary hover:underline"
                 >
                   Full game history →
-                </Link>
+                </RouterLink>
               )}
             </div>
             {games.length === 0 ? (
