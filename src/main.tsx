@@ -71,14 +71,38 @@ afterFirstPaint(async () => {
     })
     .catch(() => {});
 
+  // Service worker: required for Chrome/Android to offer the native
+  // "Install app" prompt (and for web push). Registered ONLY on the real
+  // published domain — never in dev, the Lovable preview, an iframe, or
+  // when the ?sw=off kill switch is used; in those cases we clean up.
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations?.()
-      .then((regs) => regs.forEach((reg) => reg.unregister()))
-      .catch(() => {});
+    const host = window.location.hostname;
+    const inIframe = (() => {
+      try { return window.self !== window.top; } catch { return true; }
+    })();
+    const killSwitch = new URLSearchParams(window.location.search).has("sw=off")
+      || new URLSearchParams(window.location.search).get("sw") === "off";
+    const previewHost =
+      host.startsWith("id-preview--") ||
+      host.startsWith("preview--") ||
+      host === "lovableproject.com" || host.endsWith(".lovableproject.com") ||
+      host === "lovableproject-dev.com" || host.endsWith(".lovableproject-dev.com") ||
+      host === "beta.lovable.dev" || host.endsWith(".beta.lovable.dev");
+
+    const allowed = import.meta.env.PROD && !inIframe && !previewHost && !killSwitch;
+
+    if (allowed) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    } else {
+      navigator.serviceWorker.getRegistrations?.()
+        .then((regs) => regs.forEach((reg) => reg.unregister()))
+        .catch(() => {});
+      if ("caches" in window) {
+        caches.keys()
+          .then((keys) => Promise.all(keys.filter((key) => key.startsWith("mc-shell")).map((key) => caches.delete(key))))
+          .catch(() => {});
+      }
+    }
   }
-  if ("caches" in window) {
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key.startsWith("mc-shell")).map((key) => caches.delete(key))))
-      .catch(() => {});
-  }
+
 });
