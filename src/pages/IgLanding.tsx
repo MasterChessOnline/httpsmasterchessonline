@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Crown, Sparkles } from "lucide-react";
 import Seo from "@/components/Seo";
@@ -62,7 +62,8 @@ function captureLandingSource(variant?: string) {
 
 export default function IgLanding() {
   const { variant } = useParams<{ variant?: string }>();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [coach, setCoach] = useState(false);
   // Once a visitor says they cannot play, the board keeps the hint line up.
@@ -70,6 +71,13 @@ export default function IgLanding() {
   const [detected, setDetected] = useState<TrafficSource>("direct");
   // Hard gate: the first game is free, then an account is required to continue.
   const [gate, setGate] = useState(false);
+
+  // The free guest game exists only for visitors without an account.
+  // Members go straight to the real app.
+  useEffect(() => {
+    if (!authLoading && user) navigate("/play", { replace: true });
+  }, [authLoading, user, navigate]);
+
 
   useEffect(() => {
     setDetected(detectTrafficSource().source);

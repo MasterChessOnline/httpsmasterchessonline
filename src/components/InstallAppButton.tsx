@@ -155,8 +155,10 @@ export default function InstallAppButton({
       }
       return;
     }
-    // 4. Desktop/Android without a deferred prompt — silently no-op.
-    //    User asked: no instructions, no "how to" dialogs.
+    // 4. Desktop/Android without a deferred prompt (browser hasn't offered it
+    //    yet, or the app is already installed under another profile) — show the
+    //    short manual path so the click always does something.
+    setShowAndroidHelp(true);
   };
 
   const sizeClass =
