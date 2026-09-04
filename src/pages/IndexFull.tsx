@@ -415,10 +415,13 @@ const Index = () => {
         </div>
 
         {/* ── INSTANT PLAY: a real board right under the CTA, so a curious
-              visitor can start without an account. ── */}
-        <React.Suspense fallback={<div className="mx-auto h-[360px] max-w-md" />}>
-          <InstantHeroBoard headingLevel="h2" hideHeading />
-        </React.Suspense>
+              visitor can start without an account. Members skip it — they get
+              the real online game instead of a warm-up bot. ── */}
+        {!user && (
+          <React.Suspense fallback={<div className="mx-auto h-[360px] max-w-md" />}>
+            <InstantHeroBoard headingLevel="h2" hideHeading />
+          </React.Suspense>
+        )}
 
         {/* ── RETENTION HOOK ── */}
         {/* One fixed hour a day where the queue is guaranteed to have people —
