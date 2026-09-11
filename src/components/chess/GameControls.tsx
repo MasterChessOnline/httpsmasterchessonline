@@ -92,6 +92,35 @@ export default function GameControls({
           <p className="text-[10px] text-muted-foreground text-center">
             {BOT_LEVELS.find((l) => l.value === difficulty)?.desc}
           </p>
+
+          {/* Pick any opponent by name — every bot, always available */}
+          {onBotSelect && (
+            <div className="pt-1 space-y-1.5">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                Or pick any bot
+              </p>
+              <div className="max-h-52 overflow-y-auto pr-0.5 space-y-1">
+                {ALL_BOTS.map((bot) => (
+                  <button
+                    key={bot.id}
+                    onClick={() => onBotSelect(bot)}
+                    disabled={settingsLocked}
+                    className={`w-full flex items-center gap-2 rounded-lg border px-2 py-1.5 text-left transition-all disabled:opacity-40 ${
+                      currentBotId === bot.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border/40 bg-muted/20 hover:border-primary/30"
+                    }`}
+                  >
+                    <BotAvatar avatar={bot.avatar} alt={bot.name} className="w-6 h-6 shrink-0" emojiClassName="text-lg" />
+                    <span className="text-[11px] font-semibold text-foreground truncate flex-1">
+                      {bot.name} {bot.countryFlag}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{bot.rating}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
