@@ -83,7 +83,7 @@ export default function BeatNikola() {
 
         {/* CTAs */}
         <div className="flex flex-wrap gap-3 justify-center mb-12">
-          <Link to="/play/online?tc=blitz">
+          <Link to="/play?bot=nikola-sakotic">
             <button className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-semibold transition">
               <Swords className="w-4 h-4" /> Challenge Nikola now
             </button>

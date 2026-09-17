@@ -1397,7 +1397,7 @@ const Play = () => {
                 Full settings (mode, difficulty, color, time) appear before move 1 and after game over,
                 matching pro-board layouts where active play stays focused on the board. */}
             {!isGameOver && moveHistory.length > 0 ? (
-              <div className="rounded-xl border border-border/60 bg-card/70 backdrop-blur-sm p-3 space-y-2">
+              <div className="hidden lg:block rounded-xl border border-border/60 bg-card/70 backdrop-blur-sm p-3 space-y-2">
                 <div className="flex gap-2">
                   <Button onClick={handleResign} variant="destructive" size="sm" className="flex-1 gap-1.5">
                     <Flag className="h-3.5 w-3.5" /> Resign
@@ -1435,6 +1435,8 @@ const Play = () => {
                 onToggleHints={() => setHintsEnabled(!hintsEnabled)}
                 onResign={handleResign}
                 onOfferDraw={handleOfferDraw}
+                onBotSelect={startMatchmaking}
+                currentBotId={currentBot.id}
                 canResign={true}
                 settingsLocked={!isGameOver && moveHistory.length > 0}
               />
