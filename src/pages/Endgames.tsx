@@ -242,6 +242,80 @@ function DrillBoard({ drill }: { drill: EndgameDrill }) {
   );
 }
 
+/* ------------------------------ Written guide ----------------------------- */
+
+function DrillArticle({ drill }: { drill: EndgameDrill }) {
+  const others = ENDGAME_DRILLS.filter((d) => d.id !== drill.id).slice(0, 4);
+  return (
+    <article className="mt-8 space-y-6 text-sm leading-relaxed">
+      <section className="space-y-2">
+        <h2 className="font-display text-lg font-bold text-foreground">
+          How to win {drill.title.toLowerCase()}
+        </h2>
+        <p className="text-muted-foreground">{drill.intro}</p>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          The method
+        </h2>
+        <ol className="space-y-2">
+          {drill.method.map((step, i) => (
+            <li key={i} className="flex gap-3 rounded-lg border border-border/40 bg-card/30 p-3">
+              <span className="font-display text-sm font-bold text-primary tabular-nums">{i + 1}</span>
+              <span className="text-muted-foreground">{step}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Common mistakes
+        </h2>
+        <ul className="space-y-1.5">
+          {drill.mistakes.map((m, i) => (
+            <li key={i} className="flex gap-2 text-muted-foreground">
+              <span className="text-primary">—</span>
+              <span>{m}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Questions
+        </h2>
+        {drill.faq.map((f) => (
+          <div key={f.q} className="space-y-1">
+            <h3 className="text-sm font-semibold text-foreground">{f.q}</h3>
+            <p className="text-muted-foreground">{f.a}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Train the next one
+        </h2>
+        <ul className="grid grid-cols-2 gap-2">
+          {others.map((d) => (
+            <li key={d.id}>
+              <Link
+                to={`/endgames/${d.id}`}
+                className="block rounded-lg border border-border/40 bg-card/30 p-2.5 text-xs font-medium text-foreground hover:border-primary/40 transition-colors"
+              >
+                {d.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </article>
+  );
+}
+
 /* --------------------------------- Page ---------------------------------- */
 
 export default function Endgames() {
@@ -257,6 +331,47 @@ export default function Endgames() {
   useEffect(() => {
     if (drillId && !drill) navigate("/endgames", { replace: true });
   }, [drillId, drill, navigate]);
+
+  const jsonLd = useMemo(() => {
+    if (drill) {
+      return [
+        {
+          "@context": "https://schema.org",
+          "@type": "HowTo",
+          name: `How to win ${drill.title}`,
+          description: drill.intro,
+          totalTime: "PT5M",
+          step: drill.method.map((s, i) => ({
+            "@type": "HowToStep",
+            position: i + 1,
+            name: `Step ${i + 1}`,
+            text: s,
+          })),
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: drill.faq.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        },
+      ];
+    }
+    return {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "Chess endgame drills",
+      itemListElement: ENDGAME_DRILLS.map((d, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: d.title,
+        url: `https://masterchess.live/endgames/${d.id}`,
+      })),
+    };
+  }, [drill]);
+
 
   const grouped = useMemo(
     () =>
@@ -276,15 +391,17 @@ export default function Endgames() {
         path={drill ? `/endgames/${drill.id}` : "/endgames"}
         title={
           drill
-            ? `${drill.title} — Endgame Trainer | MasterChess`
-            : "Endgame Trainer — Practice Chess Endgames Free | MasterChess"
+            ? `${drill.title} — How to Win It (Free Drill) | MasterChess`
+            : "Chess Endgame Practice — Free Endgame Trainer | MasterChess"
         }
         description={
           drill
-            ? `${drill.goal} Practice ${drill.title} against a defending engine. Free, no account needed.`
-            : "Train the endgames that decide games: king and pawn, rook endings, Lucena, queen vs rook. Free, instant, no account."
+            ? `${drill.intro.slice(0, 120)} Step-by-step method plus a free playable drill — no account needed.`
+            : "Practice the endgames that decide games: king and pawn, king and rook, Lucena, rook vs pawn, queen vs rook. Written method plus playable drills. Free, no account."
         }
+        jsonLd={jsonLd}
       />
+
 
       <header className="flex items-center justify-between px-3 py-2 border-b border-border/40">
         {drill ? (
@@ -306,7 +423,11 @@ export default function Endgames() {
 
       <main className="flex-1 w-full max-w-md mx-auto px-3 py-4">
         {drill ? (
-          <DrillBoard drill={drill} />
+          <>
+            <DrillBoard drill={drill} />
+            <DrillArticle drill={drill} />
+          </>
+
         ) : (
           <div className="space-y-6">
             <section className="space-y-2">
