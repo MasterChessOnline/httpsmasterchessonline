@@ -81,8 +81,8 @@ Deno.serve(async (req) => {
     const summaryStats = {
       username: prof?.username ?? "Player",
       elo: prof?.rating ?? 1200,
-      totalWins: prof?.wins ?? 0,
-      totalLosses: prof?.losses ?? 0,
+      totalWins: prof?.games_won ?? 0,
+      totalLosses: prof?.games_lost ?? 0,
       whiteWinRate: whiteGames ? Math.round(whiteWins/whiteGames*100) : 0,
       blackWinRate: blackGames ? Math.round(blackWins/blackGames*100) : 0,
       recentGamesAnalyzed: total,

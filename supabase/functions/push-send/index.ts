@@ -69,7 +69,10 @@ Deno.serve(async (req) => {
   try {
     const vapidPublic = Deno.env.get("VAPID_PUBLIC_KEY");
     const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY");
-    const vapidSubject = Deno.env.get("VAPID_SUBJECT") ?? "mailto:support@masterchess.live";
+    const DEFAULT_SUBJECT = "mailto:support@masterchess.live";
+    const rawSubject = (Deno.env.get("VAPID_SUBJECT") ?? "").trim();
+    const validSubject = /^(mailto:[^\s@]+@[^\s@]+\.[^\s@]+|https?:\/\/\S+)$/.test(rawSubject);
+    const vapidSubject = validSubject ? rawSubject : DEFAULT_SUBJECT;
 
     if (!vapidPublic || !vapidPrivate) {
       return new Response(
