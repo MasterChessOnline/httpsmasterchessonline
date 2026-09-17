@@ -56,9 +56,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === "digest" && userId) {
-      const { data: p } = await supa.from("profiles").select("email,username,elo_rating").eq("id", userId).maybeSingle();
+      const { data: p } = await supa.from("profiles").select("email,username,rating").eq("id", userId).maybeSingle();
       if (!p?.email) throw new Error("no email");
-      const r = await send(p.email, `Your weekly rank: ${p.elo_rating} ELO`, tpl("This week on the board", `Rating: <b>${p.elo_rating}</b><br/>Keep climbing — top 100 is within reach.`, { label: "View Stats", url: "https://masterchess.live/stats" }));
+      const r = await send(p.email, `Your weekly rank: ${p.rating} ELO`, tpl("This week on the board", `Rating: <b>${p.rating}</b><br/>Keep climbing — top 100 is within reach.`, { label: "View Stats", url: "https://masterchess.live/stats" }));
       return new Response(JSON.stringify(r), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 

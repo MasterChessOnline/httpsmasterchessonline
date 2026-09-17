@@ -84,12 +84,12 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await admin
       .from("profiles")
-      .select("username, elo")
+      .select("username, rating")
       .eq("user_id", userId)
       .maybeSingle();
 
     const who = profile?.username ? `${profile.username}` : "A player";
-    const rating = profile?.elo ? ` (${profile.elo})` : "";
+    const rating = profile?.rating ? ` (${profile.rating})` : "";
 
     const pushRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/push-send`, {
       method: "POST",
