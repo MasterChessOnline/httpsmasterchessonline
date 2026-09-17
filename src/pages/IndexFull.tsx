@@ -392,6 +392,14 @@ const Index = () => {
                       </div>
                     </>
                   )}
+
+                  <Link
+                    to="/endgames"
+                    className="mt-1 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary/20"
+                  >
+                    <Target className="h-4 w-4" />
+                    Endgame Trainer — 8 drills, no signup
+                  </Link>
                 </motion.div>
               </div>
 
