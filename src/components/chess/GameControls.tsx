@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { AI_LEVELS, type Difficulty } from "@/lib/chess-ai";
 import { TIME_CONTROLS } from "@/components/ChessClock";
 import { Link } from "react-router-dom";
+import BotAvatar from "@/components/BotAvatar";
+import { BOT_PROFILES, type BotProfile } from "@/lib/bots/profiles";
 
 type GameMode = "local" | "ai";
 type PlayerColor = "w" | "b";
@@ -25,6 +27,8 @@ interface GameControlsProps {
   onToggleHints: () => void;
   onResign?: () => void;
   onOfferDraw?: () => void;
+  onBotSelect?: (bot: BotProfile) => void;
+  currentBotId?: string;
   canResign?: boolean;
   settingsLocked?: boolean;
 }
@@ -41,7 +45,8 @@ export default function GameControls({
   statusText, moveHistory, isGameOver, hintsEnabled,
   onModeChange, onDifficultyChange, onColorChange,
   onTimeControlChange, onNewGame, onToggleHints,
-  onResign, onOfferDraw, canResign = false, settingsLocked = false,
+  onResign, onOfferDraw, onBotSelect, currentBotId,
+  canResign = false, settingsLocked = false,
 }: GameControlsProps) {
   return (
     <div className="w-full lg:max-w-xs space-y-3">
@@ -100,7 +105,7 @@ export default function GameControls({
                 Or pick any bot
               </p>
               <div className="max-h-52 overflow-y-auto pr-0.5 space-y-1">
-                {ALL_BOTS.map((bot) => (
+                {BOT_PROFILES.map((bot) => (
                   <button
                     key={bot.id}
                     onClick={() => onBotSelect(bot)}
