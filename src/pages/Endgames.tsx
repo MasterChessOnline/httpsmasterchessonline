@@ -391,15 +391,17 @@ export default function Endgames() {
         path={drill ? `/endgames/${drill.id}` : "/endgames"}
         title={
           drill
-            ? `${drill.title} — Endgame Trainer | MasterChess`
-            : "Endgame Trainer — Practice Chess Endgames Free | MasterChess"
+            ? `${drill.title} — How to Win It (Free Drill) | MasterChess`
+            : "Chess Endgame Practice — Free Endgame Trainer | MasterChess"
         }
         description={
           drill
-            ? `${drill.goal} Practice ${drill.title} against a defending engine. Free, no account needed.`
-            : "Train the endgames that decide games: king and pawn, rook endings, Lucena, queen vs rook. Free, instant, no account."
+            ? `${drill.intro.slice(0, 120)} Step-by-step method plus a free playable drill — no account needed.`
+            : "Practice the endgames that decide games: king and pawn, king and rook, Lucena, rook vs pawn, queen vs rook. Written method plus playable drills. Free, no account."
         }
+        jsonLd={jsonLd}
       />
+
 
       <header className="flex items-center justify-between px-3 py-2 border-b border-border/40">
         {drill ? (
