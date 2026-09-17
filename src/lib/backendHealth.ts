@@ -23,18 +23,27 @@ export async function probeBackend(force = false): Promise<BackendState> {
   if (!force && cached.state !== "unknown" && now - cached.at < CACHE_MS) {
     return cached.state;
   }
-  try {
-    // head-only count: cheapest possible round trip.
-    const { error } = await supabase
-      .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .limit(1);
-    // A permission error still proves the backend is answering.
-    const online = !error || !/fetch|network|timeout|paused/i.test(error.message);
-    cached = { state: online ? "online" : "offline", at: now };
-  } catch {
-    cached = { state: "offline", at: now };
+  // Only a repeated, purely network-level failure counts as an outage — a single
+  // hiccup or a permission error must never raise the banner.
+  const probeOnce = async (): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .limit(1);
+      // A permission error still proves the backend is answering.
+      return !error || !/failed to fetch|network|timeout|paused/i.test(error.message);
+    } catch {
+      return false;
+    }
+  };
+
+  let online = await probeOnce();
+  if (!online) {
+    await new Promise((r) => setTimeout(r, 2000));
+    online = await probeOnce();
   }
+  cached = { state: online ? "online" : "offline", at: now };
   return cached.state;
 }
 
