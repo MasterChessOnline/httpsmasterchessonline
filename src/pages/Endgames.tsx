@@ -423,7 +423,11 @@ export default function Endgames() {
 
       <main className="flex-1 w-full max-w-md mx-auto px-3 py-4">
         {drill ? (
-          <DrillBoard drill={drill} />
+          <>
+            <DrillBoard drill={drill} />
+            <DrillArticle drill={drill} />
+          </>
+
         ) : (
           <div className="space-y-6">
             <section className="space-y-2">
