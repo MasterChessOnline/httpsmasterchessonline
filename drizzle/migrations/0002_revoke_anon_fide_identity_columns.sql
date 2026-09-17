@@ -1,0 +1,1 @@
+REVOKE SELECT (fide_title, federation) ON public.profiles FROM anon;
