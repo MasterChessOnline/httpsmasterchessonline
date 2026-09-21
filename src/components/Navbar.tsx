@@ -76,8 +76,7 @@ const NAV_SECTIONS: NavSection[] = [
     accentRgb: "245,158,11",
     items: [
       { label: "All Tournaments", href: "/tournaments", icon: Trophy, desc: "Browse upcoming events", highlight: true },
-      { label: "DB Chess Cup", href: "/dragan-brakus", icon: Award, desc: "Official MasterChess Cup" },
-      { label: "Live Hub", href: "/dragan-brakus/live", icon: Radio, desc: "Live boards & standings" },
+      { label: "Daily Endgame", href: "/endgames/daily", icon: Award, desc: "Today's position + streak" },
       { label: "Leaderboard", href: "/leaderboard", icon: Medal, desc: "Top players globally" },
       { label: "World Events", href: "/world-tournaments", icon: Eye, desc: "FIDE & global calendar" },
     ],
@@ -93,7 +92,7 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Blog", href: "/blog", icon: BookOpen, desc: "Guides & deep dives" },
       { label: "About Nikola", href: "/nikola", icon: Crown, desc: "Founder story" },
       { label: "Why MasterChess", href: "/why-masterchess", icon: Heart, desc: "What makes us different" },
-      { label: "Press", href: "/dragan-brakus/press", icon: FileText, desc: "Media kit & releases" },
+      { label: "Press", href: "/press", icon: FileText, desc: "Media kit & releases" },
     ],
   },
   {

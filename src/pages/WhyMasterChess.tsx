@@ -61,7 +61,7 @@ export default function WhyMasterChess() {
               <Link to="/nikola">Founder story</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/dragan-brakus/press">Press kit</Link>
+              <Link to="/press">Press kit</Link>
             </Button>
           </div>
         </section>
@@ -89,7 +89,7 @@ export default function WhyMasterChess() {
             headline editors don't have to invent.
           </Pitch>
           <Pitch icon={<Trophy />} title="Real tournaments, not just a play button">
-            Dragan Brakus Cup runs as a 9-round Swiss with check-in window,
+            MasterChess tournaments run as Swiss events with a check-in window,
             anti-cheat, Buchholz / Sonneborn / Performance tiebreaks, TRF16 +
             Swiss-Manager exports, and a public live leaderboard.
           </Pitch>
@@ -119,8 +119,8 @@ export default function WhyMasterChess() {
           </h2>
           <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-5">
             <li>One social post or short video using your `/r/your-code` link.</li>
-            <li>Optional: logo placement on `/dragan-brakus` as a Gold / Silver sponsor.</li>
-            <li>Optional: co-branded round on the Dragan Brakus Cup ("Round 5 powered by …").</li>
+            <li>Optional: logo placement on `/tournaments` as a Gold / Silver sponsor.</li>
+            <li>Optional: co-branded round on a MasterChess event ("Round 5 powered by …").</li>
             <li>That's it. No exclusivity, no lock-in, transparent metrics.</li>
           </ul>
         </section>
@@ -139,7 +139,7 @@ export default function WhyMasterChess() {
               <Link to="/nikola">Meet the founder</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/dragan-brakus">See the cup</Link>
+              <Link to="/tournaments">See tournaments</Link>
             </Button>
           </div>
         </section>

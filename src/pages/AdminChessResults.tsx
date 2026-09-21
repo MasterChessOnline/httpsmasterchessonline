@@ -82,7 +82,7 @@ export default function AdminChessResults() {
 
     // Ping IndexNow so Google picks up the change quickly
     try {
-      await supabase.functions.invoke("indexnow-ping", { body: { urls: ["/dragan-brakus"] } });
+      await supabase.functions.invoke("indexnow-ping", { body: { urls: ["/tournaments"] } });
     } catch { /* silent */ }
 
     // Auto-publish a news article the first time we mark it listed
@@ -93,7 +93,7 @@ export default function AdminChessResults() {
           title: `${row.name} officially listed on Chess-Results Serbia`,
           slug,
           url: cleanUrl,
-          body_md: `**${row.name}** is now officially listed on [Chess-Results Serbia](${cleanUrl}). Live standings, pairings, and final cross-tables will be published there round by round.\n\nRegister and follow the event on [MasterChess](/dragan-brakus).`,
+          body_md: `**${row.name}** is now officially listed on [Chess-Results Serbia](${cleanUrl}). Live standings, pairings, and final cross-tables will be published there round by round.\n\nRegister and follow the event on [MasterChess](/tournaments).`,
           kind: "article",
           source: "MasterChess.live Newsroom",
           author_name: "MasterChess.live Newsroom",

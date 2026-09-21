@@ -27,7 +27,7 @@ const CHANNELS = [
   {
     icon: Trophy,
     name: "#tournaments",
-    text: "Pairings, results and pings before every round of the DB Chess Cup and arenas.",
+    text: "Pairings, results and pings before every round of MasterChess tournaments and arenas.",
   },
   {
     icon: GraduationCap,

@@ -34,8 +34,8 @@ function FastHomeShell() {
             <Crown className="h-5 w-5" /> MasterChess
           </Link>
           <div className="flex items-center gap-2">
-            <Link to="/dragan-brakus/register" className="hidden rounded-lg border border-primary/40 px-3 py-2 text-sm font-semibold text-primary sm:inline-flex">
-              DB Cup
+            <Link to="/endgames/daily" className="hidden rounded-lg border border-primary/40 px-3 py-2 text-sm font-semibold text-primary sm:inline-flex">
+              Daily Endgame
             </Link>
             <Link to={playHref} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground">
               <Play className="h-4 w-4" /> Play
@@ -49,17 +49,17 @@ function FastHomeShell() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-primary">
-                <Trophy className="h-4 w-4" /> Featured tournament
+                <Trophy className="h-4 w-4" /> Today's challenge
               </div>
-              <h2 className="mt-2 font-display text-3xl font-black leading-tight sm:text-5xl">DB Chess Cup</h2>
-              <p className="mt-1 text-sm font-semibold text-muted-foreground sm:text-base">23 July 2026 · 16:00 CEST · Register with FIDE ID or your name</p>
+              <h2 className="mt-2 font-display text-3xl font-black leading-tight sm:text-5xl">Daily Endgame</h2>
+              <p className="mt-1 text-sm font-semibold text-muted-foreground sm:text-base">One winning position a day · Keep your streak · No account</p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Link to="/dragan-brakus/register" className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground">
-                Register Now <ArrowRight className="h-4 w-4" />
+              <Link to="/endgames/daily" className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground">
+                Solve today's <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link to="/dragan-brakus" className="inline-flex items-center justify-center rounded-lg border border-border px-4 py-3 text-sm font-semibold">
-                Details
+              <Link to="/endgames" className="inline-flex items-center justify-center rounded-lg border border-border px-4 py-3 text-sm font-semibold">
+                All drills
               </Link>
             </div>
           </div>

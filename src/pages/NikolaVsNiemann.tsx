@@ -193,8 +193,7 @@ export default function NikolaVsNiemann() {
           A SADA?
         </h2>
         <p className="text-base md:text-lg leading-relaxed mb-4">
-          Sledeće na spisku: <b>Dragan Brakus Kup</b> — turnir od 9 kola koji
-          Nikola organizuje u znak sećanja na velikog srpskog organizatora.
+          Sledeće na spisku: novi MasterChess turniri i dnevni izazov završnica.
           Prijave su besplatne, a igra se online preko MasterChess platforme.
         </p>
 
@@ -230,7 +229,7 @@ export default function NikolaVsNiemann() {
               variant="outline"
               className="border-2 border-black bg-white text-black font-black uppercase hover:bg-neutral-100"
             >
-              <Link to="/dragan-brakus">Dragan Brakus Kup</Link>
+              <Link to="/tournaments">MasterChess turniri</Link>
             </Button>
           </div>
         </div>

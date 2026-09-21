@@ -13,7 +13,8 @@ import RouteLoader from "@/components/RouteLoader";
 const CursorGlow = lazy(() => import("@/components/CursorGlow"));
 const DepthLayers = lazy(() => import("@/components/DepthLayers"));
 const MobileBottomNav = lazy(() => import("@/components/MobileBottomNav"));
-const BrakusRibbon = lazy(() => import("@/components/BrakusRibbon"));
+const DailyEndgameRibbon = lazy(() => import("@/components/DailyEndgameRibbon"));
+const DailyEndgame = lazy(() => import("./pages/DailyEndgame"));
 const AntiTiltWatcher = lazy(() => import("@/components/AntiTiltWatcher"));
 const FloatingShareButton = lazy(() => import("@/components/FloatingShareButton"));
 const FloatingPlayNow = lazy(() => import("@/components/FloatingPlayNow"));
@@ -145,15 +146,7 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const TournamentLobby = lazy(() => import("./pages/TournamentLobby"));
 const TournamentRegister = lazy(() => import("./pages/TournamentRegister"));
-const DraganBrakusRedirect = lazy(() => import("./pages/DraganBrakusRedirect"));
-const DraganBrakusCup = lazy(() => import("./pages/DraganBrakusCup"));
-const DraganBrakusLive = lazy(() => import("./pages/DraganBrakusLive"));
-const DraganBrakusPress = lazy(() => import("./pages/DraganBrakusPress"));
-const DraganBrakusRules = lazy(() => import("./pages/DraganBrakusRules"));
-const DraganBrakusHallOfFame = lazy(() => import("./pages/DraganBrakusHallOfFame"));
-const DraganBrakusOverlay = lazy(() => import("./pages/DraganBrakusOverlay"));
 const AdminTournament = lazy(() => import("./pages/AdminTournament"));
-const DraganBrakusRegister = lazy(() => import("./pages/DraganBrakusRegister"));
 const InviteRedirect = lazy(() => import("./pages/InviteRedirect"));
 const WhyMasterChess = lazy(() => import("./pages/WhyMasterChess"));
 const AffiliateRedirect = lazy(() => import("./pages/AffiliateRedirect"));
@@ -351,7 +344,7 @@ function AppChrome() {
       <Suspense fallback={null}><AntiTiltWatcher /></Suspense>
       <Suspense fallback={null}><TitleUnlockGate /></Suspense>
       <Suspense fallback={null}><GameInviteListener /></Suspense>
-      <Suspense fallback={null}><BrakusRibbon /></Suspense>
+      <Suspense fallback={null}><DailyEndgameRibbon /></Suspense>
       <Suspense fallback={null}><StreakFlexController /></Suspense>
       <Suspense fallback={null}><FloatingShareButton /></Suspense>
       <Suspense fallback={null}><FloatingPlayNow /></Suspense>
@@ -382,7 +375,7 @@ function useRouteZone() {
   let zone = "";
   if (p.startsWith("/play") || p === "/" || p.startsWith("/bot") || p.startsWith("/beat")) zone = "play";
   else if (p.startsWith("/learn") || p.startsWith("/lessons") || p.startsWith("/openings") || p.startsWith("/coach") || p.startsWith("/training") || p.startsWith("/puzzle") || p.startsWith("/daily-puzzle") || p.startsWith("/guides") || p.startsWith("/glossary")) zone = "learn";
-  else if (p.startsWith("/tournament") || p.startsWith("/dragan-brakus") || p.startsWith("/leaderboard") || p.startsWith("/battle-royale") || p.startsWith("/team-battles")) zone = "tourney";
+  else if (p.startsWith("/tournament") || p.startsWith("/leaderboard") || p.startsWith("/battle-royale") || p.startsWith("/team-battles")) zone = "tourney";
   else if (p.startsWith("/community") || p.startsWith("/clubs") || p.startsWith("/club/") || p.startsWith("/friends") || p.startsWith("/live") || p.startsWith("/profile") || p.startsWith("/u/")) zone = "community";
   else if (p.startsWith("/news") || p.startsWith("/blog") || p.startsWith("/press")) zone = "news";
   if (zone) document.documentElement.setAttribute("data-zone", zone);
@@ -438,14 +431,9 @@ function AnimatedRoutes() {
           <Route path="/tournaments/wall" element={<TournamentsWall />} />
           <Route path="/tournaments/:id" element={<TournamentLobby />} />
           <Route path="/tournaments/:id/register" element={<TournamentRegister />} />
-          <Route path="/dragan-brakus" element={<DraganBrakusCup />} />
-          <Route path="/dragan-brakus/lobby" element={<DraganBrakusRedirect />} />
-          <Route path="/dragan-brakus/live" element={<DraganBrakusLive />} />
-          <Route path="/dragan-brakus/press" element={<DraganBrakusPress />} />
-          <Route path="/dragan-brakus/register" element={<DraganBrakusRegister />} />
-          <Route path="/dragan-brakus/rules" element={<DraganBrakusRules />} />
-          <Route path="/dragan-brakus/hall-of-fame" element={<DraganBrakusHallOfFame />} />
-          <Route path="/dragan-brakus/overlay" element={<DraganBrakusOverlay />} />
+          {/* DB Chess Cup was removed — old links now land on the tournaments page. */}
+          <Route path="/dragan-brakus/*" element={<Navigate to="/tournaments" replace />} />
+          <Route path="/endgames/daily" element={<DailyEndgame />} />
           <Route path="/admin/tournaments/:id" element={<AdminTournament />} />
           <Route path="/why-masterchess" element={<WhyMasterChess />} />
           <Route path="/r/:code" element={<AffiliateRedirect />} />

@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 export default function AffiliateRedirect() {
   const { code } = useParams<{ code: string }>();
   const [params] = useSearchParams();
-  const to = params.get("to") || "/dragan-brakus";
+  const to = params.get("to") || "/tournaments";
 
   useEffect(() => {
     if (!code) return;

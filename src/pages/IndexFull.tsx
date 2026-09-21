@@ -49,7 +49,6 @@ import AnimatedLogoHero from "@/components/AnimatedLogoHero";
 import NewUserIntro from "@/components/NewUserIntro";
 
 import HomeTrustStrip from "@/components/HomeTrustStrip";
-import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import SiteStatsNote from "@/components/SiteStatsNote";
 import PrimeTimeBanner from "@/components/PrimeTimeBanner";
 
@@ -292,7 +291,6 @@ const Index = () => {
       />
       <Navbar />
       <NewUserIntro />
-      <BrakusHeroBanner />
 
 
       <main>
