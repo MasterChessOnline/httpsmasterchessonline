@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import StreakIndicator from "@/components/StreakIndicator";
 import CoinBalancePill from "@/components/CoinBalancePill";
 import NavSearchPalette from "@/components/NavSearchPalette";
+import NotificationBell from "@/components/NotificationBell";
 // SiteThemePicker removed — see src/lib/site-themes.ts (forced "live" theme).
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
@@ -445,6 +446,10 @@ const Navbar = () => {
 
             {/* Right side */}
             <div className="flex items-center gap-2 shrink-0">
+
+              {/* In-app notification inbox */}
+              <NotificationBell />
+
 
               {/* Search button — opens full palette */}
               <button
