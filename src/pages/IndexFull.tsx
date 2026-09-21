@@ -446,6 +446,11 @@ const Index = () => {
             </div>
             <ChevronRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
           </Link>
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+            <Link to="/vuk-georgijev" className="underline decoration-primary/40 hover:text-primary">
+              Vuk Georgijev — full bio, chess career &amp; coaching
+            </Link>
+          </p>
         </section>
 
         {/* ── INSTANT PLAY: a real board right under the CTA, so a curious

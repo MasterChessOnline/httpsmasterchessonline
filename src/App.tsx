@@ -73,6 +73,7 @@ const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ProfileRedirect = lazy(() => import("./pages/ProfileRedirect"));
 const PublicPlayer = lazy(() => import("./pages/PublicPlayer"));
+const VukGeorgijev = lazy(() => import("./pages/VukGeorgijev"));
 const Friends = lazy(() => import("./pages/Friends"));
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const Achievements = lazy(() => import("./pages/Achievements"));
@@ -446,6 +447,8 @@ function AnimatedRoutes() {
           <Route path="/profile" element={<ProfileRedirect />} />
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/u/:username" element={<PublicPlayer />} />
+          <Route path="/vuk-georgijev" element={<VukGeorgijev />} />
+          <Route path="/vuk-georgijev/:slug" element={<VukGeorgijev />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path="/achievements" element={<Achievements />} />
