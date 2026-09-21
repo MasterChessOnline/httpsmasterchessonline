@@ -34,7 +34,7 @@ import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
-import vukProfilePhoto from "@/assets/vuk67/vuk-georgijev-profile.png.asset.json";
+import vukProfilePhoto from "@/assets/vuk-georgijev-profile.png";
 import { Instagram } from "lucide-react";
 import { trackSignupCta } from "@/lib/funnel";
 
@@ -428,7 +428,7 @@ const Index = () => {
             className="group grid grid-cols-[5rem_1fr_auto] items-center gap-4 rounded-xl border border-primary/40 bg-card/90 p-4 shadow-glow backdrop-blur-xl transition-colors hover:border-primary/70 sm:grid-cols-[6rem_1fr_auto] sm:p-5"
           >
             <img
-              src={vukProfilePhoto.url}
+              src={vukProfilePhoto}
               alt="Vuk Georgijev"
               className="h-20 w-20 rounded-lg border border-primary/40 object-cover object-top sm:h-24 sm:w-24"
             />
