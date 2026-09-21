@@ -1,0 +1,1 @@
+GRANT SELECT (master_coins) ON public.profiles TO anon;

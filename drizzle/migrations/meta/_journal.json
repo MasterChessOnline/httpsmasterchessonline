@@ -43,6 +43,13 @@
       "when": 1789990892061,
       "tag": "0005_restrict_profiles_pii_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789990961347,
+      "tag": "0006_grant_anon_master_coins",
+      "breakpoints": true
     }
   ]
 }
