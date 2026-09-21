@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -119,6 +119,7 @@ function RatingSparkline({ points }: { points: number[] }) {
 
 export default function PublicPlayer() {
   const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [card, setCard] = useState<ChessCardProfile | null>(null);
   const [ratingHistory, setRatingHistory] = useState<RatingRow[]>([]);
@@ -133,18 +134,22 @@ export default function PublicPlayer() {
     setLoading(true);
     setNotFound(false);
     (async () => {
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username);
+      const canonicalUsername = username.toLowerCase() === "vuk67" ? "vuk-georgijev" : username;
+      if (canonicalUsername !== username) {
+        navigate(`/u/${canonicalUsername}`, { replace: true });
+      }
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(canonicalUsername);
       const cols =
         "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at,profile_banner,master_coins,total_xp,skill_level,fide_title,highest_title_key";
       let data: any = null;
       if (isUuid) {
-        const r = await supabase.from("profiles").select(cols).eq("user_id", username).maybeSingle();
+        const r = await supabase.from("profiles").select(cols).eq("user_id", canonicalUsername).maybeSingle();
         data = r.data;
       } else {
-        const r = await supabase.from("profiles").select(cols).eq("username", username).maybeSingle();
+        const r = await supabase.from("profiles").select(cols).eq("username", canonicalUsername).maybeSingle();
         data = r.data;
         if (!data) {
-          const r2 = await supabase.from("profiles").select(cols).ilike("display_name", username).limit(1).maybeSingle();
+          const r2 = await supabase.from("profiles").select(cols).ilike("display_name", canonicalUsername).limit(1).maybeSingle();
           data = r2.data as any;
         }
       }
@@ -192,7 +197,7 @@ export default function PublicPlayer() {
       setMasterChessVerified(Boolean(verifiedAward));
       setLoading(false);
     })();
-  }, [username]);
+  }, [navigate, username]);
 
   // Per-time-control aggregates from rating_history + online_games
   const tcStats = useMemo(() => {

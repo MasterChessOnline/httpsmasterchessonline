@@ -27,6 +27,7 @@ import {
   Sparkles,
   LogIn,
   Check,
+  ShieldCheck,
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
@@ -440,7 +441,7 @@ const Index = () => {
               </div>
               <h2 className="mt-1 font-display text-xl font-bold text-foreground sm:text-2xl">Vuk Georgijev</h2>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                Young chess player from Belgrade, born in 2007. ŠK Tadić · MasterChess Coach · Lifetime Premium.
+                Young chess player from Belgrade, born 28 December 2007. ŠK Tadić · MasterChess Coach · Lifetime Premium.
               </p>
             </div>
             <ChevronRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
