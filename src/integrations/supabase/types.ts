@@ -5824,6 +5824,9 @@ export type Database = {
         Args: never
         Returns: {
           birth_year: number
+          federation: string
+          fide_id: string
+          fide_title: string
           first_name: string
           last_name: string
           map_lat: number
