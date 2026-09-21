@@ -50,6 +50,20 @@
       "when": 1789990961347,
       "tag": "0006_grant_anon_master_coins",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789991200027,
+      "tag": "0007_add_profiles_instagram",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789991397718,
+      "tag": "0008_public_player_profile_instagram",
+      "breakpoints": true
     }
   ]
 }

@@ -2858,6 +2858,7 @@ export type Database = {
           games_won: number
           highest_title_key: string | null
           id: string
+          instagram: string | null
           is_streamer: boolean
           last_login_reward_date: string | null
           last_name: string | null
@@ -2923,6 +2924,7 @@ export type Database = {
           games_won?: number
           highest_title_key?: string | null
           id?: string
+          instagram?: string | null
           is_streamer?: boolean
           last_login_reward_date?: string | null
           last_name?: string | null
@@ -2988,6 +2990,7 @@ export type Database = {
           games_won?: number
           highest_title_key?: string | null
           id?: string
+          instagram?: string | null
           is_streamer?: boolean
           last_login_reward_date?: string | null
           last_name?: string | null
@@ -5874,6 +5877,7 @@ export type Database = {
           games_won: number
           highest_title_key: string | null
           id: string
+          instagram: string | null
           is_streamer: boolean
           last_login_reward_date: string | null
           last_name: string | null
@@ -5947,12 +5951,12 @@ export type Database = {
           country_flag: string
           created_at: string
           display_name: string
-          fide_title: string
           games_drawn: number
           games_lost: number
           games_played: number
           games_won: number
           highest_title_key: string
+          instagram: string
           master_coins: number
           peak_rating: number
           profile_banner: string

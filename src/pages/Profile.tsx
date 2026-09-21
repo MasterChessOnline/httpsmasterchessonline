@@ -3,7 +3,7 @@ import { useParams, Link as RouterLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { User, Trophy, Swords, TrendingUp, Calendar, Edit, Settings, Camera, Loader2, Sparkles } from "lucide-react";
+import { User, Trophy, Swords, TrendingUp, Calendar, Edit, Settings, Camera, Loader2, Sparkles, Instagram } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import RankBadge from "@/components/RankBadge";
 import TitleBadge from "@/components/TitleBadge";
+import { useHasAward } from "@/hooks/use-has-award";
 import StyleTwinCard from "@/components/StyleTwinCard";
 import DailyKingCrown from "@/components/DailyKingCrown";
 import { getRank as getRankFromLib } from "@/lib/ranks";
@@ -90,9 +91,18 @@ const Profile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = user?.id === userId;
+  const isVerifiedPlayer = useHasAward(userId, "verified");
+  const [instagram, setInstagram] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!userId) { setInstagram(null); return; }
+    supabase.from("profiles").select("instagram").eq("user_id", userId).maybeSingle()
+      .then(({ data }) => setInstagram((data as any)?.instagram ?? null));
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
+
 
     const loadProfile = async () => {
       if (isOwnProfile) {
@@ -324,7 +334,10 @@ const Profile = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <TitleBadge rating={profileData.bot_rating ?? 1200} mode="bot" size="sm" hideUnranked={false} />
+                  {/* Officially verified players show their real recognitions, not a bot-rating title. */}
+                  {!isVerifiedPlayer && (
+                    <TitleBadge rating={profileData.bot_rating ?? 1200} mode="bot" size="sm" hideUnranked={false} />
+                  )}
                   <RankBadge rating={profileData.rating} size="sm" />
                   <SupporterBadge userId={profileData.user_id} size="sm" />
                   <PlayerVerifiedBadge userId={profileData.user_id} />
@@ -355,6 +368,20 @@ const Profile = () => {
                 </p>
               </div>
             )}
+
+            {/* Linked Instagram account */}
+            {instagram && (
+              <a
+                href={`https://instagram.com/${instagram.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
+              >
+                <Instagram className="h-3.5 w-3.5" /> @{instagram.replace(/^@/, "")}
+              </a>
+            )}
+
+
 
             {/* Title progress (driven by bot rating — the AI bot title ladder) */}
             {(() => {

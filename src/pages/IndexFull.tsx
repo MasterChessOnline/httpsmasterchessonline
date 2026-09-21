@@ -430,7 +430,7 @@ const Index = () => {
             <img
               src={vukProfilePhoto}
               alt="Vuk Georgijev"
-              className="h-20 w-20 rounded-lg border border-primary/40 object-cover object-top sm:h-24 sm:w-24"
+              className="h-24 w-20 rounded-lg border border-primary/40 bg-background/60 object-contain sm:h-28 sm:w-24"
             />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
