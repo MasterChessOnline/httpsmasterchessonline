@@ -327,7 +327,7 @@ const Profile = () => {
                   <TitleBadge rating={profileData.bot_rating ?? 1200} mode="bot" size="sm" hideUnranked={false} />
                   <RankBadge rating={profileData.rating} size="sm" />
                   <SupporterBadge userId={profileData.user_id} size="sm" />
-                  <VerifiedBadge userId={profileData.user_id} />
+                  <PlayerVerifiedBadge userId={profileData.user_id} />
                   <CoachBadge userId={profileData.user_id} />
                   <PresenceDot userId={profileData.user_id} showLabel />
                   {profileData.peak_rating && profileData.peak_rating > profileData.rating && (
