@@ -7,9 +7,9 @@ import { ShieldCheck, MapPin, Crown, Sparkles, Trophy } from "lucide-react";
 const items = [
   {
     icon: Trophy,
-    label: "Chess-Results Serbia",
-    sub: "Official tournament listings",
-    href: "/dragan-brakus",
+    label: "Daily Endgame",
+    sub: "A new position every day",
+    href: "/endgames/daily",
   },
   {
     icon: MapPin,

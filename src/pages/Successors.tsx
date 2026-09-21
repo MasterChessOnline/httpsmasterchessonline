@@ -27,7 +27,7 @@ export default function Successors() {
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <Badge className="mb-4">Coming after the Dragan Brakus Cup</Badge>
+          <Badge className="mb-4">Coming soon</Badge>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-xs font-bold uppercase tracking-wider text-primary mb-4 ml-2">
             <Tv className="h-3 w-3" /> Season 1
           </div>

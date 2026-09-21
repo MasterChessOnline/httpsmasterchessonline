@@ -1,20 +1,19 @@
 import Seo from "@/components/Seo";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import BrakusHeroBanner from "@/components/BrakusHeroBanner";
 import HomeProofRow from "@/components/HomeProofRow";
 
 import LiveActivityBar from "@/components/LiveActivityBar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { Crown, Play, Swords, Trophy, GraduationCap, Users, Zap, ArrowRight } from "lucide-react";
+import { Crown, Play, Swords, Flame, GraduationCap, Users, Zap, ArrowRight } from "lucide-react";
 
 const quickLinks = [
   { to: "/play-guest", title: "Play instantly", text: "Start a chess game now — no waiting.", icon: Play },
   { to: "/play", title: "Play bots", text: "Train against MasterChess bots.", icon: Swords },
   { to: "/learn", title: "Learn chess", text: "Lessons, openings and puzzles.", icon: GraduationCap },
-  { to: "/dragan-brakus", title: "DB Chess Cup", text: "Official 23 July 2026 tournament.", icon: Trophy },
+  { to: "/endgames/daily", title: "Daily Endgame", text: "One position a day — keep your streak.", icon: Flame },
 ];
 
 export default function Index() {
@@ -22,13 +21,12 @@ export default function Index() {
     <div className="min-h-screen bg-background text-foreground">
       <Seo
         title="MasterChess — Play Free Online Chess"
-        description="Play free online chess on MasterChess: instant games, bots, training and the DB Chess Cup tournament."
+        description="Play free online chess on MasterChess: instant games, bots, endgame training and daily challenges."
         path="/"
         type="website"
       />
       <Navbar />
       <LiveActivityBar />
-      <BrakusHeroBanner />
 
 
       <main className="relative overflow-hidden">
@@ -70,7 +68,7 @@ export default function Index() {
             <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
               <Link to="/play" className="hover:text-amber-300">Play vs bots</Link>
               <span className="opacity-30">·</span>
-              <Link to="/dragan-brakus/register" className="hover:text-amber-300">Register DB Cup</Link>
+              <Link to="/endgames/daily" className="hover:text-amber-300">Daily endgame</Link>
               <span className="opacity-30">·</span>
               <Link to="/learn" className="hover:text-amber-300">Learn chess</Link>
             </div>
@@ -100,16 +98,16 @@ export default function Index() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-300">
-                  <Users className="h-4 w-4" /> Tournament registration is open
+                  <Users className="h-4 w-4" /> New every day
                 </div>
-                <h2 className="mt-2 text-2xl font-bold">DB Chess Cup · 23 July 2026 · 16:00 CEST</h2>
+                <h2 className="mt-2 text-2xl font-bold">Daily Endgame Challenge</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Add your optional FIDE ID or just type your name. After registration you appear on the live standings list.
+                  One real endgame every day. Win it and your streak grows — no account needed.
                 </p>
               </div>
               <Button asChild className="bg-amber-400 text-black hover:bg-amber-300">
-                <Link to="/dragan-brakus/register">
-                  <Zap className="mr-2 h-4 w-4" /> Register Now
+                <Link to="/endgames/daily">
+                  <Zap className="mr-2 h-4 w-4" /> Solve today's
                 </Link>
               </Button>
             </div>

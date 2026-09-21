@@ -41,7 +41,7 @@ function pickDefender(rating: number) {
 
 /* ------------------------------- Drill board ------------------------------- */
 
-function DrillBoard({ drill }: { drill: EndgameDrill }) {
+export function DrillBoard({ drill, onSolved }: { drill: EndgameDrill; onSolved?: () => void }) {
   const defender = useMemo(() => pickDefender(drill.defenderRating), [drill.defenderRating]);
   const [game, setGame] = useState(() => new Chess(drill.fen));
   const [fen, setFen] = useState(drill.fen);
@@ -82,6 +82,7 @@ function DrillBoard({ drill }: { drill: EndgameDrill }) {
       if (g.isCheckmate() && g.turn() === "b") {
         setStatus("solved");
         markSolved(drill.id);
+        onSolved?.();
         playChessSound("victory");
         celebrate("big");
         return true;
@@ -98,7 +99,7 @@ function DrillBoard({ drill }: { drill: EndgameDrill }) {
       }
       return false;
     },
-    [drill.id, drill.moveLimit],
+    [drill.id, drill.moveLimit, onSolved],
   );
 
   const playDefence = useCallback(
