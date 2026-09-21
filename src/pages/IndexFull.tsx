@@ -33,6 +33,7 @@ import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
+import vukProfilePhoto from "@/assets/vuk67/vuk-georgijev-profile.png.asset.json";
 import { Instagram } from "lucide-react";
 import { trackSignupCta } from "@/lib/funnel";
 
@@ -438,6 +439,29 @@ const Index = () => {
         {user || guestPlayed ? (
           <React.Suspense fallback={null}><DailyHookCard className="mt-6" /></React.Suspense>
         ) : null}
+
+        {user?.id === "b42fd6cb-8bd7-4447-9b8b-1c2cc6e65ada" && (
+          <section className="mx-auto mt-6 max-w-2xl px-4" aria-label="Your official MasterChess profile">
+            <Link
+              to="/profile"
+              className="group flex items-center gap-4 rounded-xl border border-primary/35 bg-card/80 p-4 shadow-glow backdrop-blur-md transition-colors hover:border-primary/60"
+            >
+              <img
+                src={vukProfilePhoto.url}
+                alt="Vuk Georgijev"
+                className="h-16 w-16 shrink-0 rounded-full border-2 border-primary/40 object-cover object-top"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Official profile updated</p>
+                <h2 className="font-display text-base font-bold text-foreground sm:text-lg">Welcome, Vuk Georgijev</h2>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                  Your Coach recognition from Dragan Brakus and Lifetime Premium status are now on your profile.
+                </p>
+              </div>
+              <ChevronRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
+            </Link>
+          </section>
+        )}
 
 
         {/* ── GUESTS: five short sections, all pointing at one action. ── */}
