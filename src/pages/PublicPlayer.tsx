@@ -138,7 +138,7 @@ export default function PublicPlayer() {
       if (canonicalUsername !== username) {
         navigate(`/u/${canonicalUsername}`, { replace: true });
       }
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(canonicalUsername);
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(canonicalUsername);
       const cols =
         "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at,profile_banner,master_coins,total_xp,skill_level,fide_title,highest_title_key";
       let data: any = null;
