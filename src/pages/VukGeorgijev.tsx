@@ -78,6 +78,60 @@ function Header() {
   );
 }
 
+/** The complete biography, repeated on every page in the cluster so that
+ *  whichever page Google ranks, the searcher immediately reads the full bio. */
+function FullBio() {
+  const facts: [string, string][] = [
+    ["Full name", VUK.name],
+    ["Born", `${VUK.birthText} (${VUK.city}, ${VUK.country})`],
+    ["Chess club", VUK.club],
+    ["Role on MasterChess", VUK.role],
+    ["Recognition issued by", VUK.issuer],
+    ["Official profile", `masterchess.live${VUK.profilePath}`],
+    ["Instagram", `@${VUK.instagram}`],
+  ];
+  return (
+    <section className="space-y-4" id="full-bio">
+      <h2 className="text-xl font-semibold">{VUK.name} — full biography</h2>
+      <p className="leading-relaxed text-muted-foreground">
+        {VUK.name} is a chess player from {VUK.city}, {VUK.country}, born on {VUK.birthText}. He plays
+        for {VUK.club}, one of the Serbian clubs where players grow up on long games and endgame
+        technique rather than engine help.
+      </p>
+      <p className="leading-relaxed text-muted-foreground">
+        On MasterChess he is a Verified player and an official Coach — a recognition issued by{" "}
+        {VUK.issuer}. The Verified badge means the platform confirmed the identity behind the account,
+        and the Coach recognition means he is trusted to help other players improve, especially in
+        endgames and practical play. He holds lifetime Premium access on the platform.
+      </p>
+      <p className="leading-relaxed text-muted-foreground">
+        His complete official record — rating, games played, badges and recognitions — is public on his{" "}
+        <Link to={VUK.profilePath} className="text-primary underline">
+          MasterChess profile
+        </Link>
+        , and he shares his chess on Instagram as{" "}
+        <a
+          href={`https://www.instagram.com/${VUK.instagram}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline"
+        >
+          @{VUK.instagram}
+        </a>
+        .
+      </p>
+      <dl className="grid gap-x-6 gap-y-2 rounded-lg border border-border/60 bg-card/50 p-4 text-sm sm:grid-cols-2">
+        {facts.map(([k, v]) => (
+          <div key={k} className="flex flex-wrap gap-2">
+            <dt className="font-medium text-foreground">{k}:</dt>
+            <dd className="text-muted-foreground">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
 function RelatedLinks({ currentSlug }: { currentSlug?: string }) {
   return (
     <section className="space-y-4">
