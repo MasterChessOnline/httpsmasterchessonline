@@ -15,7 +15,7 @@ type UserAward = {
   awarded_at: string;
 };
 
-const ICONS: Record<string, any> = { coach: GraduationCap, award: Award };
+const ICONS: Record<string, any> = { coach: GraduationCap, verified: ShieldCheck, award: Award };
 
 export default function AwardsPanel({ userId }: { userId: string }) {
   const [awards, setAwards] = useState<UserAward[]>([]);
