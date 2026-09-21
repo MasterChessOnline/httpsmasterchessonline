@@ -5126,6 +5126,39 @@ export type Database = {
           },
         ]
       }
+      user_awards: {
+        Row: {
+          awarded_at: string
+          badge: string
+          description: string | null
+          id: string
+          issuer: string
+          subtitle: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          badge?: string
+          description?: string | null
+          id?: string
+          issuer?: string
+          subtitle?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          badge?: string
+          description?: string | null
+          id?: string
+          issuer?: string
+          subtitle?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_collectibles: {
         Row: {
           collectible_key: string
@@ -5257,6 +5290,39 @@ export type Database = {
           mission_date?: string
           mission_key?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          kind: string
+          link: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          kind?: string
+          link?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          kind?: string
+          link?: string | null
+          title?: string
           user_id?: string
         }
         Relationships: []

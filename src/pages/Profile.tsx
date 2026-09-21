@@ -24,6 +24,8 @@ import StreakBadge from "@/components/StreakBadge";
 import SupporterBadge from "@/components/SupporterBadge";
 import SeasonBanner from "@/components/SeasonBanner";
 import BadgeGrid from "@/components/BadgeGrid";
+import AwardsPanel from "@/components/AwardsPanel";
+import CoachBadge from "@/components/CoachBadge";
 import { getStreakState, type StreakState } from "@/lib/progression";
 
 import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
@@ -324,6 +326,7 @@ const Profile = () => {
                   <TitleBadge rating={profileData.bot_rating ?? 1200} mode="bot" size="sm" hideUnranked={false} />
                   <RankBadge rating={profileData.rating} size="sm" />
                   <SupporterBadge userId={profileData.user_id} size="sm" />
+                  <CoachBadge userId={profileData.user_id} />
                   <PresenceDot userId={profileData.user_id} showLabel />
                   {profileData.peak_rating && profileData.peak_rating > profileData.rating && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[10px] font-mono">
@@ -511,6 +514,9 @@ const Profile = () => {
               </div>
             ))}
           </div>
+
+          {/* Official recognitions (coach, special awards) */}
+          {profileData.user_id && <AwardsPanel userId={profileData.user_id} />}
 
           {/* Achievement Badges */}
           <div className="rounded-xl border border-border/50 bg-card/80 p-5">
