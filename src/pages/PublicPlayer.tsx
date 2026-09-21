@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Loader2, Trophy, Swords, TrendingUp, Sparkles, Zap, Timer,
-  Crown, Flame, ShieldCheck, Coins, Star, Award,
+  Crown, Flame, ShieldCheck, Coins, Star, Award, Instagram,
 } from "lucide-react";
 import { computeChessCard, type ChessCardGame, type ChessCardProfile } from "@/lib/chess-card";
 import { motion } from "framer-motion";
@@ -38,7 +38,7 @@ interface PublicProfile {
   master_coins: number | null;
   total_xp: number | null;
   skill_level: string | null;
-  fide_title: string | null;
+  instagram: string | null;
   highest_title_key: string | null;
 }
 
@@ -142,7 +142,7 @@ export default function PublicPlayer() {
       let data: any = null;
       if (isUuid) {
         const cols =
-          "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at,profile_banner,master_coins,total_xp,skill_level,highest_title_key";
+          "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at,profile_banner,master_coins,total_xp,skill_level,highest_title_key,instagram";
         const r = await supabase.from("profiles").select(cols).eq("user_id", canonicalUsername).maybeSingle();
         data = r.data;
       } else {
@@ -296,7 +296,7 @@ export default function PublicPlayer() {
     },
   ];
 
-  const isVerified = masterChessVerified || !!(profile.fide_title || profile.highest_title_key);
+  const isVerified = masterChessVerified || !!profile.highest_title_key;
   const bannerBg = profile.profile_banner
     ? `url(${profile.profile_banner})`
     : "linear-gradient(120deg, hsl(43 90% 55% / 0.35), hsl(280 70% 40% / 0.25), hsl(200 80% 45% / 0.30))";
@@ -364,7 +364,7 @@ export default function PublicPlayer() {
                   </div>
                 )}
                 {isVerified && (
-                  <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg ring-2 ring-background" title={profile.fide_title || profile.highest_title_key || "Verified"}>
+                  <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg ring-2 ring-background" title={profile.highest_title_key || "Verified"}>
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                 )}
@@ -372,11 +372,6 @@ export default function PublicPlayer() {
 
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
-                  {profile.fide_title && (
-                    <Badge className="bg-primary text-primary-foreground font-bold uppercase tracking-wider text-[10px]">
-                      {profile.fide_title}
-                    </Badge>
-                  )}
                   <h1 className="font-display text-3xl sm:text-5xl font-black text-foreground drop-shadow-lg">{name}</h1>
                   {masterChessVerified && (
                     <Badge className="gap-1 border-primary/50 bg-primary text-primary-foreground font-bold">
@@ -398,6 +393,16 @@ export default function PublicPlayer() {
                   )}
                 </div>
                 {profile.bio && <p className="text-sm text-white/80 max-w-prose mx-auto sm:mx-0 drop-shadow">{profile.bio}</p>}
+                {profile.instagram && (
+                  <a
+                    href={`https://instagram.com/${profile.instagram.replace(/^@/, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-2 rounded-full border border-primary/50 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/25"
+                  >
+                    <Instagram className="h-3.5 w-3.5" /> @{profile.instagram.replace(/^@/, "")}
+                  </a>
+                )}
               </div>
 
               <div className="flex flex-col gap-2 w-full sm:w-auto">
