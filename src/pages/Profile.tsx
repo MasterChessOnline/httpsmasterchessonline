@@ -26,6 +26,7 @@ import SeasonBanner from "@/components/SeasonBanner";
 import BadgeGrid from "@/components/BadgeGrid";
 import AwardsPanel from "@/components/AwardsPanel";
 import CoachBadge from "@/components/CoachBadge";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { getStreakState, type StreakState } from "@/lib/progression";
 
 import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
