@@ -201,6 +201,14 @@ export default function VukGeorgijev() {
           ],
     ),
   ];
+  jsonLd.push({
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    name: title,
+    url,
+    dateModified: new Date().toISOString().slice(0, 10),
+    mainEntity: personLd(`${SITE}/vuk-georgijev`),
+  });
   if (page?.faq.length) jsonLd.push(buildFaqSchema(page.faq));
   if (!page) {
     jsonLd.push(
@@ -209,6 +217,17 @@ export default function VukGeorgijev() {
         `${VUK.name} — official pages`,
       ),
     );
+    jsonLd.push({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: `${VUK.name} on MasterChess`,
+      url: `${SITE}/vuk-georgijev`,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE}/players?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    });
   }
 
   return (
@@ -261,6 +280,8 @@ export default function VukGeorgijev() {
             </p>
           </section>
         )}
+
+        <FullBio />
 
         <RelatedLinks currentSlug={page?.slug} />
       </main>
