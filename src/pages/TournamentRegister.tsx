@@ -108,7 +108,7 @@ export default function TournamentRegister() {
         const [{ data: profile }, { data: priv }] = await Promise.all([
           supabase
             .from("profiles")
-            .select("federation, country, club, fide_id, fide_title, city")
+            .select("country, club, city")
             .eq("user_id", user.id)
             .maybeSingle(),
           supabase.rpc("get_my_private_profile"),
@@ -118,14 +118,15 @@ export default function TournamentRegister() {
           setForm({
             first_name: p?.first_name || "",
             last_name: p?.last_name || "",
-            federation: (profile?.federation || profile?.country || "").toUpperCase(),
+            federation: (p?.federation || profile?.country || "").toUpperCase(),
             city: profile?.city || "",
             club: profile?.club || "",
-            fide_id: profile?.fide_id || "",
-            fide_title: profile?.fide_title || "",
+            fide_id: p?.fide_id || "",
+            fide_title: p?.fide_title || "",
             birth_year: p?.birth_year ? String(p.birth_year) : "",
           });
         }
+
       }
 
       setLoading(false);
