@@ -403,7 +403,18 @@ export default function PublicPlayer() {
                     <Instagram className="h-3.5 w-3.5" /> @{profile.instagram.replace(/^@/, "")}
                   </a>
                 )}
+                {username === "vuk-georgijev" && (
+                  <div className="mt-2">
+                    <Link
+                      to="/vuk-georgijev"
+                      className="text-xs font-semibold text-primary underline decoration-primary/40 hover:text-primary/80"
+                    >
+                      Full biography, chess career &amp; coaching →
+                    </Link>
+                  </div>
+                )}
               </div>
+
 
               <div className="flex flex-col gap-2 w-full sm:w-auto">
                 <Link to="/play/online" className="w-full"><Button className="w-full h-11">Play a game</Button></Link>
