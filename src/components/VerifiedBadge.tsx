@@ -1,25 +1,32 @@
-import { BadgeCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
+// Small "MasterChess Verified" chip shown next to a player's name when they
+// hold the official MasterChess Verified recognition.
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { ShieldCheck } from "lucide-react";
 
-interface VerifiedBadgeProps {
-  className?: string;
-  size?: number;
-  title?: string;
-}
+export default function VerifiedBadge({ userId }: { userId?: string | null }) {
+  const [isVerified, setIsVerified] = useState(false);
 
-/** Gold verified checkmark for partner clubs, coaches, schools, organizers. */
-export default function VerifiedBadge({
-  className,
-  size = 16,
-  title = "Verifikovani MasterChess partner",
-}: VerifiedBadgeProps) {
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    (async () => {
+      const { count } = await supabase
+        .from("user_awards")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("badge", "verified");
+      if (!cancelled) setIsVerified((count ?? 0) > 0);
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  if (!isVerified) return null;
+
   return (
-    <span
-      title={title}
-      aria-label={title}
-      className={cn("inline-flex items-center text-amber-400", className)}
-    >
-      <BadgeCheck size={size} strokeWidth={2.5} className="drop-shadow-[0_0_6px_rgba(212,168,67,0.6)]" />
-    </span>
+    <Badge className="border-primary/40 bg-primary/15 text-primary">
+      <ShieldCheck className="mr-1 h-3 w-3" /> MasterChess Verified
+    </Badge>
   );
 }
