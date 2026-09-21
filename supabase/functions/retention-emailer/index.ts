@@ -103,17 +103,19 @@ Deno.serve(async (req) => {
     for (const days of [3, 7, 30] as const) {
       const cutoffStart = new Date(Date.now() - (days + 1) * 24 * 3600 * 1000).toISOString();
       const cutoffEnd = new Date(Date.now() - days * 24 * 3600 * 1000).toISOString();
-      const { data: idle } = await admin
+      const { data: idle, error: idleErr } = await admin
         .from("profiles")
-        .select("id, display_name")
-        .lt("last_active_at", cutoffEnd)
-        .gt("last_active_at", cutoffStart)
+        .select("user_id, display_name")
+        .lt("updated_at", cutoffEnd)
+        .gt("updated_at", cutoffStart)
         .limit(200);
+      if (idleErr) console.error("retention-emailer idle query failed", idleErr.message);
       for (const p of idle ?? []) {
-        const { data: user } = await admin.auth.admin.getUserById(p.id).catch(() => ({ data: null } as any));
+        if (!p.user_id) { stats.skipped++; continue; }
+        const { data: user } = await admin.auth.admin.getUserById(p.user_id).catch(() => ({ data: null } as any));
         const email = user?.user?.email;
         if (!email || suppressedSet.has(email.toLowerCase())) { stats.skipped++; continue; }
-        const messageId = `reactivate-${days}d-${p.id}`;
+        const messageId = `reactivate-${days}d-${p.user_id}`;
         // Check if we already sent this exact template to this user
         const { count } = await admin.from("email_send_log")
           .select("id", { count: "exact", head: true })
