@@ -13,7 +13,7 @@ import {
   buildFaqSchema,
   buildItemListSchema,
 } from "@/lib/jsonld-builders";
-import vukPhoto from "@/assets/vuk67/vuk-georgijev-profile.png";
+import vukPhoto from "@/assets/vuk-georgijev-profile.png";
 
 const SITE = "https://masterchess.live";
 
