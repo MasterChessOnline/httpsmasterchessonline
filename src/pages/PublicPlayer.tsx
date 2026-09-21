@@ -142,7 +142,7 @@ export default function PublicPlayer() {
       let data: any = null;
       if (isUuid) {
         const cols =
-          "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at,profile_banner,master_coins,total_xp,skill_level,fide_title,highest_title_key";
+          "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at,profile_banner,total_xp,skill_level,highest_title_key";
         const r = await supabase.from("profiles").select(cols).eq("user_id", canonicalUsername).maybeSingle();
         data = r.data;
       } else {
