@@ -5935,6 +5935,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_public_player_profile: {
+        Args: { p_username: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          country: string
+          country_flag: string
+          created_at: string
+          display_name: string
+          fide_title: string
+          games_drawn: number
+          games_lost: number
+          games_played: number
+          games_won: number
+          highest_title_key: string
+          master_coins: number
+          peak_rating: number
+          profile_banner: string
+          rating: number
+          skill_level: string
+          total_xp: number
+          user_id: string
+          username: string
+        }[]
+      }
       get_public_style_twin: {
         Args: { p_username: string }
         Returns: {

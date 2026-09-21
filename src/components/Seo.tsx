@@ -15,7 +15,7 @@ interface SeoProps {
 
 export default function Seo({ title, description, path, image, type = "website", jsonLd, noindex = false }: SeoProps) {
   const url = `${SITE}${path}`;
-  const img = image || `${SITE}/og-image.jpg`;
+  const img = image?.startsWith("/") ? `${SITE}${image}` : image || `${SITE}/og-image.jpg`;
   const ldArr = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   return (
     <Helmet>

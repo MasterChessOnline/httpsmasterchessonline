@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Seo from "@/components/Seo";
 import ShareBar from "@/components/ShareBar";
+import AwardsPanel from "@/components/AwardsPanel";
 import RivalryCard from "@/components/social/RivalryCard";
 import ChessCardView from "@/components/ChessCard";
 import RankBadge from "@/components/RankBadge";
@@ -36,7 +37,7 @@ interface PublicProfile {
   profile_banner: string | null;
   master_coins: number | null;
   total_xp: number | null;
-  skill_level: number | null;
+  skill_level: string | null;
   fide_title: string | null;
   highest_title_key: string | null;
 }
@@ -118,11 +119,13 @@ function RatingSparkline({ points }: { points: number[] }) {
 
 export default function PublicPlayer() {
   const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [card, setCard] = useState<ChessCardProfile | null>(null);
   const [ratingHistory, setRatingHistory] = useState<RatingRow[]>([]);
   const [recentGames, setRecentGames] = useState<RecentGame[]>([]);
   const [trophies, setTrophies] = useState<TrophyRow[]>([]);
+  const [masterChessVerified, setMasterChessVerified] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -131,20 +134,20 @@ export default function PublicPlayer() {
     setLoading(true);
     setNotFound(false);
     (async () => {
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username);
-      const cols =
-        "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at,profile_banner,master_coins,total_xp,skill_level,fide_title,highest_title_key";
+      const canonicalUsername = username.toLowerCase() === "vuk67" ? "vuk-georgijev" : username;
+      if (canonicalUsername !== username) {
+        navigate(`/u/${canonicalUsername}`, { replace: true });
+      }
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(canonicalUsername);
       let data: any = null;
       if (isUuid) {
-        const r = await supabase.from("profiles").select(cols).eq("user_id", username).maybeSingle();
+        const cols =
+          "user_id,display_name,username,avatar_url,rating,peak_rating,games_played,games_won,games_lost,games_drawn,bio,country,country_flag,created_at,profile_banner,master_coins,total_xp,skill_level,fide_title,highest_title_key";
+        const r = await supabase.from("profiles").select(cols).eq("user_id", canonicalUsername).maybeSingle();
         data = r.data;
       } else {
-        const r = await supabase.from("profiles").select(cols).eq("username", username).maybeSingle();
-        data = r.data;
-        if (!data) {
-          const r2 = await supabase.from("profiles").select(cols).ilike("display_name", username).limit(1).maybeSingle();
-          data = r2.data as any;
-        }
+        const { data: rows } = await supabase.rpc("get_public_player_profile", { p_username: canonicalUsername });
+        data = Array.isArray(rows) ? rows[0] : rows;
       }
       if (!data) {
         setNotFound(true);
@@ -153,7 +156,7 @@ export default function PublicPlayer() {
       }
       setProfile(data as PublicProfile);
 
-      const [{ data: gs }, { data: rh }, { data: tr }] = await Promise.all([
+      const [{ data: gs }, { data: rh }, { data: tr }, { data: verifiedAward }] = await Promise.all([
         supabase
           .from("online_games")
           .select("white_player_id,black_player_id,result,pgn,time_control_label,white_time,black_time,created_at")
@@ -173,6 +176,13 @@ export default function PublicPlayer() {
           .eq("user_id", data.user_id)
           .order("awarded_at", { ascending: false })
           .limit(12),
+        supabase
+          .from("user_awards")
+          .select("id")
+          .eq("user_id", data.user_id)
+          .eq("badge", "verified")
+          .limit(1)
+          .maybeSingle(),
       ]);
 
       const games: ChessCardGame[] = (gs ?? []).map((g) => ({ ...g, source: "online" as const }));
@@ -180,9 +190,10 @@ export default function PublicPlayer() {
       setRatingHistory((rh ?? []) as RatingRow[]);
       setRecentGames((gs ?? []) as RecentGame[]);
       setTrophies((tr ?? []) as TrophyRow[]);
+      setMasterChessVerified(Boolean(verifiedAward));
       setLoading(false);
     })();
-  }, [username]);
+  }, [navigate, username]);
 
   // Per-time-control aggregates from rating_history + online_games
   const tcStats = useMemo(() => {
@@ -248,7 +259,10 @@ export default function PublicPlayer() {
   const winRate = profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0;
   const url = `/u/${profile.username || username}`;
   const title = `${name} — ${profile.rating} ELO chess player | MasterChess`;
-  const description = `${name} is a ${profile.rating}-rated chess player on MasterChess with ${profile.games_played} games played and a ${winRate}% win rate. Ratings, trophies, and progress on their profile.`;
+  const description = profile.bio || `${name} is a ${profile.rating}-rated chess player on MasterChess with ${profile.games_played} games played and a ${winRate}% win rate.`;
+  const absoluteImage = profile.avatar_url?.startsWith("/")
+    ? `https://masterchess.live${profile.avatar_url}`
+    : profile.avatar_url;
 
   const jsonLd = [
     {
@@ -260,11 +274,13 @@ export default function PublicPlayer() {
         name,
         alternateName: profile.username ?? undefined,
         url: `https://masterchess.live${url}`,
-        image: profile.avatar_url || `https://masterchess.live/og-image.jpg`,
+        image: absoluteImage || `https://masterchess.live/og-image.jpg`,
         description: profile.bio || description,
         nationality: profile.country ?? undefined,
         sport: "Chess",
-        award: `${profile.rating} ELO · peak ${profile.peak_rating ?? profile.rating}`,
+        award: masterChessVerified
+          ? [`MasterChess Verified`, `${profile.rating} ELO · peak ${profile.peak_rating ?? profile.rating}`]
+          : `${profile.rating} ELO · peak ${profile.peak_rating ?? profile.rating}`,
         affiliation: { "@type": "Organization", name: "MasterChess", url: "https://masterchess.live" },
         memberOf: { "@type": "Organization", name: "MasterChess" },
       },
@@ -280,7 +296,7 @@ export default function PublicPlayer() {
     },
   ];
 
-  const isVerified = !!(profile.fide_title || profile.highest_title_key);
+  const isVerified = masterChessVerified || !!(profile.fide_title || profile.highest_title_key);
   const bannerBg = profile.profile_banner
     ? `url(${profile.profile_banner})`
     : "linear-gradient(120deg, hsl(43 90% 55% / 0.35), hsl(280 70% 40% / 0.25), hsl(200 80% 45% / 0.30))";
@@ -362,6 +378,11 @@ export default function PublicPlayer() {
                     </Badge>
                   )}
                   <h1 className="font-display text-3xl sm:text-5xl font-black text-foreground drop-shadow-lg">{name}</h1>
+                  {masterChessVerified && (
+                    <Badge className="gap-1 border-primary/50 bg-primary text-primary-foreground font-bold">
+                      <ShieldCheck className="h-3.5 w-3.5" /> MasterChess Verified
+                    </Badge>
+                  )}
                   {profile.country_flag && <span className="text-2xl sm:text-3xl">{profile.country_flag}</span>}
                 </div>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-2">
@@ -372,7 +393,7 @@ export default function PublicPlayer() {
                   {profile.peak_rating && profile.peak_rating > profile.rating && (
                     <Badge variant="outline" className="text-xs">Peak {profile.peak_rating}</Badge>
                   )}
-                  {profile.skill_level != null && (
+                  {profile.skill_level && (
                     <Badge variant="outline" className="text-xs"><Star className="w-3 h-3 mr-1" /> Lvl {profile.skill_level}</Badge>
                   )}
                 </div>
@@ -408,6 +429,10 @@ export default function PublicPlayer() {
               </Card>
             ))}
           </div>
+        </section>
+
+        <section className="container mx-auto max-w-5xl px-4 mt-6">
+          <AwardsPanel userId={profile.user_id} />
         </section>
 
         {/* ─────────────── RATING CARDS (Bullet/Blitz/Rapid/Classical) ─────────────── */}
