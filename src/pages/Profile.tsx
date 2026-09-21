@@ -26,6 +26,7 @@ import SeasonBanner from "@/components/SeasonBanner";
 import BadgeGrid from "@/components/BadgeGrid";
 import AwardsPanel from "@/components/AwardsPanel";
 import CoachBadge from "@/components/CoachBadge";
+import PlayerVerifiedBadge from "@/components/PlayerVerifiedBadge";
 import { getStreakState, type StreakState } from "@/lib/progression";
 
 import RatingHistoryGraph, { type RatingPoint } from "@/components/RatingHistoryGraph";
@@ -326,6 +327,7 @@ const Profile = () => {
                   <TitleBadge rating={profileData.bot_rating ?? 1200} mode="bot" size="sm" hideUnranked={false} />
                   <RankBadge rating={profileData.rating} size="sm" />
                   <SupporterBadge userId={profileData.user_id} size="sm" />
+                  <PlayerVerifiedBadge userId={profileData.user_id} />
                   <CoachBadge userId={profileData.user_id} />
                   <PresenceDot userId={profileData.user_id} showLabel />
                   {profileData.peak_rating && profileData.peak_rating > profileData.rating && (
