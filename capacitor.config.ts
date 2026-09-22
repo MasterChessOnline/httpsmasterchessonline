@@ -1,12 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.79241b66778b473fb92a7bbbb228fe07',
+  appId: 'live.masterchess.app',
   appName: 'MasterChess',
   webDir: 'dist',
   server: {
-    url: 'https://79241b66-778b-473f-b92a-7bbbb228fe07.lovableproject.com?forceHideBadge=true',
-    cleartext: true,
+    url: 'https://masterchess.live',
+    cleartext: false,
   },
   ios: {
     contentInset: 'always',

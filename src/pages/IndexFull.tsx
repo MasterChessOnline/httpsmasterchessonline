@@ -27,15 +27,12 @@ import {
   Sparkles,
   LogIn,
   Check,
-  ShieldCheck,
 } from "lucide-react";
 import { getRank } from "@/lib/ranks";
 import RankBadge from "@/components/RankBadge";
 import heroImage from "@/assets/hero-chess.jpg";
 import nikolaAvatar from "@/assets/nikola-bot-avatar.jpg";
 import serbiaFlag from "@/assets/serbia-flag.png.asset.json";
-import vukProfilePhoto from "@/assets/vuk-georgijev-profile.png";
-import { Instagram } from "lucide-react";
 import { trackSignupCta } from "@/lib/funnel";
 
 import ParallaxCard from "@/components/ParallaxCard";
@@ -421,37 +418,6 @@ const Index = () => {
           </div>
 
         </div>
-
-        <section className="mx-auto max-w-3xl px-4 -mt-1 mb-6 relative z-20" aria-label="Featured verified player">
-          <Link
-            to="/u/vuk-georgijev"
-            className="group grid grid-cols-[5rem_1fr_auto] items-center gap-4 rounded-xl border border-primary/40 bg-card/90 p-4 shadow-glow backdrop-blur-xl transition-colors hover:border-primary/70 sm:grid-cols-[6rem_1fr_auto] sm:p-5"
-          >
-            <img
-              src={vukProfilePhoto}
-              alt="Vuk Georgijev"
-              className="h-24 w-20 rounded-lg border border-primary/40 bg-background/60 object-contain sm:h-28 sm:w-24"
-            />
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Featured player</p>
-                <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
-                  <ShieldCheck className="h-3 w-3" /> MasterChess Verified
-                </span>
-              </div>
-              <h2 className="mt-1 font-display text-xl font-bold text-foreground sm:text-2xl">Vuk Georgijev</h2>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                Young chess player from Belgrade, born 28 December 2007. ŠK Tadić · MasterChess Coach · Lifetime Premium.
-              </p>
-            </div>
-            <ChevronRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
-          </Link>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            <Link to="/vuk-georgijev" className="underline decoration-primary/40 hover:text-primary">
-              Vuk Georgijev — full bio, chess career &amp; coaching
-            </Link>
-          </p>
-        </section>
 
         {/* ── INSTANT PLAY: a real board right under the CTA, so a curious
               visitor can start without an account. Members skip it — they get

@@ -211,12 +211,6 @@ export default function TournamentRegister() {
       } else {
         toast({ title: "Registered ✓", description: "Don't forget to check in before the window closes." });
       }
-      // Best-effort confirmation email for featured events.
-      if (tournament?.name) {
-        supabase.functions.invoke("db-cup-register", {
-          body: { tournament_id: id, invite_code: new URLSearchParams(window.location.search).get("invite") || null },
-        }).catch(() => { /* email is best effort */ });
-      }
       navigate(`/tournaments/${id}`);
     } finally {
       setBusy(false);
@@ -268,7 +262,7 @@ export default function TournamentRegister() {
             {fideError && form.fide_id.length >= 5 && (
               <div className="mt-2 text-xs text-orange-400 flex items-center gap-1.5">
                 <AlertCircle className="h-3.5 w-3.5" /> {fideError}
-                <button type="button" className="ml-1 underline" onClick={() => lookupFide()}>retry</button>
+                <Button type="button" variant="link" size="sm" className="ml-1 h-auto p-0 text-xs text-orange-400 underline" onClick={() => lookupFide()}>retry</Button>
               </div>
             )}
           </div>

@@ -584,6 +584,7 @@ function AnimatedRoutes() {
           <Route path="/guide/:slug" element={<Guide />} />
           <Route path="/learn/glossary" element={<Glossary />} />
           <Route path="/learn/glossary/:slug" element={<GlossaryTerm />} />
+          <Route path="/share" element={<Navigate to="/play-guest" replace />} />
           <Route path="/share/streak/:n" element={<ShareStreak />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/tools/:slug" element={<ToolDetail />} />
