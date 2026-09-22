@@ -73,14 +73,14 @@ export default function LiveActivityFeed() {
           ...((topRes.data ?? []).map((p: any) => p.user_id)),
         ]);
 
-        let nameMap = new Map<string, { name: string; rating: number }>();
+        let nameMap = new Map<string, { name: string; username: string | null; rating: number }>();
         if (allIds.size > 0) {
           const { data: profs } = await (supabase as any)
             .from("profiles")
-            .select("user_id, display_name, rating")
+            .select("user_id, display_name, username, rating")
             .in("user_id", Array.from(allIds));
           for (const p of profs ?? []) {
-            nameMap.set(p.user_id, { name: p.display_name || "Player", rating: p.rating || 0 });
+            nameMap.set(p.user_id, { name: p.display_name || "Player", username: p.username || null, rating: p.rating || 0 });
           }
         }
 
@@ -97,7 +97,7 @@ export default function LiveActivityFeed() {
             ts: new Date(g.updated_at).getTime(),
             icon: Swords,
             accent: "150 70% 55%",
-            href: `/u/${encodeURIComponent(w.name)}`,
+            href: `/u/${encodeURIComponent(w.username || winnerId)}`,
             text: (
               <>
                 <span className="font-semibold text-foreground">{w.name}</span>{" "}
@@ -118,7 +118,7 @@ export default function LiveActivityFeed() {
               ts: new Date(p.updated_at).getTime(),
               icon: Crown,
               accent: "43 95% 60%",
-              href: `/u/${encodeURIComponent(p.display_name || "Player")}`,
+              href: `/u/${encodeURIComponent(p.username || p.user_id)}`,
               text: (
                 <>
                   <span className="font-semibold text-foreground">
@@ -202,7 +202,7 @@ export default function LiveActivityFeed() {
                   key={it.id}
                   layout
                   initial={{ opacity: 0, x: -20, backgroundColor: `hsla(${it.accent} / 0.15)` }}
-                  animate={{ opacity: 1, x: 0, backgroundColor: "rgba(0,0,0,0)" }}
+                  animate={{ opacity: 1, x: 0, backgroundColor: "transparent" }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                   className="group"
