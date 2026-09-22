@@ -1,0 +1,4 @@
+- Remove Vuk Georgijev from the homepage.
+- Improve the visible site polish without changing the core homepage identity.
+- Check current build/runtime bug signals and fix actionable issues.
+- Add clear Play Store publishing steps.
