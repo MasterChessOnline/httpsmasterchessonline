@@ -21,6 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { MoveStep } from "@/components/learn/InteractiveBoard";
 
 import VariationsExercise from "@/components/learn/VariationsExercise";
+import AutoBoardPlayer from "@/components/learn/AutoBoardPlayer";
 import { LESSON_MOVES, LessonVariation } from "@/lib/lesson-moves";
 import { MASTERCLASS_VALIDATED_LINES } from "@/lib/masterclass-validated-lines";
 import { useLessonProgress } from "@/hooks/use-lesson-progress";
@@ -774,22 +775,17 @@ function LessonView({ course, lessonIdx, onBack, onNext, onPrev, isCompleted: is
         <Progress value={((lessonIdx + 1) / totalLessons) * 100} className="h-1.5" />
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-2 mb-6 flex-wrap">
-        {videoUrl && (
-          <Button size="sm" variant={showVideo ? "default" : "outline"} onClick={() => setShowVideo(!showVideo)}>
-            <Video className="w-3.5 h-3.5 mr-1.5" /> {showVideo ? "Hide Video" : "Watch Video"}
-          </Button>
-        )}
-        {hasExercise && (
-          <Button size="sm" variant="outline" onClick={() => document.getElementById("exercise-section")?.scrollIntoView({ behavior: "smooth" })}>
-            <Play className="w-3.5 h-3.5 mr-1.5" /> Play Exercise
-          </Button>
-        )}
-      </div>
-
-
-
+      {/* Video lesson (auto-playing board) */}
+      {variations[0]?.moves?.length > 0 && (
+        <div className="mb-6">
+          <AutoBoardPlayer
+            startFen={variations[0].startFen}
+            moves={variations[0].moves}
+            orientation={["masterkurs-najdorf", "masterkurs-caro-kann", "masterkurs-kid", "masterkurs-kalashnikov"].includes(course.id) ? "black" : "white"}
+            onTryIt={() => document.getElementById("exercise-section")?.scrollIntoView({ behavior: "smooth" })}
+          />
+        </div>
+      )}
 
       {/* Lesson content */}
       <div className="rounded-xl border border-border/50 bg-card p-6 mb-6">
