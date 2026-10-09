@@ -441,6 +441,40 @@ export default function Endgames() {
               </p>
             </section>
 
+            {(() => {
+              const total = ENDGAME_DRILLS.length;
+              const done = ENDGAME_DRILLS.filter((d) => solved.includes(d.id)).length;
+              const pct = Math.round((done / total) * 100);
+              const rank =
+                done === 0 ? "Beginner" : done < 4 ? "Converter" : done < 7 ? "Technician" : done < total ? "Endgame Expert" : "Endgame Master";
+              const next = ENDGAME_DRILLS.find((d) => !solved.includes(d.id));
+              return (
+                <section className="rounded-2xl border border-primary/30 bg-card/60 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Your rank</span>
+                    <span className="text-sm font-bold text-gradient-gold">{rank}</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-background/70 overflow-hidden">
+                    <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground tabular-nums">{done}/{total} drills mastered · {pct}%</p>
+                  {next ? (
+                    <Link
+                      to={`/endgames/${next.id}`}
+                      className="flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:opacity-90 transition-opacity"
+                    >
+                      {done === 0 ? "Start first drill" : "Continue"}: {next.title}
+                    </Link>
+                  ) : (
+                    <p className="text-sm font-semibold text-primary">All drills mastered. Try the daily challenge.</p>
+                  )}
+                  <Link to="/endgames/daily" className="block text-center text-xs text-muted-foreground hover:text-primary">
+                    Daily endgame challenge →
+                  </Link>
+                </section>
+              );
+            })()}
+
             {grouped.map(({ level, drills }) => (
               <section key={level} className="space-y-2">
                 <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
