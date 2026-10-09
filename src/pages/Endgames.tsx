@@ -436,7 +436,7 @@ export default function Endgames() {
                 Practice the endgames that <span className="text-gradient-gold">win games</span>.
               </h1>
               <p className="text-sm text-muted-foreground">
-                Eight positions every strong player can convert. You attack, the engine defends.
+                Ten positions every strong player can convert. You attack, the engine defends.
                 No account, no ads, straight to the board.
               </p>
             </section>

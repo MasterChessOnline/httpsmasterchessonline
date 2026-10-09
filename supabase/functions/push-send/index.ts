@@ -67,8 +67,12 @@ Deno.serve(async (req) => {
 
 
   try {
-    const vapidPublic = Deno.env.get("VAPID_PUBLIC_KEY");
-    const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY");
+    // Pasted keys often carry quotes, spaces, newlines or "=" padding — strip them.
+    const cleanKey = (v: string | undefined) =>
+      (v ?? "").trim().replace(/^["']|["']$/g, "").replace(/\s+/g, "").replace(/=+$/, "")
+        .replace(/\+/g, "-").replace(/\//g, "_");
+    const vapidPublic = cleanKey(Deno.env.get("VAPID_PUBLIC_KEY"));
+    const vapidPrivate = cleanKey(Deno.env.get("VAPID_PRIVATE_KEY"));
     const DEFAULT_SUBJECT = "mailto:support@masterchess.live";
     const rawSubject = (Deno.env.get("VAPID_SUBJECT") ?? "").trim();
     const validSubject = /^(mailto:[^\s@]+@[^\s@]+\.[^\s@]+|https?:\/\/\S+)$/.test(rawSubject);
@@ -77,11 +81,19 @@ Deno.serve(async (req) => {
     if (!vapidPublic || !vapidPrivate) {
       return new Response(
         JSON.stringify({ error: "VAPID keys are not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+    try {
+      webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+    } catch (keyErr) {
+      console.error("push-send: invalid VAPID keys", (keyErr as Error).message);
+      return new Response(
+        JSON.stringify({ error: "Push notifications are temporarily unavailable (invalid VAPID keys)" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const parsed = BodySchema.safeParse(await req.json());
     if (!parsed.success) {
