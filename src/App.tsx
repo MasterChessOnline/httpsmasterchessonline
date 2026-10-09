@@ -45,6 +45,7 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PlayGuest = lazy(() => import("./pages/PlayGuest"));
 const Endgames = lazy(() => import("./pages/Endgames"));
+const Vision = lazy(() => import("./pages/Vision"));
 const FirstGame = lazy(() => import("./pages/FirstGame"));
 const IgLanding = lazy(() => import("./pages/IgLanding"));
 const IgBonus = lazy(() => import("./pages/IgBonus"));
@@ -551,6 +552,7 @@ function AnimatedRoutes() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/play-guest" element={<PlayGuest />} />
+          <Route path="/vision" element={<Vision />} />
           <Route path="/endgames" element={<Endgames />} />
           <Route path="/endgames/:drillId" element={<Endgames />} />
           <Route path="/first-game" element={<FirstGame />} />
