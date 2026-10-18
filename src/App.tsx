@@ -310,7 +310,8 @@ function RootDeferredOverlays() {
 }
 
 const ChannelWelcomeBanner = lazy(() => import("@/components/ChannelWelcomeBanner"));
-const SocialTrafficRouter = lazy(() => import("@/components/SocialTrafficRouter"));
+// Tiny and needed on every page: bundled directly so a stale chunk can never blank the site.
+import SocialTrafficRouter from "@/components/SocialTrafficRouter";
 const LiveGameResumeBar = lazy(() => import("@/components/LiveGameResumeBar"));
 
 function AppChrome() {

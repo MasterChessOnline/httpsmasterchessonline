@@ -12,6 +12,21 @@ function safeRun(task: () => void) {
   }
 }
 
+// After a new release, old chunk files disappear. If an open tab asks for one,
+// reload once to pick up the fresh version instead of showing a blank screen.
+const RELOAD_KEY = "mc_chunk_reload_at";
+window.addEventListener("vite:preloadError", (event) => {
+  try {
+    const last = Number(sessionStorage.getItem(RELOAD_KEY) || 0);
+    if (Date.now() - last < 10_000) return; // avoid reload loops
+    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+  } catch {
+    /* ignore */
+  }
+  event.preventDefault();
+  window.location.reload();
+});
+
 const rootEl = document.getElementById("root");
 if (!rootEl) throw new Error("Root element not found");
 
