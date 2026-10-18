@@ -321,73 +321,64 @@ const Index = () => {
                 {/* One title, one tagline, one sentence. */}
                 <AnimatedLogoHero as="h1" />
 
-                <p className="mt-3 font-display text-base sm:text-2xl font-bold uppercase tracking-[0.14em] text-primary">
-                  Play. Compete. Become a Master.
+                <p className="mt-3 font-display text-base sm:text-2xl font-bold tracking-[0.06em] text-primary">
+                  Your Game. Your Progress. Your MasterChess.
                 </p>
                 <p className={`mt-3 max-w-2xl text-sm sm:text-lg text-muted-foreground mx-auto`}>
-                  The free chess platform built for players who want to improve, compete and have fun.
+                  Play chess online for free, train your openings and challenge players from around the world.
                 </p>
 
-                {/* One dominant CTA — the account. Everything else is a quiet link. */}
+                {/* One dominant CTA — Play Chess Now. Everything else is secondary. */}
                 <motion.div
                   className={"mt-7 flex flex-col items-center gap-3"}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
-                  {user ? (
-                    <Link to="/play/online" className="w-full sm:w-auto">
-                      <Button
-                        size="lg"
-                        className="ripple-btn w-full sm:w-auto h-14 px-12 text-base font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg transition-all duration-300"
-                      >
-                        <Play className="h-5 w-5 mr-2 fill-current" />
-                        {t("hero.playOnline")}
+                  <Link
+                    to={user ? "/play" : "/play-guest"}
+                    className="w-full sm:w-auto"
+                    onClick={() => track("home_play_now_click", { surface: "home_hero" })}
+                  >
+                    <Button
+                      size="lg"
+                      className="ripple-btn w-full sm:w-auto h-16 px-12 text-base sm:text-lg font-display uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-glow-lg transition-all duration-300"
+                    >
+                      <Play className="h-5 w-5 mr-2 fill-current" />
+                      Play Chess Now
+                    </Button>
+                  </Link>
+
+                  <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:justify-center">
+                    <Link to="/learn" className="w-full sm:w-auto">
+                      <Button variant="outline" className="h-12 w-full sm:px-8 rounded-xl border-primary/40">
+                        <Target className="h-4 w-4 mr-2" />
+                        Explore Training
                       </Button>
                     </Link>
-                  ) : (
-                    <>
-                      <Link
-                        to="/signup"
-                        className="w-full sm:w-auto"
-                        onClick={() => trackSignupCta("home_hero")}
-                      >
-                        <motion.div className="home-primary-cta"
-                          animate={allowHeavy ? { scale: [1, 1.02, 1] } : undefined}
-                          transition={allowHeavy ? { duration: 2.8, repeat: Infinity, ease: "easeInOut" } : undefined}
-                        >
-                          <Button
-                            size="lg"
-                            className="ripple-btn w-full sm:w-auto h-16 px-12 text-base sm:text-lg font-display uppercase tracking-widest bg-emerald-500 text-black hover:bg-emerald-400 rounded-xl shadow-[0_0_70px_-14px_hsl(150_80%_45%/0.95)] transition-all duration-300"
-                          >
-                            <Crown className="h-5 w-5 mr-2" />
-                            Create Free Account
-                          </Button>
-                        </motion.div>
+                    {user ? (
+                      <Link to="/play/online" className="w-full sm:w-auto">
+                        <Button variant="outline" className="h-12 w-full sm:px-8 rounded-xl border-primary/40">
+                          {t("hero.playOnline")}
+                        </Button>
                       </Link>
+                    ) : (
+                      <Link to="/signup" className="w-full sm:w-auto" onClick={() => trackSignupCta("home_hero")}>
+                        <Button variant="outline" className="h-12 w-full sm:px-8 rounded-xl border-primary/40">
+                          <Crown className="h-4 w-4 mr-2" />
+                          Create Free Account
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
 
-                      {/* What you get — one line, three promises. */}
-                      <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground ">
-                        <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> 500 free coins</span>
-                        <span className="opacity-30">•</span>
-                        <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> Free to join</span>
-                        <span className="opacity-30">•</span>
-                        <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-400" /> Play online</span>
-                      </p>
-
-                      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground ">
-                        <span>
-                          Already have an account?{" "}
-                          <Link to="/login" className="font-semibold text-foreground hover:underline">
-                            Log in
-                          </Link>
-                        </span>
-                        <span className="opacity-30">·</span>
-                        <Link to="/play-guest" className="hover:text-primary">
-                          Or try a game first
-                        </Link>
-                      </div>
-                    </>
+                  {!user && (
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Already have an account?{" "}
+                      <Link to="/login" className="font-semibold text-foreground hover:underline">
+                        Log In
+                      </Link>
+                    </p>
                   )}
 
                   <Link
@@ -395,7 +386,7 @@ const Index = () => {
                     className="mt-1 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-primary/20"
                   >
                     <Target className="h-4 w-4" />
-                    Endgame Trainer — 8 drills, no signup
+                    Endgame Trainer — 10 drills, no signup
                   </Link>
                 </motion.div>
               </div>
