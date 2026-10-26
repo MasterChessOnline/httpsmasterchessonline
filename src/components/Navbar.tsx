@@ -235,7 +235,7 @@ const Navbar = () => {
         }`}
       >
         <motion.nav
-          className="relative border-b border-border/70 bg-[hsl(220,15%,7%)]/95 backdrop-blur-2xl backdrop-saturate-150"
+          className="relative border-b border-border/70 bg-background/95 backdrop-blur-2xl backdrop-saturate-150"
           initial={{ y: -80 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -449,7 +449,7 @@ const Navbar = () => {
             {/* Only the daily streak lives beside navigation; account details are tucked away. */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {!loading && user && <StreakIndicator compact />}
-              <Popover open={accountOpen} onOpenChange={setAccountOpen}>
+              <Popover open={accountOpen} onOpenChange={(open) => { setAccountOpen(open); if (open) setActiveDropdown(null); }}>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="hidden 2xl:inline-flex h-9 w-9" aria-label="Open account and tools" title="Account and tools">
                     <User className="h-4 w-4" />
@@ -527,7 +527,7 @@ const Navbar = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 bg-[hsl(220,15%,5%)]/98 backdrop-blur-xl overflow-y-auto pt-16 pb-28"
+            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl overflow-y-auto pt-16 pb-28"
           >
             {/* Sticky CTA header — auth actions only (Play CTAs live in bottom nav) */}
             {!user && (
