@@ -1,2 +1,1 @@
-- [ ] Tidy navbar indicators and expose authentication at the top.
-- [ ] Verify account tools, navigation and sign-out in the preview.
+No open tasks.
