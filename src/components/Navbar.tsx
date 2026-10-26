@@ -1,4 +1,4 @@
-import { LogOut, Trophy, Swords, GraduationCap, Crown, Brain, Play, Award, Star, ChevronDown, Menu, X, Search, Users, BookOpen, FileText, Target, Medal, Radio, Shield, Eye, Zap, Heart, Instagram } from "lucide-react";
+import { LogOut, Trophy, Swords, GraduationCap, Crown, Brain, Play, Award, Star, ChevronDown, Menu, X, Search, Users, BookOpen, FileText, Target, Medal, Radio, Shield, Eye, Zap, Heart, Instagram, User, Settings } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -11,7 +11,7 @@ import CoinBalancePill from "@/components/CoinBalancePill";
 import NavSearchPalette from "@/components/NavSearchPalette";
 import NotificationBell from "@/components/NotificationBell";
 // SiteThemePicker removed — see src/lib/site-themes.ts (forced "live" theme).
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface DropdownItem {
   label: string;
@@ -121,6 +121,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [onlineCount, setOnlineCount] = useState(0);
   const [liveGames, setLiveGames] = useState(0);
@@ -144,6 +145,7 @@ const Navbar = () => {
     setActiveDropdown(null);
     setMobileOpen(false);
     setSearchOpen(false);
+    setAccountOpen(false);
   }, [location.pathname]);
 
   // Escape closes mobile menu + body scroll lock when open
@@ -226,14 +228,14 @@ const Navbar = () => {
   return (
     <>
       <div
-        className={`app-navbar hidden lg:block fixed top-0 left-0 right-0 z-50 transition-shadow duration-500 ${
+        className={`app-navbar fixed top-0 left-0 right-0 z-50 transition-shadow duration-500 ${
           scrolled
             ? "shadow-[0_10px_30px_-6px_rgba(0,0,0,0.7),0_2px_0_hsl(var(--primary)/0.18)]"
             : "shadow-[0_4px_18px_rgba(0,0,0,0.5),0_1px_0_hsl(var(--border))]"
         }`}
       >
         <motion.nav
-          className="relative border-b border-border/70 bg-[hsl(220,15%,7%)]/95 backdrop-blur-2xl backdrop-saturate-150"
+          className="relative border-b border-border/70 bg-background/95 backdrop-blur-2xl backdrop-saturate-150"
           initial={{ y: -80 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -242,13 +244,13 @@ const Navbar = () => {
         >
           <div
             className={`container mx-auto flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-5 transition-all duration-500 ${
-              shrunk ? "h-16" : "h-20"
+              shrunk ? "h-16" : "h-16 2xl:h-20"
             }`}
           >
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 sm:gap-4 group shrink-0 min-w-0" aria-label="MasterChess home">
+            <Link to="/" className="flex items-center gap-2 group shrink-0 min-w-0" aria-label="MasterChess home">
               <BrandLogo
-                size={shrunk ? "md" : "lg"}
+                size="md"
                 motionProps={{
                   whileHover: { rotate: 6, scale: 1.05 },
                   transition: { type: "spring", stiffness: 320, damping: 18 },
@@ -256,7 +258,7 @@ const Navbar = () => {
               />
               <span
                 className={`font-display font-black tracking-wide text-foreground uppercase whitespace-nowrap shrink-0 transition-all duration-300 ${
-                  shrunk ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl"
+                  "hidden min-[400px]:inline text-base sm:text-xl"
                 }`}
                 style={{ wordBreak: "keep-all", overflowWrap: "normal", whiteSpace: "nowrap", letterSpacing: "0.02em" }}
               >
@@ -265,7 +267,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop nav */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden 2xl:flex items-center gap-1">
               {NAV_SECTIONS.map((section) => {
                 const isActive = section.items.some(item =>
                   item.href === "/" ? location.pathname === "/" : location.pathname.startsWith(item.href)
@@ -444,107 +446,62 @@ const Navbar = () => {
               })}
             </div>
 
-            {/* Right side */}
-            <div className="flex items-center gap-2 shrink-0">
-
-              {/* In-app notification inbox */}
-              <NotificationBell />
-
-
-              {/* Search button — opens full palette */}
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="hidden lg:flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted/20 transition-all duration-200 shrink-0"
-                aria-label="Search MasterChess"
-                title="Search every page (Ctrl/Cmd+K)"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-
-              {/* Official Instagram profile — reachable from every page */}
-              <a
-                href="https://www.instagram.com/masterchess.live"
-                target="_blank"
-                rel="me noopener noreferrer"
-                className="hidden lg:flex items-center justify-center h-9 w-9 rounded-lg text-muted-foreground hover:text-pink-400 hover:bg-muted/20 transition-all duration-200 shrink-0"
-                aria-label="MasterChess on Instagram"
-                title="Follow @masterchess.live on Instagram"
-              >
-                <Instagram className="h-4 w-4" />
-              </a>
-
-
-              {/* Donate + Rate moved to footer / /supporter to keep top nav uncluttered */}
-
-
-              {/* Play Now button */}
-              <Link to="/play" className="hidden lg:block">
-                <Button
-                  size="sm"
-                  className="relative bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-sm px-5 h-9 shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.35)] overflow-hidden group transition-all duration-300"
-                >
-                  <Play className="h-4 w-4 mr-1.5 fill-current" />
-                  Play Now
-                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                </Button>
-              </Link>
-
-
-              {/* Theme picker removed — site uses one unified multi-color "live" look */}
-
-
-              {/* Language switcher removed — site is English-only */}
-
-              {/* User streak + sign out */}
-              {loading ? (
-                <div className="h-9 w-9 bg-muted/20 rounded-xl animate-pulse" />
-              ) : user ? (
-                <>
-                  <CoinBalancePill />
-                  <StreakIndicator />
-                  <Link
-                    to={`/profile/${user.id}`}
-                    className="flex items-center gap-2 h-9 pl-1 pr-3 rounded-full border border-primary/30 bg-primary/10 hover:bg-primary/20 transition-colors"
-                    aria-label="My profile"
-                    title="My profile & stats"
-                  >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 text-primary text-xs font-bold overflow-hidden">
-                      {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        (profile?.display_name || profile?.username || user.email || "?").charAt(0).toUpperCase()
-                      )}
-                    </span>
-                    <span className="hidden xl:block max-w-[110px] truncate text-xs font-semibold text-foreground">
-                      {profile?.display_name || profile?.username || "My profile"}
-                    </span>
-                  </Link>
-                  <Button variant="ghost" size="icon" onClick={signOut} className="text-muted-foreground hover:text-foreground h-9 w-9 hidden xl:flex" aria-label="Sign out">
-                    <LogOut className="h-4 w-4" />
+            {/* Only the daily streak lives beside navigation; account details are tucked away. */}
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              {!loading && user && <StreakIndicator compact />}
+              <Popover open={accountOpen} onOpenChange={(open) => { setAccountOpen(open); if (open) setActiveDropdown(null); }}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hidden 2xl:inline-flex h-9 w-9" aria-label="Open account and tools" title="Account and tools">
+                    <User className="h-4 w-4" />
                   </Button>
-                </>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-72 z-[80]">
+                  {user && (
+                    <>
+                      <Button asChild variant="ghost" className="w-full justify-start mb-3">
+                        <Link to={`/profile/${user.id}`}><User /> <span className="truncate">{profile?.display_name || profile?.username || "My profile"}</span></Link>
+                      </Button>
+                      <div className="flex items-center justify-between gap-3 border-y border-border py-3 mb-3">
+                        <CoinBalancePill />
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">Notifications <NotificationBell /></div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        <Button asChild variant="outline" size="sm"><Link to="/missions"><Target /> Missions</Link></Button>
+                        <Button asChild variant="outline" size="sm"><Link to="/achievements"><Medal /> Awards</Link></Button>
+                        <Button asChild variant="ghost" size="sm"><Link to="/stats"><Trophy /> Stats</Link></Button>
+                        <Button asChild variant="ghost" size="sm"><Link to="/settings"><Settings /> Settings</Link></Button>
+                      </div>
+                    </>
+                  )}
+                  <Button variant="ghost" className="w-full justify-start" onClick={() => { setAccountOpen(false); setSearchOpen(true); }}><Search /> Search MasterChess</Button>
+                  <Button asChild variant="ghost" className="w-full justify-start">
+                    <a href="https://www.instagram.com/masterchess.live" target="_blank" rel="me noopener noreferrer"><Instagram /> Instagram</a>
+                  </Button>
+                </PopoverContent>
+              </Popover>
+              {loading ? (
+                <div className="h-9 w-16 bg-muted/20 rounded-md animate-pulse" />
+              ) : user ? (
+                <Button variant="outline" size="sm" onClick={() => void signOut()} className="h-9 px-2 sm:px-3" aria-label="Log out">
+                  <LogOut className="hidden sm:block h-4 w-4" /> Log out
+                </Button>
               ) : (
-
-                <div className="hidden lg:flex items-center gap-2">
-                  <Link to="/login">
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm h-9 px-4">Sign In</Button>
-                  </Link>
-                  <Link to="/signup">
-                    <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_20px_rgba(212,175,55,0.2)] text-sm h-9 px-5">Sign Up</Button>
-                  </Link>
+                <div className="flex items-center gap-1">
+                  <Button asChild variant="ghost" size="sm" className="px-2 sm:px-3"><Link to="/login">Sign in</Link></Button>
+                  <Button asChild size="sm" className="px-2 sm:px-3"><Link to="/signup">Sign up</Link></Button>
                 </div>
               )}
-
-              {/* Mobile hamburger */}
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-nav-overlay"
-                className="lg:hidden p-2.5 min-h-11 min-w-11 rounded-lg hover:bg-muted/20 text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="2xl:hidden h-10 w-10 shrink-0"
               >
                 {mobileOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
-              </button>
+              </Button>
             </div>
           </div>
         </motion.nav>
@@ -554,8 +511,8 @@ const Navbar = () => {
       <NavSearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
 
 
-      {/* Spacer (hidden on mobile — the top bar itself is hidden on < lg) */}
-      <div className={`app-navbar-spacer hidden lg:block transition-all duration-500 ${shrunk ? "h-16" : "h-20"}`} />
+      {/* Reserve space for the header on every screen. */}
+      <div className={`app-navbar-spacer transition-all duration-500 ${shrunk ? "h-16" : "h-16 2xl:h-20"}`} />
 
 
       {/* Mobile full-screen overlay */}
@@ -570,7 +527,7 @@ const Navbar = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 bg-[hsl(220,15%,5%)]/98 backdrop-blur-xl overflow-y-auto pt-16 pb-28"
+            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl overflow-y-auto pt-16 pb-28"
           >
             {/* Sticky CTA header — auth actions only (Play CTAs live in bottom nav) */}
             {!user && (
@@ -614,6 +571,27 @@ const Navbar = () => {
               )}
 
 
+
+              <div className="border-b border-border pb-4 space-y-3">
+                {user && (
+                  <>
+                    <div className="flex items-center justify-between gap-3">
+                      <CoinBalancePill />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">Notifications <NotificationBell /></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button asChild variant="outline" size="sm"><Link to="/missions"><Target /> Missions</Link></Button>
+                      <Button asChild variant="outline" size="sm"><Link to="/achievements"><Medal /> Awards</Link></Button>
+                      <Button asChild variant="ghost" size="sm"><Link to="/stats"><Trophy /> Stats</Link></Button>
+                      <Button asChild variant="ghost" size="sm"><Link to="/settings"><Settings /> Settings</Link></Button>
+                    </div>
+                  </>
+                )}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="ghost" onClick={() => { setMobileOpen(false); setSearchOpen(true); }}><Search /> Search</Button>
+                  <Button asChild variant="ghost"><a href="https://www.instagram.com/masterchess.live" target="_blank" rel="me noopener noreferrer"><Instagram /> Instagram</a></Button>
+                </div>
+              </div>
 
               {NAV_SECTIONS.map((section) => {
                 const accentColor = `hsl(${section.accent})`;

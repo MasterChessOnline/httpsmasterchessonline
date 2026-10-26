@@ -9,7 +9,7 @@ import { useDailyStreak } from "@/hooks/use-daily-streak";
  * - Missed 1 day with freeze available: frozen blue snowflake (streak preserved).
  * - Missed 2+ days: hidden (resets to 0 on next activity).
  */
-export default function StreakIndicator() {
+export default function StreakIndicator({ compact = false }: { compact?: boolean }) {
   const { data, loading } = useDailyStreak();
 
   if (loading || !data || data.current_streak <= 0) return null;
@@ -25,6 +25,20 @@ export default function StreakIndicator() {
 
   const big = data.current_streak >= 7;
   const legendary = data.current_streak >= 30;
+
+  if (compact) {
+    return (
+      <Link
+        to="/missions"
+        title={`Daily streak: ${data.current_streak} days${isFrozen ? " · frozen" : ""}`}
+        aria-label={`Daily streak: ${data.current_streak} days${isFrozen ? " · frozen" : ""}`}
+        className="inline-flex h-9 shrink-0 items-center gap-1 rounded-md px-1.5 text-primary"
+      >
+        {isFrozen ? <Snowflake className="h-4 w-4" /> : <Flame className="h-4 w-4" />}
+        <span className="text-sm font-bold tabular-nums">{data.current_streak}</span>
+      </Link>
+    );
+  }
 
   if (isFrozen) {
     return (

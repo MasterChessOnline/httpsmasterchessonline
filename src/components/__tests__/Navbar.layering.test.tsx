@@ -74,7 +74,7 @@ describe("Navbar visibility & z-index with background layers", () => {
     // Background layers should be z-0 (or behind)
     const bgLayers = container.querySelectorAll('[aria-hidden="true"], .fixed.inset-0');
     bgLayers.forEach((el) => {
-      const cls = (el as HTMLElement).className || "";
+      const cls = el.getAttribute("class") || "";
       // Must NOT carry z-40 or higher
       expect(cls).not.toMatch(/\bz-(4\d|50|9\d{2,})\b/);
     });
