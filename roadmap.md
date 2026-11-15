@@ -1,1 +1,4 @@
-No open tasks.
+- [ ] Build Prep Scout with public player search, identity selection, opening statistics, game replay and PGN import/export.
+- [ ] Replace lesson/course navigation with Prep Scout and add a New entry on Home.
+- [ ] Add useful preparation links and search metadata; verify real searches and mobile layout.
+- [ ] Check current growth numbers and report verified limitations.

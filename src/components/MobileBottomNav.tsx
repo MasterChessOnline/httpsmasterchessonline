@@ -1,11 +1,11 @@
-import { Crown, GraduationCap, Trophy, Swords, User } from "lucide-react";
+import { Crown, Search, Trophy, Swords, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useRef } from "react";
 
 const BASE_ITEMS = [
   { icon: Crown, label: "Home", href: "/" },
-  { icon: GraduationCap, label: "Learn", href: "/learn" },
+  { icon: Search, label: "Prep Scout", href: "/prep" },
   { icon: Trophy, label: "Compete", href: "/tournaments" },
 ];
 const GUEST_LAST = { icon: User, label: "Profile", href: "/profile" };

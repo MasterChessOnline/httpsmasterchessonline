@@ -46,6 +46,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PlayGuest = lazy(() => import("./pages/PlayGuest"));
 const Endgames = lazy(() => import("./pages/Endgames"));
 const Vision = lazy(() => import("./pages/Vision"));
+const PrepScout = lazy(() => import("./pages/PrepScout"));
 const FirstGame = lazy(() => import("./pages/FirstGame"));
 const IgLanding = lazy(() => import("./pages/IgLanding"));
 const IgBonus = lazy(() => import("./pages/IgBonus"));
@@ -63,9 +64,7 @@ const DiscordHub = lazy(() => import("./pages/DiscordHub"));
 // Lazy-loaded routes — split into separate chunks to shrink initial bundle
 const DailyChallenge = lazy(() => import("./pages/DailyChallenge"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Learn = lazy(() => import("./pages/Learn"));
 const LearnArticle = lazy(() => import("./pages/LearnArticle"));
-const Lessons = lazy(() => import("./pages/Lessons"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Tournaments = lazy(() => import("./pages/Tournaments"));
 const TournamentsWall = lazy(() => import("./pages/TournamentsWall"));
@@ -420,9 +419,11 @@ function AnimatedRoutes() {
 
 
           <Route path="/play/titles" element={<Titles />} />
-          <Route path="/learn" element={<Learn />} />
+          <Route path="/learn" element={<Navigate to="/prep" replace />} />
           <Route path="/learn/:slug" element={<LearnArticle />} />
-          <Route path="/lessons" element={<Lessons />} />
+          <Route path="/lessons" element={<Navigate to="/prep" replace />} />
+          <Route path="/prep" element={<PrepScout />} />
+          <Route path="/prep/:topic" element={<PrepScout />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<LearnArticle />} />
           <Route path="/news" element={<News />} />

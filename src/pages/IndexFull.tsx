@@ -351,10 +351,10 @@ const Index = () => {
                   </Link>
 
                   <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:justify-center">
-                    <Link to="/learn" className="w-full sm:w-auto">
+                    <Link to="/prep" className="w-full sm:w-auto">
                       <Button variant="outline" className="h-12 w-full sm:px-8 rounded-xl border-primary/40">
                         <Target className="h-4 w-4 mr-2" />
-                        Explore Training
+                        Prep Scout · New
                       </Button>
                     </Link>
                     {user ? (
@@ -836,7 +836,7 @@ const Index = () => {
                 { to: "/openings", icon: BookOpen, label: "Openings" },
                 { to: "/training", icon: Brain, label: "Training" },
                 { to: "/analysis", icon: Eye, label: "Analysis" },
-                { to: "/learn", icon: GraduationCap, label: "Lessons" },
+                { to: "/prep", icon: Target, label: "Prep Scout · New" },
               ].map((item, i) => (
                 <motion.div
                   key={item.to}
